@@ -1,0 +1,155 @@
+/**
+ * CORE responsive layer — every preview adapts to every real phone.
+ *
+ * Design canvas: 390×844 (iPhone 14) inside a fake-phone frame for desktop browsing.
+ * Real phones (under ~460px wide) drop the frame and fill the viewport edge-to-edge.
+ *
+ * Tested ranges:
+ *   iPhone SE          320×568   smallest supported
+ *   iPhone 13/14/15    390×844
+ *   iPhone Pro Max     430×932
+ *   Pixel 8            412×915
+ *   Galaxy S24         360×800
+ *   Galaxy Fold outer  280×653   (smallest practical)
+ *   iPad / tablets     >= 768px  keep the desktop-frame look
+ *
+ * Include AFTER each page's inline <style> so the media query overrides win.
+ *   <link rel="stylesheet" href="core-responsive.css">
+ */
+
+/* ── Root tokens ───────────────────────────────────────────────────── */
+:root {
+  --core-safe-top:    env(safe-area-inset-top, 0px);
+  --core-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --core-safe-left:   env(safe-area-inset-left, 0px);
+  --core-safe-right:  env(safe-area-inset-right, 0px);
+}
+
+/* ── Universal base — applies on every device ──────────────────────── */
+
+/* Apple HIG: every tappable element needs a 44pt hitbox */
+button, .tab, .opt, .pill-chip, .row, .nav-btn, .tb-btn, .stab, .icon-btn,
+.back, .back-btn, .action, .action-btn, .ach, .cta, .ap-pay {
+  min-height: 44px;
+}
+
+img, svg { max-width: 100%; }
+.grain { display: none !important; }
+
+/* ── Phone-class viewport — drop the frame, fill edge to edge ──────── */
+
+@media (max-width: 460px), (max-height: 900px) and (max-width: 768px) {
+  html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    padding: 0 !important;
+    align-items: stretch !important;
+    justify-content: stretch !important;
+    background: var(--bg-base, #02020A) !important;
+  }
+  .phone {
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-width: none !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+  .notch,
+  .home-indicator,
+  .preview-label,
+  .preview-watermark {
+    display: none !important;
+  }
+
+  /* Top bars respect notch / Dynamic Island */
+  .topbar, .header, .top-bar {
+    padding-top: max(14px, calc(env(safe-area-inset-top, 0px) + 8px)) !important;
+  }
+  /* Bottom tab bars + footers respect home-indicator zone */
+  .tabbar, .nav, .footer, .ap-sheet {
+    padding-bottom: max(20px, calc(env(safe-area-inset-bottom, 0px) + 12px)) !important;
+    padding-left: max(14px, env(safe-area-inset-left, 0px)) !important;
+    padding-right: max(14px, env(safe-area-inset-right, 0px)) !important;
+  }
+  /* Scroll containers leave clear room above the tab bar */
+  .scroll {
+    padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+/* ── Small phones (≤360px wide) ────────────────────────────────────── */
+
+@media (max-width: 360px) {
+  body { font-size: 14px; }
+  .hero-num, .life-num, .ring-num, .rank-name, .hero-name {
+    font-size: 44px !important;
+    letter-spacing: -1.4px !important;
+  }
+  .stat-val { font-size: 19px !important; }
+  .stats-grid { grid-template-columns: 1fr 1fr 1fr !important; gap: 6px !important; }
+  .stat { padding: 10px 9px 9px !important; }
+  .tab span, .tabbar .lbl { font-size: 9px !important; }
+}
+
+/* ── Very small / iPhone SE / Galaxy Fold outer (≤320px) ───────────── */
+
+@media (max-width: 320px) {
+  body { font-size: 13px; }
+  .header-actions { gap: 4px !important; }
+  .icon-btn { width: 32px !important; height: 32px !important; }
+  .hero-num, .life-num { font-size: 38px !important; }
+  .frame, .scroll { padding-left: 12px !important; padding-right: 12px !important; }
+  /* Quiz progress meta + step labels stay readable */
+  .step-meta { font-size: 10px !important; }
+}
+
+/* ── Tall phones (Pro Max, Pixel 8 Pro, foldables open) ────────────── */
+
+@media (min-height: 900px) and (max-width: 460px) {
+  .scroll {
+    padding-bottom: calc(130px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+/* ── Landscape on phones — most pages aren't designed for it ───────── */
+
+@media (max-width: 932px) and (orientation: landscape) and (max-height: 460px) {
+  .topbar, .header { padding-top: max(8px, env(safe-area-inset-top, 0px)) !important; }
+  .tabbar, .nav { padding-bottom: max(8px, env(safe-area-inset-bottom, 0px)) !important; }
+  .hero, .life { padding: 10px 14px !important; }
+  .hero-num, .life-num { font-size: 36px !important; }
+}
+
+/* ── Accessibility ─────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (prefers-contrast: more) {
+  body { color: #fff !important; }
+  .stat, .post, .life, .hero, .row, .opt, .card {
+    border-color: rgba(255,255,255,0.30) !important;
+  }
+  .muted, .text-muted, .text-dim { color: #C0C5D6 !important; }
+}
+
+/* ── Print (bank-flow-plan, legal) ─────────────────────────────────── */
+
+@media print {
+  .notch, .home-indicator, .preview-label, .preview-watermark, .tabbar, .nav {
+    display: none !important;
+  }
+  .phone { box-shadow: none !important; border-radius: 0 !important; }
+}

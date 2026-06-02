@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8" />
+<title>CORE — Find your Coach tone</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<link rel="stylesheet" href="_lib/core-buttons.css" />
+<script src="_lib/core-state.js"></script>
+<script src="_lib/analytics.js"></script>
+  <script src="_lib/core-back.js"></script>
+<style id="sf-override">
+  /* SF Pro font lock — wins over core-theme.css's Chakra Petch default */
+  html body[data-font="apple"],
+  html body[data-font="apple"] *:not(code):not(pre):not(kbd):not(samp):not([class*="mono"]),
+  html body[data-font="apple"] h1,
+  html body[data-font="apple"] h2,
+  html body[data-font="apple"] h3,
+  html body[data-font="apple"] p,
+  html body[data-font="apple"] button,
+  html body[data-font="apple"] span,
+  html body[data-font="apple"] div {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+                 "SF Pro Text", "Helvetica Neue", Helvetica, Arial,
+                 "Segoe UI", Roboto, sans-serif !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+  }
+</style>
+<style>
+  :root {
+    --bg-base:#02020A; --text:#F8FAFE; --muted:#9AA1B7; --dim:#4F5570;
+    --accent:#4A8FFF; --violet:#9F8FFF;
+    --border:rgba(255,255,255,0.08); --border-hi:rgba(255,255,255,0.14);
+    --ease:cubic-bezier(0.32,0.72,0,1);
+  }
+  * { box-sizing:border-box; }
+  html, body { margin:0; padding:0; height:100%; }
+  body {
+    min-height:100vh; background:#02020A;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--text); padding:24px; overflow:hidden;
+  }
+
+  /* iPhone shell */
+  .phone {
+    position:relative; width:390px; height:844px;
+    background:var(--bg-base); border-radius:56px; overflow:hidden;
+    box-shadow:
+      0 40px 100px rgba(0,0,0,0.6),
+      0 0 0 1px rgba(255,255,255,0.06),
+      0 0 0 10px #0a0a12,
+      0 0 0 11px #2b2b38;
+  }
+  .notch {
+    position:absolute; top:14px; left:50%; transform:translateX(-50%);
+    width:124px; height:32px; background:#000;
+    border-radius:20px; z-index:30;
+  }
+  .home-indicator {
+    position:absolute; bottom:8px; left:50%; transform:translateX(-50%);
+    width:134px; height:5px;
+    background:rgba(245,247,251,0.55); border-radius:999px; z-index:30;
+  }
+
+  .frame {
+    position:absolute; inset:0; z-index:10;
+    padding: 60px 0 24px;
+    display:flex; flex-direction:column;
+  }
+  .topbar {
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 0 22px 6px;
+  }
+  /* Perfect-circle 38px back/skip — match other polished pages */
+  .back, .skip {
+    width:38px; height:38px;
+    min-width:38px; min-height:38px; max-width:38px; max-height:38px;
+    aspect-ratio: 1/1; flex:0 0 38px; align-self:center;
+    border-radius:50% !important;
+    background: rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.10);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; padding:0;
+    transition: background .15s, border-color .15s, transform .12s;
+  }
+  .back:hover, .skip:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }
+  .back:active, .skip:active { transform: scale(0.94); }
+  .back svg, .skip svg {
+    width:16px; height:16px; stroke:#fff; fill:none;
+    stroke-width:2; stroke-linecap:round; stroke-linejoin:round;
+  }
+  .brand { display:flex; align-items:center; gap:8px; }
+  .brand .dot {
+    width:7px; height:7px; border-radius:50%;
+    background:var(--accent); box-shadow:0 0 10px var(--accent);
+  }
+  .brand .wm {
+    font-size:12px; font-weight:700; letter-spacing:0.36em;
+    color:rgba(255,255,255,0.92);
+  }
+
+  /* Progress dots — match trial style with grow + glow on active */
+  .progress {
+    display:flex; justify-content:center; gap:6px;
+    padding: 12px 0 6px;
+  }
+  .progress i {
+    width:24px; height:4px; border-radius:999px;
+    background: rgba(255,255,255,0.12);
+    transition: background .3s, width .3s, box-shadow .3s;
+  }
+  .progress i.on {
+    background: linear-gradient(90deg, var(--accent), var(--violet));
+    width:32px;
+    box-shadow: 0 0 12px rgba(159,143,255,0.55);
+  }
+
+  /* Step transitions */
+  .stepwrap { flex:1; position:relative; overflow:hidden; }
+  .step {
+    position:absolute; inset:0;
+    padding: 18px 26px 0;
+    display:flex; flex-direction:column; gap:14px;
+    opacity:0; transform: translateX(28px); pointer-events:none;
+    transition: opacity .42s var(--ease), transform .42s var(--ease);
+    overflow-y:auto;
+  }
+  .step.on { opacity:1; transform:translateX(0); pointer-events:auto; }
+  .step.out { opacity:0; transform:translateX(-28px); }
+
+  .kicker {
+    font-size:11px; letter-spacing:0.24em; text-transform:uppercase;
+    color:var(--muted); font-weight:700;
+  }
+  .q-title {
+    font-size:26px; font-weight:700; letter-spacing:-0.7px;
+    line-height:1.15; margin: 0; color:#fff;
+  }
+  @media (max-width: 380px) { .q-title { font-size: 23px; } }
+
+  /* Option cards — premium Apple-list aesthetic */
+  .opts { display:flex; flex-direction:column; gap:10px; margin-top:6px; }
+  .opt {
+    padding: 16px 18px; border-radius: 16px;
+    background: rgba(255,255,255,0.035);
+    border:1px solid var(--border);
+    text-align: left; font-family: inherit; cursor: pointer;
+    color: #fff;
+    position: relative; overflow: hidden;
+    transition: background .18s var(--ease), border-color .18s var(--ease),
+                transform .15s var(--ease), box-shadow .25s var(--ease);
+    /* fade-in stagger when parent step becomes .on */
+    opacity: 0; transform: translateY(8px);
+  }
+  .step.on .opt {
+    animation: optIn 0.5s var(--ease) forwards;
+  }
+  .step.on .opt:nth-child(1) { animation-delay: 0.08s; }
+  .step.on .opt:nth-child(2) { animation-delay: 0.16s; }
+  .step.on .opt:nth-child(3) { animation-delay: 0.24s; }
+  .step.on .opt:nth-child(4) { animation-delay: 0.32s; }
+  @keyframes optIn { to { opacity: 1; transform: translateY(0); } }
+
+  .opt:hover {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(159,143,255,0.32);
+    transform: translateY(-1px);
+  }
+  .opt:active { transform: scale(0.99); }
+  .opt.sel {
+    background: rgba(74,143,255,0.10);
+    border-color: rgba(74,143,255,0.55);
+    box-shadow:
+      0 0 0 1px rgba(74,143,255,0.20) inset,
+      0 0 24px rgba(74,143,255,0.18);
+  }
+  .opt.sel::before {
+    content:""; position:absolute; left:0; top:0; bottom:0; width:3px;
+    background: linear-gradient(180deg, var(--accent), var(--violet));
+    border-radius: 0 2px 2px 0;
+  }
+  .opt-q {
+    font-size: 15px; font-weight: 600; letter-spacing:-0.15px;
+    line-height: 1.32;
+  }
+  .opt-sub {
+    font-size: 12px; color: var(--muted); margin-top: 4px;
+    line-height: 1.45; letter-spacing:-0.05px;
+  }
+
+  /* Result card — cinematic reveal */
+  .step[data-step="4"].on .result-card { animation: cardIn .7s var(--ease) 0.05s both; }
+  .step[data-step="4"].on .result-icon { animation: iconPop .5s cubic-bezier(.34,1.56,.64,1) 0.35s both; }
+  @keyframes cardIn { from { opacity:0; transform: scale(0.96) translateY(8px); } to { opacity:1; transform: scale(1) translateY(0); } }
+  @keyframes iconPop { 0% { opacity:0; transform: scale(0); } 60% { transform: scale(1.18); } 100% { opacity:1; transform: scale(1); } }
+
+  .result-card {
+    padding: 24px 22px; border-radius: 22px;
+    background: linear-gradient(135deg, var(--rg-from), var(--rg-to));
+    border: 1px solid var(--rg-border);
+    margin-top: 8px;
+    position: relative; overflow: hidden;
+    backdrop-filter: blur(10px);
+  }
+  .result-card::before {
+    content:""; position:absolute; inset:-1px; border-radius:inherit;
+    background: radial-gradient(120% 80% at 50% -10%, var(--rg-border), transparent 60%);
+    pointer-events:none; z-index:0;
+  }
+  .result-card > * { position: relative; z-index: 1; }
+  .result-icon {
+    width: 64px; height: 64px; border-radius: 18px;
+    display:flex; align-items:center; justify-content:center;
+    background: var(--c);
+    box-shadow: 0 0 32px var(--c), 0 12px 28px rgba(0,0,0,0.4);
+    margin-bottom: 14px;
+  }
+  .result-icon svg {
+    width: 32px; height: 32px; stroke: #fff; fill:none;
+    stroke-width: 1.7; stroke-linecap:round; stroke-linejoin:round;
+  }
+  .result-label {
+    font-size: 11px; letter-spacing: 0.24em; text-transform:uppercase;
+    color: rgba(255,255,255,0.55); font-weight: 700;
+  }
+  .result-name {
+    font-size: 36px; font-weight: 800; letter-spacing: -1.2px;
+    margin: 4px 0 10px;
+    background: linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.78) 100%);
+    -webkit-background-clip:text; background-clip:text; color: transparent;
+  }
+  .result-bio {
+    font-size: 14px; color: rgba(255,255,255,0.86);
+    line-height: 1.5; letter-spacing:-0.1px;
+  }
+  .quote {
+    margin-top: 16px; padding: 14px 16px;
+    background: rgba(0,0,0,0.30);
+    border-radius: 14px;
+    border-left: 3px solid var(--c);
+    font-size: 13px; color: rgba(255,255,255,0.92);
+    font-style: italic; line-height: 1.45; letter-spacing:-0.1px;
+  }
+
+  .footer { padding: 14px 26px 0; }
+  #cta {
+    width: 100%; padding: 16px 22px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #2F8FFF 0%, #5B6AE6 100%);
+    color: #fff; font-size: 15px; font-weight: 600; letter-spacing:-0.1px;
+    border: none; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.18) inset,
+      0 12px 32px rgba(47,143,255,0.35);
+    transition: box-shadow .22s var(--ease), transform .15s var(--ease), opacity .2s;
+    font-family: inherit;
+  }
+  #cta:hover:not(:disabled) {
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.22) inset,
+      0 16px 40px rgba(47,143,255,0.50);
+  }
+  #cta:active:not(:disabled) { transform: scale(0.99); }
+  #cta:disabled {
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.40);
+    box-shadow: none; cursor: not-allowed;
+  }
+  .footer-note {
+    text-align:center; font-size:12px; color:var(--muted);
+    margin-top:10px; letter-spacing:-0.05px;
+  }
+</style>
+  <link rel="stylesheet" href="_lib/core-responsive.css">
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body data-font="apple" style='font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, "Segoe UI", Roboto, sans-serif;'>
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="frame">
+      <div class="topbar">
+        <button class="back" type="button" onclick="back()" aria-label="Back"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <div class="brand"><span class="dot"></span><span class="wm">CORE</span></div>
+        <div class="skip" onclick="window.location.href='07-trial.html'"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
+      </div>
+
+      <div class="progress" id="progress"><i class="on"></i><i></i><i></i><i></i></div>
+
+      <div class="stepwrap" id="stepwrap">
+        <!-- Q1 -->
+        <div class="step on" data-step="1">
+          <div class="kicker">Question 1 of 3</div>
+          <h2 class="q-title">When you fail at something, you'd rather hear:</h2>
+          <div class="opts" id="q1opts">
+            <button class="opt" data-pick="gentle"  onclick="pick(1,this)"><div class="opt-q">"It's OK, this is hard."</div><div class="opt-sub">Warm. Reminds you it's a process.</div></button>
+            <button class="opt" data-pick="balanced" onclick="pick(1,this)"><div class="opt-q">"What happened — and what's next?"</div><div class="opt-sub">Honest, curious, no fluff.</div></button>
+            <button class="opt" data-pick="direct"  onclick="pick(1,this)"><div class="opt-q">"That's on you. What's the play?"</div><div class="opt-sub">Sharp. Calls it like it is.</div></button>
+            <button class="opt" data-pick="drill"   onclick="pick(1,this)"><div class="opt-q">"Excuses are expensive. Move."</div><div class="opt-sub">Tough love. No comfort.</div></button>
+          </div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="step" data-step="2">
+          <div class="kicker">Question 2 of 3</div>
+          <h2 class="q-title">A friend missed the gym again. You'd text:</h2>
+          <div class="opts" id="q2opts">
+            <button class="opt" data-pick="gentle"   onclick="pick(2,this)"><div class="opt-q">"Tomorrow's a new day — no pressure."</div></button>
+            <button class="opt" data-pick="balanced" onclick="pick(2,this)"><div class="opt-q">"What's getting in the way?"</div></button>
+            <button class="opt" data-pick="direct"   onclick="pick(2,this)"><div class="opt-q">"Three skips in a row. Tomorrow non-negotiable?"</div></button>
+            <button class="opt" data-pick="drill"    onclick="pick(2,this)"><div class="opt-q">"Stop talking about it. Show me Saturday."</div></button>
+          </div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="step" data-step="3">
+          <div class="kicker">Question 3 of 3</div>
+          <h2 class="q-title">7am check-in. Which lands?</h2>
+          <div class="opts" id="q3opts">
+            <button class="opt" data-pick="gentle"   onclick="pick(3,this)"><div class="opt-q">"Take it easy on yourself today."</div></button>
+            <button class="opt" data-pick="balanced" onclick="pick(3,this)"><div class="opt-q">"Anchor the day in 30 seconds — log first, decide after."</div></button>
+            <button class="opt" data-pick="direct"   onclick="pick(3,this)"><div class="opt-q">"Phone open. Log the truth. Then go."</div></button>
+            <button class="opt" data-pick="drill"    onclick="pick(3,this)"><div class="opt-q">"No snooze. Log. Move."</div></button>
+          </div>
+        </div>
+
+        <!-- Result -->
+        <div class="step" data-step="4">
+          <div class="kicker">Your Coach</div>
+          <div class="result-card" id="resultCard">
+            <div class="result-icon" id="resultIcon"></div>
+            <div class="result-label">Recommended tone</div>
+            <div class="result-name" id="resultName">Balanced</div>
+            <div class="result-bio" id="resultBio">Honest, fair, no fluff. Tells it straight.</div>
+            <div class="quote" id="resultQuote">"Anchor the day in 30 seconds — log first, decide after."</div>
+          </div>
+          <div style="margin-top:10px; font-size:12px; color:var(--muted); line-height:17px;">You can change this any time in Settings → Coach.</div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <button id="cta" class="btn primary pill block lg" onclick="next()" disabled>Continue <svg viewBox="0 0 24 24" width="18" height="18"><path d="M5 12h14M13 5l7 7-7 7" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="footer-note" id="footerNote">Pick the closest answer · no wrong picks</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const TONES = {
+    gentle:   { name:'Gentle',   c:'#5CE1E6', from:'rgba(92,225,230,0.10)',  to:'rgba(74,143,255,0.08)', border:'rgba(92,225,230,0.35)',
+                bio:'Warm, patient, kind. Like a quiet friend who shows up without judgment.',
+                quote:'"Quiet, steady day ahead. No pressure today — what\'s on your mind?"',
+                ico:'<svg viewBox="0 0 24 24"><path d="M20 12c0 5-4 8-8 8s-8-3-8-8a8 8 0 0 1 16 0Z"/><circle cx="9" cy="11" r="1"/><circle cx="15" cy="11" r="1"/><path d="M9 15c1 1 2 1.5 3 1.5s2-.5 3-1.5"/></svg>' },
+    balanced: { name:'Balanced', c:'#9F8FFF', from:'rgba(159,143,255,0.10)', to:'rgba(91,177,255,0.08)', border:'rgba(159,143,255,0.35)',
+                bio:'Honest, fair, no fluff. Tells it straight without being cold.',
+                quote:'"Your Life Score ticked up 4 this week — Brain and Willpower carried it."',
+                ico:'<svg viewBox="0 0 24 24"><path d="M12 3v18M4 8h16M4 16h16"/></svg>' },
+    direct:   { name:'Direct',   c:'#FF7A45', from:'rgba(255,122,69,0.10)',  to:'rgba(255,107,170,0.08)', border:'rgba(255,122,69,0.40)',
+                bio:'Sharp and to the point. No excuses, no hugs. Cuts to the action.',
+                quote:'"Sleep tanked Tue/Wed. Brain held. Wednesday cost you twice. What happened?"',
+                ico:'<svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>' },
+    drill:    { name:'Drill',    c:'#FF6BAA', from:'rgba(255,107,170,0.10)', to:'rgba(255,79,107,0.08)',  border:'rgba(255,107,170,0.40)',
+                bio:'Tough love. Pushes harder when you slip. Best when you need a kick.',
+                quote:'"Phone down. Two bad nights — own it. What\'s the play tonight?"',
+                ico:'<svg viewBox="0 0 24 24"><path d="M12 2L4 7v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V7l-8-5Z"/></svg>' }
+  };
+
+  const state = { step:1, picks: {} };
+  const cta = document.getElementById('cta');
+  const note = document.getElementById('footerNote');
+  const progress = document.getElementById('progress');
+
+  function setStep(n) {
+    if (n < 1 || n > 4) return;
+    const cur = document.querySelector('.step.on');
+    const tgt = document.querySelector('.step[data-step="' + n + '"]');
+    if (cur) { cur.classList.remove('on'); cur.classList.add('out'); }
+    setTimeout(() => { if (cur) cur.classList.remove('out'); if (tgt) tgt.classList.add('on'); }, 220);
+    state.step = n;
+    [...progress.children].forEach((d,i) => d.classList.toggle('on', i < n));
+    refreshCTA();
+    if (window.coreTrack) coreTrack('tone_test_step', { step: n });
+    if (n === 4) computeResult();
+  }
+  function refreshCTA() {
+    if (state.step >= 4) {
+      cta.disabled = false;
+      cta.firstChild.nodeValue = 'Use this tone ';
+      note.textContent = 'You can change this any time in Settings';
+    } else {
+      const has = state.picks[state.step];
+      cta.disabled = !has;
+      cta.firstChild.nodeValue = state.step < 3 ? 'Next ' : 'See my Coach ';
+      note.textContent = has ? 'Tap next' : 'Pick the closest answer · no wrong picks';
+    }
+  }
+  function pick(stepN, el) {
+    document.querySelectorAll('#q' + stepN + 'opts .opt').forEach(o => o.classList.remove('sel'));
+    el.classList.add('sel');
+    state.picks[stepN] = el.dataset.pick;
+    refreshCTA();
+  }
+  function next() {
+    if (state.step < 4) { setStep(state.step + 1); return; }
+    // commit chosen tone to trial state AND record that it came from the quiz
+    const tone = state.computedTone || 'balanced';
+    try {
+      const t = JSON.parse(localStorage.getItem('coreOnboardTrial') || '{}');
+      t.tone = tone;
+      localStorage.setItem('coreOnboardTrial', JSON.stringify(t));
+      localStorage.setItem('coreToneTestResult', JSON.stringify({
+        tone, takenAt: Date.now(), picks: state.picks,
+      }));
+    } catch(e){}
+    if (window.coreTrack) coreTrack('tone_test_committed', { tone });
+    // Preview env (localhost / file:// / ?preview=1) ALWAYS continues to trial step 13
+    // (coach tone step). Real returning users go to settings to re-take.
+    const h = location.hostname;
+    const isPreview = location.protocol === 'file:' || h === 'localhost' || h === '127.0.0.1' || /[?&]preview=1/.test(location.search);
+    const onboarded = !isPreview && localStorage.getItem('coreOnboardComplete') === '1';
+    window.location.href = onboarded
+      ? '80-settings.html'
+      : ('07-trial.html?step=13&tone=' + encodeURIComponent(tone));
+  }
+  function back() {
+    if (state.step > 1) setStep(state.step - 1);
+    else window.location.href = '07-trial.html';
+  }
+  window.back = back;
+  function computeResult() {
+    const tally = { gentle:0, balanced:0, direct:0, drill:0 };
+    Object.values(state.picks).forEach(p => { if (tally[p] !== undefined) tally[p] += 1; });
+    let best = 'balanced', max = -1;
+    Object.entries(tally).forEach(([k,v]) => { if (v > max) { max = v; best = k; } });
+    state.computedTone = best;
+    const t = TONES[best];
+    const card = document.getElementById('resultCard');
+    card.style.setProperty('--rg-from', t.from);
+    card.style.setProperty('--rg-to', t.to);
+    card.style.setProperty('--rg-border', t.border);
+    card.style.setProperty('--c', t.c);
+    document.getElementById('resultIcon').innerHTML = t.ico;
+    document.getElementById('resultIcon').style.setProperty('--c', t.c);
+    document.getElementById('resultName').textContent = t.name;
+    document.getElementById('resultBio').textContent = t.bio;
+    document.getElementById('resultQuote').textContent = t.quote;
+    if (window.coreTrack) coreTrack('tone_test_result', { tone: best, tally });
+  }
+  refreshCTA();
+</script>
+</body>
+</html>

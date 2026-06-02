@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8" />
+<title>CORE — Restore your streak</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<link rel="stylesheet" href="_lib/core-buttons.css" />
+<script src="_lib/core-state.js"></script>
+<script src="_lib/analytics.js"></script>
+  <script src="_lib/core-back.js"></script>
+<style>
+  :root { --bg-base:#02020A; --text:#F8FAFE; --muted:#9AA1B7; --dim:#4F5570; --accent:#4A8FFF; --border:rgba(255,255,255,0.08); }
+  * { box-sizing:border-box; }
+  html, body { margin:0; padding:0; height:100%; }
+  body { min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text); padding:24px; overflow:hidden; }
+  .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+  .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:30; }
+  .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:30; }
+
+  .bg {
+    position:absolute; inset:0;
+    background:
+      radial-gradient(70% 40% at 50% 22%, rgba(255,107,170,0.18) 0%, transparent 65%),
+      radial-gradient(60% 35% at 50% 95%, rgba(74,143,255,0.16) 0%, transparent 60%),
+      linear-gradient(180deg, #1a0a18 0%, #02020A 60%, #050510 100%);
+  }
+  .stars { position:absolute; inset:0; pointer-events:none; z-index:1; }
+  .star { position:absolute; width:2px; height:2px; background:white; border-radius:50%; opacity:0.4; animation: tw 4s ease-in-out infinite; animation-delay:var(--del,0s); }
+  @keyframes tw { 0%,100% { opacity:0.18; transform:scale(0.7); } 50% { opacity:0.7; transform:scale(1.25); } }
+
+  /* drifting ember specks */
+  .ember { position:absolute; width:6px; height:6px; border-radius:50%; background:#FF7A45; box-shadow:0 0 8px #FF7A45; opacity:0; animation: rise var(--d,8s) linear var(--del,0s) infinite; pointer-events:none; }
+  @keyframes rise {
+    0% { transform: translateY(900px) translateX(0); opacity: 0; }
+    10% { opacity: 0.7; }
+    90% { opacity: 0; }
+    100% { transform: translateY(-40px) translateX(var(--dx, 0px)); opacity: 0; }
+  }
+
+  .frame { position:absolute; inset:0; z-index:10; padding: 60px 0 28px; display:flex; flex-direction:column; }
+  .topbar { display:flex; align-items:center; justify-content:space-between; padding: 0 22px 8px; }
+  .close { width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,0.05); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .close svg { width:14px; height:14px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .brand { display:flex; align-items:center; gap:8px; }
+  .brand .dot { width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 10px var(--accent); }
+  .brand .wm { font-size:12px; font-weight:700; letter-spacing:0.36em; color:rgba(255,255,255,0.92); }
+  .spacer-right { width:34px; }
+
+  /* extinguished flame visual */
+  .flame-stage { display:flex; align-items:center; justify-content:center; margin: 16px 0 4px; position:relative; }
+  .flame {
+    width: 130px; height: 130px; border-radius: 50%; position:relative;
+    background: radial-gradient(circle at 32% 28%, #2a1410, #190a08 60%, #0a0303 100%);
+    box-shadow: 0 0 60px rgba(255,80,80,0.10), inset 0 0 30px rgba(0,0,0,0.55);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .flame::before {
+    content:""; position:absolute; inset:-12px; border-radius:50%;
+    background: radial-gradient(circle, rgba(150,40,40,0.30) 0%, transparent 60%);
+    filter: blur(6px); animation: dying 3.5s ease-in-out infinite;
+  }
+  @keyframes dying {
+    0%,100% { opacity: 0.5; transform: scale(1); }
+    50%     { opacity: 0.15; transform: scale(0.92); }
+  }
+  .flame svg { width:54px; height:54px; opacity:0.55; }
+  .smoke { position:absolute; bottom:100%; left:50%; transform:translateX(-50%); width:80px; height:60px; pointer-events:none; }
+  .smoke-puff { position:absolute; bottom:0; left:50%; width:24px; height:24px; border-radius:50%; background: rgba(220,210,210,0.18); filter: blur(8px); animation: smoke 4s ease-out infinite; }
+  .smoke-puff:nth-child(2) { animation-delay: 1.2s; left: 35%; }
+  .smoke-puff:nth-child(3) { animation-delay: 2.4s; left: 60%; }
+  @keyframes smoke {
+    0% { transform: translate(-50%, 0) scale(0.6); opacity: 0.4; }
+    100% { transform: translate(-50%, -100px) scale(1.6); opacity: 0; }
+  }
+
+  .lost-badge {
+    display:inline-flex; align-items:center; gap:8px; padding:6px 12px; border-radius:999px;
+    background: rgba(255,79,107,0.10); border:1px solid rgba(255,79,107,0.40); margin: 14px auto 0;
+    font-size:10px; letter-spacing:0.22em; text-transform:uppercase; font-weight:700; color: #FF4F6B;
+  }
+  .lost-badge svg { width:11px; height:11px; stroke:#FF4F6B; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+
+  .hero { text-align:center; padding: 0 26px; }
+  .title { font-size:32px; font-weight:700; letter-spacing:-1px; line-height:1.08; margin: 14px 0 8px; }
+  .title .num { background: linear-gradient(135deg, #FF7A45 0%, #FF6BAA 50%, #B388FF 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+  .copy { color: var(--muted); font-size:14px; line-height:21px; margin:0 auto; max-width:300px; }
+
+  /* offer card */
+  .offer {
+    margin: 22px 26px 0; padding: 18px; border-radius:22px;
+    background: linear-gradient(135deg, rgba(74,143,255,0.10) 0%, rgba(91,177,255,0.06) 100%);
+    border: 1px solid rgba(91,177,255,0.30); position:relative; overflow:hidden;
+  }
+  .offer::before { content:""; position:absolute; inset:0; background: radial-gradient(80% 60% at 50% 0%, rgba(91,177,255,0.18), transparent 60%); pointer-events:none; }
+  .offer-row { display:flex; align-items:center; justify-content:space-between; gap:14px; position:relative; z-index:2; }
+  .offer-l .lbl { font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:var(--muted); font-weight:700; }
+  .offer-l .price { display:flex; align-items:baseline; gap:6px; margin-top:6px; }
+  .offer-l .big { font-size:32px; font-weight:800; letter-spacing:-1px; color:#fff; }
+  .offer-l .unit { font-size:12px; color:var(--muted); }
+  .offer-r .ribbon {
+    padding: 5px 10px; border-radius: 999px;
+    background: linear-gradient(135deg, #FF7A45, #FF6BAA); color:#fff;
+    font-size: 10px; letter-spacing:0.14em; text-transform:uppercase; font-weight:800; white-space:nowrap;
+    box-shadow: 0 6px 18px rgba(255,107,170,0.5);
+  }
+  .deets { margin-top:14px; display:flex; flex-direction:column; gap:8px; position:relative; z-index:2; }
+  .deets li { list-style:none; display:flex; align-items:flex-start; gap:9px; font-size:13px; color:rgba(255,255,255,0.9); line-height:18px; }
+  .deets .ck { flex-shrink:0; width:18px; height:18px; border-radius:50%; background: rgba(91,177,255,0.18); border:1px solid rgba(91,177,255,0.45); display:flex; align-items:center; justify-content:center; margin-top:1px; }
+  .deets .ck svg { width:10px; height:10px; stroke:#5BB1FF; fill:none; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
+  .small-print { font-size:10px; color:var(--dim); text-align:center; margin-top:12px; letter-spacing:0.02em; position:relative; z-index:2; }
+
+  .urgency { margin: 14px 26px 0; text-align:center; font-size:11px; color:#FF7A45; letter-spacing:0.04em; font-family:ui-monospace,'SF Mono',Menlo,monospace; }
+
+  /* footer */
+  .footer { margin-top:auto; padding: 18px 26px 0; }
+  .footnote { text-align:center; font-size:11px; color:var(--muted); margin-top:10px; letter-spacing:-0.05px; }
+
+  /* hidden if no streak to restore */
+  .empty { padding: 40px 30px; text-align:center; color: var(--muted); font-size:14px; line-height:21px; }
+  .empty strong { color:#fff; display:block; font-size:18px; margin-bottom:6px; }
+</style>
+  <link rel="stylesheet" href="_lib/core-responsive.css">
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div>
+    <div class="stars">
+      <i class="star" style="left:12%;top:8%;--del:0.5s;"></i>
+      <i class="star" style="left:84%;top:14%;--del:2s;"></i>
+      <i class="star" style="left:30%;top:38%;--del:3s;"></i>
+      <i class="star" style="left:70%;top:50%;--del:1s;"></i>
+    </div>
+    <i class="ember" style="left:20%;--d:7s;--del:0s;--dx:30px;"></i>
+    <i class="ember" style="left:42%;--d:9s;--del:2s;--dx:-20px;"></i>
+    <i class="ember" style="left:70%;--d:8s;--del:1s;--dx:15px;"></i>
+    <i class="ember" style="left:85%;--d:10s;--del:3s;--dx:-30px;"></i>
+
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="frame" id="frame">
+      <div class="topbar">
+        <div class="close" onclick="closeSheet()">
+          <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </div>
+        <div class="brand"><span class="dot"></span><span class="wm">CORE</span></div>
+        <div class="spacer-right"></div>
+      </div>
+
+      <div id="bodyContent">
+        <div class="flame-stage">
+          <div class="flame">
+            <div class="smoke"><div class="smoke-puff"></div><div class="smoke-puff"></div><div class="smoke-puff"></div></div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#7a3a3a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c0 4 4 5 4 9a4 4 0 0 1-8 0c0-1 .5-2 1-3"/><path d="M9 13c-2 1-3 3-3 5a6 6 0 0 0 12 0c0-2-1-4-3-5"/></svg>
+          </div>
+        </div>
+
+        <div style="text-align:center;">
+          <div class="lost-badge">
+            <svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M3 19h18a1 1 0 0 0 .87-1.5l-9-15.5a1 1 0 0 0-1.74 0l-9 15.5A1 1 0 0 0 3 19z"/></svg>
+            Streak lost
+          </div>
+        </div>
+
+        <div class="hero">
+          <h1 class="title">Bring back your<br/><span class="num"><span id="prevDays">14</span>-day streak.</span></h1>
+          <p class="copy">You slipped — it happens. CORE keeps the door open for 48 hours. One tap, one buck, and we put the flame back.</p>
+        </div>
+
+        <div class="offer">
+          <div class="offer-row">
+            <div class="offer-l">
+              <div class="lbl">Streak Restore</div>
+              <div class="price"><span class="big">$0.99</span><span class="unit">one-time</span></div>
+            </div>
+            <div class="offer-r"><div class="ribbon">48hr window</div></div>
+          </div>
+          <ul class="deets">
+            <li><span class="ck"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></span>Restores your <span id="prevDays2" style="color:#fff;font-weight:700;">14</span>-day streak</li>
+            <li><span class="ck"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></span>+50 XP comeback bonus on top</li>
+            <li><span class="ck"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></span>Slip stays logged — honest record kept</li>
+            <li><span class="ck"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></span><span id="costLine">One time per slip · no recurring charge</span></li>
+          </ul>
+          <div class="small-print" id="costFootnote">Your first restore is on us. After that it costs 25 coins.</div>
+        </div>
+
+        <div class="urgency" id="urgency">// 47h 12m left to restore</div>
+
+        <div class="footer">
+          <button class="btn primary shine pill block lg" id="restoreBtn" onclick="restore()">
+            Restore my streak <span id="restoreCostBadge">· free</span>
+            <svg viewBox="0 0 24 24" width="18" height="18"><path d="M5 12h14M13 5l7 7-7 7" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="btn ghost block" style="margin-top:6px;" onclick="closeSheet()">No thanks — start fresh</button>
+          <div class="footnote" id="walletFootnote">First restore free. Subsequent restores = 25 coins from your wallet.</div>
+        </div>
+      </div>
+
+      <div class="empty" id="emptyState" style="display:none;">
+        <strong>Your streak is intact.</strong>
+        Nothing to restore. Come back here only if you slip — within 48 hours we'll let you save the streak.
+        <div style="margin-top:18px;"><button class="btn secondary pill" onclick="window.location.href='20-dashboard.html'">Back to dashboard</button></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  function closeSheet() {
+    if (window.coreTrack) coreTrack('restore_streak_dismissed', {});
+    window.location.href = '20-dashboard.html';
+  }
+  function restore() {
+    var cost = (typeof coreState.restoreCost === 'function') ? coreState.restoreCost() : 0;
+    if (cost > 0) {
+      var have = (coreState.read().coins || 0);
+      if (have < cost) {
+        alert("You need " + cost + " coins to restore. You have " + have + ". Earn coins from honest logs or buy in the Shop.");
+        window.location.href = '58-shop.html';
+        return;
+      }
+      if (!confirm('Restore your streak for ' + cost + ' coins?')) return;
+      var r = coreState.spendCoins(cost, 'restore_streak');
+      if (!r.ok) { alert('Spend failed.'); return; }
+    } else {
+      if (!confirm('Use your free restore? (Subsequent restores will cost ' + (coreState.RESTORE_COIN_COST || 25) + ' coins.)')) return;
+    }
+    if (window.coreTrack) coreTrack('restore_streak_purchased', { cost_coins: cost });
+    coreState.restoreStreak();
+    const f = document.getElementById('frame');
+    f.style.transition = 'transform .3s';
+    f.style.transform = 'scale(1.02)';
+    setTimeout(() => { f.style.transform = ''; }, 300);
+    setTimeout(() => { window.location.href = '20-dashboard.html'; }, 700);
+  }
+  // Update UI based on whether this is the user's first restore or a paid one
+  function updateCostUI() {
+    try {
+      var cost = (typeof coreState.restoreCost === 'function') ? coreState.restoreCost() : 0;
+      var badge = document.getElementById('restoreCostBadge');
+      var line = document.getElementById('costLine');
+      var foot = document.getElementById('walletFootnote');
+      if (cost === 0) {
+        if (badge) badge.textContent = '· free';
+        if (line)  line.textContent = 'First restore is free — on us.';
+        if (foot)  foot.textContent = 'After this one, restores cost ' + (coreState.RESTORE_COIN_COST || 25) + ' coins.';
+      } else {
+        var have = (coreState.read().coins || 0);
+        if (badge) badge.textContent = '· ' + cost + ' coins';
+        if (line)  line.textContent  = 'Costs ' + cost + ' coins · paid from your wallet';
+        if (foot)  foot.textContent  = 'You have ' + have + ' coins. Earn more in the Shop.';
+      }
+    } catch(e){}
+  }
+  function fmtCountdown(ms) {
+    if (ms <= 0) return 'expired';
+    const h = Math.floor(ms / 3600000);
+    const m = Math.floor((ms % 3600000) / 60000);
+    return h + 'h ' + m + 'm left to restore';
+  }
+  (function init(){
+    const s = coreState.read();
+    const recoverable = coreState.isStreakRecoverable(s);
+    if (!recoverable) {
+      document.getElementById('bodyContent').style.display = 'none';
+      document.getElementById('emptyState').style.display = 'block';
+      if (window.coreTrack) coreTrack('restore_streak_unavailable', { streakDays: s.streak.days });
+      return;
+    }
+    const prev = s.streak.previousDays || 0;
+    document.getElementById('prevDays').textContent = prev;
+    document.getElementById('prevDays2').textContent = prev;
+    function tick() {
+      const since = Date.now() - (s.streak.lostAt || Date.now());
+      const left = 48*3600000 - since;
+      document.getElementById('urgency').textContent = '// ' + fmtCountdown(left);
+    }
+    tick();
+    setInterval(tick, 30000);
+    updateCostUI();
+    if (window.coreTrack) coreTrack('restore_streak_viewed', { previousDays: prev });
+  })();
+</script>
+</body>
+</html>

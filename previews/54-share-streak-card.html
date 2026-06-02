@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8" />
+<title>CORE — Share streak (QR)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<link rel="stylesheet" href="_lib/core-buttons.css" />
+<script src="_lib/core-state.js"></script>
+<script src="_lib/analytics.js"></script>
+<style>
+  :root { --bg-base:#02020A; --text:#F8FAFE; --muted:#9AA1B7; --dim:#4F5570; --accent:#4A8FFF; --border:rgba(255,255,255,0.08); }
+  * { box-sizing:border-box; }
+  html, body { margin:0; padding:0; min-height:100%; background:#0A0A14; color:#fff; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; }
+  .page { max-width: 760px; margin: 0 auto; padding: 28px 24px 56px; }
+  h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.8px; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: 13px; margin-bottom: 22px; }
+
+  /* The card (1290×1290 logical, scaled). */
+  .stage { padding: 22px; background:#050510; border-radius: 18px; border: 1px solid var(--border); display:flex; justify-content:center; position:relative; overflow:hidden; }
+  .card-wrap { transform-origin: top center; }
+  .card {
+    width: 1290px; height: 1290px; position: relative; overflow: hidden;
+    background: radial-gradient(70% 50% at 50% 14%, rgba(91,177,255,0.32), transparent 60%), radial-gradient(60% 50% at 50% 100%, rgba(159,143,255,0.20), transparent 60%), linear-gradient(180deg, #07071F 0%, #02020A 60%, #050510 100%);
+    color:#fff; padding: 100px 100px;
+  }
+  .card .brand { display:flex; align-items:center; gap: 18px; }
+  .card .brand .dot { width: 18px; height:18px; border-radius:50%; background: #4A8FFF; box-shadow: 0 0 22px #4A8FFF; }
+  .card .brand .wm { font-size: 36px; font-weight: 700; letter-spacing: 16px; color: #fff; }
+  .card .kicker { margin-top: 100px; font-size: 30px; letter-spacing: 8px; text-transform: uppercase; color: rgba(255,255,255,0.55); font-weight: 700; }
+  .card .num { font-size: 520px; font-weight: 800; letter-spacing: -32px; line-height: 0.85; background: linear-gradient(180deg, #fff 0%, #9F8FFF 80%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+  .card .num .unit { font-size: 110px; letter-spacing: 0; color: rgba(255,255,255,0.45); -webkit-text-fill-color: rgba(255,255,255,0.45); font-weight: 600; margin-left: 14px; }
+  .card .tagline { font-size: 58px; font-weight: 600; letter-spacing: -1.5px; line-height: 1.05; margin-top: 24px; max-width: 920px; }
+
+  /* QR block — sits bottom-left, glows softly */
+  .card .qr-wrap {
+    position: absolute; left: 100px; bottom: 100px;
+    display:flex; align-items:center; gap: 28px;
+  }
+  .qr-frame {
+    background: #fff; padding: 18px; border-radius: 22px; box-shadow: 0 0 50px rgba(91,177,255,0.30);
+  }
+  /* SVG-derived QR mock — visually convincing, not a real scannable code (preview only). */
+  .qr-svg { display: block; width: 180px; height: 180px; }
+  .qr-label { color:#fff; }
+  .qr-label .qr-host { font-size: 22px; font-weight: 700; letter-spacing: 0.2px; }
+  .qr-label .qr-sub { font-size: 18px; color: rgba(255,255,255,0.6); margin-top: 8px; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 600; }
+
+  .card .footer-row {
+    position: absolute; right: 100px; bottom: 100px;
+    text-align: right; font-size: 26px;
+  }
+  .card .name { color: #fff; font-weight: 700; }
+  .card .url { color: rgba(255,255,255,0.6); letter-spacing: 4px; margin-top: 6px; }
+
+  .controls { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin: 20px 0 18px; }
+  .ctrl { display:flex; flex-direction:column; gap:4px; }
+  .ctrl label { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+  .ctrl input { background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.10); color: #fff; padding: 8px 10px; border-radius: 8px; font-family: inherit; font-size: 13px; min-width: 110px; }
+  .ctrl input:focus { outline:none; border-color: #5BB1FF; }
+
+  .actions { display:flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+  .url-bar { margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; color: #9AA1B7; word-break: break-all; }
+
+  /* Mobile — pull page width back, tighten controls so the card preview fits */
+  @media (max-width: 460px) {
+    .page { padding: 18px 16px 32px; max-width: 100%; }
+    h1 { font-size: 22px; }
+    .sub { font-size: 12px; margin-bottom: 16px; }
+    .controls { gap: 8px; }
+    .ctrl input { min-width: 0; padding: 7px 9px; font-size: 12.5px; }
+    .ctrl label { font-size: 9px; letter-spacing: 0.14em; }
+    .stage { padding: 14px; }
+    .actions { gap: 6px; margin-top: 14px; }
+    .actions button, .actions .btn { padding: 11px 14px; font-size: 13px; }
+    .url-bar { padding: 9px 11px; font-size: 11px; }
+    /* Force the card preview to fit even if the JS-computed scale hasn't fired —
+       1290px card scaled to fit a roughly 240px stage column. */
+    .card-wrap {
+      transform: scale(0.186) !important;
+      width: 240px !important;
+      height: 240px !important;
+      transform-origin: top left !important;
+    }
+    .stage { min-height: 260px; align-items: flex-start; }
+  }
+  @media (max-width: 340px) {
+    .page { padding: 14px 12px 24px; }
+    .stage { padding: 10px; }
+    h1 { font-size: 19px; }
+    .card-wrap {
+      transform: scale(0.155) !important;
+      width: 200px !important;
+      height: 200px !important;
+    }
+    .stage { min-height: 220px; }
+  }
+</style>
+<link rel="stylesheet" href="_lib/core-responsive.css">
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="page">
+    <h1>Share streak card · with QR</h1>
+    <div class="sub">1290×1290 milestone card with a QR linking to your public profile (<code>core.app/u/&lt;you&gt;</code>). Non-users see proof before they download.</div>
+
+    <div class="controls">
+      <div class="ctrl"><label>Streak days</label><input id="iDays" type="number" min="0" value="14"/></div>
+      <div class="ctrl"><label>Username</label><input id="iUser" type="text" value="stone"/></div>
+      <div class="ctrl" style="flex:1;min-width:240px;"><label>Tagline</label><input id="iLine" type="text" value="Day 14 clean. Quit Vape with CORE."/></div>
+    </div>
+
+    <div class="stage">
+      <div class="card-wrap" id="cardWrap" style="transform: scale(0.5);">
+        <div class="card" id="card">
+          <div class="brand"><div class="dot"></div><div class="wm">CORE</div></div>
+          <div class="kicker">Day streak</div>
+          <div class="num"><span id="cnum">14</span><span class="unit">/ days</span></div>
+          <div class="tagline" id="ctag">Day 14 clean. Quit Vape with CORE.</div>
+
+          <div class="qr-wrap">
+            <div class="qr-frame"><svg class="qr-svg" id="qrSvg" viewBox="0 0 25 25" shape-rendering="crispEdges"></svg></div>
+            <div class="qr-label">
+              <div class="qr-host">core.app/u/<span id="qHandle">stone</span></div>
+              <div class="qr-sub">Scan to see proof</div>
+            </div>
+          </div>
+
+          <div class="footer-row">
+            <div class="name" id="cname">@stone</div>
+            <div class="url">CORE · core.app</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary pill" onclick="copyShareUrl()">Copy share URL</button>
+      <button class="btn secondary pill" onclick="window.location.href='64-u-profile.html?u=' + (document.getElementById('iUser').value || 'stone') + '&days=' + (document.getElementById('iDays').value || 14)">Preview public profile →</button>
+      <button class="btn ghost" onclick="window.location.href='51-streak-celebration.html'">← Back to celebration</button>
+    </div>
+
+    <div class="url-bar" id="urlBar"></div>
+  </div>
+
+<script>
+  // Deterministic pseudo-QR — visually convincing 25×25 module grid seeded from the URL.
+  // Real QR generation would need a library; for preview we hash and fill ~45% modules.
+  function drawQR(text) {
+    const svg = document.getElementById('qrSvg');
+    let html = '';
+    // outer fill: white
+    html += '<rect width="25" height="25" fill="#fff"/>';
+    // 3 corner finder patterns (top-left, top-right, bottom-left)
+    function finder(x, y) {
+      return '<rect x="' + x + '" y="' + y + '" width="7" height="7" fill="#000"/>' +
+             '<rect x="' + (x+1) + '" y="' + (y+1) + '" width="5" height="5" fill="#fff"/>' +
+             '<rect x="' + (x+2) + '" y="' + (y+2) + '" width="3" height="3" fill="#000"/>';
+    }
+    html += finder(0, 0) + finder(18, 0) + finder(0, 18);
+    // tiny alignment block bottom-right
+    html += '<rect x="18" y="18" width="3" height="3" fill="#000"/>';
+    // PRNG seeded from text
+    let h = 2166136261;
+    for (let i=0;i<text.length;i++) { h ^= text.charCodeAt(i); h = (h*16777619) >>> 0; }
+    function rand() { h = (h*1664525 + 1013904223) >>> 0; return h / 4294967296; }
+    // data modules — skip finder zones
+    for (let y=0;y<25;y++) {
+      for (let x=0;x<25;x++) {
+        // skip finder areas
+        if ((x<8 && y<8) || (x>=17 && y<8) || (x<8 && y>=17)) continue;
+        if (x>=18 && y>=18 && x<21 && y<21) continue;
+        if (rand() < 0.46) html += '<rect x="' + x + '" y="' + y + '" width="1" height="1" fill="#000"/>';
+      }
+    }
+    svg.innerHTML = html;
+  }
+
+  function update() {
+    const days = document.getElementById('iDays').value || '0';
+    const user = (document.getElementById('iUser').value || 'stone').toLowerCase();
+    const line = document.getElementById('iLine').value || '';
+    document.getElementById('cnum').textContent = days;
+    document.getElementById('ctag').textContent = line;
+    document.getElementById('cname').textContent = '@' + user;
+    document.getElementById('qHandle').textContent = user;
+    const url = 'https://core.app/u/' + encodeURIComponent(user) + '?days=' + encodeURIComponent(days);
+    drawQR(url);
+    document.getElementById('urlBar').textContent = url;
+    fitScale();
+  }
+  function fitScale() {
+    const stage = document.querySelector('.stage');
+    const wrap = document.getElementById('cardWrap');
+    const w = stage.clientWidth - 44;
+    const scale = Math.min(0.55, w / 1290);
+    wrap.style.transform = 'scale(' + scale + ')';
+    wrap.style.height = (1290 * scale) + 'px';
+    wrap.style.width  = (1290 * scale) + 'px';
+  }
+  function copyShareUrl() {
+    const u = document.getElementById('urlBar').textContent;
+    navigator.clipboard.writeText(u).then(()=>alert('Copied'), ()=>prompt('Copy:', u));
+    if (window.coreTrack) coreTrack('share_streak_card_copied', {});
+  }
+  ['iDays','iUser','iLine'].forEach(id => document.getElementById(id).addEventListener('input', update));
+  window.addEventListener('resize', fitScale);
+  // seed from coreState
+  (function() {
+    try {
+      const s = coreState.read();
+      document.getElementById('iDays').value = s.streak.days || 14;
+      const t = JSON.parse(localStorage.getItem('coreOnboardTrial') || '{}');
+      if (t.name) document.getElementById('iUser').value = t.name.toLowerCase();
+    } catch(e){}
+    update();
+  })();
+</script>
+</body>
+</html>

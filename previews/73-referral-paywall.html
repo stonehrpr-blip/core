@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8" />
+<title>CORE — A friend gave you a month</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<script src="_lib/analytics.js"></script>
+  <script src="_lib/core-back.js"></script>
+<style>
+  :root { --bg-base:#02020A; --text:#F8FAFE; --muted:#9AA1B7; --dim:#4F5570; --accent:#4A8FFF; --border:rgba(255,255,255,0.08); --grad-a:#4A8FFF; --grad-b:#6F70FF; --grad-c:#B388FF; }
+  * { box-sizing:border-box; }
+  html, body { margin:0; padding:0; height:100%; }
+  body { min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text); padding:24px; overflow:hidden; }
+  .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+  .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:30; }
+  .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:30; }
+
+  .bg {
+    position:absolute; inset:0;
+    background:
+      radial-gradient(70% 40% at 50% 22%, rgba(179,136,255,0.30) 0%, transparent 65%),
+      radial-gradient(60% 35% at 50% 95%, rgba(74,143,255,0.18) 0%, transparent 60%),
+      linear-gradient(180deg, #1a0833 0%, #02020A 60%, #050510 100%);
+  }
+  .stars { position:absolute; inset:0; pointer-events:none; z-index:1; }
+  .star { position:absolute; width:2px; height:2px; background:white; border-radius:50%; animation: tw 4s ease-in-out infinite; animation-delay:var(--del,0s); }
+  @keyframes tw { 0%,100% { opacity:0.18; transform:scale(0.7); } 50% { opacity:0.7; transform:scale(1.3); } }
+
+  /* confetti specks */
+  .speck { position:absolute; width:8px; height:8px; opacity:0; animation: fall var(--d,5s) linear var(--del,0s) infinite; pointer-events:none; }
+  .speck.s1 { background:#FF6BAA; }
+  .speck.s2 { background:#B388FF; }
+  .speck.s3 { background:#FFD05C; }
+  .speck.s4 { background:#5CE1E6; }
+  @keyframes fall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.9; }
+    100% { transform: translateY(900px) rotate(360deg); opacity: 0; }
+  }
+
+  .frame { position:absolute; inset:0; padding: 60px 0 28px; display:flex; flex-direction:column; z-index:10; }
+  .topbar { display:flex; align-items:center; justify-content:space-between; padding: 0 22px 8px; }
+  .close { width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,0.05); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .close svg { width:14px; height:14px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .brand { display:flex; align-items:center; gap:8px; }
+  .brand .dot { width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 10px var(--accent); }
+  .brand .wm { font-size:12px; font-weight:700; letter-spacing:0.36em; color:rgba(255,255,255,0.92); }
+  .spacer-right { width:34px; }
+
+  /* hero gift */
+  .gift {
+    width:100px; height:100px; margin: 24px auto 0; border-radius: 24px;
+    background: linear-gradient(135deg, #B388FF 0%, #FF6BAA 100%);
+    box-shadow: 0 0 50px rgba(179,136,255,0.55), inset 0 2px 8px rgba(255,255,255,0.35);
+    display:flex; align-items:center; justify-content:center; position:relative;
+    animation: bob 2.6s ease-in-out infinite;
+  }
+  @keyframes bob { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-6px); } }
+  .gift::after { content:""; position:absolute; inset:0; border-radius:24px; background:linear-gradient(160deg, rgba(255,255,255,0.32) 0%, transparent 45%); }
+  .gift svg { width:42px; height:42px; stroke:#fff; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; position:relative; z-index:2; }
+
+  /* inviter pill */
+  .from-pill {
+    display:inline-flex; align-items:center; gap:8px; margin: 22px auto 0;
+    padding: 6px 12px 6px 6px; border-radius:999px;
+    background: rgba(255,255,255,0.04); border:1px solid var(--border);
+  }
+  .from-pill .av {
+    width:24px; height:24px; border-radius:50%;
+    background: linear-gradient(135deg, #5CE1E6, #4A8FFF);
+    display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:700; color:#fff;
+  }
+  .from-pill .lbl { font-size:11px; color: rgba(255,255,255,0.85); letter-spacing:0.04em; }
+  .from-pill .lbl strong { color:#fff; font-weight:700; }
+
+  .hero { text-align:center; padding: 0 26px; }
+  .title { font-size:32px; font-weight:700; letter-spacing:-1px; line-height:1.08; margin: 18px 0 6px; }
+  .title .g { background: linear-gradient(135deg, var(--grad-a) 0%, var(--grad-b) 50%, var(--grad-c) 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+  .copy { color: var(--muted); font-size:14px; line-height:21px; margin:0 auto; max-width:300px; }
+
+  /* value box */
+  .value {
+    margin: 22px 26px 0; padding: 18px; border-radius:20px;
+    background: linear-gradient(135deg, rgba(179,136,255,0.10) 0%, rgba(255,107,170,0.06) 100%);
+    border: 1px solid rgba(179,136,255,0.35); position:relative;
+  }
+  .value-row { display:flex; align-items:center; justify-content:space-between; gap:14px; }
+  .value-l .lbl { font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:var(--muted); font-weight:700; }
+  .value-l .price { display:flex; align-items:baseline; gap:6px; margin-top:6px; }
+  .value-l .big { font-size:32px; font-weight:800; letter-spacing:-1px; color:#fff; }
+  .value-l .strike { font-size:14px; color:var(--muted); text-decoration:line-through; text-decoration-color: rgba(255,255,255,0.25); }
+  .value-l .unit { font-size:12px; color:var(--muted); }
+  .value-r .ribbon {
+    padding: 5px 10px; border-radius: 999px;
+    background: linear-gradient(135deg, #B388FF, #FF6BAA);
+    font-size: 10px; letter-spacing:0.14em; text-transform:uppercase; font-weight:800; color:#fff; white-space:nowrap;
+    box-shadow: 0 6px 18px rgba(179,136,255,0.5);
+  }
+  .perks { margin-top:14px; display:flex; flex-direction:column; gap:8px; }
+  .perks li { list-style:none; display:flex; align-items:flex-start; gap:9px; font-size:13px; color:rgba(255,255,255,0.9); line-height:18px; }
+  .perks .ck { flex-shrink:0; width:18px; height:18px; border-radius:50%; background: rgba(179,136,255,0.18); border:1px solid rgba(179,136,255,0.45); display:flex; align-items:center; justify-content:center; margin-top:1px; }
+  .perks .ck svg { width:10px; height:10px; stroke:#B388FF; fill:none; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
+  .small-print { font-size:10px; color:var(--dim); text-align:center; margin-top:12px; letter-spacing:0.02em; }
+
+  /* footer cta */
+  .footer { margin-top:auto; padding: 18px 26px 0; }
+  .cta {
+    width:100%; padding: 18px; border-radius:999px; border:none; color:white; font-size:16px; font-weight:600;
+    background: linear-gradient(135deg, var(--grad-a) 0%, var(--grad-b) 45%, var(--grad-c) 100%);
+    background-size: 200% 100%; animation: gradShift 5s ease infinite;
+    box-shadow: 0 10px 28px rgba(74,143,255,0.45), 0 0 0 1px rgba(255,255,255,0.06) inset;
+    display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer;
+  }
+  @keyframes gradShift { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+  .cta svg { width:18px; height:18px; stroke:white; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .footnote { text-align:center; font-size:11px; color:var(--muted); margin-top:10px; letter-spacing:-0.05px; }
+
+  @media (max-width: 460px) {
+    body { padding: 0; }
+    .phone { width: 100vw; height: 100vh; height: 100dvh; border-radius: 0; box-shadow: none; }
+    .notch, .home-indicator { display: none; }
+  }
+  /* Small phones — shrink gift + title + value card so CTA fits */
+  @media (max-width: 380px), (max-height: 720px) {
+    .gift { width: 64px; height: 64px; border-radius: 18px; margin-bottom: 8px; }
+    .gift svg { width: 30px; height: 30px; }
+    .title { font-size: 24px; margin: 12px 0 6px; letter-spacing: -0.8px; }
+    .copy { font-size: 13px; line-height: 18px; max-width: 280px; }
+    .hero { padding: 0 22px; }
+    .value, .value-row, .card { padding: 14px !important; }
+    .cta { padding: 14px !important; font-size: 14.5px !important; }
+    .footnote { font-size: 10px; margin-top: 6px; }
+  }
+</style>
+  <link rel="stylesheet" href="_lib/core-responsive.css">
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div>
+    <div class="stars">
+      <i class="star" style="left:14%;top:8%;"></i>
+      <i class="star" style="left:82%;top:14%;--del:1s;"></i>
+      <i class="star" style="left:30%;top:24%;--del:2.5s;"></i>
+      <i class="star" style="left:72%;top:36%;--del:0.5s;"></i>
+      <i class="star" style="left:20%;top:50%;--del:3s;"></i>
+    </div>
+    <!-- confetti -->
+    <div class="speck s1" style="left:12%;--d:6s;"></div>
+    <div class="speck s2" style="left:28%;--d:7s;--del:1s;"></div>
+    <div class="speck s3" style="left:48%;--d:5.5s;--del:2s;"></div>
+    <div class="speck s4" style="left:68%;--d:6.5s;--del:0.5s;"></div>
+    <div class="speck s1" style="left:84%;--d:6s;--del:3s;"></div>
+    <div class="speck s2" style="left:18%;--d:7s;--del:4s;"></div>
+    <div class="speck s3" style="left:60%;--d:5s;--del:2.5s;"></div>
+
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="frame">
+      <div class="topbar">
+        <div class="close" onclick="window.location.href='01-index.html'">
+          <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </div>
+        <div class="brand"><span class="dot"></span><span class="wm">CORE</span></div>
+        <div class="spacer-right"></div>
+      </div>
+
+      <div class="gift">
+        <svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 12h18M7.5 8a2.5 2.5 0 0 1 0-5C10 3 12 8 12 8M16.5 8a2.5 2.5 0 0 0 0-5C14 3 12 8 12 8"/></svg>
+      </div>
+
+      <div style="text-align:center;">
+        <div class="from-pill">
+          <div class="av" id="refAv">A</div>
+          <div class="lbl"><strong id="refName">Alex</strong> gave you a month</div>
+        </div>
+      </div>
+
+      <div class="hero">
+        <h1 class="title">One free month.<br/><span class="g">No card needed.</span></h1>
+        <p class="copy">Your friend believes CORE will work for you too. Claim 30 days of Pro — quit-vape tools, AI Coach, the full life score. Cancel any time.</p>
+      </div>
+
+      <div class="value">
+        <div class="value-row">
+          <div class="value-l">
+            <div class="lbl">1 month of CORE Pro</div>
+            <div class="price"><span class="big">$0</span><span class="strike">$7.99</span><span class="unit">for the first 30 days</span></div>
+          </div>
+          <div class="value-r">
+            <div class="ribbon">Referral gift</div>
+          </div>
+        </div>
+        <ul class="perks">
+          <li><span class="ck"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></span>Full Quit Vape track w/ slip log + recovery quests</li>
+          <li><span class="ck"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></span>5-stat life score + leaderboard + streak widget</li>
+          <li><span class="ck"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></span>AI Coach trained on your tone choice</li>
+        </ul>
+        <div class="small-print">After 30 days: $7.99/month. Cancel any time in Settings — your free month stays free.</div>
+      </div>
+
+      <div class="footer">
+        <button class="cta" onclick="claim()">
+          Claim my free month <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </button>
+        <div class="footnote">No card. Just hit go.</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  function getRef() {
+    try {
+      const p = new URLSearchParams(location.search);
+      return (p.get('ref') || '').trim();
+    } catch(e){ return ''; }
+  }
+  function claim() {
+    try {
+      const ref = getRef();
+      localStorage.setItem('coreReferralGift', JSON.stringify({ ref: ref || 'unknown', claimedAt: Date.now(), days: 30 }));
+      localStorage.setItem('coreSubscriptionActive', '1');
+      if (window.coreTrack) coreTrack('referral_claimed', { ref });
+    } catch(e){}
+    // If onboarding not done yet, go to trial flow (but skip the paywall step downstream).
+    if (localStorage.getItem('coreOnboardComplete') === '1') {
+      location.href = '20-dashboard.html';
+    } else {
+      location.href = '07-trial.html';
+    }
+  }
+  (function init(){
+    const ref = getRef();
+    if (ref) {
+      const name = ref.charAt(0).toUpperCase() + ref.slice(1);
+      document.getElementById('refName').textContent = name;
+      document.getElementById('refAv').textContent = name.charAt(0).toUpperCase();
+      if (window.coreTrack) coreTrack('referral_link_opened', { ref });
+    }
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+  <meta charset="utf-8" />
+  <title>Core — Vape habit (signature tap → smoke)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <style>
+    :root {
+      --bg-base: #02020A;
+      --text-primary: #F8FAFE;
+      --text-muted: #9AA1B7;
+      --text-dim: #4F5570;
+      --stat-lungs: #FF6BAA;
+      --accent: #4A8FFF;
+      --danger: #F87171;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; height: 100%; }
+    body {
+      min-height: 100vh; background: #0A0A14;
+      display: flex; align-items: center; justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", sans-serif;
+      color: var(--text-primary); -webkit-font-smoothing: antialiased;
+      padding: 24px; overflow: hidden;
+    }
+    .phone {
+      position: relative; width: 390px; height: 844px;
+      background: var(--bg-base); border-radius: 56px; overflow: hidden;
+      box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38;
+    }
+    .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:20; }
+    .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:20; }
+
+    .bg {
+      position: absolute; inset: 0; z-index: 0;
+      background:
+        radial-gradient(80% 50% at 50% 100%, rgba(255, 107, 170, 0.18) 0%, transparent 65%),
+        radial-gradient(60% 30% at 50% 0%, rgba(132, 46, 81, 0.20) 0%, transparent 60%),
+        linear-gradient(180deg, #1A0814 0%, var(--bg-base) 60%, #050510 100%);
+      transition: filter 0.6s ease;
+    }
+    .grain {
+      position: absolute; inset: 0; pointer-events: none; z-index: 1;
+      opacity: 0.05; mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.7 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    }
+
+    /* Top bar -------------------------------------------------------- */
+    .topbar {
+      position: absolute; top: 60px; left: 0; right: 0;
+      padding: 0 24px; display: flex; align-items: center; justify-content: space-between;
+      z-index: 10;
+    }
+    .back {
+      width: 38px !important; height: 38px !important;
+      min-width: 38px !important; min-height: 38px !important;
+      max-width: 38px !important; max-height: 38px !important;
+      aspect-ratio: 1 / 1;
+      flex: 0 0 38px;
+      align-self: center;
+      border-radius: 50% !important;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.10);
+      display: flex !important; align-items: center !important; justify-content: center !important;
+      cursor: pointer; padding: 0;
+      font-family: inherit;
+      box-sizing: border-box;
+      transition: background .15s, border-color .15s, transform .12s;
+    }
+    .back:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }
+    .back:active { transform: scale(0.94); }
+    .back svg { width:14px; height:14px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex-shrink: 0; }
+
+    .habit-name { font-size: 13px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.16em; text-transform: uppercase; }
+    .menu { width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); backdrop-filter:blur(20px); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+    .menu svg { width:16px; height:16px; stroke: var(--text-muted); }
+
+    /* Stat panel ---------------------------------------------------- */
+    .stat-panel {
+      position: absolute; top: 120px; left: 24px; right: 24px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
+      backdrop-filter: blur(18px) saturate(1.4); -webkit-backdrop-filter: blur(18px) saturate(1.4);
+      z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .stat-block { display: flex; flex-direction: column; gap: 2px; }
+    .stat-label { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted); font-weight: 500; }
+    .stat-value { font-size: 24px; font-weight: 600; letter-spacing: -0.8px; color: var(--text-primary); line-height: 1; margin-top: 4px; }
+    .stat-value.lungs { background: linear-gradient(180deg, #FFD3E4 0%, var(--stat-lungs) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .stat-divider { width: 1px; height: 30px; background: rgba(255,255,255,0.08); }
+    .stat-streak { display: inline-flex; align-items: center; gap: 4px; color: var(--text-primary); font-weight: 600; }
+    .stat-streak::before { content:"●"; color: #34D399; font-size: 8px; box-shadow: 0 0 8px #34D399; }
+
+    /* Tap zone ------------------------------------------------------ */
+    .tap-zone {
+      position: absolute; top: 240px; left: 0; right: 0; bottom: 240px;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 5;
+      perspective: 800px;
+    }
+
+    /* Lungs avatar (SVG) ------------------------------------------- */
+    .lungs-wrap {
+      position: relative;
+      width: 240px; height: 240px;
+      display: flex; align-items: center; justify-content: center;
+      transition: filter 0.8s ease;
+    }
+    .lungs-wrap.damaged { filter: hue-rotate(-30deg) saturate(0.5) brightness(0.7); }
+
+    .lungs-glow {
+      position: absolute; inset: -20px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,107,170,0.35) 0%, transparent 65%);
+      animation: lungsBreath 4s ease-in-out infinite;
+    }
+    @keyframes lungsBreath {
+      0%,100% { transform: scale(1); opacity: 0.85; }
+      50%     { transform: scale(1.08); opacity: 1; }
+    }
+    .lungs-svg { width: 200px; height: 200px; position: relative; z-index: 2; filter: drop-shadow(0 0 20px var(--stat-lungs)); }
+
+    /* Smoke particles ---------------------------------------------- */
+    .smoke-layer { position: absolute; inset: 0; pointer-events: none; z-index: 8; overflow: hidden; }
+    .smoke {
+      position: absolute;
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(180,180,200,0.6) 0%, rgba(120,120,140,0.3) 40%, transparent 70%);
+      filter: blur(10px);
+      pointer-events: none;
+      animation: smokeRise var(--dur, 2.4s) ease-out forwards;
+      opacity: 0;
+    }
+    @keyframes smokeRise {
+      0%   { opacity: 0; transform: translate(var(--sx, 0), 0) scale(0.5); }
+      15%  { opacity: 0.75; }
+      100% { opacity: 0; transform: translate(calc(var(--sx, 0) + var(--dx, 0)), -260px) scale(2.2); }
+    }
+
+    /* XP loss popup ------------------------------------------------ */
+    .xp-popup {
+      position: absolute; left: 50%; top: 0;
+      transform: translate(-50%, 0);
+      font-size: 28px; font-weight: 700; letter-spacing: -1px;
+      color: var(--danger);
+      text-shadow: 0 0 14px rgba(248,113,113,0.5);
+      animation: xpFloat 1.4s ease-out forwards;
+      opacity: 0; pointer-events: none;
+      z-index: 9;
+    }
+    @keyframes xpFloat {
+      0%   { opacity: 0; transform: translate(-50%, 20px) scale(0.6); }
+      18%  { opacity: 1; transform: translate(-50%, 0) scale(1.1); }
+      100% { opacity: 0; transform: translate(-50%, -60px) scale(1); }
+    }
+
+    /* Tap button --------------------------------------------------- */
+    .tap-btn-wrap {
+      position: absolute; bottom: 160px; left: 24px; right: 24px;
+      z-index: 11;
+    }
+    .tap-btn {
+      width: 100%; padding: 24px;
+      background: linear-gradient(180deg, rgba(255, 107, 170, 0.96) 0%, rgba(180, 60, 110, 0.94) 100%);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 999px;
+      font-size: 17px; font-weight: 600; letter-spacing: -0.2px;
+      font-family: inherit; cursor: pointer;
+      box-shadow:
+        0 0 0 1px rgba(255,107,170,0.4),
+        0 16px 50px rgba(255,107,170,0.35),
+        0 4px 14px rgba(0,0,0,0.4),
+        inset 0 1px 0 rgba(255,255,255,0.35),
+        inset 0 -2px 8px rgba(0,0,0,0.2);
+      transition: transform 0.12s ease, box-shadow 0.2s ease;
+    }
+    .tap-btn:active {
+      transform: scale(0.97);
+      box-shadow: 0 0 0 1px rgba(255,107,170,0.6), 0 6px 18px rgba(255,107,170,0.5), 0 1px 4px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.4);
+    }
+    .tap-hint { text-align: center; margin-top: 14px; font-size: 12px; color: var(--text-dim); letter-spacing: -0.1px; }
+
+    /* Recovery prompt (appears after tap) -------------------------- */
+    .recovery-prompt {
+      position: absolute; bottom: 90px; left: 24px; right: 24px;
+      padding: 14px 16px; border-radius: 14px;
+      background: rgba(74, 143, 255, 0.10);
+      border: 1px solid rgba(74, 143, 255, 0.35);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      display: flex; align-items: center; gap: 12px;
+      z-index: 12;
+      opacity: 0; transform: translateY(20px); pointer-events: none;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .recovery-prompt.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .recovery-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: var(--accent); display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 14px var(--accent);
+      flex-shrink: 0;
+    }
+    .recovery-icon svg { width: 18px; height: 18px; stroke: white; }
+    .recovery-text { flex: 1; }
+    .recovery-title { font-size: 13px; color: var(--text-primary); font-weight: 600; letter-spacing: -0.1px; }
+    .recovery-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .recovery-go { color: var(--accent); font-size: 13px; font-weight: 600; }
+
+    .preview-label {
+      position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+      color: #4A5060; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    }
+    @media (max-width: 460px) {
+      body { padding: 0; } .phone { width: 100vw; height: 100vh; border-radius: 0; box-shadow: none; }
+      .notch, .home-indicator { display: none; } .preview-label { display: none; }
+    }
+  </style>
+  <link rel="stylesheet" href="_lib/core-responsive.css">
+  <script src="_lib/core-back.js"></script>
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg" id="bg"></div>
+    <div class="grain"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="topbar">
+      <button class="back" type="button" onclick="window.location.href='20-dashboard.html'" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18L9 12l6-6"/></svg>
+      </button>
+      <div class="habit-name">Vape</div>
+      <div class="menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+      </div>
+    </div>
+
+    <div class="stat-panel">
+      <div class="stat-block">
+        <div class="stat-label">Lungs</div>
+        <div class="stat-value lungs"><span id="lungsVal">64</span><span style="color:var(--text-dim); font-weight:500; font-size:14px;">/100</span></div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-block">
+        <div class="stat-label">Clean streak</div>
+        <div class="stat-value"><span class="stat-streak"><span id="streak">14</span> days</span></div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-block">
+        <div class="stat-label">Today</div>
+        <div class="stat-value"><span id="slipsToday">0</span><span style="color:var(--text-dim); font-weight:500; font-size:14px;"> slips</span></div>
+      </div>
+    </div>
+
+    <div style="position:absolute; top:208px; left:24px; right:24px; padding:12px 14px; border-radius:14px; background:rgba(74,143,255,0.08); border:1px solid rgba(74,143,255,0.25); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); display:flex; align-items:flex-start; gap:10px; z-index:9;">
+      <div style="width:24px; height:24px; border-radius:7px; background:#4A8FFF; box-shadow:0 0 12px #4A8FFF; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; position:relative;">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" stroke="white" width="13" height="13" style="position:relative; z-index:2;"><path d="M21 12c0 5-4.5 8-9 8a9 9 0 0 1-3.5-.7L3 21l1.7-5.5A9 9 0 0 1 3 12c0-5 4.5-8 9-8s9 3 9 8z"/></svg>
+      </div>
+      <div style="flex:1;">
+        <div style="font-size:11px; font-weight:600; color:#4A8FFF; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:3px;">Coach</div>
+        <div style="font-size:12px; line-height:17px; color:#F8FAFE; letter-spacing:-0.1px;">You tend to slip between 3–5pm. Try putting the phone in another room after lunch.</div>
+      </div>
+    </div>
+
+    <div class="tap-zone">
+      <div class="lungs-wrap" id="lungsWrap">
+        <div class="lungs-glow"></div>
+        <svg class="lungs-svg" viewBox="0 0 200 200" fill="none" stroke="#FFD3E4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <defs>
+            <linearGradient id="lungGrad" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="#FFE7F1"/>
+              <stop offset="100%" stop-color="#FF6BAA"/>
+            </linearGradient>
+          </defs>
+          <!-- trachea -->
+          <path d="M100 30 L100 90" stroke="url(#lungGrad)"/>
+          <path d="M85 40 L100 50 L115 40" stroke="url(#lungGrad)"/>
+          <!-- left lung -->
+          <path d="M100 90 C 80 90 50 105 45 145 C 42 165 55 175 75 175 C 92 175 100 165 100 145 Z" fill="url(#lungGrad)" fill-opacity="0.18" stroke="url(#lungGrad)"/>
+          <!-- right lung -->
+          <path d="M100 90 C 120 90 150 105 155 145 C 158 165 145 175 125 175 C 108 175 100 165 100 145 Z" fill="url(#lungGrad)" fill-opacity="0.18" stroke="url(#lungGrad)"/>
+          <!-- bronchi -->
+          <path d="M100 100 L80 130 M100 100 L120 130 M80 130 L65 155 M80 130 L90 160 M120 130 L135 155 M120 130 L110 160" stroke="url(#lungGrad)" stroke-width="2" opacity="0.6"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="smoke-layer" id="smokeLayer"></div>
+
+    <div class="tap-btn-wrap">
+      <button class="tap-btn" onclick="logSlip()">I just took a puff</button>
+      <div class="tap-hint">Tap each time. Honesty rewards your streak too.</div>
+    </div>
+
+    <div class="recovery-prompt" id="recovery" onclick="window.location.href='29-recovery-quest.html'">
+      <div class="recovery-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v8"/><path d="M8 8l4 4 4-4"/><circle cx="12" cy="18" r="2"/></svg>
+      </div>
+      <div class="recovery-text">
+        <div class="recovery-title">Recovery quest available</div>
+        <div class="recovery-sub">60-second breath · claw back up to 12 XP</div>
+      </div>
+      <div class="recovery-go">Go →</div>
+    </div>
+  </div>
+
+  <div class="preview-label">core · habit · vape · v1</div>
+
+  <script>
+    let lungsVal = 64;
+    let streak = 14;
+    let slipsToday = 0;
+    const XP_LOSS = 25;
+
+    function logSlip() {
+      // 1. Haptic-like visual feedback (already on the button :active)
+      // 2. Spawn smoke particles from the lung area
+      spawnSmoke();
+      // 3. XP loss popup
+      spawnXPPopup();
+      // 4. Update stat values
+      lungsVal = Math.max(0, lungsVal - XP_LOSS);
+      slipsToday += 1;
+      streak = 0;
+      document.getElementById('lungsVal').textContent = lungsVal;
+      document.getElementById('slipsToday').textContent = slipsToday;
+      document.getElementById('streak').textContent = streak;
+      // 5. Damage the lungs avatar visually
+      document.getElementById('lungsWrap').classList.add('damaged');
+      // 6. Darken the background slightly
+      document.getElementById('bg').style.filter = 'brightness(0.8)';
+      setTimeout(() => { document.getElementById('bg').style.filter = ''; }, 1400);
+      // 7. Show recovery prompt
+      setTimeout(() => {
+        document.getElementById('recovery').classList.add('show');
+      }, 800);
+    }
+
+    function spawnSmoke() {
+      const layer = document.getElementById('smokeLayer');
+      const lungs = document.getElementById('lungsWrap').getBoundingClientRect();
+      const phone = layer.getBoundingClientRect();
+      const baseX = lungs.left - phone.left + lungs.width / 2;
+      const baseY = lungs.top - phone.top + lungs.height * 0.65;
+      for (let i = 0; i < 9; i++) {
+        const s = document.createElement('div');
+        s.className = 'smoke';
+        const sx = (Math.random() - 0.5) * 60;
+        const dx = (Math.random() - 0.5) * 80;
+        const dur = 1.8 + Math.random() * 1.4;
+        const delay = i * 0.06;
+        s.style.left = (baseX - 40) + 'px';
+        s.style.top  = (baseY - 40) + 'px';
+        s.style.setProperty('--sx', sx + 'px');
+        s.style.setProperty('--dx', dx + 'px');
+        s.style.setProperty('--dur', dur + 's');
+        s.style.animationDelay = delay + 's';
+        layer.appendChild(s);
+        setTimeout(() => s.remove(), (dur + delay) * 1000 + 100);
+      }
+    }
+
+    function spawnXPPopup() {
+      const layer = document.getElementById('smokeLayer');
+      const lungs = document.getElementById('lungsWrap').getBoundingClientRect();
+      const phone = layer.getBoundingClientRect();
+      const p = document.createElement('div');
+      p.className = 'xp-popup';
+      p.textContent = '−' + XP_LOSS + ' XP';
+      p.style.left = (lungs.left - phone.left + lungs.width / 2) + 'px';
+      p.style.top  = (lungs.top - phone.top + lungs.height / 2 - 20) + 'px';
+      layer.appendChild(p);
+      setTimeout(() => p.remove(), 1500);
+    }
+  </script>
+</body>
+</html>

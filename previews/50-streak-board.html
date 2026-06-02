@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8" />
+<title>CORE — Streak board</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<link rel="stylesheet" href="_lib/core-buttons.css" />
+<script src="_lib/core-state.js"></script>
+<script src="_lib/analytics.js"></script>
+  <script src="_lib/core-back.js"></script>
+<style>
+  :root { --bg-base:#02020A; --text:#F8FAFE; --muted:#9AA1B7; --dim:#4F5570; --accent:#4A8FFF; --border:rgba(255,255,255,0.08); }
+  * { box-sizing:border-box; }
+  html, body { margin:0; padding:0; height:100%; }
+  body { min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text); padding:24px; overflow:hidden; }
+  .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+  .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:30; }
+  .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:30; }
+  .bg { position:absolute; inset:0; background: radial-gradient(60% 30% at 50% 14%, rgba(74,143,255,0.16), transparent 60%), linear-gradient(180deg, #08081E 0%, #02020A 60%, #050510 100%); }
+
+  .frame { position:absolute; inset:0; padding: 60px 0 24px; display:flex; flex-direction:column; z-index:10; }
+  .topbar { padding: 0 22px 12px; display:flex; align-items:center; gap:14px; }
+    .back {
+      width: 38px !important; height: 38px !important;
+      min-width: 38px !important; min-height: 38px !important;
+      max-width: 38px !important; max-height: 38px !important;
+      aspect-ratio: 1 / 1;
+      flex: 0 0 38px;
+      align-self: center;
+      border-radius: 50% !important;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.10);
+      display: flex !important; align-items: center !important; justify-content: center !important;
+      cursor: pointer; padding: 0;
+      font-family: inherit;
+      box-sizing: border-box;
+      transition: background .15s, border-color .15s, transform .12s;
+    }
+    .back:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }
+    .back:active { transform: scale(0.94); }
+    .back svg { width:14px; height:14px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex-shrink: 0; }
+  .title { font-size:22px; font-weight:700; letter-spacing:-0.5px; flex:1; }
+
+  .scroll { flex:1; overflow-y:auto; padding: 0 18px 24px; }
+  .scroll::-webkit-scrollbar { display:none; }
+
+  /* hero stats */
+  .hero { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin: 0 4px 18px; }
+  .stat-cell { padding: 12px; border-radius: 14px; background: rgba(255,255,255,0.03); border:1px solid var(--border); text-align: center; }
+  .stat-cell .v { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; color: #fff; }
+  .stat-cell .v.cur { background: linear-gradient(180deg, #fff, #FF7A45 90%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+  .stat-cell .l { font-size: 9px; letter-spacing: 0.22em; color: var(--muted); text-transform:uppercase; margin-top: 4px; font-weight:700; }
+
+  /* heat map */
+  .hm-wrap { padding: 14px 12px; border-radius: 16px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); margin-bottom: 16px; overflow-x: auto; }
+  .hm-wrap::-webkit-scrollbar { display:none; }
+  .hm-title { font-size: 11px; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase; font-weight: 700; margin-bottom: 12px; display:flex; align-items:center; justify-content:space-between; }
+  .hm-title .yr { color: #fff; font-weight: 700; letter-spacing: 0.06em; font-family: ui-monospace,"SF Mono",Menlo,monospace; }
+  .hm {
+    display: grid; grid-template-rows: repeat(7, 1fr); grid-auto-flow: column; gap: 3px;
+    min-width: 600px; /* allow horizontal scroll on small phones */
+  }
+  .cell { width: 10px; height: 10px; border-radius: 2px; background: rgba(255,255,255,0.04); }
+  .cell.l1 { background: rgba(74,143,255,0.22); }
+  .cell.l2 { background: rgba(74,143,255,0.45); }
+  .cell.l3 { background: rgba(74,143,255,0.70); }
+  .cell.l4 { background: #4A8FFF; box-shadow: 0 0 4px rgba(74,143,255,0.6); }
+  .cell.slip { background: rgba(255,79,107,0.55); box-shadow: 0 0 4px rgba(255,79,107,0.5); }
+  .cell.today { outline: 1.5px solid #fff; outline-offset: 1px; }
+  .cell.freeze { background: rgba(92,225,230,0.55); box-shadow: 0 0 4px rgba(92,225,230,0.5); }
+  .legend { display:flex; align-items:center; justify-content:space-between; margin-top: 12px; font-size: 10px; color: var(--muted); letter-spacing: 0.06em; }
+  .legend-scale { display:flex; align-items:center; gap: 4px; }
+  .legend-scale .cell { width: 9px; height: 9px; }
+  .legend-key { display:flex; align-items:center; gap: 6px; }
+  .legend-key .swatch { width: 9px; height: 9px; border-radius: 2px; }
+
+  /* month labels under heatmap */
+  .months { display: grid; grid-template-columns: repeat(12, 1fr); margin-top: 8px; font-size: 9px; color: var(--dim); letter-spacing: 0.16em; }
+
+  /* weeks list */
+  .weeks-title { font-size: 11px; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase; font-weight: 700; margin: 4px 4px 8px; }
+  .week-row {
+    display:flex; align-items:center; gap: 14px; padding: 12px 14px;
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px;
+    margin-bottom: 6px;
+  }
+  .wk-label { font-size: 11px; color: var(--muted); letter-spacing: 0.06em; font-family: ui-monospace, "SF Mono", Menlo, monospace; min-width: 60px; }
+  .wk-bar { flex:1; height: 6px; border-radius: 999px; background: rgba(255,255,255,0.06); overflow: hidden; position: relative; }
+  .wk-bar .fill { height: 100%; background: linear-gradient(90deg, #4A8FFF, #9F8FFF); border-radius:999px; }
+  .wk-meta { font-size: 11px; color: #fff; font-weight: 700; letter-spacing:-0.1px; }
+  .wk-meta .small { color: var(--muted); font-weight: 500; margin-left: 4px; }
+
+    /* core-tabbar-clearance */
+    .scroll { padding-bottom: 110px !important; }
+  </style>
+  <link rel="stylesheet" href="_lib/core-responsive.css">
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="frame">
+      <div class="topbar">
+        <button class="back" type="button" onclick="window.location.href='20-dashboard.html'" aria-label="Back"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <div class="title">Streak board</div>
+      </div>
+
+      <div class="scroll">
+        <div class="hero">
+          <div class="stat-cell"><div class="v cur" data-core="streak.days">14</div><div class="l">Current</div></div>
+          <div class="stat-cell"><div class="v" id="longestN">14</div><div class="l">Longest</div></div>
+          <div class="stat-cell"><div class="v" id="cleanN">189</div><div class="l">Clean days</div></div>
+        </div>
+
+        <div class="hm-wrap">
+          <div class="hm-title"><span>Last 365 days · Quit Vape</span><span class="yr" id="yrLabel">2026</span></div>
+          <div class="hm" id="hm"></div>
+          <div class="months" id="months"></div>
+          <div class="legend">
+            <div class="legend-scale">less <span class="cell"></span><span class="cell l1"></span><span class="cell l2"></span><span class="cell l3"></span><span class="cell l4"></span> more</div>
+            <div class="legend-key"><span class="swatch" style="background: rgba(255,79,107,0.55);"></span>slip <span class="swatch" style="background: rgba(92,225,230,0.55); margin-left:6px;"></span>freeze</div>
+          </div>
+        </div>
+
+        <div class="weeks-title">Last 6 weeks</div>
+        <div id="weeksList"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // Hybrid: real days from coreState.slips[] for any day that has a logged slip,
+  // mock backfill for the rest (we don't keep 365 days of history yet — slip log is recent).
+  function dayKey(d) { return Math.floor(d.getTime() / 86400000); }
+  function buildDays(streakDays) {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const todayKey = dayKey(today);
+    const days = [];
+    // Bucket real slips by day-key
+    const slipsByDay = {};
+    try {
+      const s = coreState.read();
+      (s.slips || []).forEach(sl => {
+        const dt = new Date(sl.ts); dt.setHours(0,0,0,0);
+        const k = dayKey(dt);
+        slipsByDay[k] = (slipsByDay[k] || 0) + 1;
+      });
+    } catch(e){}
+    // Mock backfill PRNG (only used when no real slip exists for that day)
+    let seed = 1337;
+    function rnd() { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }
+    for (let i = 364; i >= 0; i--) {
+      const dt = new Date(today); dt.setDate(today.getDate() - i);
+      const k = dayKey(dt);
+      let state;
+      if (slipsByDay[k]) {
+        state = 'slip'; // real
+      } else if (i > 305) {
+        state = rnd() < 0.5 ? 'slip' : rnd() < 0.4 ? 'l1' : 'l2';
+      } else if (i > 120) {
+        state = rnd() < 0.10 ? 'slip' : rnd() < 0.3 ? 'l1' : rnd() < 0.5 ? 'l2' : 'l3';
+      } else if (i > streakDays) {
+        state = rnd() < 0.04 ? 'slip' : rnd() < 0.02 ? 'freeze' : 'l3';
+      } else {
+        state = 'l4';
+      }
+      if (i === 0) state = state + ' today';
+      days.push({ dt, state, real: !!slipsByDay[k] });
+    }
+    return days;
+  }
+  function render() {
+    let streakDays = 14;
+    try { streakDays = coreState.read().streak.days || 14; } catch(e){}
+
+    // metrics
+    const days = buildDays(streakDays);
+    const clean = days.filter(d => !d.state.includes('slip')).length;
+    document.getElementById('cleanN').textContent = clean;
+    document.getElementById('longestN').textContent = Math.max(streakDays, 21); // mock longest ≥ current
+
+    // heatmap grid (7 rows × ~53 cols)
+    const hm = document.getElementById('hm');
+    hm.innerHTML = '';
+    days.forEach(d => {
+      const c = document.createElement('div');
+      c.className = 'cell ' + d.state;
+      c.title = d.dt.toDateString() + ' · ' + d.state;
+      hm.appendChild(c);
+    });
+
+    // month labels — sample 12 columns roughly
+    const monthsEl = document.getElementById('months');
+    monthsEl.innerHTML = '';
+    const MONTHS = ['Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May'];
+    MONTHS.forEach(m => {
+      const s = document.createElement('span');
+      s.textContent = m;
+      monthsEl.appendChild(s);
+    });
+
+    document.getElementById('yrLabel').textContent = new Date().getFullYear();
+
+    // weeks list — last 6 weeks
+    const list = document.getElementById('weeksList');
+    list.innerHTML = '';
+    for (let w = 0; w < 6; w++) {
+      const start = days.length - (w + 1) * 7;
+      const slice = days.slice(start, start + 7);
+      const clean = slice.filter(d => !d.state.includes('slip')).length;
+      const slips = slice.length - clean;
+      const pct = Math.round((clean / 7) * 100);
+      const dayLabel = (w === 0 ? 'This week' : w === 1 ? 'Last week' : (w + ' wks ago'));
+      const row = document.createElement('div');
+      row.className = 'week-row';
+      row.innerHTML = '' +
+        '<div class="wk-label">' + dayLabel + '</div>' +
+        '<div class="wk-bar"><div class="fill" style="width:' + pct + '%;"></div></div>' +
+        '<div class="wk-meta">' + clean + '<span class="small">/ 7 clean</span></div>';
+      list.appendChild(row);
+    }
+
+    if (window.coreTrack) coreTrack('streak_board_viewed', { streakDays });
+  }
+  render();
+  window.addEventListener('coreStateChange', render);
+</script>
+<div class="tabbar"></div>
+<script src="_lib/core-tabbar.js"></script>
+</body>
+</html>

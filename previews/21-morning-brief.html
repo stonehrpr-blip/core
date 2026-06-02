@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+  <meta charset="utf-8" />
+  <title>Core — Morning brief</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <style>
+    :root { --bg-base:#02020A; --text-primary:#F8FAFE; --text-muted:#9AA1B7; --text-dim:#4F5570; --accent:#4A8FFF; --success:#34D399; --danger:#F87171; }
+    * { box-sizing: border-box; }
+    html, body { margin:0; padding:0; height:100%; }
+    body { min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text-primary); padding:24px; overflow:hidden; }
+    .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+    .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:10; }
+    .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:10; }
+
+    .bg { position:absolute; inset:0; background: radial-gradient(70% 35% at 50% 18%, rgba(255,193,107,0.18) 0%, transparent 65%), radial-gradient(60% 40% at 50% 100%, rgba(74,143,255,0.10) 0%, transparent 60%), linear-gradient(180deg, #1A0E08 0%, var(--bg-base) 60%, #050510 100%); }
+    .grain { position:absolute; inset:0; pointer-events:none; opacity:0.04; mix-blend-mode:overlay; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.7 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); z-index:2; }
+
+    .topbar { position:absolute; top:60px; left:0; right:0; padding:0 24px; display:flex; align-items:center; justify-content:space-between; z-index:10; }
+    .skip { font-size:13px; color:var(--text-dim); cursor:pointer; padding:8px 12px; font-weight:500; }
+    .date { font-size:11px; color:var(--text-muted); letter-spacing:0.18em; text-transform:uppercase; font-family:ui-monospace,"SF Mono",Menlo,monospace; font-weight:500; }
+
+    .scroll { position:absolute; top:104px; left:0; right:0; bottom:120px; padding: 0 24px 24px; overflow-y:auto; z-index:5; }
+    .scroll::-webkit-scrollbar { display:none; }
+
+    .hero { padding: 14px 0 20px; }
+    .greeting { font-size:34px; font-weight:600; letter-spacing:-1.4px; line-height:1.05; background: linear-gradient(180deg, #FFFFFF 0%, #C8CDDE 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+    .sun-row { display:flex; align-items:center; gap:8px; margin-top:6px; font-size:12px; color:var(--text-muted); letter-spacing:-0.1px; }
+    .sun-row svg { width:14px; height:14px; stroke: #FFD05C; }
+
+    .pillar { padding: 16px 18px; border-radius: 18px; margin-bottom: 12px; background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); backdrop-filter:blur(14px); }
+    .pillar-row { display:flex; align-items:center; gap:14px; }
+    .pillar-icon { width:42px; height:42px; border-radius:12px; background:var(--c); box-shadow:0 0 16px var(--c); display:flex; align-items:center; justify-content:center; flex-shrink:0; position:relative; }
+    .pillar-icon::after { content:""; position:absolute; inset:0; border-radius:12px; background:linear-gradient(160deg, rgba(255,255,255,0.30) 0%, transparent 45%); }
+    .pillar-icon svg { width:20px; height:20px; stroke:white; position:relative; z-index:2; }
+    .pillar-text { flex:1; }
+    .pillar-tag { font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:var(--text-muted); font-weight:500; margin-bottom:2px; }
+    .pillar-title { font-size:15px; font-weight:600; color:var(--text-primary); letter-spacing:-0.1px; line-height:1.3; }
+    .pillar-sub { font-size:12px; color:var(--text-muted); margin-top:6px; line-height: 17px; letter-spacing:-0.1px; }
+    .pillar-cta { margin-top:12px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.05); display:flex; gap:8px; }
+    .pc-btn { padding:8px 14px; border-radius:999px; font-size:12px; font-weight:600; font-family:inherit; cursor:pointer; transition:transform 0.15s; }
+    .pc-btn:active { transform:scale(0.97); }
+    .pc-btn.primary { background:var(--c); color:#000; border:none; box-shadow: 0 0 12px var(--c); }
+    .pc-btn.secondary { background:transparent; color:var(--text-muted); border:1px solid rgba(255,255,255,0.10); }
+
+    .quote { margin: 16px 4px; padding: 14px 16px; border-radius:14px; background: rgba(74,143,255,0.06); border:1px solid rgba(74,143,255,0.20); }
+    .quote-text { font-size:14px; line-height:21px; color:var(--text-primary); font-style:italic; letter-spacing:-0.1px; }
+    .quote-author { margin-top:6px; font-size:11px; color: var(--accent); letter-spacing:0.04em; }
+
+    .footer { position:absolute; bottom:0; left:0; right:0; padding:14px 24px 32px; z-index:6; }
+    .footer::before { content:""; position:absolute; inset:-60px 0 0 0; background:linear-gradient(180deg, transparent 0%, rgba(2,2,10,0.85) 50%, rgba(2,2,10,0.98) 100%); pointer-events:none; z-index:-1; }
+    .cta { display:block; width:100%; padding:18px; background: rgba(255,255,255,0.96); color:#050510; border:1px solid rgba(255,255,255,0.6); border-radius:999px; font-size:17px; font-weight:600; font-family:inherit; letter-spacing:-0.2px; cursor:pointer; transition: opacity 0.2s, transform 0.2s, box-shadow 0.3s; box-shadow: 0 0 0 1px rgba(74,143,255,0.18), 0 10px 40px rgba(74,143,255,0.22), 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.85); }
+    .cta:active { opacity: 0.92; transform: scale(0.985); }
+
+    .preview-label { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); color:#4A5060; font-size:11px; letter-spacing:0.16em; text-transform:uppercase; font-family:ui-monospace,"SF Mono",Menlo,monospace; }
+    @media (max-width:460px){ body{padding:0;} .phone{width:100vw; height:100vh; border-radius:0; box-shadow:none;} .notch,.home-indicator{display:none;} .preview-label{display:none;} }
+  </style>
+  <script src="_lib/core-state.js"></script>
+  <script src="_lib/analytics.js"></script>
+  <script src="_lib/core-back.js"></script>
+  <link rel="stylesheet" href="_lib/core-responsive.css">
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div>
+    <div class="grain"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="topbar">
+      <div class="date">Mon · 26 May · 7:14am</div>
+      <div class="skip" onclick="window.location.href='20-dashboard.html'">Skip</div>
+    </div>
+
+    <div class="scroll">
+      <div class="hero">
+        <div class="greeting" id="brief-greeting">Morning,<br/>Stone.</div>
+        <div class="sun-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg>
+          Sunrise 6:52am · Sunset 5:14pm · Sydney 12°
+        </div>
+      </div>
+
+      <div class="pillar" style="--c: #4A8FFF;">
+        <div class="pillar-row">
+          <div class="pillar-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M21 12c0 5-4.5 8-9 8a9 9 0 0 1-3.5-.7L3 21l1.7-5.5A9 9 0 0 1 3 12c0-5 4.5-8 9-8s9 3 9 8z"/></svg></div>
+          <div class="pillar-text">
+            <div class="pillar-tag">Coach · today's headline</div>
+            <div class="pillar-title" id="coachHeadline">Protect your 14-day vape streak — Wednesday was the trigger last week</div>
+          </div>
+        </div>
+        <div class="pillar-sub">Same time, same place: 3pm coffee break. Pre-decide now what you'll do instead. A walk around the block did it for you last Tuesday.</div>
+        <div class="pillar-cta">
+          <button class="pc-btn primary" onclick="window.location.href='26-habit.html#vape'">Pre-commit</button>
+          <button class="pc-btn secondary" onclick="window.location.href='39-coach.html'">Talk to Coach</button>
+        </div>
+      </div>
+
+      <div class="pillar" style="--c: #FF6BAA;">
+        <div class="pillar-row">
+          <div class="pillar-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M12 4v12"/><path d="M12 16c0 2-1.2 4-3 4-2.5 0-4-2-4-5"/><path d="M12 16c0 2 1.2 4 3 4 2.5 0 4-2 4-5"/></svg></div>
+          <div class="pillar-text">
+            <div class="pillar-tag">Lungs</div>
+            <div class="pillar-title" id="lungsPillarTitle"><span data-core="streak.days">14</span> clean days · +24 XP this week</div>
+          </div>
+        </div>
+        <div class="pillar-sub">Your lung capacity recovers ~30% in the first 3 weeks of quitting. You're past the worst of the cravings.</div>
+      </div>
+
+      <div class="pillar" style="--c: #B388FF;">
+        <div class="pillar-row">
+          <div class="pillar-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M12 5v14M5 12h14"/></svg></div>
+          <div class="pillar-text">
+            <div class="pillar-tag">Today's quest · +20 XP</div>
+            <div class="pillar-title">Log one Mind session before noon</div>
+          </div>
+        </div>
+        <div class="pillar-sub">5 minutes of breathing or journaling. Pushes Brain stat through 80 — first time this month.</div>
+        <div class="pillar-cta">
+          <button class="pc-btn primary" onclick="window.location.href='30-stat.html#brain'">Start now</button>
+        </div>
+      </div>
+
+      <div class="pillar" style="--c: #FF7A45;">
+        <div class="pillar-row">
+          <div class="pillar-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M12 2c1 3 3 4.5 3 7a3 3 0 1 1-6 0c0-1 .5-1.8 1-2.5"/></svg></div>
+          <div class="pillar-text">
+            <div class="pillar-tag">Willpower</div>
+            <div class="pillar-title">2 friends on streaks longer than yours</div>
+          </div>
+        </div>
+        <div class="pillar-sub">Aya (Day 18 · vape) and Saga (Day 12 · drink) are pulling ahead. Pass them this week?</div>
+        <div class="pillar-cta">
+          <button class="pc-btn secondary" onclick="window.location.href='66-leaderboard.html'">See leaderboard</button>
+        </div>
+      </div>
+
+      <div class="quote">
+        <div class="quote-text">"You do not rise to the level of your goals. You fall to the level of your systems."</div>
+        <div class="quote-author">— James Clear, your weekly anchor</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <button class="cta" onclick="window.location.href='20-dashboard.html'">Got it · open Core</button>
+    </div>
+  </div>
+  <div class="preview-label">core · morning brief · v1</div>
+  <script>
+    (function(){
+      try {
+        const t = JSON.parse(localStorage.getItem('coreOnboardTrial')||'{}');
+        if (t.name) {
+          const g = document.getElementById('brief-greeting');
+          const h = new Date().getHours();
+          const part = h<12 ? 'Morning' : (h<18 ? 'Afternoon' : 'Evening');
+          if (g) g.innerHTML = part + ',<br/>' + t.name + '.';
+        }
+        const head = document.getElementById('coachHeadline');
+        const lines = {
+          gentle:   "Quiet, steady day ahead. Your 14-day vape streak is intact — keep it kind.",
+          balanced: "Protect your 14-day vape streak — Wednesday was the trigger last week.",
+          direct:   "Day 15 on the line. 3pm break was the slip point last week. Don't repeat it.",
+          drill:    "Day 15. No excuses. 3pm was the failure point — own it before it owns you."
+        };
+        if (head && t.tone && lines[t.tone]) head.textContent = lines[t.tone];
+      } catch(e){}
+
+      // Real slip count today (last 24h)
+      try {
+        const s = coreState.read();
+        const cutoff = Date.now() - 24*60*60*1000;
+        const slipsToday = (s.slips || []).filter(sl => sl.ts >= cutoff).length;
+        if (slipsToday > 0) {
+          const pill = document.getElementById('lungsPillarTitle');
+          if (pill) pill.innerHTML = slipsToday + ' slip' + (slipsToday === 1 ? '' : 's') + ' yesterday · streak <span data-core="streak.days">0</span>';
+          coreState.bind();
+        }
+      } catch(e){}
+
+      // Pull last night's bedtime entry into the morning Coach headline if available.
+      try {
+        const bed = JSON.parse(localStorage.getItem('coreBedtimeLog')||'[]');
+        const last = bed[bed.length - 1];
+        if (last) {
+          const head = document.getElementById('coachHeadline');
+          const map = {
+            great:  "Strong close last night. Carry it into today.",
+            good:   "Good day yesterday — stack one more.",
+            okay:   "Quiet day yesterday. Today is yours to shape.",
+            rough:  "Rough one yesterday. Soft start — one win, then another.",
+            hard:   "Hard one. Take it slow. I'll keep the noise down today."
+          };
+          if (head && map[last.mood]) head.textContent = map[last.mood];
+        }
+      } catch(e){}
+    })();
+  </script>
+</body>
+</html>

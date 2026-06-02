@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8" />
+<title>CORE — Friend slipped</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<link rel="stylesheet" href="_lib/core-buttons.css" />
+<script src="_lib/core-state.js"></script>
+<script src="_lib/analytics.js"></script>
+  <script src="_lib/core-back.js"></script>
+<style>
+  :root { --bg-base:#02020A; --text:#F8FAFE; --muted:#9AA1B7; --dim:#4F5570; --accent:#4A8FFF; --border:rgba(255,255,255,0.08); }
+  * { box-sizing:border-box; }
+  html, body { margin:0; padding:0; height:100%; }
+  body { min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text); padding:24px; overflow:hidden; }
+  .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+  .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:30; }
+  .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:30; }
+
+  /* dimmed dashboard mock behind */
+  .bg-mock { position:absolute; inset:0; background: linear-gradient(180deg, #0A0820 0%, #02020A 60%); filter: blur(3px) brightness(0.4); }
+  .scrim { position:absolute; inset:0; background: rgba(2,2,10,0.55); backdrop-filter: blur(10px); }
+
+  /* iOS-style notification — appears at top then settles as sheet */
+  .notif {
+    position:absolute; top:74px; left:14px; right:14px; z-index: 20;
+    padding: 14px; border-radius: 18px;
+    background: rgba(28,30,40,0.94); backdrop-filter: blur(20px) saturate(1.4);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 14px 40px rgba(0,0,0,0.6);
+    display:flex; align-items:flex-start; gap:12px;
+    transform: translateY(-12px); opacity: 0;
+    animation: drop .45s cubic-bezier(.22,1,.36,1) forwards;
+  }
+  @keyframes drop { to { transform: translateY(0); opacity: 1; } }
+  .notif-ico { width:38px; height:38px; border-radius:10px; background: radial-gradient(circle at 32% 28%, #DCE9FF, #4A8FFF 55%, #1453A8); box-shadow: 0 0 14px rgba(74,143,255,0.55); display:flex; align-items:center; justify-content:center; flex-shrink:0; position:relative; }
+  .notif-ico::after { content:""; position:absolute; inset:0; border-radius:10px; background:linear-gradient(160deg, rgba(255,255,255,0.30) 0%, transparent 45%); }
+  .notif-ico .wm { font-size:11px; font-weight:700; letter-spacing:0.16em; color:#fff; position:relative; z-index:2; }
+  .notif-text { flex:1; }
+  .notif-head { display:flex; align-items:baseline; justify-content:space-between; }
+  .notif-app { font-size:12px; font-weight:700; color:#fff; letter-spacing:0.04em; }
+  .notif-when { font-size:11px; color: var(--muted); }
+  .notif-title { font-size:14px; font-weight:600; color:#fff; letter-spacing:-0.1px; margin-top:2px; }
+  .notif-sub { font-size:13px; color: rgba(255,255,255,0.78); margin-top:3px; line-height:18px; letter-spacing:-0.05px; }
+
+  /* sheet */
+  .sheet {
+    position:absolute; left:0; right:0; bottom:0; z-index:30;
+    background: linear-gradient(180deg, #0E0E1B 0%, #07071A 100%);
+    border-top-left-radius:28px; border-top-right-radius:28px;
+    border-top:1px solid rgba(255,255,255,0.10);
+    padding: 20px 22px 32px;
+    transform: translateY(80%); opacity:0;
+    animation: rise .5s 0.35s cubic-bezier(.22,1,.36,1) forwards;
+  }
+  @keyframes rise { to { transform: translateY(0); opacity: 1; } }
+  .grab { width:40px; height:4px; border-radius:999px; background: rgba(255,255,255,0.18); margin: 0 auto 16px; }
+
+  .who {
+    display:flex; align-items:center; gap:12px; padding:14px; border-radius:14px;
+    background: rgba(255,255,255,0.03); border:1px solid var(--border);
+  }
+  .who-av {
+    width:48px; height:48px; border-radius:50%; flex-shrink:0;
+    background: radial-gradient(circle at 32% 28%, #FFEEBF, #FFD05C 55%, #876619);
+    box-shadow: 0 0 18px rgba(255,208,92,0.45);
+    display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; color:#fff; position:relative;
+  }
+  .who-av::after { content:""; position:absolute; inset:0; border-radius:50%; background:linear-gradient(160deg, rgba(255,255,255,0.30), transparent 45%); }
+  .who-name { font-size:15px; font-weight:700; color:#fff; letter-spacing:-0.2px; }
+  .who-sub { font-size:11px; color: var(--muted); margin-top:2px; letter-spacing:0.06em; }
+  .who-streak { text-align:right; }
+  .who-streak .d { font-size:18px; font-weight:800; color:#fff; letter-spacing:-0.3px; }
+  .who-streak .l { font-size:9px; letter-spacing:0.18em; color:var(--muted); text-transform:uppercase; font-weight:700; }
+
+  .title { font-size:22px; font-weight:700; letter-spacing:-0.5px; line-height:1.12; margin: 16px 0 6px; }
+  .copy { color: var(--muted); font-size:13px; line-height:18px; margin: 0 0 16px; letter-spacing:-0.05px; }
+
+  /* template buttons */
+  .tpl-h { font-size:10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); font-weight:700; margin: 4px 4px 10px; }
+  .tpl-grid { display:flex; flex-direction:column; gap:8px; margin-bottom:6px; }
+  .tpl {
+    display:flex; align-items:flex-start; gap:11px; padding:13px 14px;
+    border-radius:14px; background: rgba(255,255,255,0.03);
+    border:1px solid var(--border); cursor:pointer; text-align: left;
+    font-family: inherit; color:#fff; font-size:13px; line-height:18px;
+    transition: background .15s, border-color .15s;
+  }
+  .tpl:hover { background: rgba(255,255,255,0.06); border-color: rgba(91,177,255,0.40); }
+  .tpl-ico { width:26px; height:26px; border-radius:8px; background: var(--c); box-shadow:0 0 10px var(--c); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .tpl-ico svg { width:13px; height:13px; stroke:#fff; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+  .tpl-text { flex:1; color: rgba(255,255,255,0.9); letter-spacing:-0.05px; }
+
+  .footer-row { display:flex; gap:8px; margin-top: 14px; }
+  .footer-row .btn { flex: 1; }
+</style>
+  <link rel="stylesheet" href="_lib/core-responsive.css">
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg-mock"></div>
+    <div class="scrim"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="notif">
+      <div class="notif-ico"><div class="wm">C</div></div>
+      <div class="notif-text">
+        <div class="notif-head"><span class="notif-app">CORE</span><span class="notif-when">2d ago</span></div>
+        <div class="notif-title">Sam slipped — they're rebuilding</div>
+        <div class="notif-sub">Day 2 again. Cravings peak about now. Send a 'come back' nudge?</div>
+      </div>
+    </div>
+
+    <div class="sheet">
+      <div class="grab"></div>
+
+      <div class="who">
+        <div class="who-av">S</div>
+        <div style="flex:1;">
+          <div class="who-name">Sam</div>
+          <div class="who-sub">@sam · Quit Vape · slipped 2 days ago</div>
+        </div>
+        <div class="who-streak"><div class="d">2</div><div class="l">days back</div></div>
+      </div>
+
+      <h2 class="title">Send Sam a nudge.</h2>
+      <p class="copy">No pressure messages. Friends respond best to one-line check-ins. Pick a template — you can edit before sending.</p>
+
+      <div class="tpl-h">Quick replies</div>
+      <div class="tpl-grid">
+        <button class="tpl" onclick="send('proud')">
+          <div class="tpl-ico" style="--c:#34D399;"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>
+          <div class="tpl-text">"Saw the slip — proud of you for logging it. Day 2 is enough."</div>
+        </button>
+        <button class="tpl" onclick="send('walk')">
+          <div class="tpl-ico" style="--c:#5BB1FF;"><svg viewBox="0 0 24 24"><path d="M13 4l-2 8h4l-2 8M9 8l-2-3M15 8l2-3"/></svg></div>
+          <div class="tpl-text">"Walk together at 6? Just 10 minutes. Loops past your usual block."</div>
+        </button>
+        <button class="tpl" onclick="send('here')">
+          <div class="tpl-ico" style="--c:#B388FF;"><svg viewBox="0 0 24 24"><path d="M21 12c0 5-4.5 8-9 8a9 9 0 0 1-3.5-.7L3 21l1.7-5.5A9 9 0 0 1 3 12c0-5 4.5-8 9-8s9 3 9 8z"/></svg></div>
+          <div class="tpl-text">"I'm here — ping me when the urge hits. Don't ride it alone."</div>
+        </button>
+        <button class="tpl" onclick="send('match')">
+          <div class="tpl-ico" style="--c:#FF6BAA;"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/></svg></div>
+          <div class="tpl-text">"Restart your streak today — I'll match each clean day with one of mine."</div>
+        </button>
+      </div>
+
+      <div class="footer-row">
+        <button class="btn ghost" onclick="dismiss()">Skip</button>
+        <button class="btn primary pill" onclick="window.location.href='69-friends-streak.html'">See all buddies →</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  function send(template) {
+    if (window.coreTrack) coreTrack('friend_nudge_sent', { template, who: 'sam' });
+    alert('Sent: ' + template + ' template. Sam will see it next time they open CORE.');
+    setTimeout(() => location.href = '69-friends-streak.html', 100);
+  }
+  function dismiss() {
+    if (window.coreTrack) coreTrack('friend_slipped_dismissed', { who: 'sam' });
+    history.length > 1 ? history.back() : (location.href = '20-dashboard.html');
+  }
+  if (window.coreTrack) coreTrack('friend_slipped_viewed', { who: 'sam' });
+</script>
+</body>
+</html>

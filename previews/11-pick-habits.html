@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+  <meta charset="utf-8" />
+  <title>Core — Pick Habits (preview v1)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <style>
+    :root {
+      --bg-base: #02020A;
+      --bg-deep: #060614;
+      --text-primary: #F8FAFE;
+      --text-muted: #9AA1B7;
+      --text-dim: #4F5570;
+      --stat-lungs: #FF6BAA;
+      --stat-brain: #B388FF;
+      --stat-wallet: #FFD05C;
+      --stat-willpower: #FF7A45;
+      --stat-body: #5CE1E6;
+      --accent: #4A8FFF;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; height: 100%; }
+    body {
+      min-height: 100vh;
+      background: #0A0A14;
+      display: flex; align-items: center; justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", sans-serif;
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+      padding: 24px;
+      overflow: hidden;
+    }
+
+    /* iPhone frame ------------------------------------------------------- */
+    .phone {
+      position: relative;
+      width: 390px; height: 844px;
+      background: var(--bg-base);
+      border-radius: 56px;
+      overflow: hidden;
+      box-shadow:
+        0 40px 100px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(255, 255, 255, 0.06),
+        0 0 0 10px #0a0a12,
+        0 0 0 11px #2b2b38;
+    }
+    .notch {
+      position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+      width: 124px; height: 32px; background: #000; border-radius: 20px; z-index: 10;
+    }
+    .home-indicator {
+      position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+      width: 134px; height: 5px;
+      background: rgba(245, 247, 251, 0.55);
+      border-radius: 999px; z-index: 10;
+    }
+
+    /* Deep cosmic background (consistent with welcome) ------------------ */
+    .bg {
+      position: absolute; inset: 0; z-index: 0;
+      background:
+        radial-gradient(60% 38% at 50% 90%, rgba(155, 130, 255, 0.10) 0%, transparent 60%),
+        radial-gradient(80% 40% at 50% -10%, rgba(74, 143, 255, 0.10) 0%, transparent 60%),
+        linear-gradient(180deg, #0A0820 0%, var(--bg-base) 50%, #050510 100%);
+    }
+    .grain {
+      position: absolute; inset: 0; pointer-events: none; z-index: 2;
+      opacity: 0.04; mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.7 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    }
+
+    /* Top bar (back + progress) ----------------------------------------- */
+    .topbar {
+      position: absolute; top: 60px; left: 0; right: 0;
+      padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      z-index: 5;
+    }
+    .back {
+      width: 38px !important; height: 38px !important;
+      min-width: 38px !important; min-height: 38px !important;
+      max-width: 38px !important; max-height: 38px !important;
+      aspect-ratio: 1 / 1;
+      flex: 0 0 38px;
+      align-self: center;
+      border-radius: 50% !important;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.10);
+      display: flex !important; align-items: center !important; justify-content: center !important;
+      cursor: pointer; padding: 0;
+      font-family: inherit;
+      box-sizing: border-box;
+      transition: background .15s, border-color .15s, transform .12s;
+    }
+    .back:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }
+    .back:active { transform: scale(0.94); }
+    .back svg { width:14px; height:14px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex-shrink: 0; }
+
+    .progress {
+      display: flex; gap: 6px; align-items: center;
+    }
+    .step { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.15); }
+    .step.active { background: var(--text-primary); width: 18px; border-radius: 999px; }
+    .step.done { background: var(--accent); }
+
+    .step-label {
+      font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--text-dim); font-weight: 500; font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    }
+
+    /* Content area ------------------------------------------------------ */
+    .content {
+      position: absolute;
+      top: 124px; left: 0; right: 0; bottom: 130px;
+      padding: 0 24px;
+      z-index: 5;
+      display: flex; flex-direction: column;
+    }
+
+    .heading {
+      margin-bottom: 24px;
+    }
+    .title {
+      margin: 0;
+      font-size: 30px;
+      font-weight: 600;
+      letter-spacing: -1.2px;
+      line-height: 1.1;
+      background: linear-gradient(180deg, #FFFFFF 0%, #C8CDDE 100%);
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle {
+      margin: 10px 0 0;
+      font-size: 14px; line-height: 20px;
+      color: var(--text-muted);
+      letter-spacing: -0.1px;
+    }
+
+    /* Habit grid -------------------------------------------------------- */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .card {
+      position: relative;
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      backdrop-filter: blur(18px) saturate(1.4);
+      -webkit-backdrop-filter: blur(18px) saturate(1.4);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex; flex-direction: column;
+      gap: 10px;
+      min-height: 108px;
+      overflow: hidden;
+    }
+    .card::before {
+      content: ""; position: absolute; inset: 0; border-radius: 18px;
+      background: radial-gradient(80% 100% at 0% 0%, var(--card-color, transparent) 0%, transparent 60%);
+      opacity: 0.12;
+      transition: opacity 0.2s ease;
+      pointer-events: none;
+    }
+    .card:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.10); transform: translateY(-1px); }
+    .card:active { transform: scale(0.98); }
+
+    .card.selected {
+      background: rgba(74, 143, 255, 0.08);
+      border-color: var(--accent);
+      box-shadow:
+        0 0 0 1px var(--accent),
+        0 0 24px rgba(74, 143, 255, 0.25);
+    }
+    .card.selected::before { opacity: 0.20; }
+    .card.selected .check { opacity: 1; transform: scale(1); }
+
+    .card-icon {
+      width: 38px; height: 38px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--card-color, #2A2E3A);
+      box-shadow: 0 4px 16px var(--card-color, transparent);
+      position: relative;
+    }
+    .card-icon::after {
+      content: ""; position: absolute; inset: 0; border-radius: 12px;
+      background: linear-gradient(160deg, rgba(255,255,255,0.30) 0%, transparent 40%);
+      pointer-events: none;
+    }
+    .card-icon svg { width: 20px; height: 20px; stroke: white; opacity: 0.95; position: relative; z-index: 2; }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+      color: var(--text-primary);
+    }
+    .card-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 14px;
+      letter-spacing: -0.1px;
+    }
+
+    .check {
+      position: absolute; top: 12px; right: 12px;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transform: scale(0.7);
+      transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 0 14px rgba(74, 143, 255, 0.6);
+    }
+    .check svg { width: 12px; height: 12px; stroke: white; stroke-width: 2.5; }
+
+    /* Bottom action ----------------------------------------------------- */
+    .footer {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 16px 28px 36px;
+      z-index: 6;
+    }
+    .footer::before {
+      content: ""; position: absolute; inset: -60px 0 0 0;
+      background: linear-gradient(180deg, transparent 0%, rgba(2,2,10,0.85) 50%, rgba(2,2,10,0.98) 100%);
+      pointer-events: none; z-index: -1;
+    }
+
+    .selection-count {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-dim);
+      letter-spacing: 0.06em;
+      margin-bottom: 12px;
+      min-height: 16px;
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    }
+    .selection-count.has { color: var(--accent); }
+
+    .cta {
+      display: block;
+      width: 100%;
+      padding: 18px;
+      background: rgba(255, 255, 255, 0.96);
+      color: #050510;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 999px;
+      font-size: 17px; font-weight: 600;
+      font-family: inherit; letter-spacing: -0.2px;
+      cursor: pointer;
+      transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.3s ease;
+      box-shadow:
+        0 0 0 1px rgba(74, 143, 255, 0.18),
+        0 10px 40px rgba(74, 143, 255, 0.22),
+        0 2px 8px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.85);
+    }
+    .cta:hover { box-shadow: 0 0 0 1px rgba(74, 143, 255, 0.3), 0 14px 44px rgba(74, 143, 255, 0.35), inset 0 1px 0 rgba(255,255,255,0.8); }
+    .cta:active { opacity: 0.92; transform: scale(0.985); }
+    .cta:disabled {
+      background: rgba(255, 255, 255, 0.10);
+      color: var(--text-dim);
+      cursor: not-allowed;
+      box-shadow: none;
+      border-color: rgba(255,255,255,0.08);
+    }
+
+    .preview-label {
+      position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+      color: #4A5060; font-size: 11px;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    }
+
+    @media (max-width: 460px) {
+      body { padding: 0; }
+      .phone { width: 100vw; height: 100vh; border-radius: 0; box-shadow: none; }
+      .notch, .home-indicator { display: none; }
+      .preview-label { display: none; }
+    }
+  </style>
+  <script>
+    (function() {
+      try {
+        var local = location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+        var p = new URLSearchParams(location.search);
+        if (local && p.get("preview") === "1") { localStorage.setItem("coreDevBypass","1"); window.__coreDemoMode = true; return; }
+        if (local && localStorage.getItem("coreDevBypass") === "1") { window.__coreDemoMode = true; return; }
+        try{(function(){var h=location.hostname;window.__corePreview=window.__corePreview||(location.protocol==='file:'||h==='localhost'||h==='127.0.0.1'||/[?&]preview=1/.test(location.search));})();}catch(e){}if(!window.__corePreview){if (localStorage.getItem("coreOnboardComplete") !== "1") { location.replace("01-index.html"); }}
+      } catch(e){}
+    })();
+  </script>
+  <link rel="stylesheet" href="_lib/core-responsive.css">
+  <script src="_lib/core-back.js"></script>
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div>
+    <div class="grain"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="topbar">
+      <button class="back" type="button" onclick="window.location.href='12-baseline.html'" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18L9 12l6-6"/></svg>
+      </button>
+      <div class="progress">
+        <span class="step active"></span>
+        <span class="step"></span>
+        <span class="step"></span>
+      </div>
+      <span class="step-label">1 of 3</span>
+    </div>
+
+    <div class="content">
+      <div class="heading">
+        <h1 class="title">What do you<br/>want to quit?</h1>
+        <p class="subtitle">Pick one or more. You can change this anytime.</p>
+      </div>
+
+      <div class="grid">
+        <!-- Vape -->
+        <div class="card" data-habit="vape" style="--card-color: #FF6BAA;" onclick="toggle(this)">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 4v12"/>
+              <path d="M12 16c0 2-1.2 4-3 4-2.5 0-4-2-4-5 0-3 1-7 3-9 1-1 2-1 2 0v5"/>
+              <path d="M12 16c0 2 1.2 4 3 4 2.5 0 4-2 4-5 0-3-1-7-3-9-1-1-2-1-2 0v5"/>
+            </svg>
+          </div>
+          <div>
+            <div class="card-title">Vaping</div>
+            <div class="card-sub">Each puff darkens your lungs</div>
+          </div>
+          <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></div>
+        </div>
+
+        <!-- Doomscroll -->
+        <div class="card" data-habit="doomscroll" style="--card-color: #B388FF;" onclick="toggle(this)">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 3a3 3 0 0 0-3 3v0a3 3 0 0 0-3 3v1a3 3 0 0 0 1 2.2A3 3 0 0 0 4 14v1a3 3 0 0 0 3 3 3 3 0 0 0 3 3h.5a1.5 1.5 0 0 0 1.5-1.5V4.5A1.5 1.5 0 0 0 10.5 3H9Z"/>
+              <path d="M15 3a3 3 0 0 1 3 3v0a3 3 0 0 1 3 3v1a3 3 0 0 1-1 2.2A3 3 0 0 1 20 14v1a3 3 0 0 1-3 3 3 3 0 0 1-3 3h-.5a1.5 1.5 0 0 1-1.5-1.5V4.5A1.5 1.5 0 0 1 13.5 3H15Z"/>
+            </svg>
+          </div>
+          <div>
+            <div class="card-title">Doom-scrolling</div>
+            <div class="card-sub">Mindless scrolling melts focus</div>
+          </div>
+          <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></div>
+        </div>
+
+        <!-- Drink -->
+        <div class="card" data-habit="drink" style="--card-color: #5CE1E6;" onclick="toggle(this)">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 3h12l-1 5a4 4 0 0 1-4 4h-2a4 4 0 0 1-4-4z"/>
+              <path d="M12 12v6"/>
+              <path d="M9 21h6"/>
+            </svg>
+          </div>
+          <div>
+            <div class="card-title">Drinking</div>
+            <div class="card-sub">Tints your body and dims recovery</div>
+          </div>
+          <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></div>
+        </div>
+
+        <!-- Spend -->
+        <div class="card" data-habit="spend" style="--card-color: #FFD05C;" onclick="toggle(this)">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="6" width="18" height="13" rx="2.5"/>
+              <path d="M3 10h18"/>
+              <circle cx="16.5" cy="14.5" r="1"/>
+            </svg>
+          </div>
+          <div>
+            <div class="card-title">Impulse spending</div>
+            <div class="card-sub">Coins fly out of your wallet</div>
+          </div>
+          <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></div>
+        </div>
+
+        <!-- Porn -->
+        <div class="card" data-habit="porn" style="--card-color: #FF7A45;" onclick="toggle(this)">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2c1 3 3 4.5 3 7a3 3 0 1 1-6 0c0-1 .5-1.8 1-2.5"/>
+              <path d="M5 14c0-2 1-4 3-5-.4 1.4 0 2.6 1 3.5-1 .5-1.5 1.5-1.5 2.5 0 2.5 2 4.5 4.5 4.5s4.5-2 4.5-4.5c0-1.7-1-3-2.5-3.7 1 1.3 1.3 2.5 1 3.7C18 13 19 11 19 9"/>
+            </svg>
+          </div>
+          <div>
+            <div class="card-title">Porn</div>
+            <div class="card-sub">Glitches willpower, dulls dopamine</div>
+          </div>
+          <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></div>
+        </div>
+
+        <!-- Junk food -->
+        <div class="card" data-habit="junk_food" style="--card-color: #5CE1E6;" onclick="toggle(this)">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 11h14l-2 9H7z"/>
+              <path d="M8 11V8a4 4 0 0 1 8 0v3"/>
+              <circle cx="10" cy="15" r="0.5"/>
+              <circle cx="14" cy="16" r="0.5"/>
+            </svg>
+          </div>
+          <div>
+            <div class="card-title">Junk food</div>
+            <div class="card-sub">Bloats your body, momentary spike</div>
+          </div>
+          <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></div>
+        </div>
+
+        <!-- Weed -->
+        <div class="card" data-habit="weed" style="--card-color: #FF6BAA;" onclick="toggle(this)">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22V10"/>
+              <path d="M12 10c0-3 2-6 5-7-1 3-2 5-5 7"/>
+              <path d="M12 10c0-3-2-6-5-7 1 3 2 5 5 7"/>
+              <path d="M12 14c0-2-2-4-5-4 1 2 2 3 5 4"/>
+              <path d="M12 14c0-2 2-4 5-4-1 2-2 3-5 4"/>
+            </svg>
+          </div>
+          <div>
+            <div class="card-title">Weed</div>
+            <div class="card-sub">Smoke and haze cloud lungs + mind</div>
+          </div>
+          <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></div>
+        </div>
+
+        <!-- Nicotine pouch -->
+        <div class="card" data-habit="nicotine_pouch" style="--card-color: #FF7A45;" onclick="toggle(this)">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="6" y="9" width="12" height="7" rx="3.5"/>
+              <path d="M8 9V7a4 4 0 0 1 8 0v2"/>
+            </svg>
+          </div>
+          <div>
+            <div class="card-title">Nicotine pouch</div>
+            <div class="card-sub">Quiet hum of dependency</div>
+          </div>
+          <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="selection-count" id="count">Pick at least one</div>
+      <button class="cta" id="continue" disabled onclick="next()">Continue</button>
+    </div>
+  </div>
+
+  <div class="preview-label">core · pick habits · v1</div>
+
+  <script>
+    const selected = new Set();
+    const countEl = document.getElementById('count');
+    const btnEl = document.getElementById('continue');
+
+    function toggle(card) {
+      const habit = card.dataset.habit;
+      if (selected.has(habit)) {
+        selected.delete(habit);
+        card.classList.remove('selected');
+      } else {
+        selected.add(habit);
+        card.classList.add('selected');
+      }
+      updateFooter();
+    }
+
+    function updateFooter() {
+      const n = selected.size;
+      if (n === 0) {
+        countEl.innerHTML = 'Quit Vaping <span style="color:rgba(255,255,255,0.4); font-weight:500;">· add more anytime</span>';
+        countEl.classList.add('has');
+        btnEl.disabled = false;
+      } else if (n === 1 && selected.has('vape')) {
+        countEl.innerHTML = 'Quit Vaping <span style="color:rgba(255,255,255,0.4); font-weight:500;">· add more anytime</span>';
+        countEl.classList.add('has');
+        btnEl.disabled = false;
+      } else {
+        countEl.textContent = n === 1 ? '1 habit selected' : `${n} habits selected`;
+        countEl.classList.add('has');
+        btnEl.disabled = false;
+      }
+    }
+
+    function next() {
+      try {
+        const list = Array.from(selected);
+        if (!list.includes('vape')) list.unshift('vape');
+        localStorage.setItem('coreSelectedHabits', JSON.stringify(list));
+        // Onboarding is already complete by the time we reach pick-habits (quiz set the flag).
+        // This screen now functions as an optional habit-add step (also surfaced in Settings later).
+        if (window.coreTrack) coreTrack('habits_selected', { habits: list });
+      } catch(e){}
+      window.location.href = '20-dashboard.html';
+    }
+
+    // Pre-select Quit Vaping (v1 launch niche)
+    (function() {
+      const vapeCard = document.querySelector('[data-habit="vape"]');
+      if (vapeCard) {
+        selected.add('vape');
+        vapeCard.classList.add('selected');
+        // Add a "primary" pill to make it feel anchored
+        const pill = document.createElement('div');
+        pill.style.cssText = 'position:absolute; top:10px; left:10px; padding:3px 8px; border-radius:6px; background:rgba(255,107,170,0.16); border:1px solid rgba(255,107,170,0.40); font-size:8px; letter-spacing:0.18em; text-transform:uppercase; font-weight:700; color:#FF6BAA; z-index:3;';
+        pill.textContent = '★ Your focus';
+        vapeCard.appendChild(pill);
+      }
+      updateFooter();
+    })();
+  </script>
+</body>
+</html>

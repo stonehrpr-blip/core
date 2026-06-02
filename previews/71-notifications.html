@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+  <meta charset="utf-8" />
+  <title>Core — Notifications</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <style>
+    :root { --bg-base:#02020A; --text-primary:#F8FAFE; --text-muted:#9AA1B7; --text-dim:#4F5570; --accent:#4A8FFF; --success:#34D399; --danger:#F87171; }
+    * { box-sizing: border-box; }
+    html, body { margin:0; padding:0; height:100%; }
+    body { min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text-primary); padding:24px; overflow:hidden; }
+    .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+    .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:10; }
+    .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:10; }
+
+    .bg { position:absolute; inset:0; background: radial-gradient(60% 30% at 50% 18%, rgba(74,143,255,0.10) 0%, transparent 65%), linear-gradient(180deg, #0A0820 0%, var(--bg-base) 50%, #050510 100%); }
+    .grain { position:absolute; inset:0; pointer-events:none; opacity:0.04; mix-blend-mode:overlay; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.7 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); z-index:2; }
+
+    .topbar { position:absolute; top:60px; left:0; right:0; padding:0 24px; display:flex; align-items:center; gap:14px; z-index:10; }
+    .back {
+      width: 38px !important; height: 38px !important;
+      min-width: 38px !important; min-height: 38px !important;
+      max-width: 38px !important; max-height: 38px !important;
+      aspect-ratio: 1 / 1;
+      flex: 0 0 38px;
+      align-self: center;
+      border-radius: 50% !important;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.10);
+      display: flex !important; align-items: center !important; justify-content: center !important;
+      cursor: pointer; padding: 0;
+      font-family: inherit;
+      box-sizing: border-box;
+      transition: background .15s, border-color .15s, transform .12s;
+    }
+    .back:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }
+    .back:active { transform: scale(0.94); }
+    .back svg { width:14px; height:14px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex-shrink: 0; }
+    .topbar-title { font-size:22px; font-weight:600; letter-spacing:-0.5px; flex:1; }
+    .mark-all { font-size:12px; color:var(--accent); font-weight:600; cursor:pointer; }
+
+    .scroll { position:absolute; top:120px; left:0; right:0; bottom:0; padding: 0 20px 28px; overflow-y:auto; z-index:5; }
+    .scroll::-webkit-scrollbar { display:none; }
+
+    .group-title { font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:var(--text-muted); font-weight:500; margin: 12px 4px 8px; }
+    .group { display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
+
+    .notif { display:flex; align-items:flex-start; gap:12px; padding:14px; border-radius:14px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); backdrop-filter:blur(14px); cursor:pointer; transition:all 0.15s; position:relative; }
+    .notif:hover { background:rgba(255,255,255,0.05); }
+    .notif.unread::after { content:""; position:absolute; top:14px; right:14px; width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 8px var(--accent); }
+    .notif-icon { width:38px; height:38px; border-radius:11px; background: var(--c, var(--accent)); box-shadow: 0 0 14px var(--c); display:flex; align-items:center; justify-content:center; flex-shrink:0; position:relative; }
+    .notif-icon::after { content:""; position:absolute; inset:0; border-radius:11px; background:linear-gradient(160deg, rgba(255,255,255,0.30) 0%, transparent 45%); }
+    .notif-icon svg { width:18px; height:18px; stroke:white; position:relative; z-index:2; }
+    .notif-text { flex:1; min-width:0; }
+    .notif-title { font-size:13px; font-weight:600; color:var(--text-primary); letter-spacing:-0.1px; }
+    .notif-sub { font-size:12px; color:var(--text-muted); margin-top:3px; line-height: 16px; }
+    .notif-time { font-size:10px; color:var(--text-dim); margin-top:5px; letter-spacing:0.04em; font-family: ui-monospace,"SF Mono",Menlo,monospace; }
+    .notif-action { font-size:11px; color:var(--accent); margin-top:6px; font-weight:600; }
+
+    .preview-label { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); color:#4A5060; font-size:11px; letter-spacing:0.16em; text-transform:uppercase; font-family:ui-monospace,"SF Mono",Menlo,monospace; }
+    @media (max-width:460px){ body{padding:0;} .phone{width:100vw; height:100vh; border-radius:0; box-shadow:none;} .notch,.home-indicator{display:none;} .preview-label{display:none;} }
+  
+    /* core-tabbar-clearance */
+    .scroll { padding-bottom: 110px !important; }
+  </style>
+  <link rel="stylesheet" href="_lib/core-responsive.css">
+  <script src="_lib/core-back.js"></script>
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div>
+    <div class="grain"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="topbar">
+      <button class="back" type="button" onclick="window.location.href='20-dashboard.html'" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18L9 12l6-6"/></svg>
+      </button>
+      <div class="topbar-title">Notifications</div>
+      <div class="mark-all">Mark all read</div>
+    </div>
+
+    <div class="scroll">
+      <div class="group-title">Today</div>
+      <div class="group">
+        <div class="notif unread" onclick="window.location.href='29-recovery-quest.html'">
+          <div class="notif-icon" style="--c: #FF7A45;"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg></div>
+          <div class="notif-text">
+            <div class="notif-title">Recovery quest ready</div>
+            <div class="notif-sub">Claw back +12 XP from your morning slip. Takes 60 seconds.</div>
+            <div class="notif-time">12 min ago</div>
+            <div class="notif-action">Start quest →</div>
+          </div>
+        </div>
+        <div class="notif unread" onclick="window.location.href='66-leaderboard.html'">
+          <div class="notif-icon" style="--c: #B388FF;"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L4 10l8 12 8-12z"/></svg></div>
+          <div class="notif-text">
+            <div class="notif-title">Aya passed you on the leaderboard</div>
+            <div class="notif-sub">She's at 2,180 XP · you're 60 XP behind. Two clean days will close it.</div>
+            <div class="notif-time">2h ago</div>
+          </div>
+        </div>
+        <div class="notif unread" onclick="window.location.href='59-feed.html'">
+          <div class="notif-icon" style="--c: #FF6BAA;"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+          <div class="notif-text">
+            <div class="notif-title">Saga liked your post</div>
+            <div class="notif-sub">"Day 14 clean from vape. Lungs feel pink again." ❤️</div>
+            <div class="notif-time">3h ago</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group-title">Yesterday</div>
+      <div class="group">
+        <div class="notif" onclick="window.location.href='62-profile.html'">
+          <div class="notif-icon" style="--c: #34D399;"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg></div>
+          <div class="notif-text">
+            <div class="notif-title">Achievement unlocked — "14-day fire"</div>
+            <div class="notif-sub">Two clean weeks on willpower. Halfway to the next milestone.</div>
+            <div class="notif-time">yesterday · 9:14 PM</div>
+            <div class="notif-action">View achievement →</div>
+          </div>
+        </div>
+        <div class="notif" onclick="window.location.href='39-coach.html'">
+          <div class="notif-icon" style="--c: #4A8FFF;"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12c0 5-4.5 8-9 8a9 9 0 0 1-3.5-.7L3 21l1.7-5.5A9 9 0 0 1 3 12c0-5 4.5-8 9-8s9 3 9 8z"/></svg></div>
+          <div class="notif-text">
+            <div class="notif-title">Coach: your week is ready</div>
+            <div class="notif-sub">Brain ▲6 · Willpower ▲8 · Wallet ▼2. Tap to see what carried it.</div>
+            <div class="notif-time">yesterday · 8:00 PM</div>
+          </div>
+        </div>
+        <div class="notif" onclick="window.location.href='66-leaderboard.html'">
+          <div class="notif-icon" style="--c: #FFD05C;"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21v-7M6 14l-3 7M6 14l3 7M12 21V9M12 9l-3 12M12 9l3 12M18 21V3M18 3l-3 18M18 3l3 18"/></svg></div>
+          <div class="notif-text">
+            <div class="notif-title">Weekly leaderboard reset</div>
+            <div class="notif-sub">You ended last week #6. Fresh start — first to 200 XP gets the bonus.</div>
+            <div class="notif-time">yesterday · 12:00 AM</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group-title">Earlier</div>
+      <div class="group">
+        <div class="notif">
+          <div class="notif-icon" style="--c: #5CE1E6;"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg></div>
+          <div class="notif-text">
+            <div class="notif-title">Friend request — Kai</div>
+            <div class="notif-sub">"Hey, met you at the Stoic group. Adding for accountability."</div>
+            <div class="notif-time">3 days ago</div>
+            <div class="notif-action">Accept · Decline</div>
+          </div>
+        </div>
+        <div class="notif">
+          <div class="notif-icon" style="--c: #4A8FFF;"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 16V11a6 6 0 0 0-12 0v5l-2 3h16z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg></div>
+          <div class="notif-text">
+            <div class="notif-title">Daily check-in</div>
+            <div class="notif-sub">Morning, Stone. Today's headline: protect your 14-day vape streak — Wednesday was the trigger last week.</div>
+            <div class="notif-time">4 days ago · 7:00 AM</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div <div class="tabbar"></div><div class="preview-label">core · notifications · v1</div>
+<script src="_lib/core-tabbar.js"></script>
+</body>
+</html>

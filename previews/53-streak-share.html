@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8" />
+<title>CORE — Share your streak</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<link rel="stylesheet" href="_lib/core-buttons.css" />
+<link rel="stylesheet" href="_lib/core-responsive.css">
+<script src="_lib/core-state.js"></script>
+<script src="_lib/analytics.js"></script>
+  <script src="_lib/core-back.js"></script>
+<style>
+  :root { --bg-base:#02020A; --text:#F8FAFE; --muted:#9AA1B7; --dim:#4F5570; --accent:#4A8FFF; --border:rgba(255,255,255,0.08); }
+  * { box-sizing:border-box; }
+  html, body { margin:0; padding:0; height:100%; }
+  body { min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text); padding:24px; overflow:hidden; }
+  .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+  .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:30; }
+  .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:30; }
+  .bg { position:absolute; inset:0; background: radial-gradient(70% 40% at 50% 16%, rgba(91,177,255,0.18), transparent 65%), radial-gradient(60% 35% at 50% 95%, rgba(159,143,255,0.16), transparent 60%), linear-gradient(180deg, #0a0830 0%, #02020A 60%); }
+
+  .frame { position:absolute; inset:0; z-index:10; padding: 60px 0 24px; display:flex; flex-direction:column; }
+  .topbar { padding: 0 22px 8px; display:flex; align-items:center; justify-content:space-between; }
+    .back {
+      width: 38px !important; height: 38px !important;
+      min-width: 38px !important; min-height: 38px !important;
+      max-width: 38px !important; max-height: 38px !important;
+      aspect-ratio: 1 / 1;
+      flex: 0 0 38px;
+      align-self: center;
+      border-radius: 50% !important;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.10);
+      display: flex !important; align-items: center !important; justify-content: center !important;
+      cursor: pointer; padding: 0;
+      font-family: inherit;
+      box-sizing: border-box;
+      transition: background .15s, border-color .15s, transform .12s;
+    }
+    .back:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }
+    .back:active { transform: scale(0.94); }
+    .back svg { width:14px; height:14px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex-shrink: 0; }
+  .title-top { font-size:13px; color:var(--muted); font-weight:600; letter-spacing:-0.1px; }
+  .spacer-right { width:34px; }
+
+  .hero { padding: 18px 26px 4px; text-align:center; }
+  .kicker { font-size:11px; letter-spacing:0.22em; text-transform:uppercase; color:var(--muted); font-weight:700; }
+  .title { font-size: 26px; font-weight: 700; letter-spacing: -0.6px; margin: 8px 0 6px; }
+  .copy { color: var(--muted); font-size: 13px; line-height: 19px; max-width: 300px; margin: 0 auto; }
+
+  /* preview card */
+  .preview-stage { display:flex; justify-content:center; padding: 18px 22px 0; }
+  .card-mini {
+    width: 100%; aspect-ratio: 1;
+    border-radius: 22px; overflow: hidden; position: relative;
+    background: radial-gradient(70% 50% at 50% 14%, rgba(91,177,255,0.30), transparent 60%), radial-gradient(60% 50% at 50% 100%, rgba(159,143,255,0.20), transparent 60%), linear-gradient(180deg, #07071F, #02020A);
+    border: 1px solid rgba(91,177,255,0.30);
+    padding: 22px;
+  }
+  .card-mini .br { display:flex; align-items:center; gap: 8px; }
+  .card-mini .br .d { width:6px; height:6px; border-radius:50%; background:#4A8FFF; box-shadow:0 0 8px #4A8FFF; }
+  .card-mini .br .w { font-size: 9px; letter-spacing:0.32em; font-weight:700; color:rgba(255,255,255,0.85); }
+  .card-mini .num { font-size: clamp(60px, 22vw, 110px); font-weight:800; letter-spacing:-3px; line-height:0.9; background: linear-gradient(180deg, #fff, #9F8FFF); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; margin-top: 14px; }
+  .card-mini .l { font-size: 10px; letter-spacing: 0.20em; color: rgba(255,255,255,0.55); text-transform: uppercase; font-weight:700; margin-top: 6px; }
+  .card-mini .ft { position:absolute; left:22px; right:22px; bottom: 16px; display:flex; justify-content:space-between; font-size: 10px; }
+  .card-mini .ft .nm { color:#fff; font-weight:700; }
+  .card-mini .ft .u { color: rgba(255,255,255,0.55); letter-spacing:1.2px; }
+
+  .channel-row { display:flex; gap: 10px; justify-content: center; padding: 18px 22px 0; }
+  .ch {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px;
+    padding: 11px 6px; border-radius: 12px;
+    background: rgba(255,255,255,0.04); border:1px solid var(--border);
+    color: #fff; font-family: inherit; cursor: pointer;
+  }
+  .ch:hover { background: rgba(255,255,255,0.07); }
+  .ch .ico { width: 38px; height: 38px; border-radius: 12px; display:flex; align-items:center; justify-content:center; background: var(--c, rgba(255,255,255,0.04)); }
+  .ch .ico svg { width: 18px; height: 18px; stroke: #fff; fill: none; stroke-width: 1.7; stroke-linecap:round; stroke-linejoin:round; }
+  .ch .lbl { font-size: 10px; color: var(--muted); letter-spacing: 0.06em; }
+
+  .footer { padding: 16px 22px 0; margin-top:auto; }
+  .footnote { text-align:center; font-size:11px; color:var(--muted); margin-top:8px; }
+
+  @media (max-width: 460px) {
+    body { padding: 0; }
+    .phone { width: 100vw; height: 100vh; height: 100dvh; border-radius: 0; box-shadow: none; }
+    .notch, .home-indicator { display: none; }
+  }
+  /* Small phones — shrink hero + preview card so channel row + CTA fit above fold */
+  @media (max-width: 380px), (max-height: 720px) {
+    .frame { padding: 50px 0 18px; }
+    .hero { padding: 6px 20px 0; }
+    .kicker { font-size: 9.5px; letter-spacing: 0.18em; }
+    .title { font-size: 22px; letter-spacing: -0.7px; }
+    .copy { font-size: 12px; line-height: 17px; margin-top: 6px; }
+    .preview-stage { padding: 14px 22px 0; }
+    .card-mini { padding: 16px; }
+    .card-mini .num { font-size: clamp(48px, 18vw, 80px); margin-top: 8px; }
+    .card-mini .l { font-size: 9px; margin-top: 4px; }
+    .channel-row { padding: 12px 18px 0; gap: 6px; }
+    .ch { padding: 8px 4px; gap: 4px; }
+    .ch .ico { width: 32px; height: 32px; }
+    .ch .ico svg { width: 15px; height: 15px; }
+    .ch .lbl { font-size: 9px; }
+    .footer { padding: 12px 22px 0; }
+  }
+  @media (max-width: 340px) {
+    .channel-row { gap: 4px; }
+    .ch { padding: 6px 2px; }
+    .ch .ico { width: 28px; height: 28px; }
+    .ch .lbl { font-size: 8px; }
+  }
+</style>
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="frame">
+      <div class="topbar">
+        <button class="back" type="button" onclick="coreBack('50-streak-board.html')" aria-label="Back"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <div class="title-top">Share your streak</div>
+        <div class="spacer-right"></div>
+      </div>
+
+      <div class="hero">
+        <div class="kicker">1290 × 1290 · ready to post</div>
+        <h1 class="title">Make the next one cleaner.</h1>
+        <p class="copy">Save the card or post directly. Friends who tap your link land on a read-only profile of your streak.</p>
+      </div>
+
+      <div class="preview-stage">
+        <div class="card-mini">
+          <div class="br"><div class="d"></div><div class="w">CORE</div></div>
+          <div class="num" id="cardNum">14</div>
+          <div class="l">Days clean · Quit Vape</div>
+          <div class="ft"><div class="nm" id="cardName">@stone</div><div class="u">core.app</div></div>
+        </div>
+      </div>
+
+      <div class="channel-row">
+        <button class="ch" style="--c:#5BB1FF;" onclick="save()">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M12 4v12M6 10l6 6 6-6M4 20h16"/></svg></div>
+          <div class="lbl">Save PNG</div>
+        </button>
+        <button class="ch" style="--c:#34D399;" onclick="msg('iMessage')">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M21 12c0 5-4.5 8-9 8a9 9 0 0 1-3.5-.7L3 21l1.7-5.5A9 9 0 0 1 3 12c0-5 4.5-8 9-8s9 3 9 8z"/></svg></div>
+          <div class="lbl">iMessage</div>
+        </button>
+        <button class="ch" style="--c:#000;" onclick="msg('X')">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M4 4l16 16M20 4L4 20"/></svg></div>
+          <div class="lbl">X (Twitter)</div>
+        </button>
+        <button class="ch" style="--c:linear-gradient(135deg,#F58529,#DD2A7B,#8134AF,#515BD4);" onclick="msg('Instagram')">
+          <div class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/></svg></div>
+          <div class="lbl">Story</div>
+        </button>
+        <button class="ch" style="--c:rgba(255,255,255,0.10);" onclick="copyLink()">
+          <div class="ico"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></div>
+          <div class="lbl">Copy link</div>
+        </button>
+      </div>
+
+      <div class="footer">
+        <button class="btn primary pill block lg" onclick="customize()">
+          Customize card
+          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M3 7h18M3 12h12M3 17h6" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+        </button>
+        <div class="footnote">Saves a 1290×1290 PNG · ready for Instagram, TikTok, X</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  let days = 14, name = 'stone';
+  try {
+    const s = coreState.read();
+    days = s.streak.days || 14;
+    document.getElementById('cardNum').textContent = days;
+    const t = JSON.parse(localStorage.getItem('coreOnboardTrial')||'{}');
+    if (t.name) { name = t.name.toLowerCase(); document.getElementById('cardName').textContent = '@' + name; }
+  } catch(e){}
+
+  function back() {
+    if (history.length > 1) history.back();
+    else window.location.href = '51-streak-celebration.html?days=' + days;
+  }
+  function customize() {
+    window.location.href = '55-share-card-generator.html?streak=' + days + '&stat=streak&score=' + days + '&name=' + encodeURIComponent(name) + '&line=' + encodeURIComponent('Day ' + days + ' clean. Quit Vape.');
+  }
+  function copyLink() {
+    const url = 'https://core.app/u/' + name + '?days=' + days;
+    navigator.clipboard?.writeText(url).then(() => alert('Copied: ' + url), () => prompt('Copy:', url));
+    if (window.coreTrack) coreTrack('streak_share_link_copied', { url });
+  }
+  function msg(via) {
+    if (window.coreTrack) coreTrack('streak_share_channel', { via });
+    alert('Opening ' + via + ' with a 1290² card + link.\n\nFalls back to native share-sheet in production.');
+  }
+  // Save → render PNG via canvas (same routine as 55-share-card-generator.html, slimmed)
+  function save() {
+    if (window.coreTrack) coreTrack('streak_share_save', {});
+    const W = 1290, H = 1290;
+    const c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const x = c.getContext('2d');
+    x.fillStyle = '#05050F'; x.fillRect(0,0,W,H);
+    const g1 = x.createRadialGradient(W/2, H*0.14, 0, W/2, H*0.14, W*0.7);
+    g1.addColorStop(0,'rgba(91,177,255,0.30)'); g1.addColorStop(1,'rgba(91,177,255,0)');
+    x.fillStyle = g1; x.fillRect(0,0,W,H);
+    const g2 = x.createRadialGradient(W/2, H, 0, W/2, H, W*0.6);
+    g2.addColorStop(0,'rgba(159,143,255,0.20)'); g2.addColorStop(1,'rgba(159,143,255,0)');
+    x.fillStyle = g2; x.fillRect(0,0,W,H);
+    // Brand
+    x.fillStyle = '#4A8FFF'; x.shadowColor = '#4A8FFF'; x.shadowBlur = 20;
+    x.beginPath(); x.arc(116, 122, 9, 0, Math.PI*2); x.fill(); x.shadowBlur = 0;
+    x.fillStyle = '#fff'; x.font = '700 32px -apple-system, "SF Pro Display", Inter, sans-serif';
+    x.fillText('C O R E', 144, 132);
+    // Big num — gradient text
+    x.textBaseline = 'top';
+    const ng = x.createLinearGradient(0, 320, 0, 760);
+    ng.addColorStop(0, '#fff'); ng.addColorStop(0.85, '#9F8FFF');
+    x.fillStyle = ng;
+    x.font = '800 460px -apple-system, "SF Pro Display", Inter, sans-serif';
+    x.fillText(String(days), 110, 320);
+    // Kicker + label
+    x.fillStyle = 'rgba(255,255,255,0.55)';
+    x.font = '700 26px -apple-system, "SF Pro Display", Inter, sans-serif';
+    x.fillText('DAYS CLEAN · QUIT VAPE', 110, 820);
+    // Footer
+    x.fillStyle = '#fff'; x.font = '700 28px -apple-system, "SF Pro Display", Inter, sans-serif';
+    x.fillText('@' + name, 110, H - 130);
+    x.fillStyle = 'rgba(255,255,255,0.55)';
+    x.font = '600 24px -apple-system, "SF Pro Display", Inter, sans-serif';
+    const host = 'CORE · core.app';
+    const hostW = x.measureText(host).width;
+    x.fillText(host, W - 110 - hostW, H - 130);
+    c.toBlob(blob => {
+      const u = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = u; a.download = 'core-streak-' + days + '.png'; a.click();
+      setTimeout(() => URL.revokeObjectURL(u), 1000);
+    }, 'image/png');
+  }
+  if (window.coreTrack) coreTrack('streak_share_opened', { days });
+</script>
+</body>
+</html>

@@ -1,0 +1,721 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8" />
+<title>CORE — Owner dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<script>
+  // Owner gate — TWO checks: email match (basic) AND 6-digit PIN (defense).
+  // In production this is server-side via Better-Auth + email OTP. Preview uses local PIN.
+  window.__CORE_OWNER_OK = false;
+  (function() {
+    try {
+      const ownerEmail = 'stonehrprzilo@gmail.com';
+      const p = new URLSearchParams(location.search);
+      const isOwnerEmail = localStorage.getItem('coreOwnerEmail') === ownerEmail || p.get('owner') === '1';
+      if (!isOwnerEmail) {
+        document.documentElement.dataset.gateState = 'denied';
+        return; // 404 shown via CSS body content swap (see DOMContentLoaded)
+      }
+      try { localStorage.setItem('coreOwnerEmail', ownerEmail); } catch(e){}
+      // PIN check — bypass once unlocked in this session, or via ?pin=<value>
+      const sessionUnlocked = sessionStorage.getItem('coreOwnerUnlocked') === '1';
+      const storedPin = localStorage.getItem('coreOwnerPin');
+      const urlPin = p.get('pin');
+      if (storedPin && urlPin === storedPin) {
+        sessionStorage.setItem('coreOwnerUnlocked', '1');
+        window.__CORE_OWNER_OK = true;
+        return;
+      }
+      if (!storedPin) {
+        // First-time: prompt to set
+        document.documentElement.dataset.gateState = 'setup';
+        return;
+      }
+      if (sessionUnlocked) {
+        window.__CORE_OWNER_OK = true;
+        return;
+      }
+      document.documentElement.dataset.gateState = 'locked';
+    } catch(e){}
+  })();
+</script>
+<style>
+  :root {
+    --bg: #02020A; --text:#F8FAFE; --muted:#9AA1B7; --dim:#4F5570;
+    --border: rgba(255,255,255,0.06); --border-strong: rgba(255,255,255,0.10);
+    --accent: #4A8FFF; --accent-hi:#6BA9FF;
+    --gold:#FFD05C; --green:#34D399; --red:#F87171; --orange:#FF7A45;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; height:100%; }
+  body {
+    min-height:100vh; background:#0A0A14;
+    display:flex; align-items:center; justify-content:center;
+    font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    color:var(--text); padding:24px; overflow:hidden;
+  }
+  .phone {
+    position:relative; width:430px; max-width:100%; height:900px; background: radial-gradient(circle at top, #0a1228 0%, #050918 50%, #02030a 100%);
+    border-radius:56px; overflow:hidden;
+    box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38;
+  }
+  .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:30; }
+  .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:30; }
+
+  .scroll { position:absolute; inset:0; padding: 56px 16px 100px; overflow-y:auto; }
+  .scroll::-webkit-scrollbar { display:none; }
+
+  /* Top */
+  .top { display:flex; align-items:center; justify-content:space-between; padding: 8px 4px 18px; }
+  .top h1 { font-size: 24px; letter-spacing: -0.6px; line-height: 1.1; margin: 0; }
+  .top .sub { color: var(--muted); font-size: 12px; margin-top: 4px; }
+  .top-right { display:flex; align-items:center; gap:8px; }
+  .icon-btn { width:38px; height:38px; border-radius:50%; background:rgba(255,255,255,0.04); border:1px solid var(--border-strong); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .icon-btn svg { width:15px; height:15px; stroke:var(--muted); fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .owner-badge { padding:4px 9px; border-radius:999px; background: rgba(255,208,92,0.12); border:1px solid rgba(255,208,92,0.40); color: var(--gold); font-size:9px; font-weight:800; letter-spacing:0.20em; text-transform:uppercase; }
+
+  /* Range tabs */
+  .range-row { display:flex; gap:6px; margin-bottom: 16px; padding: 0 2px; }
+  .range-btn { flex:1; padding: 8px 6px; border-radius: 10px; background: rgba(255,255,255,0.03); border:1px solid var(--border-strong); color: var(--muted); font-family:inherit; font-size:11px; font-weight:700; letter-spacing:0.06em; cursor:pointer; text-transform:uppercase; }
+  .range-btn.active { background:#fff; color:#050510; border-color:#fff; }
+
+  /* Hero MRR card */
+  .hero {
+    padding: 16px; border-radius: 20px;
+    background: linear-gradient(135deg, rgba(74,143,255,0.10) 0%, rgba(132,100,255,0.05) 100%);
+    border:1px solid var(--border-strong);
+    margin-bottom: 12px;
+  }
+  .hero-lbl { font-size:10px; letter-spacing:0.22em; color: var(--accent-hi); font-weight:800; text-transform:uppercase; }
+  .hero-num-row { display:flex; align-items:baseline; gap:6px; margin-top: 8px; }
+  .hero-num { font-size:42px; font-weight:800; letter-spacing:-1.6px; line-height:1; background: linear-gradient(180deg, #fff, var(--accent-hi)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+  .hero-unit { font-size:14px; color: var(--muted); font-weight: 500; letter-spacing:-0.2px; }
+  .hero-delta { font-size: 11.5px; color: var(--green); font-weight:700; margin-top:6px; }
+  .hero-delta.down { color: var(--red); }
+
+  /* Stat grid */
+  .stat-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  .stat-card {
+    padding: 12px; border-radius: 14px;
+    background: rgba(255,255,255,0.03); border:1px solid var(--border-strong);
+  }
+  .stat-card .lbl { font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color: var(--muted); font-weight:700; }
+  .stat-card .val { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; margin-top: 4px; color:#fff; }
+  .stat-card .delta { font-size: 10.5px; margin-top: 3px; font-weight: 700; letter-spacing: -0.1px; }
+  .stat-card .delta.up { color: var(--green); }
+  .stat-card .delta.down { color: var(--red); }
+  .stat-card .delta.flat { color: var(--muted); }
+
+  /* Channels */
+  .channels { display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:14px; }
+  .ch-card {
+    padding: 14px; border-radius: 14px;
+    background: var(--ch-bg, rgba(255,255,255,0.03));
+    border: 1px solid var(--ch-bd, var(--border-strong));
+    position: relative; overflow: hidden;
+  }
+  .ch-card.apple { --ch-bg: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); --ch-bd: rgba(255,255,255,0.18); }
+  .ch-card.stripe { --ch-bg: linear-gradient(135deg, rgba(99,91,255,0.08), rgba(99,91,255,0.02)); --ch-bd: rgba(99,91,255,0.30); }
+  .ch-head { display:flex; align-items:center; justify-content:space-between; }
+  .ch-name { font-size: 11px; font-weight: 800; letter-spacing:0.10em; text-transform:uppercase; color: #fff; }
+  .ch-name svg { width:14px; height:14px; vertical-align:-2px; margin-right:4px; }
+  .ch-val { font-size: 24px; font-weight: 800; letter-spacing: -0.6px; margin-top: 8px; color:#fff; }
+  .ch-sub { font-size: 10.5px; color: var(--muted); margin-top: 3px; }
+  .ch-foot { font-size: 10px; color: var(--muted); margin-top: 8px; letter-spacing: -0.05px; }
+
+  /* Section */
+  .section-title { font-size: 11px; letter-spacing: 0.20em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin: 18px 4px 10px; display:flex; align-items:center; justify-content:space-between; }
+  .section-title .more { font-size: 11px; letter-spacing:-0.05px; color: var(--accent-hi); cursor:pointer; text-transform: none; font-weight: 500; }
+
+  /* Chart */
+  .chart-card { padding: 14px; border-radius: 16px; background: rgba(255,255,255,0.03); border:1px solid var(--border-strong); margin-bottom: 14px; }
+  .chart-svg { width: 100%; height: 130px; display:block; margin-top: 6px; }
+
+  /* Recent transactions */
+  .txn { display:flex; align-items:center; gap: 11px; padding: 11px 12px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); margin-bottom: 6px; }
+  .txn-ico { width: 30px; height: 30px; border-radius: 9px; display:flex; align-items:center; justify-content:center; flex-shrink: 0; }
+  .txn-ico.in { background: var(--green); box-shadow: 0 0 10px rgba(52,211,153,0.40); }
+  .txn-ico.refund { background: var(--red); box-shadow: 0 0 10px rgba(248,113,113,0.30); }
+  .txn-ico svg { width:14px; height:14px; stroke: #050510; fill:none; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
+  .txn-body { flex:1; min-width:0; }
+  .txn-name { font-size: 13px; font-weight: 600; color:#fff; letter-spacing:-0.1px; }
+  .txn-sub  { font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+  .txn-amt  { font-size: 13.5px; font-weight: 700; letter-spacing: -0.2px; flex-shrink:0; }
+  .txn-amt.in { color: var(--green); }
+  .txn-amt.out { color: var(--red); }
+
+  /* GST card */
+  .gst-card { padding: 14px; border-radius: 14px; background: var(--gst-bg, rgba(255,208,92,0.06)); border: 1px solid var(--gst-bd, rgba(255,208,92,0.24)); margin-bottom: 18px; }
+  .gst-card.alert { --gst-bg: rgba(248,113,113,0.10); --gst-bd: rgba(248,113,113,0.40); }
+  .gst-head { display:flex; align-items:center; gap:8px; font-size: 12px; font-weight:700; color: #fff; letter-spacing:-0.1px; }
+  .gst-head .ico { width: 22px; height: 22px; border-radius: 7px; background: var(--gold); display:flex; align-items:center; justify-content:center; }
+  .gst-card.alert .gst-head .ico { background: var(--red); }
+  .gst-head .ico svg { width:13px; height:13px; stroke:#050510; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+  .gst-progress { height: 6px; border-radius: 999px; background: rgba(255,255,255,0.08); margin-top: 10px; overflow:hidden; }
+  .gst-progress-fill { height:100%; background: var(--gold); box-shadow: 0 0 8px var(--gold); transition: width .4s; }
+  .gst-card.alert .gst-progress-fill { background: var(--red); box-shadow: 0 0 8px var(--red); }
+  .gst-foot { font-size: 11px; color: var(--muted); margin-top: 8px; line-height: 16px; letter-spacing: -0.05px; }
+  .gst-foot strong { color: #fff; }
+
+  /* Gate overlays */
+  html[data-gate-state="denied"] body > div.phone .scroll { display:none; }
+  html[data-gate-state="denied"] body::before {
+    content: "404 · not found"; position: fixed; inset: 0; display:grid; place-items:center;
+    background:#0A0A14; color:#fff; font: 14px -apple-system, sans-serif;
+  }
+  .gate-screen { position:absolute; inset:0; background: rgba(2,2,10,0.96); backdrop-filter: blur(12px); z-index:100; display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 0 28px; }
+  .gate-title { font-size: 18px; font-weight: 700; color:#fff; letter-spacing:-0.3px; }
+  .gate-sub { font-size: 12px; color: var(--muted); margin-top: 8px; text-align:center; line-height: 17px; }
+  .gate-pin {
+    margin-top: 22px; padding: 14px 18px; border-radius: 14px;
+    background: rgba(255,255,255,0.04); border:1px solid var(--border-strong);
+    text-align:center; font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 24px; letter-spacing: 0.5em; color:#fff; outline:none; width: 180px;
+  }
+  .gate-pin:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(74,143,255,0.16); }
+  .gate-cta {
+    margin-top: 14px; padding: 12px 22px; border-radius: 999px; background:#fff; color:#050510;
+    border:none; font-family:inherit; font-weight:700; font-size:13px; cursor:pointer;
+  }
+  .gate-foot { font-size: 10px; color: var(--dim); margin-top: 18px; letter-spacing:0.04em; }
+
+  /* Search */
+  .search-row { display:flex; align-items:center; gap:8px; padding: 9px 14px; border-radius:12px; background:rgba(255,255,255,0.03); border:1px solid var(--border-strong); margin-bottom:14px; }
+  .search-row svg { width:14px; height:14px; stroke:var(--muted); fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+  .search-row input { flex:1; background:transparent; border:none; color:#fff; font-family:inherit; font-size:13px; outline:none; letter-spacing:-0.1px; }
+  .search-row input::placeholder { color:var(--dim); }
+
+  /* Tappable txn */
+  .txn { cursor: pointer; transition: background .12s; }
+  .txn:hover { background: rgba(255,255,255,0.05); }
+  .txn-chev { color: var(--dim); font-size: 14px; flex-shrink:0; margin-left: 6px; }
+
+  .preview-watermark { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); color:#4A5060; font-size:11px; letter-spacing:0.16em; text-transform:uppercase; font-family:ui-monospace,"SF Mono",Menlo,monospace; }
+  @media (max-width:460px){ body{padding:0;} .phone{width:100vw; height:100vh; height:100dvh; border-radius:0; box-shadow:none;} .notch,.home-indicator,.preview-watermark{display:none;} }
+</style>
+<script src="_lib/core-back.js"></script>
+<link rel="stylesheet" href="_lib/core-responsive.css">
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+<div class="phone">
+  <div class="notch"></div>
+  <div class="home-indicator"></div>
+
+  <!-- Owner PIN gate -->
+  <div class="gate-screen" id="gateScreen" style="display:none;">
+    <div class="gate-title" id="gateTitle">Owner PIN</div>
+    <div class="gate-sub" id="gateSub">Enter your 6-digit PIN to view revenue and user data.</div>
+    <input type="tel" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" class="gate-pin" id="gatePin" placeholder="••••••" autocomplete="off" />
+    <button class="gate-cta" id="gateCta" onclick="submitPin()">Unlock</button>
+    <div class="gate-foot">Stays unlocked until you close the tab.</div>
+  </div>
+
+  <div class="scroll">
+    <div class="top">
+      <div>
+        <h1>Owner</h1>
+        <div class="sub">Core · CORE</div>
+      </div>
+      <div class="top-right">
+        <span class="owner-badge">owner</span>
+        <div class="icon-btn" data-fallback="80-settings.html" aria-label="Back">
+          <svg viewBox="0 0 24 24"><path d="M15 18L9 12l6-6"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="range-row">
+      <button class="range-btn"        data-range="7">7d</button>
+      <button class="range-btn active" data-range="30">30d</button>
+      <button class="range-btn"        data-range="90">90d</button>
+      <button class="range-btn"        data-range="ytd">YTD</button>
+      <button class="range-btn"        data-range="all">All</button>
+    </div>
+
+    <!-- MRR hero -->
+    <div class="hero">
+      <div class="hero-lbl">Monthly Recurring Revenue</div>
+      <div class="hero-num-row">
+        <span class="hero-num" id="mrr">$0</span>
+        <span class="hero-unit">net to bank</span>
+      </div>
+      <div class="hero-delta up" id="mrrDelta">▲ first month</div>
+    </div>
+
+    <!-- 4 quick stats -->
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="lbl">Downloads</div>
+        <div class="val" id="downloads">0</div>
+        <div class="delta up" id="downloadsDelta">▲ 0 this week</div>
+      </div>
+      <div class="stat-card">
+        <div class="lbl">Paying users</div>
+        <div class="val" id="paying">0</div>
+        <div class="delta up" id="payingDelta">▲ 0 this week</div>
+      </div>
+      <div class="stat-card">
+        <div class="lbl">Free users</div>
+        <div class="val" id="free">0</div>
+        <div class="delta flat" id="freeDelta">— stable</div>
+      </div>
+      <div class="stat-card">
+        <div class="lbl">Conversion</div>
+        <div class="val" id="conversion">0%</div>
+        <div class="delta up" id="convDelta">▲ 0 pp</div>
+      </div>
+      <div class="stat-card" style="grid-column: span 2;">
+        <div class="lbl">Churn rate · 30d</div>
+        <div class="val" id="churn">0.0%</div>
+        <div class="delta flat" id="churnDelta">— monthly cancellations as a share of paying users</div>
+      </div>
+    </div>
+
+    <!-- Search bar -->
+    <div class="search-row">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-5-5"/></svg>
+      <input id="adminSearch" placeholder="Search by handle, email, or transaction id…" oninput="onSearchInput(this.value)" />
+    </div>
+    <div id="searchResults" style="display:none; margin-bottom: 14px;"></div>
+
+    <!-- Channel split -->
+    <div class="section-title">Revenue by channel</div>
+    <div class="channels">
+      <div class="ch-card apple">
+        <div class="ch-head">
+          <span class="ch-name">
+            <svg viewBox="0 0 24 24" fill="#fff"><path d="M17.6 12.4c0-2.3 1.9-3.4 2-3.4-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.8-3.5.8-.7 0-1.9-.8-3.1-.8-1.6 0-3.1.9-3.9 2.4-1.7 2.9-.4 7.2 1.2 9.6.8 1.2 1.7 2.5 3 2.4 1.2 0 1.7-.8 3.1-.8 1.4 0 1.9.8 3.1.8 1.3 0 2.1-1.2 2.9-2.4.9-1.4 1.3-2.7 1.3-2.8 0-.1-2.6-1-2.7-4z"/><path d="M15.3 5.8c.6-.8 1.1-1.9 1-3-.9 0-2 .6-2.7 1.4-.6.7-1.2 1.8-1 2.9 1.1.1 2.1-.5 2.7-1.3z"/></svg>
+            iOS
+          </span>
+        </div>
+        <div class="ch-val" id="appleRev">$0</div>
+        <div class="ch-sub" id="appleSubs">0 subscribers</div>
+        <div class="ch-foot" id="appleNet">Net after 15% Apple cut</div>
+      </div>
+      <div class="ch-card stripe">
+        <div class="ch-head">
+          <span class="ch-name">
+            <svg viewBox="0 0 24 24" fill="#A4ACFF"><path d="M13.5 9.2c0-1 .8-1.4 2.2-1.4 2 0 4.5.6 6.4 1.6V3.5c-2.1-.8-4.2-1.2-6.4-1.2C10.7 2.3 7 5.1 7 9.7c0 7.3 10 6.1 10 9.3 0 1.2-1 1.5-2.5 1.5-2.2 0-5-1-7-2.1v6c2.3 1 4.7 1.4 7 1.4 5.2 0 9-2.7 9-7.4 0-7.9-10-6.5-10-9.2z" transform="scale(0.9) translate(1.3, 0)"/></svg>
+            Web
+          </span>
+        </div>
+        <div class="ch-val" id="stripeRev">$0</div>
+        <div class="ch-sub" id="stripeSubs">0 subscribers</div>
+        <div class="ch-foot" id="stripeNet">Net after 2.9% + 30¢</div>
+      </div>
+    </div>
+
+    <!-- Sparkline chart -->
+    <div class="chart-card">
+      <div class="section-title" style="margin: 0 0 4px;">
+        <span>Downloads · 30d</span>
+        <span class="more" id="chartTotal">0 total</span>
+      </div>
+      <svg class="chart-svg" id="chart" viewBox="0 0 300 130" preserveAspectRatio="none" fill="none">
+        <defs>
+          <linearGradient id="adminGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#6BA9FF" stop-opacity="0.4"/>
+            <stop offset="100%" stop-color="#6BA9FF" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <path id="chartFill" d="" fill="url(#adminGrad)"/>
+        <path id="chartLine" d="" stroke="#6BA9FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" filter="drop-shadow(0 0 4px #4A8FFF)"/>
+      </svg>
+    </div>
+
+    <!-- GST tracker (AU threshold $75K) -->
+    <div class="section-title">Tax · GST threshold</div>
+    <div class="gst-card" id="gstCard">
+      <div class="gst-head">
+        <span class="ico"><svg viewBox="0 0 24 24"><path d="M3 12h2l3-8 4 16 3-12 2 6h4"/></svg></span>
+        <span id="gstLabel">$0 of $75,000 AUD · GST not required yet</span>
+      </div>
+      <div class="gst-progress"><div class="gst-progress-fill" id="gstFill" style="width: 0%;"></div></div>
+      <div class="gst-foot" id="gstFoot">Australian businesses must register for GST when annualized turnover exceeds <strong>$75K AUD</strong>. We'll warn you at 80%.</div>
+    </div>
+
+    <!-- Recent transactions -->
+    <div class="section-title">
+      <span>Recent</span>
+      <span class="more" onclick="window.location.href='89-admin.html#all'">View all ›</span>
+    </div>
+    <div id="txnList"></div>
+
+    <div style="text-align:center; margin: 22px 0 10px; font-size: 11px; color: var(--muted); letter-spacing:-0.05px;">
+      Read-only · data pulls from your Stripe + Apple feeds<br/>
+      <strong style="color: #fff;">All net revenue routes to Core bank.</strong>
+    </div>
+  </div>
+</div>
+<div class="preview-watermark">core · admin · v1</div>
+
+<script>
+  // Real API endpoint (Phase 3). Falls back to demo if the backend isn't reachable
+  // (e.g. when running the HTML preview directly off file://).
+  const API_BASE = (location.protocol === 'file:') ? null : '';
+
+  async function fetchLiveMetrics(rangeDays) {
+    if (!API_BASE && API_BASE !== '') return null;
+    try {
+      const res = await fetch(`${API_BASE}/api/admin/metrics?range=${rangeDays}`, { credentials: 'include' });
+      if (res.status === 404) return null; // owner cookie missing or non-owner
+      if (!res.ok) return null;
+      return await res.json();
+    } catch { return null; }
+  }
+
+  // Demo seed — used when the API isn't reachable (file:// preview)
+  function demoData(rangeDays) {
+    const days = rangeDays === 'all' ? 270 : rangeDays === 'ytd' ? Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 1).getTime()) / 86400000) : Number(rangeDays) || 30;
+    // Simulated growth curve — slow start, takeoff
+    let downloads = 0, paying = 0, freeUsers = 0, appleRev = 0, stripeRev = 0;
+    const series = [];
+    for (let i = 0; i < days; i++) {
+      const t = i / Math.max(1, days - 1);
+      const dailyDl = Math.round(3 + 22 * Math.pow(t, 2.2) + Math.sin(i * 0.4) * 3);
+      const dailyPay = Math.round(dailyDl * (0.08 + 0.10 * t));
+      downloads += Math.max(0, dailyDl);
+      paying += Math.max(0, dailyPay);
+      freeUsers += Math.max(0, dailyDl - dailyPay);
+      // Mix: 75% iOS, 25% web for revenue
+      const appleNew = Math.round(dailyPay * 0.75) * 7.99 * 0.85;  // 85% net after Apple
+      const stripeNew = Math.round(dailyPay * 0.25) * 7.99 * 0.94; // 94% net after Stripe
+      appleRev += appleNew;
+      stripeRev += stripeNew;
+      series.push(dailyDl);
+    }
+    return { downloads, paying, free: freeUsers, appleRev, stripeRev, series };
+  }
+
+  function fmtUSD(n) { return '$' + Math.round(n).toLocaleString(); }
+  function fmtPct(n) { return (Math.round(n * 10) / 10) + '%'; }
+
+  async function render(rangeDays) {
+    // Try the real API first; fall back to demo if not reachable
+    const live = await fetchLiveMetrics(rangeDays);
+    if (live) return renderFromLive(live, rangeDays);
+    const d = demoData(rangeDays);
+    const mrr = (d.appleRev + d.stripeRev) / (Number(rangeDays) || 30) * 30; // approximate monthly
+    document.getElementById('mrr').textContent = fmtUSD(mrr);
+
+    document.getElementById('downloads').textContent = d.downloads.toLocaleString();
+    document.getElementById('paying').textContent = d.paying.toLocaleString();
+    document.getElementById('free').textContent = d.free.toLocaleString();
+    document.getElementById('conversion').textContent = fmtPct(d.downloads > 0 ? (d.paying / d.downloads * 100) : 0);
+
+    document.getElementById('appleRev').textContent = fmtUSD(d.appleRev);
+    document.getElementById('appleSubs').textContent = Math.round(d.paying * 0.75).toLocaleString() + ' subscribers';
+    document.getElementById('stripeRev').textContent = fmtUSD(d.stripeRev);
+    document.getElementById('stripeSubs').textContent = Math.round(d.paying * 0.25).toLocaleString() + ' subscribers';
+
+    // Churn — cancellations / paying users at start of period. Simulated.
+    const churnPct = d.paying > 0 ? (3.2 + Math.random() * 1.6) : 0;
+    document.getElementById('churn').textContent = churnPct.toFixed(1) + '%';
+    const churnLine = churnPct > 6 ? '▲ above healthy (industry avg ~5%)'
+                    : churnPct > 4 ? '— around industry average'
+                    : '▼ below industry average';
+    document.getElementById('churnDelta').textContent = churnLine;
+    document.getElementById('churnDelta').className = 'delta ' + (churnPct > 6 ? 'down' : churnPct > 4 ? 'flat' : 'up');
+
+    // Chart
+    const series = d.series.slice(-30);
+    if (series.length) {
+      const max = Math.max(1, ...series);
+      const pts = series.map((v, i) => {
+        const x = (i / (series.length - 1)) * 290 + 5;
+        const y = 120 - (v / max) * 100;
+        return { x, y };
+      });
+      const lineD = pts.map((p, i) => (i === 0 ? 'M' : 'L') + p.x + ' ' + p.y).join(' ');
+      document.getElementById('chartLine').setAttribute('d', lineD);
+      document.getElementById('chartFill').setAttribute('d', lineD + ' L' + pts[pts.length-1].x + ' 124 L' + pts[0].x + ' 124 Z');
+      document.getElementById('chartTotal').textContent = series.reduce((a,b)=>a+b,0).toLocaleString() + ' downloads';
+    }
+
+    // GST tracker — annualized turnover (extrapolated from selected range)
+    const days = Number(rangeDays) || 30;
+    const annualized = (d.appleRev + d.stripeRev) / Math.max(1, days) * 365;
+    const GST_THRESHOLD = 75000; // AUD
+    const pct = Math.min(100, (annualized / GST_THRESHOLD) * 100);
+    document.getElementById('gstFill').style.width = pct + '%';
+    document.getElementById('gstLabel').textContent = fmtUSD(annualized) + ' AUD of $75,000 · ' + (annualized < GST_THRESHOLD ? 'GST not required yet' : 'GST REGISTRATION REQUIRED');
+    const card = document.getElementById('gstCard');
+    if (pct >= 80) {
+      card.classList.add('alert');
+      document.getElementById('gstFoot').innerHTML = '<strong>Action needed:</strong> approaching GST registration threshold. Register at <strong>business.gov.au</strong> within 21 days of crossing $75K AUD.';
+      maybePushGstAlert(annualized);
+    } else {
+      card.classList.remove('alert');
+      document.getElementById('gstFoot').innerHTML = 'Australian businesses must register for GST when annualized turnover exceeds <strong>$75K AUD</strong>. We\'ll warn you at 80%.';
+    }
+
+    // Recent transactions — synthesized from demo, in production from Stripe / App Store feed
+    const txnList = document.getElementById('txnList');
+    txnList.innerHTML = '';
+    const USERS = [
+      { name: 'Aya Tanaka',  handle: 'aya' },
+      { name: 'Kai Reed',    handle: 'kai' },
+      { name: 'Wren Park',   handle: 'wren' },
+      { name: 'Liv Anders',  handle: 'liv' },
+      { name: 'Saga Mills',  handle: 'saga' },
+      { name: 'Jordan Cole', handle: 'jordan' },
+      { name: 'Mei Lin',     handle: 'mei' },
+      { name: 'Ezra Holt',   handle: 'ezra' },
+    ];
+    const sources = ['Apple', 'Apple', 'Apple', 'Stripe']; // 75/25 split
+    const now = Date.now();
+    for (let i = 0; i < 6; i++) {
+      const isRefund = Math.random() < 0.08;
+      const src = sources[Math.floor(Math.random() * sources.length)];
+      const u = USERS[i % USERS.length];
+      const amt = src === 'Apple' ? 7.99 * 0.85 : 7.99 * 0.94;
+      const ts = now - (i * 3600000 + Math.random() * 3600000);
+      const ago = (function(d) {
+        const m = Math.floor(d / 60000);
+        if (m < 60) return m + 'm ago';
+        if (m < 1440) return Math.floor(m/60) + 'h ago';
+        return Math.floor(m/1440) + 'd ago';
+      })(now - ts);
+      const div = document.createElement('div');
+      div.className = 'txn';
+      const fakeTxnId = 'demo_' + i; // demo only; live API passes the real Transaction.id
+      div.onclick = function() { openUserFromTxn(u.handle, fakeTxnId); };
+      div.innerHTML =
+        '<div class="txn-ico ' + (isRefund ? 'refund' : 'in') + '">' +
+          (isRefund
+            ? '<svg viewBox="0 0 24 24"><path d="M7 7l5 5 5-5"/></svg>'
+            : '<svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>') +
+        '</div>' +
+        '<div class="txn-body">' +
+          '<div class="txn-name">' + u.name + (isRefund ? ' · refund' : '') + '</div>' +
+          '<div class="txn-sub">@' + u.handle + ' · ' + src + ' · ' + ago + '</div>' +
+        '</div>' +
+        '<div class="txn-amt ' + (isRefund ? 'out' : 'in') + '">' + (isRefund ? '−' : '+') + fmtUSD(amt) + '</div>' +
+        '<span class="txn-chev">›</span>';
+      txnList.appendChild(div);
+    }
+  }
+
+  // Render from live API response (Phase 3 — real backend metrics)
+  function renderFromLive(live, rangeDays) {
+    const fmtCents = c => '$' + Math.round((c || 0) / 100).toLocaleString();
+    document.getElementById('mrr').textContent = fmtCents(live.mrrCents);
+    document.getElementById('downloads').textContent = (live.downloads || 0).toLocaleString();
+    document.getElementById('paying').textContent   = (live.paying || 0).toLocaleString();
+    document.getElementById('free').textContent     = (live.free || 0).toLocaleString();
+    document.getElementById('conversion').textContent = (live.conversionPct || 0).toFixed(1) + '%';
+    document.getElementById('appleRev').textContent  = fmtCents(live.apple?.netCents);
+    document.getElementById('appleSubs').textContent = (live.apple?.subscribers || 0) + ' subscribers';
+    document.getElementById('stripeRev').textContent = fmtCents(live.stripe?.netCents);
+    document.getElementById('stripeSubs').textContent = (live.stripe?.subscribers || 0) + ' subscribers';
+    document.getElementById('churn').textContent = (live.churnPct || 0).toFixed(1) + '%';
+
+    // Chart from live.series
+    const series = (live.series || []).map(s => s.count);
+    if (series.length > 0) {
+      const max = Math.max(1, ...series);
+      const pts = series.map((v, i) => {
+        const x = (i / Math.max(1, series.length - 1)) * 290 + 5;
+        const y = 120 - (v / max) * 100;
+        return { x, y };
+      });
+      const lineD = pts.map((p, i) => (i === 0 ? 'M' : 'L') + p.x + ' ' + p.y).join(' ');
+      document.getElementById('chartLine').setAttribute('d', lineD);
+      document.getElementById('chartFill').setAttribute('d', lineD + ' L' + pts[pts.length-1].x + ' 124 L' + pts[0].x + ' 124 Z');
+      document.getElementById('chartTotal').textContent = series.reduce((a,b)=>a+b,0).toLocaleString() + ' downloads';
+    }
+
+    // GST (AU) annualized turnover
+    const totalNetCents = (live.apple?.netCents || 0) + (live.stripe?.netCents || 0);
+    const days = Number(rangeDays) || 30;
+    const annualized = (totalNetCents / 100) / Math.max(1, days) * 365;
+    const GST_THRESHOLD = 75000;
+    const pct = Math.min(100, (annualized / GST_THRESHOLD) * 100);
+    document.getElementById('gstFill').style.width = pct + '%';
+    document.getElementById('gstLabel').textContent = '$' + Math.round(annualized).toLocaleString() + ' AUD of $75,000 · ' + (annualized < GST_THRESHOLD ? 'GST not required yet' : 'GST REGISTRATION REQUIRED');
+    const card = document.getElementById('gstCard');
+    if (pct >= 80) card.classList.add('alert'); else card.classList.remove('alert');
+
+    // Recent transactions — Phase 3 adds a separate /api/admin/transactions endpoint
+    // For now show "Live · synced" message
+    document.getElementById('txnList').innerHTML =
+      '<div style="padding:14px; text-align:center; color: var(--muted); font-size: 12px; border-radius: 12px; background: rgba(52,211,153,0.06); border: 1px solid rgba(52,211,153,0.20);">✓ Live data from your backend (Phase 3) · transaction list endpoint next</div>';
+  }
+
+  // Tappable transaction row → owner action sheet
+  function openUserFromTxn(handle, txnId) {
+    // If we have a transaction id, show owner action sheet (refund / open user)
+    if (txnId) {
+      const choice = prompt(
+        'Transaction · ' + txnId + '\n\n' +
+        'Actions:\n' +
+        '  1. View user profile\n' +
+        '  2. Issue refund\n\n' +
+        'Type 1 or 2:'
+      );
+      if (choice === '2') return issueRefund(txnId);
+    }
+    window.location.href = '63-user-profile.html?u=' + encodeURIComponent(handle);
+  }
+  async function issueRefund(transactionId) {
+    const reason = prompt('Refund reason (visible in audit log):');
+    if (reason === null) return;
+    if (!confirm('Refund this transaction in full? User will be revoked to Free immediately.')) return;
+    try {
+      const res = await fetch('/api/admin/refund', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-csrf-token': (document.cookie.split('core_csrf=')[1] || '').split(';')[0],
+        },
+        credentials: 'include',
+        body: JSON.stringify({ transactionId, reason, fullRefund: true }),
+      });
+      if (res.status === 404) { alert('Refund endpoint not found (admin session may have expired — re-enter PIN).'); return; }
+      if (!res.ok) { const e = await res.json().catch(()=>({})); alert('Refund failed: ' + (e.error || res.status)); return; }
+      const json = await res.json();
+      alert('Refund issued · ' + (json.appleNote || 'Stripe refunded $' + (json.refundCents/100).toFixed(2)));
+      render(document.querySelector('.range-btn.active').dataset.range);
+    } catch (err) {
+      alert('Refund failed: ' + err.message);
+    }
+  }
+  window.openUserFromTxn = openUserFromTxn;
+  window.issueRefund = issueRefund;
+
+  // GST push — when annualized turnover crosses 80% of $75K, fire a browser notification
+  // (real iOS app routes this through APNs from the backend's GST cron job).
+  let gstPushedThisSession = false;
+  async function maybePushGstAlert(annualized) {
+    if (gstPushedThisSession) return;
+    if (annualized < 60000) return; // 80% of 75K
+    if (!('Notification' in window)) return;
+    try {
+      if (Notification.permission === 'default') {
+        const perm = await Notification.requestPermission();
+        if (perm !== 'granted') return;
+      }
+      if (Notification.permission !== 'granted') return;
+      new Notification('CORE · GST threshold approaching', {
+        body: 'Annualized turnover at $' + Math.round(annualized).toLocaleString() + ' — register for GST at business.gov.au within 21 days of crossing $75K.',
+        icon: '95-app-icon.html',
+      });
+      gstPushedThisSession = true;
+    } catch(e){}
+  }
+
+  // Search — filter the synthesized user list. In production: GET /api/admin/users?q=...
+  function onSearchInput(q) {
+    const results = document.getElementById('searchResults');
+    const txnList = document.getElementById('txnList');
+    const term = (q || '').trim().toLowerCase();
+    if (!term) {
+      results.style.display = 'none';
+      txnList.style.display = '';
+      return;
+    }
+    results.style.display = '';
+    txnList.style.display = 'none';
+    // Demo user pool — in production server returns matching users
+    const POOL = [
+      { handle: 'aya',    email: 'aya@example.com',    rank: 'Gold',     coins: 240, status: 'Pro · iOS' },
+      { handle: 'kai',    email: 'kai@example.com',    rank: 'Silver',   coins: 80,  status: 'Pro · iOS' },
+      { handle: 'wren',   email: 'wren@example.com',   rank: 'Bronze',   coins: 50,  status: 'Pro · web' },
+      { handle: 'liv',    email: 'liv@example.com',    rank: 'Emerald',  coins: 420, status: 'Pro · iOS' },
+      { handle: 'saga',   email: 'saga@example.com',   rank: 'Platinum', coins: 920, status: 'Pro · web' },
+      { handle: 'jordan', email: 'jordan@example.com', rank: 'Diamond',  coins: 1300,status: 'Pro · iOS' },
+      { handle: 'stone',  email: 'stonehrprzilo@gmail.com', rank: 'Iron', coins: 100, status: 'Owner' },
+    ];
+    const hits = POOL.filter(u => u.handle.includes(term) || u.email.includes(term));
+    results.innerHTML = hits.length === 0
+      ? '<div style="padding:20px; text-align:center; color: var(--muted); font-size: 12px;">No users match "' + q + '"</div>'
+      : hits.map(u =>
+          '<div class="txn" onclick="openUserFromTxn(\'' + u.handle + '\')">' +
+            '<div class="txn-ico in" style="background:#4A8FFF;"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg></div>' +
+            '<div class="txn-body">' +
+              '<div class="txn-name">@' + u.handle + ' · ' + u.rank + '</div>' +
+              '<div class="txn-sub">' + u.email + ' · ' + u.status + ' · ' + u.coins + ' coins</div>' +
+            '</div>' +
+            '<span class="txn-chev">›</span>' +
+          '</div>'
+        ).join('');
+  }
+  window.onSearchInput = onSearchInput;
+
+  // PIN gate handlers
+  function submitPin() {
+    const v = (document.getElementById('gatePin').value || '').trim();
+    if (v.length !== 6 || !/^\d{6}$/.test(v)) {
+      document.getElementById('gateSub').textContent = '6 digits exactly. Try again.';
+      document.getElementById('gateSub').style.color = '#F87171';
+      return;
+    }
+    const storedPin = localStorage.getItem('coreOwnerPin');
+    const setupMode = document.documentElement.dataset.gateState === 'setup';
+    if (setupMode) {
+      localStorage.setItem('coreOwnerPin', v);
+      sessionStorage.setItem('coreOwnerUnlocked', '1');
+      window.__CORE_OWNER_OK = true;
+      hideGate();
+      render('30');
+      return;
+    }
+    if (v === storedPin) {
+      sessionStorage.setItem('coreOwnerUnlocked', '1');
+      window.__CORE_OWNER_OK = true;
+      hideGate();
+      render('30');
+    } else {
+      document.getElementById('gateSub').textContent = 'Wrong PIN. Try again.';
+      document.getElementById('gateSub').style.color = '#F87171';
+      document.getElementById('gatePin').value = '';
+    }
+  }
+  function hideGate() { document.getElementById('gateScreen').style.display = 'none'; }
+  function showGate() {
+    const setup = document.documentElement.dataset.gateState === 'setup';
+    const screen = document.getElementById('gateScreen');
+    screen.style.display = 'flex';
+    document.getElementById('gateTitle').textContent = setup ? 'Set your owner PIN' : 'Owner PIN';
+    document.getElementById('gateSub').textContent = setup
+      ? 'First time here. Choose a 6-digit PIN you\'ll remember. Required to view revenue every session.'
+      : 'Enter your 6-digit PIN to view revenue and user data.';
+    document.getElementById('gateCta').textContent = setup ? 'Set PIN & unlock' : 'Unlock';
+    setTimeout(() => document.getElementById('gatePin').focus(), 100);
+  }
+  window.submitPin = submitPin;
+  document.addEventListener('DOMContentLoaded', function() {
+    const state = document.documentElement.dataset.gateState;
+    if (state === 'denied') return; // CSS already replaced the body
+    if (window.__CORE_OWNER_OK) return; // unlocked
+    showGate();
+  });
+  document.getElementById('gatePin').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') submitPin();
+  });
+
+  // Range tabs
+  document.querySelectorAll('.range-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('.range-btn').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      render(b.dataset.range);
+    });
+  });
+
+  if (window.__CORE_OWNER_OK) render('30');
+</script>
+</body>
+</html>

@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>CORE — Money back in your pocket</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<link rel="stylesheet" href="_lib/core-responsive.css">
+<script src="_lib/analytics.js" defer></script>
+<style>
+  :root {
+    --apple-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --text:#F8FAFE; --muted:#9AA1B7; --dim:#4F5570;
+    --gold:#FFC857; --gold-deep:#E8A82F; --green:#5BE39A;
+  }
+  * { box-sizing:border-box; }
+  html, body { margin:0; padding:0; height:100%; }
+  body {
+    min-height:100vh; background:#0A0A14;
+    display:flex; align-items:center; justify-content:center;
+    font-family: var(--apple-font);
+    color: var(--text); -webkit-font-smoothing:antialiased;
+    padding: 24px; overflow: hidden;
+  }
+  .phone {
+    position:relative; width:390px; height:844px; background:#02020A;
+    border-radius:56px; overflow:hidden;
+    box-shadow:0 40px 100px rgba(0,0,0,0.6),
+               0 0 0 1px rgba(255,255,255,0.06),
+               0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38;
+  }
+  .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:30; }
+  .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:30; }
+
+  .bg {
+    position:absolute; inset:0; z-index:0;
+    background:
+      radial-gradient(60% 35% at 50% 36%, rgba(255,200,87,0.18) 0%, transparent 60%),
+      radial-gradient(60% 35% at 50% 92%, rgba(91,227,154,0.08) 0%, transparent 65%),
+      linear-gradient(180deg, #1A0E04 0%, #02020A 55%, #050510 100%);
+  }
+  .stars { position:absolute; inset:0; pointer-events:none; z-index:2; }
+  .star { position:absolute; border-radius:50%; background:#fff; animation: twinkle var(--d,4s) ease-in-out var(--del,0s) infinite; }
+  .star.s1 { width:1px; height:1px; opacity:0.4; }
+  .star.s2 { width:1.5px; height:1.5px; opacity:0.55; }
+  .star.s3 { width:2px; height:2px; opacity:0.7; box-shadow:0 0 4px rgba(255,255,255,0.6); }
+  @keyframes twinkle { 0%,100% { opacity:0.15; transform:scale(0.7); } 50% { opacity:0.85; transform:scale(1.15); } }
+
+  .frame {
+    position:absolute; inset:0; z-index:10;
+    display:flex; flex-direction:column;
+    padding: 64px 26px 32px;
+  }
+  .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .brand { display:flex; align-items:center; gap:8px; }
+  .brand .dot { width:8px; height:8px; border-radius:50%; background:var(--gold); box-shadow:0 0 12px var(--gold); animation: dot 2.5s ease-in-out infinite; }
+  @keyframes dot { 0%,100% { transform:scale(1); opacity:1; } 50% { transform:scale(1.3); opacity:0.85; } }
+  .brand .wm { font-size:13px; font-weight:600; letter-spacing:0.30em; color:rgba(255,255,255,0.92); }
+  .chip-day {
+    font-size:10px; letter-spacing:0.20em; text-transform:uppercase;
+    color: var(--gold); font-weight:700;
+    padding:5px 10px; border-radius:999px;
+    background: rgba(255,200,87,0.10);
+    border: 1px solid rgba(255,200,87,0.30);
+  }
+
+  .head { margin-top: 4px; text-align: center; opacity: 0; animation: fadeUp .7s .1s forwards; }
+  .kicker {
+    font-size:11px; letter-spacing:0.22em; text-transform:uppercase;
+    color: var(--gold); font-weight:700; margin-bottom: 6px;
+  }
+  h1 {
+    font-size: 26px; font-weight: 700; letter-spacing: -0.7px;
+    line-height: 1.1; margin: 0;
+  }
+  h1 .g {
+    background: linear-gradient(135deg, var(--gold) 0%, var(--green) 100%);
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+  @keyframes fadeUp {
+    from { opacity:0; transform: translateY(8px); }
+    to { opacity:1; transform: translateY(0); }
+  }
+
+  /* Money showpiece — animated counter + stacked bills */
+  .money-card {
+    flex: 1; min-height: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 12px 8px;
+    position: relative;
+  }
+
+  /* Animated bill stack — bills rise + fall back into stack */
+  .bill-stack {
+    position: relative;
+    width: 220px; height: 80px;
+    margin: 0 auto 18px;
+    perspective: 600px;
+  }
+  .bill {
+    position: absolute; left: 50%;
+    width: 200px; height: 100px;
+    margin-left: -100px;
+    border-radius: 8px;
+    background: linear-gradient(140deg, #2E5A36 0%, #1F3F25 50%, #14301B 100%);
+    border: 1px solid rgba(168,217,176,0.30);
+    box-shadow:
+      0 8px 18px rgba(0,0,0,0.40),
+      inset 0 0 0 6px rgba(255,255,255,0.05),
+      inset 0 0 0 7px rgba(168,217,176,0.20);
+    transform-origin: 50% 100%;
+    opacity: 0;
+    animation: billRise 2.6s ease-out forwards;
+  }
+  .bill::before {
+    content: ""; position: absolute; inset: 14px;
+    border: 1px dashed rgba(168,217,176,0.30);
+    border-radius: 4px;
+    pointer-events: none;
+  }
+  .bill::after {
+    content: "$"; position: absolute;
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    font-size: 38px; font-weight: 900; color: rgba(255,255,255,0.18);
+    font-family: serif;
+    text-shadow: 0 0 12px rgba(168,217,176,0.30);
+  }
+  .bill.b1 { transform: translateY(40px) rotate(-4deg); animation-delay: 200ms; }
+  .bill.b2 { transform: translateY(30px) rotate(2deg);  animation-delay: 320ms; }
+  .bill.b3 { transform: translateY(20px) rotate(-2deg); animation-delay: 440ms; }
+  .bill.b4 { transform: translateY(10px) rotate(3deg);  animation-delay: 560ms; }
+  .bill.b5 { transform: translateY(0)    rotate(-1deg); animation-delay: 680ms; }
+  @keyframes billRise {
+    0%   { opacity: 0; transform: translateY(140px) rotate(-12deg); }
+    60%  { opacity: 1; }
+    100% { opacity: 1; }
+  }
+
+  .money-counter {
+    font-size: 64px; font-weight: 900; letter-spacing: -2.5px;
+    line-height: 1; margin-top: 8px;
+    background: linear-gradient(135deg, #FFE48F 0%, var(--gold) 35%, var(--gold-deep) 100%);
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent;
+    text-shadow: 0 0 24px rgba(255,200,87,0.25);
+    font-variant-numeric: tabular-nums;
+    opacity: 0; transform: translateY(8px);
+    animation: fadeUp .7s 1.4s forwards;
+  }
+  .money-sub {
+    font-size: 13px; color: var(--muted);
+    margin-top: 8px; text-align: center;
+    letter-spacing: -0.1px;
+    opacity: 0;
+    animation: fadeUp .6s 1.7s forwards;
+  }
+  .money-sub strong { color: #fff; font-weight: 700; }
+  .money-period {
+    font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--gold); font-weight: 700;
+    margin-top: 4px;
+    opacity: 0;
+    animation: fadeUp .6s 1.6s forwards;
+  }
+
+  /* Comparison cards — what $X buys */
+  .compare {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    width: 100%; margin-top: 18px;
+    opacity: 0; animation: fadeUp .6s 2.1s forwards;
+  }
+  .compare-card {
+    padding: 12px 10px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    text-align: left;
+  }
+  .compare-ico {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: linear-gradient(135deg, rgba(255,200,87,0.20), rgba(91,227,154,0.10));
+    border: 1px solid rgba(255,200,87,0.25);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 6px;
+  }
+  .compare-ico svg { width: 14px; height: 14px; stroke: var(--gold); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .compare-name { font-size: 12px; font-weight: 700; color: #fff; letter-spacing: -0.1px; }
+  .compare-sub  { font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+
+  /* CTAs */
+  .ctas { padding-top: 16px; opacity:0; animation: fadeUp .6s 2.4s forwards; }
+  .cta {
+    width: 100%; padding: 18px 24px;
+    border-radius: 999px; border: none;
+    color: #1A0B00;
+    font-family: inherit; font-size: 17px; font-weight: 800;
+    letter-spacing: -0.32px;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--green) 100%);
+    background-size: 200% 200%;
+    animation: gradShift 5s ease infinite;
+    box-shadow:
+      0 14px 36px rgba(255,200,87,0.40),
+      0 0 0 1px rgba(255,255,255,0.30) inset,
+      0 1px 0 rgba(255,255,255,0.45) inset;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: transform .12s, filter .2s;
+  }
+  .cta:hover { filter: brightness(1.05); }
+  .cta:active { transform: scale(0.985); filter: brightness(0.92); }
+  .cta svg { width:18px; height:18px; stroke:#1A0B00; fill:none; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
+  @keyframes gradShift { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="bg"></div>
+  <div class="stars" id="stars"></div>
+  <div class="notch"></div>
+  <div class="home-indicator"></div>
+
+  <div class="frame">
+    <div class="topbar">
+      <div class="brand"><span class="dot"></span><span class="wm">CORE</span></div>
+      <div class="chip-day">CASH BACK</div>
+    </div>
+
+    <div class="head">
+      <div class="kicker">In your pocket</div>
+      <h1>This much<br/><span class="g" id="periodLabel">in 12 months.</span></h1>
+    </div>
+
+    <div class="money-card">
+      <div class="bill-stack">
+        <div class="bill b1"></div>
+        <div class="bill b2"></div>
+        <div class="bill b3"></div>
+        <div class="bill b4"></div>
+        <div class="bill b5"></div>
+      </div>
+      <div class="money-period">YEAR ONE</div>
+      <div class="money-counter" id="counter">$0</div>
+      <div class="money-sub" id="moneySub">From <strong id="habitLabel">your daily habit</strong>. That's <strong id="perDay">$0/day</strong> not bleeding.</div>
+
+      <div class="compare">
+        <div class="compare-card">
+          <div class="compare-ico"><svg viewBox="0 0 24 24"><path d="M4 7h16v12H4z"/><path d="M9 7V4h6v3"/></svg></div>
+          <div class="compare-name" id="compareA">— flights</div>
+          <div class="compare-sub" id="compareASub"></div>
+        </div>
+        <div class="compare-card">
+          <div class="compare-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="9" r="3"/><path d="M5 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v2"/></svg></div>
+          <div class="compare-name" id="compareB">— months rent</div>
+          <div class="compare-sub" id="compareBSub"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ctas">
+      <button class="cta" id="continueBtn">
+        Worth it
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Stars
+  (function () {
+    const sl = document.getElementById('stars');
+    for (let i = 0; i < 50; i++) {
+      const s = document.createElement('div');
+      const r = Math.random();
+      s.className = 'star ' + (r < 0.55 ? 's1' : r < 0.85 ? 's2' : 's3');
+      s.style.left = (Math.random()*100)+'%'; s.style.top = (Math.random()*100)+'%';
+      s.style.setProperty('--d', (2.5+Math.random()*5)+'s');
+      s.style.setProperty('--del', (Math.random()*5)+'s');
+      sl.appendChild(s);
+    }
+  })();
+
+  function track(n, p) { try { if (window.coreTrack) window.coreTrack(n, p||{}); } catch(e){} }
+  window.addEventListener('load', () => track('cost_saved_viewed', {}));
+
+  // Read trial state, derive $/day from habit + amount
+  let trial = {};
+  try { trial = JSON.parse(localStorage.getItem('coreOnboardTrial') || '{}'); } catch(e){}
+  const habit = trial.habit || 'vape';
+  const amount = (trial.vape && trial.vape.amount) || 'half';
+
+  // $/day per habit × amount bucket. Australian-leaning numbers.
+  const COST_TABLE = {
+    vape:       { few: 4,  half: 8,  one: 12, 'two+': 22 },
+    alcohol:    { few: 12, half: 28, one: 55, 'two+': 110 },
+    porn:       { few: 0,  half: 0,  one: 0,  'two+': 0  }, // psychic cost, not $
+    doomscroll: { few: 0,  half: 0,  one: 0,  'two+': 0  },
+    spend:      { few: 25, half: 80, one: 200, 'two+': 500 },
+    build:      { few: 0,  half: 0,  one: 0,  'two+': 0  },
+  };
+  // For non-$ habits, fall back to a default attention-cost
+  const tbl = COST_TABLE[habit] || COST_TABLE.vape;
+  let perDay = tbl[amount] || 8;
+  // Porn / doom-scroll: pivot the message — show "hours back" not $
+  let mode = 'money';
+  if (habit === 'porn' || habit === 'doomscroll') {
+    mode = 'time';
+    perDay = (habit === 'doomscroll')
+      ? ({ few: 3, half: 5, one: 7.5, 'two+': 10 }[amount] || 5)
+      : ({ few: 1, half: 2, one: 3, 'two+': 5 }[amount] || 2);
+  } else if (habit === 'build') {
+    // Build-only: skip this page entirely → bounce ahead
+    location.replace('./18-rating-ask.html');
+  }
+
+  // Set the labels
+  const habitLabels = {
+    vape:'vaping', alcohol:'drinking', porn:'porn',
+    doomscroll:'doom-scrolling', spend:'impulse spend', build:'building',
+  };
+  document.getElementById('habitLabel').textContent = habitLabels[habit] || 'your habit';
+
+  if (mode === 'time') {
+    // Reframe to hours back. Year total = perDay × 365.
+    const hoursYear = Math.round(perDay * 365);
+    document.getElementById('periodLabel').innerHTML = 'back in your life.';
+    document.querySelector('.money-period').textContent = 'YEAR ONE';
+    document.querySelector('.compare-ico').innerHTML =
+      '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+    document.getElementById('compareA').textContent = Math.round(hoursYear / 24) + ' full days';
+    document.getElementById('compareASub').textContent = 'awake hours back';
+    document.getElementById('compareB').textContent = Math.round(hoursYear / 8) + ' deep-work blocks';
+    document.getElementById('compareBSub').textContent = '8 hr focused sessions';
+    // The big number is hours
+    animateCounter(0, hoursYear, 'hr');
+    document.getElementById('perDay').textContent = perDay + ' hr/day';
+    document.getElementById('moneySub').innerHTML =
+      'From <strong>' + (habitLabels[habit] || 'the loop') + '</strong>. That\'s <strong id="perDay">' + perDay + ' hr/day</strong> not lost.';
+  } else {
+    const yearTotal = perDay * 365;
+    document.getElementById('perDay').textContent = '$' + perDay + '/day';
+    // Comparisons
+    document.getElementById('compareA').textContent = Math.floor(yearTotal / 800) + ' return flights';
+    document.getElementById('compareASub').textContent = '@ ~$800 each';
+    document.getElementById('compareB').textContent = Math.floor(yearTotal / 600) + ' months of groceries';
+    document.getElementById('compareBSub').textContent = '@ ~$600/mo';
+    animateCounter(0, yearTotal, '$');
+  }
+
+  function animateCounter(from, to, unit) {
+    const el = document.getElementById('counter');
+    const begin = performance.now() + 1300; // wait for bills to settle
+    const dur = 1400;
+    function step(now) {
+      if (now < begin) { requestAnimationFrame(step); return; }
+      const t = Math.min(1, (now - begin) / dur);
+      const eased = 1 - Math.pow(1 - t, 4);
+      const val = Math.round(from + (to - from) * eased);
+      const formatted = unit === '$'
+        ? '$' + val.toLocaleString()
+        : val.toLocaleString() + ' hr';
+      el.textContent = formatted;
+      if (t < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  document.getElementById('continueBtn').addEventListener('click', () => {
+    track('cost_saved_continue', {});
+    window.location.href = './18-rating-ask.html';
+  });
+</script>
+</body>
+</html>

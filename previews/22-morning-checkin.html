@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8" />
+<title>CORE — Morning check-in</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<link rel="stylesheet" href="_lib/core-buttons.css" />
+<script src="_lib/core-state.js"></script>
+<script src="_lib/analytics.js"></script>
+  <script src="_lib/core-back.js"></script>
+<style>
+  :root { --bg-base:#02020A; --text:#F8FAFE; --muted:#9AA1B7; --dim:#4F5570; --accent:#4A8FFF; --border:rgba(255,255,255,0.08); }
+  * { box-sizing:border-box; }
+  html, body { margin:0; padding:0; height:100%; }
+  body { min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text); padding:24px; overflow:hidden; }
+  .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+  .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:30; }
+  .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:30; }
+
+  /* dawn / sunrise palette */
+  .bg { position:absolute; inset:0; background: radial-gradient(70% 50% at 50% 100%, rgba(255,200,87,0.18), transparent 60%), radial-gradient(60% 40% at 50% 0%, rgba(91,177,255,0.20), transparent 60%), linear-gradient(180deg, #051026 0%, #1a1228 70%, #2a1812 100%); }
+  .sun { position:absolute; left:50%; bottom:60px; transform:translateX(-50%); width:80px; height:80px; border-radius:50%; background: radial-gradient(circle at 30% 30%, #FFEEBF, #FFC857 60%, #FF7A45); box-shadow: 0 0 90px rgba(255,200,87,0.4); opacity:0.5; }
+
+  .frame { position:absolute; inset:0; z-index:10; padding: 60px 0 24px; display:flex; flex-direction:column; }
+  .topbar { padding: 0 22px 8px; display:flex; align-items:center; justify-content:space-between; }
+  .skip { padding: 8px 12px; font-size:13px; color:var(--muted); background:none; border:none; cursor:pointer; font-family: inherit; }
+  .skip:hover { color: #fff; }
+  .brand { display:flex; align-items:center; gap:8px; }
+  .brand .dot { width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 10px var(--accent); }
+  .brand .wm { font-size:12px; font-weight:700; letter-spacing:0.36em; color:rgba(255,255,255,0.92); }
+
+  .progress { display:flex; justify-content:center; gap:6px; padding: 12px 0; }
+  .progress i { width:24px; height:4px; border-radius:999px; background: rgba(255,255,255,0.12); transition: background .3s, width .3s; }
+  .progress i.on { background: linear-gradient(90deg, #FFC857, #FF7A45); width:32px; }
+
+  .scroll { flex:1; overflow-y:auto; padding: 18px 26px 0; }
+  .scroll::-webkit-scrollbar { display:none; }
+
+  .step { display:none; flex-direction:column; gap:14px; opacity:0; animation: fadeIn .4s forwards; }
+  .step.on { display:flex; }
+  @keyframes fadeIn { to { opacity:1; } }
+
+  .kicker { font-size:11px; letter-spacing:0.22em; text-transform:uppercase; color:var(--muted); font-weight:700; }
+  .title { font-size:26px; font-weight:700; letter-spacing:-0.6px; line-height:1.15; margin:0; }
+  .copy { font-size:13px; color:var(--muted); line-height:19px; }
+
+  /* mood */
+  .moods { display:flex; gap:8px; margin-top:6px; }
+  .mood-btn { flex:1; padding:16px 4px; border-radius:14px; background: rgba(255,255,255,0.04); border:1px solid var(--border); cursor:pointer; transition: all .15s; display:flex; flex-direction:column; align-items:center; gap:6px; font-family:inherit; color:#fff; }
+  .mood-btn:hover { background: rgba(255,255,255,0.07); }
+  .mood-btn.sel { background: rgba(255,200,87,0.14); border-color: rgba(255,200,87,0.45); box-shadow: 0 0 0 1px rgba(255,200,87,0.4) inset; }
+  .mood-btn .em { font-size:28px; line-height:1; }
+  .mood-btn .l { font-size:10px; color:var(--muted); letter-spacing:0.06em; font-weight:600; }
+
+  /* sleep hours stepper */
+  .sleep-card { padding:18px; border-radius:18px; background: rgba(255,255,255,0.03); border:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:14px; margin-top:6px; }
+  .sleep-l { font-size:13px; color:var(--muted); }
+  .sleep-stepper { display:flex; align-items:center; gap:12px; }
+  .sleep-stepper button { width:34px; height:34px; border-radius:50%; background: rgba(255,255,255,0.05); border:1px solid var(--border); color:#fff; font-family:inherit; font-size:18px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .sleep-stepper button:hover { background: rgba(255,255,255,0.08); }
+  .sleep-v { font-size:28px; font-weight:800; color:#fff; letter-spacing:-0.6px; min-width:60px; text-align:center; }
+  .sleep-v .unit { font-size:13px; color:var(--muted); font-weight:500; margin-left:2px; }
+
+  /* intention */
+  .intention {
+    margin-top: 6px;
+    width: 100%; min-height: 96px; resize: none;
+    padding: 14px; border-radius: 14px; border:1px solid var(--border);
+    background: rgba(255,255,255,0.03); color: #fff; font-family: inherit;
+    font-size: 14px; line-height: 20px; outline: none;
+  }
+  .intention:focus { border-color: rgba(255,200,87,0.45); background: rgba(255,200,87,0.06); }
+  .intention::placeholder { color: rgba(255,255,255,0.30); }
+
+  .prompts { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+  .prompt-chip { padding: 8px 12px; border-radius: 999px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); font-size: 11px; color: rgba(255,255,255,0.85); cursor: pointer; font-family: inherit; }
+  .prompt-chip:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,200,87,0.40); }
+
+  /* summary */
+  .summary {
+    padding: 18px; border-radius: 18px; margin-top: 8px;
+    background: linear-gradient(135deg, rgba(255,200,87,0.10), rgba(255,122,69,0.10));
+    border: 1px solid rgba(255,200,87,0.30);
+  }
+  .summary .row { display:flex; align-items:center; justify-content:space-between; padding: 6px 0; font-size: 13px; color:#fff; }
+  .summary .row + .row { border-top: 1px dashed rgba(255,255,255,0.06); }
+  .summary .row .label { color: var(--muted); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; font-weight:600; }
+  .summary .row .val { font-weight: 700; letter-spacing: -0.1px; }
+  .coach-line { margin-top: 14px; padding: 12px 14px; background: rgba(0,0,0,0.30); border-left: 3px solid #FFC857; border-radius: 10px; font-size: 12px; color: rgba(255,255,255,0.88); font-style: italic; line-height: 17px; }
+
+  .footer { padding: 14px 26px 0; }
+  .footnote { text-align:center; font-size:11px; color:var(--muted); margin-top:10px; }
+</style>
+  <link rel="stylesheet" href="_lib/core-responsive.css">
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div>
+    <div class="sun"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="frame">
+      <div class="topbar">
+        <div class="brand"><span class="dot"></span><span class="wm">CORE</span></div>
+        <button class="skip" onclick="window.location.href='20-dashboard.html'">Skip</button>
+      </div>
+
+      <div class="progress" id="progress"><i class="on"></i><i></i><i></i></div>
+
+      <div class="scroll">
+        <!-- Step 1: mood -->
+        <div class="step on" data-step="1">
+          <div class="kicker">Morning check-in</div>
+          <h2 class="title">Morning, <span id="hiName">Stone</span>.</h2>
+          <p class="copy">How does today feel before you start?</p>
+          <div class="moods" id="moods">
+            <button class="mood-btn" data-mood="energized" onclick="pickMood(this)"><div class="em">🔥</div><div class="l">SHARP</div></button>
+            <button class="mood-btn" data-mood="rested"    onclick="pickMood(this)"><div class="em">🙂</div><div class="l">RESTED</div></button>
+            <button class="mood-btn" data-mood="meh"       onclick="pickMood(this)"><div class="em">😐</div><div class="l">MEH</div></button>
+            <button class="mood-btn" data-mood="groggy"    onclick="pickMood(this)"><div class="em">😴</div><div class="l">GROGGY</div></button>
+            <button class="mood-btn" data-mood="anxious"   onclick="pickMood(this)"><div class="em">😬</div><div class="l">ON EDGE</div></button>
+          </div>
+
+          <div class="sleep-card">
+            <div class="sleep-l">Sleep last night</div>
+            <div class="sleep-stepper">
+              <button onclick="stepSleep(-0.5)">−</button>
+              <div class="sleep-v"><span id="sleepN">7.5</span><span class="unit">h</span></div>
+              <button onclick="stepSleep(0.5)">+</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: intention -->
+        <div class="step" data-step="2">
+          <div class="kicker">One intention</div>
+          <h2 class="title">What's the one thing<br/>you're betting on today?</h2>
+          <p class="copy">Skip if it's quiet. Coach reads this back at 9pm.</p>
+          <textarea class="intention" id="intention" placeholder="e.g. 'walk past the 3pm coffee break without flinching'"></textarea>
+          <div class="prompts" id="prompts"></div>
+        </div>
+
+        <!-- Step 3: summary -->
+        <div class="step" data-step="3">
+          <div class="kicker">Plan locked</div>
+          <h2 class="title">Good. Now go.</h2>
+          <div class="summary">
+            <div class="row"><span class="label">Mood</span><span class="val" id="sumMood">·</span></div>
+            <div class="row"><span class="label">Sleep</span><span class="val"><span id="sumSleep">7.5</span>h</span></div>
+            <div class="row"><span class="label">Streak</span><span class="val"><span data-core="streak.days">14</span> days</span></div>
+            <div class="row"><span class="label">Intention</span><span class="val" id="sumInt" style="max-width:200px; text-align:right; font-weight:500; color:rgba(255,255,255,0.85); font-size:12px;">·</span></div>
+            <div class="coach-line" id="coachLine">"Anchor the day in 30 seconds — log first, decide after."</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <button id="cta" class="btn primary pill block lg" onclick="next()" disabled>Next <svg viewBox="0 0 24 24" width="18" height="18"><path d="M5 12h14M13 5l7 7-7 7" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="footnote" id="footerNote">Pick a mood</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const state = { step:1, mood:null, sleepHrs:7.5, intention:'' };
+  const cta = document.getElementById('cta');
+  const note = document.getElementById('footerNote');
+  const progress = document.getElementById('progress');
+  const SUGGESTIONS = [
+    "walk past the corner shop without flinching",
+    "log every craving honestly",
+    "stay 60s on the breath if it hits",
+    "no phone before 7pm",
+    "one Mind session at lunch"
+  ];
+
+  function setStep(n) {
+    document.querySelectorAll('.step').forEach(s => s.classList.toggle('on', +s.dataset.step === n));
+    [...progress.children].forEach((d,i) => d.classList.toggle('on', i < n));
+    state.step = n;
+    refresh();
+  }
+  function refresh() {
+    if (state.step === 1) {
+      cta.disabled = !state.mood;
+      cta.firstChild.nodeValue = 'Next ';
+      note.textContent = state.mood ? state.mood + ' · tap next' : 'Pick a mood';
+    } else if (state.step === 2) {
+      cta.disabled = false;
+      cta.firstChild.nodeValue = 'Next ';
+      note.textContent = state.intention ? 'Looks good' : 'Or skip — empty is fine';
+      // render prompt suggestions
+      const p = document.getElementById('prompts');
+      if (!p.children.length) {
+        SUGGESTIONS.forEach(t => {
+          const b = document.createElement('button');
+          b.className = 'prompt-chip';
+          b.textContent = t;
+          b.onclick = () => { document.getElementById('intention').value = t; state.intention = t; refresh(); };
+          p.appendChild(b);
+        });
+      }
+    } else {
+      cta.disabled = false;
+      cta.firstChild.nodeValue = 'Lock it in ';
+      note.textContent = 'See you at 9pm';
+      document.getElementById('sumMood').textContent = state.mood || '·';
+      document.getElementById('sumSleep').textContent = state.sleepHrs;
+      document.getElementById('sumInt').textContent = state.intention || '—';
+      // tone-aware Coach line
+      try {
+        const t = JSON.parse(localStorage.getItem('coreOnboardTrial')||'{}');
+        const tone = t.tone || 'balanced';
+        const lines = {
+          gentle:   "Quiet start. No need to be strong — just present.",
+          balanced: "Anchor the day in 30 seconds — log first, decide after.",
+          direct:   "Phone open. Log the truth. Then go.",
+          drill:    "No snooze. Log. Move."
+        };
+        const cl = document.getElementById('coachLine');
+        if (cl) cl.textContent = '"' + lines[tone] + '"';
+      } catch(e){}
+    }
+  }
+  function pickMood(el) {
+    document.querySelectorAll('.mood-btn').forEach(m => m.classList.remove('sel'));
+    el.classList.add('sel');
+    state.mood = el.dataset.mood;
+    refresh();
+    if (window.coreTrack) coreTrack('morning_mood', { mood: state.mood });
+  }
+  function stepSleep(d) {
+    state.sleepHrs = Math.max(0, Math.min(14, +(state.sleepHrs + d).toFixed(1)));
+    document.getElementById('sleepN').textContent = state.sleepHrs;
+  }
+  function next() {
+    if (state.step === 2) state.intention = (document.getElementById('intention').value || '').trim();
+    if (state.step === 3) {
+      try {
+        const entry = { ts: Date.now(), mood: state.mood, sleepHrs: state.sleepHrs, intention: state.intention };
+        const log = JSON.parse(localStorage.getItem('coreMorningLog') || '[]');
+        log.push(entry);
+        localStorage.setItem('coreMorningLog', JSON.stringify(log.slice(-90)));
+      } catch(e){}
+      if (window.coreTrack) coreTrack('morning_committed', { mood: state.mood, sleepHrs: state.sleepHrs, hasIntention: !!state.intention });
+      window.location.href = '20-dashboard.html';
+      return;
+    }
+    setStep(state.step + 1);
+  }
+  try {
+    const t = JSON.parse(localStorage.getItem('coreOnboardTrial')||'{}');
+    if (t.name) document.getElementById('hiName').textContent = t.name;
+  } catch(e){}
+  refresh();
+</script>
+</body>
+</html>

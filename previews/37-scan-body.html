@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+  <meta charset="utf-8" />
+  <title>Core — Body scan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <style>
+    :root { --bg-base:#02020A; --text-primary:#F8FAFE; --text-muted:#9AA1B7; --text-dim:#4F5570; --accent:#4A8FFF; --stat-body:#5CE1E6; }
+    * { box-sizing: border-box; }
+    html, body { margin:0; padding:0; height:100%; }
+    body { min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text-primary); padding:24px; overflow:hidden; }
+    .phone { position:relative; width:390px; height:844px; background:#000; border-radius:56px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+    .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:30; }
+    .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:30; }
+
+    .viewfinder { position:absolute; inset:0; background: linear-gradient(180deg, #1a1a20 0%, #050508 60%, #02020a 100%); }
+
+    /* silhouette */
+    .silhouette { position:absolute; top:48%; left:50%; transform:translate(-50%, -50%); z-index:2; }
+    .silhouette svg { width:240px; height:380px; }
+
+    /* AI dots overlay */
+    .pose-pt { position:absolute; width:8px; height:8px; border-radius:50%; background:var(--stat-body); box-shadow: 0 0 12px var(--stat-body); animation: ptPulse 1.6s ease-in-out infinite; }
+    @keyframes ptPulse { 0%,100%{transform:scale(1); opacity:0.7;} 50%{transform:scale(1.4); opacity:1;} }
+
+    .frame { position:absolute; inset:90px 32px 220px; z-index:5; border-radius: 28px; border: 2px solid rgba(92,225,230,0.4); box-shadow: inset 0 0 30px rgba(92,225,230,0.15), 0 0 30px rgba(92,225,230,0.10); }
+    .scan-line { position:absolute; left:0; right:0; height:3px; background: linear-gradient(90deg, transparent, var(--stat-body), transparent); box-shadow: 0 0 16px var(--stat-body); animation: scanMove 3s ease-in-out infinite; top:50%; }
+    @keyframes scanMove { 0% { top:0; } 50% { top:100%; } 100% { top:0; } }
+
+    .topbar { position:absolute; top:60px; left:0; right:0; padding:0 20px; display:flex; align-items:center; justify-content:space-between; z-index:20; }
+    .icon-btn { width:36px; height:36px; border-radius:50%; background:rgba(0,0,0,0.45); border:1px solid rgba(255,255,255,0.10); backdrop-filter:blur(20px); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+    .icon-btn svg { width:16px; height:16px; stroke:white; }
+    .topbar-pill { padding:6px 12px; border-radius:999px; background:rgba(0,0,0,0.45); border:1px solid rgba(255,255,255,0.10); backdrop-filter:blur(20px); font-size:12px; font-weight:600; color:white; }
+
+    .pose-helper {
+      position:absolute; top:108px; left:50%; transform:translateX(-50%);
+      padding:8px 14px; border-radius:999px;
+      background:rgba(92,225,230,0.10); border:1px solid rgba(92,225,230,0.30);
+      backdrop-filter:blur(20px);
+      font-size:11px; font-weight:600; color: var(--stat-body); letter-spacing:0.1em;
+      z-index:25;
+      max-width: calc(100% - 40px); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    @media (max-width: 380px) {
+      .pose-helper { font-size: 9.5px; padding: 6px 10px; letter-spacing: 0.06em; top: 104px; }
+      .topbar-pill { font-size: 11px; padding: 5px 10px; }
+    }
+    .pose-helper::before { content:""; display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--stat-body); box-shadow:0 0 8px var(--stat-body); margin-right:6px; vertical-align:middle; }
+
+    /* Angle picker */
+    .mode-strip { position:absolute; left:0; right:0; bottom:200px; display:flex; justify-content:center; gap:8px; padding: 0 24px; z-index:20; }
+    .mode { padding:8px 16px; border-radius:999px; background:rgba(0,0,0,0.50); border:1px solid rgba(255,255,255,0.10); backdrop-filter:blur(20px); font-size:12px; font-weight:600; color:rgba(255,255,255,0.6); cursor:pointer; font-family:inherit; }
+    .mode.active { background:var(--stat-body); color:#000; border-color:var(--stat-body); }
+
+    /* Result card */
+    .result {
+      position:absolute; left:16px; right:16px; bottom:120px; z-index:25;
+      padding: 18px; border-radius: 22px;
+      background: rgba(2,2,10,0.88); border:1px solid rgba(255,255,255,0.10);
+      backdrop-filter: blur(24px) saturate(1.4);
+      transform: translateY(40px); opacity:0; pointer-events:none;
+      transition: transform 0.4s cubic-bezier(0.22,1,0.36,1), opacity 0.3s;
+    }
+    .result.show { transform: translateY(0); opacity:1; pointer-events:auto; }
+    .result-head { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:10px; }
+    .result-name { font-size:16px; font-weight:600; letter-spacing:-0.2px; }
+    .result-conf { font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:var(--stat-body); font-weight:600; }
+    .big-score { font-size:48px; font-weight:700; letter-spacing:-1.8px; line-height:1; background: linear-gradient(180deg, #FFFFFF 0%, var(--stat-body) 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+    .big-score-unit { font-size:14px; color: var(--text-muted); font-weight:500; margin-left:4px; }
+
+    .metrics { display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin: 12px 0; }
+    .metric { padding:10px 12px; border-radius:10px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); }
+    .metric-lbl { font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color: var(--text-muted); margin-bottom:2px; }
+    .metric-val { font-size:14px; font-weight:600; color: var(--text-primary); letter-spacing:-0.1px; }
+    .disclaimer { font-size:10px; color: var(--text-dim); line-height:14px; margin: 6px 0 12px; padding: 8px 10px; border-radius: 8px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); }
+    .result-actions { display:flex; gap:8px; }
+    .r-btn { flex:1; padding:12px; border-radius:999px; font-size:14px; font-weight:600; font-family:inherit; cursor:pointer; letter-spacing:-0.2px; }
+    .r-btn.primary { background: var(--stat-body); color:#000; border:none; }
+    .r-btn.secondary { background:transparent; color:var(--text-muted); border:1px solid rgba(255,255,255,0.10); }
+
+    .shutter-wrap { position:absolute; bottom:36px; left:0; right:0; display:flex; align-items:center; justify-content:center; gap:36px; z-index:25; }
+    .shutter { width:74px; height:74px; border-radius:50%; background:transparent; border:5px solid white; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+    .shutter-inner { width:54px; height:54px; border-radius:50%; background:white; transition: all 0.15s; }
+    .shutter:active .shutter-inner { background: var(--stat-body); }
+    .gallery, .flip { width:48px; height:48px; border-radius:50%; background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.10); display:flex; align-items:center; justify-content:center; backdrop-filter:blur(20px); }
+    .gallery svg, .flip svg { width:18px; height:18px; stroke:white; }
+
+    .preview-label { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); color:#4A5060; font-size:11px; letter-spacing:0.16em; text-transform:uppercase; font-family:ui-monospace,"SF Mono",Menlo,monospace; }
+    @media (max-width:460px){ body{padding:0;} .phone{width:100vw; height:100vh; border-radius:0; box-shadow:none;} .notch,.home-indicator{display:none;} .preview-label{display:none;} }
+  </style>
+  <link rel="stylesheet" href="_lib/core-responsive.css">
+  <script src="_lib/core-back.js"></script>
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="viewfinder"></div>
+    <div class="silhouette">
+      <svg viewBox="0 0 120 200" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="60" cy="22" r="14" fill="rgba(255,255,255,0.05)"/>
+        <path d="M60 36 L60 80" />
+        <path d="M40 50 L60 65 L80 50" />
+        <path d="M60 80 L46 130" />
+        <path d="M60 80 L74 130" />
+        <path d="M46 130 L40 195" />
+        <path d="M74 130 L80 195" />
+      </svg>
+    </div>
+    <div class="pose-pt" style="top:14.5%; left:50%;"></div>
+    <div class="pose-pt" style="top:23%; left:34%; animation-delay:0.2s;"></div>
+    <div class="pose-pt" style="top:23%; left:66%; animation-delay:0.4s;"></div>
+    <div class="pose-pt" style="top:38%; left:50%; animation-delay:0.6s;"></div>
+    <div class="pose-pt" style="top:55%; left:42%; animation-delay:0.3s;"></div>
+    <div class="pose-pt" style="top:55%; left:58%; animation-delay:0.5s;"></div>
+
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="topbar">
+      <div class="icon-btn" onclick="window.location.href='20-dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M6 6l12 12M6 18L18 6"/></svg></div>
+      <div class="topbar-pill">⚡ Body scan</div>
+      <div class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12 18a3 3 0 0 0 0-6m0 6a3 3 0 0 1 0-6m0 0V4"/><circle cx="12" cy="20" r="1"/></svg></div>
+    </div>
+
+    <div class="pose-helper">Stand 6 ft back · facing camera · arms relaxed</div>
+
+    <div class="frame"><div class="scan-line"></div></div>
+
+    <div class="mode-strip">
+      <button class="mode active">Front</button>
+      <button class="mode">Side</button>
+      <button class="mode">Back</button>
+    </div>
+
+    <div class="result" id="result">
+      <div class="result-head">
+        <div>
+          <div class="result-name">Physique check-in</div>
+          <div><span class="big-score">68</span><span class="big-score-unit">/100</span></div>
+        </div>
+        <div class="result-conf">91% conf</div>
+      </div>
+      <div class="metrics">
+        <div class="metric"><div class="metric-lbl">Posture</div><div class="metric-val">Good · slight forward</div></div>
+        <div class="metric"><div class="metric-lbl">Definition</div><div class="metric-val">6.5 / 10</div></div>
+        <div class="metric"><div class="metric-lbl">Body fat est.</div><div class="metric-val">14–17%</div></div>
+        <div class="metric"><div class="metric-lbl">Change</div><div class="metric-val">▲ 2 vs last scan</div></div>
+      </div>
+      <div class="disclaimer">Visual estimates only. Not a clinical assessment. Photo stays on your device unless you choose to share.</div>
+      <div class="result-actions">
+        <button class="r-btn secondary" onclick="document.getElementById('result').classList.remove('show')">Retake</button>
+        <button class="r-btn primary" onclick="window.location.href='30-stat.html#body'">Save to Body</button>
+      </div>
+    </div>
+
+    <div class="shutter-wrap">
+      <div class="gallery"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg></div>
+      <button class="shutter" onclick="setTimeout(()=>document.getElementById('result').classList.add('show'), 400)"><div class="shutter-inner"></div></button>
+      <div class="flip"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-7.4-3.9M3 12a9 9 0 0 1 16.4-5.1M21 6v5h-5M3 18v-5h5"/></svg></div>
+    </div>
+  </div>
+  <div class="preview-label">core · scan · body · v1</div>
+</body>
+</html>

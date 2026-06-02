@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8" />
+<title>Core — Mind</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#000000" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+<script src="_lib/core-back.js"></script>
+<script src="_lib/core-state.js" defer></script>
+<script src="_lib/core-theme.js" defer></script>
+<script src="_lib/core-ai.js" defer></script>
+<script src="_lib/core-tasks.js" defer></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;}
+  body{min-height:100vh;background:#0A0A14;color:var(--text);font-family:'Chakra Petch',-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;padding:24px;overflow:hidden;-webkit-font-smoothing:antialiased;}
+  .phone{position:relative;width:390px;height:844px;background:var(--bg-void);border-radius:56px;overflow:hidden;box-shadow:0 40px 100px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.06),0 0 0 10px #0a0a12,0 0 0 11px #2b2b38;}
+  .notch{position:absolute;top:14px;left:50%;transform:translateX(-50%);width:124px;height:32px;background:#000;border-radius:20px;z-index:30;}
+  .home-indicator{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;background:rgba(245,247,251,0.55);border-radius:999px;z-index:30;}
+
+  .scroll{position:absolute;inset:0;padding:56px 0 110px;overflow-y:auto;z-index:10;}
+  .scroll::-webkit-scrollbar { display: none; }
+
+  .large-title { font-size: 32px; font-weight: 700; letter-spacing: -0.5px; color: #fff; padding: 14px 20px 4px; }
+  .subtitle    { font-size: 14px; color: rgba(235,235,245,0.65); padding: 0 20px 16px; }
+
+  .section-h { font-size: 13px; font-weight: 400; letter-spacing: 0.5px; text-transform: uppercase; color: rgba(235,235,245,0.55); padding: 22px 20px 6px; }
+  .card { margin: 0 16px; padding: 16px; border-radius: 14px; background: rgba(255,255,255,0.04); }
+  .list { margin: 0 16px; background: rgba(255,255,255,0.04); border-radius: 14px; overflow: hidden; }
+  .list-row { padding: 14px 16px; border-bottom: 0.5px solid rgba(255,255,255,0.08); }
+  .list-row:last-child { border-bottom: none; }
+  .list-row .q { font-size: 13px; color: rgba(235,235,245,0.60); margin-bottom: 6px; }
+  .list-row textarea { width: 100%; background: transparent; border: none; resize: none; color: #fff; font-family: inherit; font-size: 15px; line-height: 1.4; outline: none; min-height: 36px; }
+  .list-row textarea::placeholder { color: rgba(235,235,245,0.30); }
+
+  .meter { padding: 14px 16px; border-bottom: 0.5px solid rgba(255,255,255,0.08); }
+  .meter:last-child { border-bottom: none; }
+  .meter .head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .meter .head .lbl { font-size: 15px; color: #fff; font-weight: 500; }
+  .meter .head .val { font-size: 22px; font-weight: 700; color: var(--c, #fff); font-variant-numeric: tabular-nums; letter-spacing: -0.5px; }
+  .meter input[type="range"] { width: 100%; -webkit-appearance: none; appearance: none; height: 6px; background: rgba(255,255,255,0.10); border-radius: 999px; outline: none; }
+  .meter input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--c, #0A84FF); cursor: pointer; box-shadow: 0 3px 10px rgba(10,132,255,0.45); }
+  .meter .scale { display: flex; justify-content: space-between; font-size: 11px; color: rgba(235,235,245,0.40); margin-top: 4px; }
+
+  .cta-row { padding: 16px; }
+  .cta { width:100%; padding: 14px; border: none; border-radius: 14px; background: #0A84FF; color: #fff; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; letter-spacing: -0.2px; }
+  .cta:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  .insight { margin: 12px 16px 0; padding: 14px 16px; border-radius: 12px; background: rgba(10,132,255,0.10); border: 0.5px solid rgba(10,132,255,0.32); }
+  .insight .h { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #6BA9FF; font-weight: 700; margin-bottom: 6px; }
+  .insight .body { font-size: 14px; color: #fff; line-height: 1.45; }
+
+  .topbar { position:absolute; top: 54px; left: 0; right: 0; padding: 0 16px; display: flex; align-items: center; gap: 8px; z-index: 20; }
+  .icon-btn { width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .icon-btn svg { width:14px; height:14px; stroke:#fff; fill:none; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
+
+  @media (max-width:460px){body{padding:0;}.phone{width:100vw;height:100vh;height:100dvh;border-radius:0;box-shadow:none;}.notch,.home-indicator{display:none;}}
+</style>
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="scroll" id="scroll">
+      <div class="large-title">Mind</div>
+      <div class="subtitle">Reflect honestly. The AI will turn it into action items.</div>
+
+      <div class="section-h">How are you, really?</div>
+      <div class="card" style="padding:0;">
+        <div class="meter" style="--c:#FF6BAA;">
+          <div class="head"><span class="lbl">Mood</span><span class="val" id="moodV">5</span></div>
+          <input type="range" id="moodS" min="1" max="10" value="5" />
+          <div class="scale"><span>Off</span><span>Locked in</span></div>
+        </div>
+        <div class="meter" style="--c:#FF9F0A;">
+          <div class="head"><span class="lbl">Stress</span><span class="val" id="stressV">5</span></div>
+          <input type="range" id="stressS" min="1" max="10" value="5" />
+          <div class="scale"><span>Calm</span><span>Overloaded</span></div>
+        </div>
+        <div class="meter" style="--c:#0A84FF;">
+          <div class="head"><span class="lbl">Confidence</span><span class="val" id="confV">5</span></div>
+          <input type="range" id="confS" min="1" max="10" value="5" />
+          <div class="scale"><span>Shaky</span><span>Solid</span></div>
+        </div>
+        <div class="meter" style="--c:#BF5AF2;">
+          <div class="head"><span class="lbl">Focus</span><span class="val" id="focusV">5</span></div>
+          <input type="range" id="focusS" min="1" max="10" value="5" />
+          <div class="scale"><span>Scattered</span><span>Sharp</span></div>
+        </div>
+      </div>
+
+      <div class="section-h">Daily reflection</div>
+      <div class="list">
+        <div class="list-row">
+          <div class="q">What happened today?</div>
+          <textarea data-key="happened" placeholder="The big things, the small things."></textarea>
+        </div>
+        <div class="list-row">
+          <div class="q">What went well?</div>
+          <textarea data-key="well" placeholder="One thing you got right."></textarea>
+        </div>
+        <div class="list-row">
+          <div class="q">What went wrong?</div>
+          <textarea data-key="wrong" placeholder="The slip, the avoidance, the missed beat."></textarea>
+        </div>
+        <div class="list-row">
+          <div class="q">What did you learn?</div>
+          <textarea data-key="learned" placeholder="Lesson, pattern, insight."></textarea>
+        </div>
+        <div class="list-row">
+          <div class="q">What are you avoiding?</div>
+          <textarea data-key="avoiding" placeholder="Be honest. The thing you keep pushing back."></textarea>
+        </div>
+      </div>
+
+      <div class="cta-row">
+        <button class="cta" id="generateBtn">Get action items from AI</button>
+      </div>
+
+      <div id="aiResult"></div>
+    </div>
+
+    <div class="topbar">
+      <div class="icon-btn" id="backBtn" role="button" aria-label="Back" onclick="window.history.length > 1 ? window.history.back() : (window.location.href='20-dashboard.html')">
+        <svg viewBox="0 0 24 24"><path d="M15 18L9 12l6-6"/></svg>
+      </div>
+    </div>
+
+    <div class="tabbar" data-active="mind"></div>
+  </div>
+
+<script src="_lib/core-tabbar.js"></script>
+<script>
+  // Meter live-update
+  ['mood','stress','conf','focus'].forEach(k => {
+    const s = document.getElementById(k + 'S');
+    const v = document.getElementById(k + 'V');
+    s.addEventListener('input', () => { v.textContent = s.value; });
+  });
+
+  // Persist meters + reflection
+  function snapshot() {
+    return {
+      ts: Date.now(),
+      meters: {
+        mood: +document.getElementById('moodS').value,
+        stress: +document.getElementById('stressS').value,
+        confidence: +document.getElementById('confS').value,
+        focus: +document.getElementById('focusS').value,
+      },
+      reflection: Object.fromEntries(Array.from(document.querySelectorAll('textarea')).map(t => [t.dataset.key, t.value.trim()]))
+    };
+  }
+
+  // ── Generate action items via AI ────────────────────────────────────
+  document.getElementById('generateBtn').addEventListener('click', async () => {
+    const snap = snapshot();
+    try {
+      const log = JSON.parse(localStorage.getItem('coreMindLog.v1') || '[]');
+      log.push(snap);
+      localStorage.setItem('coreMindLog.v1', JSON.stringify(log.slice(-60)));
+    } catch (e) {}
+    const btn = document.getElementById('generateBtn');
+    btn.disabled = true; btn.textContent = 'Thinking…';
+
+    const messages = [{
+      role: 'user',
+      content:
+        'Daily reflection intake. Generate 3 concrete action items the user can do this week. ' +
+        'Return strict JSON only: {"summary":"one-line read","actions":[{"title":"","category":"mind|fitness|relationships|business|health|learning","xp":5-25}]}.\n\n' +
+        JSON.stringify(snap, null, 2)
+    }];
+
+    let actions = null, summary = null;
+    if (window.coreAI) {
+      const r = await coreAI.chat(messages, { temperature: 0.5, maxTokens: 500 });
+      try {
+        const j = JSON.parse((r.text || '').replace(/^```json\s*|\s*```$/g, '').trim());
+        actions = j.actions; summary = j.summary;
+      } catch (e) { /* fall through */ }
+    }
+    if (!actions || !actions.length) {
+      // Fallback heuristic
+      summary = "You logged honestly. Here's one small move per area.";
+      actions = [
+        { title: 'Write 1 sentence about what you avoided',  category: 'mind',     xp: 5 },
+        { title: '10-minute walk to reset',                  category: 'fitness',  xp: 10 },
+        { title: 'Text 1 person you\'ve been avoiding',      category: 'relationships', xp: 15 },
+      ];
+    }
+
+    const $r = document.getElementById('aiResult');
+    $r.innerHTML = `
+      <div class="insight">
+        <div class="h">AI insight</div>
+        <div class="body">${escape(summary || '')}</div>
+      </div>
+      <div class="section-h">Today's action items</div>
+      <div class="list" id="actionList">
+        ${actions.map((a,i) => `
+          <div class="list-row" style="display:flex;align-items:center;gap:12px;padding:14px 16px;">
+            <div style="width:24px;height:24px;border-radius:6px;background:rgba(10,132,255,0.18);color:#6BA9FF;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;">${i+1}</div>
+            <div style="flex:1;color:#fff;font-size:15px;line-height:1.35;">${escape(a.title)}<div style="color:rgba(235,235,245,0.60);font-size:11px;margin-top:2px;letter-spacing:0.04em;text-transform:uppercase;">${escape(a.category || 'mind')} · +${a.xp || 5} XP</div></div>
+            <button class="add-task-btn" data-i="${i}" style="background:rgba(48,209,88,0.16);color:#30D158;border:0.5px solid rgba(48,209,88,0.40);border-radius:999px;padding:6px 12px;font-family:inherit;font-size:11px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;cursor:pointer;">+ Task</button>
+          </div>
+        `).join('')}
+      </div>
+      <div class="cta-row"><button class="cta" id="addAllBtn">Add all to Tasks</button></div>
+    `;
+    $r.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // Wire add-task buttons
+    document.querySelectorAll('.add-task-btn').forEach(b => {
+      b.addEventListener('click', () => {
+        const a = actions[+b.dataset.i];
+        if (window.coreTasks) coreTasks.create({ title: a.title, category: a.category || 'mind', xp: a.xp || 5, source: 'mind-reflection' });
+        b.textContent = '✓ Added'; b.disabled = true; b.style.opacity = '0.5';
+      });
+    });
+    document.getElementById('addAllBtn').addEventListener('click', () => {
+      actions.forEach(a => { if (window.coreTasks) coreTasks.create({ title: a.title, category: a.category || 'mind', xp: a.xp || 5, source: 'mind-reflection' }); });
+      window.location.href = '34-tasks.html';
+    });
+
+    btn.disabled = false; btn.textContent = 'Get action items from AI';
+  });
+
+  function escape(s){ return String(s||'').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+</script>
+</body>
+</html>

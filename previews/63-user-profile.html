@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+  <meta charset="utf-8" />
+  <title>Core — Friend's profile</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <style>
+    :root { --bg-base:#02020A; --text-primary:#F8FAFE; --text-muted:#9AA1B7; --text-dim:#4F5570; --accent:#4A8FFF; }
+    * { box-sizing: border-box; }
+    html, body { margin:0; padding:0; height:100%; }
+    body { min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text-primary); padding:24px; overflow:hidden; }
+    .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+    .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:10; }
+    .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:10; }
+
+    .bg { position:absolute; inset:0; background: radial-gradient(60% 30% at 50% 18%, rgba(255,107,170,0.14) 0%, transparent 65%), radial-gradient(70% 40% at 50% 100%, rgba(74,143,255,0.10) 0%, transparent 60%), linear-gradient(180deg, #1A0814 0%, var(--bg-base) 50%, #050510 100%); }
+    .grain { position:absolute; inset:0; pointer-events:none; opacity:0.04; mix-blend-mode:overlay; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.7 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); z-index:2; }
+
+    .header { position:absolute; top:60px; left:0; right:0; padding:0 20px; display:flex; align-items:center; justify-content:space-between; z-index:10; }
+    .icon-btn { width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); backdrop-filter:blur(20px); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+    .icon-btn svg { width:16px; height:16px; stroke:var(--text-muted); }
+
+    .scroll { position:absolute; top:108px; left:0; right:0; bottom:0; padding: 0 20px 28px; overflow-y:auto; z-index:4; }
+    .scroll::-webkit-scrollbar { display:none; }
+
+    .hero { display:flex; flex-direction:column; align-items:center; padding: 8px 0 16px; }
+    .avatar { width: 96px; height: 96px; border-radius: 50%; background: radial-gradient(circle at 35% 28%, #FFD3E4 0%, #FF6BAA 60%, #832D50 100%); box-shadow: 0 0 50px rgba(255,107,170,0.5), inset 0 2px 6px rgba(255,255,255,0.3); position:relative; margin-bottom:14px; }
+    .avatar::after { content:""; position:absolute; inset:0; border-radius:50%; background:linear-gradient(160deg, rgba(255,255,255,0.32) 0%, transparent 45%); }
+    .name { font-size: 24px; font-weight: 700; letter-spacing: -0.6px; }
+    .handle { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+    .rank { display:inline-flex; align-items:center; gap:8px; margin-top:14px; padding:6px 12px; border-radius:999px; background: linear-gradient(135deg, rgba(255,122,69,0.20) 0%, rgba(255,107,170,0.20) 100%); border:1px solid rgba(255,122,69,0.40); font-size:12px; font-weight:700; letter-spacing:0.16em; text-transform:uppercase; color: #FF7A45; box-shadow: 0 0 12px rgba(255,122,69,0.30); }
+    .bio { font-size:13px; color: var(--text-muted); margin-top: 14px; line-height: 19px; text-align: center; max-width: 280px; }
+
+    .actions { display:flex; gap:8px; margin-top: 20px; width:100%; max-width: 300px; }
+    .action-btn { flex:1; padding: 12px; border-radius: 999px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; letter-spacing:-0.1px; transition: transform 0.15s; }
+    .action-btn:active { transform: scale(0.97); }
+    .action-btn.primary { background: var(--accent); color:white; border:none; box-shadow: 0 0 14px rgba(74,143,255,0.4); }
+    .action-btn.secondary { background: rgba(255,255,255,0.05); color: var(--text-primary); border: 1px solid rgba(255,255,255,0.10); }
+    .action-btn.icon-only { flex:0 0 44px; padding: 12px 0; }
+    .action-btn.icon-only svg { width:14px; height:14px; stroke: var(--text-muted); }
+
+    /* Streaks/trio */
+    .trio { display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 18px; }
+    .trio-cell { padding: 12px; border-radius: 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); backdrop-filter: blur(14px); text-align:center; }
+    .trio-val { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: var(--text-primary); }
+    .trio-label { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted); margin-top:4px; font-weight: 500; }
+
+    .section-title { font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:var(--text-muted); font-weight:500; margin: 20px 4px 10px; }
+
+    /* Shared habits */
+    .shared-list { display:flex; flex-direction:column; gap:6px; }
+    .shared-row { display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:12px; background:rgba(255,255,255,0.025); border:1px solid rgba(255,255,255,0.04); }
+    .shared-icon { width:32px; height:32px; border-radius:9px; background: var(--c); box-shadow: 0 0 10px var(--c); display:flex; align-items:center; justify-content:center; position:relative; flex-shrink:0; }
+    .shared-icon::after { content:""; position:absolute; inset:0; border-radius:9px; background:linear-gradient(160deg, rgba(255,255,255,0.30) 0%, transparent 45%); }
+    .shared-icon svg { width:14px; height:14px; stroke:white; position:relative; z-index:2; }
+    .shared-info { flex:1; }
+    .shared-name { font-size:13px; font-weight:600; letter-spacing:-0.1px; }
+    .shared-sub { font-size:11px; color:var(--text-muted); margin-top:1px; }
+    .shared-meta { font-size:11px; color:var(--text-muted); font-family:ui-monospace,"SF Mono",Menlo,monospace; }
+
+    /* Post snippet (their feed) */
+    .post-mini { padding:14px 16px; border-radius:16px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); backdrop-filter:blur(14px); margin-bottom:8px; }
+    .pm-tag { display:inline-flex; align-items:center; gap:5px; padding:3px 8px; border-radius:999px; background:rgba(255,107,170,0.10); font-size:10px; color:#FF6BAA; font-weight:500; margin-bottom:6px; }
+    .pm-tag::before { content:""; width:5px; height:5px; border-radius:50%; background:#FF6BAA; }
+    .pm-text { font-size:13px; line-height:18px; color: var(--text-primary); letter-spacing:-0.1px; }
+    .pm-meta { font-size:10px; color:var(--text-dim); margin-top:8px; letter-spacing:0.06em; font-family:ui-monospace,"SF Mono",Menlo,monospace; }
+
+    .preview-label { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); color:#4A5060; font-size:11px; letter-spacing:0.16em; text-transform:uppercase; font-family:ui-monospace,"SF Mono",Menlo,monospace; }
+    @media (max-width:460px){ body{padding:0;} .phone{width:100vw; height:100vh; border-radius:0; box-shadow:none;} .notch,.home-indicator{display:none;} .preview-label{display:none;} }
+  </style>
+  <link rel="stylesheet" href="_lib/core-responsive.css">
+  <script src="_lib/core-back.js"></script>
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div>
+    <div class="grain"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="header">
+      <div class="icon-btn" onclick="window.location.href='66-leaderboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18L9 12l6-6"/></svg></div>
+      <div class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></div>
+    </div>
+
+    <div class="scroll">
+      <div class="hero">
+        <div class="avatar"></div>
+        <div class="name">Aya Khan</div>
+        <div class="handle">@aya</div>
+        <div class="rank">
+          <svg viewBox="0 0 24 24" fill="#FF7A45" stroke="none" width="14" height="14"><path d="M12 2L4 10l8 12 8-12z"/></svg>
+          Forge II · 2,180 XP
+        </div>
+        <p class="bio">"Stairs to 5km in 3 weeks. The lungs heal faster than you think." Day 18 clean from vape.</p>
+
+        <div class="actions">
+          <button class="action-btn primary" id="followBtn" onclick="toggleFollow()">Follow</button>
+          <button class="action-btn secondary" onclick="sendCoinsToUser()" style="display:flex; align-items:center; justify-content:center; gap:6px;">
+            <span style="width:9px; height:9px; border-radius:50%; background:#FFD05C; box-shadow:0 0 6px #FFD05C;"></span>
+            Send coins
+          </button>
+          <button class="action-btn secondary icon-only" onclick="window.location.href='60-compose.html'" aria-label="Compose"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button>
+        </div>
+      </div>
+
+      <div class="trio">
+        <div class="trio-cell"><div class="trio-val" style="color:#FF6BAA;">18</div><div class="trio-label">Day streak</div></div>
+        <div class="trio-cell"><div class="trio-val">84</div><div class="trio-label">Life Score</div></div>
+        <div class="trio-cell"><div class="trio-val">42</div><div class="trio-label">Friends</div></div>
+      </div>
+
+      <div class="section-title">You both track</div>
+      <div class="shared-list">
+        <div class="shared-row">
+          <div class="shared-icon" style="--c: #FF6BAA;"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M12 4v12"/><path d="M12 16c0 2-1.2 4-3 4-2.5 0-4-2-4-5"/><path d="M12 16c0 2 1.2 4 3 4 2.5 0 4-2 4-5"/></svg></div>
+          <div class="shared-info">
+            <div class="shared-name">Vape</div>
+            <div class="shared-sub">Aya 18d · you 14d</div>
+          </div>
+          <span class="shared-meta">accountability buddy</span>
+        </div>
+        <div class="shared-row">
+          <div class="shared-icon" style="--c: #B388FF;"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M9 3a3 3 0 0 0-3 3v0a3 3 0 0 0-3 3v1a3 3 0 0 0 1 2.2A3 3 0 0 0 4 14v1a3 3 0 0 0 3 3 3 3 0 0 0 3 3h.5a1.5 1.5 0 0 0 1.5-1.5V4.5A1.5 1.5 0 0 0 10.5 3H9Z"/></svg></div>
+          <div class="shared-info">
+            <div class="shared-name">Doom-scroll</div>
+            <div class="shared-sub">Both struggling — both have 3 slips this week</div>
+          </div>
+          <span class="shared-meta">similar pattern</span>
+        </div>
+      </div>
+
+      <div class="section-title">Recent posts</div>
+      <div class="post-mini" onclick="window.location.href='61-comments.html'" style="cursor:pointer;">
+        <div class="pm-tag">Lungs · Day 18 clean</div>
+        <div class="pm-text">Three weeks ago I couldn't walk up a flight of stairs without wheezing. Just ran 5km. The lungs heal faster than you think.</div>
+        <div class="pm-meta">18 min ago · 42 likes · 9 comments</div>
+      </div>
+      <div class="post-mini">
+        <div class="pm-tag" style="background:rgba(255,122,69,0.10); color:#FF7A45;">Willpower · Day 15 fire</div>
+        <div class="pm-text">Cold shower #15. Today was the first one I didn't dread. Brain just files it as "what we do now."</div>
+        <div class="pm-meta">3 days ago · 23 likes · 4 comments</div>
+      </div>
+    </div>
+  </div>
+  <div class="preview-label">core · user profile · v2</div>
+  <script src="_lib/core-state.js"></script>
+  <script src="_lib/analytics.js"></script>
+  <script>
+    // Follow/unfollow + send-coins for the viewed user.
+    (function() {
+      try {
+        var p = new URLSearchParams(location.search);
+        var uname = p.get('u') || 'Friend';
+        window.__viewUser = uname;
+        var following = JSON.parse(localStorage.getItem('coreFollowing') || '[]');
+        var btn = document.getElementById('followBtn');
+        if (btn) btn.textContent = following.indexOf(uname) >= 0 ? 'Following' : 'Follow';
+      } catch(e){}
+    })();
+    function toggleFollow() {
+      try {
+        var uname = window.__viewUser || 'Friend';
+        var following = JSON.parse(localStorage.getItem('coreFollowing') || '[]');
+        var i = following.indexOf(uname);
+        if (i >= 0) following.splice(i, 1);
+        else following.push(uname);
+        localStorage.setItem('coreFollowing', JSON.stringify(following));
+        var btn = document.getElementById('followBtn');
+        btn.textContent = following.indexOf(uname) >= 0 ? 'Following' : 'Follow';
+        if (window.coreTrack) coreTrack('user_follow_toggled', { user: uname, now: btn.textContent });
+      } catch(e){}
+    }
+    function sendCoinsToUser() {
+      var uname = window.__viewUser || 'Friend';
+      var have = (window.coreState && coreState.read().coins) || 0;
+      var amt = parseInt(prompt('Send how many coins to ' + uname + '? (You have ' + have + ')'), 10);
+      if (!amt || amt <= 0) return;
+      if (amt > have) { alert('Not enough coins. You have ' + have + '.'); return; }
+      if (!confirm('Send ' + amt + ' coins to ' + uname + '?')) return;
+      var r = coreState.spendCoins(amt, 'transfer_to_' + uname);
+      if (!r.ok) { alert('Spend failed.'); return; }
+      if (window.coreTrack) coreTrack('user_coin_transfer', { to: uname, amount: amt });
+      alert(amt + ' coins sent to ' + uname + '.');
+    }
+    window.toggleFollow = toggleFollow;
+    window.sendCoinsToUser = sendCoinsToUser;
+  </script>
+</body>
+</html>

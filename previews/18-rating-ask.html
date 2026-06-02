@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>CORE — Mind rating us?</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<link rel="stylesheet" href="_lib/core-responsive.css">
+<script src="_lib/analytics.js" defer></script>
+<style>
+  :root {
+    --apple-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --text:#F8FAFE; --muted:#9AA1B7; --dim:#4F5570; --accent:#2F8FFF;
+    --gold:#FFD05C; --gold-deep:#E8A82F; --pink:#FF6BAA;
+  }
+  * { box-sizing:border-box; }
+  html, body { margin:0; padding:0; height:100%; }
+  body {
+    min-height:100vh; background:#0A0A14;
+    display:flex; align-items:center; justify-content:center;
+    font-family: var(--apple-font);
+    color: var(--text); -webkit-font-smoothing:antialiased;
+    padding: 24px; overflow: hidden;
+  }
+  .phone {
+    position:relative; width:390px; height:844px; background:#02020A;
+    border-radius:56px; overflow:hidden;
+    box-shadow:0 40px 100px rgba(0,0,0,0.6),
+               0 0 0 1px rgba(255,255,255,0.06),
+               0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38;
+  }
+  .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:30; }
+  .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:30; }
+
+  .bg {
+    position:absolute; inset:0; z-index:0;
+    background:
+      radial-gradient(60% 35% at 50% 32%, rgba(255,208,92,0.18) 0%, transparent 60%),
+      radial-gradient(60% 35% at 50% 92%, rgba(179,136,255,0.10) 0%, transparent 65%),
+      linear-gradient(180deg, #1A0E04 0%, #02020A 55%, #050510 100%);
+  }
+  .stars { position:absolute; inset:0; pointer-events:none; z-index:2; }
+  .star { position:absolute; border-radius:50%; background:#fff; animation: twinkle var(--d,4s) ease-in-out var(--del,0s) infinite; }
+  .star.s1 { width:1px; height:1px; opacity:0.4; }
+  .star.s2 { width:1.5px; height:1.5px; opacity:0.55; }
+  .star.s3 { width:2px; height:2px; opacity:0.7; box-shadow:0 0 4px rgba(255,255,255,0.6); }
+  @keyframes twinkle { 0%,100% { opacity:0.15; transform:scale(0.7); } 50% { opacity:0.85; transform:scale(1.15); } }
+
+  .frame {
+    position:absolute; inset:0; z-index:10;
+    display:flex; flex-direction:column;
+    padding: 64px 26px 32px;
+  }
+  .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .brand { display:flex; align-items:center; gap:8px; }
+  .brand .dot { width:8px; height:8px; border-radius:50%; background:var(--gold); box-shadow:0 0 12px var(--gold); animation: dot 2.5s ease-in-out infinite; }
+  @keyframes dot { 0%,100% { transform:scale(1); opacity:1; } 50% { transform:scale(1.3); opacity:0.85; } }
+  .brand .wm { font-size:13px; font-weight:600; letter-spacing:0.30em; color:rgba(255,255,255,0.92); }
+  .skip {
+    background:none; border:none;
+    color:var(--muted); font-size:13px; font-family:inherit;
+    cursor:pointer; letter-spacing:-0.1px;
+    padding:5px 8px;
+  }
+
+  .head { margin-top: 4px; text-align: center; opacity: 0; animation: fadeUp .7s .1s forwards; }
+  .kicker {
+    font-size:11px; letter-spacing:0.22em; text-transform:uppercase;
+    color: var(--gold); font-weight:700; margin-bottom: 6px;
+  }
+  h1 {
+    font-size: 26px; font-weight: 700; letter-spacing: -0.7px;
+    line-height: 1.1; margin: 0;
+  }
+  h1 .g {
+    background: linear-gradient(135deg, var(--gold) 0%, var(--pink) 100%);
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+  .sub {
+    font-size:13px; color: var(--muted); line-height:19px;
+    margin: 10px auto 0; max-width: 280px;
+  }
+  @keyframes fadeUp {
+    from { opacity:0; transform: translateY(8px); }
+    to { opacity:1; transform: translateY(0); }
+  }
+
+  /* Stars rating */
+  .rating {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 24px;
+    padding-top: 12px;
+  }
+  .stars-row {
+    display: flex; gap: 10px;
+    opacity: 0; transform: translateY(8px);
+    animation: fadeUp .7s .35s forwards;
+  }
+  .rstar {
+    width: 52px; height: 52px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform .12s cubic-bezier(0.22,1.4,0.36,1);
+  }
+  .rstar:active { transform: scale(0.92); }
+  .rstar svg {
+    width: 100%; height: 100%;
+    fill: rgba(255,255,255,0.10);
+    stroke: rgba(255,255,255,0.30);
+    stroke-width: 1.4;
+    transition: fill .25s, stroke .25s, transform .35s cubic-bezier(0.22,1.4,0.36,1), filter .25s;
+  }
+  .rstar.on svg {
+    fill: var(--gold);
+    stroke: var(--gold-deep);
+    filter: drop-shadow(0 0 14px rgba(255,208,92,0.85));
+    transform: scale(1.08);
+  }
+  .rstar.peak svg { animation: starPop .55s cubic-bezier(0.22,1.5,0.36,1); }
+  @keyframes starPop {
+    0%   { transform: scale(0.85); }
+    55%  { transform: scale(1.30); }
+    100% { transform: scale(1.08); }
+  }
+  .stars-msg {
+    font-size: 15px; color: rgba(255,255,255,0.78);
+    font-weight: 500; letter-spacing: -0.2px;
+    min-height: 22px; text-align: center;
+    transition: opacity .25s;
+  }
+  .stars-msg strong { color: var(--gold); font-weight: 700; }
+
+  /* Confetti for 5-star */
+  .confetti {
+    position: absolute; inset: 0; pointer-events: none; z-index: 20;
+    overflow: hidden;
+  }
+  .confetti i {
+    position: absolute;
+    width: 8px; height: 12px; border-radius: 2px;
+    opacity: 0; transform-origin: center;
+    will-change: transform, opacity;
+  }
+  .confetti.go i { animation: confettiFly 2.4s ease-out forwards; }
+  @keyframes confettiFly {
+    0%   { opacity: 0; transform: translate(0,0) rotate(0deg); }
+    10%  { opacity: 1; }
+    100% { opacity: 0; transform: translate(var(--cx,0), var(--cy,-360px)) rotate(var(--cr,540deg)); }
+  }
+
+  /* CTAs */
+  .ctas {
+    padding-top: 10px;
+    opacity: 0; transform: translateY(8px);
+    transition: opacity .5s, transform .5s;
+    pointer-events: none;
+  }
+  .ctas.show { opacity:1; transform: translateY(0); pointer-events: auto; }
+  .cta {
+    width: 100%; padding: 18px 24px;
+    border-radius: 999px; border: none;
+    color: #1A0B00;
+    font-family: inherit; font-size: 17px; font-weight: 800;
+    letter-spacing: -0.32px;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--pink) 100%);
+    background-size: 200% 200%;
+    animation: gradShift 5s ease infinite;
+    box-shadow:
+      0 14px 36px rgba(255,107,170,0.36),
+      0 0 0 1px rgba(255,255,255,0.30) inset,
+      0 1px 0 rgba(255,255,255,0.45) inset;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: transform .12s, filter .2s;
+  }
+  .cta:hover { filter: brightness(1.05); }
+  .cta:active { transform: scale(0.985); filter: brightness(0.92); }
+  .cta svg { width:18px; height:18px; stroke:#1A0B00; fill:none; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
+  @keyframes gradShift { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
+  .leave {
+    width: 100%; margin-top: 10px; padding: 12px;
+    background: transparent; border: none;
+    color: var(--muted); font-family: inherit;
+    font-size: 13px; font-weight: 500;
+    cursor: pointer;
+  }
+  .leave:hover { color: rgba(255,255,255,0.9); }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="bg"></div>
+  <div class="stars" id="stars"></div>
+  <div class="notch"></div>
+  <div class="home-indicator"></div>
+
+  <div class="frame">
+    <div class="topbar">
+      <div class="brand"><span class="dot"></span><span class="wm">CORE</span></div>
+      <button class="skip" id="skipBtn">Skip</button>
+    </div>
+
+    <div class="head">
+      <div class="kicker">One ask</div>
+      <h1>Mind<br/><span class="g">rating us?</span></h1>
+      <p class="sub">Ratings are how we beat the big apps. 30 seconds, tops.</p>
+    </div>
+
+    <div class="rating">
+      <div class="stars-row" id="starsRow">
+        <button class="rstar" data-n="1" aria-label="1 star"><svg viewBox="0 0 24 24"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg></button>
+        <button class="rstar" data-n="2" aria-label="2 stars"><svg viewBox="0 0 24 24"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg></button>
+        <button class="rstar" data-n="3" aria-label="3 stars"><svg viewBox="0 0 24 24"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg></button>
+        <button class="rstar" data-n="4" aria-label="4 stars"><svg viewBox="0 0 24 24"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg></button>
+        <button class="rstar" data-n="5" aria-label="5 stars"><svg viewBox="0 0 24 24"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg></button>
+      </div>
+      <div class="stars-msg" id="starsMsg">Tap the stars to rate</div>
+    </div>
+
+    <div class="ctas" id="ctas">
+      <button class="cta" id="rateBtn">
+        Rate on App Store
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </button>
+      <button class="leave" id="laterBtn">Maybe later</button>
+    </div>
+
+    <div class="confetti" id="confetti" aria-hidden="true"></div>
+  </div>
+</div>
+
+<script>
+  // Stars background
+  (function () {
+    const sl = document.getElementById('stars');
+    for (let i = 0; i < 55; i++) {
+      const s = document.createElement('div');
+      const r = Math.random();
+      s.className = 'star ' + (r < 0.55 ? 's1' : r < 0.85 ? 's2' : 's3');
+      s.style.left = (Math.random()*100)+'%'; s.style.top = (Math.random()*100)+'%';
+      s.style.setProperty('--d', (2.5+Math.random()*5)+'s');
+      s.style.setProperty('--del', (Math.random()*5)+'s');
+      sl.appendChild(s);
+    }
+  })();
+
+  function track(n, p) { try { if (window.coreTrack) window.coreTrack(n, p||{}); } catch(e){} }
+  window.addEventListener('load', () => track('rating_ask_viewed', {}));
+
+  // Confetti pieces
+  (function () {
+    const wrap = document.getElementById('confetti');
+    const colors = ['#FFD05C','#FF6BAA','#B388FF','#5BB1FF','#5CE1E6','#5BE39A'];
+    for (let i = 0; i < 32; i++) {
+      const c = document.createElement('i');
+      c.style.background = colors[i % colors.length];
+      c.style.left = (44 + Math.random() * 12) + '%';
+      c.style.top  = '52%';
+      c.style.setProperty('--cx', (Math.random() * 320 - 160) + 'px');
+      c.style.setProperty('--cy', (-(180 + Math.random() * 280)) + 'px');
+      c.style.setProperty('--cr', (Math.random() * 1080 + 360) + 'deg');
+      c.style.animationDelay = (Math.random() * 0.3) + 's';
+      wrap.appendChild(c);
+    }
+  })();
+
+  const stars = document.querySelectorAll('.rstar');
+  const msg = document.getElementById('starsMsg');
+  const ctas = document.getElementById('ctas');
+  const rateBtn = document.getElementById('rateBtn');
+  const confetti = document.getElementById('confetti');
+  let rated = 0;
+
+  const MESSAGES = {
+    1: 'Brutal. What broke?',
+    2: "Hmm. We'll keep working.",
+    3: 'Not bad. Tell us how to earn 5.',
+    4: 'Almost there. Cheers.',
+    5: "<strong>You're the best.</strong> Thank you.",
+  };
+
+  function setStars(n, animate) {
+    rated = n;
+    stars.forEach((s, i) => {
+      s.classList.toggle('on', i < n);
+      if (animate && i === n - 1) {
+        s.classList.remove('peak');
+        void s.offsetWidth;
+        s.classList.add('peak');
+      } else if (!animate) {
+        s.classList.remove('peak');
+      }
+    });
+    msg.innerHTML = MESSAGES[n] || 'Tap the stars to rate';
+    if (n >= 4) {
+      ctas.classList.add('show');
+      rateBtn.querySelector('span') || (rateBtn.innerHTML =
+        'Rate on App Store <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>');
+    } else if (n >= 1) {
+      ctas.classList.add('show');
+      rateBtn.innerHTML = "Tell us what's missing <svg viewBox=\"0 0 24 24\"><path d=\"M5 12h14M13 5l7 7-7 7\"/></svg>";
+    }
+    if (n === 5) {
+      confetti.classList.remove('go');
+      void confetti.offsetWidth;
+      confetti.classList.add('go');
+      track('rating_5_star', {});
+    } else {
+      track('rating_picked', { stars: n });
+    }
+  }
+
+  stars.forEach((s, i) => {
+    s.addEventListener('click', () => setStars(i + 1, true));
+    s.addEventListener('mouseenter', () => {
+      // Hover preview — fill stars up to this one without firing animation
+      if (rated > 0) return;
+      stars.forEach((s2, j) => s2.classList.toggle('on', j <= i));
+    });
+  });
+  document.getElementById('starsRow').addEventListener('mouseleave', () => {
+    if (rated === 0) stars.forEach(s => s.classList.remove('on'));
+  });
+
+  rateBtn.addEventListener('click', () => {
+    if (rated >= 4) {
+      track('rating_app_store_tapped', { stars: rated });
+      // In production this is StoreKit's requestReview / direct App Store URL.
+      // For preview, simulate by saving the rating and moving on.
+      try { localStorage.setItem('coreRating', JSON.stringify({ stars: rated, at: Date.now() })); } catch (e) {}
+      // Briefly show "thanks"
+      msg.innerHTML = '<strong>Opening App Store…</strong>';
+      setTimeout(() => { location.href = '19-rank-reveal.html'; }, 700);
+    } else {
+      track('rating_feedback_requested', { stars: rated });
+      msg.innerHTML = '<strong>Thanks — we hear you.</strong> Coach will follow up in chat.';
+      setTimeout(() => { location.href = '19-rank-reveal.html'; }, 1000);
+    }
+  });
+
+  document.getElementById('laterBtn').addEventListener('click', () => {
+    track('rating_later', {});
+    location.href = '19-rank-reveal.html';
+  });
+  document.getElementById('skipBtn').addEventListener('click', () => {
+    track('rating_skipped', {});
+    location.href = '19-rank-reveal.html';
+  });
+</script>
+</body>
+</html>

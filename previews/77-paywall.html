@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+  <meta charset="utf-8" />
+  <title>Core — Paywall</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <style>
+    :root { --bg-base:#02020A; --text-primary:#F8FAFE; --text-muted:#9AA1B7; --text-dim:#4F5570; --accent:#4A8FFF; }
+    * { box-sizing: border-box; }
+    html, body { margin:0; padding:0; height:100%; }
+    body { min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text-primary); padding:24px; overflow:hidden; }
+    .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+    .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:10; }
+    .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:10; }
+
+    .bg { position:absolute; inset:0; background: radial-gradient(70% 50% at 50% 18%, rgba(74,143,255,0.25) 0%, transparent 65%), radial-gradient(70% 40% at 50% 100%, rgba(179,136,255,0.15) 0%, transparent 60%), linear-gradient(180deg, #08081E 0%, var(--bg-base) 60%, #050510 100%); }
+    .grain { position:absolute; inset:0; pointer-events:none; opacity:0.04; mix-blend-mode:overlay; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.7 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); z-index:2; }
+
+    .close { position:absolute; top:60px; right:24px; width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); backdrop-filter:blur(20px); display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:10; }
+    .close svg { width:14px; height:14px; stroke:var(--text-muted); }
+
+    .content { position:absolute; left:0; right:0; bottom:0; top:0; display:flex; flex-direction:column; padding: 90px 28px 28px; z-index:5; }
+
+    .badge {
+      width: 78px; height: 78px; border-radius: 20px;
+      margin: 8px auto 22px;
+      background: linear-gradient(135deg, #4A8FFF 0%, #B388FF 100%);
+      box-shadow: 0 0 50px rgba(74,143,255,0.55), inset 0 2px 6px rgba(255,255,255,0.35);
+      display:flex; align-items:center; justify-content:center;
+      position:relative;
+      animation: pulseBadge 3s ease-in-out infinite;
+    }
+    .badge::after { content:""; position:absolute; inset:0; border-radius:20px; background:linear-gradient(160deg, rgba(255,255,255,0.32) 0%, transparent 45%); }
+    .badge svg { width: 38px; height: 38px; stroke: white; position:relative; z-index:2; }
+    @keyframes pulseBadge { 0%,100%{ transform:scale(1); filter:brightness(1); } 50%{ transform:scale(1.04); filter:brightness(1.15); } }
+
+    h1 { font-size:30px; font-weight:600; letter-spacing:-1.2px; line-height:1.08; text-align:center; margin:0; background: linear-gradient(180deg, #FFFFFF 0%, #C8CDDE 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+    .sub { text-align:center; margin:12px auto 24px; font-size:14px; color:var(--text-muted); line-height: 20px; letter-spacing:-0.1px; max-width: 300px; }
+
+    .perks { display:flex; flex-direction:column; gap:10px; margin-bottom: 22px; }
+    .perk { display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:14px; background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); backdrop-filter: blur(14px); }
+    .perk-icon { width:32px; height:32px; border-radius:10px; background: var(--c, var(--accent)); box-shadow: 0 0 14px var(--c); display:flex; align-items:center; justify-content:center; flex-shrink:0; position:relative; }
+    .perk-icon::after { content:""; position:absolute; inset:0; border-radius:10px; background:linear-gradient(160deg, rgba(255,255,255,0.30) 0%, transparent 45%); }
+    .perk-icon svg { width:16px; height:16px; stroke:white; position:relative; z-index:2; }
+    .perk-text { flex:1; }
+    .perk-title { font-size:13px; font-weight:600; color:var(--text-primary); letter-spacing:-0.1px; }
+    .perk-sub { font-size:11px; color:var(--text-muted); margin-top:1px; }
+
+    .price-pill { display:flex; align-items:center; justify-content:center; gap: 10px; padding: 14px; margin-bottom: 14px; border-radius:14px; background: rgba(74,143,255,0.08); border:1px solid rgba(74,143,255,0.30); }
+    .price-pill-big { font-size:24px; font-weight:700; letter-spacing:-0.6px; color: var(--text-primary); }
+    .price-pill-sub { font-size:11px; color:var(--accent); font-weight:600; letter-spacing:0.06em; text-transform:uppercase; }
+
+    .cta { display:block; width:100%; padding:18px; background: linear-gradient(135deg, #4A8FFF 0%, #6F70FF 45%, #B388FF 100%); background-size:200% 100%; animation: gradShift 5s ease infinite; color:white; border:none; border-radius:999px; font-size:16px; font-weight:600; font-family:inherit; letter-spacing:-0.2px; cursor:pointer; transition: opacity 0.2s, transform 0.2s, box-shadow 0.3s; box-shadow: 0 10px 28px rgba(74,143,255,0.45), 0 0 0 1px rgba(255,255,255,0.06) inset; }
+    @keyframes gradShift { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+    .cta:active { opacity: 0.92; transform: scale(0.985); }
+
+    .alt-cta { display:block; text-align:center; margin-top:14px; padding: 8px; font-size:13px; color: var(--text-muted); background:none; border:none; font-family:inherit; cursor:pointer; }
+    .alt-cta:hover { color: var(--text-primary); }
+
+    .trust { display:flex; justify-content:center; gap: 12px; margin: 14px 0 4px; font-size:10px; color: var(--text-dim); letter-spacing:0.04em; }
+    .trust span::before { content:"·"; margin-right: 12px; }
+    .trust span:first-child::before { display:none; }
+
+    .preview-label { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); color:#4A5060; font-size:11px; letter-spacing:0.16em; text-transform:uppercase; font-family:ui-monospace,"SF Mono",Menlo,monospace; }
+    @media (max-width:460px){ body{padding:0;} .phone{width:100vw; height:100vh; border-radius:0; box-shadow:none;} .notch,.home-indicator{display:none;} .preview-label{display:none;} }
+    /* Small phones — compress badge + perks so price-pill + CTA fit */
+    @media (max-width: 380px), (max-height: 720px) {
+      .badge { width: 56px; height: 56px; border-radius: 16px; margin: 0 auto 12px; }
+      .badge svg { width: 28px; height: 28px; }
+      h1 { font-size: 22px; letter-spacing: -0.8px; }
+      .sub { font-size: 12px; line-height: 17px; margin: 8px auto 14px; max-width: 280px; }
+      .perks { gap: 6px; margin-bottom: 12px; }
+      .perk { padding: 9px 11px; gap: 10px; }
+      .perk-icon { width: 28px; height: 28px; }
+      .perk-icon svg { width: 14px; height: 14px; }
+      .perk-title { font-size: 12px; }
+      .perk-sub { font-size: 10.5px; }
+      .price-pill { padding: 10px; margin-bottom: 10px; }
+      .price-pill-big { font-size: 20px; }
+      .price-pill-sub { font-size: 10px; }
+      .cta { padding: 14px; font-size: 14.5px; }
+      .alt-cta { margin-top: 8px; padding: 6px; font-size: 12px; }
+      .trust { font-size: 9.5px; margin: 8px 0 0; }
+    }
+    @media (max-width: 340px) {
+      h1 { font-size: 20px; }
+      .perk-title { font-size: 11.5px; }
+    }
+  </style>
+  <script src="_lib/analytics.js"></script>
+  <script src="_lib/core-back.js"></script>
+  <link rel="stylesheet" href="_lib/core-responsive.css">
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div>
+    <div class="grain"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="close" onclick="window.location.href='20-dashboard.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M6 18L18 6"/></svg>
+    </div>
+
+    <div class="content">
+      <div class="badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L4 10l8 12 8-12z"/></svg>
+      </div>
+      <h1>Unlock the full Core.</h1>
+      <p class="sub">Free is great for one habit. Pro is what makes Core actually transform your life.</p>
+
+      <div class="perks">
+        <div class="perk">
+          <div class="perk-icon" style="--c: #FF6BAA;"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg></div>
+          <div class="perk-text"><div class="perk-title">Unlimited habits + all 5 stats</div><div class="perk-sub">Free is locked to 1 of each</div></div>
+        </div>
+        <div class="perk">
+          <div class="perk-icon" style="--c: #4A8FFF;"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12c0 5-4.5 8-9 8a9 9 0 0 1-3.5-.7L3 21l1.7-5.5A9 9 0 0 1 3 12c0-5 4.5-8 9-8s9 3 9 8z"/></svg></div>
+          <div class="perk-text"><div class="perk-title">AI Coach that runs tasks</div><div class="perk-sub">"Hey Coach, log a slip" · "Set a 10pm nudge"</div></div>
+        </div>
+        <div class="perk">
+          <div class="perk-icon" style="--c: #FFD05C;"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg></div>
+          <div class="perk-text"><div class="perk-title">Home-screen widget</div><div class="perk-sub">See streak + Life Score without opening</div></div>
+        </div>
+        <div class="perk">
+          <div class="perk-icon" style="--c: #FF7A45;"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg></div>
+          <div class="perk-text"><div class="perk-title">Recovery + streak protection</div><div class="perk-sub">Claw back XP · save a streak in a pinch</div></div>
+        </div>
+      </div>
+
+      <div class="price-pill">
+        <span class="price-pill-big">$3.75<span style="font-size:12px; color:var(--text-muted); font-weight:500;"> /mo</span></span>
+        <span class="price-pill-sub">Annual $44.99 · Save 53%</span>
+      </div>
+
+      <button class="cta" onclick="startTrial()">Start 7 days free</button>
+      <!-- Invite combo — both get 50% off first month -->
+      <div onclick="window.location.href='74-invite.html'" style="margin-top:10px; padding:10px 14px; border-radius:12px; background:rgba(255,200,87,0.08); border:1px solid rgba(255,200,87,0.30); display:flex; align-items:center; gap:10px; cursor:pointer;">
+        <span style="font-size:18px;">🎁</span>
+        <div style="flex:1; min-width:0;">
+          <div style="font-size:12.5px; font-weight:700; color:#FFC857; letter-spacing:-0.05px;">Invite a friend · both get 50% off</div>
+          <div style="font-size:10.5px; color:var(--text-muted); margin-top:2px;">First month $3.99 each when they sign up</div>
+        </div>
+        <span style="color:#FFC857; font-size:16px;">›</span>
+      </div>
+      <button class="alt-cta" onclick="window.location.href='76-pricing.html'">Compare plans · view monthly</button>
+
+      <div class="trust">
+        <span>No card to start</span>
+        <span>Cancel anytime</span>
+        <span>Restore on iPad / Mac</span>
+      </div>
+    </div>
+  </div>
+  <div class="preview-label">core · paywall · v1</div>
+  <script>
+    function startTrial() {
+      const btn = document.querySelector('.cta');
+      btn.textContent = 'Starting trial...';
+      btn.disabled = true;
+      setTimeout(() => window.location.href = '20-dashboard.html', 700);
+    }
+  </script>
+</body>
+</html>

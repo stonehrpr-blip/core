@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+  <meta charset="utf-8" />
+  <title>Core — App icon variants</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <style>
+    :root { --bg-base:#02020A; --text-primary:#F8FAFE; --text-muted:#9AA1B7; --text-dim:#4F5570; --accent:#4A8FFF; }
+    * { box-sizing: border-box; }
+    html, body { margin:0; padding:0; height:100%; }
+    body { min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text-primary); -webkit-font-smoothing:antialiased; padding:24px; overflow:hidden; }
+    .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+    .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:10; }
+    .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:10; }
+
+    .bg { position:absolute; inset:0; z-index:0; background: radial-gradient(60% 30% at 50% 18%, rgba(155,130,255,0.10) 0%, transparent 65%), radial-gradient(70% 40% at 50% 100%, rgba(74,143,255,0.10) 0%, transparent 60%), linear-gradient(180deg, #0A0820 0%, var(--bg-base) 50%, #050510 100%); }
+    .grain { position:absolute; inset:0; opacity:0.04; mix-blend-mode:overlay; z-index:2; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.7 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); pointer-events:none; }
+
+    .topbar { position:absolute; top:60px; left:0; right:0; padding:0 20px; display:flex; align-items:center; justify-content:space-between; z-index:10; }
+    .back {
+      width: 38px !important; height: 38px !important;
+      min-width: 38px !important; min-height: 38px !important;
+      max-width: 38px !important; max-height: 38px !important;
+      aspect-ratio: 1 / 1;
+      flex: 0 0 38px;
+      align-self: center;
+      border-radius: 50% !important;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.10);
+      display: flex !important; align-items: center !important; justify-content: center !important;
+      cursor: pointer; padding: 0;
+      font-family: inherit;
+      box-sizing: border-box;
+      transition: background .15s, border-color .15s, transform .12s;
+    }
+    .back:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }
+    .back:active { transform: scale(0.94); }
+    .back svg { width:14px; height:14px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex-shrink: 0; }
+    .topbar-title { font-size:17px; font-weight:600; letter-spacing:-0.2px; }
+
+    .scroll { position:absolute; top:120px; left:0; right:0; bottom:0; padding:0 24px 28px; overflow-y:auto; z-index:5; }
+    .scroll::-webkit-scrollbar { display:none; }
+
+    .lead { font-size:13px; color:var(--text-muted); line-height:19px; letter-spacing:-0.1px; margin-bottom: 24px; }
+
+    /* Hero icon */
+    .hero-icon { width: 220px; height: 220px; border-radius: 50px; margin: 0 auto 28px; position:relative; }
+    .hero-icon::after { content:""; position:absolute; inset:0; border-radius:50px; background:linear-gradient(160deg, rgba(255,255,255,0.32) 0%, transparent 45%); pointer-events:none; }
+    .hero-name { text-align:center; font-size:28px; font-weight:700; letter-spacing:-0.6px; margin-bottom: 4px; }
+    .hero-sub { text-align:center; font-size:11px; color:var(--text-muted); letter-spacing:0.16em; text-transform:uppercase; margin-bottom: 32px; }
+
+    /* Section labels */
+    .section-label { font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:var(--text-muted); font-weight:500; margin: 18px 4px 12px; display:flex; align-items:center; gap:10px; }
+    .section-label::after { content:""; flex:1; height:1px; background:rgba(255,255,255,0.06); }
+
+    /* Variant grid */
+    .var-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .var { padding: 14px 12px; border-radius:14px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); display:flex; flex-direction:column; align-items:center; gap:10px; cursor:pointer; transition: all 0.18s; }
+    .var:hover { background:rgba(255,255,255,0.05); }
+    .var-icon { width: 84px; height: 84px; border-radius: 18px; position:relative; }
+    .var-icon::after { content:""; position:absolute; inset:0; border-radius:18px; background:linear-gradient(160deg, rgba(255,255,255,0.32) 0%, transparent 45%); pointer-events:none; }
+    .var-name { font-size: 11px; font-weight: 600; color: var(--text-primary); letter-spacing:-0.05px; }
+    .var-tag { font-size: 9px; color: var(--text-muted); letter-spacing: 0.16em; text-transform: uppercase; }
+
+    /* Specific icon designs */
+    .icon-v1 { background: radial-gradient(circle at 30% 30%, #DCEBFF 0%, #4A8FFF 60%, #1856B8 100%); display:flex; align-items:center; justify-content:center; box-shadow: 0 0 30px rgba(74,143,255,0.4); }
+    .icon-v1 svg { width: 60%; height: 60%; stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; opacity: 0.92; position:relative; z-index:2; }
+    .hero-icon.icon-v1 svg { stroke-width: 1.4; }
+
+    .icon-v2 { background: linear-gradient(135deg, #4A8FFF 0%, #B388FF 100%); display:flex; align-items:center; justify-content:center; box-shadow: 0 0 30px rgba(74,143,255,0.4); }
+    .icon-v2-text { font-size: 32px; font-weight: 800; color: white; letter-spacing: -1px; position:relative; z-index:2; }
+
+    .icon-v3 { background: #050510; display:flex; align-items:center; justify-content:center; box-shadow: 0 0 30px rgba(74,143,255,0.30); overflow:hidden; }
+    .icon-v3::before { content:""; position:absolute; inset:0; background: radial-gradient(circle at 50% 50%, rgba(74,143,255,0.25) 0%, transparent 70%); }
+    .icon-v3-orb { width: 50%; height: 50%; border-radius: 50%; background: radial-gradient(circle at 35% 28%, #DCEBFF 0%, #4A8FFF 60%, #1856B8 100%); box-shadow: 0 0 20px #4A8FFF; position:relative; z-index:2; }
+
+    .icon-v4 { background: linear-gradient(135deg, #FF6BAA 0%, #832D50 100%); display:flex; align-items:center; justify-content:center; box-shadow: 0 0 30px rgba(255,107,170,0.4); }
+    .icon-v4-lungs { width: 60%; height: 60%; position:relative; z-index:2; }
+    .icon-v4-lungs svg { width: 100%; height: 100%; stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; opacity: 0.95; }
+
+    .icon-v5 { background: linear-gradient(135deg, #B388FF 0%, #4A8FFF 100%); display:flex; align-items:center; justify-content:center; box-shadow: 0 0 30px rgba(132,100,255,0.4); }
+    .icon-v5-c { width: 60%; aspect-ratio:1; border-radius: 50%; border: 6px solid white; position:relative; z-index:2; }
+    .icon-v5-c::after { content:""; position:absolute; inset: -6px; left: -6px; width: 6px; height: 50%; background: linear-gradient(135deg, #B388FF, #4A8FFF); border-radius: 0; }
+
+    .icon-v6 { background: #050510; position:relative; box-shadow: 0 0 30px rgba(74,143,255,0.3); }
+    .icon-v6-rings { position:absolute; inset:0; }
+    .ring-v6 { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); border-radius:50%; border: 2px solid var(--c); box-shadow: 0 0 12px var(--c); }
+    .ring-v6.r1 { width:60%; height:60%; border-color: rgba(255,107,170,0.8); }
+    .ring-v6.r2 { width:80%; height:80%; border-color: rgba(179,136,255,0.6); }
+    .ring-v6.r3 { width:40%; height:40%; border-color: rgba(74,143,255,0.9); }
+
+    .var.selected { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+
+    /* Context preview row */
+    .ctx-row { display:flex; gap: 16px; padding: 18px; border-radius: 14px; background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); margin-bottom: 14px; align-items:center; }
+    .ctx-icon { width: 60px; height: 60px; border-radius: 14px; flex-shrink:0; position:relative; }
+    .ctx-icon::after { content:""; position:absolute; inset:0; border-radius:14px; background:linear-gradient(160deg, rgba(255,255,255,0.32) 0%, transparent 45%); pointer-events:none; }
+    .ctx-text { flex:1; }
+    .ctx-name { font-size: 14px; font-weight: 600; letter-spacing:-0.1px; }
+    .ctx-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; letter-spacing:-0.05px; }
+    .ctx-stars { color: #FFD05C; font-size: 11px; margin-top: 4px; }
+
+    /* Specs */
+    .specs { padding: 16px; border-radius: 14px; background: rgba(74,143,255,0.06); border:1px solid rgba(74,143,255,0.25); margin-bottom: 24px; }
+    .spec-row { display:flex; justify-content:space-between; padding: 6px 0; font-size: 12px; }
+    .spec-key { color: var(--text-muted); letter-spacing:-0.05px; }
+    .spec-val { color: var(--text-primary); font-weight: 600; font-family: ui-monospace,"SF Mono",Menlo,monospace; }
+
+    .preview-label { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); color:#4A5060; font-size:11px; letter-spacing:0.16em; text-transform:uppercase; font-family:ui-monospace,"SF Mono",Menlo,monospace; }
+    @media (max-width:460px){ body{padding:0;} .phone{width:100vw; height:100vh; border-radius:0; box-shadow:none;} .notch,.home-indicator{display:none;} .preview-label{display:none;} }
+  </style>
+  <link rel="stylesheet" href="_lib/core-responsive.css">
+  <script src="_lib/core-back.js"></script>
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div>
+    <div class="grain"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="topbar">
+      <button class="back" type="button" onclick="window.location.href='01-index.html'" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18L9 12l6-6"/></svg></button>
+      <div class="topbar-title">App icon</div>
+      <div style="width:36px;"></div>
+    </div>
+
+    <div class="scroll">
+      <!-- Hero recommended -->
+      <div class="hero-icon icon-v3">
+        <div class="icon-v3-orb"></div>
+      </div>
+      <div class="hero-name">CORE</div>
+      <div class="hero-sub">Recommended · v3 · Pulse orb</div>
+
+      <p class="lead">6 icon concepts to test on TestFlight users. Recommended pick is the pulse orb — instantly Core-branded, scales down to 29px App Store search results without losing identity.</p>
+
+      <div class="section-label">All variants</div>
+      <div class="var-grid">
+        <div class="var">
+          <div class="var-icon icon-v1"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="9"/></svg></div>
+          <div class="var-name">v1 · Concentric</div>
+          <div class="var-tag">Core target</div>
+        </div>
+        <div class="var">
+          <div class="var-icon icon-v2"><span class="icon-v2-text">C</span></div>
+          <div class="var-name">v2 · Monogram</div>
+          <div class="var-tag">Bold C</div>
+        </div>
+        <div class="var selected">
+          <div class="var-icon icon-v3"><div class="icon-v3-orb"></div></div>
+          <div class="var-name">v3 · Pulse orb ★</div>
+          <div class="var-tag">Recommended</div>
+        </div>
+        <div class="var">
+          <div class="var-icon icon-v4">
+            <div class="icon-v4-lungs">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 4v12"/>
+                <path d="M12 16c0 2-1.2 4-3 4-2.5 0-4-2-4-5"/>
+                <path d="M12 16c0 2 1.2 4 3 4 2.5 0 4-2 4-5"/>
+              </svg>
+            </div>
+          </div>
+          <div class="var-name">v4 · Lungs</div>
+          <div class="var-tag">Niche</div>
+        </div>
+        <div class="var">
+          <div class="var-icon icon-v5">
+            <div class="icon-v5-c"></div>
+          </div>
+          <div class="var-name">v5 · Open core</div>
+          <div class="var-tag">Geometric</div>
+        </div>
+        <div class="var">
+          <div class="var-icon icon-v6">
+            <div class="icon-v6-rings">
+              <div class="ring-v6 r2"></div>
+              <div class="ring-v6 r1"></div>
+              <div class="ring-v6 r3"></div>
+            </div>
+          </div>
+          <div class="var-name">v6 · 3-stat rings</div>
+          <div class="var-tag">Apple Health vibe</div>
+        </div>
+      </div>
+
+      <div class="section-label">In context · Home screen</div>
+      <div class="ctx-row">
+        <div class="ctx-icon icon-v3" style="border-radius:14px;"><div class="icon-v3-orb" style="width:40%; height:40%;"></div></div>
+        <div class="ctx-text">
+          <div class="ctx-name">Core</div>
+          <div class="ctx-sub">Among 4 other apps on home screen</div>
+        </div>
+      </div>
+
+      <div class="section-label">In context · App Store search</div>
+      <div class="ctx-row">
+        <div class="ctx-icon icon-v3" style="width:48px; height:48px; border-radius:10px;"><div class="icon-v3-orb" style="width:50%; height:50%;"></div></div>
+        <div class="ctx-text">
+          <div class="ctx-name">Core: Quit Vape &amp; Coach</div>
+          <div class="ctx-sub">Health &amp; Fitness · Free</div>
+          <div class="ctx-stars">★★★★★ 4.8 · 12k</div>
+        </div>
+      </div>
+
+      <div class="section-label">Export specs</div>
+      <div class="specs">
+        <div class="spec-row"><span class="spec-key">App Store master</span><span class="spec-val">1024 × 1024 PNG</span></div>
+        <div class="spec-row"><span class="spec-key">iPhone (rendered by iOS)</span><span class="spec-val">180 × 180 @3x</span></div>
+        <div class="spec-row"><span class="spec-key">Corner radius (iOS auto-masks)</span><span class="spec-val">22.37%</span></div>
+        <div class="spec-row"><span class="spec-key">Background</span><span class="spec-val">No transparency</span></div>
+        <div class="spec-row"><span class="spec-key">Color profile</span><span class="spec-val">Display P3</span></div>
+        <div class="spec-row"><span class="spec-key">Format</span><span class="spec-val">PNG (no alpha)</span></div>
+      </div>
+
+      <div style="text-align:center; font-size: 11px; color: var(--text-dim); letter-spacing: 0.06em; padding: 12px 0 4px;">
+        Export v3 from Figma at 1024×1024 · core.app/brand
+      </div>
+    </div>
+  </div>
+  <div class="preview-label">core · app icon · 6 variants</div>
+</body>
+</html>

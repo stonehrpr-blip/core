@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8" />
+<title>Core — Account paused</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#000000" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+<script src="_lib/core-moderation.js" defer></script>
+<style>
+  :root { --bg:#000; --text:#F8FAFE; --muted:#8B91A8; --dim:#3E4456; --warn:#F87171; --border:rgba(255,255,255,0.07); }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;}
+  body{min-height:100vh;background:#000;color:var(--text);font-family:'Chakra Petch',-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;padding:24px;overflow:hidden;-webkit-font-smoothing:antialiased;}
+  .phone{position:relative;width:390px;height:844px;background:#000;border-radius:56px;overflow:hidden;box-shadow:0 40px 100px rgba(0,0,0,0.7),0 0 0 1px rgba(255,255,255,0.04),0 0 0 10px #0a0a12,0 0 0 11px #2b2b38;}
+  .notch{position:absolute;top:14px;left:50%;transform:translateX(-50%);width:124px;height:32px;background:#000;border-radius:20px;z-index:30;}
+  .home-indicator{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;background:rgba(245,247,251,0.55);border-radius:999px;z-index:30;}
+  .bg{position:absolute;inset:0;background:radial-gradient(60% 30% at 50% 12%,rgba(248,113,113,0.10),transparent 60%);z-index:0;}
+  .wrap{position:absolute;inset:0;padding:80px 28px 60px;display:flex;flex-direction:column;align-items:center;text-align:center;z-index:10;}
+  .ico{width:80px;height:80px;border-radius:24px;background:linear-gradient(135deg,#F87171,#7A1F1F);display:flex;align-items:center;justify-content:center;font-size:38px;box-shadow:0 14px 40px rgba(248,113,113,0.32);margin-bottom:22px;}
+  h1{font-size:26px;font-weight:700;color:#fff;letter-spacing:-0.6px;margin-bottom:10px;}
+  .sub{font-size:13.5px;color:var(--muted);line-height:1.5;max-width:300px;margin-bottom:24px;}
+  .stat{margin-top:8px;padding:16px 18px;border-radius:16px;background:rgba(248,113,113,0.06);border:1px solid rgba(248,113,113,0.28);width:100%;}
+  .stat .k{font-size:10px;letter-spacing:0.20em;color:#F87171;font-weight:700;text-transform:uppercase;}
+  .stat .v{font-size:34px;font-weight:800;color:#fff;letter-spacing:-1px;margin-top:6px;font-variant-numeric:tabular-nums;}
+  .stat .lbl{font-size:12px;color:var(--muted);margin-top:4px;}
+  .reasons{margin-top:24px;text-align:left;width:100%;}
+  .reasons .h{font-size:11px;letter-spacing:0.18em;color:var(--muted);text-transform:uppercase;font-weight:700;margin-bottom:8px;padding-left:4px;}
+  .reasons ul{list-style:none;}
+  .reasons li{font-size:12.5px;color:#F8FAFE;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid var(--border);margin-bottom:6px;}
+  .actions{position:absolute;left:24px;right:24px;bottom:36px;display:flex;flex-direction:column;gap:10px;z-index:11;}
+  .btn{padding:14px;border:none;border-radius:14px;font-family:inherit;font-size:14px;font-weight:700;letter-spacing:-0.2px;cursor:pointer;}
+  .btn.primary{background:rgba(255,255,255,0.05);color:#fff;border:1px solid var(--border);}
+  .btn.danger{background:rgba(248,113,113,0.08);color:#FCA5A5;border:1px solid rgba(248,113,113,0.32);}
+  @media (max-width:460px){body{padding:0;}.phone{width:100vw;height:100vh;height:100dvh;border-radius:0;box-shadow:none;}.notch,.home-indicator{display:none;}}
+</style>
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="wrap">
+      <div class="ico">⛔</div>
+      <h1>Your account is paused</h1>
+      <p class="sub">We don't allow hate speech, slurs, or harassment. You received 2 warnings, then a 3rd violation triggered an automatic 30-day pause.</p>
+
+      <div class="stat">
+        <div class="k">Pause lifts in</div>
+        <div class="v" id="daysLeft">—</div>
+        <div class="lbl" id="liftsOn">—</div>
+      </div>
+
+      <div class="reasons">
+        <div class="h">Recent flags</div>
+        <ul id="historyList"><li style="color:var(--muted);">No flagged content on record.</li></ul>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" onclick="window.location.href='82-legal.html'">Read content policy</button>
+      <button class="btn danger" onclick="signOut()">Sign out</button>
+    </div>
+  </div>
+
+<script>
+  function fmtDate(ts) {
+    const d = new Date(ts);
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+  function render() {
+    let ban = null, hist = [];
+    try { ban = JSON.parse(localStorage.getItem('coreModBan') || 'null'); } catch (e) {}
+    try { hist = (JSON.parse(localStorage.getItem('coreModWarnings') || '{}').history) || []; } catch (e) {}
+
+    const daysEl = document.getElementById('daysLeft');
+    const liftsEl = document.getElementById('liftsOn');
+    if (ban && ban.until > Date.now()) {
+      const days = Math.ceil((ban.until - Date.now()) / (24*60*60*1000));
+      daysEl.textContent = days + (days === 1 ? ' day' : ' days');
+      liftsEl.textContent = 'Lifts on ' + fmtDate(ban.until);
+    } else {
+      daysEl.textContent = '0 days';
+      liftsEl.textContent = 'No active pause';
+    }
+
+    const histEl = document.getElementById('historyList');
+    if (hist.length) {
+      histEl.innerHTML = hist.slice(-5).reverse().map(h =>
+        `<li>${(h.reason||'violation')} <span style="color:var(--muted);font-size:11px;float:right;">${fmtDate(h.ts)}</span></li>`
+      ).join('');
+    }
+  }
+  function signOut() {
+    try {
+      localStorage.removeItem('coreOnboardComplete');
+      localStorage.removeItem('coreOnboardTrial');
+    } catch (e) {}
+    window.location.href = '04-sign-in.html';
+  }
+  render();
+</script>
+</body>
+</html>

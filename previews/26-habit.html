@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+  <meta charset="utf-8" />
+  <title>Core — Habit (universal template)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <style>
+    :root { --bg-base:#02020A; --text-primary:#F8FAFE; --text-muted:#9AA1B7; --text-dim:#4F5570; --accent:#4A8FFF; --danger:#F87171; --success:#34D399; --c:#FF6BAA; --c-deep:#8C2E55; }
+    * { box-sizing: border-box; }
+    html, body { margin:0; padding:0; height:100%; }
+    body { min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text-primary); padding:24px; overflow:hidden; }
+    .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+    .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:20; }
+    .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:20; }
+
+    .bg {
+      position:absolute; inset:0; z-index:0;
+      background:
+        radial-gradient(80% 50% at 50% 100%, var(--c-soft, rgba(255,107,170,0.18)) 0%, transparent 65%),
+        radial-gradient(60% 30% at 50% 0%, var(--c-deep-soft, rgba(132,46,81,0.20)) 0%, transparent 60%),
+        linear-gradient(180deg, #1A0814 0%, var(--bg-base) 60%, #050510 100%);
+      transition: filter 0.6s ease;
+    }
+    .grain { position:absolute; inset:0; pointer-events:none; z-index:1; opacity:0.05; mix-blend-mode:overlay; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.7 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+
+    /* Top bar */
+    .topbar { position:absolute; top:60px; left:0; right:0; padding:0 24px; display:flex; align-items:center; justify-content:space-between; z-index:10; }
+    .icon-btn { width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); backdrop-filter:blur(20px); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+    .icon-btn svg { width:16px; height:16px; stroke:var(--text-muted); }
+    .habit-name { font-size:13px; font-weight:600; color:var(--text-muted); letter-spacing:0.16em; text-transform:uppercase; }
+
+    /* Scroll body */
+    .scroll { position:absolute; top:108px; left:0; right:0; bottom:200px; overflow-y:auto; z-index:5; padding: 0 16px 16px; }
+    .scroll::-webkit-scrollbar { display:none; }
+
+    /* Stat panel */
+    .stat-panel { display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-radius:18px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); backdrop-filter:blur(18px); margin-bottom: 10px; }
+    .stat-block { display:flex; flex-direction:column; gap:2px; }
+    .stat-label { font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:var(--text-muted); font-weight:500; }
+    .stat-value { font-size:24px; font-weight:600; letter-spacing:-0.8px; line-height:1; margin-top:4px; color: var(--text-primary); }
+    .stat-value.tinted { background: linear-gradient(180deg, var(--c-light, #FFD3E4) 0%, var(--c) 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+    .stat-divider { width:1px; height:30px; background:rgba(255,255,255,0.08); }
+    .stat-streak { display:inline-flex; align-items:center; gap:5px; font-weight:600; }
+    .stat-streak::before { content:"●"; color:#34D399; font-size:8px; }
+
+    /* Coach insight */
+    .coach-card {
+      padding:12px 14px; border-radius:14px; background:rgba(74,143,255,0.08); border:1px solid rgba(74,143,255,0.25); backdrop-filter:blur(14px);
+      display:flex; align-items:flex-start; gap:10px; margin-bottom: 10px;
+    }
+    .coach-icon { width:24px; height:24px; border-radius:7px; background:#4A8FFF; box-shadow:0 0 12px #4A8FFF; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; position:relative; }
+    .coach-icon::after { content:""; position:absolute; inset:0; border-radius:7px; background:linear-gradient(160deg, rgba(255,255,255,0.30) 0%, transparent 45%); }
+    .coach-icon svg { width:13px; height:13px; stroke:white; position:relative; z-index:2; }
+    .coach-text { flex:1; }
+    .coach-label { font-size:11px; font-weight:600; color:#4A8FFF; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:3px; }
+    .coach-msg { font-size:12px; line-height:17px; color:#F8FAFE; letter-spacing:-0.1px; }
+
+    /* Avatar zone */
+    .avatar-zone { padding: 14px 0 18px; display:flex; align-items:center; justify-content:center; position:relative; min-height: 200px; }
+    .avatar-wrap { position:relative; width: 180px; height: 180px; display:flex; align-items:center; justify-content:center; transition: filter 0.8s ease; }
+    .avatar-wrap.damaged { filter: hue-rotate(-30deg) saturate(0.5) brightness(0.7); }
+    .avatar-glow { position:absolute; inset:-20px; border-radius:50%; background: radial-gradient(circle, var(--c-soft) 0%, transparent 65%); animation: breath 4s ease-in-out infinite; }
+    @keyframes breath { 0%,100% { transform:scale(1); opacity:0.85; } 50% { transform:scale(1.08); opacity:1; } }
+    .avatar-svg { width:160px; height:160px; position:relative; z-index:2; filter: drop-shadow(0 0 18px var(--c)); }
+
+    /* Smoke + particle layer */
+    .fx-layer { position:absolute; inset:0; pointer-events:none; z-index:8; overflow:hidden; }
+    .smoke { position:absolute; width:70px; height:70px; border-radius:50%; background: radial-gradient(circle, var(--c-particle, rgba(180,180,200,0.6)) 0%, var(--c-particle-fade, rgba(120,120,140,0.3)) 40%, transparent 70%); filter: blur(10px); animation: smokeRise var(--dur, 2.4s) ease-out forwards; opacity:0; }
+    @keyframes smokeRise { 0% { opacity:0; transform: translate(var(--sx,0), 0) scale(0.5); } 15% { opacity:0.75; } 100% { opacity:0; transform: translate(calc(var(--sx,0) + var(--dx,0)), -260px) scale(2.2); } }
+    .xp-popup { position:absolute; left:50%; top:0; transform: translate(-50%, 0); font-size:26px; font-weight:700; letter-spacing:-1px; color:var(--danger); text-shadow: 0 0 14px rgba(248,113,113,0.5); animation: xpFloat 1.4s ease-out forwards; opacity:0; pointer-events:none; }
+    @keyframes xpFloat { 0% { opacity:0; transform: translate(-50%, 20px) scale(0.6); } 18% { opacity:1; transform: translate(-50%, 0) scale(1.1); } 100% { opacity:0; transform: translate(-50%, -60px) scale(1); } }
+
+    /* Action row (Mark / Honest log / Streak protect) */
+    .action-row { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-bottom: 12px; }
+    .a-btn { padding:12px 6px; border-radius:14px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); backdrop-filter:blur(14px); display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer; transition:all 0.18s; font-family:inherit; color:var(--text-primary); }
+    .a-btn:hover { background:rgba(255,255,255,0.05); }
+    .a-btn:active { transform:scale(0.97); }
+    .a-icon { width:28px; height:28px; border-radius:8px; background:var(--ac, #2A2E3A); box-shadow:0 0 12px var(--ac); display:flex; align-items:center; justify-content:center; position:relative; }
+    .a-icon::after { content:""; position:absolute; inset:0; border-radius:8px; background:linear-gradient(160deg, rgba(255,255,255,0.3) 0%, transparent 45%); }
+    .a-icon svg { width:14px; height:14px; stroke:white; position:relative; z-index:2; }
+    .a-label { font-size:10px; font-weight:600; letter-spacing:-0.1px; line-height: 12px; }
+
+    /* Recent slips list */
+    .section-title { font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:var(--text-muted); font-weight:500; margin: 14px 4px 8px; display:flex; justify-content:space-between; align-items:center; }
+    .section-link { font-size:11px; color:var(--accent); letter-spacing:-0.1px; font-weight:600; cursor:pointer; text-transform:none; }
+    .slip-list { display:flex; flex-direction:column; gap:6px; }
+    .slip-row { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:12px; background:rgba(255,255,255,0.025); border:1px solid rgba(255,255,255,0.04); }
+    .slip-time { font-size:11px; color:var(--text-dim); letter-spacing:0.06em; font-family:ui-monospace,"SF Mono",Menlo,monospace; flex-shrink:0; width: 52px; }
+    .slip-text { flex:1; font-size:13px; color:var(--text-primary); letter-spacing:-0.1px; }
+    .slip-xp { font-size:11px; color: var(--danger); font-weight:600; font-family:ui-monospace,"SF Mono",Menlo,monospace; }
+
+    /* Trend graph */
+    .trend-card { padding:14px 16px; border-radius:16px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); backdrop-filter:blur(14px); margin-bottom: 10px; }
+    .trend-head { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:10px; }
+    .trend-title { font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:var(--text-muted); font-weight:500; }
+    .trend-delta { font-size:13px; font-weight:600; color: var(--success); }
+    .trend-delta.down { color: var(--danger); }
+    .trend-svg { width:100%; height:60px; display:block; }
+
+    /* Triggers */
+    .trigger-chip { display:inline-block; padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); font-size: 11px; color: var(--text-muted); margin: 2px 4px 2px 0; letter-spacing: -0.05px; }
+    .trigger-chip.hot { background: rgba(248,113,113,0.10); border-color: rgba(248,113,113,0.30); color: #F87171; }
+
+    /* Tap button */
+    .tap-btn-wrap { position:absolute; bottom: 100px; left: 24px; right: 24px; z-index: 11; }
+    .tap-btn {
+      width:100%; padding: 22px;
+      background: linear-gradient(180deg, var(--c-bright, rgba(255,107,170,0.96)) 0%, var(--c-deep, rgba(180,60,110,0.94)) 100%);
+      color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 999px;
+      font-size: 17px; font-weight: 600; letter-spacing: -0.2px;
+      font-family: inherit; cursor: pointer;
+      box-shadow: 0 0 0 1px var(--c-shadow, rgba(255,107,170,0.4)), 0 16px 50px var(--c-shadow, rgba(255,107,170,0.35)), 0 4px 14px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.35), inset 0 -2px 8px rgba(0,0,0,0.2);
+      transition: transform 0.12s ease, box-shadow 0.2s ease;
+    }
+    .tap-btn:active { transform: scale(0.97); box-shadow: 0 0 0 1px var(--c-shadow), 0 6px 18px var(--c-shadow), 0 1px 4px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.4); }
+    .tap-hint { text-align:center; margin-top: 10px; font-size: 11px; color: var(--text-dim); letter-spacing: -0.1px; }
+
+    /* Recovery prompt */
+    .recovery-prompt { position:absolute; bottom: 36px; left: 24px; right: 24px; padding: 12px 14px; border-radius: 14px; background: rgba(74,143,255,0.10); border: 1px solid rgba(74,143,255,0.35); backdrop-filter: blur(18px); display:flex; align-items:center; gap:10px; z-index: 12; opacity:0; transform: translateY(20px); pointer-events:none; transition: opacity 0.4s ease, transform 0.4s ease; }
+    .recovery-prompt.show { opacity:1; transform: translateY(0); pointer-events:auto; }
+    .recovery-icon { width:32px; height:32px; border-radius:9px; background: var(--accent); display:flex; align-items:center; justify-content:center; box-shadow: 0 0 12px var(--accent); flex-shrink:0; position:relative; }
+    .recovery-icon::after { content:""; position:absolute; inset:0; border-radius:9px; background:linear-gradient(160deg, rgba(255,255,255,0.30) 0%, transparent 45%); }
+    .recovery-icon svg { width:16px; height:16px; stroke:white; position:relative; z-index:2; }
+    .recovery-text { flex:1; }
+    .recovery-title { font-size:12px; color:var(--text-primary); font-weight:600; letter-spacing:-0.1px; }
+    .recovery-sub { font-size:11px; color:var(--text-muted); margin-top:1px; }
+    .recovery-go { color:var(--accent); font-size:12px; font-weight:600; }
+
+    .preview-label { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); color:#4A5060; font-size:11px; letter-spacing:0.16em; text-transform:uppercase; font-family:ui-monospace,"SF Mono",Menlo,monospace; }
+    @media (max-width:460px){ body{padding:0;} .phone{width:100vw; height:100vh; border-radius:0; box-shadow:none;} .notch,.home-indicator{display:none;} .preview-label{display:none;} }
+  
+    /* core-tabbar-clearance */
+    .scroll { padding-bottom: 110px !important; }
+  </style>
+  <script src="_lib/core-state.js"></script>
+  <script src="_lib/restore-banner.js"></script>
+  <script src="_lib/analytics.js"></script>
+  <script src="_lib/core-back.js"></script>
+  <link rel="stylesheet" href="_lib/core-responsive.css">
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg" id="bg"></div>
+    <div class="grain"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="topbar">
+      <div class="icon-btn" onclick="window.location.href='20-dashboard.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18L9 12l6-6"/></svg>
+      </div>
+      <div class="habit-name" id="habitName">Vape</div>
+      <div class="icon-btn" id="settingsBtn" aria-label="Settings" onclick="window.location.href='80-settings.html'"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></div>
+    </div>
+
+    <div class="scroll">
+      <div id="coreRestoreBanner" style="display:none; width:100%; margin-bottom:14px;"></div>
+      <div class="stat-panel">
+        <div class="stat-block">
+          <div class="stat-label" id="statLabel">Lungs</div>
+          <div class="stat-value tinted"><span id="statVal" data-core="stats.lungs">64</span><span style="color:var(--text-dim); font-weight:500; font-size:14px;">/100</span></div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-block">
+          <div class="stat-label">Clean streak</div>
+          <div class="stat-value"><span class="stat-streak"><span id="streakDays" data-core="streak.days">14</span> days</span></div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-block">
+          <div class="stat-label">Today</div>
+          <div class="stat-value"><span id="slipsToday">0</span><span style="color:var(--text-dim); font-weight:500; font-size:14px;"> slips</span></div>
+        </div>
+      </div>
+
+      <div class="coach-card">
+        <div class="coach-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12c0 5-4.5 8-9 8a9 9 0 0 1-3.5-.7L3 21l1.7-5.5A9 9 0 0 1 3 12c0-5 4.5-8 9-8s9 3 9 8z"/></svg></div>
+        <div class="coach-text">
+          <div class="coach-label">Coach</div>
+          <div class="coach-msg" id="coachMsg">You tend to slip between 3–5pm. Try putting the phone in another room after lunch.</div>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <button class="a-btn" style="--ac: #FFD05C;" onclick="honestLog()">
+          <div class="a-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20"/></svg></div>
+          <div class="a-label">Honest<br/>craving</div>
+        </button>
+        <button class="a-btn" style="--ac: #34D399;" onclick="protectStreak()">
+          <div class="a-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+          <div class="a-label">Protect<br/>streak</div>
+        </button>
+        <button class="a-btn" style="--ac: #4A8FFF;" id="habitSettingsBtn" onclick="window.location.href='80-settings.html'">
+          <div class="a-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></div>
+          <div class="a-label">Habit<br/>settings</div>
+        </button>
+      </div>
+
+      <div class="avatar-zone">
+        <div class="avatar-wrap" id="avatarWrap">
+          <div class="avatar-glow"></div>
+          <svg class="avatar-svg" id="avatarSvg" viewBox="0 0 200 200"></svg>
+        </div>
+      </div>
+
+      <div class="trend-card">
+        <div class="trend-head">
+          <span class="trend-title">7-day trend</span>
+          <span class="trend-delta" id="trendDelta">▲ 6 this week</span>
+        </div>
+        <svg class="trend-svg" viewBox="0 0 320 60" fill="none">
+          <defs>
+            <linearGradient id="trendFill" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="var(--c)" stop-opacity="0.4"/>
+              <stop offset="100%" stop-color="var(--c)" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path d="M0 45 L46 38 L92 42 L138 30 L184 34 L230 22 L276 26 L320 14 L320 60 L0 60 Z" fill="url(#trendFill)" />
+          <path d="M0 45 L46 38 L92 42 L138 30 L184 34 L230 22 L276 26 L320 14" stroke="var(--c)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </div>
+
+      <div class="section-title">Triggers spotted</div>
+      <div style="padding: 0 4px 8px;">
+        <span class="trigger-chip hot">Afternoon (3–5pm)</span>
+        <span class="trigger-chip">After meals</span>
+        <span class="trigger-chip">Stress (work calls)</span>
+        <span class="trigger-chip">Social (mates)</span>
+      </div>
+
+      <div class="section-title">
+        <span>Recent slips</span>
+        <span class="section-link" onclick="window.location.href='65-activity.html'">All time →</span>
+      </div>
+      <div class="slip-list" id="slipList">
+        <div class="slip-row"><span class="slip-time">2h ago</span><span class="slip-text">Slip · "stressed about deadline"</span><span class="slip-xp">−25</span></div>
+        <div class="slip-row"><span class="slip-time">1d ago</span><span class="slip-text">Slip · evening · no note</span><span class="slip-xp">−25</span></div>
+        <div class="slip-row"><span class="slip-time">3d ago</span><span class="slip-text">Slip · after lunch</span><span class="slip-xp">−25</span></div>
+      </div>
+    </div>
+
+    <div class="fx-layer" id="fxLayer"></div>
+
+    <div class="tap-btn-wrap">
+      <button class="tap-btn" id="tapBtn" onclick="window.location.href='28-slip-confirm.html?habit=' + ((window.location.hash || '#vape').slice(1))">Mark a puff</button>
+      <div class="tap-hint">Tap each time. Honesty rewards your streak too.</div>
+    </div>
+
+    <div class="recovery-prompt" id="recovery" onclick="window.location.href='29-recovery-quest.html'">
+      <div class="recovery-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v8"/><path d="M8 8l4 4 4-4"/><circle cx="12" cy="18" r="2"/></svg></div>
+      <div class="recovery-text">
+        <div class="recovery-title">Recovery quest ready</div>
+        <div class="recovery-sub">60-second breath · claw back +12 XP</div>
+      </div>
+      <div class="recovery-go">Go →</div>
+    </div>
+  </div>
+
+  <div <div class="tabbar"></div><div class="preview-label" id="previewLabel">core · habit · vape · v2</div>
+
+  <script>
+    // ──── habit registry ───────────────────────────────────────────────
+    const HABITS = {
+      vape:           { name: "Vape",            stat: "Lungs",     statVal: 64, streak: 14, xpLoss: 25, color: "#FF6BAA", colorLight: "#FFD3E4", colorDeep: "#8C2E55", btn: "Mark a puff", coach: "You tend to slip between 3–5pm. Try putting the phone in another room after lunch.", svg: "lungs", particle: "smoke", particleColor: "rgba(180,180,200,0.6)" },
+      doomscroll:     { name: "Doom-scroll",     stat: "Brain",     statVal: 78, streak: 9,  xpLoss: 15, color: "#B388FF", colorLight: "#E6D7FF", colorDeep: "#4F3A8A", btn: "Mark a scroll", coach: "Your scrolling spikes in the evening. The 'phone-in-a-drawer' trick worked last week.", svg: "brain", particle: "glitch", particleColor: "rgba(179,136,255,0.5)" },
+      drink:          { name: "Drink",           stat: "Body",      statVal: 67, streak: 12, xpLoss: 30, color: "#5CE1E6", colorLight: "#C2F3F5", colorDeep: "#1F7A7E", btn: "Mark a drink", coach: "Slips cluster on weekends. Pre-decide your max before you head out tonight.", svg: "liver", particle: "darken", particleColor: "rgba(92,225,230,0.4)" },
+      spend:          { name: "Spend",           stat: "Wallet",    statVal: 58, streak: 3,  xpLoss: 20, color: "#FFD05C", colorLight: "#FFEEBF", colorDeep: "#876619", btn: "Mark a spend", coach: "Online checkout is the trigger. Try the 24-hour cart rule.", svg: "wallet", particle: "drain", particleColor: "rgba(255,208,92,0.6)" },
+      porn:           { name: "Porn",            stat: "Willpower", statVal: 81, streak: 7,  xpLoss: 25, color: "#FF7A45", colorLight: "#FFCEB3", colorDeep: "#813617", btn: "Mark a slip", coach: "Late-night phone use is the trigger. A book by the bed wins this fight.", svg: "willpower", particle: "glitch", particleColor: "rgba(255,122,69,0.5)" },
+      junk_food:      { name: "Junk food",       stat: "Body",      statVal: 67, streak: 5,  xpLoss: 15, color: "#FF9F6B", colorLight: "#FFCEB3", colorDeep: "#823F1A", btn: "Mark a slip", coach: "Hungriest at 3pm. Pre-pack a protein snack at lunch.", svg: "body", particle: "bloat", particleColor: "rgba(255,159,107,0.5)" },
+      weed:           { name: "Weed",            stat: "Lungs",     statVal: 64, streak: 21, xpLoss: 25, color: "#34D399", colorLight: "#A7F3D0", colorDeep: "#1E7A5C", btn: "Mark a session", coach: "Three clean weeks. Your sleep deepened 14% — keep going.", svg: "lungs", particle: "smoke", particleColor: "rgba(120,200,160,0.5)" },
+      nicotine_pouch: { name: "Nicotine pouch",  stat: "Willpower", statVal: 81, streak: 4,  xpLoss: 15, color: "#FF7A45", colorLight: "#FFCEB3", colorDeep: "#813617", btn: "Mark a pouch", coach: "Cravings cluster in meetings. Cinnamon gum bridges the gap.", svg: "willpower", particle: "hum", particleColor: "rgba(255,122,69,0.4)" },
+    };
+
+    // ──── SVG body parts ──────────────────────────────────────────────
+    const SVGS = {
+      lungs: `
+        <defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="var(--c-light)"/><stop offset="100%" stop-color="var(--c)"/></linearGradient></defs>
+        <path d="M100 30 L100 90" stroke="url(#g)" stroke-width="3" stroke-linecap="round"/>
+        <path d="M85 40 L100 50 L115 40" stroke="url(#g)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M100 90 C 80 90 50 105 45 145 C 42 165 55 175 75 175 C 92 175 100 165 100 145 Z" fill="url(#g)" fill-opacity="0.18" stroke="url(#g)" stroke-width="3"/>
+        <path d="M100 90 C 120 90 150 105 155 145 C 158 165 145 175 125 175 C 108 175 100 165 100 145 Z" fill="url(#g)" fill-opacity="0.18" stroke="url(#g)" stroke-width="3"/>
+        <path d="M100 100 L80 130 M100 100 L120 130 M80 130 L65 155 M80 130 L90 160 M120 130 L135 155 M120 130 L110 160" stroke="url(#g)" stroke-width="2" opacity="0.6"/>
+      `,
+      brain: `
+        <defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="var(--c-light)"/><stop offset="100%" stop-color="var(--c)"/></linearGradient></defs>
+        <path d="M80 50 C 55 50 35 70 35 100 C 35 120 50 138 70 140 C 78 162 92 170 100 170 L100 50 C 92 40 86 50 80 50 Z" fill="url(#g)" fill-opacity="0.18" stroke="url(#g)" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M120 50 C 145 50 165 70 165 100 C 165 120 150 138 130 140 C 122 162 108 170 100 170 L100 50 C 108 40 114 50 120 50 Z" fill="url(#g)" fill-opacity="0.18" stroke="url(#g)" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M70 90 C 60 100 60 115 70 125 M130 90 C 140 100 140 115 130 125 M80 75 C 90 80 95 85 95 95 M120 75 C 110 80 105 85 105 95" stroke="url(#g)" stroke-width="2" opacity="0.6"/>
+      `,
+      liver: `
+        <defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="var(--c-light)"/><stop offset="100%" stop-color="var(--c)"/></linearGradient></defs>
+        <path d="M40 80 C 30 100 35 140 70 160 C 110 175 160 165 165 130 C 168 110 160 90 145 80 C 130 70 100 65 80 70 C 60 72 50 75 40 80 Z" fill="url(#g)" fill-opacity="0.18" stroke="url(#g)" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M100 80 L 90 130 M115 85 L 115 140 M70 95 L 80 145" stroke="url(#g)" stroke-width="2" opacity="0.5"/>
+      `,
+      wallet: `
+        <defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="var(--c-light)"/><stop offset="100%" stop-color="var(--c)"/></linearGradient></defs>
+        <rect x="30" y="50" width="140" height="100" rx="14" fill="url(#g)" fill-opacity="0.18" stroke="url(#g)" stroke-width="3"/>
+        <path d="M30 80 L170 80" stroke="url(#g)" stroke-width="3"/>
+        <circle cx="135" cy="115" r="6" fill="url(#g)" />
+        <path d="M50 130 L80 130 M50 138 L70 138" stroke="url(#g)" stroke-width="2" opacity="0.6"/>
+      `,
+      willpower: `
+        <defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="var(--c-light)"/><stop offset="100%" stop-color="var(--c)"/></linearGradient></defs>
+        <path d="M100 20 C 108 50 130 65 130 95 C 130 115 116 130 100 130 C 84 130 70 115 70 95 C 70 80 78 70 84 64" fill="url(#g)" fill-opacity="0.18" stroke="url(#g)" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M60 130 C 60 110 80 100 100 100 C 120 100 140 110 140 130 C 140 160 120 180 100 180 C 80 180 60 160 60 130 Z" fill="url(#g)" fill-opacity="0.15" stroke="url(#g)" stroke-width="3" stroke-linejoin="round"/>
+      `,
+      body: `
+        <defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="var(--c-light)"/><stop offset="100%" stop-color="var(--c)"/></linearGradient></defs>
+        <circle cx="100" cy="40" r="20" fill="url(#g)" fill-opacity="0.20" stroke="url(#g)" stroke-width="3"/>
+        <path d="M100 60 L100 130 M70 80 L100 70 L130 80 M70 175 L100 130 L130 175" fill="url(#g)" fill-opacity="0.20" stroke="url(#g)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      `,
+    };
+
+    // ──── init from URL hash ──────────────────────────────────────────
+    const hash = (window.location.hash || '#vape').slice(1);
+    const config = HABITS[hash] || HABITS.vape;
+
+    const root = document.documentElement;
+    root.style.setProperty('--c', config.color);
+    root.style.setProperty('--c-light', config.colorLight);
+    root.style.setProperty('--c-deep', config.colorDeep);
+    root.style.setProperty('--c-soft', config.color + '2D');
+    root.style.setProperty('--c-deep-soft', config.colorDeep + '33');
+    root.style.setProperty('--c-bright', config.color + 'EE');
+    root.style.setProperty('--c-shadow', config.color + '66');
+    root.style.setProperty('--c-particle', config.particleColor);
+
+    document.getElementById('habitName').textContent = config.name;
+    document.getElementById('statLabel').textContent = config.stat;
+    document.getElementById('statVal').textContent = config.statVal;
+    document.getElementById('streakDays').textContent = config.streak;
+    document.getElementById('coachMsg').textContent = config.coach;
+    document.getElementById('tapBtn').textContent = config.btn;
+    document.getElementById('avatarSvg').innerHTML = SVGS[config.svg] || SVGS.lungs;
+    document.getElementById('previewLabel').textContent = 'core · habit · ' + config.name + ' · v2';
+
+    // ──── interactive ────────────────────────────────────────────────
+    let statVal = config.statVal;
+    let streak = config.streak;
+    let slipsToday = 0;
+
+    function logSlip() {
+      spawnParticles();
+      spawnXPPopup();
+      // Single source of truth — slip writes to coreState, which dispatches a change event
+      // that updates all data-core bound elements (here AND on dashboard, profile, leaderboard).
+      const habitKey = (window.location.hash || '#vape').slice(1);
+      if (window.coreState) coreState.logSlip(habitKey, { magnitude: 1 });
+      if (window.coreTrack) coreTrack('slip_logged', { habit: habitKey });
+      slipsToday += 1;
+      document.getElementById('slipsToday').textContent = slipsToday;
+      document.getElementById('avatarWrap').classList.add('damaged');
+      document.getElementById('bg').style.filter = 'brightness(0.8)';
+      setTimeout(() => { document.getElementById('bg').style.filter = ''; }, 1400);
+      // prepend slip to list
+      const list = document.getElementById('slipList');
+      const row = document.createElement('div');
+      row.className = 'slip-row';
+      row.innerHTML = '<span class="slip-time">now</span><span class="slip-text">Slip · just now</span><span class="slip-xp">−' + config.xpLoss + '</span>';
+      list.insertBefore(row, list.firstChild);
+      setTimeout(() => document.getElementById('recovery').classList.add('show'), 700);
+    }
+    function spawnParticles() {
+      const layer = document.getElementById('fxLayer');
+      const av = document.getElementById('avatarWrap').getBoundingClientRect();
+      const ph = layer.getBoundingClientRect();
+      const baseX = av.left - ph.left + av.width / 2;
+      const baseY = av.top - ph.top + av.height * 0.65;
+      for (let i = 0; i < 9; i++) {
+        const s = document.createElement('div'); s.className = 'smoke';
+        const sx = (Math.random() - 0.5) * 60;
+        const dx = (Math.random() - 0.5) * 80;
+        const dur = 1.8 + Math.random() * 1.4;
+        const delay = i * 0.06;
+        s.style.left = (baseX - 35) + 'px';
+        s.style.top  = (baseY - 35) + 'px';
+        s.style.setProperty('--sx', sx + 'px');
+        s.style.setProperty('--dx', dx + 'px');
+        s.style.setProperty('--dur', dur + 's');
+        s.style.animationDelay = delay + 's';
+        layer.appendChild(s);
+        setTimeout(() => s.remove(), (dur + delay) * 1000 + 100);
+      }
+    }
+    function spawnXPPopup() {
+      const layer = document.getElementById('fxLayer');
+      const av = document.getElementById('avatarWrap').getBoundingClientRect();
+      const ph = layer.getBoundingClientRect();
+      const p = document.createElement('div'); p.className = 'xp-popup';
+      p.textContent = '−' + config.xpLoss + ' XP';
+      p.style.left = (av.left - ph.left + av.width / 2) + 'px';
+      p.style.top  = (av.top - ph.top + av.height / 2 - 20) + 'px';
+      layer.appendChild(p);
+      setTimeout(() => p.remove(), 1500);
+    }
+    function honestLog() {
+      const btn = event.currentTarget;
+      btn.style.background = 'rgba(52,211,153,0.10)';
+      btn.style.borderColor = 'rgba(52,211,153,0.4)';
+      const label = btn.querySelector('.a-label');
+      label.innerHTML = '+5 Will ✓';
+    }
+    function protectStreak() {
+      if (confirm('Burn 50 XP to protect your streak today?')) {
+        statVal = Math.max(0, statVal - 50);
+        document.getElementById('statVal').textContent = statVal;
+        const btn = event.currentTarget;
+        btn.style.background = 'rgba(52,211,153,0.10)';
+        btn.style.borderColor = 'rgba(52,211,153,0.4)';
+        btn.querySelector('.a-label').innerHTML = 'Protected<br/>✓';
+      }
+    }
+  </script>
+<script src="_lib/core-tabbar.js"></script>
+</body>
+</html>

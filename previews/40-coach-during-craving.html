@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8" />
+<title>CORE — Coach (craving)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<link rel="stylesheet" href="_lib/core-buttons.css" />
+<script src="_lib/core-state.js"></script>
+<script src="_lib/analytics.js"></script>
+  <script src="_lib/core-back.js"></script>
+<style>
+  :root { --bg-base:#02020A; --text:#F8FAFE; --muted:#9AA1B7; --dim:#4F5570; --accent:#4A8FFF; --calm:#5CE1E6; }
+  * { box-sizing:border-box; }
+  html, body { margin:0; padding:0; height:100%; }
+  body { min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text); padding:24px; overflow:hidden; }
+  .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+  .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:30; }
+  .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:30; }
+  .bg { position:absolute; inset:0; background: radial-gradient(60% 50% at 50% 20%, rgba(92,225,230,0.18), transparent 70%), radial-gradient(50% 40% at 50% 90%, rgba(91,177,255,0.16), transparent 70%), linear-gradient(180deg, #04101A 0%, #050B25 40%, #02020A 80%); }
+  .bg::after { content:""; position:absolute; inset:0; background: radial-gradient(50% 40% at 50% 40%, rgba(92,225,230,0.12), transparent 75%); animation: drift 12s ease-in-out infinite; }
+  @keyframes drift { 0%,100% { transform: translateY(0); opacity:0.85; } 50% { transform: translateY(-10px); opacity:1; } }
+
+  .frame { position:absolute; inset:0; z-index:10; padding: 60px 0 24px; display:flex; flex-direction:column; }
+
+  /* Mode banner — narrow, soft, persistent */
+  .mode-banner {
+    margin: 0 22px 8px; padding: 8px 14px; border-radius:999px;
+    background: linear-gradient(135deg, rgba(92,225,230,0.10), rgba(91,177,255,0.10));
+    border: 1px solid rgba(92,225,230,0.30);
+    display:flex; align-items:center; gap:8px; justify-content:center;
+  }
+  .mode-banner .dot { width:6px; height:6px; border-radius:50%; background:var(--calm); box-shadow:0 0 8px var(--calm); animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.4); } }
+  .mode-banner span { font-size:11px; letter-spacing:0.22em; text-transform:uppercase; color:var(--calm); font-weight:700; }
+
+  /* Coach header — softer */
+  .header { padding: 4px 24px 12px; display:flex; align-items:center; gap:12px; }
+    .back {
+      width: 38px !important; height: 38px !important;
+      min-width: 38px !important; min-height: 38px !important;
+      max-width: 38px !important; max-height: 38px !important;
+      aspect-ratio: 1 / 1;
+      flex: 0 0 38px;
+      align-self: center;
+      border-radius: 50% !important;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.10);
+      display: flex !important; align-items: center !important; justify-content: center !important;
+      cursor: pointer; padding: 0;
+      font-family: inherit;
+      box-sizing: border-box;
+      transition: background .15s, border-color .15s, transform .12s;
+    }
+    .back:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }
+    .back:active { transform: scale(0.94); }
+    .back svg { width:14px; height:14px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex-shrink: 0; }
+  .coach-info { flex:1; display:flex; align-items:center; gap:10px; }
+  .coach-orb { width:42px; height:42px; border-radius:50%; background: radial-gradient(circle at 35% 28%, #C2F3F5 0%, #5CE1E6 55%, #1F7478 100%); box-shadow: 0 0 26px rgba(92,225,230,0.55), inset 0 1px 3px rgba(255,255,255,0.4); animation: orbPulse 3.6s ease-in-out infinite; position:relative; }
+  .coach-orb::after { content:""; position:absolute; inset:0; border-radius:50%; background:linear-gradient(160deg, rgba(255,255,255,0.32), transparent 40%); }
+  @keyframes orbPulse { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.2); } }
+  .coach-name { font-size:15px; font-weight:600; color:#fff; letter-spacing:-0.2px; }
+  .coach-status { font-size:11px; color:var(--calm); display:flex; align-items:center; gap:5px; margin-top:1px; }
+  .coach-status::before { content:""; width:6px; height:6px; border-radius:50%; background: var(--calm); box-shadow: 0 0 6px var(--calm); }
+
+  /* Chat (frozen — Coach is the only one talking) */
+  .chat { flex:1; padding: 12px 18px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; }
+  .chat::-webkit-scrollbar { display:none; }
+  .bubble.coach {
+    align-self:flex-start; max-width:84%;
+    padding: 14px 16px; border-radius: 18px; border-bottom-left-radius:6px;
+    background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08);
+    color:#fff; font-size:14px; line-height:21px; letter-spacing:-0.1px;
+    animation: fadeUp .5s var(--del,0s) both;
+  }
+  @keyframes fadeUp { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: translateY(0); } }
+  .bubble-time { font-size:10px; color: var(--dim); align-self:flex-start; margin-left:14px; letter-spacing:0.06em; font-family: ui-monospace,"SF Mono",Menlo,monospace; }
+
+  /* Tiny breathing helper inside chat */
+  .breath-mini {
+    margin: 14px auto 8px; width: 120px; height: 120px;
+    border-radius:50%;
+    background: radial-gradient(circle, rgba(92,225,230,0.20), rgba(91,177,255,0.10) 60%, transparent 80%);
+    border:1px solid rgba(92,225,230,0.30);
+    box-shadow: 0 0 28px rgba(92,225,230,0.18), inset 0 0 24px rgba(91,177,255,0.18);
+    animation: breath 16s cubic-bezier(0.4,0,0.6,1) infinite;
+    display:flex; align-items:center; justify-content:center;
+  }
+  @keyframes breath {
+    0%,100% { transform: scale(0.6); opacity:0.5; }
+    25% { transform: scale(1); opacity:1; }
+    50% { transform: scale(1); opacity:1; }
+    75% { transform: scale(0.6); opacity:0.5; }
+  }
+  .breath-mini .b-label { font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:#5BB1FF; font-weight:700; }
+
+  /* Quick reply rail (instead of input — input disabled during craving) */
+  .reply-rail { padding: 8px 18px 0; display:flex; flex-direction:column; gap:8px; }
+  .reply-btn {
+    display:flex; align-items:center; gap:12px; padding: 13px 14px; border-radius: 14px;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    cursor:pointer; transition: background .15s, border-color .15s; font-family: inherit; text-align: left;
+    font-size: 14px; color:#fff; width:100%;
+  }
+  .reply-btn:hover { background: rgba(255,255,255,0.07); border-color: rgba(92,225,230,0.45); }
+  .reply-btn .ico { width:30px; height:30px; border-radius:9px; background: var(--c); box-shadow: 0 0 10px var(--c); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .reply-btn .ico svg { width:14px; height:14px; stroke:#fff; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+  .reply-btn .l { flex:1; font-weight:600; letter-spacing:-0.1px; }
+  .reply-btn .l small { display:block; font-weight:500; color:var(--muted); font-size:11px; margin-top:2px; }
+
+  .footer { padding: 12px 18px 4px; font-size:11px; color:var(--dim); text-align:center; letter-spacing:0.04em; }
+  .footer a { color: var(--muted); text-decoration: none; }
+  .footer a:hover { color:#fff; }
+</style>
+  <link rel="stylesheet" href="_lib/core-responsive.css">
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="frame">
+      <div class="mode-banner"><span class="dot"></span><span>Craving mode · Coach has the floor</span></div>
+
+      <div class="header">
+        <button class="back" type="button" onclick="window.location.href='39-coach.html'" aria-label="Back"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <div class="coach-info">
+          <div class="coach-orb"></div>
+          <div>
+            <div class="coach-name">Coach</div>
+            <div class="coach-status">Here for the next 3 minutes</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat" id="chat">
+        <div class="bubble coach" style="--del:0s;">I'm here. Breathe with me. Tell me when it passes.</div>
+        <div class="bubble-time">just now</div>
+
+        <div class="breath-mini"><div class="b-label">Breathe</div></div>
+
+        <div class="bubble coach" style="--del:0.4s;" id="line2">Cravings peak around 3 minutes then crash. You don't have to decide anything right now.</div>
+      </div>
+
+      <div class="reply-rail">
+        <button class="reply-btn" style="--c:#34D399;" onclick="passed()">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>
+          <div class="l">It passed<small>Send relief signal · +10 XP</small></div>
+        </button>
+        <button class="reply-btn" style="--c:#FF6BAA;" onclick="slipped()">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M12 4v12M12 16c0 2-1.2 4-3 4-2.5 0-4-2-4-5"/><path d="M12 16c0 2 1.2 4 3 4 2.5 0 4-2 4-5"/></svg></div>
+          <div class="l">I slipped<small>Log honestly · Coach won't lecture</small></div>
+        </button>
+        <button class="reply-btn" style="--c:#B388FF;" onclick="callFriend()">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M3 5a2 2 0 0 1 2-2h2l2 5-2 1a11 11 0 0 0 6 6l1-2 5 2v2a2 2 0 0 1-2 2A16 16 0 0 1 3 5z"/></svg></div>
+          <div class="l">Call a friend<small>Mia answered in 2 min last time</small></div>
+        </button>
+      </div>
+
+      <div class="footer"><a href="42-panic.html">← Back to breath timer</a></div>
+    </div>
+  </div>
+
+<script>
+  // tone-aware second line
+  (function() {
+    try {
+      const t = JSON.parse(localStorage.getItem('coreOnboardTrial') || '{}');
+      const tone = t.tone || 'balanced';
+      const line2 = {
+        gentle:   "You don't have to be strong right now. Just stay with me.",
+        balanced: "Cravings peak around 3 minutes then crash. You don't have to decide anything right now.",
+        direct:   "Three minutes max, then the wave breaks. Hold position.",
+        drill:    "180 seconds. Hold the line. Breathe. Talk to me after."
+      }[tone];
+      if (line2) document.getElementById('line2').textContent = line2;
+    } catch(e){}
+  })();
+
+  function passed() {
+    if (window.coreTrack) coreTrack('craving_passed', {});
+    try { coreState.update(s => { s.stats.willpower = Math.min(100, s.stats.willpower + 2); s.xp += 10; return s; }); } catch(e){}
+    alert('Logged: craving passed. +10 XP. Willpower +2. Proud of you.');
+    location.href = '20-dashboard.html';
+  }
+  function slipped() {
+    if (window.coreTrack) coreTrack('craving_slipped_honest', {});
+    location.href = '28-slip-confirm.html?habit=vape';
+  }
+  function callFriend() {
+    if (window.coreTrack) coreTrack('craving_called_friend', {});
+    location.href = '67-find-friends.html';
+  }
+  if (window.coreTrack) coreTrack('coach_craving_opened', {});
+</script>
+</body>
+</html>

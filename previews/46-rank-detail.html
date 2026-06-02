@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8" />
+<title>Core — Rank detail</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#02020A" />
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-void:#02020A; --text:#F8FAFE; --muted:#9AA1B7; --dim:#4F5570;
+    --accent:#4A8FFF; --accent-hi:#6BA9FF;
+    --border:rgba(255,255,255,0.08); --hairline:rgba(255,255,255,0.06);
+    /* Tier-tinted — set by JS */
+    --tier-c1:#5f6670; --tier-c2:#1d2229; --tier-glow:#9aa0aa;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    min-height:100vh; background:#0A0A14; color:var(--text);
+    font-family:'Chakra Petch',-apple-system,BlinkMacSystemFont,"Inter",sans-serif;
+    display:flex; align-items:center; justify-content:center;
+    padding:24px; overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  .phone{
+    position:relative; width:390px; height:844px;
+    background:var(--bg-void); border-radius:56px; overflow:hidden;
+    box-shadow:0 40px 100px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.06),0 0 0 10px #0a0a12,0 0 0 11px #2b2b38;
+  }
+  .notch{position:absolute;top:14px;left:50%;transform:translateX(-50%);width:124px;height:32px;background:#000;border-radius:20px;z-index:30;}
+  .home-indicator{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;background:rgba(245,247,251,0.55);border-radius:999px;z-index:30;}
+
+  /* Tier-tinted atmosphere — subtle, no big radial wash */
+  .bg{position:absolute;inset:0;z-index:0;
+    background:
+      radial-gradient(60% 30% at 50% 6%, var(--tier-glow) 0%, transparent 55%),
+      linear-gradient(180deg,#050518 0%,#02020A 55%,#050510 100%);
+    opacity: 0.4;
+  }
+
+  /* Top bar */
+  .topbar{
+    position:absolute; top:0; left:0; right:0; height: 56px;
+    padding: 60px 22px 0; z-index:25;
+    display:flex; align-items:center; justify-content:space-between;
+    pointer-events:none;
+  }
+  .back, .more {
+    pointer-events: auto;
+    width:36px; height:36px; border-radius:50%;
+    background:rgba(255,255,255,0.06); border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+    backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+    transition: background .15s, transform .12s;
+  }
+  .back:hover, .more:hover { background:rgba(255,255,255,0.10); }
+  .back:active, .more:active { transform: scale(0.94); }
+  .back svg, .more svg { width:15px; height:15px; stroke:var(--text); fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+
+  /* Scroll surface */
+  .scroll{
+    position:absolute; inset:0; padding: 116px 22px 100px; z-index:10;
+    overflow-y:auto; overflow-x:hidden;
+  }
+  .scroll::-webkit-scrollbar{display:none;}
+
+  /* Hero — clean stack, no overdone effects */
+  .hero{ text-align:center; }
+  .crest{
+    width: 96px; height: 96px; margin: 0 auto;
+    border-radius: 22px;
+    background: linear-gradient(160deg, var(--tier-c1) 0%, var(--tier-c2) 100%);
+    display:flex; align-items:center; justify-content:center;
+    position: relative;
+    box-shadow: 0 14px 36px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.20);
+  }
+  .crest::after{
+    content:""; position:absolute; inset:0; border-radius:22px;
+    background: linear-gradient(160deg, rgba(255,255,255,0.28) 0%, transparent 50%);
+    pointer-events:none;
+  }
+  .crest svg{ width:42px; height:42px; position:relative; z-index:1; }
+
+  .tier-tag{
+    margin-top: 14px;
+    font-size: 10px; letter-spacing: 0.28em; text-transform: uppercase;
+    color: var(--tier-c1); font-weight: 700;
+  }
+  .tier-name{
+    margin-top: 4px;
+    font-size: 36px; font-weight: 800; letter-spacing: -1.4px; line-height: 1;
+    color: #fff;
+  }
+  .tier-xp{
+    margin-top: 8px;
+    font-size: 13px; color: var(--muted); letter-spacing: -0.05px;
+  }
+
+  /* Status row — Reached / Current / X XP to unlock */
+  .status{
+    margin: 16px auto 0;
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 6px 12px; border-radius: 999px;
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700;
+    background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .status .dot{ width:6px; height:6px; border-radius:50%; background: currentColor; box-shadow: 0 0 8px currentColor; }
+  .status.reached { background: rgba(52,211,153,0.10); border-color: rgba(52,211,153,0.45); color: #34D399; }
+  .status.current { background: rgba(74,143,255,0.14); border-color: rgba(74,143,255,0.55); color: var(--accent-hi); }
+
+  /* Progress (current + locked tiers) — subtle Apple-style track */
+  .progress{
+    margin: 22px 8px 0; padding: 14px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.03); border:1px solid var(--border);
+  }
+  .p-row{ display:flex; justify-content:space-between; align-items:baseline; }
+  .p-label{ font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+  .p-num{ font-size: 14px; font-weight: 700; color: #fff; }
+  .p-num strong{ color: var(--tier-c1); }
+  .p-bar{ height: 6px; border-radius:999px; background: rgba(255,255,255,0.06); margin-top: 10px; overflow:hidden; }
+  .p-fill{
+    height:100%; border-radius:999px;
+    background: linear-gradient(90deg, var(--tier-c1), var(--tier-glow));
+    box-shadow: 0 0 10px var(--tier-glow);
+    transition: width 1.2s cubic-bezier(0.22,1,0.36,1);
+  }
+
+  /* PERKS LIST — Apple Settings-style: icon + title/sub + chevron */
+  .section-h{
+    margin: 28px 4px 12px;
+    font-size: 11px; letter-spacing: 0.20em; text-transform: uppercase;
+    color: var(--muted); font-weight: 700;
+  }
+  .perks{
+    border-radius: 16px; overflow: hidden;
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+  }
+  .perk{
+    display:flex; align-items:center; gap: 14px;
+    padding: 14px 14px;
+    border-bottom: 1px solid var(--hairline);
+    transition: background .15s;
+  }
+  .perk:last-child{ border-bottom: none; }
+  .perk:hover{ background: rgba(255,255,255,0.04); }
+
+  .perk-icon{
+    flex-shrink: 0; width: 34px; height: 34px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--tier-c1), var(--tier-c2));
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: 0 0 18px var(--tier-glow);
+    position: relative;
+  }
+  .perk-icon::after{
+    content:""; position:absolute; inset:0; border-radius:10px;
+    background: linear-gradient(160deg, rgba(255,255,255,0.28), transparent 50%);
+    pointer-events:none;
+  }
+  .perk-icon svg{ width:16px; height:16px; stroke:#fff; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; position:relative; z-index:1; }
+  /* Locked perks → desaturated icon, no glow */
+  .perk.locked .perk-icon{ background: rgba(255,255,255,0.06); box-shadow: none; }
+  .perk.locked .perk-icon svg{ stroke: var(--dim); }
+  .perk.locked .perk-title{ color: var(--muted); }
+  .perk.locked .perk-sub  { color: var(--dim); }
+
+  .perk-body{ flex: 1; min-width: 0; }
+  .perk-title{ font-size: 14px; font-weight: 600; color: #fff; letter-spacing: -0.15px; line-height: 1.2; }
+  .perk-sub  { font-size: 12px; color: var(--muted); margin-top: 2px; line-height: 1.35; letter-spacing: -0.05px; }
+
+  .perk-trail{ flex-shrink: 0; display:flex; align-items:center; gap: 4px; color: var(--dim); }
+  .perk.unlocked .perk-trail{ color: #34D399; }
+  .perk-trail svg{ width: 14px; height: 14px; stroke: currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+
+  /* CTA */
+  .footer{
+    position: absolute; left: 0; right: 0; bottom: 0;
+    padding: 12px 22px calc(22px + env(safe-area-inset-bottom, 0px));
+    z-index: 24;
+    background: linear-gradient(180deg, transparent, rgba(2,2,10,0.92) 40%);
+  }
+  .cta{
+    width: 100%; padding: 14px; border: none; border-radius: 14px;
+    background: #fff; color: #050510;
+    font-size: 14.5px; font-weight: 700; letter-spacing: -0.2px; font-family: inherit;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    cursor: pointer;
+    box-shadow: 0 12px 30px rgba(255,255,255,0.10);
+    transition: transform .12s, opacity .15s;
+  }
+  .cta:active { transform: scale(0.985); opacity: 0.92; }
+  .cta svg { width: 14px; height: 14px; stroke: #050510; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+  .cta.locked{
+    background: rgba(255,255,255,0.06); color: var(--text); box-shadow: none;
+    border: 1px solid var(--border);
+  }
+  .cta.locked svg { stroke: var(--text); }
+
+  .preview-label{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);color:#4A5060;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;font-family:ui-monospace,"SF Mono",Menlo,monospace;}
+
+  @media (max-width: 460px){
+    body{padding:0;}
+    .phone{width:100vw;height:100vh;height:100dvh;border-radius:0;box-shadow:none;}
+    .notch,.home-indicator,.preview-label{display:none;}
+  }
+  @media (max-width: 380px), (max-height: 720px){
+    .scroll{ padding-top: 96px; }
+    .crest{ width: 80px; height: 80px; border-radius: 18px; }
+    .crest svg{ width: 36px; height: 36px; }
+    .tier-name{ font-size: 30px; letter-spacing: -1.2px; }
+    .tier-xp{ font-size: 12px; }
+    .section-h{ margin: 22px 4px 10px; }
+    .perk{ padding: 12px; }
+    .perk-title{ font-size: 13px; }
+    .perk-sub{ font-size: 11px; }
+  }
+</style>
+<link rel="stylesheet" href="_lib/core-responsive.css">
+<link rel="stylesheet" href="_lib/core-theme.css">
+<script src="_lib/core-state.js"></script>
+<script src="_lib/core-rank-perks.js"></script>
+<script src="_lib/analytics.js"></script>
+<script src="_lib/core-back.js"></script>
+<script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="topbar">
+      <button class="back" type="button" onclick="window.location.href='45-ranks.html'" aria-label="Back">
+        <svg viewBox="0 0 24 24"><path d="M15 18L9 12l6-6"/></svg>
+      </button>
+      <div class="more" role="button" aria-label="Rank info" onclick="shareRank()">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+      </div>
+    </div>
+
+    <div class="scroll">
+      <!-- Hero -->
+      <div class="hero">
+        <div class="crest" id="crest"></div>
+        <div class="tier-tag" id="tierTag">TIER 01</div>
+        <div class="tier-name" id="tierName">IRON</div>
+        <div class="tier-xp" id="tierXp">0 – 299 XP</div>
+        <div class="status" id="status"><span class="dot"></span><span id="statusText">CURRENT</span></div>
+      </div>
+
+      <!-- Progress (only when not yet reached) -->
+      <div class="progress" id="progress" hidden>
+        <div class="p-row">
+          <span class="p-label" id="pLabel">Your progress</span>
+          <span class="p-num" id="pNum"><strong>—</strong> XP to go</span>
+        </div>
+        <div class="p-bar"><div class="p-fill" id="pFill" style="width:0%"></div></div>
+      </div>
+
+      <!-- Perks — Apple Settings-style list -->
+      <div class="section-h">What you unlock at this tier</div>
+      <div class="perks" id="perks"></div>
+    </div>
+
+    <div class="footer">
+      <button class="cta" id="cta" onclick="ctaClick()">
+        <span id="ctaText">Keep climbing</span>
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="preview-label">core · rank-detail · v2</div>
+
+<script>
+  (function(){
+    const params = new URLSearchParams(location.search);
+    const reqName = params.get('rank') || 'Iron';
+    const RANKS = (window.coreState && coreState.RANKS) || [];
+    const idx = Math.max(0, RANKS.findIndex(r => r.name.toLowerCase() === reqName.toLowerCase()));
+    const rank = RANKS[idx];
+    if (!rank) { location.replace('45-ranks.html'); return; }
+
+    const state = coreState.read();
+    const userXp = state.xp || 0;
+    const userIdx = RANKS.findIndex(r => userXp >= r.min && (r.max === Infinity || userXp <= r.max));
+    const isAchieved = idx < userIdx;
+    const isCurrent  = idx === userIdx;
+    const isLocked   = idx > userIdx;
+
+    // Theme the page with the tier palette
+    document.documentElement.style.setProperty('--tier-c1', rank.c1);
+    document.documentElement.style.setProperty('--tier-c2', rank.c2);
+    document.documentElement.style.setProperty('--tier-glow', rank.glow);
+
+    // Crest — single hexagon shield, tier-colored
+    document.getElementById('crest').innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M12 2l8 4v6c0 5-4 9-8 10-4-1-8-5-8-10V6l8-4z"/>
+      <path d="M12 8l3 3-3 3-3-3z" fill="#fff" stroke="none"/>
+    </svg>`;
+
+    document.getElementById('tierTag').textContent = 'TIER ' + String(idx + 1).padStart(2, '0');
+    document.getElementById('tierName').textContent = rank.name.toUpperCase();
+    const xpRange = rank.max === Infinity
+      ? (rank.min.toLocaleString() + '+ XP')
+      : (rank.min.toLocaleString() + ' – ' + rank.max.toLocaleString() + ' XP');
+    document.getElementById('tierXp').textContent = xpRange;
+
+    // Status
+    const statusEl = document.getElementById('status');
+    const statusText = document.getElementById('statusText');
+    if (isAchieved) { statusEl.classList.add('reached'); statusText.textContent = 'Reached'; }
+    else if (isCurrent) { statusEl.classList.add('current'); statusText.textContent = 'Your current tier'; }
+    else { statusText.textContent = Math.max(0, rank.min - userXp).toLocaleString() + ' XP to unlock'; }
+
+    // Progress block — show only when current or locked (anything not yet "reached")
+    if (!isAchieved) {
+      const wrap = document.getElementById('progress');
+      wrap.hidden = false;
+      let pct, label, num;
+      if (isCurrent) {
+        const into = userXp - rank.min;
+        const span = (rank.max === Infinity ? rank.min + 500 : rank.max + 1) - rank.min;
+        pct = Math.max(0, Math.min(100, (into / span) * 100));
+        label = 'Your progress';
+        const toNext = rank.max === Infinity ? null : (rank.max + 1 - userXp);
+        num = toNext === null ? '<strong>Max</strong>' : '<strong>' + toNext.toLocaleString() + '</strong> XP to next';
+      } else {
+        const prev = RANKS[idx - 1] || { min: 0 };
+        const into = Math.max(0, userXp - prev.min);
+        const span = rank.min - prev.min;
+        pct = Math.max(0, Math.min(100, (into / span) * 100));
+        label = 'Path to this tier';
+        num = '<strong>' + Math.max(0, rank.min - userXp).toLocaleString() + '</strong> XP to go';
+      }
+      document.getElementById('pLabel').textContent = label;
+      document.getElementById('pNum').innerHTML = num;
+      requestAnimationFrame(() => document.getElementById('pFill').style.width = pct.toFixed(1) + '%');
+    }
+
+    // Perks — pulled from the engine. Each row uses Apple-list shape (icon · title · chevron/check)
+    const perks = window.coreRankPerks.perksFor(rank.name, userXp);
+    const list = document.getElementById('perks');
+    list.innerHTML = perks.map(p => `
+      <div class="perk ${p.unlocked ? 'unlocked' : 'locked'}">
+        <div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${p.iconSvg}</svg></div>
+        <div class="perk-body">
+          <div class="perk-title">${p.title}</div>
+          <div class="perk-sub">${p.sub}</div>
+        </div>
+        <div class="perk-trail">
+          ${p.unlocked
+            ? '<svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>'
+            : '<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>'}
+        </div>
+      </div>
+    `).join('');
+
+    // CTA — context-aware
+    const cta = document.getElementById('cta');
+    const ctaText = document.getElementById('ctaText');
+    if (isAchieved) { ctaText.textContent = 'See your active tier'; }
+    else if (isCurrent) { ctaText.textContent = 'Open dashboard'; }
+    else { cta.classList.add('locked'); ctaText.textContent = 'View progress'; }
+
+    window.ctaClick = function() {
+      if (window.coreTrack) coreTrack('rank_detail_cta', { rank: rank.name, state: isAchieved ? 'achieved' : isCurrent ? 'current' : 'locked' });
+      if (isCurrent || isAchieved) location.href = '20-dashboard.html';
+      else location.href = '45-ranks.html';
+    };
+    window.shareRank = function() {
+      try { navigator.share && navigator.share({ title: 'CORE — ' + rank.name, text: 'I just unlocked ' + rank.name + ' in CORE.' }); }
+      catch (e) {}
+    };
+
+    if (window.coreTrack) coreTrack('screen_view', { screen: 'rank-detail', rank: rank.name });
+  })();
+</script>
+</body>
+</html>

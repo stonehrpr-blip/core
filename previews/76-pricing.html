@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+  <meta charset="utf-8" />
+  <title>Core — Pricing</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <style>
+    :root { --bg-base:#02020A; --text-primary:#F8FAFE; --text-muted:#9AA1B7; --text-dim:#4F5570; --accent:#4A8FFF; }
+    * { box-sizing: border-box; }
+    html, body { margin:0; padding:0; height:100%; }
+    body { min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text-primary); padding:24px; overflow:hidden; }
+    .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+    .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:10; }
+    .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:10; }
+
+    .bg { position:absolute; inset:0; background: radial-gradient(60% 30% at 50% 18%, rgba(74,143,255,0.18) 0%, transparent 65%), radial-gradient(70% 40% at 50% 100%, rgba(155,130,255,0.10) 0%, transparent 60%), linear-gradient(180deg, #0A0820 0%, var(--bg-base) 50%, #050510 100%); }
+    .grain { position:absolute; inset:0; pointer-events:none; opacity:0.04; mix-blend-mode:overlay; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.7 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); z-index:2; }
+
+    .topbar { position:absolute; top:60px; left:0; right:0; padding:0 24px; display:flex; align-items:center; justify-content:space-between; z-index:10; }
+    .back {
+      width: 38px !important; height: 38px !important;
+      min-width: 38px !important; min-height: 38px !important;
+      max-width: 38px !important; max-height: 38px !important;
+      aspect-ratio: 1 / 1;
+      flex: 0 0 38px;
+      align-self: center;
+      border-radius: 50% !important;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.10);
+      display: flex !important; align-items: center !important; justify-content: center !important;
+      cursor: pointer; padding: 0;
+      font-family: inherit;
+      box-sizing: border-box;
+      transition: background .15s, border-color .15s, transform .12s;
+    }
+    .back:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }
+    .back:active { transform: scale(0.94); }
+    .back svg { width:14px; height:14px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex-shrink: 0; }
+    .topbar-title { font-size:14px; font-weight:600; color:var(--text-primary); letter-spacing:-0.1px; }
+    .topbar-spacer { width: 36px; }
+
+    .scroll { position:absolute; top:120px; left:0; right:0; bottom:0; padding: 0 20px 28px; overflow-y:auto; z-index:5; }
+    .scroll::-webkit-scrollbar { display:none; }
+
+    .hero { text-align:center; margin-bottom: 24px; }
+    .hero-eyebrow { display:inline-flex; align-items:center; gap:8px; padding:6px 12px; border-radius:999px; background: rgba(74,143,255,0.10); border:1px solid rgba(74,143,255,0.30); color: var(--accent); font-size:11px; font-weight:500; letter-spacing:0.18em; text-transform:uppercase; margin-bottom:14px; }
+    .hero-eyebrow::before { content:""; width:6px; height:6px; border-radius:50%; background:var(--accent); box-shadow:0 0 8px var(--accent); }
+    .hero h1 { margin:0; font-size:34px; font-weight:600; letter-spacing:-1.4px; line-height:1.05; background: linear-gradient(180deg, #FFFFFF 0%, #C8CDDE 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+    .hero-sub { margin:10px 0 0; font-size:13px; color:var(--text-muted); line-height:19px; letter-spacing:-0.1px; }
+
+    /* Period toggle */
+    .period-toggle {
+      display:flex; gap:4px; padding:4px; margin: 0 auto 18px; max-width: 280px;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.04); border-radius:12px;
+      position: relative;
+    }
+    .period-btn { flex:1; padding:10px; border-radius:9px; font-size:13px; font-weight:600; color:var(--text-muted); cursor:pointer; background:transparent; border:none; font-family:inherit; transition: all 0.18s; position: relative; }
+    .period-btn.active { background: rgba(255,255,255,0.96); color: #050510; box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
+    .save-pill { position:absolute; top:-8px; right:8px; background: linear-gradient(135deg, #34D399 0%, #4A8FFF 100%); color: white; font-size:9px; font-weight:700; letter-spacing:0.1em; padding: 3px 7px; border-radius: 999px; box-shadow: 0 0 12px rgba(52,211,153,0.4); text-transform:uppercase; }
+
+    .plans { display:flex; flex-direction:column; gap:12px; margin-bottom: 22px; }
+    .plan {
+      position:relative; padding: 20px; border-radius: 22px;
+      background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06);
+      backdrop-filter: blur(18px) saturate(1.4);
+      transition: all 0.2s;
+    }
+    .plan.pro {
+      background: linear-gradient(135deg, rgba(74,143,255,0.14) 0%, rgba(132,100,255,0.10) 100%);
+      border-color: rgba(74,143,255,0.40);
+      box-shadow: 0 0 28px rgba(74,143,255,0.15);
+    }
+    .plan.pro::before { content:"Most popular"; position:absolute; top:-10px; left:50%; transform:translateX(-50%); background: linear-gradient(135deg, #4A8FFF 0%, #B388FF 100%); color: white; font-size:10px; font-weight:700; letter-spacing:0.16em; padding:4px 10px; border-radius:999px; text-transform:uppercase; box-shadow: 0 0 12px rgba(74,143,255,0.5); }
+    .plan-head { display:flex; align-items:baseline; justify-content:space-between; margin-bottom: 8px; }
+    .plan-name { font-size:17px; font-weight:600; letter-spacing:-0.3px; color: var(--text-primary); }
+    .plan-tag { font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color: var(--text-muted); font-weight:500; }
+    .plan-price-row { display:flex; align-items:baseline; gap:6px; }
+    .plan-price { font-size:42px; font-weight:700; letter-spacing:-1.6px; line-height:1; background: linear-gradient(180deg, #FFFFFF 0%, #B5BAC9 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+    .plan-period { font-size:13px; color:var(--text-muted); font-weight:500; }
+    .plan-equiv { font-size:11px; color:var(--text-dim); margin-top:6px; font-family: ui-monospace,"SF Mono",Menlo,monospace; letter-spacing:0.04em; }
+    .plan-equiv.saving { color: #34D399; font-weight:600; }
+    .plan-features { display:flex; flex-direction:column; gap:8px; margin: 14px 0 16px; }
+    .feat { display:flex; align-items:flex-start; gap:8px; font-size:13px; color:var(--text-primary); letter-spacing:-0.1px; line-height: 19px; }
+    .feat svg { width:14px; height:14px; flex-shrink:0; margin-top:2px; }
+    .feat.muted { color: var(--text-dim); text-decoration: line-through; text-decoration-color: rgba(255,255,255,0.15); }
+    .feat.muted svg { stroke: var(--text-dim); }
+    .plan-cta { display:block; width:100%; padding:14px; border-radius:999px; font-family:inherit; font-size:14px; font-weight:600; letter-spacing:-0.2px; cursor:pointer; transition: all 0.2s; border: 1px solid rgba(255,255,255,0.08); }
+    .plan-cta:active { transform: scale(0.98); }
+    .plan-cta.primary { background: linear-gradient(135deg, #4A8FFF 0%, #6F70FF 45%, #B388FF 100%); background-size:200% 100%; animation: gradShift 5s ease infinite; color: white; border-color: transparent; box-shadow: 0 10px 28px rgba(74,143,255,0.45), 0 0 0 1px rgba(255,255,255,0.06) inset; }
+    @keyframes gradShift { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+    .plan-cta.secondary { background: rgba(255,255,255,0.04); color: var(--text-primary); }
+
+    /* Comparison */
+    .compare-title { font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:var(--text-muted); font-weight:500; margin: 22px 4px 12px; }
+    .compare {
+      border-radius: 16px; overflow: hidden;
+      background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06);
+      backdrop-filter: blur(14px);
+    }
+    .compare-row { display:grid; grid-template-columns: 1fr 60px 60px; padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 13px; color: var(--text-primary); letter-spacing:-0.1px; align-items: center; }
+    .compare-row:last-child { border-bottom: none; }
+    .compare-row.head { font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color: var(--text-muted); font-weight:500; background: rgba(255,255,255,0.02); }
+    .compare-cell { text-align:center; }
+    .check { color: var(--accent); }
+    .dash { color: var(--text-dim); }
+
+    /* Trust */
+    .trust { display:flex; justify-content:center; gap: 14px; margin: 18px 0; font-size:11px; color: var(--text-dim); letter-spacing:-0.05px; }
+    .trust span { display:flex; align-items:center; gap:4px; }
+    .trust svg { width:11px; height:11px; stroke: #34D399; }
+
+    /* FAQ */
+    .faq-title { font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:var(--text-muted); font-weight:500; margin: 22px 4px 12px; }
+    .faq-item { padding: 12px 14px; border-radius: 14px; background: rgba(255,255,255,0.025); border:1px solid rgba(255,255,255,0.04); margin-bottom: 8px; cursor: pointer; }
+    .faq-q { display:flex; justify-content:space-between; align-items:center; font-size: 13px; font-weight: 600; color: var(--text-primary); letter-spacing:-0.1px; }
+    .faq-q svg { width:12px; height:12px; stroke: var(--text-dim); transition: transform 0.2s; }
+    .faq-item.open .faq-q svg { transform: rotate(180deg); }
+    .faq-a { display:none; margin-top:8px; font-size:12px; color: var(--text-muted); line-height: 18px; letter-spacing:-0.1px; }
+    .faq-item.open .faq-a { display:block; }
+
+    .footer-note { text-align:center; font-size:11px; color: var(--text-dim); line-height: 18px; padding: 16px 0 8px; letter-spacing:-0.05px; }
+
+    .preview-label { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); color:#4A5060; font-size:11px; letter-spacing:0.16em; text-transform:uppercase; font-family:ui-monospace,"SF Mono",Menlo,monospace; }
+    @media (max-width:460px){ body{padding:0;} .phone{width:100vw; height:100vh; border-radius:0; box-shadow:none;} .notch,.home-indicator{display:none;} .preview-label{display:none;} }
+  </style>
+  <script src="_lib/analytics.js"></script>
+  <script src="_lib/core-back.js"></script>
+  <link rel="stylesheet" href="_lib/core-responsive.css">
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div>
+    <div class="grain"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="topbar">
+      <button class="back" type="button" onclick="window.location.href='80-settings.html'" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18L9 12l6-6"/></svg>
+      </button>
+      <div class="topbar-title">Core Pro</div>
+      <div class="topbar-spacer"></div>
+    </div>
+
+    <div class="scroll">
+      <div class="hero">
+        <div class="hero-eyebrow">Pricing</div>
+        <h1>Unlock your<br/>whole Core.</h1>
+        <p class="hero-sub">One subscription. All 5 stats, AI Coach, home-screen widget, recovery quests, social. Cheaper than a coffee a week.</p>
+      </div>
+
+      <div class="period-toggle">
+        <button class="period-btn" id="periodMonthly" onclick="setPeriod('monthly')">Monthly</button>
+        <button class="period-btn active" id="periodAnnual" onclick="setPeriod('annual')">Annual<span class="save-pill">Save 50%</span></button>
+      </div>
+
+      <div class="plans">
+        <!-- Free -->
+        <div class="plan">
+          <div class="plan-head">
+            <span class="plan-name">Free</span>
+            <span class="plan-tag">Forever</span>
+          </div>
+          <div class="plan-price-row">
+            <span class="plan-price">$0</span>
+            <span class="plan-period">/mo</span>
+          </div>
+          <div class="plan-equiv">try before you commit</div>
+          <div class="plan-features">
+            <div class="feat"><svg viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>1 habit · 1 stat visible</div>
+            <div class="feat"><svg viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>Basic dashboard + slip tracking</div>
+            <div class="feat"><svg viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>Read-only feed</div>
+            <div class="feat"><svg viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>Coin economy · Shop · streak restore</div>
+            <div class="feat muted"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M6 18L18 6"/></svg>No AI Coach</div>
+            <div class="feat muted"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M6 18L18 6"/></svg>No widget</div>
+          </div>
+          <button class="plan-cta secondary" onclick="window.location.href='20-dashboard.html'">Stay on Free</button>
+        </div>
+
+        <!-- Pro (toggleable) -->
+        <div class="plan pro" id="proPlan">
+          <div class="plan-head">
+            <span class="plan-name">Core Pro</span>
+            <span class="plan-tag" id="planTag">Annual · Best value</span>
+          </div>
+          <div class="plan-price-row">
+            <span class="plan-price" id="planPrice">$3.75</span>
+            <span class="plan-period" id="planPeriod">/ month</span>
+          </div>
+          <div class="plan-equiv saving" id="planEquiv">7 days free · cancel any time</div>
+          <div class="plan-features">
+            <div class="feat"><svg viewBox="0 0 24 24" fill="none" stroke="#4A8FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>Unlimited habits</div>
+            <div class="feat"><svg viewBox="0 0 24 24" fill="none" stroke="#4A8FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>All 5 stats · drilldowns · history</div>
+            <div class="feat"><svg viewBox="0 0 24 24" fill="none" stroke="#4A8FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>AI Coach (chat + voice + actions)</div>
+            <div class="feat"><svg viewBox="0 0 24 24" fill="none" stroke="#4A8FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>Home-screen widget (iOS)</div>
+            <div class="feat"><svg viewBox="0 0 24 24" fill="none" stroke="#4A8FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>Recovery quests + streak protection</div>
+            <div class="feat"><svg viewBox="0 0 24 24" fill="none" stroke="#4A8FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>Full social + posting + ranks</div>
+            <div class="feat"><svg viewBox="0 0 24 24" fill="none" stroke="#4A8FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>Food / body / outfit scanners (S2+)</div>
+          </div>
+          <button class="plan-cta primary" onclick="startTrial()">Start 7 days free</button>
+        </div>
+      </div>
+
+      <div class="trust">
+        <span><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>Cancel anytime</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>No card to start</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>Privacy-first</span>
+      </div>
+
+      <div class="compare-title">Add-on</div>
+      <div style="padding:16px; border-radius:16px; background: linear-gradient(135deg, rgba(255,79,107,0.10), rgba(255,122,69,0.10)); border: 1px solid rgba(255,79,107,0.30); display:flex; align-items:center; gap:14px; margin-bottom:14px;">
+        <div style="width:42px; height:42px; border-radius:50%; background: radial-gradient(circle at 32% 28%, #FFCEB3, #FF7A45 55%, #813617); box-shadow: 0 0 16px rgba(255,122,69,0.45); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+          <svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 2l3 7h7l-5.5 4 2 8L12 17l-6.5 4 2-8L2 9h7z" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div style="flex:1;">
+          <div style="font-size:14px; font-weight:700; color:#fff; letter-spacing:-0.1px;">Streak Insurance · $1.99/mo</div>
+          <div style="font-size:11px; color:var(--text-muted); margin-top:3px; line-height:15px; letter-spacing:-0.05px;">Unlimited freezes · auto-restore on first slip · chains across habits. For when the streak matters more than the lesson.</div>
+        </div>
+        <button style="background: linear-gradient(135deg, #FF7A45, #FF6BAA); color:#fff; border:none; padding:9px 14px; border-radius:999px; font-family:inherit; font-size:12px; font-weight:600; cursor:pointer; letter-spacing:-0.1px; box-shadow: 0 6px 18px rgba(255,122,69,0.40);" onclick="if(window.coreTrack)coreTrack('streak_insurance_addon_tapped',{}); alert('Streak Insurance addon would be unlocked here ($1.99/mo).');">Add</button>
+      </div>
+
+      <div class="compare-title">Compare</div>
+      <div class="compare">
+        <div class="compare-row head"><span>Feature</span><span class="compare-cell">Free</span><span class="compare-cell">Pro</span></div>
+        <div class="compare-row"><span>Habits</span><span class="compare-cell">1</span><span class="compare-cell check">Unlimited</span></div>
+        <div class="compare-row"><span>Stats visible</span><span class="compare-cell">1</span><span class="compare-cell check">All 5</span></div>
+        <div class="compare-row"><span>AI Coach</span><span class="compare-cell dash">—</span><span class="compare-cell check">✓</span></div>
+        <div class="compare-row"><span>Home-screen widget</span><span class="compare-cell dash">—</span><span class="compare-cell check">✓</span></div>
+        <div class="compare-row"><span>Recovery quests</span><span class="compare-cell dash">—</span><span class="compare-cell check">✓</span></div>
+        <div class="compare-row"><span>Streak protection</span><span class="compare-cell dash">—</span><span class="compare-cell check">✓</span></div>
+        <div class="compare-row"><span>Post to feed</span><span class="compare-cell dash">Read-only</span><span class="compare-cell check">✓</span></div>
+        <div class="compare-row"><span>Camera scanners</span><span class="compare-cell dash">—</span><span class="compare-cell check">✓ (S2+)</span></div>
+        <div class="compare-row"><span>Custom Coach tone</span><span class="compare-cell dash">—</span><span class="compare-cell check">✓</span></div>
+      </div>
+
+      <div class="faq-title">FAQ</div>
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">Can I switch plans later?<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div>
+        <div class="faq-a">Yes — change monthly ↔ annual anytime from Settings → Subscription. Annual switchers get a pro-rata credit; monthly switchers start their year fresh.</div>
+      </div>
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">What's in the trial?<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div>
+        <div class="faq-a">Everything in Core Pro — unlocked for 7 days. We'll ask on day 6 if you want to keep going. Decline and you stay on Free.</div>
+      </div>
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">What happens to my data if I cancel?<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div>
+        <div class="faq-a">Stays yours. Habits, slips, streaks, and stats all remain — you just drop back to Free tier limits (1 habit, 1 stat visible). Export your data any time.</div>
+      </div>
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">Refunds?<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div>
+        <div class="faq-a">14 days on annual, no questions. Monthly is too cheap to refund — just cancel for the next month.</div>
+      </div>
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">Why so cheap?<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div>
+        <div class="faq-a">We want Core in front of millions, not thousands. Most habit apps charge $10–15/mo and gate the basics. We'd rather earn your year than your discount.</div>
+      </div>
+
+      <div class="footer-note">
+        Core is local-first. Your data stays on your device unless you sync.<br/>
+        Subscription auto-renews. Cancel in Settings → Subscription any time.
+      </div>
+    </div>
+  </div>
+  <div class="preview-label">core · pricing · v1</div>
+
+  <script>
+    let period = 'annual';
+    function setPeriod(p) {
+      period = p;
+      document.getElementById('periodMonthly').classList.toggle('active', p === 'monthly');
+      document.getElementById('periodAnnual').classList.toggle('active', p === 'annual');
+      const price = document.getElementById('planPrice');
+      const periodEl = document.getElementById('planPeriod');
+      const equiv = document.getElementById('planEquiv');
+      const tag = document.getElementById('planTag');
+      if (p === 'monthly') {
+        price.textContent = '$7.99';
+        periodEl.textContent = '/mo';
+        equiv.textContent = 'Billed monthly · cancel anytime';
+        equiv.classList.remove('saving');
+        tag.textContent = 'Monthly';
+      } else {
+        price.textContent = '$3.75';
+        periodEl.textContent = '/mo';
+        equiv.textContent = 'Billed $44.99 / year · save $51/yr vs monthly (53%)';
+        equiv.classList.add('saving');
+        tag.textContent = 'Annual · Best value';
+      }
+    }
+    // Real Stripe Checkout when backend is reachable; HTML-only preview falls back to dashboard.
+    async function startTrial() {
+      const btn = document.querySelector('.plan-cta.primary');
+      const wasText = btn.textContent;
+      btn.textContent = 'Connecting...';
+      btn.disabled = true;
+      try {
+        const plan = document.getElementById('periodAnnual').classList.contains('active') ? 'yearly' : 'monthly';
+        // Preview (file://): skip the API call
+        if (location.protocol === 'file:') {
+          setTimeout(() => window.location.href = '20-dashboard.html', 700);
+          return;
+        }
+        const res = await fetch('/api/billing/checkout', {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            'x-csrf-token': document.cookie.split('core_csrf=')[1]?.split(';')[0] || '',
+          },
+          credentials: 'include',
+          body: JSON.stringify({ plan }),
+        });
+        if (!res.ok) throw new Error('checkout failed');
+        const json = await res.json();
+        if (json.url) window.location.href = json.url;
+        else throw new Error('no checkout url');
+      } catch (err) {
+        btn.textContent = wasText;
+        btn.disabled = false;
+        alert("Couldn't start checkout. Try again in a moment.");
+      }
+    }
+  </script>
+</body>
+</html>

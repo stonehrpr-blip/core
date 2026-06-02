@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+  <meta charset="utf-8" />
+  <title>Core — Feed</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <script>
+    // Gate: must complete onboarding
+    (function() {
+      try {
+        var p = new URLSearchParams(location.search);
+        var local = location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+        if (local && p.get('preview') === '1') { localStorage.setItem('coreDevBypass','1'); window.__coreDemoMode = true; return; }
+        if (local && localStorage.getItem('coreDevBypass') === '1') { window.__coreDemoMode = true; return; }
+        try{(function(){var h=location.hostname;window.__corePreview=window.__corePreview||(location.protocol==='file:'||h==='localhost'||h==='127.0.0.1'||/[?&]preview=1/.test(location.search));})();}catch(e){}if(!window.__corePreview){if (localStorage.getItem('coreOnboardComplete') !== '1') location.replace('01-index.html');
+      }} catch(e){}
+    })();
+  </script>
+  <style>
+    :root {
+      /* canonical tokens come from core-theme.css */
+      --accent: #4A8FFF;
+      --accent-hi: #6BA9FF;
+      --danger: #F87171;
+      --c-fitness: #34D399;
+      --c-mind: #B388FF;
+      --c-wallet: #FFD05C;
+      --c-body: #FF6BAA;
+      --c-streaks: #FF7A45;
+      --c-all: #6BA9FF;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin:0; padding:0; height:100%; }
+    body {
+      min-height:100vh; background:#0A0A14;
+      display:flex; align-items:center; justify-content:center;
+      font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+      color:var(--text); -webkit-font-smoothing: antialiased; padding:24px; overflow:hidden;
+    }
+    .phone {
+      position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden;
+      box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38;
+    }
+    .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:30; }
+    .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:30; }
+
+    .bg {
+      position:absolute; inset:0; z-index:0;
+      background: radial-gradient(60% 30% at 50% 0%, rgba(74,143,255,0.10) 0%, transparent 60%), linear-gradient(180deg, #050518 0%, #02020A 55%, #050510 100%);
+    }
+    .stars { position:absolute; inset:0; pointer-events:none; z-index:1; }
+    .star { position:absolute; border-radius:50%; background:#fff; animation: twk var(--d,4s) ease-in-out var(--del,0s) infinite; }
+    .star.s1 { width:1px; height:1px; opacity:0.3; }
+    .star.s2 { width:1.5px; height:1.5px; opacity:0.45; }
+    @keyframes twk { 0%,100% { opacity:var(--min,0.10); transform:scale(0.7); } 50% { opacity:var(--max,0.55); transform:scale(1.15); } }
+
+    /* Header */
+    .header {
+      position:absolute; top:56px; left:0; right:0; padding: 8px 18px 12px;
+      display:flex; align-items:center; justify-content:space-between; gap:10px; z-index:11;
+      background: linear-gradient(180deg, rgba(2,2,10,0.92) 0%, rgba(2,2,10,0.75) 100%);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    }
+    .header-title { font-size:24px; font-weight:700; letter-spacing:-0.6px; color:#fff; }
+    .header-actions { display:flex; align-items:center; gap:8px; }
+    .icon-btn {
+      width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.04); border:1px solid var(--border-strong);
+      display:flex; align-items:center; justify-content:center; cursor:pointer;
+    }
+    .icon-btn svg { width:16px; height:16px; stroke:var(--text); fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+    .compose-btn {
+      padding: 7px 13px; border-radius: 999px; background:#fff; color:#050510;
+      border:none; font-family:inherit; font-weight: 700; font-size: 12px; letter-spacing:-0.1px;
+      display:flex; align-items:center; gap:5px; cursor:pointer;
+      box-shadow: 0 0 0 1px rgba(74,143,255,0.20), 0 6px 18px rgba(74,143,255,0.18);
+    }
+    .compose-btn svg { width:13px; height:13px; stroke:#050510; fill:none; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
+
+    /* Section tabs */
+    .tabs-row {
+      position:absolute; top:108px; left:0; right:0; padding: 6px 14px 10px;
+      z-index:10; background: rgba(2,2,10,0.85); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+    .tabs {
+      display:flex; gap:6px; overflow-x:auto; overflow-y:hidden; padding: 0 4px; -webkit-overflow-scrolling: touch;
+    }
+    .tabs::-webkit-scrollbar { display:none; }
+    .stab {
+      padding: 7px 13px; border-radius: 999px;
+      background: rgba(255,255,255,0.03); border:1px solid var(--border-strong);
+      font-family:inherit; font-size:11px; font-weight:700; letter-spacing:0.06em;
+      color: var(--muted); cursor:pointer; white-space:nowrap; flex-shrink:0;
+      transition: all 0.15s;
+    }
+    .stab:hover { background: rgba(255,255,255,0.06); color:#fff; }
+    .stab.active { background: var(--tab-c, var(--accent)); color:#050510; border-color: var(--tab-c, var(--accent)); box-shadow: 0 0 14px var(--tab-c-soft, rgba(74,143,255,0.45)); }
+
+    /* Scroll area */
+    .scroll {
+      position:absolute; top:158px; left:0; right:0; bottom:78px;
+      overflow-y:auto; padding: 12px 16px 20px; z-index:5;
+    }
+    .scroll::-webkit-scrollbar { display:none; }
+
+    /* Empty state */
+    .empty-state {
+      padding: 60px 20px; text-align:center; color: var(--muted);
+    }
+    .empty-state .ico { width:48px; height:48px; margin: 0 auto 14px; border-radius:14px; background: rgba(255,255,255,0.04); border:1px solid var(--border-strong); display:flex; align-items:center; justify-content:center; }
+    .empty-state .ico svg { width:20px; height:20px; stroke:var(--muted); fill:none; stroke-width:1.7; }
+    .empty-state .t { font-size:15px; font-weight:700; color:#fff; letter-spacing:-0.2px; }
+    .empty-state .s { font-size:12px; margin-top:6px; line-height:17px; }
+    .empty-state .cta-mini { display:inline-block; margin-top: 16px; padding: 9px 16px; border-radius:999px; background:#fff; color:#050510; font-size:12px; font-weight:700; cursor:pointer; }
+
+    /* Find-people row */
+    .find-row {
+      display:flex; align-items:center; gap:10px; padding: 10px 12px; margin-bottom: 14px;
+      border-radius: 14px; background: rgba(74,143,255,0.08); border:1px solid rgba(74,143,255,0.30); cursor:pointer;
+    }
+    .find-row svg { width:18px; height:18px; stroke: var(--accent-hi); fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+    .find-row .ft { flex:1; font-size:13px; font-weight:600; color:#fff; letter-spacing:-0.15px; }
+    .find-row .ft span { color: var(--muted); font-weight:500; font-size:11px; display:block; margin-top:1px; }
+    .find-row .arr { color: var(--accent-hi); font-size:16px; }
+
+    /* Post card */
+    .post {
+      border-radius: 18px;
+      background: rgba(255,255,255,0.03); border:1px solid var(--border-strong);
+      padding: 14px; margin-bottom: 12px;
+      transition: border-color .3s, box-shadow .3s;
+    }
+    .post.just-posted {
+      border-color: rgba(52,211,153,0.50);
+      box-shadow: 0 0 0 1px rgba(52,211,153,0.30), 0 0 28px rgba(52,211,153,0.18);
+      animation: postFlash 1.6s ease-out 1;
+    }
+    @keyframes postFlash { 0% { box-shadow: 0 0 0 1px rgba(52,211,153,0.60), 0 0 48px rgba(52,211,153,0.40); } 100% { box-shadow: 0 0 0 1px rgba(52,211,153,0.30), 0 0 28px rgba(52,211,153,0.18); } }
+    .post-head { display:flex; align-items:center; gap:10px; margin-bottom: 10px; }
+    .post-avatar { width:36px; height:36px; border-radius:50%; flex-shrink:0; }
+    .post-meta { flex:1; min-width:0; }
+    .post-name {
+      font-size:13px; font-weight:700; color:#fff; letter-spacing:-0.15px;
+      display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+    }
+    .post-time { font-size:10px; color: var(--muted); margin-top:1px; }
+    .post-menu { width:26px; height:26px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--muted); }
+    .post-menu svg { width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:1.6; }
+
+    .rank-pill {
+      padding: 2px 7px; border-radius: 999px;
+      font-size: 8.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      background: var(--rp-bg, rgba(155,194,255,0.14));
+      border:1px solid var(--rp-bd, rgba(155,194,255,0.35));
+      color: var(--rp-c, #9BC2FF);
+    }
+    /* 10-tier rank pills */
+    .rp-iron        { --rp-bg: rgba(154,160,170,0.14); --rp-bd: rgba(154,160,170,0.35); --rp-c:#C0C5D0; }
+    .rp-bronze      { --rp-bg: rgba(255,154,47,0.14); --rp-bd: rgba(255,154,47,0.40); --rp-c:#FFB870; }
+    .rp-silver      { --rp-bg: rgba(219,233,255,0.14); --rp-bd: rgba(219,233,255,0.40); --rp-c:#E9F3FF; }
+    .rp-gold        { --rp-bg: rgba(255,216,77,0.14); --rp-bd: rgba(255,216,77,0.42); --rp-c:#FFE070; }
+    .rp-emerald     { --rp-bg: rgba(49,245,178,0.14); --rp-bd: rgba(49,245,178,0.42); --rp-c:#5DF8C5; }
+    .rp-platinum    { --rp-bg: rgba(56,199,255,0.14); --rp-bd: rgba(56,199,255,0.42); --rp-c:#7DD8FF; }
+    .rp-diamond     { --rp-bg: rgba(169,112,255,0.14); --rp-bd: rgba(169,112,255,0.45); --rp-c:#BC95FF; }
+    .rp-master      { --rp-bg: rgba(255,90,61,0.14); --rp-bd: rgba(255,90,61,0.45); --rp-c:#FF8870; }
+    .rp-grandmaster { --rp-bg: rgba(227,92,255,0.14); --rp-bd: rgba(227,92,255,0.45); --rp-c:#EB85FF; }
+    .rp-legend      { --rp-bg: rgba(255,230,109,0.16); --rp-bd: rgba(255,230,109,0.50); --rp-c:#FFEC8E; }
+
+    .section-tag {
+      display:inline-flex; align-items:center; gap:5px; padding: 3px 9px; border-radius:999px;
+      background: var(--tag-soft, rgba(74,143,255,0.10)); border:1px solid var(--tag-bd, rgba(74,143,255,0.32));
+      color: var(--tag-c, var(--accent-hi));
+      font-size: 9.5px; font-weight:700; letter-spacing:0.10em; text-transform:uppercase; margin-bottom:9px;
+    }
+    .section-tag .dot { width:5px; height:5px; border-radius:50%; background: currentColor; box-shadow:0 0 6px currentColor; }
+
+    .post-text { font-size:13.5px; color:#E5E9F0; line-height:1.42; letter-spacing:-0.1px; margin: 0 0 12px; }
+    .post-text .filtered { background: rgba(248,113,113,0.18); color: var(--danger); border-radius: 3px; padding: 0 4px; font-weight: 500; }
+
+    /* Score card — the "picture" of the post */
+    .scorecard {
+      position:relative; padding: 14px 16px; border-radius: 14px; overflow:hidden;
+      background: var(--sc-bg, linear-gradient(135deg, rgba(74,143,255,0.16) 0%, rgba(74,143,255,0.04) 100%));
+      border: 1px solid var(--sc-bd, rgba(74,143,255,0.32));
+      margin-bottom: 10px;
+    }
+    .scorecard::before {
+      content:""; position:absolute; top:-30px; right:-30px; width:120px; height:120px; border-radius:50%;
+      background: radial-gradient(circle, var(--sc-glow, rgba(74,143,255,0.30)) 0%, transparent 65%);
+      pointer-events:none;
+    }
+    .sc-row { display:flex; align-items:center; gap:12px; position:relative; z-index:2; }
+    .sc-left { flex:1; min-width:0; }
+    .sc-label { font-size:10px; letter-spacing:0.20em; text-transform:uppercase; color: var(--sc-c, var(--accent-hi)); font-weight:700; }
+    .sc-num { font-size:36px; font-weight:800; letter-spacing:-1.4px; line-height:1; color:#fff; margin-top:2px; }
+    .sc-num-sub { font-size:13px; color: var(--muted); font-weight:500; letter-spacing:-0.3px; margin-left:3px; }
+    .sc-note { font-size:11px; color:#D0D4E0; margin-top:5px; letter-spacing:-0.1px; }
+    .sc-right { width:64px; height:64px; flex-shrink:0; }
+    .sc-ring-bg { stroke: rgba(255,255,255,0.07); fill: none; stroke-width: 6; }
+    .sc-ring-fg { fill: none; stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset 0.6s cubic-bezier(0.22,1,0.36,1); }
+    .sc-bar { height: 4px; margin-top: 9px; border-radius: 999px; background: rgba(255,255,255,0.07); overflow:hidden; position:relative; z-index:2; }
+    .sc-bar-fill { height:100%; border-radius:999px; background: var(--sc-c, var(--accent-hi)); box-shadow: 0 0 8px var(--sc-c, var(--accent-hi)); }
+
+    /* Action row */
+    .post-actions { display:flex; align-items:center; gap:14px; }
+    .pa-btn {
+      background:none; border:none; padding: 6px 4px; cursor:pointer;
+      display:flex; align-items:center; gap:5px; color: var(--muted); font-family:inherit; font-size:12px; font-weight:600;
+      transition: color 0.15s;
+    }
+    .pa-btn:hover { color: #fff; }
+    .pa-btn svg { width:17px; height:17px; stroke:currentColor; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+    .pa-btn.liked { color: var(--danger); }
+    .pa-btn.liked svg { fill: var(--danger); }
+
+    /* Bottom tab bar */
+    .tabbar {
+      position:absolute; bottom:0; left:0; right:0; padding: 10px 14px 28px;
+      display:flex; justify-content:space-around; align-items:flex-end; gap:4px;
+      background: linear-gradient(180deg, transparent 0%, rgba(2,2,10,0.85) 35%, rgba(2,2,10,0.95) 100%);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      z-index: 20; border-top: 1px solid var(--border);
+    }
+    .tab {
+      flex:1; display:flex; flex-direction:column; align-items:center; gap:3px;
+      background:none; border:none; cursor:pointer; padding: 4px 0;
+      font-family:inherit; color: var(--muted); transition: color .15s;
+    }
+    .tab svg { width:22px; height:22px; stroke: currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+    .tab span { font-size:10px; font-weight:600; letter-spacing:0.02em; }
+    .tab.active { color: var(--accent-hi); }
+    .tab.active svg { filter: drop-shadow(0 0 6px var(--accent)); }
+
+    .preview-label { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); color:#4A5060; font-size:11px; letter-spacing:0.16em; text-transform:uppercase; font-family:ui-monospace,"SF Mono",Menlo,monospace; }
+
+    @media (max-width: 460px) {
+      body { padding:0; }
+      .phone { width:100vw; height:100vh; height:100dvh; border-radius:0; box-shadow:none; }
+      .notch, .home-indicator, .preview-label { display:none; }
+    }
+    @media (prefers-reduced-motion: reduce) { .star { animation: none !important; } }
+  </style>
+  <script src="_lib/core-state.js"></script>
+  <script src="_lib/restore-banner.js"></script>
+  <script src="_lib/analytics.js"></script>
+  <script src="_lib/core-back.js"></script>
+  <script src="_lib/core-toast.js"></script>
+  <script src="_lib/core-avatar.js"></script>
+  <link rel="stylesheet" href="_lib/core-responsive.css">
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div>
+    <div class="stars" id="stars"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="header">
+      <div class="header-title">Feed</div>
+      <div class="header-actions">
+        <div class="icon-btn" onclick="window.location.href='67-find-friends.html'" aria-label="Find friends">
+          <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21v-2c0-3 3-5 7-5s7 2 7 5v2"/><path d="M18 6v6M15 9h6"/></svg>
+        </div>
+        <button class="compose-btn" onclick="window.location.href='60-compose.html'">
+          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          Post
+        </button>
+      </div>
+    </div>
+
+    <div class="tabs-row">
+      <div class="tabs" id="tabs">
+        <button class="stab active" data-tab="all"     style="--tab-c: var(--c-all);     --tab-c-soft: rgba(107,169,255,0.45);">All</button>
+        <button class="stab"        data-tab="fitness" style="--tab-c: var(--c-fitness); --tab-c-soft: rgba(52,211,153,0.45);">Fitness</button>
+        <button class="stab"        data-tab="mind"    style="--tab-c: var(--c-mind);    --tab-c-soft: rgba(179,136,255,0.45);">Mind</button>
+        <button class="stab"        data-tab="wallet"  style="--tab-c: var(--c-wallet);  --tab-c-soft: rgba(255,208,92,0.45);">Wallet</button>
+        <button class="stab"        data-tab="body"    style="--tab-c: var(--c-body);    --tab-c-soft: rgba(255,107,170,0.45);">Body</button>
+        <button class="stab"        data-tab="streaks" style="--tab-c: var(--c-streaks); --tab-c-soft: rgba(255,122,69,0.45);">Streaks</button>
+      </div>
+    </div>
+
+    <div class="scroll" id="scroll">
+      <div id="coreRestoreBanner" style="display:none; margin-bottom:12px;"></div>
+
+      <!-- Find people CTA — always visible, leads to add/follow flow -->
+      <div class="find-row" onclick="window.location.href='67-find-friends.html'">
+        <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21v-2c0-3 3-5 7-5s7 2 7 5v2"/><path d="M18 6v6M15 9h6"/></svg>
+        <div class="ft">Add people<span>Follow others to see their honest logs</span></div>
+        <span class="arr">›</span>
+      </div>
+
+      <div id="postList"></div>
+
+      <!-- Empty-state template (hidden by default) -->
+      <div id="emptyState" class="empty-state" style="display:none;">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
+        <div class="t" id="emptyTitle">Nothing here yet</div>
+        <div class="s" id="emptySub">Post the first honest log in this section.</div>
+        <div class="cta-mini" onclick="window.location.href='60-compose.html'">Post to feed</div>
+      </div>
+    </div>
+
+    <div class="tabbar">
+      <button class="tab" onclick="window.location.href='20-dashboard.html'" aria-label="Home">
+        <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+        <span>Home</span>
+      </button>
+      <button class="tab active" aria-label="Feed">
+        <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>
+        <span>Feed</span>
+      </button>
+      <button class="tab" onclick="window.location.href='39-coach.html'" aria-label="Coach">
+        <svg viewBox="0 0 24 24"><path d="M21 12c0 5-4.5 8-9 8a9 9 0 0 1-3.5-.7L3 21l1.7-5.5A9 9 0 0 1 3 12c0-5 4.5-8 9-8s9 3 9 8z"/></svg>
+        <span>Coach</span>
+      </button>
+      <button class="tab" onclick="window.location.href='45-ranks.html'" aria-label="Ranks">
+        <svg viewBox="0 0 24 24"><path d="M6 9l3-6 3 6 3-3 3 3v12H6z"/><path d="M2 21h20"/></svg>
+        <span>Ranks</span>
+      </button>
+      <button class="tab" onclick="window.location.href='62-profile.html'" aria-label="You">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg>
+        <span>You</span>
+      </button>
+    </div>
+  </div>
+  <div class="preview-label">core · feed · v2</div>
+
+<script>
+  // Section → color + descriptor (kept fixed per Stone's spec)
+  const SECTIONS = {
+    fitness: { name:'Fitness', c:'#34D399', soft:'rgba(52,211,153,0.16)',  bd:'rgba(52,211,153,0.34)',  glow:'rgba(52,211,153,0.28)',  label:'Fitness' },
+    mind:    { name:'Mind',    c:'#B388FF', soft:'rgba(179,136,255,0.16)', bd:'rgba(179,136,255,0.34)', glow:'rgba(179,136,255,0.28)', label:'Mind' },
+    wallet:  { name:'Wallet',  c:'#FFD05C', soft:'rgba(255,208,92,0.16)',  bd:'rgba(255,208,92,0.34)',  glow:'rgba(255,208,92,0.28)',  label:'Wallet' },
+    body:    { name:'Body',    c:'#FF6BAA', soft:'rgba(255,107,170,0.16)', bd:'rgba(255,107,170,0.34)', glow:'rgba(255,107,170,0.28)', label:'Body' },
+    streaks: { name:'Streaks', c:'#FF7A45', soft:'rgba(255,122,69,0.16)',  bd:'rgba(255,122,69,0.34)',  glow:'rgba(255,122,69,0.28)',  label:'Streaks' },
+  };
+
+  // Demo posts. In production these come from a backend.
+  // Each post carries a section and an autogenerated score-card payload.
+  const POSTS = [
+    {
+      id:'p1', section:'body', author:'Aya', rank:'gold', rankLabel:'Gold', time:'18 min ago',
+      avatarGrad:'radial-gradient(circle at 35% 28%, #FFD3E4 0%, #FF6BAA 60%, #832D50 100%)',
+      text:"Three weeks ago I couldn't walk up a flight without wheezing. Just ran 5km. The lungs heal faster than you think.",
+      score: { label:'Lungs', n:86, note:'Day 18 clean · ↑ 22 this month' },
+      likes: 42, comments: 9, liked: true,
+    },
+    {
+      id:'p2', section:'streaks', author:'Kai', rank:'silver', rankLabel:'Silver', time:'1h ago',
+      avatarGrad:'radial-gradient(circle at 35% 28%, #DCC8FF 0%, #B388FF 60%, #4F3A8A 100%)',
+      text:"Day 9. The 9pm cravings are still there. I just notice them now instead of acting on them.",
+      score: { label:'Streak', n:9, note:'9-day streak · vape clean', unit:'days' },
+      likes: 18, comments: 3, liked: false,
+    },
+    {
+      id:'p3', section:'mind', author:'Saga', rank:'platinum', rankLabel:'Platinum', time:'3h ago',
+      avatarGrad:'radial-gradient(circle at 35% 28%, #C2F3F5 0%, #5CE1E6 60%, #2E9CA0 100%)',
+      text:"Slept 9 hours straight last night. First time in years. Don't let anyone <span class='filtered'>[filtered]</span> tell you alcohol \"helps\" you sleep — it absolutely doesn't.",
+      score: { label:'Brain', n:88, note:'Sharp · ↑ 9 this week' },
+      likes: 67, comments: 14, liked: false,
+    },
+    {
+      id:'p4', section:'wallet', author:'Wren', rank:'bronze', rankLabel:'Bronze', time:'5h ago',
+      avatarGrad:'radial-gradient(circle at 35% 28%, #FFEEBF 0%, #FFD05C 60%, #876619 100%)',
+      text:"24h cart rule saved me $180 this week. The wallet stat finally moving up after months of red.",
+      score: { label:'Wallet', n:62, note:'Good · ↑ 8 this week' },
+      likes: 23, comments: 5, liked: false,
+    },
+    {
+      id:'p5', section:'fitness', author:'Liv', rank:'emerald', rankLabel:'Emerald', time:'today',
+      avatarGrad:'radial-gradient(circle at 35% 28%, #FFCEB3 0%, #FF7A45 60%, #813617 100%)',
+      text:'5 workouts this week. First time in 6 months. The streak is louder than the excuses.',
+      score: { label:'Body', n:79, note:'Good · ↑ 14 this month' },
+      likes: 51, comments: 8, liked: true,
+    },
+    {
+      id:'p6', section:'streaks', author:'Jordan', rank:'diamond', rankLabel:'Diamond', time:'today',
+      avatarGrad:'radial-gradient(circle at 35% 28%, #FFD3E4 0%, #FF6BAA 60%, #832D50 100%)',
+      text:'Day 100. The version of me from January would not believe this.',
+      score: { label:'Streak', n:100, note:'100-day streak · porn clean', unit:'days' },
+      likes: 312, comments: 47, liked: false,
+    }
+  ];
+
+  function escapeHtml(s) { return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+  function safeText(s) { return s; /* posts carry sanitized HTML demo (filtered span) */ }
+
+  // SVG ring path for a 0-100 score
+  function ringPath(pct, color) {
+    const r = 27, c = 2 * Math.PI * r;
+    const dash = (Math.max(0, Math.min(100, pct)) / 100) * c;
+    return `<svg viewBox="0 0 64 64">
+      <circle class="sc-ring-bg" cx="32" cy="32" r="${r}"/>
+      <circle class="sc-ring-fg" cx="32" cy="32" r="${r}" stroke="${color}"
+        stroke-dasharray="${c}" stroke-dashoffset="${c - dash}"
+        transform="rotate(-90 32 32)" style="filter: drop-shadow(0 0 6px ${color});"/>
+      <text x="32" y="38" text-anchor="middle" fill="#fff" font-size="16" font-weight="800" font-family="-apple-system,Inter,sans-serif" letter-spacing="-0.6">${pct}</text>
+    </svg>`;
+  }
+
+  function renderPost(p) {
+    const sec = SECTIONS[p.section] || SECTIONS.streaks;
+    const isStreak = p.score && (p.score.unit === 'days' || p.section === 'streaks');
+    const ringPct = isStreak ? Math.min(100, p.score.n) : p.score.n;
+    const justId = (function(){ try { return sessionStorage.getItem('coreJustPostedId'); } catch(e){ return null; } })();
+    const justFlag = (justId && justId === p.id) ? ' just-posted' : '';
+    return `
+      <article class="post${justFlag}" data-section="${p.section}">
+        <div class="post-head">
+          <div class="post-avatar" style="background:${p.avatarGrad}; cursor:pointer;" onclick="openUserProfile('${encodeURIComponent(p.author)}')"></div>
+          <div class="post-meta">
+            <div class="post-name" style="cursor:pointer;" onclick="openUserProfile('${encodeURIComponent(p.author)}')"><span class="${p.isMine ? 'core-username' : ''}">${escapeHtml(p.author)}</span> <span class="rank-pill rp-${p.rank}">${escapeHtml(p.rankLabel)}</span></div>
+            <div class="post-time">${escapeHtml(p.time)}</div>
+          </div>
+          <div class="post-menu" onclick="postAction('${p.id}')"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></div>
+        </div>
+        <div class="section-tag" style="--tag-c:${sec.c}; --tag-soft:${sec.soft}; --tag-bd:${sec.bd};">
+          <span class="dot"></span>${sec.label}
+        </div>
+        <p class="post-text">${safeText(p.text)}</p>
+        <div class="scorecard" onclick="openScoreDetail('${p.section}', event)" style="--sc-bg: linear-gradient(135deg, ${sec.soft} 0%, rgba(255,255,255,0.02) 100%); --sc-bd:${sec.bd}; --sc-glow:${sec.glow}; --sc-c:${sec.c}; cursor:pointer;">
+          <div class="sc-row">
+            <div class="sc-left">
+              <div class="sc-label">${escapeHtml(p.score.label)}</div>
+              <div><span class="sc-num">${p.score.n}</span><span class="sc-num-sub">${p.score.unit ? '' : '/100'}</span></div>
+              <div class="sc-note">${escapeHtml(p.score.note)}</div>
+            </div>
+            <div class="sc-right">${ringPath(ringPct, sec.c)}</div>
+          </div>
+        </div>
+        <div class="post-actions">
+          <button class="pa-btn ${p.liked ? 'liked' : ''}" onclick="toggleLike(this, '${p.id}')">
+            <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            <span class="like-count">${p.likes}</span>
+          </button>
+          <button class="pa-btn" onclick="window.location.href='61-comments.html?post=${p.id}'">
+            <svg viewBox="0 0 24 24"><path d="M21 12c0 5-4.5 8-9 8a9 9 0 0 1-3.5-.7L3 21l1.7-5.5A9 9 0 0 1 3 12c0-5 4.5-8 9-8s9 3 9 8z"/></svg>
+            <span>${p.comments}</span>
+          </button>
+          <button class="pa-btn" style="margin-left:auto;" onclick="sharePost('${p.id}')" aria-label="Share">
+            <svg viewBox="0 0 24 24"><path d="M4 12v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8M16 6l-4-4-4 4M12 2v14"/></svg>
+          </button>
+        </div>
+      </article>`;
+  }
+
+  // Load user-created posts (from 60-compose.html) and convert to display shape
+  function loadUserPosts() {
+    try {
+      const raw = JSON.parse(localStorage.getItem('coreUserPosts') || '[]');
+      let authorName = 'You';
+      try { const t = JSON.parse(localStorage.getItem('coreOnboardTrial') || '{}'); if (t.name) authorName = t.name; } catch(e){}
+      let rankLabel = 'Iron', rankKey = 'iron';
+      try { const s = coreState.read(); const r = coreState.rankFor(s.xp || 0); if (r) { rankLabel = r.name; rankKey = r.name.toLowerCase().replace(/\s+/g, ''); } } catch(e){}
+      // Selected avatar gradient (Core / Rise / Wave / etc.) for own posts
+      let myAvatar = 'radial-gradient(circle at 35% 28%, #DCEBFF 0%, #4A8FFF 60%, #1856B8 100%)';
+      try { if (window.coreAvatar) myAvatar = coreAvatar.gradient(coreAvatar.current().key); } catch(e){}
+      return raw.map(p => ({
+        id: p.id, section: p.section, author: authorName, rank: rankKey, rankLabel: rankLabel,
+        time: friendlyAgo(p.ts),
+        avatarGrad: myAvatar,
+        text: p.text,
+        score: p.score,
+        likes: 0, comments: 0, liked: false,
+        isMine: true,
+      }));
+    } catch(e) { return []; }
+  }
+  function friendlyAgo(ts) {
+    const diff = Date.now() - ts;
+    if (diff < 60000) return 'just now';
+    if (diff < 3600000) return Math.floor(diff/60000) + 'm ago';
+    if (diff < 86400000) return Math.floor(diff/3600000) + 'h ago';
+    return Math.floor(diff/86400000) + 'd ago';
+  }
+
+  function renderFeed(filter) {
+    const list = document.getElementById('postList');
+    const userPosts = loadUserPosts();
+    const allPosts = [...userPosts, ...POSTS];
+    const visible = filter === 'all' ? allPosts : allPosts.filter(p => p.section === filter);
+    list.innerHTML = visible.map(renderPost).join('');
+    applyPersistedLikes();
+    // Clear the just-posted flag once we've shown it once
+    try { sessionStorage.removeItem('coreJustPostedId'); } catch(e){}
+    const empty = document.getElementById('emptyState');
+    if (visible.length === 0) {
+      empty.style.display = 'block';
+      const sec = SECTIONS[filter];
+      document.getElementById('emptyTitle').textContent = sec ? `No ${sec.name} posts yet` : 'Nothing here yet';
+      document.getElementById('emptySub').textContent = 'Post the first honest log in this section.';
+    } else {
+      empty.style.display = 'none';
+    }
+  }
+
+  // Tab activation
+  let activeTab = 'all';
+  function setTab(name) {
+    activeTab = name;
+    document.querySelectorAll('.stab').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+    renderFeed(name);
+    try { sessionStorage.setItem('coreFeedTab', name); } catch(e){}
+    if (window.coreTrack) coreTrack('feed_tab_changed', { tab: name });
+  }
+  document.querySelectorAll('.stab').forEach(b => {
+    b.addEventListener('click', () => setTab(b.dataset.tab));
+  });
+
+  // Like toggle — persists across reloads via localStorage.coreLikes
+  function getLikes() { try { return JSON.parse(localStorage.getItem('coreLikes') || '{}'); } catch(e) { return {}; } }
+  function setLikes(o) { try { localStorage.setItem('coreLikes', JSON.stringify(o)); } catch(e){} }
+  function toggleLike(btn, id) {
+    const liked = btn.classList.toggle('liked');
+    const span = btn.querySelector('.like-count');
+    const n = parseInt(span.textContent, 10) || 0;
+    span.textContent = liked ? n + 1 : Math.max(0, n - 1);
+    const map = getLikes();
+    if (liked) map[id] = true; else delete map[id];
+    setLikes(map);
+    if (window.coreTrack) coreTrack('post_liked', { id, liked });
+  }
+  // Apply persisted likes on render
+  function applyPersistedLikes() {
+    const map = getLikes();
+    document.querySelectorAll('.pa-btn[onclick*="toggleLike"]').forEach(btn => {
+      const m = btn.getAttribute('onclick').match(/'([^']+)'/);
+      const id = m && m[1];
+      if (!id) return;
+      if (map[id] && !btn.classList.contains('liked')) {
+        btn.classList.add('liked');
+        const span = btn.querySelector('.like-count');
+        if (span) span.textContent = (parseInt(span.textContent, 10) || 0) + 1;
+      }
+    });
+  }
+  function postAction(id) {
+    if (window.coreTrack) coreTrack('post_menu_opened', { id });
+    // Simple action sheet
+    const choice = prompt('Post options:\n1) Save\n2) Hide\n3) Report\nType 1, 2, or 3 (or Cancel)');
+    if (choice === '3') alert('Reported. Thanks — we review every flag.');
+  }
+  function sharePost(id) {
+    if (window.coreTrack) coreTrack('post_shared', { id });
+    window.location.href = '56-share-options.html?post=' + encodeURIComponent(id);
+  }
+  // Tap a post author's name or avatar → their profile
+  function openUserProfile(u) {
+    window.location.href = '63-user-profile.html?u=' + u;
+  }
+  window.openUserProfile = openUserProfile;
+  // Tap a scorecard → open the matching stat detail
+  function openScoreDetail(section, e) {
+    if (e) e.stopPropagation();
+    const SEC_TO_STAT = { fitness:'body', mind:'brain', wallet:'wallet', body:'lungs', streaks:'willpower' };
+    const stat = SEC_TO_STAT[section] || 'brain';
+    window.location.href = '30-stat.html#' + stat;
+  }
+  window.openScoreDetail = openScoreDetail;
+  window.toggleLike = toggleLike;
+  window.postAction = postAction;
+  window.sharePost = sharePost;
+
+  // Stars
+  (function() {
+    const sl = document.getElementById('stars');
+    for (let i = 0; i < 40; i++) {
+      const s = document.createElement('div');
+      s.className = 'star ' + (Math.random() < 0.7 ? 's1' : 's2');
+      s.style.left = (Math.random() * 100) + '%';
+      s.style.top  = (Math.random() * 100) + '%';
+      s.style.setProperty('--d',   (2.5 + Math.random() * 5) + 's');
+      s.style.setProperty('--del', (Math.random() * 5) + 's');
+      s.style.setProperty('--min', (0.08 + Math.random() * 0.15).toFixed(2));
+      s.style.setProperty('--max', (0.40 + Math.random() * 0.30).toFixed(2));
+      sl.appendChild(s);
+    }
+  })();
+
+  // Restore previously-selected tab if there was one
+  try {
+    const saved = sessionStorage.getItem('coreFeedTab');
+    if (saved && SECTIONS[saved]) setTab(saved);
+    else setTab('all');
+  } catch(e) { setTab('all'); }
+
+  if (window.coreTrack) coreTrack('screen_view', { screen: 'feed' });
+</script>
+<script src="_lib/core-header.js"></script>
+<script src="_lib/core-tabbar.js"></script>
+</body>
+</html>

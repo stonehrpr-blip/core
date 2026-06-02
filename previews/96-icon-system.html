@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+  <meta charset="utf-8" />
+  <title>Core — Icon system</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <style>
+    :root { --bg-base:#02020A; --text-primary:#F8FAFE; --text-muted:#9AA1B7; --text-dim:#4F5570; --accent:#4A8FFF; }
+    * { box-sizing: border-box; }
+    html, body { margin:0; padding:0; height:100%; }
+    body { min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text-primary); -webkit-font-smoothing:antialiased; padding:24px; overflow:hidden; }
+    .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+    .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:10; }
+    .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:10; }
+
+    .bg { position:absolute; inset:0; background: linear-gradient(180deg, #0A0820 0%, var(--bg-base) 50%, #050510 100%); }
+    .grain { position:absolute; inset:0; opacity:0.04; mix-blend-mode:overlay; z-index:2; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.7 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); pointer-events:none; }
+
+    .topbar { position:absolute; top:60px; left:0; right:0; padding:0 20px; display:flex; align-items:center; justify-content:space-between; z-index:10; }
+    .back {
+      width: 38px !important; height: 38px !important;
+      min-width: 38px !important; min-height: 38px !important;
+      max-width: 38px !important; max-height: 38px !important;
+      aspect-ratio: 1 / 1;
+      flex: 0 0 38px;
+      align-self: center;
+      border-radius: 50% !important;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.10);
+      display: flex !important; align-items: center !important; justify-content: center !important;
+      cursor: pointer; padding: 0;
+      font-family: inherit;
+      box-sizing: border-box;
+      transition: background .15s, border-color .15s, transform .12s;
+    }
+    .back:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }
+    .back:active { transform: scale(0.94); }
+    .back svg { width:14px; height:14px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex-shrink: 0; }
+    .topbar-title { font-size:17px; font-weight:600; letter-spacing:-0.2px; }
+
+    .scroll { position:absolute; top:120px; left:0; right:0; bottom:0; padding:0 24px 28px; overflow-y:auto; z-index:5; }
+    .scroll::-webkit-scrollbar { display:none; }
+
+    /* Rules card */
+    .rules { padding: 14px 16px; border-radius: 14px; background: rgba(74,143,255,0.06); border:1px solid rgba(74,143,255,0.20); margin-bottom: 18px; }
+    .rules-l { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: 8px; }
+    .rule-row { display:flex; gap: 8px; font-size: 11px; line-height: 16px; color: var(--text-primary); padding: 4px 0; letter-spacing:-0.05px; }
+    .rule-row strong { color: var(--accent); font-weight: 600; }
+    .rule-row::before { content:"·"; color: var(--accent); flex-shrink:0; }
+
+    /* Section label */
+    .section-label { font-size: 10px; letter-spacing:0.22em; text-transform:uppercase; color:var(--text-muted); font-weight:500; margin: 18px 4px 10px; }
+
+    /* Icon grid */
+    .icon-grid { display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
+    .ic-tile { padding: 10px 6px; border-radius: 10px; background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); display:flex; flex-direction:column; align-items:center; gap: 6px; cursor:pointer; transition: all 0.15s; }
+    .ic-tile:hover { background: rgba(255,255,255,0.05); }
+    .ic-svg { width: 28px; height: 28px; }
+    .ic-svg svg { width: 100%; height: 100%; stroke: var(--text-primary); fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+    .ic-svg.accent svg { stroke: var(--accent); }
+    .ic-name { font-size: 9px; color: var(--text-muted); text-align: center; letter-spacing:-0.05px; line-height: 11px; }
+
+    /* Stat icons (colored) */
+    .stat-row { display:grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap: 8px; }
+    .stat-tile { padding: 14px 6px; border-radius: 12px; background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); display:flex; flex-direction:column; align-items:center; gap: 6px; }
+    .stat-ico { width: 36px; height: 36px; border-radius:10px; background: var(--c); box-shadow: 0 0 14px var(--c); display:flex; align-items:center; justify-content:center; position:relative; }
+    .stat-ico::after { content:""; position:absolute; inset:0; border-radius:10px; background: linear-gradient(160deg, rgba(255,255,255,0.30) 0%, transparent 45%); }
+    .stat-ico svg { width:18px; height:18px; stroke:white; fill:none; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; position:relative; z-index:2; }
+    .stat-n { font-size: 9px; letter-spacing:0.16em; text-transform: uppercase; color: var(--text-muted); font-weight: 500; }
+
+    /* Spec list */
+    .spec-card { padding: 14px 16px; border-radius:14px; background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); }
+    .spec-row { display:flex; justify-content:space-between; padding: 6px 0; font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .spec-row:last-child { border-bottom: none; }
+    .spec-key { color: var(--text-muted); }
+    .spec-val { color: var(--text-primary); font-weight: 600; font-family: ui-monospace,"SF Mono",Menlo,monospace; }
+
+    /* Sizes preview */
+    .sizes { display:flex; gap: 10px; align-items:center; padding: 14px 16px; border-radius:14px; background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); justify-content:space-around; }
+    .size-c { display:flex; flex-direction:column; align-items:center; gap:5px; }
+    .size-i svg { stroke: var(--text-primary); fill:none; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+    .size-i.s14 svg { width:14px; height:14px; }
+    .size-i.s18 svg { width:18px; height:18px; }
+    .size-i.s22 svg { width:22px; height:22px; }
+    .size-i.s28 svg { width:28px; height:28px; }
+    .size-i.s36 svg { width:36px; height:36px; }
+    .size-l { font-size: 9px; color: var(--text-muted); letter-spacing: 0.06em; font-family: ui-monospace,"SF Mono",Menlo,monospace; }
+
+    .preview-label { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); color:#4A5060; font-size:11px; letter-spacing:0.16em; text-transform:uppercase; font-family:ui-monospace,"SF Mono",Menlo,monospace; }
+    @media (max-width:460px){ body{padding:0;} .phone{width:100vw; height:100vh; border-radius:0; box-shadow:none;} .notch,.home-indicator{display:none;} .preview-label{display:none;} }
+  </style>
+  <link rel="stylesheet" href="_lib/core-responsive.css">
+  <script src="_lib/core-back.js"></script>
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div>
+    <div class="grain"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="topbar">
+      <button class="back" type="button" onclick="window.location.href='01-index.html'" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18L9 12l6-6"/></svg></button>
+      <div class="topbar-title">Icon system</div>
+      <div style="width:36px;"></div>
+    </div>
+
+    <div class="scroll">
+      <div class="rules">
+        <div class="rules-l">House rules</div>
+        <div class="rule-row"><strong>Style:</strong> Phosphor / Lucide stroke icons</div>
+        <div class="rule-row"><strong>Stroke width:</strong> 1.6 px consistent (1.8 only on 14px and below)</div>
+        <div class="rule-row"><strong>Caps:</strong> stroke-linecap round, linejoin round</div>
+        <div class="rule-row"><strong>ViewBox:</strong> 0 0 24 24</div>
+        <div class="rule-row"><strong>Fill:</strong> never. Outline only (except brand icons)</div>
+        <div class="rule-row"><strong>Color:</strong> currentColor or stat color. Never hex-coded</div>
+        <div class="rule-row"><strong>No emoji icons</strong> — anywhere, ever</div>
+      </div>
+
+      <div class="section-label">Tab bar (5)</div>
+      <div class="icon-grid">
+        <div class="ic-tile"><div class="ic-svg accent"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg></div><div class="ic-name">Home</div></div>
+        <div class="ic-tile"><div class="ic-svg"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></div><div class="ic-name">Feed</div></div>
+        <div class="ic-tile"><div class="ic-svg"><svg viewBox="0 0 24 24"><path d="M21 12c0 5-4.5 8-9 8a9 9 0 0 1-3.5-.7L3 21l1.7-5.5A9 9 0 0 1 3 12c0-5 4.5-8 9-8s9 3 9 8z"/></svg></div><div class="ic-name">Coach</div></div>
+        <div class="ic-tile"><div class="ic-svg"><svg viewBox="0 0 24 24"><path d="M6 21v-7M6 14l-3 7M6 14l3 7M12 21V9M12 9l-3 12M12 9l3 12M18 21V3M18 3l-3 18M18 3l3 18"/></svg></div><div class="ic-name">Ranks</div></div>
+        <div class="ic-tile"><div class="ic-svg"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg></div><div class="ic-name">You</div></div>
+      </div>
+
+      <div class="section-label">Stat icons (5)</div>
+      <div class="stat-row">
+        <div class="stat-tile"><div class="stat-ico" style="--c:#FF6BAA;"><svg viewBox="0 0 24 24"><path d="M12 4v12"/><path d="M12 16c0 2-1.2 4-3 4-2.5 0-4-2-4-5"/><path d="M12 16c0 2 1.2 4 3 4 2.5 0 4-2 4-5"/></svg></div><div class="stat-n">Lungs</div></div>
+        <div class="stat-tile"><div class="stat-ico" style="--c:#B388FF;"><svg viewBox="0 0 24 24"><path d="M9 3a3 3 0 0 0-3 3v0a3 3 0 0 0-3 3v1a3 3 0 0 0 1 2.2A3 3 0 0 0 4 14v1a3 3 0 0 0 3 3 3 3 0 0 0 3 3h.5a1.5 1.5 0 0 0 1.5-1.5V4.5A1.5 1.5 0 0 0 10.5 3H9Z"/><path d="M15 3a3 3 0 0 1 3 3v0a3 3 0 0 1 3 3v1a3 3 0 0 1-1 2.2A3 3 0 0 1 20 14v1a3 3 0 0 1-3 3 3 3 0 0 1-3 3h-.5a1.5 1.5 0 0 1-1.5-1.5V4.5A1.5 1.5 0 0 1 13.5 3H15Z"/></svg></div><div class="stat-n">Brain</div></div>
+        <div class="stat-tile"><div class="stat-ico" style="--c:#FFD05C;"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18"/><circle cx="16.5" cy="14.5" r="1"/></svg></div><div class="stat-n">Wallet</div></div>
+        <div class="stat-tile"><div class="stat-ico" style="--c:#FF7A45;"><svg viewBox="0 0 24 24"><path d="M12 2c1 3 3 4.5 3 7a3 3 0 1 1-6 0c0-1 .5-1.8 1-2.5"/><path d="M5 14c0-2 1-4 3-5"/></svg></div><div class="stat-n">Will</div></div>
+        <div class="stat-tile"><div class="stat-ico" style="--c:#5CE1E6;"><svg viewBox="0 0 24 24"><circle cx="12" cy="5.5" r="2.5"/><path d="M12 8.5v6"/><path d="M8 11l4-2 4 2"/><path d="M9 21l3-6 3 6"/></svg></div><div class="stat-n">Body</div></div>
+      </div>
+
+      <div class="section-label">UI · Actions</div>
+      <div class="icon-grid">
+        <div class="ic-tile"><div class="ic-svg"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div><div class="ic-name">Check</div></div>
+        <div class="ic-tile"><div class="ic-svg"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M6 18L18 6"/></svg></div><div class="ic-name">Close</div></div>
+        <div class="ic-tile"><div class="ic-svg"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div><div class="ic-name">Plus</div></div>
+        <div class="ic-tile"><div class="ic-svg"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></div><div class="ic-name">Minus</div></div>
+        <div class="ic-tile"><div class="ic-svg"><svg viewBox="0 0 24 24"><path d="M15 18L9 12l6-6"/></svg></div><div class="ic-name">Back</div></div>
+        <div class="ic-tile"><div class="ic-svg"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div><div class="ic-name">Forward</div></div>
+        <div class="ic-tile"><div class="ic-svg"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></div><div class="ic-name">Down</div></div>
+        <div class="ic-tile"><div class="ic-svg"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div><div class="ic-name">Arrow R</div></div>
+      </div>
+
+      <div class="section-label">UI · Status</div>
+      <div class="icon-grid">
+        <div class="ic-tile"><div class="ic-svg"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div class="ic-name">Clock</div></div>
+        <div class="ic-tile"><div class="ic-svg"><svg viewBox="0 0 24 24"><path d="M18 16V11a6 6 0 0 0-12 0v5l-2 3h16z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg></div><div class="ic-name">Bell</div></div>
+        <div class="ic-tile"><div class="ic-svg"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4"/><circle cx="12" cy="16" r="0.5" fill="currentColor"/></svg></div><div class="ic-name">Info</div></div>
+        <div class="ic-tile"><div class="ic-svg"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h0M4.93 19h14.14a2 2 0 0 0 1.74-3L13.74 4a2 2 0 0 0-3.48 0L3.2 16a2 2 0 0 0 1.74 3z"/></svg></div><div class="ic-name">Warn</div></div>
+        <div class="ic-tile"><div class="ic-svg"><svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><div class="ic-name">Lock</div></div>
+        <div class="ic-tile"><div class="ic-svg"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div><div class="ic-name">Settings</div></div>
+        <div class="ic-tile"><div class="ic-svg"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg></div><div class="ic-name">Search</div></div>
+        <div class="ic-tile"><div class="ic-svg"><svg viewBox="0 0 24 24"><path d="M4 12v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8M16 6l-4-4-4 4M12 2v14"/></svg></div><div class="ic-name">Share</div></div>
+      </div>
+
+      <div class="section-label">Sizes</div>
+      <div class="sizes">
+        <div class="size-c"><div class="size-i s14"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div><div class="size-l">14</div></div>
+        <div class="size-c"><div class="size-i s18"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div><div class="size-l">18</div></div>
+        <div class="size-c"><div class="size-i s22"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div><div class="size-l">22</div></div>
+        <div class="size-c"><div class="size-i s28"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div><div class="size-l">28</div></div>
+        <div class="size-c"><div class="size-i s36"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div><div class="size-l">36</div></div>
+      </div>
+
+      <div class="section-label">Implementation specs</div>
+      <div class="spec-card">
+        <div class="spec-row"><span class="spec-key">SVG library</span><span class="spec-val">Phosphor (free)</span></div>
+        <div class="spec-row"><span class="spec-key">RN package</span><span class="spec-val">phosphor-react-native</span></div>
+        <div class="spec-row"><span class="spec-key">Weight</span><span class="spec-val">regular (1.6 stroke)</span></div>
+        <div class="spec-row"><span class="spec-key">Default size</span><span class="spec-val">22</span></div>
+        <div class="spec-row"><span class="spec-key">Default color</span><span class="spec-val">var(--text-primary)</span></div>
+        <div class="spec-row"><span class="spec-key">A11y label</span><span class="spec-val">Always provide</span></div>
+      </div>
+
+      <div style="text-align:center; padding: 18px 0 4px; font-size: 11px; color: var(--text-dim); letter-spacing: 0.06em;">
+        Use this set everywhere · no exceptions · no emojis
+      </div>
+    </div>
+  </div>
+  <div class="preview-label">core · icon system · v1</div>
+</body>
+</html>

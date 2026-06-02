@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+  <meta charset="utf-8" />
+  <title>Core — Preview gallery</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <style>
+    :root { --bg-base:#02020A; --text-primary:#F8FAFE; --text-muted:#9AA1B7; --text-dim:#4F5570; --accent:#4A8FFF; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(60% 30% at 50% 0%, rgba(155,130,255,0.10) 0%, transparent 65%),
+        radial-gradient(70% 40% at 50% 100%, rgba(74,143,255,0.10) 0%, transparent 60%),
+        linear-gradient(180deg, #0A0820 0%, var(--bg-base) 50%, #050510 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+      color: var(--text-primary); -webkit-font-smoothing: antialiased; padding: 60px 40px;
+    }
+    .container { max-width: 1320px; margin: 0 auto; }
+
+    .header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 40px; gap: 32px; flex-wrap: wrap; }
+    .title-block { max-width: 720px; }
+    .badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; background: rgba(74,143,255,0.10); border: 1px solid rgba(74,143,255,0.30); font-size: 11px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 18px; }
+    .badge::before { content:""; width:6px; height:6px; border-radius:50%; background:var(--accent); box-shadow:0 0 8px var(--accent); }
+
+    h1 { margin: 0; font-size: 64px; font-weight: 600; letter-spacing: -2.6px; line-height: 1; background: linear-gradient(180deg, #FFFFFF 0%, #B5BAC9 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .sub { margin: 20px 0 0; font-size: 17px; line-height: 26px; color: var(--text-muted); max-width: 620px; }
+    .meta-line { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--text-dim); letter-spacing: 0.06em; font-family: ui-monospace,"SF Mono",Menlo,monospace; margin-top: 24px; }
+    .meta-line span::before { content: "·"; margin-right: 16px; color: var(--text-dim); }
+    .meta-line span:first-child::before { display: none; }
+    .counter { padding: 14px 22px; border-radius: 14px; background: rgba(74,143,255,0.06); border:1px solid rgba(74,143,255,0.25); text-align: center; flex-shrink: 0; }
+    .counter-num { font-size: 44px; font-weight: 700; letter-spacing: -1.5px; line-height: 1; color: var(--accent); }
+    .counter-lbl { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-muted); margin-top: 4px; }
+
+    .section-label { font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-muted); font-weight: 500; margin: 40px 0 16px; display: flex; align-items: center; gap: 12px; }
+    .section-label::after { content:""; flex:1; height:1px; background: rgba(255,255,255,0.06); }
+    .section-meta { font-size:11px; color:var(--text-dim); letter-spacing:0.06em; font-family:ui-monospace,"SF Mono",Menlo,monospace; text-transform: none; }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+
+    .card { position: relative; display: block; padding: 18px; border-radius: 18px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); backdrop-filter: blur(18px) saturate(1.4); -webkit-backdrop-filter: blur(18px) saturate(1.4); color: var(--text-primary); text-decoration: none; transition: all 0.2s ease; cursor: pointer; overflow: hidden; }
+    .card::before { content:""; position:absolute; inset:0; border-radius:18px; background: radial-gradient(80% 100% at 0% 0%, var(--c, transparent) 0%, transparent 60%); opacity: 0.16; pointer-events: none; }
+    .card:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.10); transform: translateY(-2px); }
+    .card:active { transform: scale(0.99); }
+    .card-num { font-size: 10px; color: var(--text-dim); letter-spacing: 0.18em; font-family: ui-monospace,"SF Mono",Menlo,monospace; margin-bottom: 10px; }
+    .card-title { font-size: 17px; font-weight: 600; letter-spacing: -0.3px; color: var(--text-primary); }
+    .card-sub { font-size: 12px; color: var(--text-muted); margin-top: 6px; line-height: 18px; letter-spacing: -0.1px; }
+    .card-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+    .card-pill { display: inline-block; padding: 3px 8px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted); font-weight: 500; }
+    .card-pill.signature { background: rgba(255,107,170,0.10); border-color: rgba(255,107,170,0.30); color: #FF6BAA; }
+    .card-pill.new { background: rgba(74,143,255,0.10); border-color: rgba(74,143,255,0.30); color: var(--accent); }
+    .card-pill.warm { background: rgba(52,211,153,0.10); border-color: rgba(52,211,153,0.30); color: #34D399; }
+    .lock-mark { display:inline-flex; align-items:center; justify-content:center; vertical-align: middle; margin-left: 8px; color: #FFD05C; opacity: 0.85; }
+    .card.owner-only { border-color: rgba(255,208,92,0.22) !important; }
+    .card.owner-only:hover { border-color: rgba(255,208,92,0.40) !important; }
+    .card-pill.tier { background: rgba(255,122,69,0.10); border-color: rgba(255,122,69,0.30); color: #FF7A45; }
+
+    footer { margin-top: 80px; padding-top: 40px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 12px; color: var(--text-dim); display: flex; justify-content: space-between; align-items: center; font-family: ui-monospace,"SF Mono",Menlo,monospace; letter-spacing: 0.06em; flex-wrap: wrap; gap: 16px; }
+    footer a { color: var(--accent); text-decoration: none; padding: 8px 18px; border-radius: 999px; background: rgba(74,143,255,0.08); border: 1px solid rgba(74,143,255,0.30); }
+    footer a:hover { background: rgba(74,143,255,0.15); }
+  </style>
+  <script>
+    // Owner-only gate. file:// is always allowed (Stone's local dev).
+    // On any other origin we require the passphrase. Stored once in localStorage.
+    (function() {
+      try {
+        var local = location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+        if (local) return;
+        if (localStorage.getItem('coreStoneAccess') === '1') return;
+        // Allow ?pass=<phrase> direct-link unlock (URL-only — no UI exposes this).
+        var p = new URLSearchParams(location.search);
+        var PASS = 'stone-core-2026';
+        if (p.get('pass') === PASS) {
+          localStorage.setItem('coreStoneAccess','1');
+          // strip the query param so it doesn't linger in browser history
+          history.replaceState(null,'', location.pathname);
+          return;
+        }
+        // Block: render a tiny passphrase prompt and stop everything else from loading.
+        // Template literal + escaped closing tags so the inner HTML doesn't break the outer block.
+        document.documentElement.innerHTML = `<head><meta charset="utf-8"/><title>CORE</title><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="_lib/core-theme.css"><script src="_lib/core-theme.js" defer><\/script><link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"><link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png"><link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png"><link rel="stylesheet" href="_lib/core-background.css"><script src="_lib/core-background.js"><\/script></head><body style="margin:0;min-height:100vh;background:#02020A;color:#fff;font-family:-apple-system,BlinkMacSystemFont,Inter,sans-serif;display:flex;align-items:center;justify-content:center;padding:24px;"><form id="lf" style="max-width:320px;width:100%;text-align:center;"><div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:18px;"><span style="width:7px;height:7px;border-radius:50%;background:#4A8FFF;box-shadow:0 0 10px #4A8FFF;display:inline-block;"></span><span style="font-size:12px;font-weight:700;letter-spacing:0.36em;">CORE</span></div><div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#9AA1B7;font-weight:700;margin-bottom:10px;">Owner only</div><div style="font-size:14px;color:#9AA1B7;line-height:20px;margin-bottom:18px;">This preview index is private. Enter the passphrase to continue.</div><input id="pp" type="password" placeholder="passphrase" style="width:100%;padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.10);background:rgba(255,255,255,0.04);color:#fff;font-size:15px;text-align:center;outline:none;font-family:inherit;letter-spacing:0.06em;"/><button type="submit" style="display:block;width:100%;margin-top:12px;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,#4A8FFF,#5B6AE6);color:#fff;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;">Unlock</button><div id="err" style="color:#FF4F6B;font-size:12px;margin-top:10px;min-height:16px;"></div><a href="01-index.html" style="display:block;margin-top:18px;color:#4F5570;font-size:12px;text-decoration:none;">→ Go to the app instead</a></form></body>`;
+        var lf = document.getElementById('lf');
+        lf.addEventListener('submit', function(e){
+          e.preventDefault();
+          var v = document.getElementById('pp').value;
+          if (v === PASS) { localStorage.setItem('coreStoneAccess','1'); location.reload(); }
+          else { document.getElementById('err').textContent = 'Wrong passphrase.'; }
+        });
+        // Halt further script execution by throwing once.
+        throw 'core_gallery_locked';
+      } catch(e){
+        if (e === 'core_gallery_locked') throw e;
+      }
+    })();
+  </script>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="title-block">
+        <div class="badge" style="display:inline-flex; align-items:center; gap:6px;">
+          <svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.85;"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+          Core · Preview v4 · Owner only
+        </div>
+        <h1>The whole app, on one page.</h1>
+        <p class="sub">89 polished HTML mockups in 20 sections. Every flow connects — launch, onboarding, the 5 tabs, habits, stats, scanners, AI coach, ranks, social, streaks, monetization, safety, brand, B2B. Click any card to jump in.</p>
+        <div class="meta-line">
+          <span>Apple Vision Pro × Jarvis</span>
+          <span>5-stat life-OS</span>
+          <span>3 scanners · AI agent · rank ladder</span>
+          <span>$7.99/mo · $59.99/yr</span>
+        </div>
+      </div>
+      <div class="counter">
+        <div class="counter-num">89</div>
+        <div class="counter-lbl">screens</div>
+      </div>
+    </div>
+
+    <div class="section-label"><span>1 · Launch &amp; entry</span><span class="section-meta">splash → index → trial · returning users see welcome-back</span></div>
+    <div class="grid">
+      
+      <a class="card" href="01-index.html" style="--c: #B388FF;"><div class="card-num">01 · index</div><div class="card-title">Welcome (index)</div><div class="card-sub">Five glowing labeled stat orbs · pentagon layout · names + 3-word taglines · gradient CTA → trial. The first screen a new user sees.</div><div class="card-pills"><span class="card-pill new">★ Entry</span></div></a>
+      <a class="card" href="02-social-proof.html" style="--c: #5BB1FF;"><div class="card-num">02 · social-proof</div><div class="card-title">Social proof modal</div><div class="card-sub">Mid-trial day 4-5 reactivation · animated 3,247 counter · rotating testimonials · 5-avatar stack · live tickers (slips logged, clean days, graduates).</div><div class="card-pills"><span class="card-pill">Conversion</span></div></a>
+      <a class="card" href="03-welcome-back.html" style="--c: #FF7A45;"><div class="card-num">03 · welcome-back</div><div class="card-title">Welcome back (3+ days idle)</div><div class="card-sub">Reactivation screen · frozen streak flame card · "Keep going" gradient CTA · missed-coach-messages list · rank drop alert · weekly review prompt.</div><div class="card-pills"><span class="card-pill">Reactivation</span></div></a>
+    </div>
+
+    <div class="section-label"><span>2 · Sign in</span><span class="section-meta">Apple · Google · email · 6-digit OTP</span></div>
+    <div class="grid">
+      <a class="card" href="04-sign-in.html" style="--c: #4A8FFF;"><div class="card-num">04 · sign-in</div><div class="card-title">Sign in (returning)</div><div class="card-sub">Apple · Google · email · pulsing glow orb. Returning users only.</div><div class="card-pills"><span class="card-pill">Returning</span></div></a>
+      <a class="card" href="05-sign-in-email.html" style="--c: #4A8FFF;"><div class="card-num">05 · sign-in-email</div><div class="card-title">Sign in with email</div><div class="card-sub">"What's your email?" capture step · validates + sends a code · continues to OTP.</div><div class="card-pills"><span class="card-pill">Auth</span></div></a>
+      <a class="card" href="06-sign-in-otp.html" style="--c: #4A8FFF;"><div class="card-num">06 · sign-in-otp</div><div class="card-title">Enter your code</div><div class="card-sub">6-digit OTP entry · auto-advancing boxes · resend timer · verifies and lands on dashboard.</div><div class="card-pills"><span class="card-pill">Auth</span></div></a>
+    </div>
+
+    <div class="section-label"><span>3 · Onboarding (locked)</span><span class="section-meta">trial → tone → quiz → setup · gated, can't skip</span></div>
+    <div class="grid">
+      <a class="card" href="07-trial.html" style="--c: #4A8FFF;"><div class="card-num">07 · trial</div><div class="card-title">Free-trial gate (3 steps)</div><div class="card-sub">Name capture · coach tone picker · 7-day free trial pitch. Animated step-card flow with progress dots. CTA → quiz.</div><div class="card-pills"><span class="card-pill">Gate 1</span></div></a>
+      <a class="card" href="08-coach-tone-test.html" style="--c: #9F8FFF;"><div class="card-num">08 · coach-tone-test</div><div class="card-title">Coach tone quiz</div><div class="card-sub">3-question quiz that recommends gentle / balanced / direct / drill. The "Not sure? Take the 30-second tone test" escape hatch from trial Step 2.</div><div class="card-pills"><span class="card-pill">Onboarding</span></div></a>
+      <a class="card" href="09-tone-detail.html?tone=balanced" style="--c: #9F8FFF;"><div class="card-num">10 · tone-detail</div><div class="card-title">Tone preview (4 versions)</div><div class="card-sub">Single full-screen sample conversation per tone. Same slip context, 4 different Coach responses. Wired into trial Step 2 "preview ›" chip.</div><div class="card-pills"><span class="card-pill">Onboarding</span></div></a>
+      <a class="card" href="14-ai-setup.html" style="--c: #4A8FFF;"><div class="card-num">14 · ai-setup</div><div class="card-title">AI setup</div><div class="card-sub">"Bring CORE to life." — personalize the AI coach: goals, context, voice. Primes the assistant before first use.</div><div class="card-pills"><span class="card-pill new">★ NEW</span></div></a>
+      <a class="card" href="15-permissions.html" style="--c: #4A8FFF;"><div class="card-num">15 · permissions</div><div class="card-title">Permissions</div><div class="card-sub">Notifications · Camera · Widget — each card flips to green "granted".</div><div class="card-pills"><span class="card-pill">Optional</span></div></a>
+      <a class="card" href="11-pick-habits.html" style="--c: #FF6BAA;"><div class="card-num">11 · pick-habits</div><div class="card-title">Pick your habits</div><div class="card-sub">2×4 grid of 8 habit cards · multi-select. Sets the habits CORE tracks.</div><div class="card-pills"><span class="card-pill">Setup</span></div></a>
+      <a class="card" href="12-baseline.html" style="--c: #5CE1E6;"><div class="card-num">12 · baseline</div><div class="card-title">Baseline (short)</div><div class="card-sub">4-question quick intake — sex · age · height · weight.</div><div class="card-pills"><span class="card-pill">Alt flow</span></div></a>
+      <a class="card" href="13-deep-onboarding.html" style="--c: #B388FF;"><div class="card-num">13 · deep-onboarding</div><div class="card-title">Deep life intake</div><div class="card-sub">Long-form quiz that seeds all five stats — habits, mind, body, context. The full version of baseline.</div><div class="card-pills"><span class="card-pill new">★ NEW</span></div></a>
+    </div>
+
+    <div class="section-label"><span>4 · Main app · the 5 tabs</span><span class="section-meta">Home · Feed · Coach · Ranks · You</span></div>
+    <div class="grid">
+      <a class="card" href="20-dashboard.html?preview=1" style="--c: #B388FF;"><div class="card-num">16 · dashboard</div><div class="card-title">Dashboard <span style="color:var(--text-dim);font-weight:500;">· Home</span></div><div class="card-sub">Greeting + rank pill + bell · Life Score · 4 quick actions (Log/Coach/Scan/Post) · achievement teaser · 5 tappable stats · Today feed.</div><div class="card-pills"><span class="card-pill">Tab 1</span></div></a>
+      <a class="card" href="59-feed.html" style="--c: #FF6BAA;"><div class="card-num">59 · feed</div><div class="card-title">Feed <span style="color:var(--text-dim);font-weight:500;">· Feed</span></div><div class="card-sub">Friends streak strip · habit-tagged posts with rank pills · like/comment/share · before/after card · action sheet.</div><div class="card-pills"><span class="card-pill">Tab 2</span></div></a>
+      <a class="card" href="39-coach.html" style="--c: #4A8FFF;"><div class="card-num">39 · coach</div><div class="card-title">AI Coach <span style="color:var(--text-dim);font-weight:500;">· Coach</span></div><div class="card-sub">Conversation history · typing dots · suggested prompts · voice button · inline action cards (confirmation-gated).</div><div class="card-pills"><span class="card-pill">Tab 3</span></div></a>
+      <a class="card" href="66-leaderboard.html" style="--c: #4A8FFF;"><div class="card-num">66 · leaderboard</div><div class="card-title">Ranks / Leaderboard <span style="color:var(--text-dim);font-weight:500;">· Ranks</span></div><div class="card-sub">Your-rank hero · gold/silver/bronze podium · friends list (tap row → user profile) · friends/global toggle.</div><div class="card-pills"><span class="card-pill">Tab 4</span></div></a>
+      <a class="card" href="62-profile.html" style="--c: #B388FF;"><div class="card-num">62 · profile</div><div class="card-title">Your profile <span style="color:var(--text-dim);font-weight:500;">· You</span></div><div class="card-sub">Avatar + rank pill · streak/score/friends trio · tappable 5-stat strip → drilldown · segmented tabs to Achievements/Posts/Activity.</div><div class="card-pills"><span class="card-pill">Tab 5</span></div></a>
+    </div>
+
+    <div class="section-label"><span>5 · Habits · track · slip · recover</span><span class="section-meta">tap → smoke → XP loss → recovery</span></div>
+    <div class="grid">
+      <a class="card" href="26-habit.html#vape" style="--c: #FF6BAA;"><div class="card-num">21 · habit</div><div class="card-title">Habit page (universal)</div><div class="card-sub">1 template, 8 habits via #hash. Animated avatar · tap → smoke + XP loss + recovery prompt · Coach insight · trend graph · triggers · slip history · honest-craving + streak-protect.</div><div class="card-pills"><span class="card-pill signature">★ Signature</span><span class="card-pill">8-in-1</span></div></a>
+      <a class="card" href="27-habit-vape.html" style="--c: #FF6BAA;"><div class="card-num">27 · habit-vape</div><div class="card-title">Vape habit (standalone)</div><div class="card-sub">The signature tap → smoke page, vape-specific build. Cloud animation, craving log, streak protect.</div><div class="card-pills"><span class="card-pill signature">★ Signature</span></div></a>
+      <a class="card" href="28-slip-confirm.html?habit=vape" style="--c: #FF6BAA;"><div class="card-num">23 · slip-confirm</div><div class="card-title">Slip confirm (hold to log)</div><div class="card-sub">2-second hold-to-confirm sheet that gates the actual slip log. Animated SVG ring fills as you hold. Escape hatch: "I almost did but didn't" → +5 XP, willpower +1.</div><div class="card-pills"><span class="card-pill">Intent</span></div></a>
+      <a class="card" href="29-recovery-quest.html" style="--c: #4A8FFF;"><div class="card-num">29 · recovery-quest</div><div class="card-title">Recovery quest</div><div class="card-sub">60s box-breath · pulsing orb · reflection input · claw back XP after a slip.</div><div class="card-pills"><span class="card-pill">Post-slip</span></div></a>
+    </div>
+
+    <div class="section-label"><span>6 · Stats · 5-stat life-OS</span><span class="section-meta">drilldown · Mind · Gym · baseline</span></div>
+    <div class="grid">
+      <a class="card" href="30-stat.html#brain" style="--c: #B388FF;"><div class="card-num">25 · stat</div><div class="card-title">Stat drilldown (universal)</div><div class="card-sub">1 template, 5 stats via #hash. Ring + breathing glow · action chips · AI insight · 30-day chart · contributing modules · recent activity.</div><div class="card-pills"><span class="card-pill">5-in-1</span></div></a>
+      <a class="card" href="31-stat-wizard.html" style="--c: #5CE1E6;"><div class="card-num">31 · stat-wizard</div><div class="card-title">Stat baseline wizard</div><div class="card-sub">Quick 4 questions to set a stat's starting score · skippable · feeds the ring on the drilldown.</div><div class="card-pills"><span class="card-pill new">★ NEW</span></div></a>
+      <a class="card" href="32-mind.html" style="--c: #B388FF;"><div class="card-num">32 · mind</div><div class="card-title">Mind (daily reflection)</div><div class="card-sub">"Reflect honestly — the AI turns it into action items." Mood chips (Locked in / Overloaded / Scattered / Confidence) + reflection input.</div><div class="card-pills"><span class="card-pill new">★ NEW</span></div></a>
+      <a class="card" href="33-gym.html" style="--c: #FF7A45;"><div class="card-num">33 · gym</div><div class="card-title">Gym · today's workout</div><div class="card-sub">"Push · Chest, Shoulders, Tris" split · exercise list · log sets/reps · feeds the Body stat.</div><div class="card-pills"><span class="card-pill new">★ NEW</span></div></a>
+    </div>
+
+    <div class="section-label"><span>7 · AI Coach &amp; Assistant</span><span class="section-meta">Jarvis-mode · craving support · confirmation-gated</span></div>
+    <div class="grid">
+      <a class="card" href="35-assistant.html" style="--c: #4A8FFF;"><div class="card-num">35 · assistant</div><div class="card-title">Assistant (Jarvis mode)</div><div class="card-sub">Voice-first full-screen · breathing orb · transcript · suggested commands · action cards with Confirm/Cancel · mic + keyboard + text-mode switch.</div><div class="card-pills"><span class="card-pill new">★ Voice</span></div></a>
+      <a class="card" href="40-coach-during-craving.html" style="--c: #5CE1E6;"><div class="card-num">40 · coach-during-craving</div><div class="card-title">Coach during craving</div><div class="card-sub">Takeover Coach view · single "I'm here. Breathe with me." opener · tone-aware second line · inline breath ring · 3 quick replies. Input disabled during the wave.</div><div class="card-pills"><span class="card-pill signature">★ Signature</span></div></a>
+      <a class="card" href="41-coach-craving-result.html" style="--c: #34D399;"><div class="card-num">41 · coach-craving-result</div><div class="card-title">Wave broke (post-craving win)</div><div class="card-sub">Auto-shown after the 60s timer. Green check ring + calm rays + +10 XP / Willpower +2 / streak-safe chips + tone-aware Coach quote + Share-this-win CTA.</div><div class="card-pills"><span class="card-pill signature">★ Signature</span></div></a>
+    </div>
+
+    <div class="section-label"><span>8 · Scanners · multimodal AI</span><span class="section-meta">food · body · outfit</span></div>
+    <div class="grid">
+      <a class="card" href="36-scan-food.html" style="--c: #5CE1E6;"><div class="card-num">36 · scan-food</div><div class="card-title">Food scanner</div><div class="card-sub">Camera viewfinder with simulated food · scan-line animation · 3-mode strip · result card with calories, macros, cooked-status check, Body impact.</div><div class="card-pills"><span class="card-pill new">★ S2</span></div></a>
+      <a class="card" href="37-scan-body.html" style="--c: #5CE1E6;"><div class="card-num">37 · scan-body</div><div class="card-title">Body scanner</div><div class="card-sub">Silhouette + AI pose-points · cyan scan frame · front/side/back angle picker · result with physique score + posture + body fat range.</div><div class="card-pills"><span class="card-pill new">★ S3</span></div></a>
+      <a class="card" href="38-scan-outfit.html" style="--c: #FFD05C;"><div class="card-num">38 · scan-outfit</div><div class="card-title">Outfit scanner</div><div class="card-sub">Outfit silhouette + AI bounding boxes · item recognition (color, fit, material) · style score · palette · Coach improvements list.</div><div class="card-pills"><span class="card-pill new">★ S4</span></div></a>
+    </div>
+
+    <div class="section-label"><span>9 · Ranks &amp; progression</span><span class="section-meta">7-tier ladder · Focus → Apex</span></div>
+    <div class="grid">
+      <a class="card" href="45-ranks.html" style="--c: #FF7A45;"><div class="card-num">45 · ranks</div><div class="card-title">Ranks (the ladder)</div><div class="card-sub">Full 7-tier ladder · current tier highlighted · XP to next · tier rewards. Tap a tier → rank detail.</div><div class="card-pills"><span class="card-pill tier">7-tier</span></div></a>
+      <a class="card" href="46-rank-detail.html" style="--c: #FF7A45;"><div class="card-num">46 · rank-detail</div><div class="card-title">Rank detail</div><div class="card-sub">One tier expanded · your progress bar · "What you unlock at this tier" · keep-climbing CTA.</div><div class="card-pills"><span class="card-pill new">★ NEW</span></div></a>
+      <a class="card" href="19-rank-reveal.html" style="--c: #FF7A45;"><div class="card-num">19 · rank-reveal</div><div class="card-title">Starting rank reveal</div><div class="card-sub">"Welcome, …" — cinematic first-rank assignment at the end of onboarding. Badge animates in.</div><div class="card-pills"><span class="card-pill new">★ NEW</span></div></a>
+      <a class="card" href="47-rank-up.html" style="--c: #FF7A45;"><div class="card-num">47 · rank-up</div><div class="card-title">Rank-up celebration</div><div class="card-sub">Floating particles · pulsing badge · "You hit FORGE I" · unlocked rewards · share-to-feed CTA.</div><div class="card-pills"><span class="card-pill tier">Cinematic</span></div></a>
+      <a class="card" href="48-goal-set.html" style="--c: #5BB1FF;"><div class="card-num">48 · goal-set</div><div class="card-title">Next goal picker (day 30+)</div><div class="card-sub">Triggered from streak-celebration on day 30. 5 options (alcohol / porn / doom-scroll / junk food / hold the line). Adds picked goal to coreSelectedHabits.</div><div class="card-pills"><span class="card-pill">Retention</span></div></a>
+      <a class="card" href="49-achievements.html" style="--c: #FFD05C;"><div class="card-num">49 · achievements</div><div class="card-title">Achievements</div><div class="card-sub">9 unlocked / 3 in-progress (with bars) / 18 locked · category filter chips · summary trio.</div><div class="card-pills"><span class="card-pill new">★ NEW</span></div></a>
+    </div>
+
+    <div class="section-label"><span>10 · Streaks</span><span class="section-meta">board · milestones · restore</span></div>
+    <div class="grid">
+      <a class="card" href="50-streak-board.html" style="--c: #4A8FFF;"><div class="card-num">50 · streak-board</div><div class="card-title">Streak board (365-day heatmap)</div><div class="card-sub">Apple-contribution-style grid in CORE blues. Slips render red, freezes cyan, today outlined. Hero metrics (current / longest / clean days) + last 6 weeks list.</div><div class="card-pills"><span class="card-pill">Habit</span></div></a>
+      <a class="card" href="51-streak-celebration.html?days=14" style="--c: #B388FF;"><div class="card-num">42 · streak-celebration</div><div class="card-title">Streak milestone</div><div class="card-sub">Full-screen 7/14/30/60/100/365-day celebration with confetti, spinning aurora rays, mini share-card preview, "Post to feed" + "Customize share card" CTAs.</div><div class="card-pills"><span class="card-pill">Retention</span></div></a>
+      <a class="card" href="52-restore-streak.html" style="--c: #FF7A45;"><div class="card-num">52 · restore-streak</div><div class="card-title">Restore streak · $0.99</div><div class="card-sub">One-time IAP modal that only appears if streak is lost AND within the 48hr window. Dying flame visual · 48hr countdown · +50 XP comeback bonus.</div><div class="card-pills"><span class="card-pill">Monetization</span></div></a>
+    </div>
+
+    <div class="section-label"><span>11 · Sharing &amp; growth</span><span class="section-meta">share cards · referral · invite · public profile</span></div>
+    <div class="grid">
+      <a class="card" href="53-streak-share.html" style="--c: #9F8FFF;"><div class="card-num">53 · streak-share</div><div class="card-title">Streak share (save + send)</div><div class="card-sub">Mini-card preview + Save PNG (real 1290² canvas export) + iMessage/X/Instagram/Copy-link channels. Target from streak-celebration "Post to feed".</div><div class="card-pills"><span class="card-pill">Growth</span></div></a>
+      <a class="card" href="54-share-streak-card.html" style="--c: #B388FF;"><div class="card-num">54 · share-streak-card</div><div class="card-title">Streak card · with QR</div><div class="card-sub">1290² share card with deterministic pseudo-QR (seeded from URL) that points to <code>core.app/u/&lt;name&gt;</code>. Live edit days/user/tagline.</div><div class="card-pills"><span class="card-pill">Growth</span></div></a>
+      <a class="card" href="55-share-card-generator.html" style="--c: #5CE1E6;"><div class="card-num">55 · share-card-generator</div><div class="card-title">Share card generator (1290²)</div><div class="card-sub">URL-driven milestone card · streak/stat/score/name/line params · live edit · share URL · ready for expo-image-manipulator export.</div><div class="card-pills"><span class="card-pill">Growth</span></div></a>
+      <a class="card" href="56-share-options.html" style="--c: #5BB1FF;"><div class="card-num">56 · share-options</div><div class="card-title">Share sheet (iOS-style)</div><div class="card-sub">Bottom-sheet picker · Image / Story / X / TikTok / Copy + Messages/Mail/Save rows. Mini preview card up top reads from coreState.</div><div class="card-pills"><span class="card-pill">Growth</span></div></a>
+      <a class="card" href="72-referral.html" style="--c: #B388FF;"><div class="card-num">72 · referral</div><div class="card-title">Refer a friend</div><div class="card-sub">"Give a month, get a month" · animated gift icon · invite link + copy + 4 share buttons · 7/3/90d stats · referral activity list · 4-step how-it-works.</div><div class="card-pills"><span class="card-pill">Growth</span></div></a>
+      <a class="card" href="73-referral-paywall.html?ref=alex" style="--c: #B388FF;"><div class="card-num">49 · referral-paywall</div><div class="card-title">Referral paywall (gifted)</div><div class="card-sub">Friend-gift variant · $0 for 30 days · inviter pill with avatar · confetti bg · "Claim my free month" CTA. Triggered by ?ref=alex.</div><div class="card-pills"><span class="card-pill">Growth</span></div></a>
+      <a class="card" href="74-invite.html" style="--c: #4A8FFF;"><div class="card-num">74 · invite</div><div class="card-title">Friend invite landing</div><div class="card-sub">What friends see clicking your referral link · inviter pill · animated gift · "30 days on Stone" hero · trust strip.</div><div class="card-pills"><span class="card-pill">Growth</span></div></a>
+      <a class="card" href="75-gift.html" style="--c: #FF6BAA;"><div class="card-num">75 · gift</div><div class="card-title">Gift a month</div><div class="card-sub">Send a paid month to a friend · recipient + personal message · checkout. Generous-growth loop.</div><div class="card-pills"><span class="card-pill new">★ NEW</span></div></a>
+      <a class="card" href="64-u-profile.html?u=stone&days=14" style="--c: #5BB1FF;"><div class="card-num">u/ · public-profile</div><div class="card-title">Public profile (read-only)</div><div class="card-sub">Non-user proof page · ?u=&days=&score= params · avatar + rank pill + big day-count + 5-stat strip + milestones + "Start my 7-day free trial" CTA. No app needed.</div><div class="card-pills"><span class="card-pill">Public</span></div></a>
+    </div>
+
+    <div class="section-label"><span>12 · Social &amp; friends</span><span class="section-meta">posts · comments · friends · activity</span></div>
+    <div class="grid">
+      <a class="card" href="60-compose.html" style="--c: #B388FF;"><div class="card-num">60 · compose</div><div class="card-title">Compose post</div><div class="card-sub">Big text input · habit tag chips · live char counter · live word filter that flags + blocks harmful content.</div><div class="card-pills"><span class="card-pill">Filter</span></div></a>
+      <a class="card" href="61-comments.html" style="--c: #FF6BAA;"><div class="card-num">61 · comments</div><div class="card-title">Comments thread</div><div class="card-sub">Original post pinned · comment stream with rank pills · nested replies · live composer.</div><div class="card-pills"><span class="card-pill">Thread</span></div></a>
+      <a class="card" href="63-user-profile.html" style="--c: #FF6BAA;"><div class="card-num">63 · user-profile</div><div class="card-title">Friend's profile</div><div class="card-sub">View another user · follow/message/save · "You both track" shared habits · recent posts preview.</div><div class="card-pills"><span class="card-pill new">★ NEW</span></div></a>
+      <a class="card" href="67-find-friends.html" style="--c: #5CE1E6;"><div class="card-num">67 · find-friends</div><div class="card-title">Find friends</div><div class="card-sub">Search · invite link + QR · suggested from contacts · suggested by same habits · pending requests.</div><div class="card-pills"><span class="card-pill">Network</span></div></a>
+      <a class="card" href="70-friend-slipped.html" style="--c: #FFD05C;"><div class="card-num">70 · friend-slipped</div><div class="card-title">Friend slipped — nudge</div><div class="card-sub">iOS-style notif lands top + bottom sheet rises with Sam's profile + 4 one-tap reply templates (proud / walk / here / match). Wired into the Poke flow.</div><div class="card-pills"><span class="card-pill">Social</span></div></a>
+      <a class="card" href="69-friends-streak.html" style="--c: #FF6BAA;"><div class="card-num">69 · friends-streak</div><div class="card-title">Friends streak ring</div><div class="card-sub">Horizontal scroll of buddy rings with conic-gradient progress arcs + slipped-buddy "Poke" CTA. Full list below. Syncs your ring from coreState.</div><div class="card-pills"><span class="card-pill">Social</span></div></a>
+      <a class="card" href="68-friends-leaderboard.html" style="--c: #B388FF;"><div class="card-num">68 · friends-leaderboard</div><div class="card-title">Friends leaderboard (weekly)</div><div class="card-sub">5-friend table · weekly XP / all-time toggle · gold/silver/bronze positions · rank pills · own row highlighted, syncs from coreState.</div><div class="card-pills"><span class="card-pill">Social</span></div></a>
+      <a class="card" href="65-activity.html" style="--c: #4A8FFF;"><div class="card-num">65 · activity</div><div class="card-title">Activity timeline</div><div class="card-sub">Grouped by day · vertical timeline with colored dots · slips, recoveries, achievements, coach actions · category filters · +/− XP.</div><div class="card-pills"><span class="card-pill new">★ NEW</span></div></a>
+    </div>
+
+    <div class="section-label"><span>13 · Daily routines &amp; review</span><span class="section-meta">morning · evening · weekly · builder</span></div>
+    <div class="grid">
+      <a class="card" href="21-morning-brief.html" style="--c: #FFD05C;"><div class="card-num">21 · morning-brief</div><div class="card-title">Morning brief</div><div class="card-sub">Daily 7am check-in · sunrise data · Coach's headline · stat highlights · today's quest · social comparison · daily anchor quote.</div><div class="card-pills"><span class="card-pill new">★ NEW</span></div></a>
+      <a class="card" href="22-morning-checkin.html" style="--c: #FFC857;"><div class="card-num">22 · morning-checkin</div><div class="card-title">Morning check-in</div><div class="card-sub">3-step dawn flow · 5 mood emoji · sleep-hours stepper · intention textarea with suggestion chips · tone-aware Coach line. Persists to coreMorningLog.</div><div class="card-pills"><span class="card-pill new">★ NEW</span></div></a>
+      <a class="card" href="23-bedtime.html" style="--c: #FF6BAA;"><div class="card-num">23 · bedtime</div><div class="card-title">Evening check-in (bedtime)</div><div class="card-sub">3-step flow · 5 mood emoji · slip toggle with stepper · one-sentence reflection · summary card. Writes to coreBedtimeLog. Triggered by 9pm check-in.</div><div class="card-pills"><span class="card-pill new">★ NEW</span></div></a>
+      <a class="card" href="24-weekly-review.html" style="--c: #B388FF;"><div class="card-num">24 · weekly-review</div><div class="card-title">Weekly review</div><div class="card-sub">AI-generated week recap · stat changes with mini sparklines · wins + lessons · day-by-day clean bars · share + discuss CTAs.</div><div class="card-pills"><span class="card-pill new">★ NEW</span></div></a>
+      <a class="card" href="25-routine-builder.html" style="--c: #4A8FFF;"><div class="card-num">25 · routine-builder</div><div class="card-title">Routine builder</div><div class="card-sub">Assemble a custom daily routine from step blocks · reorder · set times · saves as your anchor routine.</div><div class="card-pills"><span class="card-pill new">★ NEW</span></div></a>
+    </div>
+
+    <div class="section-label"><span>14 · Coins &amp; shop</span><span class="section-meta">earn · spend · gift</span></div>
+    <div class="grid">
+      <a class="card" href="57-coin-history.html" style="--c: #FFD05C;"><div class="card-num">57 · coin-history</div><div class="card-title">Coin history</div><div class="card-sub">Current balance + recent-activity ledger. Earn coins from honest logs, streak milestones, and posts. Open-Shop CTA.</div><div class="card-pills"><span class="card-pill new">★ NEW</span></div></a>
+      <a class="card" href="58-shop.html" style="--c: #FFD05C;"><div class="card-num">58 · shop</div><div class="card-title">Shop</div><div class="card-sub">Spend coins · Streak restore · Double-XP day (2× for 24h) · Flame badge sticker · Send coins to a friend.</div><div class="card-pills"><span class="card-pill new">★ NEW</span></div></a>
+    </div>
+
+    <div class="section-label"><span>15 · Monetization</span><span class="section-meta">$7.99/mo · $59.99/yr</span></div>
+    <div class="grid">
+      <a class="card" href="76-pricing.html" style="--c: #4A8FFF;"><div class="card-num">76 · pricing</div><div class="card-title">Pricing</div><div class="card-sub">Free / Pro Monthly $7.99 / Pro Annual $59.99 (save 50%) · period toggle · feature comparison · FAQ · 7-day free trial.</div><div class="card-pills"><span class="card-pill">Monetization</span></div></a>
+      <a class="card" href="77-paywall.html" style="--c: #B388FF;"><div class="card-num">77 · paywall</div><div class="card-title">Paywall modal</div><div class="card-sub">Limit-hit screen · pulsing badge · 4 key perks · price pill · trial CTA · trust signals.</div><div class="card-pills"><span class="card-pill">Monetization</span></div></a>
+      <a class="card" href="78-trial-expired.html" style="--c: #FF6BAA;"><div class="card-num">78 · trial-expired</div><div class="card-title">Trial expired (day 8)</div><div class="card-sub">Locked dashboard preview blurred + lock icon · streak-frozen pill · monthly/yearly plan toggle · "Resume my account" CTA. Where day-7 lapses land.</div><div class="card-pills"><span class="card-pill">Recovery</span></div></a>
+      <a class="card" href="79-cancel.html" style="--c: #FF6B6B;"><div class="card-num">79 · cancel</div><div class="card-title">Cancel (3-step retain)</div><div class="card-sub">Step 1 reason picker · Step 2 retain offers (pause 30d / 50% off 3mo) · Step 3 loss confirm with what-you-give-up list. Reachable from Settings.</div><div class="card-pills"><span class="card-pill">Retention</span></div></a>
+    </div>
+
+    <div class="section-label"><span>16 · Safety &amp; account</span><span class="section-meta">crisis · SOS · pause · paused account</span></div>
+    <div class="grid">
+      <a class="card" href="42-panic.html" style="--c: #5CE1E6;"><div class="card-num">42 · panic</div><div class="card-title">Craving SOS</div><div class="card-sub">Full-screen calming gradient + 16s box-breath (4·4·4·4) + 60s stay timer + 3 emergency prompts. Tone-aware. +2 willpower / +10 XP for staying full 60s.</div><div class="card-pills"><span class="card-pill signature">★ Signature</span></div></a>
+      <a class="card" href="43-crisis.html" style="--c: #5CE1E6;"><div class="card-num">43 · crisis</div><div class="card-title">Crisis support</div><div class="card-sub">If-you-need-help-right-now · 24/7 lines (AU/US/UK) · 60s breath · talk to Coach · reach a friend.</div><div class="card-pills"><span class="card-pill new">★ Safety</span></div></a>
+      <a class="card" href="44-pause-overlay.html" style="--c: #4A8FFF;"><div class="card-num">44 · pause-overlay</div><div class="card-title">Pause Core (overlay)</div><div class="card-sub">Bottom sheet · 4 duration options · streak freeze · "while paused" list · primary CTA · "leave Core completely" escalator.</div><div class="card-pills"><span class="card-pill">Safety</span></div></a>
+      <a class="card" href="83-banned.html" style="--c: #F87171;"><div class="card-num">83 · banned</div><div class="card-title">Account paused (moderation)</div><div class="card-sub">"Your account is paused." — moderation block screen with reason + appeal path. The user-facing end of the moderation queue.</div><div class="card-pills"><span class="card-pill new">★ Trust&amp;Safety</span></div></a>
+    </div>
+
+    <div class="section-label"><span>17 · Settings &amp; system</span><span class="section-meta">settings · notifications · legal · tasks</span></div>
+    <div class="grid">
+      <a class="card" href="80-settings.html" style="--c: #FFD05C;"><div class="card-num">80 · settings</div><div class="card-title">Settings</div><div class="card-sub">Profile · Pro upsell · Habits · Social · Notifications · Subscription · Widget · Privacy · Crisis · Help. All rows wired.</div><div class="card-pills"><span class="card-pill">Deep view</span></div></a>
+      <a class="card" href="71-notifications.html" style="--c: #4A8FFF;"><div class="card-num">71 · notifications</div><div class="card-title">Notifications inbox</div><div class="card-sub">Grouped by Today / Yesterday / Earlier · unread dots · inline accept/decline · friend requests · weekly reset notices.</div><div class="card-pills"><span class="card-pill">Inbox</span></div></a>
+      <a class="card" href="81-notifications-settings.html" style="--c: #4A8FFF;"><div class="card-num">81 · notifications-settings</div><div class="card-title">Notifications settings</div><div class="card-sub">Check-in time picker (Off/Morning/Evening/Both) · channel toggles for Coach/Streak risk/Weekly review/Friend activity/Milestones · Do-not-disturb.</div><div class="card-pills"><span class="card-pill new">★ NEW</span></div></a>
+      <a class="card" href="82-legal.html" style="--c: #9AA1B7;"><div class="card-num">82 · legal</div><div class="card-title">Legal · Privacy/Terms/EULA</div><div class="card-sub">3-tab phone-format. TL;DR boxes for each. Local-first stance, no-sell promise, Apple EULA, subscription terms, governing law.</div><div class="card-pills"><span class="card-pill">Compliance</span></div></a>
+      <a class="card" href="34-tasks.html" style="--c: #5CE1E6;"><div class="card-num">34 · tasks</div><div class="card-title">Tasks</div><div class="card-sub">To-do list tied to habits and goals · check off · feeds activity + XP.</div><div class="card-pills"><span class="card-pill new">★ NEW</span></div></a>
+    </div>
+
+    <div class="section-label"><span>18 · Brand &amp; marketing</span><span class="section-meta">site · ASO · widgets · icons</span></div>
+    <div class="grid">
+      <a class="card" href="92-landing.html" style="--c: #B388FF;"><div class="card-num">92 · landing</div><div class="card-title">Landing / marketing site</div><div class="card-sub">"Become your core." · brand hero · live device preview (mirrors index) · 5-stat areas · 7-tier ladder · XP table · testimonial · "Begin" CTA → index.</div><div class="card-pills"><span class="card-pill">Public web</span></div></a>
+      <a class="card" href="93-app-store-screenshots.html" style="--c: #FF6BAA;"><div class="card-num">93 · app-store-screenshots</div><div class="card-title">App Store screenshots (5)</div><div class="card-sub">5 vertical mockups with headline overlays · habit mid-smoke · dashboard healing · coach action card · recovery orb · rank-up FORGE I.</div><div class="card-pills"><span class="card-pill">ASO</span></div></a>
+      <a class="card" href="94-widgets.html" style="--c: #5CE1E6;"><div class="card-num">94 · widgets</div><div class="card-title">iOS widget previews</div><div class="card-sub">iOS lock screen mock with time + date · 2 small widgets (streak + Life Score ring) · medium · large with 4-stat grid + sparkline.</div><div class="card-pills"><span class="card-pill">Widget</span></div></a>
+      <a class="card" href="95-app-icon.html" style="--c: #4A8FFF;"><div class="card-num">95 · app-icon</div><div class="card-title">App icon · 6 variants</div><div class="card-sub">Hero pick (Pulse orb) · 6 variants · in-context preview (home screen + App Store search) · export specs.</div><div class="card-pills"><span class="card-pill">Brand</span></div></a>
+      <a class="card" href="96-icon-system.html" style="--c: #B388FF;"><div class="card-num">96 · icon-system</div><div class="card-title">Icon system reference</div><div class="card-sub">Phosphor-style stroke library · house rules · 5 tab + 5 stat + 16 UI icons · sizes ladder · implementation specs.</div><div class="card-pills"><span class="card-pill">Brand</span></div></a>
+    </div>
+
+    <div class="section-label"><span>19 · B2B · Core for Coaches</span><span class="section-meta">$399–1,499/mo · target 25 coaches → $12k/mo</span></div>
+    <div class="grid">
+      <a class="card" href="84-coach-signup.html" style="--c: #B388FF;"><div class="card-num">84 · coach-signup</div><div class="card-title">Coach signup / landing</div><div class="card-sub">Public marketing page for coaches · hero with live mock dashboard · 6 feature cards · 3-tier pricing ($399/$799/$1499) · application form.</div><div class="card-pills"><span class="card-pill new">★ B2B</span></div></a>
+      <a class="card" href="85-coach-onboarding.html" style="--c: #4A8FFF;"><div class="card-num">85 · coach-onboarding</div><div class="card-title">Coach onboarding (4 steps)</div><div class="card-sub">Step 1 practice details · Step 2 plan pick (90 days free) · Step 3 invite first clients · Step 4 confirm → opens dashboard.</div><div class="card-pills"><span class="card-pill new">★ B2B</span></div></a>
+      <a class="card" href="86-coach-dashboard.html" style="--c: #B388FF;"><div class="card-num">86 · coach-dashboard</div><div class="card-title">Coach dashboard</div><div class="card-sub">3-column layout · client list with status colors (urgent/drifting/healthy) · per-client mini sparklines · AI coach brief · sessions-today sidebar.</div><div class="card-pills"><span class="card-pill">B2B</span></div></a>
+      <a class="card" href="87-session-prep.html" style="--c: #4A8FFF;"><div class="card-num">87 · session-prep</div><div class="card-title">Coach session prep</div><div class="card-sub">Auto-generated brief for one client · 5 prioritized talking points · stat snapshot · triggers · 7-day slip log · private coach notes.</div><div class="card-pills"><span class="card-pill new">★ B2B</span></div></a>
+      <a class="card" href="88-moderation.html" style="--c: #F87171;"><div class="card-num">88 · moderation</div><div class="card-title">Moderation queue</div><div class="card-sub">Back-office triage · 23 pending reports · category tabs · per-report AI suggestion + 3 action buttons (approve/warn/remove) · SLA tracker.</div><div class="card-pills"><span class="card-pill new">★ Trust&amp;Safety</span></div></a>
+    </div>
+
+    <div class="section-label"><span>20 · Owner / dev</span><span class="section-meta">private · file:// or PIN-gated</span></div>
+    <div class="grid">
+      <a class="card owner-only" href="89-admin.html" style="--c: #FFD05C;"><div class="card-num">89 · admin</div><div class="card-title">Owner dashboard<span class="lock-mark" title="Owner-only · PIN"><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span></div><div class="card-sub">6-digit PIN gate · Monthly Recurring Revenue · net-to-bank · downloads · user data. Stays unlocked until tab closes.</div><div class="card-pills"><span class="card-pill" style="background:rgba(255,208,92,0.12); color:#FFD05C; border-color:rgba(255,208,92,0.30);">Owner-only</span></div></a>
+      <a class="card owner-only" href="90-state-debug.html" style="--c: #FFD05C;"><div class="card-num">90 · state-debug</div><div class="card-title">State debug (dev)<span class="lock-mark" title="Owner-only · file:// only"><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span></div><div class="card-sub">Every core* localStorage key in one table · edit-in-place · reset coreState · wipe all. file:// only — blocked on deploy.</div><div class="card-pills"><span class="card-pill" style="background:rgba(255,208,92,0.12); color:#FFD05C; border-color:rgba(255,208,92,0.30);">Owner-only</span></div></a>
+      <a class="card owner-only" href="91-bank-flow-plan.html" style="--c: #FFD05C;"><div class="card-num">91 · bank-flow-plan</div><div class="card-title">Bank flow plan<span class="lock-mark" title="Owner-only"><svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span></div><div class="card-sub">Payment-flow plan doc for the accountant — how money moves App Store → Stripe → bank.</div><div class="card-pills"><span class="card-pill" style="background:rgba(255,208,92,0.12); color:#FFD05C; border-color:rgba(255,208,92,0.30);">Owner-only</span></div></a></div>
+
+
+    <footer>
+      <span>core · ~/Desktop/lifeos · 89 screens · 20 sections · every button wired · v5</span>
+      <a href="01-index.html">→ Walk the flow</a>
+    </footer>
+  </div>
+
+  <!-- Demo state toolbar (dev only) -->
+  <div id="demoBar" style="position:fixed; right:18px; bottom:18px; z-index:9999; background: rgba(10,10,20,0.92); border:1px solid rgba(255,255,255,0.12); border-radius:14px; padding:10px; backdrop-filter: blur(20px); box-shadow: 0 14px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(74,143,255,0.20); font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',Inter,sans-serif; color:#fff; min-width:240px;">
+    <div id="demoHead" style="display:flex; align-items:center; justify-content:space-between; gap:10px; cursor:pointer;" onclick="toggleDemoBar()">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="width:8px; height:8px; border-radius:50%; background:#FFD05C; box-shadow:0 0 8px #FFD05C; display:inline-block;"></span>
+        <span style="font-size:11px; letter-spacing:0.18em; text-transform:uppercase; font-weight:700; color:#FFD05C;">Demo state</span>
+      </div>
+      <span id="demoChev" style="color:#9AA1B7; font-size:13px;">▾</span>
+    </div>
+    <div id="demoBody" style="margin-top:10px; display:flex; flex-direction:column; gap:5px;">
+      <button class="dbtn" data-state="new" onclick="setDemoState('new')">New user</button>
+      <button class="dbtn" data-state="day3" onclick="setDemoState('day3')">Mid-trial · day 3</button>
+      <button class="dbtn" data-state="expired" onclick="setDemoState('expired')">Trial expired</button>
+      <button class="dbtn" data-state="idle" onclick="setDemoState('idle')">Returning · 5 days idle</button>
+      <button class="dbtn" data-state="sub" onclick="setDemoState('sub')">Subscribed (paid)</button>
+      <div style="height:1px; background:rgba(255,255,255,0.08); margin:4px 0;"></div>
+      <button class="dbtn ghost" onclick="resetDemo()">Reset · clear all state</button>
+      <button class="dbtn ghost" onclick="openInspector()">Open analytics log</button>
+    </div>
+    <style>
+      /* Aligned with core-buttons.css palette but local (gallery doesn't import it). */
+      .dbtn {
+        font-family:inherit; font-size:12px; font-weight:500; text-align:left;
+        padding:9px 12px; border-radius:10px;
+        background: rgba(255,255,255,0.04);
+        border:1px solid rgba(255,255,255,0.08);
+        color:#fff; cursor:pointer;
+        transition: background .15s ease, border-color .15s ease, transform .12s ease;
+      }
+      .dbtn:hover  { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.14); }
+      .dbtn:active { transform: scale(0.985); }
+      .dbtn.active {
+        border-color: rgba(91,177,255,0.55);
+        background: linear-gradient(135deg, rgba(74,143,255,0.16), rgba(91,106,230,0.10));
+        color:#5BB1FF;
+        box-shadow: 0 1px 0 rgba(255,255,255,0.10) inset, 0 6px 16px rgba(74,143,255,0.20);
+      }
+      .dbtn.ghost { color:#9AA1B7; background: transparent; border-color: transparent; }
+      .dbtn.ghost:hover { color:#fff; background: rgba(255,255,255,0.04); }
+    </style>
+  </div>
+
+<script>
+  // Demo state presets — set localStorage keys and reload the right landing page.
+  const PRESETS = {
+    new: { clear:true, target:'01-index.html' },
+    day3: {
+      keys: {
+        coreOnboardComplete: '1',
+        coreOnboardTrial: JSON.stringify({ name:'Stone', tone:'balanced', checkin:'both', committed:true, trialStartedAt: Date.now() - 3*24*60*60*1000 }),
+        coreLastSeen: String(Date.now()),
+      },
+      target: '20-dashboard.html',
+    },
+    expired: {
+      keys: {
+        coreOnboardComplete: '1',
+        coreOnboardTrial: JSON.stringify({ name:'Stone', tone:'balanced', checkin:'both', committed:true, trialStartedAt: Date.now() - 10*24*60*60*1000 }),
+      },
+      target: '78-trial-expired.html',
+    },
+    idle: {
+      keys: {
+        coreOnboardComplete: '1',
+        coreOnboardTrial: JSON.stringify({ name:'Stone', tone:'balanced', checkin:'both', committed:true, trialStartedAt: Date.now() - 5*24*60*60*1000 }),
+        coreLastSeen: String(Date.now() - 5*24*60*60*1000),
+      },
+      target: '03-welcome-back.html',
+    },
+    sub: {
+      keys: {
+        coreOnboardComplete: '1',
+        coreSubscriptionActive: '1',
+        coreOnboardTrial: JSON.stringify({ name:'Stone', tone:'balanced', checkin:'both', committed:true, trialStartedAt: Date.now() - 30*24*60*60*1000 }),
+        coreLastSeen: String(Date.now()),
+      },
+      target: '20-dashboard.html',
+    },
+  };
+  function setDemoState(name) {
+    const cfg = PRESETS[name]; if (!cfg) return;
+    try {
+      if (cfg.clear) {
+        ['coreOnboardComplete','coreOnboardTrial','coreSubscriptionActive','coreLastSeen','corePauseUntil','coreDownPlan','coreCancelledAt','coreReferralGift','coreSelectedHabits','coreDevBypass'].forEach(k => localStorage.removeItem(k));
+      }
+      if (cfg.keys) for (const k in cfg.keys) localStorage.setItem(k, cfg.keys[k]);
+      localStorage.setItem('coreDemoState', name);
+      if (window.coreTrack) coreTrack('demo_state_set', { state: name });
+    } catch(e){}
+    location.href = cfg.target;
+  }
+  function resetDemo() {
+    if (!confirm('Clear all CORE localStorage state?')) return;
+    try {
+      Object.keys(localStorage).filter(k => k.startsWith('core')).forEach(k => localStorage.removeItem(k));
+      sessionStorage.removeItem('coreAnalyticsRing');
+    } catch(e){}
+    location.reload();
+  }
+  function openInspector() {
+    try {
+      const ring = JSON.parse(sessionStorage.getItem('coreAnalyticsRing') || '[]');
+      const w = window.open('', '_blank', 'width=720,height=600');
+      const lines = ring.map(r => '<div style="padding:8px 12px; border-bottom:1px solid #222;"><span style="color:#5BB1FF; font-weight:700;">' + r.event + '</span> <code style="color:#aaa;">' + JSON.stringify(r.payload) + '</code></div>').join('');
+      w.document.write('<html><head><title>CORE analytics</title></head><body style="font-family:ui-monospace,monospace; background:#0a0a14; color:#fff; padding:0; margin:0;"><div style="padding:14px; border-bottom:1px solid #222; font-weight:700;">Analytics ring buffer · ' + ring.length + ' events</div>' + (lines || '<div style="padding:20px; color:#666;">No events yet. Click around the app.</div>') + '</body></html>');
+    } catch(e){ alert('Inspector failed: '+e.message); }
+  }
+  function toggleDemoBar() {
+    const body = document.getElementById('demoBody');
+    const chev = document.getElementById('demoChev');
+    const open = body.style.display !== 'none';
+    body.style.display = open ? 'none' : 'flex';
+    chev.textContent = open ? '▸' : '▾';
+  }
+  // Highlight active state
+  (function(){
+    try {
+      const cur = localStorage.getItem('coreDemoState');
+      if (cur) document.querySelectorAll('.dbtn[data-state]').forEach(b => {
+        if (b.dataset.state === cur) b.classList.add('active');
+      });
+    } catch(e){}
+  })();
+</script>
+</body>
+</html>

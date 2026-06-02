@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+  <meta charset="utf-8" />
+  <title>Core — Achievements</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <style>
+    :root { --bg-base:#02020A; --text-primary:#F8FAFE; --text-muted:#9AA1B7; --text-dim:#4F5570; --accent:#4A8FFF; }
+    * { box-sizing: border-box; }
+    html, body { margin:0; padding:0; height:100%; }
+    body { min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text-primary); padding:24px; overflow:hidden; }
+    .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+    .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:10; }
+    .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:10; }
+
+    .bg { position:absolute; inset:0; background: radial-gradient(60% 30% at 50% 18%, rgba(179,136,255,0.10) 0%, transparent 65%), linear-gradient(180deg, #0A0820 0%, var(--bg-base) 50%, #050510 100%); }
+    .grain { position:absolute; inset:0; pointer-events:none; opacity:0.04; mix-blend-mode:overlay; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.7 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); z-index:2; }
+
+    .topbar { position:absolute; top:60px; left:0; right:0; padding:0 24px; display:flex; align-items:center; gap:14px; z-index:10; }
+    .back {
+      width: 38px !important; height: 38px !important;
+      min-width: 38px !important; min-height: 38px !important;
+      max-width: 38px !important; max-height: 38px !important;
+      aspect-ratio: 1 / 1;
+      flex: 0 0 38px;
+      align-self: center;
+      border-radius: 50% !important;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.10);
+      display: flex !important; align-items: center !important; justify-content: center !important;
+      cursor: pointer; padding: 0;
+      font-family: inherit;
+      box-sizing: border-box;
+      transition: background .15s, border-color .15s, transform .12s;
+    }
+    .back:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }
+    .back:active { transform: scale(0.94); }
+    .back svg { width:14px; height:14px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex-shrink: 0; }
+    .topbar-title { font-size:22px; font-weight:600; letter-spacing:-0.5px; flex:1; }
+    .topbar-meta { font-size:12px; color:var(--text-muted); font-family:ui-monospace,"SF Mono",Menlo,monospace; letter-spacing:0.06em; }
+
+    .scroll { position:absolute; top:120px; left:0; right:0; bottom:0; padding: 0 20px 28px; overflow-y:auto; z-index:5; }
+    .scroll::-webkit-scrollbar { display:none; }
+
+    /* Stats summary */
+    .summary { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; padding: 6px 0 16px; }
+    .sum-cell { padding: 12px 10px; border-radius: 14px; background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); text-align:center; }
+    .sum-val { font-size: 22px; font-weight: 700; letter-spacing:-0.5px; }
+    .sum-lbl { font-size:9px; letter-spacing:0.18em; text-transform:uppercase; color:var(--text-muted); margin-top:4px; font-weight:500; }
+
+    /* Filter tabs */
+    .filters { display:flex; gap:6px; overflow-x:auto; padding: 4px 0 14px; }
+    .filters::-webkit-scrollbar { display:none; }
+    .filter { flex-shrink:0; padding: 7px 14px; border-radius: 999px; background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); font-size:12px; font-weight:600; color:var(--text-muted); cursor:pointer; font-family:inherit; letter-spacing:-0.05px; }
+    .filter.active { background: rgba(255,255,255,0.96); color: #050510; border-color: rgba(255,255,255,0.6); }
+
+    /* Achievement grid */
+    .ach-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    .ach {
+      padding: 12px 8px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      backdrop-filter: blur(14px);
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      transition: all 0.18s;
+      position: relative;
+      overflow: hidden;
+      cursor:pointer;
+    }
+    .ach::before { content:""; position:absolute; inset:0; background: radial-gradient(80% 100% at 50% 0%, var(--c) 0%, transparent 70%); opacity:0.18; pointer-events:none; }
+    .ach:hover { transform: translateY(-2px); background: rgba(255,255,255,0.05); }
+    .ach.locked { opacity: 0.4; }
+    .ach.locked::before { opacity: 0; }
+    .ach-icon {
+      width: 42px; height: 42px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--c); box-shadow: 0 0 14px var(--c);
+      position: relative;
+    }
+    .ach.locked .ach-icon { background: #2A2E3A; box-shadow: none; }
+    .ach-icon::after { content:""; position:absolute; inset:0; border-radius:12px; background:linear-gradient(160deg, rgba(255,255,255,0.3) 0%, transparent 45%); }
+    .ach.locked .ach-icon::after { opacity: 0; }
+    .ach-icon svg { width: 20px; height: 20px; stroke: white; position: relative; z-index: 2; }
+    .ach.locked .ach-icon svg { stroke: var(--text-dim); }
+    .ach-name { font-size: 11px; font-weight: 600; color: var(--text-primary); text-align:center; letter-spacing:-0.1px; line-height:13px; }
+    .ach-sub { font-size: 10px; color: var(--text-dim); text-align: center; font-family: ui-monospace,"SF Mono",Menlo,monospace; }
+    .ach-progress { width:100%; margin-top:4px; height:3px; background: rgba(255,255,255,0.06); border-radius:999px; overflow:hidden; }
+    .ach-progress-fill { height:100%; background: var(--c); border-radius:999px; box-shadow:0 0 4px var(--c); }
+
+    .section-title { font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:var(--text-muted); font-weight:500; margin: 22px 4px 10px; }
+
+    .preview-label { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); color:#4A5060; font-size:11px; letter-spacing:0.16em; text-transform:uppercase; font-family:ui-monospace,"SF Mono",Menlo,monospace; }
+    @media (max-width:460px){ body{padding:0;} .phone{width:100vw; height:100vh; border-radius:0; box-shadow:none;} .notch,.home-indicator{display:none;} .preview-label{display:none;} }
+  
+    /* core-tabbar-clearance */
+    .scroll { padding-bottom: 110px !important; }
+  </style>
+  <link rel="stylesheet" href="_lib/core-responsive.css">
+  <script src="_lib/core-back.js"></script>
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div>
+    <div class="grain"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="topbar">
+      <button class="back" type="button" onclick="window.location.href='62-profile.html'" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18L9 12l6-6"/></svg></button>
+      <div class="topbar-title">Achievements</div>
+      <div class="topbar-meta">9 / 30</div>
+    </div>
+
+    <div class="scroll">
+      <div class="summary">
+        <div class="sum-cell"><div class="sum-val" style="color:#34D399;">9</div><div class="sum-lbl">Unlocked</div></div>
+        <div class="sum-cell"><div class="sum-val" style="color:#FF7A45;">3</div><div class="sum-lbl">In progress</div></div>
+        <div class="sum-cell"><div class="sum-val" style="color:#4F5570;">18</div><div class="sum-lbl">Locked</div></div>
+      </div>
+
+      <div class="filters">
+        <button class="filter active">All</button>
+        <button class="filter">Lungs</button>
+        <button class="filter">Brain</button>
+        <button class="filter">Wallet</button>
+        <button class="filter">Willpower</button>
+        <button class="filter">Body</button>
+        <button class="filter">Ranks</button>
+        <button class="filter">Social</button>
+      </div>
+
+      <div class="section-title">Unlocked · <span id="unlockedCount">9</span></div>
+      <div class="ach-grid">
+        <!-- Perfect Week — awarded when all 7 days of an ISO week have check-ins (any week, ever). Auto-shown by JS at bottom. -->
+        <div class="ach" id="achPerfectWeek" style="--c: #FFC857; display: none;" data-perk="perfectWeek" title="7 daily check-ins in one week">
+          <div class="ach-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M6 9V4h12v5a6 6 0 0 1-12 0z"/><path d="M6 4H3v3a3 3 0 0 0 3 3"/><path d="M18 4h3v3a3 3 0 0 1-3 3"/><path d="M9 19h6"/><path d="M12 15v4"/></svg></div>
+          <div class="ach-name">Perfect Week</div>
+          <div class="ach-sub" id="achPerfectWeekSub">7/7 days</div>
+        </div>
+        <div class="ach" style="--c: #34D399;"><div class="ach-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg></div><div class="ach-name">First Log</div><div class="ach-sub">May 25</div></div>
+        <div class="ach" style="--c: #FF6BAA;"><div class="ach-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M12 2l3 7h7l-5.5 4 2 8L12 17l-6.5 4 2-8L2 9h7z"/></svg></div><div class="ach-name">7-day Clean</div><div class="ach-sub">Lungs</div></div>
+        <div class="ach" style="--c: #B388FF;"><div class="ach-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg></div><div class="ach-name">First Recovery</div><div class="ach-sub">+12 XP</div></div>
+        <div class="ach" style="--c: #FFD05C;"><div class="ach-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M12 2c4 6 4 12 0 18M12 2c-4 6-4 12 0 18"/></svg></div><div class="ach-name">Honest Day</div><div class="ach-sub">Logged a slip</div></div>
+        <div class="ach" style="--c: #FF7A45;"><div class="ach-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M12 2c1 3 3 4.5 3 7a3 3 0 1 1-6 0c0-1 .5-1.8 1-2.5"/></svg></div><div class="ach-name">14-day Fire</div><div class="ach-sub">Willpower</div></div>
+        <div class="ach" style="--c: #4A8FFF;"><div class="ach-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M12 2L4 10l8 12 8-12z"/></svg></div><div class="ach-name">Flow Tier</div><div class="ach-sub">Reached</div></div>
+        <div class="ach" style="--c: #B388FF;"><div class="ach-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M21 12c0 5-4.5 8-9 8a9 9 0 0 1-3.5-.7L3 21l1.7-5.5A9 9 0 0 1 3 12c0-5 4.5-8 9-8s9 3 9 8z"/></svg></div><div class="ach-name">Coach Talker</div><div class="ach-sub">5 chats</div></div>
+        <div class="ach" style="--c: #5CE1E6;"><div class="ach-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg></div><div class="ach-name">First Friend</div><div class="ach-sub">Added Aya</div></div>
+        <div class="ach" style="--c: #FF6BAA;"><div class="ach-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><div class="ach-name">First Post</div><div class="ach-sub">Shared</div></div>
+      </div>
+
+      <div class="section-title">In progress · 3</div>
+      <div class="ach-grid">
+        <div class="ach" style="--c: #FF7A45;"><div class="ach-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></svg></div><div class="ach-name">30-day Clean</div><div class="ach-sub">14 / 30</div><div class="ach-progress"><div class="ach-progress-fill" style="width:47%;"></div></div></div>
+        <div class="ach" style="--c: #4A8FFF;"><div class="ach-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M12 2L4 10l8 12 8-12z"/></svg></div><div class="ach-name">Forge Tier</div><div class="ach-sub">60 XP to go</div><div class="ach-progress"><div class="ach-progress-fill" style="width:95%;"></div></div></div>
+        <div class="ach" style="--c: #5CE1E6;"><div class="ach-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M5 12l5 5L20 7"/></svg></div><div class="ach-name">5 Friends</div><div class="ach-sub">3 / 5</div><div class="ach-progress"><div class="ach-progress-fill" style="width:60%;"></div></div></div>
+      </div>
+
+      <div class="section-title">Locked · 18</div>
+      <div class="ach-grid">
+        <div class="ach locked"><div class="ach-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><div class="ach-name">100 Days</div><div class="ach-sub">Locked</div></div>
+        <div class="ach locked"><div class="ach-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><div class="ach-name">365 Apex</div><div class="ach-sub">Locked</div></div>
+        <div class="ach locked"><div class="ach-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><div class="ach-name">Perfect Week</div><div class="ach-sub">All clean</div></div>
+        <div class="ach locked"><div class="ach-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><div class="ach-name">All 5 Stats &gt;80</div><div class="ach-sub">Locked</div></div>
+        <div class="ach locked"><div class="ach-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><div class="ach-name">10 Friends</div><div class="ach-sub">Locked</div></div>
+        <div class="ach locked"><div class="ach-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><div class="ach-name">50 Recoveries</div><div class="ach-sub">Locked</div></div>
+        <div class="ach locked"><div class="ach-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><div class="ach-name">Comeback</div><div class="ach-sub">After 0</div></div>
+        <div class="ach locked"><div class="ach-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><div class="ach-name">Mentor</div><div class="ach-sub">Help a friend</div></div>
+        <div class="ach locked"><div class="ach-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><div class="ach-name">First Scan</div><div class="ach-sub">Food / body</div></div>
+      </div>
+    </div>
+  </div>
+  <div <div class="tabbar"></div><div class="preview-label">core · achievements · v1</div>
+  <script src="_lib/core-state.js"></script>
+  <script>
+    // Recompute the summary numbers from real state so the page isn't lying.
+    (function() {
+      try {
+        var s = coreState.read();
+        // Achievement rules — minimal set, expand later
+        var rules = [
+          { id:'first_log',      ok: (s.slips || []).length > 0 },
+          { id:'first_stat',     ok: Object.keys(s.statWizardsDone || {}).length > 0 },
+          { id:'all_5_stats',    ok: Object.keys(s.statWizardsDone || {}).length >= 5 },
+          { id:'first_post',     ok: (JSON.parse(localStorage.getItem('coreUserPosts')||'[]')).length > 0 },
+          { id:'streak_3',       ok: (s.streak.days || 0) >= 3 },
+          { id:'streak_7',       ok: (s.streak.days || 0) >= 7 },
+          { id:'streak_14',      ok: (s.streak.days || 0) >= 14 },
+          { id:'streak_30',      ok: (s.streak.days || 0) >= 30 },
+          { id:'streak_100',     ok: (s.streak.days || 0) >= 100 },
+          { id:'all_stats_80',   ok: ['brain','lungs','wallet','willpower','body'].every(k => (s.stats[k]||0) >= 80) },
+          { id:'first_friend',   ok: (JSON.parse(localStorage.getItem('coreFollowing')||'[]')).length > 0 },
+          { id:'five_friends',   ok: (JSON.parse(localStorage.getItem('coreFollowing')||'[]')).length >= 5 },
+          { id:'first_coin_buy', ok: (s.coinLedger || []).some(e => e.delta < 0) },
+          { id:'comeback',       ok: (s.restoresUsedFree || 0) > 0 },
+        ];
+        var unlocked = rules.filter(r => r.ok).length;
+        var total = rules.length;
+        // Update top summary
+        var sumCells = document.querySelectorAll('.sum-cell .sum-val');
+        if (sumCells[0]) sumCells[0].textContent = unlocked;
+        if (sumCells[1]) sumCells[1].textContent = Math.min(3, Math.max(0, Math.min(total, unlocked + 3) - unlocked));
+        if (sumCells[2]) sumCells[2].textContent = total - unlocked;
+        var meta = document.querySelector('.topbar-meta');
+        if (meta) meta.textContent = unlocked + ' / ' + total;
+        var st = document.querySelectorAll('.section-title');
+        if (st[0]) st[0].textContent = 'Unlocked · ' + unlocked;
+        if (st[1]) st[1].textContent = 'Locked · ' + (total - unlocked);
+      } catch(e){ console.error(e); }
+    })();
+  </script>
+  <!-- Perfect-week unlock — scan corePerfectWeek.* keys and reveal the badge if any week has been completed -->
+  <script>
+    (function() {
+      try {
+        let perfectCount = 0;
+        let mostRecent = null;
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith('corePerfectWeek.')) {
+            perfectCount++;
+            const wk = k.replace('corePerfectWeek.', '');
+            if (!mostRecent || wk > mostRecent) mostRecent = wk;
+          }
+        }
+        if (perfectCount > 0) {
+          const el = document.getElementById('achPerfectWeek');
+          const sub = document.getElementById('achPerfectWeekSub');
+          if (el) el.style.display = '';
+          if (sub) sub.textContent = perfectCount === 1
+            ? '7/7 days · ' + (mostRecent || '')
+            : perfectCount + 'x perfect weeks';
+          // Bump the "Unlocked · N" count
+          const cnt = document.getElementById('unlockedCount');
+          if (cnt) {
+            const n = parseInt(cnt.textContent || '9', 10);
+            cnt.textContent = String(n + 1);
+          }
+        }
+      } catch (e) {}
+    })();
+  </script>
+<script src="_lib/core-header.js"></script>
+<script src="_lib/core-tabbar.js"></script>
+</body>
+</html>

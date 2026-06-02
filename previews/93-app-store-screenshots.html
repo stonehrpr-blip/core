@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+  <meta charset="utf-8" />
+  <title>Core — App Store screenshots viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <style>
+    :root { --bg-base:#02020A; --text-primary:#F8FAFE; --text-muted:#9AA1B7; --text-dim:#4F5570; --accent:#4A8FFF; }
+    * { box-sizing: border-box; }
+    html, body { margin:0; padding:0; height:100%; }
+    body { min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text-primary); -webkit-font-smoothing:antialiased; padding:24px; overflow:hidden; }
+    .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+    .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:30; }
+    .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:30; }
+
+    /* The whole phone IS the screenshot — swipe between 5 */
+    .deck { position:absolute; inset:0; overflow:hidden; }
+    .ss { position:absolute; inset:0; padding: 70px 28px 70px; display:flex; flex-direction:column; opacity:0; transition: opacity 0.4s ease; }
+    .ss.active { opacity:1; }
+
+    .ss-overlay { text-align:center; }
+    .ss-headline { font-size: 26px; font-weight: 700; letter-spacing:-0.8px; line-height:1.15; color: white; text-shadow: 0 2px 14px rgba(0,0,0,0.75); margin-bottom: 8px; }
+    .ss-subhead { font-size: 13px; font-weight: 500; letter-spacing:-0.1px; color: rgba(255,255,255,0.9); text-shadow: 0 1px 10px rgba(0,0,0,0.7); line-height: 18px; }
+
+    /* SS 1 — Habit page mid smoke */
+    .ss-1 { background: radial-gradient(circle at 50% 60%, rgba(255,107,170,0.25) 0%, transparent 70%), radial-gradient(circle at 50% 100%, rgba(132,46,81,0.30) 0%, transparent 60%), linear-gradient(180deg, #1A0814 0%, #050510 100%); }
+    .ss-1-art { flex:1; position:relative; }
+    .ss-1-lungs { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:140px; height:140px; }
+    .ss-1-lungs::before { content:""; position:absolute; inset:0; border-radius:50%; background: radial-gradient(circle, rgba(255,107,170,0.30) 0%, transparent 65%); }
+    .ss-1-lungs::after { content:""; position:absolute; inset:30px; border-radius:50%; background: radial-gradient(circle at 35% 28%, #FFD3E4 0%, #FF6BAA 55%, #832D50 100%); box-shadow: 0 0 50px #FF6BAA, inset 0 2px 5px rgba(255,255,255,0.3); }
+    .smoke { position:absolute; left:50%; top:35%; transform:translate(-50%,-50%); width:60px; height:60px; border-radius:50%; background: radial-gradient(circle, rgba(180,180,200,0.45) 0%, transparent 70%); filter: blur(8px); }
+    .smoke.s2 { left:35%; top:25%; width:50px; height:50px; }
+    .smoke.s3 { left:65%; top:30%; width:45px; height:45px; }
+    .ss-1-xp { position:absolute; left:50%; top:30%; transform:translateX(-50%); font-size: 28px; font-weight: 700; color: #F87171; text-shadow: 0 0 14px rgba(248,113,113,0.5); }
+    .ss-1-btn { padding: 16px; border-radius:999px; background: linear-gradient(180deg,#FF6BAA,#832D50); color:white; font-size:15px; font-weight:600; text-align:center; box-shadow: 0 0 28px rgba(255,107,170,0.4); }
+
+    /* SS 2 — Healing lungs ring */
+    .ss-2 { background: radial-gradient(circle at 50% 0%, rgba(155,130,255,0.20) 0%, transparent 65%), linear-gradient(180deg, #0A0820 0%, #050510 100%); }
+    .ss-2-ring { margin: 30px auto; width:200px; height:200px; position:relative; }
+    .ss-2-ring::before { content:""; position:absolute; inset:0; border-radius:50%; background: conic-gradient(from -90deg, #FF6BAA 64%, rgba(255,255,255,0.06) 64%); box-shadow: 0 0 50px rgba(255,107,170,0.4); }
+    .ss-2-ring-in { position:absolute; inset:16px; border-radius:50%; background: var(--bg-base); display:flex; flex-direction:column; align-items:center; justify-content:center; }
+    .ss-2-ring-num { font-size: 56px; font-weight: 700; color: #FF6BAA; line-height:1; }
+    .ss-2-ring-lbl { font-size: 10px; color: var(--text-muted); letter-spacing: 0.22em; text-transform: uppercase; margin-top: 6px; }
+    .ss-2-trend { padding: 16px 18px; border-radius: 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
+    .ss-2-trend-l { font-size: 10px; color: var(--text-muted); letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 6px; }
+    .ss-2-trend-svg { width:100%; height:50px; }
+
+    /* SS 3 — AI Coach action card */
+    .ss-3 { background: radial-gradient(circle at 50% 0%, rgba(74,143,255,0.20) 0%, transparent 65%), linear-gradient(180deg, #050C26 0%, #050510 100%); }
+    .ss-3-chat { display:flex; flex-direction:column; gap: 8px; margin-top: 18px; flex:1; }
+    .ss-3-bubble { padding: 12px 14px; border-radius: 16px; font-size: 13px; line-height: 18px; max-width: 80%; letter-spacing:-0.1px; }
+    .ss-3-bubble.coach { align-self:flex-start; background: rgba(255,255,255,0.06); color: white; border-bottom-left-radius: 5px; }
+    .ss-3-bubble.user { align-self:flex-end; background: linear-gradient(180deg, #4A8FFF, #1c70d6); color: white; border-bottom-right-radius: 5px; }
+    .ss-3-action { padding: 14px; border-radius: 16px; background: linear-gradient(135deg, rgba(74,143,255,0.20) 0%, rgba(132,100,255,0.15) 100%); border: 1px solid rgba(74,143,255,0.40); margin-top: 8px; }
+    .ss-3-action-lbl { font-size: 10px; color: var(--accent); letter-spacing: 0.18em; text-transform: uppercase; font-weight: 600; margin-bottom: 6px; }
+    .ss-3-action-t { font-size: 14px; color: white; font-weight: 600; letter-spacing:-0.1px; }
+    .ss-3-btns { display:flex; gap:8px; margin-top: 10px; }
+    .ss-3-btn { flex:1; padding: 10px; border-radius: 10px; font-size: 12px; text-align:center; font-weight: 600; }
+    .ss-3-btn.primary { background: var(--accent); color: white; }
+    .ss-3-btn.secondary { background: rgba(255,255,255,0.06); color: var(--text-muted); }
+
+    /* SS 4 — Recovery breath orb */
+    .ss-4 { background: radial-gradient(circle at 50% 50%, rgba(74,143,255,0.25) 0%, transparent 60%), linear-gradient(180deg, #051026 0%, #050510 60%, #050510 100%); }
+    .ss-4-orb { margin: 40px auto 30px; width:200px; height:200px; position:relative; }
+    .ss-4-orb::before { content:""; position:absolute; inset:0; border-radius:50%; background: radial-gradient(circle, rgba(74,143,255,0.30) 0%, transparent 65%); border: 1px solid rgba(74,143,255,0.4); }
+    .ss-4-orb::after { content:""; position:absolute; inset:40px; border-radius:50%; background: radial-gradient(circle at 35% 28%, #DCEBFF 0%, #4A8FFF 60%, #1856B8 100%); box-shadow: 0 0 50px #4A8FFF, inset 0 2px 8px rgba(255,255,255,0.4); }
+    .ss-4-breath { text-align:center; font-size: 22px; font-weight: 500; color: white; letter-spacing:-0.5px; }
+    .ss-4-progress-wrap { margin-top: auto; padding-top: 20px; }
+    .ss-4-progress { height: 6px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow:hidden; }
+    .ss-4-progress-fill { height: 100%; width: 65%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+    .ss-4-prog-lbl { text-align:center; font-size: 11px; color: var(--text-muted); margin-top: 8px; letter-spacing:0.06em; font-family:ui-monospace,"SF Mono",Menlo,monospace; }
+
+    /* SS 5 — Rank up FORGE */
+    .ss-5 { background: radial-gradient(circle at 50% 30%, rgba(255,122,69,0.30) 0%, transparent 65%), radial-gradient(circle at 50% 100%, rgba(132,100,255,0.20) 0%, transparent 60%), linear-gradient(180deg, #1A0814 0%, #050510 60%); }
+    .ss-5-art { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap: 18px; }
+    .ss-5-badge { width:140px; height:140px; border-radius: 28px; background: linear-gradient(135deg, #FF7A45 0%, #813617 100%); box-shadow: 0 0 70px rgba(255,122,69,0.6), inset 0 4px 12px rgba(255,255,255,0.4); display:flex; align-items:center; justify-content:center; position:relative; }
+    .ss-5-badge::after { content:""; position:absolute; inset:0; border-radius:28px; background:linear-gradient(160deg, rgba(255,255,255,0.32) 0%, transparent 45%); }
+    .ss-5-badge svg { width: 70px; height: 70px; stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; position:relative; z-index:2; }
+    .ss-5-title { font-size:32px; font-weight: 700; color: #FF7A45; letter-spacing:-0.6px; text-shadow: 0 0 24px rgba(255,122,69,0.5); }
+    .ss-5-sub { font-size: 13px; color: var(--text-muted); letter-spacing:-0.1px; }
+
+    /* Dots indicator + nav */
+    .dots { position:absolute; bottom: 30px; left:0; right:0; display:flex; justify-content:center; gap: 6px; z-index: 20; }
+    .dot { width:7px; height:7px; border-radius: 50%; background: rgba(255,255,255,0.20); cursor:pointer; transition: all 0.2s; }
+    .dot.active { background: white; width: 22px; border-radius: 999px; }
+
+    .ss-num { position:absolute; top: 56px; left: 22px; z-index: 25; font-size: 11px; color: white; opacity: 0.6; font-family:ui-monospace,"SF Mono",Menlo,monospace; letter-spacing: 0.18em; }
+    .ss-num-total { color: rgba(255,255,255,0.4); }
+
+    .arrow-btn { position:absolute; bottom: 24px; width: 36px; height: 36px; border-radius:50%; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); display:flex; align-items:center; justify-content:center; cursor:pointer; z-index: 25; backdrop-filter: blur(20px); }
+    .arrow-btn.left { left: 16px; }
+    .arrow-btn.right { right: 16px; }
+    .arrow-btn svg { width: 14px; height: 14px; stroke: white; fill: none; stroke-width: 2; }
+
+    .preview-label { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); color:#4A5060; font-size:11px; letter-spacing:0.16em; text-transform:uppercase; font-family:ui-monospace,"SF Mono",Menlo,monospace; }
+    @media (max-width:460px){ body{padding:0;} .phone{width:100vw; height:100vh; border-radius:0; box-shadow:none;} .notch,.home-indicator{display:none;} .preview-label{display:none;} }
+  </style>
+  <link rel="stylesheet" href="_lib/core-responsive.css">
+  <script src="_lib/core-back.js"></script>
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="deck">
+      <!-- SS 1 -->
+      <div class="ss ss-1 active" data-idx="0">
+        <div class="ss-overlay">
+          <div class="ss-headline">Slip happens.<br/>So does the consequence.</div>
+          <div class="ss-subhead">Live visual feedback every time.</div>
+        </div>
+        <div class="ss-1-art">
+          <div class="ss-1-lungs"></div>
+          <div class="smoke"></div>
+          <div class="smoke s2"></div>
+          <div class="smoke s3"></div>
+          <div class="ss-1-xp">−25 XP</div>
+        </div>
+        <div class="ss-1-btn">I just took a puff</div>
+      </div>
+
+      <!-- SS 2 -->
+      <div class="ss ss-2" data-idx="1">
+        <div class="ss-overlay">
+          <div class="ss-headline">Watch your lungs<br/>come back to pink.</div>
+          <div class="ss-subhead">30-day trend, in real time.</div>
+        </div>
+        <div class="ss-2-ring">
+          <div class="ss-2-ring-in">
+            <div class="ss-2-ring-num">64</div>
+            <div class="ss-2-ring-lbl">Lungs</div>
+          </div>
+        </div>
+        <div style="flex:1;"></div>
+        <div class="ss-2-trend">
+          <div class="ss-2-trend-l">7-day trend · ▲ 8</div>
+          <svg class="ss-2-trend-svg" viewBox="0 0 320 50" fill="none">
+            <defs>
+              <linearGradient id="trFill" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stop-color="#FF6BAA" stop-opacity="0.4"/>
+                <stop offset="100%" stop-color="#FF6BAA" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path d="M0 38 L46 35 L92 32 L138 22 L184 26 L230 14 L276 12 L320 6 L320 50 L0 50 Z" fill="url(#trFill)"/>
+            <path d="M0 38 L46 35 L92 32 L138 22 L184 26 L230 14 L276 12 L320 6" stroke="#FF6BAA" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="320" cy="6" r="3" fill="#FF6BAA"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- SS 3 -->
+      <div class="ss ss-3" data-idx="2">
+        <div class="ss-overlay">
+          <div class="ss-headline">An AI coach that catches<br/>your patterns.</div>
+          <div class="ss-subhead">"You slip at 3pm. Here's what to try."</div>
+        </div>
+        <div class="ss-3-chat">
+          <div class="ss-3-bubble user">why does this keep happening</div>
+          <div class="ss-3-bubble coach">You tend to slip between 3 and 5pm. That's the third time this month after work calls.</div>
+          <div class="ss-3-bubble coach">Want me to set a 'phone-in-the-kitchen' nudge for 2:45pm tomorrow?</div>
+          <div class="ss-3-action">
+            <div class="ss-3-action-lbl">Confirm action</div>
+            <div class="ss-3-action-t">Set 2:45pm nudge: "Phone away"</div>
+            <div class="ss-3-btns">
+              <div class="ss-3-btn secondary">Cancel</div>
+              <div class="ss-3-btn primary">Confirm</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SS 4 -->
+      <div class="ss ss-4" data-idx="3">
+        <div class="ss-overlay">
+          <div class="ss-headline">60-second comeback<br/>after a slip.</div>
+          <div class="ss-subhead">Claw back XP. Honesty rewarded.</div>
+        </div>
+        <div class="ss-4-orb"></div>
+        <div class="ss-4-breath">Inhale</div>
+        <div class="ss-4-progress-wrap">
+          <div class="ss-4-progress"><div class="ss-4-progress-fill"></div></div>
+          <div class="ss-4-prog-lbl">39 seconds remaining</div>
+        </div>
+      </div>
+
+      <!-- SS 5 -->
+      <div class="ss ss-5" data-idx="4">
+        <div class="ss-overlay">
+          <div class="ss-headline">Climb the 7-tier<br/>rank ladder.</div>
+          <div class="ss-subhead">Focus · Spark · Flow · Forge · Edge · Peak · Apex</div>
+        </div>
+        <div class="ss-5-art">
+          <div class="ss-5-badge">
+            <svg viewBox="0 0 24 24"><path d="M12 2L4 10l8 12 8-12z" fill="white" fill-opacity="0.2"/><path d="M12 2L4 10l8 12 8-12z"/><path d="M8 10l4 4 4-4"/></svg>
+          </div>
+          <div style="text-align:center;">
+            <div class="ss-5-title">FORGE I</div>
+            <div class="ss-5-sub">14 clean days · 1,200 XP</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ss-num"><span id="cur">01</span><span class="ss-num-total"> / 05</span></div>
+
+    <div class="dots">
+      <span class="dot active" onclick="go(0)"></span>
+      <span class="dot" onclick="go(1)"></span>
+      <span class="dot" onclick="go(2)"></span>
+      <span class="dot" onclick="go(3)"></span>
+      <span class="dot" onclick="go(4)"></span>
+    </div>
+
+    <div class="arrow-btn left" onclick="step(-1)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18L9 12l6-6"/></svg></div>
+    <div class="arrow-btn right" onclick="step(1)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></div>
+  </div>
+  <div class="preview-label">core · app store screenshots · v2 phone</div>
+
+  <script>
+    let idx = 0;
+    function go(n) {
+      idx = Math.max(0, Math.min(4, n));
+      document.querySelectorAll('.ss').forEach((s, i) => s.classList.toggle('active', i === idx));
+      document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+      document.getElementById('cur').textContent = String(idx + 1).padStart(2, '0');
+    }
+    function step(d) { go(idx + d); }
+    // Swipe gestures
+    let sx = 0;
+    const deck = document.querySelector('.deck');
+    deck.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, { passive: true });
+    deck.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - sx;
+      if (Math.abs(dx) > 40) step(dx < 0 ? 1 : -1);
+    });
+    // Keyboard arrows
+    window.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight') step(1);
+      if (e.key === 'ArrowLeft') step(-1);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8" />
+<title>CORE — Tone preview</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<link rel="stylesheet" href="_lib/core-buttons.css" />
+<script src="_lib/core-state.js"></script>
+<script src="_lib/analytics.js"></script>
+  <script src="_lib/core-back.js"></script>
+<style>
+  :root { --bg-base:#02020A; --text:#F8FAFE; --muted:#9AA1B7; --dim:#4F5570; --accent:#4A8FFF; --border:rgba(255,255,255,0.08); }
+  * { box-sizing:border-box; }
+  html, body { margin:0; padding:0; height:100%; }
+  body { min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text); padding:24px; overflow:hidden; }
+  .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+  .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:30; }
+  .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:30; }
+  .bg { position:absolute; inset:0; background: var(--bg-grad); }
+
+  .frame { position:absolute; inset:0; z-index:10; padding: 60px 0 24px; display:flex; flex-direction:column; }
+  .topbar { padding: 0 22px 8px; display:flex; align-items:center; justify-content:space-between; }
+    .back {
+      width: 38px !important; height: 38px !important;
+      min-width: 38px !important; min-height: 38px !important;
+      max-width: 38px !important; max-height: 38px !important;
+      aspect-ratio: 1 / 1;
+      flex: 0 0 38px;
+      align-self: center;
+      border-radius: 50% !important;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.10);
+      display: flex !important; align-items: center !important; justify-content: center !important;
+      cursor: pointer; padding: 0;
+      font-family: inherit;
+      box-sizing: border-box;
+      transition: background .15s, border-color .15s, transform .12s;
+    }
+    .back:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }
+    .back:active { transform: scale(0.94); }
+    .back svg { width:14px; height:14px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex-shrink: 0; }
+  .brand { display:flex; align-items:center; gap:8px; }
+  .brand .dot { width:7px; height:7px; border-radius:50%; background:var(--c); box-shadow:0 0 10px var(--c); }
+  .brand .wm { font-size:12px; font-weight:700; letter-spacing:0.36em; color:rgba(255,255,255,0.92); }
+
+  .hero { padding: 14px 26px 4px; text-align: left; }
+  .ico { width:54px; height:54px; border-radius:16px; background: var(--c); box-shadow: 0 0 22px var(--c); display:flex; align-items:center; justify-content:center; margin-bottom: 14px; }
+  .ico svg { width:26px; height:26px; stroke:#fff; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+  .label { font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-bottom: 4px; }
+  .name { font-size: 30px; font-weight: 800; letter-spacing: -0.8px; color: #fff; }
+  .desc { color: var(--muted); font-size: 13px; line-height: 19px; margin-top: 6px; }
+
+  .chat-context { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--dim); margin: 16px 26px 8px; font-weight: 700; }
+
+  .chat { padding: 0 18px; flex: 1; overflow-y: auto; }
+  .chat::-webkit-scrollbar { display:none; }
+  .bubble {
+    max-width: 80%; padding: 12px 14px; border-radius: 16px; margin-bottom: 4px;
+    font-size: 14px; line-height: 20px; letter-spacing: -0.1px;
+    animation: fadeUp .4s var(--del,0s) both;
+  }
+  @keyframes fadeUp { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: translateY(0); } }
+  .bubble.coach {
+    align-self: flex-start; background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); border-bottom-left-radius: 6px; color: #fff;
+    margin-left: 6px;
+  }
+  .bubble.user {
+    align-self: flex-end; background: linear-gradient(180deg, var(--c), var(--cd)); color:#fff; border-bottom-right-radius:6px; margin-left: auto; margin-right: 6px;
+    box-shadow: 0 4px 14px var(--c-glow, rgba(255,255,255,0.10));
+  }
+  .bubble-time { font-size: 10px; color: var(--dim); margin-bottom: 12px; letter-spacing: 0.06em; font-family: ui-monospace,"SF Mono",Menlo,monospace; }
+  .b-stage { display:flex; flex-direction:column; }
+
+  .footer { padding: 14px 26px 0; }
+  .footnote { text-align:center; font-size:11px; color:var(--muted); margin-top:10px; }
+</style>
+  <link rel="stylesheet" href="_lib/core-responsive.css">
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="frame">
+      <div class="topbar">
+        <button class="back" type="button" onclick="window.location.href='07-trial.html'" aria-label="Back"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <div class="brand"><span class="dot"></span><span class="wm">CORE</span></div>
+        <div style="width:34px;"></div>
+      </div>
+
+      <div class="hero">
+        <div class="ico" id="ico"></div>
+        <div class="label">Coach tone preview</div>
+        <div class="name" id="name">Balanced</div>
+        <div class="desc" id="desc">Honest, fair, no fluff. Tells it straight without being cold.</div>
+      </div>
+
+      <div class="chat-context" id="ctxLabel">Sample conversation · 24h ago slip</div>
+
+      <div class="chat b-stage" id="chat"></div>
+
+      <div class="footer">
+        <button class="btn primary pill block lg" onclick="useTone()">Use this Coach <svg viewBox="0 0 24 24" width="18" height="18"><path d="M5 12h14M13 5l7 7-7 7" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="footnote" id="footnote">Change anytime in Settings</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const TONES = {
+    gentle: {
+      name: 'Gentle', c: '#5CE1E6', cd: '#1F7478',
+      bgGrad: 'radial-gradient(60% 30% at 50% 14%, rgba(92,225,230,0.20), transparent 65%), linear-gradient(180deg, #04101A 0%, #02020A 60%)',
+      desc: 'Warm, patient, kind. Like a quiet friend who shows up without judgment.',
+      ico: '<svg viewBox="0 0 24 24"><path d="M20 12c0 5-4 8-8 8s-8-3-8-8a8 8 0 0 1 16 0Z"/><circle cx="9" cy="11" r="1"/><circle cx="15" cy="11" r="1"/><path d="M9 15c1 1 2 1.5 3 1.5s2-.5 3-1.5"/></svg>',
+      chat: [
+        { who: 'coach', t: "Saw the slip yesterday at 3pm. I'm glad you logged it." },
+        { who: 'coach', t: "Doesn't change anything between us. Want to walk me through what was happening, or skip and start fresh today?" },
+        { who: 'user',  t: 'i was just stressed about work and walked outside for a smoke before i thought about it' },
+        { who: 'coach', t: "Yeah. That makes sense — stress + walking outside is a pattern we can plan around. Today's still day 1 of clean. You can do day 2." }
+      ]
+    },
+    balanced: {
+      name: 'Balanced', c: '#9F8FFF', cd: '#4F3A8A',
+      bgGrad: 'radial-gradient(60% 30% at 50% 14%, rgba(159,143,255,0.20), transparent 65%), linear-gradient(180deg, #100828 0%, #02020A 60%)',
+      desc: 'Honest, fair, no fluff. Tells it straight without being cold.',
+      ico: '<svg viewBox="0 0 24 24"><path d="M12 3v18M4 8h16M4 16h16"/></svg>',
+      chat: [
+        { who: 'coach', t: "Slip at 3pm yesterday. Same window as last Wednesday. That's a pattern, not bad luck." },
+        { who: 'coach', t: "What was the trigger — same one (stress break) or new?" },
+        { who: 'user',  t: 'stress' },
+        { who: 'coach', t: "Right. Set a 2:55pm 'walk loop, not corner' nudge for tomorrow. I'll fire it. Restart streak counter now or after one more clean day?" }
+      ]
+    },
+    direct: {
+      name: 'Direct', c: '#FF7A45', cd: '#813617',
+      bgGrad: 'radial-gradient(60% 30% at 50% 14%, rgba(255,122,69,0.22), transparent 65%), linear-gradient(180deg, #1C0A04 0%, #02020A 60%)',
+      desc: 'Sharp and to the point. No excuses, no hugs. Cuts to the action.',
+      ico: '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>',
+      chat: [
+        { who: 'coach', t: "3pm slip. Two Wednesdays in a row. That's not a craving — that's a habit you let live." },
+        { who: 'coach', t: "Pre-decide tomorrow's 2:55pm move. One sentence. Now." },
+        { who: 'user',  t: 'walk to the bench by the river' },
+        { who: 'coach', t: "Good. I'll ping you at 2:55. If you go to the corner shop again I'll know — that's the deal." }
+      ]
+    },
+    drill: {
+      name: 'Drill', c: '#FF6BAA', cd: '#832D50',
+      bgGrad: 'radial-gradient(60% 30% at 50% 14%, rgba(255,107,170,0.22), transparent 65%), linear-gradient(180deg, #1a0814 0%, #02020A 60%)',
+      desc: 'Tough love. Pushes harder when you slip. Best when you need a kick.',
+      ico: '<svg viewBox="0 0 24 24"><path d="M12 2L4 7v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V7l-8-5Z"/></svg>',
+      chat: [
+        { who: 'coach', t: "Slipped at 3. Predictable. Same trigger, same hour, same outcome." },
+        { who: 'coach', t: "Don't tell me it 'just happened.' What's the play tomorrow at 2:55?" },
+        { who: 'user',  t: 'walk to the bench' },
+        { who: 'coach', t: "Walk. Not 'maybe walk.' If you slip again the streak doesn't matter — your word matters. Tomorrow, 2:55. I'm watching." }
+      ]
+    }
+  };
+
+  function load() {
+    const p = new URLSearchParams(location.search);
+    const k = (p.get('tone') || 'balanced').toLowerCase();
+    const t = TONES[k] || TONES.balanced;
+    state.tone = k;
+    document.documentElement.style.setProperty('--c', t.c);
+    document.documentElement.style.setProperty('--cd', t.cd);
+    document.documentElement.style.setProperty('--bg-grad', t.bgGrad);
+    document.getElementById('ico').innerHTML = t.ico;
+    document.getElementById('ico').style.background = t.c;
+    document.getElementById('ico').style.boxShadow = '0 0 22px ' + t.c;
+    document.getElementById('name').textContent = t.name;
+    document.getElementById('desc').textContent = t.desc;
+    const chat = document.getElementById('chat');
+    chat.innerHTML = '';
+    t.chat.forEach((b, i) => {
+      const div = document.createElement('div');
+      div.className = 'bubble ' + b.who;
+      div.style.setProperty('--del', (i * 0.18) + 's');
+      div.textContent = b.t;
+      chat.appendChild(div);
+    });
+    if (window.coreTrack) coreTrack('tone_detail_viewed', { tone: k });
+  }
+  const state = { tone: 'balanced' };
+  function useTone() {
+    try {
+      const t = JSON.parse(localStorage.getItem('coreOnboardTrial') || '{}');
+      t.tone = state.tone;
+      localStorage.setItem('coreOnboardTrial', JSON.stringify(t));
+    } catch(e){}
+    if (window.coreTrack) coreTrack('tone_detail_chosen', { tone: state.tone });
+    location.href = '07-trial.html';
+  }
+  load();
+</script>
+</body>
+</html>

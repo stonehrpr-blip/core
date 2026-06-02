@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8" />
+<title>Core — AI Setup</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#000000" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+<script src="_lib/core-back.js"></script>
+<script src="_lib/core-theme.js" defer></script>
+<script src="_lib/core-ai.js" defer></script>
+<style>
+  :root { /* canonical tokens from core-theme.css */ }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;}
+  body{min-height:100vh;background:#0A0A14;color:var(--text);font-family:'Chakra Petch',-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;padding:24px;overflow:hidden;-webkit-font-smoothing:antialiased;}
+  .phone{position:relative;width:390px;height:844px;background:var(--bg-void);border-radius:56px;overflow:hidden;box-shadow:0 40px 100px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.06),0 0 0 10px #0a0a12,0 0 0 11px #2b2b38;}
+  .notch{position:absolute;top:14px;left:50%;transform:translateX(-50%);width:124px;height:32px;background:#000;border-radius:20px;z-index:30;}
+  .home-indicator{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;background:rgba(245,247,251,0.55);border-radius:999px;z-index:30;}
+
+  .scroll { position:absolute; inset:0; padding: 60px 0 40px; overflow-y:auto; z-index:10; }
+  .scroll::-webkit-scrollbar{display:none;}
+
+  .topbar { display:flex; align-items:center; gap:12px; padding: 0 16px 8px; }
+    .back {
+      width: 38px !important; height: 38px !important;
+      min-width: 38px !important; min-height: 38px !important;
+      max-width: 38px !important; max-height: 38px !important;
+      aspect-ratio: 1 / 1;
+      flex: 0 0 38px;
+      align-self: center;
+      border-radius: 50% !important;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.10);
+      display: flex !important; align-items: center !important; justify-content: center !important;
+      cursor: pointer; padding: 0;
+      font-family: inherit;
+      box-sizing: border-box;
+      transition: background .15s, border-color .15s, transform .12s;
+    }
+    .back:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }
+    .back:active { transform: scale(0.94); }
+    .back svg { width:14px; height:14px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex-shrink: 0; }
+  .nav-title { font-size: 17px; font-weight: 600; color: #fff; letter-spacing: -0.2px; }
+
+  .hero { padding: 18px 20px 8px; }
+  .hero-icon { width:64px; height:64px; border-radius:18px; background: linear-gradient(135deg, #0A84FF, #5B6AE6); display:flex; align-items:center; justify-content:center; box-shadow:0 14px 36px rgba(10,132,255,0.32); margin-bottom: 16px; font-size: 30px; }
+  .h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.4px; color: #fff; margin: 0 0 8px; }
+  .copy { font-size: 14px; color: rgba(235,235,245,0.70); line-height: 1.45; }
+
+  .section-h { font-size: 13px; font-weight: 400; letter-spacing: 0.5px; text-transform: uppercase; color: rgba(235,235,245,0.60); padding: 22px 20px 6px; }
+  .list { margin: 0 16px; background: rgba(255,255,255,0.04); border-radius: 12px; overflow: hidden; }
+  .list-row { display:flex; align-items:center; gap:12px; padding: 12px 16px; min-height: 44px; border-bottom: 0.5px solid rgba(255,255,255,0.10); }
+  .list-row:last-child { border-bottom: none; }
+  .list-row .lbl { font-size: 15px; color: #fff; flex: 1; }
+  .list-row .val { font-size: 14px; color: rgba(235,235,245,0.60); }
+
+  .key-input {
+    width: 100%; padding: 14px;
+    background: rgba(255,255,255,0.06); border: none; border-radius: 10px;
+    color: #fff; font-family: ui-monospace, Menlo, monospace;
+    font-size: 13px; letter-spacing: 0.02em;
+  }
+  .key-row { display: flex; flex-direction: column; gap: 6px; padding: 12px 16px; }
+  .key-help { font-size: 12px; color: rgba(235,235,245,0.50); line-height: 1.4; padding: 4px 4px 0; }
+  .key-help a { color: #6BA9FF; text-decoration: none; }
+
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 999px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .status-pill.ok   { background: rgba(48,209,88,0.16); color: #30D158; border: 0.5px solid rgba(48,209,88,0.40); }
+  .status-pill.off  { background: rgba(255,255,255,0.06); color: rgba(235,235,245,0.60); border: 0.5px solid rgba(255,255,255,0.10); }
+
+  .actions { padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+  .btn {
+    width: 100%; padding: 14px; border: none; border-radius: 12px;
+    font-family: inherit; font-size: 15px; font-weight: 600;
+    cursor: pointer; letter-spacing: -0.2px;
+  }
+  .btn.primary { background: #0A84FF; color: #fff; }
+  .btn.danger  { background: rgba(248,113,113,0.10); color: #FCA5A5; border: 0.5px solid rgba(248,113,113,0.32); }
+  .btn.ghost   { background: transparent; color: rgba(235,235,245,0.70); }
+
+  .test-output { padding: 14px 16px; margin: 0 16px; border-radius: 10px; background: rgba(10,132,255,0.06); border: 0.5px solid rgba(10,132,255,0.32); font-size: 13px; color: #fff; line-height: 1.4; display: none; }
+  .test-output.on { display: block; }
+  .test-output.err { background: rgba(248,113,113,0.06); border-color: rgba(248,113,113,0.32); color: #FCA5A5; }
+
+  @media (max-width:460px){body{padding:0;}.phone{width:100vw;height:100vh;height:100dvh;border-radius:0;box-shadow:none;}.notch,.home-indicator{display:none;}}
+</style>
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="scroll">
+      <div class="topbar">
+        <button class="back" type="button" onclick="coreBack('09-tone-detail.html')" aria-label="Back">
+          
+          <svg viewBox="0 0 24 24"><path d="M15 18L9 12l6-6"/></svg>
+        </button>
+        <div class="nav-title">AI Setup</div>
+      </div>
+
+      <div class="hero">
+        <div class="hero-icon">✨</div>
+        <h1 class="h1">Bring CORE to life.</h1>
+        <p class="copy">Add your OpenAI key once and the coach, plan generator, proof-of-work scanner, and habit engine become real AI — not scripted.</p>
+      </div>
+
+      <div class="section-h">Status</div>
+      <div class="list">
+        <div class="list-row"><span class="lbl">AI features</span><span id="aiStatus" class="status-pill off">Demo mode</span></div>
+        <div class="list-row"><span class="lbl">Model</span><span class="val" id="aiModel">gpt-4o-mini</span></div>
+      </div>
+
+      <div class="section-h">Your OpenAI key</div>
+      <div class="list">
+        <div class="key-row">
+          <input id="aiKey" class="key-input" type="password" placeholder="sk-..." autocomplete="off" autocapitalize="off" spellcheck="false" />
+          <div class="key-help">
+            Get a key at <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">platform.openai.com/api-keys</a>. Stored only in this browser. Never sent to CORE servers.
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" id="saveBtn">Save key</button>
+        <button class="btn ghost" id="testBtn">Test connection</button>
+        <button class="btn danger" id="clearBtn">Clear stored key</button>
+      </div>
+
+      <div id="testOutput" class="test-output"></div>
+
+      <div class="section-h">What AI unlocks</div>
+      <div class="list">
+        <div class="list-row"><span class="lbl">Coach chat</span><span class="val">Real, personalized</span></div>
+        <div class="list-row"><span class="lbl">Life plan generation</span><span class="val">12mo / 90d / 30d / today</span></div>
+        <div class="list-row"><span class="lbl">Proof-of-work scan</span><span class="val">Vision verifies tasks</span></div>
+        <div class="list-row"><span class="lbl">Adaptive habits</span><span class="val">Difficulty auto-adjusts</span></div>
+        <div class="list-row"><span class="lbl">Reflection action items</span><span class="val">From your journal entries</span></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const $key = document.getElementById('aiKey');
+  const $status = document.getElementById('aiStatus');
+  const $test = document.getElementById('testOutput');
+
+  function paintStatus() {
+    if (!window.coreAI) return setTimeout(paintStatus, 60);
+    if (coreAI.hasKey()) {
+      $status.textContent = 'Active';
+      $status.className = 'status-pill ok';
+      const k = coreAI.getKey();
+      $key.placeholder = '••••' + k.slice(-4);
+    } else {
+      $status.textContent = 'Demo mode';
+      $status.className = 'status-pill off';
+      $key.placeholder = 'sk-...';
+    }
+  }
+  paintStatus();
+
+  document.getElementById('saveBtn').addEventListener('click', () => {
+    if (!window.coreAI) return;
+    const v = $key.value.trim();
+    if (!v) { showOutput('Paste your key first.', true); return; }
+    if (!v.startsWith('sk-')) { showOutput('That doesn\'t look like an OpenAI key (sk-...).', true); return; }
+    coreAI.setKey(v);
+    $key.value = '';
+    paintStatus();
+    showOutput('✓ Key saved. AI features are live.', false);
+  });
+
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    if (!window.coreAI) return;
+    if (confirm('Clear your stored OpenAI key? AI features will fall back to scripted demo responses.')) {
+      coreAI.setKey('');
+      paintStatus();
+      showOutput('Key cleared. Back in demo mode.', false);
+    }
+  });
+
+  document.getElementById('testBtn').addEventListener('click', async () => {
+    if (!window.coreAI) return;
+    if (!coreAI.hasKey()) { showOutput('No key set — save one first.', true); return; }
+    showOutput('Pinging OpenAI…');
+    const r = await coreAI.chat([{ role: 'user', content: 'Reply with exactly: ready.' }],
+                                { temperature: 0, maxTokens: 10 });
+    if (r.ok) showOutput('✓ Connection works. AI replied: "' + r.text.trim() + '"', false);
+    else      showOutput('✗ Test failed: ' + (r.text || 'unknown error'), true);
+  });
+
+  function showOutput(text, isErr) {
+    $test.textContent = text;
+    $test.className = 'test-output on' + (isErr ? ' err' : '');
+  }
+</script>
+</body>
+</html>

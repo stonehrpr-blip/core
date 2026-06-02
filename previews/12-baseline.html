@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+  <meta charset="utf-8" />
+  <title>Core — Let's get started (preview v1)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <style>
+    :root {
+      --bg-base: #02020A;
+      --bg-deep: #060614;
+      --text-primary: #F8FAFE;
+      --text-muted: #9AA1B7;
+      --text-dim: #4F5570;
+      --stat-body: #5CE1E6;
+      --accent: #4A8FFF;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; height: 100%; }
+    body {
+      min-height: 100vh;
+      background: #0A0A14;
+      display: flex; align-items: center; justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", sans-serif;
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+      padding: 24px;
+      overflow: hidden;
+    }
+
+    /* iPhone frame ------------------------------------------------------- */
+    .phone {
+      position: relative;
+      width: 390px; height: 844px;
+      background: var(--bg-base);
+      border-radius: 56px;
+      overflow: hidden;
+      box-shadow:
+        0 40px 100px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(255, 255, 255, 0.06),
+        0 0 0 10px #0a0a12,
+        0 0 0 11px #2b2b38;
+    }
+    .notch {
+      position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+      width: 124px; height: 32px; background: #000; border-radius: 20px; z-index: 10;
+    }
+    .home-indicator {
+      position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+      width: 134px; height: 5px;
+      background: rgba(245, 247, 251, 0.55);
+      border-radius: 999px; z-index: 10;
+    }
+
+    /* Deep cosmic background (consistent) ------------------------------- */
+    .bg {
+      position: absolute; inset: 0; z-index: 0;
+      background:
+        radial-gradient(70% 40% at 50% 85%, rgba(92, 225, 230, 0.10) 0%, transparent 65%),
+        radial-gradient(80% 40% at 50% -10%, rgba(74, 143, 255, 0.10) 0%, transparent 60%),
+        linear-gradient(180deg, #0A0820 0%, var(--bg-base) 50%, #050510 100%);
+    }
+    .grain {
+      position: absolute; inset: 0; pointer-events: none; z-index: 2;
+      opacity: 0.04; mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.7 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    }
+
+    /* Top bar (back + progress) ----------------------------------------- */
+    .topbar {
+      position: absolute; top: 60px; left: 0; right: 0;
+      padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      z-index: 5;
+    }
+    .back {
+      width: 38px !important; height: 38px !important;
+      min-width: 38px !important; min-height: 38px !important;
+      max-width: 38px !important; max-height: 38px !important;
+      aspect-ratio: 1 / 1;
+      flex: 0 0 38px;
+      align-self: center;
+      border-radius: 50% !important;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.10);
+      display: flex !important; align-items: center !important; justify-content: center !important;
+      cursor: pointer; padding: 0;
+      font-family: inherit;
+      box-sizing: border-box;
+      transition: background .15s, border-color .15s, transform .12s;
+    }
+    .back:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }
+    .back:active { transform: scale(0.94); }
+    .back svg { width:14px; height:14px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex-shrink: 0; }
+
+    .progress { display: flex; gap: 6px; align-items: center; }
+    .step { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.15); }
+    .step.active { background: var(--text-primary); width: 18px; border-radius: 999px; }
+    .step.done { background: var(--accent); }
+    .step-label {
+      font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--text-dim); font-weight: 500; font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    }
+
+    /* Content ----------------------------------------------------------- */
+    .content {
+      position: absolute;
+      top: 124px; left: 0; right: 0; bottom: 130px;
+      padding: 0 24px;
+      z-index: 5;
+      overflow-y: auto;
+    }
+    .content::-webkit-scrollbar { display: none; }
+
+    .heading { margin-bottom: 24px; }
+    .title {
+      margin: 0;
+      font-size: 32px;
+      font-weight: 600;
+      letter-spacing: -1.3px;
+      line-height: 1.05;
+      background: linear-gradient(180deg, #FFFFFF 0%, #C8CDDE 100%);
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle {
+      margin: 10px 0 0;
+      font-size: 14px; line-height: 20px;
+      color: var(--text-muted); letter-spacing: -0.1px;
+    }
+
+    /* Question card ------------------------------------------------------ */
+    .card {
+      position: relative;
+      padding: 18px 18px 20px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      backdrop-filter: blur(18px) saturate(1.4);
+      -webkit-backdrop-filter: blur(18px) saturate(1.4);
+      margin-bottom: 12px;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+    .card.answered {
+      border-color: rgba(74, 143, 255, 0.35);
+      background: rgba(74, 143, 255, 0.04);
+    }
+
+    .q-label {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-bottom: 14px;
+    }
+    .q-status { color: var(--accent); font-size: 11px; opacity: 0; transition: opacity 0.2s ease; }
+    .card.answered .q-status { opacity: 1; }
+
+    /* Segmented control (sex) ------------------------------------------- */
+    .segment {
+      display: flex; gap: 4px;
+      padding: 4px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+    .seg {
+      flex: 1;
+      padding: 12px 8px;
+      border-radius: 9px;
+      font-size: 14px; font-weight: 500;
+      color: var(--text-muted);
+      text-align: center; cursor: pointer;
+      transition: all 0.18s ease;
+      letter-spacing: -0.1px;
+      background: transparent;
+      border: none;
+      font-family: inherit;
+    }
+    .seg:hover { color: var(--text-primary); }
+    .seg.selected {
+      background: rgba(255,255,255,0.96);
+      color: #050510;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.85);
+    }
+
+    /* Big number input -------------------------------------------------- */
+    .number-input {
+      display: flex; align-items: baseline; justify-content: center;
+      gap: 8px;
+      padding: 6px 0 2px;
+    }
+    .number-input input {
+      width: 90px;
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-size: 44px;
+      font-weight: 600;
+      letter-spacing: -1.5px;
+      text-align: center;
+      font-family: inherit;
+      caret-color: var(--accent);
+      outline: none;
+      -moz-appearance: textfield;
+    }
+    .number-input input::-webkit-outer-spin-button,
+    .number-input input::-webkit-inner-spin-button {
+      -webkit-appearance: none; margin: 0;
+    }
+    .number-input input::placeholder { color: var(--text-dim); font-weight: 500; }
+
+    .unit-toggle {
+      display: inline-flex;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 8px;
+      padding: 2px;
+      align-self: center;
+      margin-left: 4px;
+    }
+    .unit {
+      padding: 6px 10px;
+      font-size: 12px; font-weight: 500;
+      color: var(--text-muted); cursor: pointer;
+      border-radius: 6px;
+      background: transparent; border: none;
+      font-family: inherit;
+      transition: all 0.18s ease;
+    }
+    .unit.selected {
+      background: rgba(255,255,255,0.10);
+      color: var(--text-primary);
+    }
+
+    /* Privacy note ------------------------------------------------------- */
+    .privacy {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 16px; padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+    .privacy svg { width: 14px; height: 14px; stroke: var(--text-dim); flex-shrink: 0; }
+    .privacy span {
+      font-size: 11px; line-height: 16px;
+      color: var(--text-dim); letter-spacing: -0.1px;
+    }
+
+    /* Bottom CTA -------------------------------------------------------- */
+    .footer {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 16px 28px 36px;
+      z-index: 6;
+    }
+    .footer::before {
+      content: ""; position: absolute; inset: -60px 0 0 0;
+      background: linear-gradient(180deg, transparent 0%, rgba(2,2,10,0.85) 50%, rgba(2,2,10,0.98) 100%);
+      pointer-events: none; z-index: -1;
+    }
+
+    .status-line {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-dim);
+      letter-spacing: 0.06em;
+      margin-bottom: 12px;
+      min-height: 16px;
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    }
+    .status-line.complete { color: var(--accent); }
+
+    .cta {
+      display: block; width: 100%; padding: 18px;
+      background: rgba(255, 255, 255, 0.96);
+      color: #050510;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 999px;
+      font-size: 17px; font-weight: 600;
+      font-family: inherit; letter-spacing: -0.2px;
+      cursor: pointer;
+      transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.3s ease;
+      box-shadow:
+        0 0 0 1px rgba(74, 143, 255, 0.18),
+        0 10px 40px rgba(74, 143, 255, 0.22),
+        0 2px 8px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.85);
+    }
+    .cta:hover { box-shadow: 0 0 0 1px rgba(74, 143, 255, 0.3), 0 14px 44px rgba(74, 143, 255, 0.35), inset 0 1px 0 rgba(255,255,255,0.8); }
+    .cta:active { opacity: 0.92; transform: scale(0.985); }
+    .cta:disabled {
+      background: rgba(255, 255, 255, 0.10);
+      color: var(--text-dim);
+      cursor: not-allowed;
+      box-shadow: none;
+      border-color: rgba(255,255,255,0.08);
+    }
+
+    .preview-label {
+      position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+      color: #4A5060; font-size: 11px;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    }
+
+    @media (max-width: 460px) {
+      body { padding: 0; }
+      .phone { width: 100vw; height: 100vh; border-radius: 0; box-shadow: none; }
+      .notch, .home-indicator { display: none; }
+      .preview-label { display: none; }
+    }
+  </style>
+  <link rel="stylesheet" href="_lib/core-responsive.css">
+  <script src="_lib/core-back.js"></script>
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div>
+    <div class="grain"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="topbar">
+      <button class="back" type="button" onclick="window.location.href='15-permissions.html'" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18L9 12l6-6"/></svg>
+      </button>
+      <div class="progress">
+        <span class="step done"></span>
+        <span class="step active"></span>
+        <span class="step"></span>
+      </div>
+      <span class="step-label">2 of 3</span>
+    </div>
+
+    <div class="content">
+      <div class="heading">
+        <h1 class="title">Let's get started.</h1>
+        <p class="subtitle">Four quick things so we can calibrate your Body stat. Stays on your device.</p>
+      </div>
+
+      <!-- Sex at birth -->
+      <div class="card" id="card-sex">
+        <div class="q-label"><span>Sex at birth</span><span class="q-status">✓</span></div>
+        <div class="segment">
+          <button class="seg" data-value="female" onclick="pickSeg('sex', this)">Female</button>
+          <button class="seg" data-value="male" onclick="pickSeg('sex', this)">Male</button>
+          <button class="seg" data-value="other" onclick="pickSeg('sex', this)">Other</button>
+        </div>
+      </div>
+
+      <!-- Age -->
+      <div class="card" id="card-age">
+        <div class="q-label"><span>Age</span><span class="q-status">✓</span></div>
+        <div class="number-input">
+          <input type="number" id="age" placeholder="—" min="13" max="100" inputmode="numeric" oninput="checkInput('age')" />
+          <span style="color: var(--text-muted); font-size: 14px;">years</span>
+        </div>
+      </div>
+
+      <!-- Height -->
+      <div class="card" id="card-height">
+        <div class="q-label"><span>Height</span><span class="q-status">✓</span></div>
+        <div class="number-input">
+          <input type="number" id="height" placeholder="—" min="50" max="250" inputmode="numeric" oninput="checkInput('height')" />
+          <div class="unit-toggle" id="height-unit">
+            <button class="unit selected" data-unit="cm" onclick="pickUnit('height', this)">cm</button>
+            <button class="unit" data-unit="ft" onclick="pickUnit('height', this)">ft</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Weight -->
+      <div class="card" id="card-weight">
+        <div class="q-label"><span>Weight</span><span class="q-status">✓</span></div>
+        <div class="number-input">
+          <input type="number" id="weight" placeholder="—" min="20" max="300" inputmode="numeric" oninput="checkInput('weight')" />
+          <div class="unit-toggle" id="weight-unit">
+            <button class="unit selected" data-unit="kg" onclick="pickUnit('weight', this)">kg</button>
+            <button class="unit" data-unit="lb" onclick="pickUnit('weight', this)">lb</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="privacy">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4" y="11" width="16" height="9" rx="2"/>
+          <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+        </svg>
+        <span>Stays on your device. Used only to calibrate your Body stat baseline. Never sold or shared.</span>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="status-line" id="status">0 of 4 answered</div>
+      <button class="cta" id="continue" disabled onclick="next()">Continue</button>
+    </div>
+  </div>
+
+  <div class="preview-label">core · baseline · v1</div>
+
+  <script>
+    const answers = { sex: null, age: null, height: null, weight: null };
+    const units = { height: 'cm', weight: 'kg' };
+
+    function pickSeg(key, btn) {
+      const parent = btn.parentElement;
+      parent.querySelectorAll('.seg').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      answers[key] = btn.dataset.value;
+      document.getElementById('card-' + key).classList.add('answered');
+      updateStatus();
+    }
+
+    function pickUnit(key, btn) {
+      const parent = btn.parentElement;
+      parent.querySelectorAll('.unit').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      units[key] = btn.dataset.unit;
+    }
+
+    function checkInput(key) {
+      const val = document.getElementById(key).value;
+      const n = parseFloat(val);
+      if (val && !isNaN(n) && n > 0) {
+        answers[key] = n;
+        document.getElementById('card-' + key).classList.add('answered');
+      } else {
+        answers[key] = null;
+        document.getElementById('card-' + key).classList.remove('answered');
+      }
+      updateStatus();
+    }
+
+    function updateStatus() {
+      const filled = Object.values(answers).filter(v => v !== null && v !== '').length;
+      const total = 4;
+      const status = document.getElementById('status');
+      const btn = document.getElementById('continue');
+      status.textContent = filled === total ? 'All set' : `${filled} of ${total} answered`;
+      status.classList.toggle('complete', filled === total);
+      btn.disabled = filled !== total;
+    }
+
+    function next() {
+      window.location.href = '15-permissions.html';
+    }
+  </script>
+</body>
+</html>

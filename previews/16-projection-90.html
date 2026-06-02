@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>CORE — Where you'll be in 90 days</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<link rel="stylesheet" href="_lib/core-responsive.css">
+<script src="_lib/analytics.js" defer></script>
+<style>
+  :root {
+    --apple-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --text:#F8FAFE; --muted:#9AA1B7; --dim:#4F5570; --accent:#2F8FFF;
+    --lungs:#5CE1E6; --brain:#5BB1FF; --body:#5BE39A; --wallet:#FFC857;
+  }
+  * { box-sizing:border-box; }
+  html, body { margin:0; padding:0; height:100%; }
+  body {
+    min-height:100vh; background:#0A0A14;
+    display:flex; align-items:center; justify-content:center;
+    font-family: var(--apple-font);
+    color: var(--text); -webkit-font-smoothing:antialiased;
+    padding: 24px; overflow: hidden;
+  }
+  .phone {
+    position:relative; width:390px; height:844px; background:#02020A;
+    border-radius:56px; overflow:hidden;
+    box-shadow:0 40px 100px rgba(0,0,0,0.6),
+               0 0 0 1px rgba(255,255,255,0.06),
+               0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38;
+  }
+  .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:30; }
+  .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:30; }
+
+  .bg {
+    position:absolute; inset:0; z-index:0;
+    background:
+      radial-gradient(60% 35% at 50% 22%, rgba(91,177,255,0.16) 0%, transparent 60%),
+      radial-gradient(60% 35% at 50% 92%, rgba(92,225,230,0.10) 0%, transparent 65%),
+      linear-gradient(180deg, #050C26 0%, #02020A 55%, #050510 100%);
+  }
+  .stars { position:absolute; inset:0; pointer-events:none; z-index:2; }
+  .star { position:absolute; border-radius:50%; background:#fff; animation: twinkle var(--d,4s) ease-in-out var(--del,0s) infinite; }
+  .star.s1 { width:1px; height:1px; opacity:0.4; }
+  .star.s2 { width:1.5px; height:1.5px; opacity:0.55; }
+  .star.s3 { width:2px; height:2px; opacity:0.7; box-shadow:0 0 4px rgba(255,255,255,0.6); }
+  @keyframes twinkle { 0%,100% { opacity:0.15; transform:scale(0.7); } 50% { opacity:0.85; transform:scale(1.15); } }
+
+  .frame {
+    position:absolute; inset:0; z-index:10;
+    display:flex; flex-direction:column;
+    padding: 64px 26px 32px;
+  }
+  .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .brand { display:flex; align-items:center; gap:8px; }
+  .brand .dot { width:8px; height:8px; border-radius:50%; background:var(--accent); box-shadow:0 0 12px var(--accent); animation: dot 2.5s ease-in-out infinite; }
+  @keyframes dot { 0%,100% { transform:scale(1); opacity:1; } 50% { transform:scale(1.3); opacity:0.85; } }
+  .brand .wm { font-size:13px; font-weight:600; letter-spacing:0.30em; color:rgba(255,255,255,0.92); }
+  .chip-day {
+    font-size:10px; letter-spacing:0.20em; text-transform:uppercase;
+    color: var(--accent); font-weight:700;
+    padding:5px 10px; border-radius:999px;
+    background: rgba(47,143,255,0.10);
+    border: 1px solid rgba(47,143,255,0.30);
+  }
+
+  .head { margin-top: 2px; }
+  .kicker { font-size:11px; letter-spacing:0.22em; text-transform:uppercase; color:var(--lungs); font-weight:700; margin-bottom:8px; opacity:0; animation: fadeUp .6s 100ms forwards; }
+  h1 {
+    font-size: 30px; font-weight: 700; letter-spacing: -0.8px;
+    line-height: 1.08; margin: 0;
+    opacity:0; animation: fadeUp .7s 200ms cubic-bezier(0.22,1,0.36,1) forwards;
+  }
+  h1 .g {
+    background: linear-gradient(135deg, var(--lungs) 0%, var(--brain) 50%, var(--body) 100%);
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+  .sub {
+    font-size:13.5px; color: var(--muted); line-height:19px;
+    margin-top: 10px; margin-bottom: 16px;
+    opacity:0; animation: fadeUp .6s 350ms forwards;
+  }
+  @keyframes fadeUp {
+    from { opacity:0; transform: translateY(8px); }
+    to { opacity:1; transform: translateY(0); }
+  }
+
+  /* Stat lift cards row */
+  .lift-row {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+    margin: 0 0 12px;
+    opacity:0; animation: fadeUp .6s 500ms forwards;
+  }
+  .lift {
+    padding: 9px 6px 8px; border-radius: 12px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    text-align: center;
+  }
+  .lift-name { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+  .lift-val { font-size: 16px; font-weight: 800; letter-spacing: -0.4px; margin-top: 2px; color: #fff; }
+  .lift-delta {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.02em;
+    margin-top: 1px;
+  }
+  .lift-delta.up { color: var(--body); }
+
+  /* The chart */
+  .chart-card {
+    flex: 1; min-height: 0;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 14px 12px 8px;
+    opacity:0; animation: fadeUp .7s 650ms forwards;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .chart-legend {
+    display: flex; gap: 10px; flex-wrap: wrap;
+    font-size: 10px; color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .legend-item { display: inline-flex; align-items: center; gap: 4px; }
+  .legend-dot { width: 8px; height: 2px; border-radius: 2px; }
+  .legend-item.lungs .legend-dot { background: var(--lungs); box-shadow: 0 0 6px var(--lungs); }
+  .legend-item.brain .legend-dot { background: var(--brain); box-shadow: 0 0 6px var(--brain); }
+  .legend-item.body .legend-dot { background: var(--body); box-shadow: 0 0 6px var(--body); }
+  .legend-item.wallet .legend-dot { background: var(--wallet); box-shadow: 0 0 6px var(--wallet); }
+  .chart { flex: 1; min-height: 0; position: relative; }
+  .chart svg { width: 100%; height: 100%; display: block; overflow: visible; }
+  .chart-x {
+    display: flex; justify-content: space-between;
+    font-size: 9.5px; color: var(--muted); font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 6px 4px 0;
+  }
+
+  /* CTAs */
+  .ctas { padding-top: 14px; opacity:0; animation: fadeUp .6s 1700ms forwards; }
+  .cta {
+    width: 100%; padding: 18px 24px;
+    border-radius: 999px; border: none;
+    color: #FFFFFF;
+    font-family: inherit; font-size: 17px; font-weight: 700;
+    letter-spacing: -0.32px;
+    background: linear-gradient(135deg, #2F8FFF 0%, #5BB1FF 50%, #5CE1E6 100%);
+    background-size: 200% 200%;
+    animation: gradShift 5s ease infinite;
+    box-shadow:
+      0 14px 36px rgba(47,143,255,0.40),
+      0 0 0 1px rgba(255,255,255,0.16) inset,
+      0 1px 0 rgba(255,255,255,0.30) inset;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: transform .12s, filter .2s;
+  }
+  .cta:hover { filter: brightness(1.08); }
+  .cta:active { transform: scale(0.985); filter: brightness(0.92); }
+  .cta svg { width:18px; height:18px; stroke:#fff; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+  @keyframes gradShift { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="bg"></div>
+  <div class="stars" id="stars"></div>
+  <div class="notch"></div>
+  <div class="home-indicator"></div>
+
+  <div class="frame">
+    <div class="topbar">
+      <div class="brand"><span class="dot"></span><span class="wm">CORE</span></div>
+      <div class="chip-day">DAY 1 · TODAY</div>
+    </div>
+
+    <div class="head">
+      <div class="kicker">90-day projection</div>
+      <h1>This is where<br/><span class="g" id="namedRecipient">you'll be.</span></h1>
+      <p class="sub" id="sub">Based on your baseline, this is what 90 days of CORE looks like. The math isn't a promise — it's a target the coach will hold you to.</p>
+    </div>
+
+    <div class="lift-row" id="liftRow"></div>
+
+    <div class="chart-card">
+      <div class="chart-legend">
+        <span class="legend-item lungs"><span class="legend-dot"></span> Lungs</span>
+        <span class="legend-item brain"><span class="legend-dot"></span> Brain</span>
+        <span class="legend-item body"><span class="legend-dot"></span> Body</span>
+        <span class="legend-item wallet"><span class="legend-dot"></span> Wallet</span>
+      </div>
+      <div class="chart">
+        <svg id="chart" viewBox="0 0 320 180" preserveAspectRatio="none" aria-hidden="true">
+          <!-- horizontal grid lines -->
+          <g stroke="rgba(255,255,255,0.06)" stroke-width="1">
+            <line x1="0" y1="20"  x2="320" y2="20"/>
+            <line x1="0" y1="60"  x2="320" y2="60"/>
+            <line x1="0" y1="100" x2="320" y2="100"/>
+            <line x1="0" y1="140" x2="320" y2="140"/>
+          </g>
+          <!-- The 4 stat paths are injected here -->
+          <g id="paths"></g>
+          <!-- Endpoint dots -->
+          <g id="endpoints"></g>
+        </svg>
+      </div>
+      <div class="chart-x">
+        <span>Today</span><span>+30d</span><span>+60d</span><span>+90d</span>
+      </div>
+    </div>
+
+    <div class="ctas">
+      <button class="cta" id="continueBtn">
+        Keep going
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Stars
+  (function () {
+    const sl = document.getElementById('stars');
+    for (let i = 0; i < 60; i++) {
+      const s = document.createElement('div');
+      const r = Math.random();
+      s.className = 'star ' + (r < 0.55 ? 's1' : r < 0.85 ? 's2' : 's3');
+      s.style.left = (Math.random()*100)+'%'; s.style.top = (Math.random()*100)+'%';
+      s.style.setProperty('--d', (2.5+Math.random()*5)+'s');
+      s.style.setProperty('--del', (Math.random()*5)+'s');
+      sl.appendChild(s);
+    }
+  })();
+
+  function track(n, p) { try { if (window.coreTrack) window.coreTrack(n, p||{}); } catch(e){} }
+  window.addEventListener('load', () => track('projection_90_viewed', {}));
+
+  // Read trial state + baseline stats
+  let trial = {}; let baselineStats = {};
+  try { trial = JSON.parse(localStorage.getItem('coreOnboardTrial') || '{}'); } catch(e){}
+  try {
+    const saved = JSON.parse(localStorage.getItem('coreState.v1') || '{}');
+    baselineStats = saved.stats || {};
+  } catch(e){}
+  // Sensible defaults if no baseline yet
+  const start = {
+    lungs:     baselineStats.lungs     ?? 28,
+    brain:     baselineStats.brain     ?? 50,
+    body:      baselineStats.body      ?? 50,
+    wallet:    baselineStats.wallet    ?? 50,
+  };
+  // Projected lifts at 90d (Stone's pick — aspirational, calibrated)
+  const target = {
+    lungs:  Math.min(95, start.lungs  + 50),
+    brain:  Math.min(95, start.brain  + 22),
+    body:   Math.min(95, start.body   + 28),
+    wallet: Math.min(95, start.wallet + 32),
+  };
+
+  // Personalize heading
+  if (trial.name) {
+    const named = document.getElementById('namedRecipient');
+    named.innerHTML = trial.name + '<br/>will be in 90 days.';
+  }
+
+  // Build lift cards
+  const liftRow = document.getElementById('liftRow');
+  const stats = ['lungs','brain','body','wallet'];
+  const niceNames = { lungs:'Lungs', brain:'Brain', body:'Body', wallet:'Wallet' };
+  stats.forEach(k => {
+    const dom = document.createElement('div');
+    dom.className = 'lift';
+    dom.innerHTML =
+      '<div class="lift-name">'+ niceNames[k] +'</div>' +
+      '<div class="lift-val" data-k="'+ k +'">'+ start[k] +'</div>' +
+      '<div class="lift-delta up">+'+ (target[k] - start[k]) +'</div>';
+    liftRow.appendChild(dom);
+  });
+
+  // Build chart paths.
+  // SVG viewBox: 320 × 180. Plot area: x 10→310, y 160→20 (inverted).
+  function pathFor(s, t, midScale) {
+    // 4 points: today, +30d, +60d, +90d.
+    // Use a slight S-curve so the line accelerates after day 30.
+    const x = [10, 110, 210, 310];
+    const mid = s + (t - s) * midScale;
+    const ys = [s, s + (mid - s) * 0.55, s + (t - s) * 0.85, t];
+    function yToPx(y) { return 160 - (y / 100) * 140; }
+    return 'M' + x.map((xi, i) => xi + ' ' + yToPx(ys[i]).toFixed(1)).join(' L');
+  }
+  const pathsHost = document.getElementById('paths');
+  const endpoints = document.getElementById('endpoints');
+  const styles = [
+    { k:'lungs',  color:'#5CE1E6', midScale: 0.45 },
+    { k:'brain',  color:'#5BB1FF', midScale: 0.55 },
+    { k:'body',   color:'#5BE39A', midScale: 0.50 },
+    { k:'wallet', color:'#FFC857', midScale: 0.40 },
+  ];
+  styles.forEach((st, i) => {
+    const d = pathFor(start[st.k], target[st.k], st.midScale);
+    const p = document.createElementNS('http://www.w3.org/2000/svg','path');
+    p.setAttribute('d', d);
+    p.setAttribute('fill','none');
+    p.setAttribute('stroke', st.color);
+    p.setAttribute('stroke-width', '2.4');
+    p.setAttribute('stroke-linecap', 'round');
+    p.setAttribute('stroke-linejoin', 'round');
+    p.setAttribute('filter', 'drop-shadow(0 0 4px ' + st.color + 'aa)');
+    pathsHost.appendChild(p);
+    // Animate by setting stroke-dasharray to path length
+    requestAnimationFrame(() => {
+      const len = p.getTotalLength();
+      p.style.strokeDasharray = len;
+      p.style.strokeDashoffset = len;
+      p.style.transition = 'stroke-dashoffset 1700ms cubic-bezier(0.22, 1, 0.36, 1) ' + (650 + i * 110) + 'ms';
+      requestAnimationFrame(() => { p.style.strokeDashoffset = 0; });
+    });
+    // Endpoint dot
+    const yEnd = 160 - (target[st.k] / 100) * 140;
+    const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx', 310); c.setAttribute('cy', yEnd.toFixed(1));
+    c.setAttribute('r', 4); c.setAttribute('fill', st.color);
+    c.setAttribute('filter', 'drop-shadow(0 0 6px ' + st.color + ')');
+    c.style.opacity = 0;
+    c.style.transition = 'opacity 400ms ease ' + (1800 + i * 110) + 'ms';
+    endpoints.appendChild(c);
+    requestAnimationFrame(() => { c.style.opacity = 1; });
+  });
+
+  // After paths finish drawing, tick the lift-val numbers up to their target
+  setTimeout(() => {
+    document.querySelectorAll('.lift-val').forEach((el, idx) => {
+      const k = el.dataset.k;
+      const from = start[k]; const to = target[k];
+      const begin = performance.now() + idx * 60;
+      function step(now) {
+        if (now < begin) { requestAnimationFrame(step); return; }
+        const t = Math.min(1, (now - begin) / 900);
+        const eased = 1 - Math.pow(1 - t, 3);
+        el.textContent = Math.round(from + (to - from) * eased);
+        if (t < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    });
+  }, 700);
+
+  // CTA → next moment page
+  document.getElementById('continueBtn').addEventListener('click', () => {
+    track('projection_90_continue', {});
+    window.location.href = './17-cost-saved.html';
+  });
+</script>
+</body>
+</html>

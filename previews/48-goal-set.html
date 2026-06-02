@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8" />
+<title>CORE — Next goal</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<link rel="stylesheet" href="_lib/core-buttons.css" />
+<link rel="stylesheet" href="_lib/core-responsive.css">
+<script src="_lib/core-state.js"></script>
+<script src="_lib/analytics.js"></script>
+  <script src="_lib/core-back.js"></script>
+<style>
+  :root { --bg-base:#02020A; --text:#F8FAFE; --muted:#9AA1B7; --dim:#4F5570; --accent:#4A8FFF; --border:rgba(255,255,255,0.08); }
+  * { box-sizing:border-box; }
+  html, body { margin:0; padding:0; height:100%; }
+  body { min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text); padding:24px; overflow:hidden; }
+  .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+  .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:30; }
+  .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:30; }
+  .bg { position:absolute; inset:0; background: radial-gradient(70% 40% at 50% 18%, rgba(91,177,255,0.18), transparent 65%), radial-gradient(60% 35% at 50% 95%, rgba(159,143,255,0.16), transparent 60%), linear-gradient(180deg, #0c0830 0%, #02020A 60%); }
+
+  .frame { position:absolute; inset:0; z-index:10; padding: 60px 0 24px; display:flex; flex-direction:column; }
+  .topbar { padding: 0 22px 8px; display:flex; align-items:center; justify-content:space-between; }
+  .skip { padding: 8px 12px; font-size:13px; color:var(--muted); background:none; border:none; cursor:pointer; font-family:inherit; }
+  .skip:hover { color:#fff; }
+  .brand { display:flex; align-items:center; gap:8px; }
+  .brand .dot { width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 10px var(--accent); }
+  .brand .wm { font-size:12px; font-weight:700; letter-spacing:0.36em; color:rgba(255,255,255,0.92); }
+
+  .hero { padding: 14px 26px 0; text-align:center; }
+  .kicker { font-size:11px; letter-spacing:0.22em; text-transform:uppercase; color:var(--muted); font-weight:700; margin-bottom:8px; }
+  .badge { display:inline-flex; align-items:center; gap:8px; padding:6px 14px; border-radius:999px; background: linear-gradient(135deg, rgba(91,177,255,0.18), rgba(159,143,255,0.14)); border:1px solid rgba(91,177,255,0.35); font-size:11px; font-weight:700; color:#5BB1FF; letter-spacing:0.18em; text-transform:uppercase; }
+  .badge svg { width:11px; height:11px; stroke:#5BB1FF; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .title { font-size:28px; font-weight:700; letter-spacing:-0.8px; line-height:1.1; margin: 14px 0 6px; }
+  .title .g { background: linear-gradient(135deg, #4A8FFF, #6F70FF, #B388FF); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+  .copy { color: var(--muted); font-size: 13px; line-height: 19px; margin: 0 auto; max-width: 310px; }
+
+  .scroll { flex:1; overflow-y:auto; padding: 16px 22px 10px; }
+  .scroll::-webkit-scrollbar { display:none; }
+
+  .goals { display: flex; flex-direction: column; gap: 10px; }
+  .goal {
+    padding: 16px; border-radius: 18px;
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    cursor: pointer; transition: border-color .15s, background .15s, transform .12s;
+    text-align: left; font-family: inherit; color:#fff; width:100%;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .goal:hover { background: rgba(255,255,255,0.06); border-color: rgba(91,177,255,0.35); }
+  .goal:active { transform: scale(0.99); }
+  .goal.sel { background: rgba(74,143,255,0.08); border-color: rgba(74,143,255,0.45); box-shadow: 0 0 0 1px rgba(74,143,255,0.35) inset; }
+  .goal-ico { width:44px; height:44px; border-radius:14px; background: var(--c); box-shadow:0 0 16px var(--c); display:flex; align-items:center; justify-content:center; flex-shrink:0; position:relative; }
+  .goal-ico::after { content:""; position:absolute; inset:0; border-radius:14px; background:linear-gradient(160deg, rgba(255,255,255,0.30), transparent 45%); }
+  .goal-ico svg { width:22px; height:22px; stroke:#fff; fill:none; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; position:relative; z-index:2; }
+  .goal-text { flex: 1; }
+  .goal-title { font-size: 15px; font-weight: 700; letter-spacing: -0.2px; }
+  .goal-sub { font-size: 11px; color: var(--muted); margin-top: 3px; line-height: 15px; }
+  .goal-tag { padding: 3px 8px; border-radius: 6px; background: rgba(255,255,255,0.04); font-size: 9px; color: var(--muted); letter-spacing: 0.16em; text-transform: uppercase; font-weight: 700; flex-shrink:0; align-self: flex-start; }
+
+  .footer { padding: 14px 26px 0; }
+  .footnote { text-align:center; font-size:11px; color:var(--muted); margin-top:10px; }
+</style>
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="frame">
+      <div class="topbar">
+        <div class="brand"><span class="dot"></span><span class="wm">CORE</span></div>
+        <button class="skip" onclick="window.location.href='20-dashboard.html'">Later</button>
+      </div>
+
+      <div class="hero">
+        <span class="badge"><svg viewBox="0 0 24 24"><path d="M12 2L4 7v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V7l-8-5Z"/></svg>30 days clean</span>
+        <h1 class="title">Pick your <span class="g">next mountain.</span></h1>
+        <p class="copy">Vape is anchored. Most people who hit 30 days quit something else within 90. Stack one more — or stick with the streak.</p>
+      </div>
+
+      <div class="scroll">
+        <div class="goals" id="goals">
+          <button class="goal" data-goal="alcohol" style="--c:#FFC857;" onclick="pickGoal(this)">
+            <div class="goal-ico"><svg viewBox="0 0 24 24"><path d="M6 3h12l-2 7a4 4 0 1 1-8 0z"/><path d="M12 14v5M8 21h8"/></svg></div>
+            <div class="goal-text"><div class="goal-title">Quit drinking</div><div class="goal-sub">Track alcohol-free days · liver/sleep score lift. Big jump on Brain.</div></div>
+            <div class="goal-tag">Most picked</div>
+          </button>
+          <button class="goal" data-goal="porn" style="--c:#9F8FFF;" onclick="pickGoal(this)">
+            <div class="goal-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg></div>
+            <div class="goal-text"><div class="goal-title">Quit porn</div><div class="goal-sub">Same slip-log mechanic. Brain stat takes the lift — direct dopamine recovery.</div></div>
+            <div class="goal-tag">High Brain</div>
+          </button>
+          <button class="goal" data-goal="doomscroll" style="--c:#5CE1E6;" onclick="pickGoal(this)">
+            <div class="goal-ico"><svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M10 18h4"/></svg></div>
+            <div class="goal-text"><div class="goal-title">Quit doom-scrolling</div><div class="goal-sub">Daily screen-time cap. Slip = a session over your limit. Brain + Sleep climb fast.</div></div>
+            <div class="goal-tag">Recommended</div>
+          </button>
+          <button class="goal" data-goal="junk" style="--c:#FF6BAA;" onclick="pickGoal(this)">
+            <div class="goal-ico"><svg viewBox="0 0 24 24"><path d="M4 11l1 9h14l1-9M6 11a6 6 0 0 1 12 0"/><path d="M9 6V4a3 3 0 0 1 6 0v2"/></svg></div>
+            <div class="goal-text"><div class="goal-title">Cut junk food</div><div class="goal-sub">Daily "no junk" pass/fail. Body stat moves fastest here.</div></div>
+            <div class="goal-tag">Body up</div>
+          </button>
+          <button class="goal" data-goal="hold" style="--c:#9AA1B7;" onclick="pickGoal(this)">
+            <div class="goal-ico"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></div>
+            <div class="goal-text"><div class="goal-title">Just hold the vape streak</div><div class="goal-sub">No second habit. Focus on getting to 60.</div></div>
+          </button>
+        </div>
+      </div>
+
+      <div class="footer">
+        <button id="cta" class="btn primary pill block lg" onclick="commit()" disabled>Add this goal <svg viewBox="0 0 24 24" width="18" height="18"><path d="M5 12h14M13 5l7 7-7 7" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="footnote" id="footnote">Pick a goal · you can add more later</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const state = { goal: null };
+  function pickGoal(btn) {
+    document.querySelectorAll('.goal').forEach(g => g.classList.remove('sel'));
+    btn.classList.add('sel');
+    state.goal = btn.dataset.goal;
+    document.getElementById('cta').disabled = false;
+    document.getElementById('footnote').textContent = state.goal === 'hold' ? "Holding the line · we'll keep coaching" : "Adds " + state.goal + " to your habit list";
+  }
+  function commit() {
+    if (!state.goal) return;
+    try {
+      if (state.goal !== 'hold') {
+        const list = JSON.parse(localStorage.getItem('coreSelectedHabits') || '["vape"]');
+        if (!list.includes(state.goal)) list.push(state.goal);
+        localStorage.setItem('coreSelectedHabits', JSON.stringify(list));
+      }
+      localStorage.setItem('coreNextGoalPicked', JSON.stringify({ goal: state.goal, at: Date.now() }));
+    } catch(e){}
+    if (window.coreTrack) coreTrack('next_goal_picked', { goal: state.goal });
+    window.location.href = '20-dashboard.html';
+  }
+  if (window.coreTrack) coreTrack('goal_set_viewed', {});
+</script>
+</body>
+</html>

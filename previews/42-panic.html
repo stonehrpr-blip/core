@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8" />
+<title>CORE — Craving SOS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<link rel="stylesheet" href="_lib/core-buttons.css" />
+<script src="_lib/core-state.js"></script>
+<script src="_lib/analytics.js"></script>
+  <script src="_lib/core-back.js"></script>
+<style>
+  :root { --bg-base:#02020A; --text:#F8FAFE; --muted:#9AA1B7; --dim:#4F5570; --accent:#4A8FFF; --calm:#5CE1E6; }
+  * { box-sizing:border-box; }
+  html, body { margin:0; padding:0; height:100%; }
+  body { min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text); padding:24px; overflow:hidden; }
+  .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+  .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:30; }
+  .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:30; }
+
+  /* deeply calming gradient — cyan + indigo, slow shift */
+  .bg {
+    position:absolute; inset:0;
+    background: linear-gradient(180deg, #04101A 0%, #050B25 35%, #02020A 80%);
+  }
+  .bg::after {
+    content:""; position:absolute; inset:0;
+    background:
+      radial-gradient(60% 50% at 50% 30%, rgba(92,225,230,0.20), transparent 70%),
+      radial-gradient(50% 40% at 50% 80%, rgba(91,177,255,0.20), transparent 70%);
+    animation: drift 14s ease-in-out infinite;
+  }
+  @keyframes drift {
+    0%, 100% { transform: translateY(0); opacity: 0.85; }
+    50% { transform: translateY(-14px); opacity: 1; }
+  }
+
+  .frame { position:absolute; inset:0; z-index:10; padding: 60px 0 24px; display:flex; flex-direction:column; }
+  .topbar { padding: 0 20px 4px; display:flex; align-items:center; justify-content: space-between; }
+  .quit { font-size:13px; color: rgba(255,255,255,0.55); padding:8px 12px; cursor:pointer; background:none; border:none; font-family:inherit; }
+  .brand { display:flex; align-items:center; gap:8px; }
+  .brand .dot { width:6px; height:6px; border-radius:50%; background:var(--calm); box-shadow:0 0 10px var(--calm); }
+  .brand .wm { font-size:10px; font-weight:700; letter-spacing:0.36em; color:rgba(255,255,255,0.7); }
+
+  .hero { text-align:center; padding: 14px 26px 0; }
+  .kicker { font-size: 11px; letter-spacing: 0.26em; text-transform: uppercase; color: var(--calm); font-weight: 800; margin-bottom: 8px; }
+  .title { font-size: 30px; font-weight: 700; letter-spacing: -0.8px; line-height: 1.1; }
+  .copy { color: rgba(255,255,255,0.78); font-size: 14px; line-height: 21px; margin: 12px auto 0; max-width: 290px; letter-spacing:-0.05px; }
+
+  /* breath orb — slow box-breath 4-4-4-4 = 16s */
+  .breath-stage { display:flex; align-items:center; justify-content:center; margin: 26px 0 4px; position:relative; }
+  .breath-ring {
+    width: 240px; height: 240px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(92,225,230,0.24) 0%, rgba(91,177,255,0.10) 50%, transparent 80%);
+    box-shadow: 0 0 60px rgba(92,225,230,0.25), inset 0 0 60px rgba(91,177,255,0.20);
+    border: 1px solid rgba(92,225,230,0.30);
+    animation: breath 16s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  @keyframes breath {
+    0%   { transform: scale(0.55); opacity: 0.4; }
+    25%  { transform: scale(1.00); opacity: 1.0; }
+    50%  { transform: scale(1.00); opacity: 1.0; }
+    75%  { transform: scale(0.55); opacity: 0.4; }
+    100% { transform: scale(0.55); opacity: 0.4; }
+  }
+  .breath-label {
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:4px; pointer-events:none;
+  }
+  .breath-label .phase { font-size: 22px; font-weight: 600; letter-spacing: -0.4px; color: #fff; }
+  .breath-label .count { font-size: 13px; color: var(--muted); letter-spacing: 0.16em; font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+  .timer-bar { margin: 8px 32px 0; height: 3px; background: rgba(255,255,255,0.06); border-radius: 999px; overflow: hidden; }
+  .timer-bar .fill { height: 100%; background: linear-gradient(90deg, var(--calm), var(--accent)); width: 0%; box-shadow: 0 0 8px var(--calm); transition: width 1s linear; }
+  .timer-label { text-align: center; font-size: 11px; color: var(--muted); letter-spacing: 0.18em; margin-top: 8px; font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+
+  /* 3 emergency prompts */
+  .prompts { margin: 16px 22px 0; display: flex; flex-direction: column; gap: 8px; }
+  .prompt { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+  .prompt:hover { background: rgba(255,255,255,0.07); border-color: rgba(92,225,230,0.40); }
+  .prompt-ico { width: 32px; height: 32px; border-radius: 10px; background: var(--c); box-shadow: 0 0 12px var(--c); display: flex; align-items: center; justify-content: center; flex-shrink:0; }
+  .prompt-ico svg { width: 16px; height: 16px; stroke: white; fill:none; stroke-width: 1.7; stroke-linecap:round; stroke-linejoin:round; }
+  .prompt-text { flex: 1; }
+  .prompt-title { font-size: 13px; font-weight: 600; color: #fff; letter-spacing: -0.1px; }
+  .prompt-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .prompt-chev { color: var(--dim); font-size: 16px; }
+
+  .crisis-link { display:block; text-align:center; margin: 12px auto 0; padding: 8px; font-size: 11px; color: rgba(255,255,255,0.45); letter-spacing: 0.12em; text-decoration: none; text-transform:uppercase; font-weight: 600; }
+  .crisis-link:hover { color: #FF6B6B; }
+
+  .footer { margin-top: auto; padding: 0 22px; }
+</style>
+  <link rel="stylesheet" href="_lib/core-responsive.css">
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="frame">
+      <div class="topbar">
+        <div class="brand"><span class="dot"></span><span class="wm">CORE</span></div>
+        <button class="quit" onclick="leave()">I'm okay</button>
+      </div>
+
+      <div class="hero">
+        <div class="kicker">Craving SOS</div>
+        <h1 class="title" id="title">Stay here<br/>for 60 seconds.</h1>
+        <p class="copy" id="copy">The craving peaks for about 3 minutes then fades. Don't decide anything — just breathe. Stay until the bar fills.</p>
+      </div>
+
+      <div class="breath-stage">
+        <div class="breath-ring"></div>
+        <div class="breath-label">
+          <div class="phase" id="phase">Breathe in</div>
+          <div class="count" id="count">4 · 4 · 4 · 4</div>
+        </div>
+      </div>
+
+      <div class="timer-bar"><div class="fill" id="timerFill"></div></div>
+      <div class="timer-label" id="timerLabel">60s left</div>
+
+      <div class="prompts">
+        <div class="prompt" onclick="walk()">
+          <div class="prompt-ico" style="--c:#5CE1E6;"><svg viewBox="0 0 24 24"><path d="M13 4l-2 8h4l-2 8M9 8l-2-3M15 8l2-3"/></svg></div>
+          <div class="prompt-text"><div class="prompt-title">Walk 5 minutes</div><div class="prompt-sub">Step away from the trigger. Move.</div></div>
+          <div class="prompt-chev">›</div>
+        </div>
+        <div class="prompt" onclick="water()">
+          <div class="prompt-ico" style="--c:#5BB1FF;"><svg viewBox="0 0 24 24"><path d="M12 3c-4 5-6 8-6 11a6 6 0 0 0 12 0c0-3-2-6-6-11z"/></svg></div>
+          <div class="prompt-text"><div class="prompt-title">Drink a full glass of water</div><div class="prompt-sub">Cold. Slowly. Now.</div></div>
+          <div class="prompt-chev">›</div>
+        </div>
+        <div class="prompt" onclick="call()">
+          <div class="prompt-ico" style="--c:#B388FF;"><svg viewBox="0 0 24 24"><path d="M3 5a2 2 0 0 1 2-2h2l2 5-2 1a11 11 0 0 0 6 6l1-2 5 2v2a2 2 0 0 1-2 2A16 16 0 0 1 3 5z"/></svg></div>
+          <div class="prompt-text"><div class="prompt-title">Message a safe friend</div><div class="prompt-sub">Mia replied within 2 minutes last time.</div></div>
+          <div class="prompt-chev">›</div>
+        </div>
+        <div class="prompt" onclick="window.location.href='40-coach-during-craving.html'">
+          <div class="prompt-ico" style="--c:#5CE1E6;"><svg viewBox="0 0 24 24"><path d="M21 12c0 5-4.5 8-9 8a9 9 0 0 1-3.5-.7L3 21l1.7-5.5A9 9 0 0 1 3 12c0-5 4.5-8 9-8s9 3 9 8z"/></svg></div>
+          <div class="prompt-text"><div class="prompt-title">Talk to Coach</div><div class="prompt-sub">Coach takes over while the wave breaks.</div></div>
+          <div class="prompt-chev">›</div>
+        </div>
+      </div>
+
+      <a class="crisis-link" href="43-crisis.html">If you're not safe → Crisis lines</a>
+
+      <div class="footer"></div>
+    </div>
+  </div>
+
+<script>
+  // tone-aware copy
+  (function() {
+    try {
+      const t = JSON.parse(localStorage.getItem('coreOnboardTrial') || '{}');
+      const tone = t.tone || 'balanced';
+      const title = {
+        gentle:   'Stay here<br/>for 60 seconds.',
+        balanced: 'Stay here<br/>for 60 seconds.',
+        direct:   'Sixty seconds.<br/>Then decide.',
+        drill:    "Sixty seconds.<br/>Don't move."
+      }[tone];
+      const copy = {
+        gentle:   "Cravings peak then fade. You don't have to decide anything right now — just breathe. Stay until the bar fills.",
+        balanced: "The craving peaks for about 3 minutes then fades. Don't decide anything — just breathe. Stay until the bar fills.",
+        direct:   "Cravings peak then crash. 3 minutes max. Don't decide while it's loud. Breathe. The bar finishes — then choose.",
+        drill:    "Cravings are mostly bluff. They peak at 3 minutes. Hold position. Breathe. Don't move until the bar fills."
+      }[tone];
+      if (title) document.getElementById('title').innerHTML = title;
+      if (copy) document.getElementById('copy').textContent = copy;
+    } catch(e){}
+  })();
+
+  // box-breath label sync: 4s in / 4s hold / 4s out / 4s hold = 16s loop
+  const PHASES = [
+    { label: 'Breathe in',  count: '4 · _ · _ · _' },
+    { label: 'Hold',        count: '_ · 4 · _ · _' },
+    { label: 'Breathe out', count: '_ · _ · 4 · _' },
+    { label: 'Hold',        count: '_ · _ · _ · 4' },
+  ];
+  let pIdx = 0;
+  function tickPhase() {
+    document.getElementById('phase').textContent = PHASES[pIdx].label;
+    document.getElementById('count').textContent = PHASES[pIdx].count;
+    pIdx = (pIdx + 1) % PHASES.length;
+  }
+  tickPhase();
+  setInterval(tickPhase, 4000);
+
+  // 60-second timer
+  const TOTAL = 60;
+  let elapsed = 0;
+  const fill = document.getElementById('timerFill');
+  const lbl = document.getElementById('timerLabel');
+  const startedAt = Date.now();
+  if (window.coreTrack) coreTrack('panic_started', {});
+  const interval = setInterval(() => {
+    elapsed = Math.min(TOTAL, Math.round((Date.now() - startedAt) / 1000));
+    fill.style.width = (elapsed / TOTAL * 100) + '%';
+    const left = TOTAL - elapsed;
+    lbl.textContent = left > 0 ? (left + 's left') : 'Done · craving will fade';
+    if (elapsed >= TOTAL) {
+      clearInterval(interval);
+      if (window.coreTrack) coreTrack('panic_completed', { seconds: TOTAL });
+      // small willpower bonus for staying
+      try { coreState.update(s => { s.stats.willpower = Math.min(100, s.stats.willpower + 2); s.xp += 10; return s; }); } catch(e){}
+      // Route to the win screen so the user gets the dopamine + share path
+      setTimeout(() => { window.location.href = '41-coach-craving-result.html'; }, 700);
+    }
+  }, 1000);
+
+  function walk()  { if (window.coreTrack) coreTrack('panic_action', { action: 'walk'  }); alert('Walking for 5 min — see you in a bit.'); }
+  function water() { if (window.coreTrack) coreTrack('panic_action', { action: 'water' }); alert('Cold glass. Slowly. Done.'); }
+  function call()  { if (window.coreTrack) coreTrack('panic_action', { action: 'call'  }); window.location.href = '67-find-friends.html'; }
+  function leave() {
+    if (elapsed < 30) {
+      if (!confirm("Less than 30s in — you sure? Cravings peak around now.")) return;
+    }
+    if (window.coreTrack) coreTrack('panic_left', { seconds: elapsed });
+    history.length > 1 ? history.back() : (location.href = '20-dashboard.html');
+  }
+</script>
+</body>
+</html>

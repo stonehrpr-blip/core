@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+  <meta charset="utf-8" />
+  <title>Core — Moderation queue</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <style>
+    :root { --bg-base:#02020A; --text-primary:#F8FAFE; --text-muted:#9AA1B7; --text-dim:#4F5570; --accent:#4A8FFF; --success:#34D399; --warning:#FBBF24; --danger:#F87171; }
+    * { box-sizing: border-box; }
+    html, body { margin:0; padding:0; height:100%; }
+    body { min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text-primary); -webkit-font-smoothing:antialiased; padding:24px; overflow:hidden; }
+    .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+    .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:10; }
+    .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:10; }
+
+    .bg { position:absolute; inset:0; background: radial-gradient(60% 30% at 50% 18%, rgba(248,113,113,0.08) 0%, transparent 65%), linear-gradient(180deg, #150A0A 0%, var(--bg-base) 50%, #050510 100%); }
+    .grain { position:absolute; inset:0; opacity:0.04; mix-blend-mode:overlay; z-index:2; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.7 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); pointer-events:none; }
+
+    .topbar { position:absolute; top:60px; left:0; right:0; padding:0 20px; display:flex; align-items:center; justify-content:space-between; z-index:10; }
+    .brand { display:flex; align-items:center; gap:10px; }
+    .brand-mark { width:30px; height:30px; border-radius: 9px; background:linear-gradient(135deg,#F87171,#DA552F); display:flex; align-items:center; justify-content:center; box-shadow:0 0 12px rgba(248,113,113,0.4); position:relative; }
+    .brand-mark::after { content:""; position:absolute; inset:0; border-radius:9px; background:linear-gradient(160deg, rgba(255,255,255,0.32) 0%, transparent 45%); }
+    .brand-mark svg { width:14px; height:14px; stroke:white; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; position:relative; z-index:2; }
+    .brand-name { font-size:14px; font-weight:600; letter-spacing:-0.2px; line-height:1.2; }
+    .brand-name span { font-size:9px; color:var(--text-muted); display:block; letter-spacing:0.1em; text-transform:uppercase; margin-top:1px; }
+    .header-actions { display:flex; align-items:center; gap:8px; }
+    .seats-pill { padding:5px 10px; border-radius:999px; background: rgba(248,113,113,0.10); border:1px solid rgba(248,113,113,0.30); font-size:10px; color:var(--danger); font-weight:600; letter-spacing:0.06em; }
+
+    .tabs { position:absolute; top:108px; left:0; right:0; padding:0 20px 10px; display:flex; gap:4px; z-index:8; overflow-x:auto; scrollbar-width:none; }
+    .tabs::-webkit-scrollbar { display:none; }
+    .tab { flex-shrink:0; padding:7px 12px; border-radius:999px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); font-size:11px; font-weight:600; color:var(--text-muted); cursor:pointer; font-family:inherit; }
+    .tab.active { background:rgba(255,255,255,0.96); color:#050510; border-color:rgba(255,255,255,0.6); }
+    .tab.danger { background:rgba(248,113,113,0.10); border-color:rgba(248,113,113,0.30); color:var(--danger); }
+
+    .scroll { position:absolute; top:154px; left:0; right:0; bottom:0; padding:0 16px 24px; overflow-y:auto; z-index:5; }
+    .scroll::-webkit-scrollbar { display:none; }
+
+    /* Stats */
+    .stats { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px; margin-bottom: 14px; }
+    .s-c { padding:10px 8px; border-radius:12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); text-align:center; }
+    .s-v { font-size: 20px; font-weight: 700; letter-spacing:-0.4px; }
+    .s-v.danger { color: var(--danger); }
+    .s-v.warn { color: var(--warning); }
+    .s-v.ok { color: var(--success); }
+    .s-l { font-size: 9px; letter-spacing: 0.16em; text-transform:uppercase; color:var(--text-muted); margin-top:2px; }
+
+    /* Report card */
+    .report { padding: 14px; border-radius: 16px; background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); margin-bottom: 10px; position:relative; overflow:hidden; }
+    .r-priority-l { position:absolute; left:0; top:0; bottom:0; width: 3px; }
+    .r-priority-l.high { background: var(--danger); }
+    .r-priority-l.med { background: var(--warning); }
+    .r-priority-l.low { background: var(--text-dim); }
+
+    .r-head { display:flex; align-items:center; gap:8px; margin-bottom: 10px; }
+    .r-cat-pill { padding: 3px 8px; border-radius: 999px; font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform:uppercase; }
+    .r-cat-pill.slur { background: rgba(248,113,113,0.10); color: var(--danger); border:1px solid rgba(248,113,113,0.30); }
+    .r-cat-pill.crisis { background: rgba(248,113,113,0.20); color: var(--danger); border:1px solid rgba(248,113,113,0.40); }
+    .r-cat-pill.spam { background: rgba(255,208,92,0.10); color: var(--warning); border:1px solid rgba(255,208,92,0.30); }
+    .r-cat-pill.harass { background: rgba(255,122,69,0.10); color: #FF7A45; border:1px solid rgba(255,122,69,0.30); }
+    .r-time { margin-left:auto; font-size: 10px; color: var(--text-dim); font-family:ui-monospace,"SF Mono",Menlo,monospace; letter-spacing:0.04em; }
+
+    /* Reported content quote */
+    .r-quote { padding: 10px 12px; border-radius: 10px; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); margin-bottom: 10px; font-size: 12px; line-height: 17px; color: var(--text-primary); letter-spacing:-0.05px; font-style: italic; }
+    .r-quote .flagged { background: rgba(248,113,113,0.20); padding: 1px 4px; border-radius: 3px; color: var(--danger); font-weight: 600; }
+
+    /* Meta */
+    .r-meta-row { display:flex; align-items:center; gap: 8px; flex-wrap: wrap; font-size: 11px; color: var(--text-muted); margin-bottom: 10px; }
+    .r-meta-row .ru { display:flex; align-items:center; gap: 5px; }
+    .r-meta-av { width: 18px; height: 18px; border-radius: 50%; }
+    .r-meta-row b { color: var(--text-primary); font-weight: 600; }
+    .r-arrow svg { width:11px; height:11px; stroke: var(--text-dim); fill: none; stroke-width: 2; }
+
+    /* Actions */
+    .r-actions { display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+    .r-act { padding: 8px 4px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor:pointer; font-family:inherit; letter-spacing:-0.05px; text-align:center; transition: all 0.15s; }
+    .r-act.approve { background: rgba(52,211,153,0.10); color: var(--success); border:1px solid rgba(52,211,153,0.30); }
+    .r-act.warn { background: rgba(255,208,92,0.10); color: var(--warning); border:1px solid rgba(255,208,92,0.30); }
+    .r-act.remove { background: rgba(248,113,113,0.10); color: var(--danger); border:1px solid rgba(248,113,113,0.30); }
+    .r-act:active { transform: scale(0.97); }
+
+    .section-label { font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:var(--text-muted); font-weight:500; margin: 6px 4px 10px; }
+
+    /* AI suggestion */
+    .ai-suggest { padding: 10px 12px; border-radius:10px; background: rgba(74,143,255,0.06); border:1px solid rgba(74,143,255,0.20); margin-bottom: 10px; display:flex; align-items:center; gap: 8px; }
+    .ai-suggest svg { width:13px; height:13px; stroke: var(--accent); fill:none; stroke-width:1.8; flex-shrink:0; }
+    .ai-suggest-t { font-size: 11px; color: var(--text-primary); line-height: 15px; letter-spacing:-0.05px; }
+    .ai-suggest-t strong { color: var(--accent); font-weight: 600; }
+
+    .preview-label { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); color:#4A5060; font-size:11px; letter-spacing:0.16em; text-transform:uppercase; font-family:ui-monospace,"SF Mono",Menlo,monospace; }
+    @media (max-width:460px){ body{padding:0;} .phone{width:100vw; height:100vh; border-radius:0; box-shadow:none;} .notch,.home-indicator{display:none;} .preview-label{display:none;} }
+  </style>
+  <link rel="stylesheet" href="_lib/core-responsive.css">
+  <script src="_lib/core-back.js"></script>
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div>
+    <div class="grain"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-mark"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h0M4.93 19h14.14a2 2 0 0 0 1.74-3L13.74 4a2 2 0 0 0-3.48 0L3.2 16a2 2 0 0 0 1.74 3z"/></svg></div>
+        <div class="brand-name">Core<span>Moderation</span></div>
+      </div>
+      <div class="header-actions">
+        <div class="seats-pill">8 urgent</div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active danger" data-cat="all">Queue · 23</button>
+      <button class="tab" data-cat="crisis">Crisis · 2</button>
+      <button class="tab" data-cat="slur">Slurs · 6</button>
+      <button class="tab" data-cat="spam">Spam · 12</button>
+      <button class="tab" data-cat="harass">Harass · 3</button>
+      <button class="tab" data-cat="approved">Approved</button>
+      <button class="tab" data-cat="blocked">Blocked</button>
+    </div>
+
+    <div class="scroll">
+      <!-- Stats strip -->
+      <div class="stats">
+        <div class="s-c"><div class="s-v danger">23</div><div class="s-l">Pending</div></div>
+        <div class="s-c"><div class="s-v warn">6h</div><div class="s-l">Avg wait</div></div>
+        <div class="s-c"><div class="s-v ok">98%</div><div class="s-l">SLA</div></div>
+      </div>
+
+      <div class="section-label">Highest priority · review now</div>
+
+      <!-- Report 1: Crisis -->
+      <div class="report">
+        <div class="r-priority-l high"></div>
+        <div class="r-head">
+          <span class="r-cat-pill crisis">CRISIS</span>
+          <span class="r-cat-pill" style="background:rgba(255,255,255,0.04); color:var(--text-muted); border:1px solid rgba(255,255,255,0.06);">Auto-flag</span>
+          <span class="r-time">3 min ago</span>
+        </div>
+        <div class="ai-suggest">
+          <svg viewBox="0 0 24 24"><path d="M21 12c0 5-4.5 8-9 8a9 9 0 0 1-3.5-.7L3 21l1.7-5.5A9 9 0 0 1 3 12c0-5 4.5-8 9-8s9 3 9 8z"/></svg>
+          <div class="ai-suggest-t"><strong>AI:</strong> Self-harm language detected. Crisis-line auto-inserted above post. Recommend: hide from feed + DM safety check + flag for human follow-up within 60 min.</div>
+        </div>
+        <div class="r-quote">"I don't even know why I'm still trying. Every <span class="flagged">[crisis phrase]</span> day feels like a setup for failure."</div>
+        <div class="r-meta-row">
+          <div class="ru"><div class="r-meta-av" style="background:radial-gradient(circle at 35% 28%,#FFEEBF 0%,#FFD05C 60%,#876619 100%);"></div><b>@wrenp</b></div>
+          <div>· Spark · 2-day streak ·</div>
+          <div>Reported by 3</div>
+          <div class="r-arrow"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></div>
+        </div>
+        <div class="r-actions">
+          <button class="r-act remove">Hide + DM</button>
+          <button class="r-act warn">Auto crisis-overlay</button>
+          <button class="r-act approve">Keep visible</button>
+        </div>
+      </div>
+
+      <!-- Report 2: Slur -->
+      <div class="report">
+        <div class="r-priority-l high"></div>
+        <div class="r-head">
+          <span class="r-cat-pill slur">SLUR</span>
+          <span class="r-time">18 min ago</span>
+        </div>
+        <div class="ai-suggest">
+          <svg viewBox="0 0 24 24"><path d="M21 12c0 5-4.5 8-9 8a9 9 0 0 1-3.5-.7L3 21l1.7-5.5A9 9 0 0 1 3 12c0-5 4.5-8 9-8s9 3 9 8z"/></svg>
+          <div class="ai-suggest-t"><strong>AI:</strong> Hard-block term detected. Already filtered to [filtered] in feed. Recommend: remove post + 24h posting suspension + DM with terms reminder.</div>
+        </div>
+        <div class="r-quote">"...what a <span class="flagged">[slur]</span> thing to say to someone trying to quit..."</div>
+        <div class="r-meta-row">
+          <div class="ru"><div class="r-meta-av" style="background:radial-gradient(circle at 35% 28%,#FFCEB3 0%,#FF7A45 60%,#813617 100%);"></div><b>@livhansen</b></div>
+          <div>· Flow · Reported by 7</div>
+        </div>
+        <div class="r-actions">
+          <button class="r-act remove">Remove + 24h ban</button>
+          <button class="r-act warn">Edit to [filtered]</button>
+          <button class="r-act approve">Allow</button>
+        </div>
+      </div>
+
+      <!-- Report 3: Harassment -->
+      <div class="report">
+        <div class="r-priority-l med"></div>
+        <div class="r-head">
+          <span class="r-cat-pill harass">HARASSMENT</span>
+          <span class="r-time">42 min ago</span>
+        </div>
+        <div class="r-quote">"Your 'progress' is fake, everyone can see you slipped again. Why are you even posting here..."</div>
+        <div class="r-meta-row">
+          <div class="ru"><div class="r-meta-av" style="background:radial-gradient(circle at 35% 28%,#E5E8F0 0%,#9AA1B7 60%,#4F5570 100%);"></div><b>@anon_42</b></div>
+          <div>· Focus · Account 4 days old ·</div>
+          <div>Reported by 2</div>
+        </div>
+        <div class="r-actions">
+          <button class="r-act remove">Remove + warn</button>
+          <button class="r-act warn">Hide for OP</button>
+          <button class="r-act approve">Approve</button>
+        </div>
+      </div>
+
+      <!-- Report 4: Spam -->
+      <div class="report">
+        <div class="r-priority-l low"></div>
+        <div class="r-head">
+          <span class="r-cat-pill spam">SPAM</span>
+          <span class="r-time">2h ago</span>
+        </div>
+        <div class="ai-suggest">
+          <svg viewBox="0 0 24 24"><path d="M21 12c0 5-4.5 8-9 8a9 9 0 0 1-3.5-.7L3 21l1.7-5.5A9 9 0 0 1 3 12c0-5 4.5-8 9-8s9 3 9 8z"/></svg>
+          <div class="ai-suggest-t"><strong>AI:</strong> External URL + promo language. Posted to 12 different threads in 4h. Recommend: shadow-ban + remove all posts from this user.</div>
+        </div>
+        <div class="r-quote">"Hey! I know a much better app that helped me quit in 3 days check it out <span class="flagged">[URL]</span>"</div>
+        <div class="r-meta-row">
+          <div class="ru"><div class="r-meta-av" style="background:radial-gradient(circle at 35% 28%,#E5E8F0 0%,#9AA1B7 60%,#4F5570 100%);"></div><b>@quitfast_bot</b></div>
+          <div>· Account 2 hours old</div>
+        </div>
+        <div class="r-actions">
+          <button class="r-act remove">Ban + purge</button>
+          <button class="r-act warn">Shadow-ban</button>
+          <button class="r-act approve">Allow</button>
+        </div>
+      </div>
+
+      <!-- Report 5: Borderline -->
+      <div class="report">
+        <div class="r-priority-l low"></div>
+        <div class="r-head">
+          <span class="r-cat-pill" style="background:rgba(154,161,183,0.10); color:var(--text-muted); border:1px solid rgba(154,161,183,0.30);">BORDERLINE</span>
+          <span class="r-time">3h ago</span>
+        </div>
+        <div class="r-quote">"Drinking is so much better than vaping for stress, just sayin"</div>
+        <div class="r-meta-row">
+          <div class="ru"><div class="r-meta-av" style="background:radial-gradient(circle at 35% 28%,#DCC8FF 0%,#B388FF 60%,#4F3A8A 100%);"></div><b>@kaip</b></div>
+          <div>· Flow · Reported by 1</div>
+        </div>
+        <div class="r-actions">
+          <button class="r-act remove">Remove</button>
+          <button class="r-act warn">Add content note</button>
+          <button class="r-act approve">Approve</button>
+        </div>
+      </div>
+
+      <div style="text-align:center; padding: 16px 0 8px; font-size: 11px; color: var(--text-dim); letter-spacing: 0.06em;">
+        SLA: 24h response for spam · 6h for harassment · 1h for slurs · &lt;30min for crisis flags
+      </div>
+    </div>
+  </div>
+  <div class="preview-label">core · moderation queue · v1</div>
+<script>
+  // Tag each .report with a stable ID + category. Wire tabs + actions with
+  // Apple-style snackbar (3s undo window) and localStorage persistence.
+  (function () {
+    const STORE_KEY = 'coreModResolved';
+    function readResolved() {
+      try { return JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); } catch (e) { return {}; }
+    }
+    function writeResolved(obj) {
+      try { localStorage.setItem(STORE_KEY, JSON.stringify(obj)); } catch (e) {}
+    }
+    const resolved = readResolved();
+
+    document.querySelectorAll('.report').forEach((r, i) => {
+      r.dataset.id = 'r' + i;
+      const pill = r.querySelector('.r-cat-pill');
+      const cls = pill ? Array.from(pill.classList).find(c => ['crisis','slur','harass','spam'].includes(c)) : null;
+      r.dataset.cat = cls || 'other';
+      // Hide already-resolved on load
+      if (resolved[r.dataset.id]) r.dataset.resolvedAs = resolved[r.dataset.id];
+    });
+
+    let currentTab = 'all';
+    function applyTab(cat) {
+      currentTab = cat;
+      document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
+      document.querySelectorAll('.report').forEach(r => {
+        const rs = r.dataset.resolvedAs;
+        let show = false;
+        if (cat === 'all')       show = !rs;
+        else if (cat === 'approved') show = rs === 'approve';
+        else if (cat === 'blocked')  show = rs === 'remove';
+        else show = !rs && r.dataset.cat === cat;
+        r.style.display = show ? '' : 'none';
+      });
+      const anyVisible = Array.from(document.querySelectorAll('.report')).some(r => r.style.display !== 'none');
+      let empty = document.getElementById('modEmpty');
+      if (!anyVisible) {
+        if (!empty) {
+          empty = document.createElement('div');
+          empty.id = 'modEmpty';
+          empty.style.cssText = 'text-align:center; padding:48px 24px; color: var(--text-muted); font-size: 13px;';
+          document.querySelector('.scroll').appendChild(empty);
+        }
+        empty.textContent = (cat === 'approved') ? 'No approved reports yet.' :
+                            (cat === 'blocked')  ? 'No blocked reports yet.' :
+                            'Nothing here right now — queue is clear.';
+        empty.style.display = '';
+      } else if (empty) {
+        empty.style.display = 'none';
+      }
+    }
+    document.querySelectorAll('.tab[data-cat]').forEach(b => {
+      b.addEventListener('click', () => applyTab(b.dataset.cat));
+    });
+
+    // ── Apple-style snackbar with UNDO ───────────────────────────────────
+    let snackTimer = null;
+    function snackbar(text, undoCb) {
+      const old = document.getElementById('modSnack'); if (old) old.remove();
+      clearTimeout(snackTimer);
+      const s = document.createElement('div');
+      s.id = 'modSnack';
+      s.style.cssText = `position:fixed;left:16px;right:16px;bottom:24px;display:flex;
+        align-items:center;gap:8px;padding:14px 16px;border-radius:14px;
+        background:rgba(28,28,30,0.96);backdrop-filter:saturate(180%) blur(20px);
+        -webkit-backdrop-filter:saturate(180%) blur(20px);
+        box-shadow:0 14px 36px rgba(0,0,0,0.45);
+        color:#fff;font-family:-apple-system,'Chakra Petch',sans-serif;
+        font-size:15px;z-index:9999;
+        transform:translateY(20px);opacity:0;transition:all 0.32s cubic-bezier(.32,.72,0,1);`;
+      s.innerHTML = `<span style="flex:1;">${text}</span>
+        <button id="snackUndo" style="background:transparent;border:none;color:#0A84FF;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;padding:4px 8px;">Undo</button>`;
+      document.body.appendChild(s);
+      requestAnimationFrame(() => { s.style.transform = 'translateY(0)'; s.style.opacity = '1'; });
+      let undone = false;
+      s.querySelector('#snackUndo').addEventListener('click', () => {
+        undone = true;
+        if (typeof undoCb === 'function') undoCb();
+        s.style.opacity = '0'; s.style.transform = 'translateY(20px)';
+        setTimeout(() => s.remove(), 340);
+      });
+      snackTimer = setTimeout(() => {
+        s.style.opacity = '0'; s.style.transform = 'translateY(20px)';
+        setTimeout(() => { s.remove(); }, 340);
+      }, 3000);
+      return { undone: () => undone };
+    }
+
+    function flagReport(report, action) {
+      // Add a colored stamp overlay that fades in before the report hides
+      const color = action === 'approve' ? '#34D399' : action === 'remove' ? '#F87171' : '#FF9F0A';
+      const label = action === 'approve' ? '✓ APPROVED' : action === 'remove' ? '✗ REMOVED' : '⚠ FLAGGED';
+      let stamp = report.querySelector('.r-stamp');
+      if (!stamp) {
+        stamp = document.createElement('div');
+        stamp.className = 'r-stamp';
+        stamp.style.cssText = `position:absolute;top:14px;right:14px;
+          padding:4px 10px;border-radius:6px;background:${color};color:#fff;
+          font-family:-apple-system,sans-serif;font-size:10px;font-weight:700;
+          letter-spacing:0.10em;opacity:0;transform:scale(1.2) rotate(-6deg);
+          transition:all 0.28s cubic-bezier(.32,.72,0,1);z-index:5;
+          box-shadow:0 6px 14px ${color}66;`;
+        // Ensure parent is positioned
+        if (getComputedStyle(report).position === 'static') report.style.position = 'relative';
+        report.appendChild(stamp);
+      }
+      stamp.style.background = color;
+      stamp.style.boxShadow = `0 6px 14px ${color}66`;
+      stamp.textContent = label;
+      requestAnimationFrame(() => {
+        stamp.style.opacity = '1';
+        stamp.style.transform = 'scale(1) rotate(-3deg)';
+      });
+      // Slight desaturation of the report body
+      report.style.transition = 'opacity 0.32s, filter 0.32s';
+      report.style.filter = 'saturate(0.4)';
+      report.style.opacity = '0.65';
+    }
+    function unflagReport(report) {
+      const stamp = report.querySelector('.r-stamp');
+      if (stamp) stamp.remove();
+      report.style.filter = '';
+      report.style.opacity = '';
+    }
+
+    document.querySelectorAll('.r-act').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const report = btn.closest('.report');
+        if (!report) return;
+        const id = report.dataset.id;
+        const label = btn.textContent.trim();
+        const action = btn.classList.contains('approve') ? 'approve' :
+                       btn.classList.contains('remove')  ? 'remove'  : 'warn';
+        // 1. Stamp the report
+        flagReport(report, action);
+        // 2. After the stamp animates, hide via tab filter + persist
+        setTimeout(() => {
+          report.dataset.resolvedAs = action;
+          const r = readResolved(); r[id] = action; writeResolved(r);
+          applyTab(currentTab);
+          snackbar(`${label} — applied to ${report.dataset.cat || 'report'}`, () => {
+            delete report.dataset.resolvedAs;
+            const r2 = readResolved(); delete r2[id]; writeResolved(r2);
+            unflagReport(report);
+            applyTab(currentTab);
+          });
+        }, 600);
+      });
+    });
+
+    // Initial paint reflects any pre-existing localStorage state
+    applyTab('all');
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+  <meta charset="utf-8" />
+  <title>Core — Refer a friend</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <style>
+    :root { --bg-base:#02020A; --text-primary:#F8FAFE; --text-muted:#9AA1B7; --text-dim:#4F5570; --accent:#4A8FFF; --success:#34D399; }
+    * { box-sizing: border-box; }
+    html, body { margin:0; padding:0; height:100%; }
+    body { min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text-primary); -webkit-font-smoothing:antialiased; padding:24px; overflow:hidden; }
+    .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+    .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:10; }
+    .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:10; }
+
+    .bg { position:absolute; inset:0; z-index:0; background: radial-gradient(70% 50% at 50% 20%, rgba(74,143,255,0.18) 0%, transparent 65%), radial-gradient(60% 40% at 50% 100%, rgba(132,100,255,0.15) 0%, transparent 60%), linear-gradient(180deg, #050C26 0%, var(--bg-base) 60%, #050510 100%); }
+    .grain { position:absolute; inset:0; opacity:0.04; mix-blend-mode:overlay; z-index:2; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.7 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); pointer-events:none; }
+
+    .topbar { position:absolute; top:60px; left:0; right:0; padding:0 20px; display:flex; align-items:center; justify-content:space-between; z-index:10; }
+    .back {
+      width: 38px !important; height: 38px !important;
+      min-width: 38px !important; min-height: 38px !important;
+      max-width: 38px !important; max-height: 38px !important;
+      aspect-ratio: 1 / 1;
+      flex: 0 0 38px;
+      align-self: center;
+      border-radius: 50% !important;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.10);
+      display: flex !important; align-items: center !important; justify-content: center !important;
+      cursor: pointer; padding: 0;
+      font-family: inherit;
+      box-sizing: border-box;
+      transition: background .15s, border-color .15s, transform .12s;
+    }
+    .back:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }
+    .back:active { transform: scale(0.94); }
+    .back svg { width:14px; height:14px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex-shrink: 0; }
+    .topbar-title { font-size:17px; font-weight:600; letter-spacing:-0.2px; }
+
+    .scroll { position:absolute; top:120px; left:0; right:0; bottom:0; padding:0 24px 28px; overflow-y:auto; z-index:5; }
+    .scroll::-webkit-scrollbar { display:none; }
+
+    /* Hero */
+    .gift-wrap { display:flex; justify-content:center; margin-bottom: 22px; }
+    .gift { width: 108px; height: 108px; border-radius: 28px; background: linear-gradient(135deg, var(--accent) 0%, #B388FF 100%); box-shadow: 0 0 48px rgba(74,143,255,0.5), inset 0 3px 10px rgba(255,255,255,0.4); display:flex; align-items:center; justify-content:center; position:relative; animation: giftBreath 3s ease-in-out infinite; }
+    .gift::after { content:""; position:absolute; inset:0; border-radius:28px; background:linear-gradient(160deg, rgba(255,255,255,0.32) 0%, transparent 45%); }
+    .gift svg { width:48px; height:48px; stroke:white; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; position:relative; z-index:2; }
+    @keyframes giftBreath { 0%,100%{transform:scale(1);} 50%{transform:scale(1.04);} }
+
+    h1 { margin: 0 0 12px; font-size: 30px; font-weight: 600; letter-spacing:-1.2px; line-height:1.1; text-align:center; background: linear-gradient(180deg, #FFFFFF 0%, #C8CDDE 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+    .sub { text-align:center; font-size: 14px; line-height: 21px; color: var(--text-muted); margin: 0 auto 24px; max-width: 300px; letter-spacing:-0.1px; }
+
+    /* Reward chips */
+    .rewards { display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 22px; }
+    .r-card { padding: 14px 14px; border-radius: 14px; background: linear-gradient(135deg, rgba(74,143,255,0.10) 0%, rgba(132,100,255,0.08) 100%); border: 1px solid rgba(74,143,255,0.30); }
+    .r-c-l { font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:var(--accent); font-weight:600; margin-bottom:6px; }
+    .r-c-v { font-size: 20px; font-weight: 700; letter-spacing:-0.4px; }
+    .r-c-s { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+
+    /* Share box */
+    .share-card { padding: 16px; border-radius: 16px; background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); margin-bottom: 18px; }
+    .share-label { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted); font-weight: 500; margin-bottom: 10px; }
+    .share-link { display:flex; align-items:center; gap:8px; padding: 12px 14px; border-radius:12px; background: rgba(74,143,255,0.06); border: 1px solid rgba(74,143,255,0.25); margin-bottom: 10px; }
+    .share-link-text { flex:1; font-size: 13px; color: var(--accent); font-weight: 600; letter-spacing:-0.05px; font-family: ui-monospace,"SF Mono",Menlo,monospace; }
+    .copy-btn { padding: 6px 12px; border-radius: 999px; background: var(--accent); color: white; border:none; cursor:pointer; font-size: 11px; font-weight: 600; font-family:inherit; letter-spacing:-0.05px; }
+    .share-row { display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; }
+    .share-btn { padding: 12px 6px; border-radius:12px; background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; transition: all 0.15s; }
+    .share-btn:hover { background: rgba(255,255,255,0.06); }
+    .share-btn svg { width: 18px; height: 18px; stroke: var(--text-primary); fill:none; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+    .share-btn-l { font-size: 9px; color: var(--text-muted); letter-spacing: 0.06em; font-weight: 600; }
+
+    /* Stats row */
+    .section-label { font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:var(--text-muted); font-weight:500; margin: 18px 4px 10px; }
+    .stats-row { display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 18px; }
+    .stat-c { padding: 12px 8px; border-radius: 12px; background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); text-align:center; }
+    .stat-c-v { font-size: 22px; font-weight: 700; letter-spacing:-0.5px; color: var(--accent); }
+    .stat-c-l { font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-muted); margin-top: 3px; }
+
+    /* Activity list */
+    .activity { padding: 14px 14px; border-radius: 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); margin-bottom: 6px; display:flex; align-items:center; gap: 12px; }
+    .ar-av { width: 34px; height: 34px; border-radius:50%; flex-shrink:0; position:relative; }
+    .ar-av::after { content:""; position:absolute; inset:0; border-radius:50%; background:linear-gradient(160deg, rgba(255,255,255,0.30) 0%, transparent 45%); }
+    .ar-i { flex:1; }
+    .ar-n { font-size: 13px; font-weight: 600; letter-spacing:-0.1px; }
+    .ar-s { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+    .ar-status { font-size: 10px; padding: 3px 8px; border-radius: 999px; font-weight: 600; letter-spacing:0.06em; }
+    .ar-status.earned { background: rgba(52,211,153,0.10); color: var(--success); }
+    .ar-status.pending { background: rgba(154,161,183,0.10); color: var(--text-muted); }
+
+    /* How it works */
+    .how-step { display:flex; gap: 12px; padding: 10px 0; }
+    .how-num { width: 24px; height: 24px; border-radius: 7px; background: rgba(74,143,255,0.10); border:1px solid rgba(74,143,255,0.30); color: var(--accent); font-size: 11px; font-weight: 700; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-family:ui-monospace,"SF Mono",Menlo,monospace; }
+    .how-text { font-size: 12px; line-height: 17px; color: var(--text-primary); letter-spacing:-0.05px; }
+    .how-text strong { color: var(--accent); font-weight: 600; }
+
+    .preview-label { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); color:#4A5060; font-size:11px; letter-spacing:0.16em; text-transform:uppercase; font-family:ui-monospace,"SF Mono",Menlo,monospace; }
+    @media (max-width:460px){ body{padding:0;} .phone{width:100vw; height:100vh; border-radius:0; box-shadow:none;} .notch,.home-indicator{display:none;} .preview-label{display:none;} }
+  </style>
+  <link rel="stylesheet" href="_lib/core-responsive.css">
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div>
+    <div class="grain"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="topbar">
+      <button class="back" type="button" onclick="window.location.href='80-settings.html'" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18L9 12l6-6"/></svg></button>
+      <div class="topbar-title">Refer a friend</div>
+      <div style="width:36px;"></div>
+    </div>
+
+    <div class="scroll">
+      <div class="gift-wrap">
+        <div class="gift">
+          <svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M3 12h18"/><path d="M12 8v13"/><path d="M7 8a2.5 2.5 0 0 1 0-5c1.5 0 3 2 5 5"/><path d="M17 8a2.5 2.5 0 0 0 0-5c-1.5 0-3 2-5 5"/></svg>
+        </div>
+      </div>
+
+      <h1>Give a month free.<br/>Get a month free.</h1>
+      <p class="sub">Send your friend Core. When they start their 7-day trial and stay past day 14, you both get 30 days of Pro for free.</p>
+
+      <div class="rewards">
+        <div class="r-card">
+          <div class="r-c-l">You get</div>
+          <div class="r-c-v">+30 days</div>
+          <div class="r-c-s">Pro Annual valued at $4.99</div>
+        </div>
+        <div class="r-card">
+          <div class="r-c-l">Friend gets</div>
+          <div class="r-c-v">+30 days</div>
+          <div class="r-c-s">Same as you · stacks with trial</div>
+        </div>
+      </div>
+
+      <div class="share-card">
+        <div class="share-label">Your invite link</div>
+        <div class="share-link">
+          <span class="share-link-text" id="link">core.app/i/stone</span>
+          <button class="copy-btn" onclick="copyLink()">Copy</button>
+        </div>
+        <div class="share-row">
+          <button class="share-btn" onclick="share('Messages')"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="share-btn-l">iMessage</span></button>
+          <button class="share-btn" onclick="share('WhatsApp')"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg><span class="share-btn-l">WhatsApp</span></button>
+          <button class="share-btn" onclick="share('Twitter')"><svg viewBox="0 0 24 24"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg><span class="share-btn-l">X / Twitter</span></button>
+          <button class="share-btn" onclick="share('More')"><svg viewBox="0 0 24 24"><path d="M4 12v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8M16 6l-4-4-4 4M12 2v14"/></svg><span class="share-btn-l">More</span></button>
+        </div>
+      </div>
+
+      <div class="section-label">Your impact</div>
+      <div class="stats-row">
+        <div class="stat-c"><div class="stat-c-v">7</div><div class="stat-c-l">Invited</div></div>
+        <div class="stat-c"><div class="stat-c-v">3</div><div class="stat-c-l">Joined</div></div>
+        <div class="stat-c"><div class="stat-c-v">90d</div><div class="stat-c-l">Earned</div></div>
+      </div>
+
+      <div class="section-label">Recent referrals</div>
+
+      <div class="activity">
+        <div class="ar-av" style="background:radial-gradient(circle at 35% 28%,#FFD3E4 0%,#FF6BAA 60%,#832D50 100%);"></div>
+        <div class="ar-i">
+          <div class="ar-n">Aya K.</div>
+          <div class="ar-s">Joined · day 18 clean</div>
+        </div>
+        <span class="ar-status earned">+30d</span>
+      </div>
+
+      <div class="activity">
+        <div class="ar-av" style="background:radial-gradient(circle at 35% 28%,#C2F3F5 0%,#5CE1E6 60%,#2E9CA0 100%);"></div>
+        <div class="ar-i">
+          <div class="ar-n">Saga B.</div>
+          <div class="ar-s">Joined · day 12 clean</div>
+        </div>
+        <span class="ar-status earned">+30d</span>
+      </div>
+
+      <div class="activity">
+        <div class="ar-av" style="background:radial-gradient(circle at 35% 28%,#DCC8FF 0%,#B388FF 60%,#4F3A8A 100%);"></div>
+        <div class="ar-i">
+          <div class="ar-n">Kai P.</div>
+          <div class="ar-s">Trial day 3 · need 14 days clean</div>
+        </div>
+        <span class="ar-status pending">Pending</span>
+      </div>
+
+      <div class="activity">
+        <div class="ar-av" style="background:radial-gradient(circle at 35% 28%,#FFEEBF 0%,#FFD05C 60%,#876619 100%);"></div>
+        <div class="ar-i">
+          <div class="ar-n">Wren P.</div>
+          <div class="ar-s">Trial expired · didn't stay</div>
+        </div>
+        <span class="ar-status pending">No reward</span>
+      </div>
+
+      <div class="section-label">How it works</div>
+      <div style="padding: 14px 16px; border-radius: 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);">
+        <div class="how-step"><div class="how-num">1</div><div class="how-text"><strong>Share your link.</strong> Friend gets a custom Core sign-up page with your name on it.</div></div>
+        <div class="how-step"><div class="how-num">2</div><div class="how-text"><strong>They start a trial.</strong> Free 7 days. No card needed. Their referral status: Pending.</div></div>
+        <div class="how-step"><div class="how-num">3</div><div class="how-text"><strong>They stay 14 days clean.</strong> Proves it's real. You both get 30 days of Pro added to your accounts.</div></div>
+        <div class="how-step"><div class="how-num">4</div><div class="how-text"><strong>Stack credits.</strong> No cap. 12 successful referrals = 1 year of Core free.</div></div>
+      </div>
+
+      <div style="text-align:center; font-size:11px; color: var(--text-dim); letter-spacing: 0.06em; padding: 16px 0;">
+        Why the 14-day rule? It filters out throwaway signups. Real progress = real reward.
+      </div>
+    </div>
+  </div>
+  <div class="preview-label">core · referral · v1</div>
+  <script src="_lib/core-state.js"></script>
+  <script src="_lib/analytics.js"></script>
+  <script src="_lib/core-back.js"></script>
+  <script>
+    // Real link from trial state: core.app/u/<lowercase>?ref=<lowercase>
+    function buildLink() {
+      let user = 'stone';
+      try {
+        const t = JSON.parse(localStorage.getItem('coreOnboardTrial')||'{}');
+        if (t.name) user = String(t.name).trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+      } catch(e){}
+      return 'core.app/u/' + user + '?ref=' + user;
+    }
+    function copyLink() {
+      const link = buildLink();
+      navigator.clipboard?.writeText('https://' + link);
+      const btn = event.target;
+      const old = btn.textContent;
+      btn.textContent = '✓ Copied';
+      btn.style.background = 'rgba(52,211,153,0.20)';
+      btn.style.color = '#34D399';
+      setTimeout(() => { btn.textContent = old; btn.style.background = ''; btn.style.color = ''; }, 1500);
+      if (window.coreTrack) coreTrack('referral_link_copied', { link });
+    }
+    function share(via) {
+      const link = buildLink();
+      if (window.coreTrack) coreTrack('referral_link_shared', { via, link });
+      alert('Opening ' + via + ' with:\nhttps://' + link);
+    }
+    (function init() {
+      const el = document.getElementById('link');
+      if (el) el.textContent = buildLink();
+    })();
+  </script>
+</body>
+</html>

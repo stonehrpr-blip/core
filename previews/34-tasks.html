@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8" />
+<title>Core — Tasks</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#000000" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+<script src="_lib/core-back.js"></script>
+<script src="_lib/core-state.js" defer></script>
+<script src="_lib/core-theme.js" defer></script>
+<script src="_lib/core-ai.js" defer></script>
+<script src="_lib/core-tasks.js" defer></script>
+<script src="_lib/core-proof.js" defer></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;}
+  body{min-height:100vh;background:#0A0A14;color:var(--text);font-family:'Chakra Petch',-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;padding:24px;overflow:hidden;-webkit-font-smoothing:antialiased;}
+  .phone{position:relative;width:390px;height:844px;background:var(--bg-void);border-radius:56px;overflow:hidden;box-shadow:0 40px 100px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.06),0 0 0 10px #0a0a12,0 0 0 11px #2b2b38;}
+  .notch{position:absolute;top:14px;left:50%;transform:translateX(-50%);width:124px;height:32px;background:#000;border-radius:20px;z-index:30;}
+  .home-indicator{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;background:rgba(245,247,251,0.55);border-radius:999px;z-index:30;}
+
+  .scroll{position:absolute;inset:0;padding: 56px 0 110px;overflow-y:auto;z-index:10;}
+  .scroll::-webkit-scrollbar { display: none; }
+  .nav { position: sticky; top: 0; z-index: 5; padding: 12px 16px; display:flex; align-items:center; justify-content: space-between; background: rgba(28,28,30,0.82); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 0.5px solid rgba(255,255,255,0.10); }
+  .nav .title-row { display: flex; align-items: baseline; gap: 8px; }
+  .large-title { font-size: 32px; font-weight: 700; letter-spacing: -0.5px; color: #fff; padding: 14px 20px 4px; }
+  .subtitle    { font-size: 14px; color: rgba(235,235,245,0.65); padding: 0 20px 14px; }
+
+  .add-btn { background: transparent; border: none; color: #0A84FF; font-family: inherit; font-size: 17px; font-weight: 600; cursor: pointer; padding: 6px 10px; }
+
+  /* Segmented filter */
+  .seg { display:flex; gap:6px; padding: 0 16px 12px; overflow-x: auto; }
+  .seg::-webkit-scrollbar { display: none; }
+  .seg-btn {
+    flex-shrink: 0; padding: 6px 14px; border-radius: 999px;
+    background: rgba(255,255,255,0.08); color: rgba(235,235,245,0.70);
+    border: none; font-family: inherit; font-size: 13px; font-weight: 500;
+    letter-spacing: -0.1px; cursor: pointer; white-space: nowrap;
+  }
+  .seg-btn.on { background: #0A84FF; color: #fff; }
+
+  /* Task list */
+  .list { margin: 0 16px; background: rgba(255,255,255,0.04); border-radius: 14px; overflow: hidden; }
+  .task-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px;
+    min-height: 60px;
+    border-bottom: 0.5px solid rgba(255,255,255,0.08);
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+  .task-row:last-child { border-bottom: none; }
+  .task-row:active { background: rgba(255,255,255,0.06); }
+  .task-row.done { opacity: 0.50; }
+  .task-row.done .task-title { text-decoration: line-through; text-decoration-color: rgba(255,255,255,0.40); }
+
+  .task-icon {
+    width: 36px; height: 36px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; background: rgba(255,255,255,0.06);
+  }
+  .task-icon svg { width: 20px; height: 20px; stroke: #fff; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .task-body { flex: 1; min-width: 0; }
+  .task-title { font-size: 16px; color: #fff; font-weight: 500; letter-spacing: -0.2px; }
+  .task-sub { font-size: 12px; color: rgba(235,235,245,0.55); margin-top: 2px; display: flex; gap: 6px; align-items: center; }
+  .task-xp {
+    font-size: 11px; font-weight: 700;
+    padding: 3px 8px; border-radius: 6px;
+    background: rgba(10,132,255,0.18); color: #6BA9FF;
+    letter-spacing: 0.04em;
+  }
+  .task-diff { color: rgba(235,235,245,0.40); }
+
+  .task-check {
+    width: 26px; height: 26px; border-radius: 50%;
+    border: 1.8px solid rgba(255,255,255,0.22); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .task-check svg { width: 14px; height: 14px; stroke: #fff; fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; opacity: 0; transition: opacity 0.18s; }
+  .task-row.done .task-check { background: #30D158; border-color: #30D158; }
+  .task-row.done .task-check svg { opacity: 1; }
+
+  /* Empty state */
+  .empty { padding: 60px 24px; text-align: center; }
+  .empty .em-icon { width: 80px; height: 80px; margin: 0 auto 18px; border-radius: 24px; background: linear-gradient(135deg, #0A84FF, #5B6AE6); display:flex; align-items:center; justify-content:center; font-size: 36px; box-shadow:0 18px 44px rgba(10,132,255,0.30); }
+  .empty .em-title { font-size: 22px; font-weight: 700; color: #fff; letter-spacing: -0.4px; margin-bottom: 8px; }
+  .empty .em-copy { font-size: 14px; color: rgba(235,235,245,0.60); line-height: 1.4; max-width: 260px; margin: 0 auto 24px; }
+  .empty .em-btn { background: #0A84FF; color: #fff; border: none; border-radius: 999px; padding: 12px 22px; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
+
+  /* Quick-add sheet */
+  .sheet-back { position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9990; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
+  .sheet-back.on { opacity: 1; pointer-events: auto; }
+  .sheet { position: fixed; left: 0; right: 0; bottom: 0; background: #0a0a14; border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 22px 22px calc(34px + env(safe-area-inset-bottom,0px)); z-index: 9991; transform: translateY(110%); transition: transform 0.36s cubic-bezier(.32,.72,0,1); max-height: 84vh; overflow-y: auto; }
+  .sheet.on { transform: translateY(0); }
+  .sheet-handle { width: 36px; height: 4px; border-radius: 999px; background: rgba(255,255,255,0.20); margin: 0 auto 18px; }
+  .sheet-title { font-size: 19px; font-weight: 700; color: #fff; letter-spacing: -0.3px; margin-bottom: 14px; }
+  .sheet input, .sheet textarea {
+    width: 100%; padding: 12px 14px; background: rgba(255,255,255,0.06); border: none; border-radius: 10px;
+    color: #fff; font-family: inherit; font-size: 16px; margin-bottom: 12px;
+  }
+  .cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+  .cat-cell { padding: 10px 6px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1.5px solid transparent; display:flex; flex-direction:column; align-items:center; gap: 4px; cursor: pointer; }
+  .cat-cell.sel { border-color: var(--c, #0A84FF); background: rgba(10,132,255,0.10); }
+  .cat-cell .ci { width:24px; height: 24px; }
+  .cat-cell .cl { font-size: 10px; color: #fff; font-weight: 600; letter-spacing: -0.05px; }
+  .row-line { display: flex; gap: 10px; margin-bottom: 14px; }
+  .row-line label { flex:1; padding: 10px; background: rgba(255,255,255,0.04); border-radius: 10px; color: rgba(235,235,245,0.65); font-size: 12px; cursor: pointer; display:flex; align-items:center; gap:8px; }
+  .row-line label.sel { background: rgba(10,132,255,0.10); color: #fff; border: 1px solid rgba(10,132,255,0.40); }
+  .row-line input[type="checkbox"] { accent-color: #0A84FF; }
+  .save-btn { width: 100%; padding: 15px; border-radius: 14px; background: linear-gradient(180deg, #fff, #e8ecf4); color: #050510; font-family: inherit; font-size: 16px; font-weight: 700; border: none; cursor: pointer; }
+  .save-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Section headers */
+  .section-h { font-size: 13px; font-weight: 400; letter-spacing: 0.5px; text-transform: uppercase; color: rgba(235,235,245,0.55); padding: 20px 20px 6px; }
+
+  @media (max-width:460px){body{padding:0;}.phone{width:100vw;height:100vh;height:100dvh;border-radius:0;box-shadow:none;}.notch,.home-indicator{display:none;}}
+</style>
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="scroll" id="scroll">
+      <div class="large-title">Tasks</div>
+      <div class="subtitle" id="subtitle">Loading…</div>
+
+      <div class="seg" id="seg">
+        <button class="seg-btn on" data-filter="all">All</button>
+        <button class="seg-btn" data-filter="today">Today</button>
+        <button class="seg-btn" data-filter="pending">Pending</button>
+        <button class="seg-btn" data-filter="completed">Done</button>
+      </div>
+
+      <div id="taskWrap"></div>
+    </div>
+
+    <!-- Bottom tabbar gets injected by core-tabbar.js (loaded after) -->
+    <div class="tabbar" data-active="tasks"></div>
+  </div>
+
+  <!-- Add task sheet -->
+  <div class="sheet-back" id="sheetBack" onclick="closeSheet()"></div>
+  <div class="sheet" id="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">New task</div>
+    <input id="nTitle" type="text" placeholder="What needs doing?" autocapitalize="sentences" />
+    <div style="font-size:11px;letter-spacing:0.08em;color:rgba(235,235,245,0.55);text-transform:uppercase;margin-bottom:6px;">Category</div>
+    <div class="cat-grid" id="catGrid"></div>
+    <div class="row-line">
+      <label><input type="checkbox" id="nProof" /> Require proof photo</label>
+      <label style="flex:0 0 auto;padding-right:14px;"><span>XP:</span>
+        <select id="nXP" style="background:transparent;color:#fff;border:none;font-family:inherit;font-size:13px;">
+          <option value="5">5</option><option value="10" selected>10</option><option value="15">15</option><option value="25">25</option><option value="50">50</option>
+        </select>
+      </label>
+    </div>
+    <button class="save-btn" id="saveBtn">Add task</button>
+  </div>
+
+<script src="_lib/core-tabbar.js"></script>
+<script>
+  // Wait for core-tasks to load
+  (function init(){
+    if (!window.coreTasks) return setTimeout(init, 60);
+
+    const CATS = coreTasks.CATEGORIES;
+    let filter = 'all';
+    let selCat = 'mind';
+
+    // Build category grid in sheet
+    const $cat = document.getElementById('catGrid');
+    $cat.innerHTML = Object.entries(CATS).map(([k, v]) => `
+      <div class="cat-cell ${k===selCat?'sel':''}" data-k="${k}" style="--c:${v.color};">
+        <svg class="ci" viewBox="0 0 24 24" fill="none" stroke="${v.color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${v.icon}"/></svg>
+        <div class="cl">${v.label}</div>
+      </div>`).join('');
+    $cat.addEventListener('click', e => {
+      const c = e.target.closest('.cat-cell');
+      if (!c) return;
+      $cat.querySelectorAll('.cat-cell').forEach(el => el.classList.remove('sel'));
+      c.classList.add('sel');
+      selCat = c.dataset.k;
+    });
+
+    document.getElementById('saveBtn').addEventListener('click', () => {
+      const title = document.getElementById('nTitle').value.trim();
+      if (!title) return;
+      coreTasks.create({
+        title,
+        category: selCat,
+        xp: +document.getElementById('nXP').value,
+        proofRequired: document.getElementById('nProof').checked,
+      });
+      document.getElementById('nTitle').value = '';
+      document.getElementById('nProof').checked = false;
+      closeSheet();
+      paint();
+    });
+
+    // Seg filter
+    document.getElementById('seg').addEventListener('click', e => {
+      const b = e.target.closest('.seg-btn'); if (!b) return;
+      filter = b.dataset.filter;
+      document.querySelectorAll('.seg-btn').forEach(x => x.classList.toggle('on', x.dataset.filter === filter));
+      paint();
+    });
+
+    // Add row in nav
+    const titleEl = document.querySelector('.large-title');
+    titleEl.insertAdjacentHTML('afterend', `<button id="addBtn" style="position:absolute;top:18px;right:20px;background:transparent;border:none;color:#0A84FF;font-family:inherit;font-size:16px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;z-index:6;">＋ New</button>`);
+    document.getElementById('addBtn').addEventListener('click', openSheet);
+
+    window.openSheet  = openSheet;
+    window.closeSheet = closeSheet;
+    function openSheet() {
+      document.getElementById('sheetBack').classList.add('on');
+      document.getElementById('sheet').classList.add('on');
+    }
+    function closeSheet() {
+      document.getElementById('sheetBack').classList.remove('on');
+      document.getElementById('sheet').classList.remove('on');
+    }
+
+    function paint() {
+      let tasks = coreTasks.list();
+      if (filter === 'pending')    tasks = tasks.filter(t => t.status === 'pending');
+      else if (filter === 'completed') tasks = tasks.filter(t => t.status === 'completed');
+      else if (filter === 'today') tasks = coreTasks.list({ todayOnly: true });
+      else tasks = tasks.filter(t => t.status !== 'skipped');
+
+      // Sort: pending first, then completed, newest first within each
+      tasks.sort((a, b) => {
+        if (a.status === b.status) return b.createdAt - a.createdAt;
+        return a.status === 'pending' ? -1 : 1;
+      });
+
+      const stats = coreTasks.stats(7);
+      document.getElementById('subtitle').textContent =
+        `${tasks.filter(t=>t.status==='pending').length} pending · ${stats.done} done this week · ${stats.xpEarned} XP earned`;
+
+      const $wrap = document.getElementById('taskWrap');
+      if (!tasks.length) {
+        $wrap.innerHTML = `<div class="empty">
+          <div class="em-icon">✓</div>
+          <div class="em-title">${filter==='completed' ? 'Nothing finished yet.' : "You're clear."}</div>
+          <div class="em-copy">${filter==='completed' ? 'Complete a task to see it here.' : "Add your first task or take the deep intake and we'll seed today's plan."}</div>
+          <button class="em-btn" onclick="openSheet()">＋ Add task</button>
+        </div>`;
+        return;
+      }
+
+      // Group by status
+      const pending = tasks.filter(t => t.status === 'pending');
+      const done    = tasks.filter(t => t.status === 'completed');
+      let html = '';
+      if (pending.length) {
+        html += '<div class="section-h">To do · ' + pending.length + '</div>';
+        html += '<div class="list">' + pending.map(rowHTML).join('') + '</div>';
+      }
+      if (done.length) {
+        html += '<div class="section-h">Completed · ' + done.length + '</div>';
+        html += '<div class="list">' + done.map(rowHTML).join('') + '</div>';
+      }
+      $wrap.innerHTML = html;
+      $wrap.querySelectorAll('.task-check').forEach(el => {
+        el.addEventListener('click', e => {
+          e.stopPropagation();
+          const id = el.closest('.task-row').dataset.id;
+          const t = coreTasks.list().find(x => x.id === id);
+          if (!t) return;
+          if (t.status === 'completed') return; // no toggle off in this UI
+          if (t.proofRequired && window.coreProof) {
+            coreProof.captureFor(t, (proof) => {
+              if (proof && proof.verdict === 'fail') {
+                alert('AI says proof doesn\'t match — try again.');
+                return;
+              }
+              coreTasks.complete(id, proof);
+              paint();
+            });
+          } else {
+            coreTasks.complete(id);
+            paint();
+          }
+        });
+      });
+      $wrap.querySelectorAll('.task-row').forEach(row => {
+        row.addEventListener('click', () => {
+          const id = row.dataset.id;
+          // Long-press menu candidate — for now tap = no-op on row, only check toggles
+          // Future: open task detail
+        });
+      });
+    }
+
+    function rowHTML(t) {
+      const cat = CATS[t.category] || CATS.mind;
+      return `<div class="task-row ${t.status === 'completed' ? 'done' : ''}" data-id="${t.id}">
+        <div class="task-icon" style="background:${cat.color}22;"><svg viewBox="0 0 24 24"><path d="${cat.icon}" stroke="${cat.color}"/></svg></div>
+        <div class="task-body">
+          <div class="task-title">${escape(t.title)}</div>
+          <div class="task-sub">
+            <span style="color:${cat.color};">${cat.label}</span>
+            <span class="task-xp">+${t.xp} XP</span>
+            ${t.proofRequired ? '<span class="task-diff">· photo</span>' : ''}
+            ${t.deadline ? '<span class="task-diff">· ' + new Date(t.deadline).toLocaleDateString() + '</span>' : ''}
+          </div>
+        </div>
+        <div class="task-check"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>
+      </div>`;
+    }
+    function escape(s){ return String(s||'').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+    // Initial seed if empty
+    if (!coreTasks.list().length) {
+      coreTasks.create({ title: 'Sign your daily contract', category: 'mind', xp: 5, source: 'seed' });
+      coreTasks.create({ title: '10 minutes of focused work', category: 'business', xp: 10, source: 'seed' });
+      coreTasks.create({ title: 'Drink 1L water before lunch', category: 'health', xp: 5, source: 'seed' });
+    }
+    paint();
+    // Re-paint when tasks change via other sources
+    window.addEventListener('coreTaskCreate', paint);
+    window.addEventListener('coreTaskComplete', paint);
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+  <meta charset="utf-8" />
+  <title>Core for Coaches — Session prep</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <style>
+    :root { --bg-base:#02020A; --text-primary:#F8FAFE; --text-muted:#9AA1B7; --text-dim:#4F5570; --accent:#4A8FFF; --success:#34D399; --danger:#F87171; --warning:#FBBF24; }
+    * { box-sizing: border-box; }
+    html, body { margin:0; padding:0; height:100%; }
+    body { min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text-primary); -webkit-font-smoothing:antialiased; padding:24px; overflow:hidden; }
+    .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+    .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:10; }
+    .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:10; }
+
+    .bg { position:absolute; inset:0; background: radial-gradient(60% 30% at 50% 18%, rgba(155,130,255,0.10) 0%, transparent 65%), linear-gradient(180deg, #0A0820 0%, var(--bg-base) 50%, #050510 100%); }
+    .grain { position:absolute; inset:0; opacity:0.04; mix-blend-mode:overlay; z-index:2; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.7 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); pointer-events:none; }
+
+    .topbar { position:absolute; top:60px; left:0; right:0; padding:0 20px; display:flex; align-items:center; justify-content:space-between; z-index:10; }
+    .back {
+      width: 38px !important; height: 38px !important;
+      min-width: 38px !important; min-height: 38px !important;
+      max-width: 38px !important; max-height: 38px !important;
+      aspect-ratio: 1 / 1;
+      flex: 0 0 38px;
+      align-self: center;
+      border-radius: 50% !important;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.10);
+      display: flex !important; align-items: center !important; justify-content: center !important;
+      cursor: pointer; padding: 0;
+      font-family: inherit;
+      box-sizing: border-box;
+      transition: background .15s, border-color .15s, transform .12s;
+    }
+    .back:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }
+    .back:active { transform: scale(0.94); }
+    .back svg { width:14px; height:14px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex-shrink: 0; }
+    .topbar-title { font-size:13px; font-weight:600; letter-spacing:0.06em; color: var(--text-muted); text-transform: uppercase; }
+    .actions { display:flex; gap:6px; }
+    .ico-btn { width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); backdrop-filter:blur(20px); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+    .ico-btn svg { width:14px; height:14px; stroke:var(--text-muted); fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+
+    .scroll { position:absolute; top:108px; left:0; right:0; bottom:0; padding:0 20px 28px; overflow-y:auto; z-index:5; }
+    .scroll::-webkit-scrollbar { display:none; }
+
+    /* Client card */
+    .client { display:flex; gap: 14px; padding: 16px 18px; border-radius:18px; background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); margin-bottom: 14px; align-items:center; }
+    .c-av { width:56px; height:56px; border-radius:50%; background:radial-gradient(circle at 35% 28%,#FFD3E4 0%,#FF6BAA 60%,#832D50 100%); position:relative; flex-shrink:0; }
+    .c-av::after { content:""; position:absolute; inset:0; border-radius:50%; background:linear-gradient(160deg, rgba(255,255,255,0.30) 0%, transparent 45%); }
+    .c-name { font-size:20px; font-weight:700; letter-spacing:-0.4px; }
+    .c-meta { font-size:11px; color:var(--text-muted); margin-top:3px; display:flex; align-items:center; gap:6px; }
+    .urgent-dot { width:7px; height:7px; border-radius:50%; background:var(--danger); box-shadow:0 0 6px var(--danger); flex-shrink:0; }
+
+    /* Session info */
+    .session-meta { display:grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+    .sm-cell { padding: 10px 12px; border-radius: 12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); }
+    .sm-l { font-size: 9px; letter-spacing: 0.18em; text-transform:uppercase; color: var(--text-muted); font-weight:500; }
+    .sm-v { font-size: 14px; font-weight:600; margin-top: 4px; letter-spacing:-0.1px; }
+
+    /* AI brief big card */
+    .brief { padding: 18px; border-radius:18px; background: linear-gradient(135deg, rgba(74,143,255,0.10) 0%, rgba(132,100,255,0.08) 100%); border:1px solid rgba(74,143,255,0.30); margin-bottom: 16px; }
+    .brief-h { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+    .brief-icon { width:28px; height:28px; border-radius:8px; background:var(--accent); box-shadow:0 0 12px var(--accent); display:flex; align-items:center; justify-content:center; position:relative; }
+    .brief-icon::after { content:""; position:absolute; inset:0; border-radius:8px; background:linear-gradient(160deg, rgba(255,255,255,0.30) 0%, transparent 45%); }
+    .brief-icon svg { width:14px; height:14px; stroke:white; fill:none; stroke-width:1.6; position:relative; z-index:2; }
+    .brief-title { font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:var(--accent); font-weight:600; }
+    .brief-time { margin-left:auto; font-size:10px; color:var(--text-muted); font-family:ui-monospace,"SF Mono",Menlo,monospace; }
+
+    .brief-headline { font-size: 16px; font-weight: 600; color: white; letter-spacing:-0.2px; line-height: 22px; margin-bottom: 14px; }
+    .brief-headline strong { color: var(--accent); font-weight: 700; }
+
+    /* Sectioned content */
+    .section-label { font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:var(--text-muted); font-weight:500; margin: 16px 4px 10px; }
+    .card { padding: 14px 16px; border-radius:14px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); margin-bottom: 8px; }
+    .talking-point { display:flex; gap:10px; padding:8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); align-items:flex-start; }
+    .talking-point:last-child { border-bottom:none; }
+    .tp-num { font-size:10px; font-weight:700; color:var(--accent); width:18px; flex-shrink:0; font-family:ui-monospace,"SF Mono",Menlo,monospace; margin-top:2px; }
+    .tp-text { flex:1; font-size:13px; line-height:18px; color:var(--text-primary); letter-spacing:-0.05px; }
+    .tp-text strong { color: var(--accent); font-weight:600; }
+
+    /* Stat snapshot */
+    .stat-snapshot { display:flex; gap:6px; margin-bottom: 12px; }
+    .ss { flex:1; padding: 10px 8px; border-radius:10px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); text-align:center; }
+    .ss-name { font-size:9px; letter-spacing:0.16em; text-transform:uppercase; color:var(--text-muted); }
+    .ss-v { font-size: 18px; font-weight: 700; margin-top:3px; line-height:1; }
+    .ss-d { font-size: 10px; margin-top:2px; font-weight:600; }
+    .ss-d.up { color: var(--success); }
+    .ss-d.down { color: var(--danger); }
+    .ss-d.flat { color: var(--text-dim); }
+
+    /* Triggers */
+    .trig { display:inline-block; padding: 4px 10px; border-radius:999px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); font-size:11px; color:var(--text-muted); margin: 2px 4px 2px 0; letter-spacing:-0.05px; }
+    .trig.hot { background: rgba(248,113,113,0.10); border-color: rgba(248,113,113,0.30); color: var(--danger); }
+
+    /* Slip log */
+    .slip-row { display:flex; align-items:center; gap:10px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 12px; }
+    .slip-row:last-child { border-bottom:none; }
+    .slip-time { color: var(--text-dim); width: 60px; font-family: ui-monospace,"SF Mono",Menlo,monospace; letter-spacing:0.04em; }
+    .slip-desc { flex: 1; color: var(--text-primary); letter-spacing:-0.05px; }
+    .slip-xp { color: var(--danger); font-weight: 600; font-family: ui-monospace,"SF Mono",Menlo,monospace; }
+    .slip-rec { color: var(--success); }
+
+    /* Coach notes input */
+    .notes-card { padding: 14px; border-radius: 14px; background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 16px; }
+    .notes-l { font-size: 10px; color: var(--text-muted); letter-spacing: 0.16em; text-transform: uppercase; font-weight: 500; margin-bottom: 8px; display:flex; align-items:center; justify-content:space-between; }
+    .notes-l-meta { color: var(--text-dim); font-family: ui-monospace,"SF Mono",Menlo,monospace; letter-spacing: 0.06em; }
+    .notes-text { width:100%; background:transparent; border:none; outline:none; color:var(--text-primary); font-family:inherit; font-size: 13px; line-height: 19px; resize:none; min-height: 50px; letter-spacing:-0.05px; }
+    .notes-text::placeholder { color: var(--text-dim); }
+
+    /* Footer */
+    .footer { position:absolute; bottom:0; left:0; right:0; padding: 14px 20px 30px; z-index: 10; background: linear-gradient(180deg, transparent 0%, rgba(2,2,10,0.92) 35%, rgba(2,2,10,0.98) 100%); display:flex; gap:8px; }
+    .cta-secondary, .cta-primary { flex:1; padding:14px; border-radius:999px; font-family:inherit; font-size:13px; font-weight:600; cursor:pointer; letter-spacing:-0.1px; }
+    .cta-secondary { background:rgba(255,255,255,0.04); color:var(--text-primary); border:1px solid rgba(255,255,255,0.08); }
+    .cta-primary { background: rgba(255,255,255,0.96); color:#050510; border:1px solid rgba(255,255,255,0.6); box-shadow: 0 10px 30px rgba(74,143,255,0.22), inset 0 1px 0 rgba(255,255,255,0.85); }
+
+    .preview-label { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); color:#4A5060; font-size:11px; letter-spacing:0.16em; text-transform:uppercase; font-family:ui-monospace,"SF Mono",Menlo,monospace; }
+    @media (max-width:460px){ body{padding:0;} .phone{width:100vw; height:100vh; border-radius:0; box-shadow:none;} .notch,.home-indicator{display:none;} .preview-label{display:none;} }
+  </style>
+  <link rel="stylesheet" href="_lib/core-responsive.css">
+  <script src="_lib/core-back.js"></script>
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div>
+    <div class="grain"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="topbar">
+      <button class="back" type="button" onclick="window.location.href='86-coach-dashboard.html'" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18L9 12l6-6"/></svg></button>
+      <div class="topbar-title">Session prep</div>
+      <div class="actions">
+        <div class="ico-btn"><svg viewBox="0 0 24 24"><path d="M4 12v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8M16 6l-4-4-4 4M12 2v14"/></svg></div>
+        <div class="ico-btn"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></div>
+      </div>
+    </div>
+
+    <div class="scroll">
+      <div class="client">
+        <div class="c-av"></div>
+        <div>
+          <div class="c-name">Tom Reilly</div>
+          <div class="c-meta">
+            <span class="urgent-dot"></span>
+            <span>Vape · Day 12 clean · @tomr</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="session-meta">
+        <div class="sm-cell"><div class="sm-l">Session</div><div class="sm-v">2:00 PM today</div></div>
+        <div class="sm-cell"><div class="sm-l">Duration</div><div class="sm-v">50 min</div></div>
+        <div class="sm-cell"><div class="sm-l">Format</div><div class="sm-v">Zoom · #4 this month</div></div>
+        <div class="sm-cell"><div class="sm-l">Last session</div><div class="sm-v">May 19 · 1 wk ago</div></div>
+      </div>
+
+      <!-- AI brief -->
+      <div class="brief">
+        <div class="brief-h">
+          <div class="brief-icon"><svg viewBox="0 0 24 24"><path d="M21 12c0 5-4.5 8-9 8a9 9 0 0 1-3.5-.7L3 21l1.7-5.5A9 9 0 0 1 3 12c0-5 4.5-8 9-8s9 3 9 8z"/></svg></div>
+          <div class="brief-title">AI session brief</div>
+          <span class="brief-time">Refreshed 6:00 AM</span>
+        </div>
+        <div class="brief-headline">Tom is on <strong>day 12 clean</strong>, but slipped twice this week — both at <strong>3pm after work calls</strong>. The pattern is now confirmed. Make this session about <strong>building the 3pm replacement ritual</strong>.</div>
+      </div>
+
+      <div class="section-label">Talking points · in priority</div>
+      <div class="card">
+        <div class="talking-point">
+          <div class="tp-num">01</div>
+          <div class="tp-text"><strong>Validate the 3pm trigger.</strong> Show him the pattern (3 weeks of data confirms 3pm slip window). He's probably blaming himself; the data lets him externalize it.</div>
+        </div>
+        <div class="talking-point">
+          <div class="tp-num">02</div>
+          <div class="tp-text"><strong>Brainstorm a replacement ritual.</strong> Last Tuesday a walk around the block worked. Why didn't he do it on Wednesday or Friday? Was it a different work call, different stressor, or just no muscle memory?</div>
+        </div>
+        <div class="talking-point">
+          <div class="tp-num">03</div>
+          <div class="tp-text"><strong>Reinforce his honesty.</strong> He logged both slips, completed one recovery quest. That's <strong>honesty streak +7</strong>. Make sure he sees that as progress, not failure.</div>
+        </div>
+        <div class="talking-point">
+          <div class="tp-num">04</div>
+          <div class="tp-text"><strong>Avoid this topic.</strong> Don't ask about the dating life update from last session — he flagged it as "not session material" in his post-session feedback.</div>
+        </div>
+        <div class="talking-point">
+          <div class="tp-num">05</div>
+          <div class="tp-text"><strong>End with a commit.</strong> Get him to verbalize the exact 2:45pm action for Mon/Tue/Wed. Specificity = follow-through.</div>
+        </div>
+      </div>
+
+      <div class="section-label">Stat snapshot · this week</div>
+      <div class="stat-snapshot">
+        <div class="ss"><div class="ss-name">Lungs</div><div class="ss-v" style="color:#FF6BAA;">42</div><div class="ss-d down">▼ 12</div></div>
+        <div class="ss"><div class="ss-name">Brain</div><div class="ss-v">68</div><div class="ss-d up">▲ 4</div></div>
+        <div class="ss"><div class="ss-name">Will</div><div class="ss-v">65</div><div class="ss-d down">▼ 8</div></div>
+        <div class="ss"><div class="ss-name">Body</div><div class="ss-v">71</div><div class="ss-d up">▲ 2</div></div>
+      </div>
+
+      <div class="section-label">Triggers detected</div>
+      <div class="card">
+        <span class="trig hot">3pm work calls</span>
+        <span class="trig hot">Wednesday afternoons</span>
+        <span class="trig">After lunch</span>
+        <span class="trig">Stress at deadlines</span>
+        <span class="trig">When alone in apartment</span>
+      </div>
+
+      <div class="section-label">Recent slips · 7 days</div>
+      <div class="card">
+        <div class="slip-row">
+          <span class="slip-time">Fri 3:14p</span>
+          <span class="slip-desc">"stressed about deadline"</span>
+          <span class="slip-xp">−25</span>
+        </div>
+        <div class="slip-row">
+          <span class="slip-time">Fri 3:42p</span>
+          <span class="slip-desc">Recovery quest · 60s breath</span>
+          <span class="slip-rec">+12</span>
+        </div>
+        <div class="slip-row">
+          <span class="slip-time">Wed 4:08p</span>
+          <span class="slip-desc">"after long call · no note"</span>
+          <span class="slip-xp">−25</span>
+        </div>
+        <div class="slip-row">
+          <span class="slip-time">Wed 4:09p</span>
+          <span class="slip-desc">Recovery skipped</span>
+          <span class="slip-rec" style="color:var(--text-dim);">—</span>
+        </div>
+      </div>
+
+      <div class="section-label">Your private notes · only you see this</div>
+      <div class="notes-card">
+        <div class="notes-l">
+          <span>Pre-session</span>
+          <span class="notes-l-meta">Auto-saves</span>
+        </div>
+        <textarea class="notes-text" placeholder="Anything to remember before the call…">Last session he mentioned mum's birthday is this Saturday — check in. Don't bring up the dating thing.
+
+He responds well to direct accountability. Pressure works on him.</textarea>
+      </div>
+
+      <div style="text-align:center; font-size:11px; color: var(--text-dim); letter-spacing: 0.06em; padding-bottom: 16px;">
+        AI brief is suggestion, not script. You know Tom better than the data does.
+      </div>
+    </div>
+
+    <div class="footer">
+      <button class="cta-secondary" onclick="window.location.href='20-dashboard.html?as=tom'">Open client view</button>
+      <button class="cta-primary" onclick="window.location.href='39-coach.html?session=tom'">Start session →</button>
+    </div>
+  </div>
+  <div class="preview-label">core · session prep · Tom Reilly</div>
+</body>
+</html>

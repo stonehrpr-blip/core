@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8" />
+<title>CORE — state debug (dev only)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<script>
+  // Hard-block on non-local hosts. This page is dev-only.
+  (function() {
+    var local = location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    if (!local) {
+      document.documentElement.innerHTML = '<body style="margin:0;background:#02020A;color:#9AA1B7;font-family:-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;text-align:center;">This is a dev-only screen. <a href="01-index.html" style="color:#5BB1FF;margin-left:6px;">Go home →</a></body>';
+      throw 'core_state_debug_blocked';
+    }
+  })();
+</script>
+<script src="_lib/core-state.js"></script>
+<style>
+  body { margin:0; background:#02020A; color:#F8FAFE; font-family: ui-monospace, "SF Mono", Menlo, monospace; padding: 20px 24px; min-height:100vh; }
+  h1 { font-family: -apple-system, sans-serif; font-size: 20px; font-weight: 700; letter-spacing: -0.5px; margin: 0 0 4px; display:flex; align-items:center; gap:10px; }
+  h1::before { content:""; width:10px; height:10px; border-radius:50%; background:#FFD05C; box-shadow:0 0 10px #FFD05C; }
+  .sub { font-family: -apple-system, sans-serif; font-size: 12px; color: #9AA1B7; margin-bottom: 18px; letter-spacing:-0.05px; }
+  .bar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom: 16px; }
+  button { font-family: inherit; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); color: #fff; padding: 8px 14px; border-radius: 8px; font-size: 12px; cursor: pointer; }
+  button:hover { background: rgba(255,255,255,0.10); }
+  button.danger { background: rgba(255,79,107,0.10); border-color: rgba(255,79,107,0.40); color: #FF4F6B; }
+  button.primary { background: linear-gradient(135deg,#4A8FFF,#5B6AE6); border-color: transparent; color:#fff; box-shadow: 0 6px 18px rgba(74,143,255,0.30); }
+  table { width:100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  th { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #9AA1B7; font-weight: 600; }
+  td.key { color: #5BB1FF; word-break: break-all; max-width: 240px; }
+  td.val { color: #F8FAFE; word-break: break-all; }
+  input.edit { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.10); color: #fff; padding: 6px 8px; border-radius: 6px; font-family: inherit; font-size: 12px; width: 100%; }
+  input.edit:focus { outline: none; border-color: #5BB1FF; background: rgba(74,143,255,0.06); }
+  .actions { display:flex; gap:4px; }
+  .small { font-size: 11px; padding: 4px 8px; }
+  pre { background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding: 14px; border-radius: 10px; font-size: 11px; color: #C8CDDE; white-space: pre-wrap; word-break: break-all; max-height: 240px; overflow-y: auto; }
+  .section-h { font-family: -apple-system, sans-serif; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #9AA1B7; font-weight: 600; margin: 24px 0 8px; }
+  .note { font-family: -apple-system, sans-serif; color: #4F5570; font-size:11px; margin-top: 8px; }
+</style>
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <h1>CORE state debug</h1>
+  <div class="sub">Edit any <code>core*</code> localStorage key directly. Changes broadcast to every open tab via the storage event.</div>
+
+  <div class="bar">
+    <button class="primary" onclick="addKey()">+ Add key</button>
+    <button onclick="refresh()">↻ Refresh</button>
+    <button onclick="resetCoreState()">Reset coreState.v1 to defaults</button>
+    <button class="danger" onclick="wipeAll()">⚠ Wipe ALL core* keys</button>
+    <button onclick="window.location.href='97-gallery.html'">← Gallery</button>
+  </div>
+
+  <table id="kvTable">
+    <thead><tr><th style="width:38%;">key</th><th>value</th><th style="width:120px;">actions</th></tr></thead>
+    <tbody></tbody>
+  </table>
+
+  <div class="section-h">coreState.v1 (parsed)</div>
+  <pre id="stateDump">{}</pre>
+
+  <div class="note">file:// only · this screen is blocked on any deployed origin.</div>
+
+<script>
+  function listKeys() {
+    const out = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (!k) continue;
+      if (k.toLowerCase().startsWith('core')) out.push(k);
+    }
+    out.sort();
+    return out;
+  }
+  function refresh() {
+    const tbody = document.querySelector('#kvTable tbody');
+    tbody.innerHTML = '';
+    listKeys().forEach((k) => {
+      const tr = document.createElement('tr');
+      const v = localStorage.getItem(k) || '';
+      tr.innerHTML = '<td class="key">' + k + '</td>' +
+        '<td class="val"><input class="edit" data-key="' + k + '" value="' + escapeAttr(v) + '"/></td>' +
+        '<td class="actions">' +
+          '<button class="small" data-save="' + k + '">save</button>' +
+          '<button class="small danger" data-del="' + k + '">delete</button>' +
+        '</td>';
+      tbody.appendChild(tr);
+    });
+    // wire buttons
+    tbody.querySelectorAll('button[data-save]').forEach(b => {
+      b.onclick = () => {
+        const k = b.dataset.save;
+        const v = tbody.querySelector('input[data-key="' + k + '"]').value;
+        localStorage.setItem(k, v);
+        refresh();
+      };
+    });
+    tbody.querySelectorAll('button[data-del]').forEach(b => {
+      b.onclick = () => {
+        if (!confirm('Delete ' + b.dataset.del + '?')) return;
+        localStorage.removeItem(b.dataset.del);
+        refresh();
+      };
+    });
+    // state dump
+    let dump;
+    try { dump = JSON.stringify(JSON.parse(localStorage.getItem('coreState.v1') || '{}'), null, 2); }
+    catch(e) { dump = '(invalid JSON in coreState.v1)'; }
+    document.getElementById('stateDump').textContent = dump;
+  }
+  function escapeAttr(v) { return String(v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function addKey() {
+    const k = prompt('Key name (must start with "core"):');
+    if (!k) return;
+    if (!k.toLowerCase().startsWith('core')) { alert('Key must start with "core"'); return; }
+    localStorage.setItem(k, '');
+    refresh();
+  }
+  function resetCoreState() {
+    if (!confirm('Reset coreState.v1 to defaults? (other core* keys preserved)')) return;
+    if (window.coreState) coreState.resetAll();
+    refresh();
+  }
+  function wipeAll() {
+    if (!confirm('Wipe every core* key from localStorage? This cannot be undone.')) return;
+    listKeys().forEach(k => localStorage.removeItem(k));
+    refresh();
+  }
+  window.addEventListener('storage', refresh);
+  refresh();
+</script>
+</body>
+</html>

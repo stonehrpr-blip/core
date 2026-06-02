@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+  <meta charset="utf-8" />
+  <title>Core — Coach (preview v1)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <style>
+    :root {
+      /* canonical tokens come from core-theme.css */
+    }
+    * { box-sizing: border-box; }
+    html, body { margin:0; padding:0; height:100%; }
+    body {
+      min-height:100vh; background:#0A0A14;
+      display:flex; align-items:center; justify-content:center;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display","SF Pro Text","Inter", sans-serif;
+      color: var(--text-primary); -webkit-font-smoothing: antialiased;
+      padding: 24px; overflow: hidden;
+    }
+    .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden; box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+    .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:20; }
+    .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:20; }
+
+    .bg {
+      position:absolute; inset:0; z-index:0;
+      background:
+        radial-gradient(50% 30% at 50% 8%, rgba(74, 143, 255, 0.18) 0%, transparent 65%),
+        radial-gradient(70% 40% at 50% 100%, rgba(155, 130, 255, 0.10) 0%, transparent 60%),
+        linear-gradient(180deg, #051026 0%, var(--bg-base) 60%, #050510 100%);
+    }
+    .grain { position:absolute; inset:0; pointer-events:none; z-index:1; opacity:0.04; mix-blend-mode:overlay; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.7 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+
+    /* Header --------------------------------------------------------- */
+    .header {
+      position: absolute; top: 56px; left: 0; right: 0;
+      padding: 0 24px; display: flex; align-items: center; gap: 12px;
+      z-index: 10;
+    }
+    .back {
+      width: 38px !important; height: 38px !important;
+      min-width: 38px !important; min-height: 38px !important;
+      max-width: 38px !important; max-height: 38px !important;
+      aspect-ratio: 1 / 1;
+      flex: 0 0 38px;
+      align-self: center;
+      border-radius: 50% !important;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.10);
+      display: flex !important; align-items: center !important; justify-content: center !important;
+      cursor: pointer; padding: 0;
+      font-family: inherit;
+      box-sizing: border-box;
+      transition: background .15s, border-color .15s, transform .12s;
+    }
+    .back:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }
+    .back:active { transform: scale(0.94); }
+    .back svg { width:14px; height:14px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex-shrink: 0; }
+    .coach-info { flex: 1; display: flex; align-items: center; gap: 10px; }
+    .coach-orb {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: radial-gradient(circle at 35% 28%, #DCEBFF 0%, #4A8FFF 55%, #1856B8 100%);
+      box-shadow: 0 0 24px var(--accent), inset 0 2px 5px rgba(255,255,255,0.4);
+      animation: orbPulse 3.5s ease-in-out infinite;
+      position: relative;
+    }
+    .coach-orb::after { content:""; position:absolute; inset:0; border-radius:50%; background:linear-gradient(160deg, rgba(255,255,255,0.32) 0%, transparent 40%); }
+    @keyframes orbPulse { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.15); } }
+    .coach-meta { display: flex; flex-direction: column; gap: 1px; }
+    .coach-name { font-size: 15px; font-weight: 600; letter-spacing: -0.2px; color: var(--text-primary); }
+    .coach-status { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
+    .coach-status::before { content:""; width:6px; height:6px; border-radius:50%; background:#34D399; box-shadow: 0 0 6px #34D399; }
+
+    /* Chat ---------------------------------------------------------- */
+    .chat {
+      position: absolute; top: 124px; left: 0; right: 0; bottom: 168px;
+      padding: 8px 18px 16px;
+      overflow-y: auto; z-index: 5;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .chat::-webkit-scrollbar { display: none; }
+
+    .day-divider {
+      text-align: center; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--text-dim); margin: 8px 0; font-weight: 500; font-family: ui-monospace,"SF Mono",Menlo,monospace;
+    }
+
+    .bubble {
+      padding: 12px 14px; border-radius: 18px;
+      max-width: 78%; font-size: 14px; line-height: 20px;
+      letter-spacing: -0.1px;
+      word-wrap: break-word;
+    }
+    .bubble.coach {
+      align-self: flex-start;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.06);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      color: var(--text-primary);
+      border-bottom-left-radius: 6px;
+    }
+    .bubble.user {
+      align-self: flex-end;
+      background: linear-gradient(180deg, #4A8FFF 0%, #1c70d6 100%);
+      color: white;
+      border-bottom-right-radius: 6px;
+      box-shadow: 0 4px 18px rgba(74,143,255,0.35), inset 0 1px 0 rgba(255,255,255,0.2);
+    }
+    .bubble-time {
+      font-size: 10px; color: var(--text-dim); margin-top: 4px;
+      letter-spacing: 0.06em; font-family: ui-monospace,"SF Mono",Menlo,monospace;
+    }
+    .bubble.coach + .bubble-time { align-self: flex-start; margin-left: 14px; }
+    .bubble.user + .bubble-time { align-self: flex-end; margin-right: 14px; }
+
+    /* Action card (coach can run tasks) */
+    .action-card {
+      align-self: flex-start; max-width: 86%;
+      padding: 14px; border-radius: 18px; border-bottom-left-radius: 6px;
+      background: linear-gradient(135deg, rgba(74,143,255,0.10) 0%, rgba(132,100,255,0.10) 100%);
+      border: 1px solid rgba(74,143,255,0.30);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    }
+    .ac-row { display:flex; gap: 10px; align-items: flex-start; }
+    .ac-icon {
+      width:32px; height:32px; border-radius:9px; flex-shrink:0;
+      background: linear-gradient(135deg, var(--accent), #B388FF);
+      box-shadow: 0 0 12px rgba(74,143,255,0.4);
+      display:flex; align-items:center; justify-content:center; position:relative;
+    }
+    .ac-icon::after { content:""; position:absolute; inset:0; border-radius:9px; background:linear-gradient(160deg, rgba(255,255,255,0.30) 0%, transparent 45%); }
+    .ac-icon svg { width:16px; height:16px; position:relative; z-index:2; }
+    .ac-text { flex:1; }
+    .ac-title { font-size: 13px; color: var(--text-primary); font-weight: 600; letter-spacing: -0.1px; }
+    .ac-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .ac-actions { display:flex; gap: 8px; margin-top: 12px; }
+    .ac-btn { flex:1; padding: 8px 12px; border-radius: 10px; font-size: 13px; font-weight: 600; letter-spacing: -0.1px; cursor: pointer; font-family: inherit; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); color: var(--text-muted); transition: all 0.15s; }
+    .ac-btn:active { transform: scale(0.98); }
+    .ac-btn.primary { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 0 12px rgba(74,143,255,0.35); }
+    .ac-btn.confirmed { background: rgba(52,211,153,0.15); color: #34D399; border-color: rgba(52,211,153,0.40); box-shadow: none; cursor: default; }
+
+    /* Typing indicator */
+    .typing {
+      align-self: flex-start;
+      padding: 14px 16px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.06);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border-radius: 18px; border-bottom-left-radius: 6px;
+      display: flex; gap: 4px;
+    }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted); animation: dotBounce 1.4s ease-in-out infinite; }
+    .dot:nth-child(2) { animation-delay: 0.18s; }
+    .dot:nth-child(3) { animation-delay: 0.36s; }
+    @keyframes dotBounce { 0%, 60%, 100% { transform: translateY(0); opacity: 0.5; } 30% { transform: translateY(-4px); opacity: 1; } }
+
+    /* Input bar ------------------------------------------------------ */
+    .composer {
+      position: absolute; bottom: 70px; left: 0; right: 0;
+      padding: 10px 16px 8px;
+      z-index: 10;
+      background: linear-gradient(180deg, transparent 0%, rgba(2,2,10,0.85) 30%, rgba(2,2,10,0.98) 100%);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    }
+    .chat { bottom: 168px !important; }
+    .tabbar { position:absolute; bottom:0; left:0; right:0; padding:8px 24px 28px; display:flex; justify-content:space-between; align-items:center; z-index:8; background:rgba(2,2,10,0.98); backdrop-filter:blur(20px); }
+    .tab { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; padding:6px 4px; border-radius:10px; background:transparent; border:none; font-family:inherit; }
+    .tab svg { width:22px; height:22px; stroke: var(--text-dim); fill:none; stroke-width:1.6; }
+    .tab span { font-size:10px; color: var(--text-dim); letter-spacing:0.04em; font-weight:500; }
+    .tab.active svg { stroke: var(--accent); filter: drop-shadow(0 0 6px var(--accent)); }
+    .tab.active span { color: var(--accent); }
+    .suggested-row {
+      display: flex; gap: 6px; overflow-x: auto; padding: 4px 0 10px; margin: 0 -4px 6px;
+      scrollbar-width: none;
+    }
+    .suggested-row::-webkit-scrollbar { display: none; }
+    .sugg-chip {
+      flex-shrink: 0; padding: 8px 14px; border-radius: 999px;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
+      backdrop-filter: blur(12px);
+      font-size: 12px; color: var(--text-muted);
+      font-family: inherit; font-weight: 500;
+      cursor: pointer; transition: all 0.15s;
+      letter-spacing: -0.1px;
+      white-space: nowrap;
+    }
+    .sugg-chip:hover { background: rgba(255,255,255,0.06); color: var(--text-primary); }
+    .sugg-chip:active { transform: scale(0.96); }
+    .input-row {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px;
+      padding: 6px 6px 6px 16px;
+      transition: border-color 0.2s;
+    }
+    .input-row:focus-within { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(74,143,255,0.15); }
+    .input-row input {
+      flex: 1; background: transparent; border: none; outline: none;
+      color: var(--text-primary); font-size: 15px; font-family: inherit; letter-spacing: -0.1px;
+      padding: 8px 0;
+    }
+    .input-row input::placeholder { color: var(--text-dim); }
+    .send-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--accent); border: none;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; flex-shrink: 0;
+      box-shadow: 0 0 14px rgba(74,143,255,0.5), inset 0 1px 0 rgba(255,255,255,0.2);
+      transition: transform 0.15s;
+    }
+    .send-btn:active { transform: scale(0.92); }
+    .send-btn:disabled { background: rgba(255,255,255,0.08); box-shadow: none; cursor: not-allowed; }
+    .send-btn svg { width: 16px; height: 16px; stroke: white; }
+    .voice-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; flex-shrink: 0;
+    }
+    .voice-btn svg { width: 16px; height: 16px; stroke: var(--text-muted); }
+
+    .preview-label { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); color:#4A5060; font-size:11px; letter-spacing:0.16em; text-transform:uppercase; font-family:ui-monospace,"SF Mono",Menlo,monospace; }
+    @media (max-width: 460px) {
+      body { padding: 0; } .phone { width: 100vw; height: 100vh; border-radius: 0; box-shadow: none; }
+      .notch, .home-indicator { display: none; } .preview-label { display: none; }
+    }
+  </style>
+  <script>
+    (function() {
+      try {
+        var local = location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+        var p = new URLSearchParams(location.search);
+        if (local && p.get("preview") === "1") { localStorage.setItem("coreDevBypass","1"); window.__coreDemoMode = true; return; }
+        if (local && localStorage.getItem("coreDevBypass") === "1") { window.__coreDemoMode = true; return; }
+        try{(function(){var h=location.hostname;window.__corePreview=window.__corePreview||(location.protocol==='file:'||h==='localhost'||h==='127.0.0.1'||/[?&]preview=1/.test(location.search));})();}catch(e){}if(!window.__corePreview){if (localStorage.getItem("coreOnboardComplete") !== "1") { location.replace("01-index.html"); }}
+      } catch(e){}
+    })();
+  </script>
+  <script src="_lib/core-state.js"></script>
+  <script src="_lib/restore-banner.js"></script>
+  <script src="_lib/analytics.js"></script>
+  <script src="_lib/core-back.js"></script>
+  <link rel="stylesheet" href="_lib/core-responsive.css">
+  <link rel="stylesheet" href="_lib/core-theme.css">
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="_lib/core-background.css">
+  <script src="_lib/core-background.js"></script>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div>
+    <div class="grain"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="header">
+      <button class="back" type="button" onclick="window.location.href='20-dashboard.html'" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18L9 12l6-6"/></svg>
+      </button>
+      <div class="coach-info">
+        <div class="coach-orb"></div>
+        <div class="coach-meta">
+          <div class="coach-name">Coach</div>
+          <div class="coach-status">Online · knows your history</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat" id="chat">
+      <div id="coreRestoreBanner" style="display:none; padding: 0 18px 4px;"></div>
+      <div id="coachInsights" style="display:flex; flex-direction:column; gap:8px; padding: 0 4px 6px;"></div>
+      <div class="day-divider" id="chatDivider">Today</div>
+
+      <div class="bubble coach" id="coachOpener">Welcome back. What's on your mind?</div>
+      <div class="bubble-time" id="openerTime">just now</div>
+
+      <div class="typing" style="display:none;"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    </div>
+
+    <div class="composer">
+      <div class="suggested-row" id="suggestedRow">
+        <button class="sugg-chip" onclick="useSuggestion(this)">How am I doing this week?</button>
+        <button class="sugg-chip" onclick="useSuggestion(this)">I'm about to slip</button>
+        <button class="sugg-chip" onclick="useSuggestion(this)">Why is my Brain stat dropping?</button>
+        <button class="sugg-chip" onclick="useSuggestion(this)">Set a 10pm nudge</button>
+        <button class="sugg-chip" onclick="useSuggestion(this)">Help me reframe a craving</button>
+      </div>
+      <div class="input-row">
+        <input id="msg" placeholder="Tell Coach something..." oninput="checkInput()" />
+        <button class="voice-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>
+        </button>
+        <button class="send-btn" id="send" disabled onclick="send()">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l14-7-5 14-2-6-7-1z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+    <div class="tabbar">
+      <button class="tab" onclick="window.location.href='20-dashboard.html'">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+        <span>Home</span>
+      </button>
+      <button class="tab" onclick="window.location.href='59-feed.html'">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+        <span>Feed</span>
+      </button>
+      <button class="tab active">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12c0 5-4.5 8-9 8a9 9 0 0 1-3.5-.7L3 21l1.7-5.5A9 9 0 0 1 3 12c0-5 4.5-8 9-8s9 3 9 8z"/></svg>
+        <span>Coach</span>
+      </button>
+      <button class="tab" onclick="window.location.href='66-leaderboard.html'">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21v-7M6 14l-3 7M6 14l3 7M12 21V9M12 9l-3 12M12 9l3 12M18 21V3M18 3l-3 18M18 3l3 18"/></svg>
+        <span>Ranks</span>
+      </button>
+      <button class="tab" onclick="window.location.href='62-profile.html'">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg>
+        <span>You</span>
+      </button>
+    </div>
+  </div>
+  <div class="preview-label">core · coach · v2</div>
+
+  <script>
+    // Coach chat idle-reset — fresh conversation if the user has been away.
+    // 4 hours is "took a break and came back". Tunable via coreCoachIdleHours localStorage.
+    (function() {
+      try {
+        const IDLE_MS = (parseInt(localStorage.getItem('coreCoachIdleHours') || '4', 10) || 4) * 3600000;
+        const lastActive = parseInt(localStorage.getItem('coreCoachLastActive') || '0', 10);
+        const didReset = lastActive && (Date.now() - lastActive) > IDLE_MS;
+        if (didReset) {
+          const chat = document.getElementById('chat');
+          if (chat) {
+            chat.querySelectorAll('.bubble, .bubble-time, .day-divider, .quick-actions').forEach(el => el.remove());
+            const now = new Date();
+            // Personalized divider — uses the user's name from onboarding
+            let name = '';
+            try { const t = JSON.parse(localStorage.getItem('coreOnboardTrial') || '{}'); if (t.name) name = ', ' + t.name; } catch(e){}
+            const div = document.createElement('div');
+            div.className = 'day-divider';
+            div.textContent = 'Welcome back' + name + ' · new session';
+            chat.appendChild(div);
+            const opener = document.createElement('div');
+            opener.className = 'bubble coach';
+            opener.id = 'coachOpener';
+            opener.textContent = 'Fresh start. What\'s on your mind?';
+            chat.appendChild(opener);
+            const ot = document.createElement('div');
+            ot.className = 'bubble-time';
+            ot.textContent = 'just now';
+            chat.appendChild(ot);
+            localStorage.removeItem('coreCoachTranscript');
+          }
+        }
+        localStorage.setItem('coreCoachLastActive', String(Date.now()));
+      } catch(e){}
+    })();
+
+    // Always set the divider + opener time to "now" on each load
+    (function() {
+      try {
+        const now = new Date();
+        const divEl = document.getElementById('chatDivider');
+        if (divEl) divEl.textContent = 'Today · ' + now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        const ot = document.getElementById('openerTime');
+        if (ot) ot.textContent = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      } catch(e){}
+    })();
+    const msg = document.getElementById('msg');
+    const sendBtn = document.getElementById('send');
+    function checkInput() { sendBtn.disabled = !msg.value.trim(); }
+    msg.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
+    function bumpActivity() {
+      try { localStorage.setItem('coreCoachLastActive', String(Date.now())); } catch(e){}
+    }
+    function useSuggestion(btn) {
+      msg.value = btn.textContent;
+      checkInput();
+      msg.focus();
+    }
+    function confirmAction(btn, msg) {
+      btn.classList.add('confirmed');
+      btn.textContent = '✓ ' + msg;
+      btn.disabled = true;
+      // hide cancel
+      const cancel = btn.nextElementSibling;
+      if (cancel) cancel.style.display = 'none';
+    }
+    // ── Conversation history persisted to localStorage ────────────────
+    const HISTORY_KEY = 'coreCoachHistory.v1';
+    function readHistory() {
+      try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch(e){ return []; }
+    }
+    function writeHistory(h) {
+      try { localStorage.setItem(HISTORY_KEY, JSON.stringify(h.slice(-30))); } catch(e){}
+    }
+
+    async function send() {
+      const text = msg.value.trim(); if (!text) return;
+      const chat = document.getElementById('chat');
+      const typing = chat.querySelector('.typing');
+      // user bubble
+      const u = document.createElement('div'); u.className = 'bubble user'; u.textContent = text;
+      const ut = document.createElement('div'); ut.className = 'bubble-time'; ut.textContent = new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+      chat.insertBefore(u, typing); chat.insertBefore(ut, typing);
+      msg.value = ''; checkInput();
+      typing.style.display = 'flex';
+      chat.scrollTop = chat.scrollHeight;
+      bumpActivity();
+
+      // Persist user message
+      const hist = readHistory();
+      hist.push({ role: 'user', content: text, ts: Date.now() });
+      writeHistory(hist);
+
+      // Call coreAI with recent history
+      if (window.coreAI) {
+        try { coreAI.logActivity('coach_msg_sent', { textPreview: text.slice(0, 120) }); } catch(e){}
+        const r = await coreAI.chat(
+          readHistory().slice(-12).map(m => ({ role: m.role, content: m.content })),
+          { temperature: 0.7, maxTokens: 400 }
+        );
+        typing.style.display = 'none';
+        const reply = (r.text || '').trim() || "I'm here. Tell me more.";
+        const c  = document.createElement('div'); c.className = 'bubble coach'; c.textContent = reply;
+        const ct = document.createElement('div'); ct.className = 'bubble-time'; ct.textContent = new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+        chat.insertBefore(c, typing); chat.insertBefore(ct, typing);
+        chat.scrollTop = chat.scrollHeight;
+        // Persist assistant reply
+        const h2 = readHistory();
+        h2.push({ role: 'assistant', content: reply, ts: Date.now() });
+        writeHistory(h2);
+      } else {
+        // Library not loaded — best-effort fallback
+        setTimeout(() => {
+          typing.style.display = 'none';
+          const c = document.createElement('div'); c.className = 'bubble coach';
+          c.textContent = "I hear you. One step you could take in the next 10 minutes?";
+          const ct = document.createElement('div'); ct.className = 'bubble-time'; ct.textContent = new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+          chat.insertBefore(c, typing); chat.insertBefore(ct, typing);
+        }, 800);
+      }
+    }
+    document.getElementById('chat').scrollTop = 9999;
+
+    // Personalize opener based on coach tone + name from 07-trial.html
+    try {
+      const t = JSON.parse(localStorage.getItem('coreOnboardTrial') || '{}');
+      const op = document.getElementById('coachOpener');
+      const name = (t.name || '').trim();
+      const greet = name ? ', ' + name : '';
+      const part = (function(){ const h = new Date().getHours(); return h<12?'Morning':(h<18?'Afternoon':'Evening'); })();
+      const lines = {
+        gentle:   part + greet + ". I'm glad you're here. No pressure today — what's on your mind?",
+        balanced: part + greet + ". Your Life Score ticked up 4 this week — Brain and Willpower carried it. Sleep dropped Tue/Wed; want to talk about it?",
+        direct:   part + greet + ". Sleep tanked Tue/Wed. Brain held. Wednesday cost you twice. What happened?",
+        drill:    "Phone down" + greet + ". Two bad sleep nights. One was reading — fine. One was doom-scroll — not fine. Own it. What's the play tonight?"
+      };
+      if (op && t.tone && lines[t.tone]) {
+        op.textContent = lines[t.tone];
+      }
+      const cs = document.querySelector('.coach-status');
+      if (cs && t.tone) cs.textContent = 'Online · ' + t.tone + ' mode';
+
+      // Streak-broken takeover — overrides the opener if user just slipped (recoverable)
+      if (window.coreState && coreState.isStreakRecoverable()) {
+        const s = coreState.read();
+        const prev = s.streak.previousDays || 0;
+        const tone = t.tone || 'balanced';
+        // Same first line for every tone — no lecture
+        const line1 = "I saw you tap. No lecture. Walk me through the trigger when you're ready.";
+        const line2 = {
+          gentle:   "You can come back from this. " + prev + " days didn't disappear — they're in you. Take your time.",
+          balanced: prev + " days are still real. Restore the streak when you're ready — the 48hr window is on the dashboard.",
+          direct:   "You've got 48 hours to restore the " + prev + "-day streak. After that it's a clean slate.",
+          drill:    "48 hours. Pay the dollar, get the " + prev + " days back, tell me what triggered it. Move."
+        }[tone];
+        if (op) op.textContent = line1;
+        // Append the tone-specific follow-up as a second bubble right after the first
+        const followUp = document.createElement('div');
+        followUp.className = 'bubble coach';
+        followUp.textContent = line2;
+        const followUpTime = document.createElement('div');
+        followUpTime.className = 'bubble-time';
+        followUpTime.textContent = 'just now';
+        op.parentNode.insertBefore(followUp, op.nextSibling.nextSibling);
+        op.parentNode.insertBefore(followUpTime, followUp.nextSibling);
+        if (cs) cs.textContent = 'Online · here for the slip';
+      }
+    } catch(e){}
+
+    // Threshold-cross insight cards — same rules as dashboard, surfaced inline in chat.
+    (function renderCoachInsights() {
+      try {
+        if (!window.coreState) return;
+        const slot = document.getElementById('coachInsights');
+        if (!slot) return;
+        const s = coreState.read();
+        const RULES = [
+          { id:'lungs_climb',  test: s => s.stats.lungs >= 80,           c:'#FF6BAA', title:'Lungs in the green',     body:"Capacity 80+ for the first time. That's the pivot." },
+          { id:'will_dip',     test: s => s.stats.willpower < 30,        c:'#FF4F6B', title:'Willpower is low',       body:"Below 30 — high-slip zone. One honest log feeds it back." },
+          { id:'brain_climb',  test: s => s.stats.brain >= 85,           c:'#9F8FFF', title:'Brain over 85',          body:"Sleep + Mind are stacking. Protect tonight's wind-down." },
+          { id:'wallet_low',   test: s => s.stats.wallet < 40,           c:'#FFC857', title:'Wallet drifting',        body:"Try the 24h cart rule on the next order." },
+          { id:'streak_close', test: s => s.streak.days >= 6 && s.streak.days < 7, c:'#FFC857', title:'One day from week one', body:"Day 7 unlocks the milestone screen." },
+        ];
+        const dismissed = JSON.parse(localStorage.getItem('coreInsightDismissed') || '{}');
+        slot.innerHTML = '';
+        RULES.forEach(r => {
+          if (!r.test(s) || dismissed[r.id]) return;
+          const card = document.createElement('div');
+          card.style.cssText = 'display:flex; align-items:flex-start; gap:10px; padding:11px 13px; border-radius:14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); align-self: flex-start; max-width: 88%;';
+          card.innerHTML =
+            '<div style="width:26px; height:26px; border-radius:8px; background:' + r.c + '; box-shadow:0 0 10px ' + r.c + '; flex-shrink:0;"></div>' +
+            '<div style="flex:1; min-width:0;"><div style="font-size:12px; font-weight:700; color:#fff;">' + r.title + '</div><div style="font-size:11px; color:#9AA1B7; margin-top:2px; line-height:15px;">' + r.body + '</div></div>' +
+            '<button data-d="' + r.id + '" style="background:none; border:none; color:#4F5570; font-size:14px; cursor:pointer; padding:0 4px;">×</button>';
+          card.querySelector('button').onclick = () => {
+            dismissed[r.id] = Date.now();
+            localStorage.setItem('coreInsightDismissed', JSON.stringify(dismissed));
+            renderCoachInsights();
+          };
+          slot.appendChild(card);
+        });
+      } catch(e){}
+    })();
+  </script>
+<script src="_lib/core-header.js"></script>
+<script src="_lib/core-tabbar.js"></script>
+</body>
+</html>
