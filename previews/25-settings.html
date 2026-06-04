@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8" />
+<title>CORE — Settings</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<style>
+  :root { --bg-base:#02020A; --bg-card:rgba(255,255,255,0.035); --bg-card-2:rgba(255,255,255,0.06); --border:rgba(255,255,255,0.08); --text:#F8FAFE; --muted:#9AA1B7; --dim:#4F5570; --accent:#4A8FFF; --grad-a:#4A8FFF; --grad-b:#6F70FF; --good:#34D399; --danger:#FF6B6B; }
+  * { box-sizing:border-box; } html,body{ margin:0; padding:0; height:100%; }
+  body { min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text); -webkit-font-smoothing:antialiased; padding:24px; overflow:hidden; }
+  .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+  .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:60; }
+  .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:60; }
+  .bg { position:absolute; inset:0; z-index:0; background: radial-gradient(60% 30% at 50% 8%, rgba(74,143,255,0.10), transparent 65%), linear-gradient(180deg, #060620 0%, #02020A 55%, #050510 100%); }
+  .frame { position:absolute; inset:0; z-index:10; display:flex; flex-direction:column; padding:54px 0 0; }
+  .hdr { display:flex; align-items:center; gap:12px; padding:2px 18px 10px; }
+  .back { width:38px; height:38px; border-radius:50%; border:none; background:rgba(255,255,255,0.06); color:var(--text); display:flex; align-items:center; justify-content:center; text-decoration:none; flex:none; } .back svg{ width:19px; height:19px; }
+  .hdr .ttl { font-size:19px; font-weight:900; }
+  .scroll { flex:1; overflow-y:auto; padding:6px 18px 40px; } .scroll::-webkit-scrollbar{ display:none; }
+  .lab { font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); margin:20px 4px 9px; }
+  .group{ border-radius:18px; background:var(--bg-card); border:1px solid var(--border); overflow:hidden; }
+  .row{ display:flex; align-items:center; gap:12px; padding:14px 15px; border-bottom:1px solid var(--border); }
+  .row:last-child{ border-bottom:none; }
+  .row .ri{ width:34px; height:34px; flex:none; border-radius:10px; display:flex; align-items:center; justify-content:center; background:rgba(74,143,255,0.12); border:1px solid rgba(120,160,255,0.22); } .row .ri svg{ width:18px; height:18px; color:#8FB4FF; }
+  .row .rb{ flex:1; min-width:0; } .row .rb b{ font-size:14px; font-weight:700; display:block; } .row .rb span{ font-size:12px; color:var(--muted); }
+  .row input.name{ flex:1; background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:10px; padding:9px 11px; color:var(--text); font:inherit; font-size:14px; font-weight:700; outline:none; } .row input.name:focus{ border-color:rgba(120,160,255,.5); }
+  .row .val{ font-size:13px; font-weight:700; color:var(--muted); font-variant-numeric:tabular-nums; }
+  .row .mini{ border:1px solid var(--border); background:rgba(255,255,255,0.04); color:var(--text); font:inherit; font-size:12px; font-weight:800; padding:7px 12px; border-radius:10px; cursor:pointer; } .row .mini.ok{ color:var(--good); border-color:rgba(52,211,153,.4); }
+  /* toggle */
+  .sw{ width:46px; height:28px; border-radius:999px; background:rgba(255,255,255,0.12); border:none; position:relative; cursor:pointer; flex:none; transition:.2s; }
+  .sw::after{ content:""; position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:#fff; transition:.2s; }
+  .sw.on{ background:linear-gradient(135deg,var(--grad-a),var(--grad-b)); } .sw.on::after{ transform:translateX(18px); }
+  .danger{ color:var(--danger); } .danger .ri{ background:rgba(255,107,107,0.12); border-color:rgba(255,107,107,0.25); } .danger .ri svg{ color:var(--danger); }
+  .danger .rb b{ color:var(--danger); }
+  .confirm{ border:1px solid var(--danger); background:rgba(255,107,107,0.12); color:var(--danger); font:inherit; font-size:12px; font-weight:800; padding:8px 13px; border-radius:10px; cursor:pointer; }
+  .about{ text-align:center; font-size:11px; color:var(--dim); margin-top:24px; font-weight:600; }
+  .toast{ position:absolute; left:50%; bottom:40px; transform:translateX(-50%) translateY(14px); z-index:90; background:rgba(20,22,34,0.96); border:1px solid var(--border); border-radius:14px; padding:11px 16px; font-size:13px; font-weight:700; opacity:0; pointer-events:none; transition:.3s; } .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div><div class="notch"></div>
+    <div class="frame">
+      <div class="hdr"><a class="back" href="23-profile.html" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"/></svg></a><div class="ttl">Settings</div></div>
+      <div class="scroll">
+        <div class="lab">Account</div>
+        <div class="group">
+          <div class="row"><div class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></div><div class="rb"><b>Display name</b></div><input class="name" id="nameInput" maxlength="18" /></div>
+          <div class="row"><div class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18"/></svg></div><div class="rb"><b>Player ID</b><span id="pidVal">—</span></div><button class="mini" id="copyId">Copy</button></div>
+          <div class="row"><div class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14.5 4H20v5.5L9 20.5l-5.5-5.5L14.5 4Z"/></svg></div><div class="rb"><b>Class</b></div><span class="val" id="classVal">Warrior</span></div>
+        </div>
+
+        <div class="lab">Preferences</div>
+        <div class="group" id="prefs"></div>
+
+        <div class="lab">Privacy</div>
+        <div class="group" id="privacy"></div>
+
+        <div class="lab">Data</div>
+        <div class="group">
+          <div class="row danger"><div class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13"/></svg></div><div class="rb"><b>Reset progress</b><span>Clears all XP, rank, items & perks</span></div><button class="confirm" id="resetBtn">Reset</button></div>
+        </div>
+
+        <div class="about">CORE · v0.9 preview<br>Settings sync to this device.</div>
+      </div>
+    </div>
+    <div class="toast" id="toast"></div>
+  </div>
+  <script src="_lib/core-sfx.js"></script>
+  <script src="_lib/core-state.js"></script>
+  <script>
+  (function(){
+    var S=window.coreState, qs=function(s){return document.querySelector(s);};
+    try{ if(/[?&]demo=1/.test(location.search)) S.seedDemo(); }catch(e){}
+    function pget(k,d){ try{var v=localStorage.getItem(k); return v===null?d:v;}catch(e){return d;} }
+    function pset(k,v){ try{localStorage.setItem(k,v);}catch(e){} }
+    var toastT; function toast(m){ var t=qs('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(function(){t.classList.remove('show');},1600); }
+    function copyText(t,cb){ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(cb,fb);} else fb(); function fb(){ try{var ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);}catch(e){} cb&&cb(); } }
+
+    // account
+    var pid=pget('corePlayerId','CORE-XXXX-XXXX'); qs('#pidVal').textContent=pid;
+    var s=S.read(); qs('#classVal').textContent=(s.class||'Warrior').replace(/^\w/,function(c){return c.toUpperCase();});
+    var nm=''; try{ var t=JSON.parse(localStorage.getItem('coreOnboardTrial')||'{}'); nm=t.name||t.firstName||''; }catch(e){}
+    var ni=qs('#nameInput'); ni.value=nm||'Player';
+    ni.addEventListener('change', function(){ var v=ni.value.trim()||'Player'; try{ var o=JSON.parse(localStorage.getItem('coreOnboardTrial')||'{}'); o.name=v; localStorage.setItem('coreOnboardTrial',JSON.stringify(o)); }catch(e){} pset('coreName',v); toast('Name saved'); });
+    qs('#copyId').addEventListener('click', function(){ var b=this; copyText(pid,function(){ b.textContent='Copied'; b.classList.add('ok'); setTimeout(function(){ b.textContent='Copy'; b.classList.remove('ok'); },1400); }); });
+
+    // toggle rows (persisted to localStorage)
+    function toggleRow(host, key, def, icon, title, sub, onChange){
+      var on = pget(key, def?'1':'0')==='1';
+      var row=document.createElement('div'); row.className='row';
+      row.innerHTML='<div class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">'+icon+'</svg></div><div class="rb"><b>'+title+'</b><span>'+sub+'</span></div><button class="sw'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" aria-label="'+title+'"></button>';
+      var sw=row.querySelector('.sw');
+      sw.addEventListener('click', function(){ on=!on; sw.classList.toggle('on',on); sw.setAttribute('aria-checked',on); pset(key,on?'1':'0'); if(onChange) onChange(on); });
+      host.appendChild(row);
+      if(onChange) onChange(on); // apply persisted state on load
+    }
+    var P=qs('#prefs');
+    toggleRow(P,'coreSet.notifs',true,'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/>','Notifications','Quest reminders & rank-ups');
+    // Sounds → drives the core-sfx engine. Seed the toggle from the engine's own
+    // mute flag so it stays in sync with the in-app mute button.
+    try{ if(window.coreSfx) pset('coreSet.sounds', coreSfx.muted()?'0':'1'); }catch(e){}
+    toggleRow(P,'coreSet.sounds',true,'<path d="M11 5L6 9H2v6h4l5 4V5ZM16 9a4 4 0 0 1 0 6"/>','Sounds','Reward, chest & level-up sounds', function(on){ try{ if(window.coreSfx) coreSfx.mute(!on); }catch(e){} });
+    toggleRow(P,'coreSet.motion',false,'<path d="M5 12h14M12 5v14"/>','Reduce motion','Calmer card animations');
+    var PR=qs('#privacy');
+    toggleRow(PR,'coreSet.public',true,'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/>','Public profile','Others can find you by ID');
+    toggleRow(PR,'coreSet.leaderboard',true,'<path d="M4 20h4v-7H4v7ZM10 20h4V6h-4v14ZM16 20h4v-10h-4v10Z"/>','Show on leaderboard','Appear in rankings (when live)');
+
+    // reset (two-tap confirm — no native alert)
+    var armed=false, rb=qs('#resetBtn'), rt;
+    rb.addEventListener('click', function(){
+      if(!armed){ armed=true; rb.textContent='Tap again to confirm'; clearTimeout(rt); rt=setTimeout(function(){ armed=false; rb.textContent='Reset'; },3000); return; }
+      S.resetAll();
+      ['corePlayerId','coreFriends','coreAchievements','coreUnlockedPerks','coreProfileTheme','coreProfileTitle','coreEquippedBadge','coreEquippedFrame','coreLastRankIndex','corePendingRankUp','corePendingRankUpData','coreCorePower','coreRank','coreRankIndex','coreLevel','coreTotalXP','coreStreak'].forEach(function(k){ try{localStorage.removeItem(k);}catch(e){} });
+      try{ S.syncProgress(); }catch(e){}
+      armed=false; rb.textContent='Reset'; toast('Progress reset');
+    });
+  })();
+  </script>
+</body>
+</html>

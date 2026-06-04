@@ -1,0 +1,674 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8" />
+<title>CORE — Shop</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<style>
+  :root {
+    --bg-base:#02020A; --bg-card:rgba(255,255,255,0.035); --bg-card-2:rgba(255,255,255,0.06);
+    --border:rgba(255,255,255,0.08); --text:#F8FAFE; --muted:#9AA1B7; --dim:#4F5570;
+    --accent:#4A8FFF; --grad-a:#4A8FFF; --grad-b:#6F70FF; --grad-c:#B388FF; --good:#34D399;
+    --coin:#FFCB3D; --coin2:#FFE07A; --shard:#B388FF;
+    --common:#9AA1B7; --rare:#4A8FFF; --epic:#B388FF; --legendary:#FFC56B; --mythic:#FF5C8A;
+  }
+  * { box-sizing:border-box; }
+  html, body { margin:0; padding:0; height:100%; }
+  body { min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif;
+    color:var(--text); -webkit-font-smoothing:antialiased; padding:24px; overflow:hidden; }
+  .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden;
+    box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+  .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:60; }
+  .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:60; }
+
+  .bg { position:absolute; inset:0; z-index:0; background:
+      radial-gradient(60% 35% at 50% 10%, rgba(255,203,61,0.10) 0%, transparent 62%),
+      radial-gradient(60% 35% at 50% 94%, rgba(159,143,255,0.10) 0%, transparent 65%),
+      linear-gradient(180deg, #07071a 0%, #02020A 55%, #050510 100%); }
+  .aurora { position:absolute; inset:0; z-index:1; pointer-events:none; opacity:0.36; mix-blend-mode:screen; }
+  .aurora::before, .aurora::after { content:""; position:absolute; border-radius:50%; filter:blur(72px); animation:auroraDrift 22s ease-in-out infinite; will-change:transform; }
+  .aurora::before { width:70%; height:40%; left:-10%; top:3%; background:radial-gradient(circle, rgba(74,143,255,0.26), transparent 65%); }
+  .aurora::after { width:60%; height:35%; right:-8%; bottom:13%; background:radial-gradient(circle, rgba(159,143,255,0.22), transparent 65%); animation-delay:-11s; }
+  @keyframes auroraDrift { 0%,100%{transform:translate(0,0) scale(1);opacity:0.4;} 50%{transform:translate(16px,-12px) scale(1.06);opacity:0.6;} }
+  .stars { position:absolute; inset:-2%; pointer-events:none; z-index:2; }
+  .star { position:absolute; border-radius:50%; background:#fff; animation:twinkle var(--d,4s) ease-in-out var(--del,0s) infinite; }
+  @keyframes twinkle { 0%,100%{opacity:0.15;transform:scale(0.7);} 50%{opacity:0.8;transform:scale(1.1);} }
+  @media (prefers-reduced-motion: reduce){ .aurora::before,.aurora::after,.star,.feat::after,.shimmer{animation:none!important;} }
+
+  .frame { position:absolute; inset:0; z-index:10; display:flex; flex-direction:column; padding:54px 0 0; }
+  .scroll { flex:1; overflow-y:auto; padding:4px 18px 110px; -webkit-overflow-scrolling:touch; }
+  .scroll::-webkit-scrollbar{ display:none; }
+  .card-tap{ cursor:pointer; transition:transform .16s cubic-bezier(.2,.8,.2,1), border-color .2s, background .2s; }
+  .card-tap:active{ transform:scale(.985); }
+
+  /* header */
+  .topbar { position:relative; display:flex; align-items:center; justify-content:space-between; padding:6px 18px 8px; }
+  .back { width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; background:var(--bg-card); border:1px solid var(--border); color:var(--text); text-decoration:none; }
+  .back svg{ width:20px; height:20px; }
+  .topbar .ttl { position:absolute; left:50%; transform:translateX(-50%); font-size:13px; font-weight:800; letter-spacing:0.2em; text-transform:uppercase; color:var(--text); }
+  .coinchip { display:inline-flex; align-items:center; gap:6px; height:36px; padding:0 13px; border-radius:999px; background:linear-gradient(135deg, rgba(255,203,61,0.16), rgba(255,160,60,0.06)); border:1px solid rgba(255,203,61,0.3); font-size:13.5px; font-weight:900; color:var(--coin2); }
+  .coinchip svg{ width:16px; height:16px; color:var(--coin); }
+
+  /* intro */
+  .intro { padding:2px 4px 2px; }
+  .intro h1 { margin:0; font-size:26px; font-weight:900; letter-spacing:-0.02em; }
+  .intro p { margin:5px 0 0; font-size:13.5px; color:var(--muted); }
+
+  /* currency bar */
+  .curbar { display:flex; gap:9px; margin-top:15px; }
+  .cur { flex:1; border-radius:15px; padding:11px 12px; background:var(--bg-card); border:1px solid var(--border); position:relative; overflow:hidden; }
+  .cur .cl{ display:flex; align-items:center; gap:6px; font-size:9.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--dim); }
+  .cur .cl svg{ width:13px; height:13px; }
+  .cur .cv{ font-size:17px; font-weight:900; margin-top:6px; }
+  .cur.coins{ border-color:rgba(255,203,61,0.32); background:linear-gradient(155deg, rgba(255,203,61,0.10), rgba(255,255,255,0.02)); }
+  .cur.coins .cl{ color:var(--coin2); } .cur.coins .cl svg{ color:var(--coin); } .cur.coins .cv{ color:var(--coin2); }
+  .cur.shards{ border-color:rgba(179,136,255,0.32); background:linear-gradient(155deg, rgba(179,136,255,0.10), rgba(255,255,255,0.02)); }
+  .cur.shards .cl{ color:#C7B3FF; } .cur.shards .cl svg{ color:var(--shard); } .cur.shards .cv{ color:#C7B3FF; }
+  .cur.locked .cv{ color:var(--dim); font-size:12px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; }
+  .cur.locked .lk{ position:absolute; top:10px; right:11px; } .cur.locked .lk svg{ width:13px; height:13px; color:var(--dim); }
+
+  /* featured */
+  .feat { position:relative; margin-top:20px; border-radius:24px; padding:18px; overflow:hidden;
+    background:linear-gradient(150deg, rgba(159,143,255,0.18), rgba(74,143,255,0.06) 60%, rgba(255,255,255,0.02));
+    border:1px solid rgba(159,143,255,0.34); box-shadow:0 22px 60px rgba(40,20,90,0.4); }
+  .feat::after{ content:""; position:absolute; top:-40%; left:-30%; width:55%; height:180%; transform:rotate(20deg); background:linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent); animation:shine 6.5s ease-in-out infinite; }
+  @keyframes shine { 0%,100%{transform:translateX(0) rotate(20deg);} 50%{transform:translateX(300px) rotate(20deg);} }
+  .feat .ftag{ position:relative; z-index:1; display:inline-flex; align-items:center; gap:6px; font-size:9.5px; font-weight:800; letter-spacing:.18em; text-transform:uppercase; color:#C7B3FF; }
+  .feat .frow{ position:relative; z-index:1; display:flex; align-items:center; gap:15px; margin-top:12px; }
+  .feat .fic{ width:74px; height:74px; flex:none; border-radius:18px; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.3); border:2px solid var(--epic); box-shadow:0 0 26px rgba(179,136,255,0.5); }
+  .feat .fic svg{ width:38px; height:38px; color:#D9C9FF; }
+  .feat .fb{ flex:1; min-width:0; }
+  .feat .fn{ font-size:18px; font-weight:900; }
+  .feat .fmeta{ display:flex; align-items:center; gap:8px; margin-top:5px; }
+  .feat .fd{ font-size:12.5px; color:var(--muted); margin-top:9px; line-height:1.4; position:relative; z-index:1; }
+  .feat .fcta{ position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between; margin-top:14px; gap:12px; }
+  .feat .fcost{ display:inline-flex; align-items:center; gap:7px; font-size:17px; font-weight:900; color:var(--coin2); } .feat .fcost svg{ width:17px; height:17px; color:var(--coin); }
+
+  .rtag{ display:inline-flex; align-items:center; gap:5px; font-size:9.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; padding:3px 8px; border-radius:999px; border:1px solid currentColor; }
+  .rtag .rd{ width:6px; height:6px; border-radius:50%; background:currentColor; }
+
+  /* buy / equip buttons */
+  .btn{ border:none; cursor:pointer; font:inherit; font-weight:800; border-radius:12px; display:inline-flex; align-items:center; justify-content:center; gap:6px; transition:filter .2s, transform .12s, opacity .2s; }
+  .btn:active{ transform:scale(.97); } .btn svg{ width:14px; height:14px; }
+  .btn.buy{ color:#1a1206; background:linear-gradient(135deg,#FFD98A,#FF9F45); box-shadow:0 6px 16px rgba(255,150,60,.35); }
+  .btn.buy.cant{ background:rgba(255,255,255,0.06); color:var(--dim); box-shadow:none; }
+  .btn.equip{ color:#fff; background:linear-gradient(135deg,var(--grad-a),var(--grad-b)); box-shadow:0 6px 16px rgba(74,143,255,.35); }
+  .btn.owned{ background:rgba(52,211,153,0.14); color:var(--good); cursor:default; }
+  .btn.equipped{ background:rgba(52,211,153,0.18); color:var(--good); cursor:default; }
+  .btn.locked{ background:rgba(255,255,255,0.04); color:var(--dim); cursor:not-allowed; border:1px solid var(--border); }
+  .feat .btn{ padding:13px 22px; font-size:15px; }
+
+  /* category tabs */
+  .tabs { display:flex; gap:8px; overflow-x:auto; padding:2px 0 4px; margin-top:6px; } .tabs::-webkit-scrollbar{ display:none; }
+  .tab{ flex:none; padding:9px 15px; border-radius:999px; font-size:12.5px; font-weight:800; letter-spacing:.02em; color:var(--muted); background:var(--bg-card); border:1px solid var(--border); cursor:pointer; transition:.2s; white-space:nowrap; }
+  .tab.on{ color:#fff; background:linear-gradient(135deg,var(--grad-a),var(--grad-b)); border-color:transparent; box-shadow:0 6px 16px rgba(74,143,255,.3); }
+
+  /* item grid */
+  .grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:11px; animation:fadeIn .3s ease; }
+  @keyframes fadeIn { from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
+  .item{ position:relative; border-radius:18px; padding:14px; background:var(--bg-card); border:1px solid var(--border); display:flex; flex-direction:column; min-height:206px; overflow:hidden; transition:border-color .2s, box-shadow .4s, transform .15s; }
+  .item .ic{ width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; background:rgba(74,143,255,0.12); border:1px solid rgba(120,160,255,0.22); margin-bottom:10px; }
+  .item .ic svg{ width:22px; height:22px; color:var(--accent); }
+  .item .in{ font-size:14px; font-weight:800; line-height:1.12; }
+  .item .it{ font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--dim); margin-top:3px; }
+  .item .id2{ font-size:11px; color:var(--muted); margin-top:6px; line-height:1.35; flex:1; }
+  .item .ifoot{ margin-top:10px; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .item .cost{ display:inline-flex; align-items:center; gap:5px; font-size:13px; font-weight:900; color:var(--coin2); } .item .cost svg{ width:14px; height:14px; color:var(--coin); }
+  .item .cost.free{ color:var(--good); }
+  .item .ifoot .btn{ padding:8px 12px; font-size:11.5px; }
+  .item .rtag{ position:absolute; top:13px; right:13px; }
+  .item.r-common{ }
+  .item.r-rare{ border-color:rgba(74,143,255,0.35); box-shadow:0 0 20px -10px var(--rare); }
+  .item.r-epic{ border-color:rgba(179,136,255,0.4); box-shadow:0 0 20px -9px var(--epic); }
+  .item.r-legendary{ border-color:rgba(255,197,107,0.45); box-shadow:0 0 22px -8px var(--legendary); }
+  .item.r-mythic{ border-color:rgba(255,92,138,0.5); box-shadow:0 0 24px -7px var(--mythic); }
+  .item.r-mythic::before{ content:""; position:absolute; inset:0; border-radius:18px; padding:1px; pointer-events:none; z-index:1;
+    background:linear-gradient(120deg,var(--mythic),transparent,var(--epic),transparent,var(--mythic)); background-size:300% 300%;
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; animation:mythShift 4s linear infinite; }
+  @keyframes mythShift{ to{ background-position:300% 0; } }
+  @media (prefers-reduced-motion: reduce){ .item.r-mythic::before{ animation:none; } }
+  .item.owned{ border-color:rgba(52,211,153,0.3); background:linear-gradient(160deg, rgba(52,211,153,0.06), rgba(255,255,255,0.015)); }
+  .item.locked{ opacity:.92; }
+  .item.locked .ic svg{ color:var(--dim); } .item.locked .ic{ background:rgba(255,255,255,0.04); border-color:var(--border); }
+  .item.locked::after{ content:""; position:absolute; inset:0; pointer-events:none; background:linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.05) 50%, transparent 70%); background-size:220% 100%; animation:shimmer 3.4s linear infinite; }
+  @keyframes shimmer { 0%{background-position:130% 0;} 100%{background-position:-130% 0;} }
+  .item.bought{ animation:bought .6s cubic-bezier(.2,.9,.3,1.2); }
+  @keyframes bought { 0%{box-shadow:0 0 0 rgba(52,211,153,0);} 45%{box-shadow:0 0 28px rgba(52,211,153,.5);} 100%{box-shadow:0 0 0 rgba(52,211,153,0);} }
+  .item.equipped-now{ animation:equippulse .7s ease; }
+  @keyframes equippulse { 0%,100%{box-shadow:0 0 0 rgba(74,143,255,0);} 50%{box-shadow:0 0 26px rgba(74,143,255,.55);} }
+
+  /* ── live cosmetic previews (what the item actually looks like) ── */
+  .pv{ height:66px; display:flex; align-items:center; justify-content:center; margin-bottom:11px; }
+  .pv .av{ width:22px; height:22px; color:#cdd6e6; }
+  /* frame: mini card with the frame's coloured border + glow */
+  .pv-frame{ width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center;
+             background:radial-gradient(circle at 50% 28%, rgba(255,255,255,0.07), rgba(0,0,0,0.32));
+             border:2px solid var(--fc); box-shadow:0 0 16px color-mix(in srgb,var(--fc) 55%,transparent), inset 0 0 12px color-mix(in srgb,var(--fc) 22%,transparent); }
+  /* aura: avatar with a glowing colour halo */
+  .pv-aura{ position:relative; width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.14); }
+  .pv-aura .glow{ position:absolute; inset:-10px; border-radius:50%; background:radial-gradient(circle, color-mix(in srgb,var(--ac) 62%,transparent), transparent 70%); animation:pvpulse 3s ease-in-out infinite; }
+  @keyframes pvpulse{ 0%,100%{opacity:.5; transform:scale(.93);} 50%{opacity:1; transform:scale(1.1);} }
+  /* badge: medallion in rarity colour */
+  .pv-badge{ width:52px; height:52px; border-radius:15px; display:flex; align-items:center; justify-content:center;
+             background:linear-gradient(150deg, rgba(255,255,255,0.06), rgba(0,0,0,0.26)); border:1px solid color-mix(in srgb,var(--bc) 48%,transparent); box-shadow:0 0 15px color-mix(in srgb,var(--bc) 36%,transparent); }
+  .pv-badge svg{ width:27px; height:27px; color:var(--bc); }
+  /* title: a mini nameplate showing how it reads under your name */
+  .pv-title{ text-align:center; }
+  .pv-title .nm{ font-size:13px; font-weight:900; color:#e7edf7; letter-spacing:.01em; }
+  .pv-title .tt{ margin-top:4px; font-size:8.5px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); padding:3px 8px; border-radius:999px; border:1px solid rgba(74,143,255,0.4); display:inline-block; }
+  /* chest: tinted to rarity with glow */
+  .pv-chest{ width:54px; height:54px; border-radius:15px; display:flex; align-items:center; justify-content:center;
+             background:linear-gradient(150deg, rgba(255,255,255,0.05), rgba(0,0,0,0.26)); border:1px solid color-mix(in srgb,var(--cc) 42%,transparent); box-shadow:0 0 16px color-mix(in srgb,var(--cc) 36%,transparent); }
+  .pv-chest svg{ width:28px; height:28px; color:var(--cc); }
+  /* boost: effect glyph */
+  .pv-boost{ width:52px; height:52px; border-radius:15px; display:flex; align-items:center; justify-content:center; background:linear-gradient(150deg, rgba(255,203,61,0.16), rgba(255,255,255,0.02)); border:1px solid rgba(255,203,61,0.28); box-shadow:0 0 14px rgba(255,180,60,0.2); }
+  .pv-boost svg{ width:25px; height:25px; color:var(--coin); }
+  @media (prefers-reduced-motion: reduce){ .pv-aura .glow{ animation:none; } }
+
+  /* fx particles */
+  .spark{ position:absolute; width:7px; height:7px; border-radius:50%; pointer-events:none; z-index:65; will-change:transform,opacity; }
+
+  /* chest opening now lives on the dedicated full-screen opener (28-chest.html) */
+  @media (prefers-reduced-motion: reduce){ .spark{ animation:none!important; } }
+
+  /* featured icon life */
+  .feat .fic{ animation:featBob 3.4s ease-in-out infinite; }
+  @keyframes featBob{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-5px);} }
+  @media (prefers-reduced-motion: reduce){ .feat .fic{ animation:none; } }
+
+  /* nav */
+  .nav { position:absolute; left:0; right:0; bottom:0; z-index:50; padding:10px 12px 26px; display:flex; justify-content:space-around; align-items:flex-end; background:linear-gradient(180deg, rgba(5,6,14,0) 0%, rgba(5,6,14,0.88) 34%, #04040c 100%); backdrop-filter:blur(14px); }
+  .nav a { background:none; border:none; font:inherit; cursor:pointer; position:relative; display:flex; flex-direction:column; align-items:center; gap:4px; padding:6px 8px; min-width:48px; min-height:44px; text-decoration:none; color:var(--dim); transition:color .2s, transform .15s; }
+  .nav svg{ width:23px; height:23px; } .nav .nl{ font-size:10px; font-weight:800; } .nav .item:active{ transform:translateY(1px); }
+  .nav .item.active{ color:var(--text); } .nav .item.active svg{ color:var(--accent); filter:drop-shadow(0 0 8px rgba(74,143,255,.75)); }
+  .nav .item:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:10px; }
+
+  .toast{ position:absolute; left:50%; bottom:100px; transform:translateX(-50%) translateY(16px); z-index:70; background:rgba(20,22,34,0.97); border:1px solid var(--border); border-radius:14px; padding:12px 18px; font-size:13px; font-weight:800; opacity:0; pointer-events:none; transition:.32s cubic-bezier(.2,.9,.3,1); box-shadow:0 12px 34px rgba(0,0,0,.55); white-space:nowrap; display:flex; align-items:center; gap:8px; }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+  .toast.good{ border-color:rgba(52,211,153,0.4); } .toast.good svg{ width:15px; height:15px; color:var(--good); }
+  .toast.warn{ border-color:rgba(255,180,84,0.4); } .toast.warn svg{ width:15px; height:15px; color:#FFB454; }
+
+  /* ── free chest (hero) ── */
+  .freechest{ position:relative; margin-top:18px; border-radius:24px; padding:18px; overflow:hidden;
+    background:linear-gradient(150deg, rgba(255,203,61,0.2), rgba(255,160,60,0.06) 60%, rgba(255,255,255,0.02));
+    border:1px solid rgba(255,203,61,0.42); box-shadow:0 22px 60px rgba(90,60,10,0.4); }
+  .freechest::after{ content:""; position:absolute; top:-40%; left:-30%; width:55%; height:180%; transform:rotate(20deg); background:linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); animation:shine 6.5s ease-in-out infinite; }
+  .freechest .ftag{ position:relative; z-index:1; display:inline-flex; align-items:center; gap:6px; font-size:9.5px; font-weight:800; letter-spacing:.18em; text-transform:uppercase; color:var(--coin2); }
+  .freechest .frow{ position:relative; z-index:1; display:flex; align-items:center; gap:15px; margin-top:12px; }
+  .freechest .fic{ width:74px; height:74px; flex:none; border-radius:18px; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.3); border:2px solid var(--coin); box-shadow:0 0 26px rgba(255,200,70,0.5); animation:featBob 3.4s ease-in-out infinite; }
+  .freechest .fic svg{ width:40px; height:40px; color:var(--coin2); }
+  .freechest .fn{ font-size:18px; font-weight:900; }
+  .freechest .fsub{ font-size:12.5px; color:var(--muted); margin-top:4px; line-height:1.4; }
+  .freechest .fcta{ position:relative; z-index:1; margin-top:14px; }
+  .btn.free{ width:100%; padding:14px; font-size:15px; color:#1a1206; background:linear-gradient(135deg,#FFD98A,#FF9F45); box-shadow:0 8px 20px rgba(255,150,60,.4); }
+  .btn.free.cooldown{ background:rgba(255,255,255,0.05); color:var(--muted); box-shadow:none; cursor:default; border:1px solid var(--border); }
+  .freechest .timer{ font-variant-numeric:tabular-nums; }
+  @media (prefers-reduced-motion: reduce){ .freechest::after,.freechest .fic{ animation:none; } }
+
+  /* ── daily deals ── */
+  .deals-wrap{ margin-top:22px; }
+  .deals-head{ display:flex; align-items:center; justify-content:space-between; margin:0 2px 11px; }
+  .deals-head .dh{ font-size:13px; font-weight:900; letter-spacing:.02em; display:flex; align-items:center; gap:7px; }
+  .deals-head .dh .fire{ width:15px; height:15px; color:#FF7A3D; }
+  .deals-timer{ display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:800; color:#FFB454; padding:4px 9px; border-radius:999px; background:rgba(255,180,84,0.1); border:1px solid rgba(255,180,84,0.28); font-variant-numeric:tabular-nums; }
+  .deals{ display:flex; gap:11px; overflow-x:auto; padding-bottom:4px; } .deals::-webkit-scrollbar{ display:none; }
+  .deal{ flex:none; width:152px; border-radius:18px; padding:13px; background:var(--bg-card); border:1px solid var(--border); position:relative; overflow:hidden; }
+  .deal.r-rare{ border-color:rgba(74,143,255,0.35); } .deal.r-epic{ border-color:rgba(179,136,255,0.4); } .deal.r-legendary{ border-color:rgba(255,197,107,0.45); }
+  .deal .disc{ position:absolute; top:11px; right:11px; font-size:9px; font-weight:900; letter-spacing:.04em; color:#fff; background:linear-gradient(135deg,#FF5C8A,#FF7A3D); padding:3px 7px; border-radius:999px; box-shadow:0 4px 12px rgba(255,92,138,.4); }
+  .deal .dn{ font-size:13px; font-weight:800; margin-top:2px; line-height:1.15; }
+  .deal .dprice{ display:flex; align-items:center; gap:7px; margin-top:9px; }
+  .deal .dnow{ display:inline-flex; align-items:center; gap:4px; font-size:14px; font-weight:900; color:var(--coin2); } .deal .dnow svg{ width:13px; height:13px; color:var(--coin); }
+  .deal .dwas{ font-size:11px; color:var(--dim); text-decoration:line-through; }
+  .deal .btn{ width:100%; margin-top:11px; padding:8px; font-size:11.5px; }
+
+  /* ── premium ── */
+  .premium{ margin-top:24px; margin-bottom:6px; border-radius:22px; padding:18px; overflow:hidden; position:relative;
+    background:linear-gradient(150deg, rgba(74,143,255,0.16), rgba(179,136,255,0.1) 55%, rgba(255,255,255,0.02));
+    border:1px solid rgba(120,160,255,0.34); box-shadow:0 22px 50px rgba(30,30,90,0.4); }
+  .premium::after{ content:""; position:absolute; top:-40%; left:-30%; width:55%; height:180%; transform:rotate(20deg); background:linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent); animation:shine 7.5s ease-in-out infinite; }
+  .premium .ptag{ position:relative; z-index:1; display:inline-flex; align-items:center; gap:6px; font-size:9.5px; font-weight:800; letter-spacing:.18em; text-transform:uppercase; color:#C7B3FF; }
+  .premium .pt{ position:relative; z-index:1; font-size:19px; font-weight:900; margin-top:10px; }
+  .premium .pp{ position:relative; z-index:1; font-size:12.5px; color:var(--muted); margin-top:5px; line-height:1.45; }
+  .premium .pfeat{ position:relative; z-index:1; margin-top:13px; display:flex; flex-direction:column; gap:8px; }
+  .premium .pf{ display:flex; align-items:center; gap:9px; font-size:12.5px; color:var(--text); }
+  .premium .pf .pk{ width:22px; height:22px; flex:none; border-radius:7px; display:flex; align-items:center; justify-content:center; background:rgba(74,143,255,0.16); } .premium .pf .pk svg{ width:13px; height:13px; color:var(--accent); }
+  .premium .pcta{ position:relative; z-index:1; margin-top:15px; display:flex; align-items:center; gap:12px; }
+  .btn.premium-btn{ flex:1; padding:14px; font-size:14px; color:#fff; background:linear-gradient(135deg,var(--grad-a),var(--grad-b),var(--grad-c)); box-shadow:0 8px 22px rgba(74,143,255,.4); }
+  .premium .pprice{ font-size:11px; color:var(--muted); white-space:nowrap; }
+  @media (prefers-reduced-motion: reduce){ .premium::after{ animation:none; } }
+
+  /* ── coin spend float ── */
+  .coinfloat{ position:absolute; z-index:75; font-size:14px; font-weight:900; color:#FF8FA8; pointer-events:none; text-shadow:0 1px 4px rgba(0,0,0,.6); }
+  .coinchip.spend{ animation:chipPulse .5s ease; }
+  @keyframes chipPulse{ 0%,100%{transform:scale(1);} 40%{transform:scale(1.12); border-color:rgba(255,143,168,0.6);} }
+
+  /* section heading reused for deals/premium */
+  .shop-sec{ margin:24px 2px 11px; font-size:13px; font-weight:900; letter-spacing:.02em; }
+</style>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div><div class="aurora"></div><div class="stars" id="stars"></div><div class="notch"></div>
+
+    <div class="frame">
+      <div class="topbar">
+        <a class="back" href="20-dashboard.html" aria-label="Back to dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></a>
+        <span class="ttl">Shop</span>
+        <div style="display:flex;align-items:center;gap:9px">
+          <button class="back" data-sfx-toggle type="button"></button>
+          <span class="coinchip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/></svg><span id="coinTop">0</span></span>
+        </div>
+      </div>
+
+      <div class="scroll">
+        <div class="intro">
+          <h1>Shop</h1>
+          <p>Spend coins. Upgrade your profile.</p>
+        </div>
+
+        <!-- currency bar -->
+        <div class="curbar">
+          <div class="cur coins"><div class="cl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/></svg>Coins</div><div class="cv" id="curCoins">0</div></div>
+          <div class="cur shards"><div class="cl"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l4 7-4 13-4-13z"/></svg>Shards</div><div class="cv" id="curShards">0</div></div>
+          <div class="cur locked"><span class="lk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span><div class="cl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h16l-1.5 11a1 1 0 0 1-1 .9H6.5a1 1 0 0 1-1-.9L4 8ZM9 8V6a3 3 0 0 1 6 0v2"/></svg>Tickets</div><div class="cv">Locked</div></div>
+        </div>
+
+        <!-- free chest (hero) -->
+        <div class="freechest" id="freeChest"></div>
+
+        <!-- daily deals -->
+        <div class="deals-wrap" id="dealsWrap"></div>
+
+        <!-- featured -->
+        <div class="feat" id="feat"></div>
+
+        <!-- categories -->
+        <div class="tabs" id="tabs"></div>
+
+        <!-- grid -->
+        <div class="grid" id="grid"></div>
+
+        <!-- premium (future monetization) -->
+        <div class="premium" id="premium"></div>
+      </div>
+
+      <nav class="nav" aria-label="Primary">
+        <a class="item" href="20-dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 11l9-7 9 7M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/></svg><span class="nl">Home</span></a>
+        <a class="item" href="21-quests.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg><span class="nl">Quests</span></a>
+        <a class="item active" href="27-shop.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M6 2L3 6v13a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"/></svg><span class="nl">Shop</span></a>
+        <a class="item" href="23-profile.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="nl">Profile</span></a>
+        <a class="item" href="24-more.html"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg><span class="nl">More</span></a>
+      </nav>
+      <div class="home-indicator"></div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script src="_lib/core-sfx.js"></script>
+  <script src="_lib/core-state.js"></script>
+  <script>
+  (function(){
+    var S=window.coreState, qs=function(s){return document.querySelector(s);};
+
+    (function(){ var h=document.getElementById('stars'); if(!h) return; var f=document.createDocumentFragment();
+      for(var i=0;i<54;i++){ var d=document.createElement('span'); d.className='star'; var sz=(i%7===0)?2.2:(i%3===0)?1.6:1.0;
+        d.style.width=sz+'px'; d.style.height=sz+'px'; d.style.left=((i*37)%100)+'%'; d.style.top=((i*53)%100)+'%';
+        d.style.setProperty('--d',(3+(i%5))+'s'); d.style.setProperty('--del',((i%9)*0.4)+'s'); if(i%11===0) d.style.boxShadow='0 0 6px rgba(150,195,255,0.8)'; f.appendChild(d); }
+      h.appendChild(f); })();
+
+    // ── helpers ───────────────────────────────────────────────────────────────
+    function lget(k,d){ try{ var v=localStorage.getItem(k); return (v===null||v==='')?d:v; }catch(e){ return d; } }
+    function lset(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+    function ig(k,d){ var v=parseInt(lget(k,''),10); return isNaN(v)?d:v; }
+    function jget(k,d){ try{ var v=JSON.parse(localStorage.getItem(k)||'null'); return Array.isArray(v)?v:(v||d); }catch(e){ return d; } }
+    function jset(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+    function pushUniq(k,val){ var a=jget(k,[]); if(a.indexOf(val)<0){ a.push(val); jset(k,a); } }
+    function coins(){ return (S.read().coins)||0; }
+    function rankIdx(){ return S.rankFor(S.read().xp||0).idx; }
+    function needIdx(name){ try{ var i=S.RANKS.findIndex(function(r){return r.name===name;}); return i<0?99:i; }catch(e){ return 99; } }
+    function starterOpened(){ try{ return !!(S.read().chests&&S.read().chests.starterOpened) || lget('coreFirstChestOpened','0')==='1'; }catch(e){ return false; } }
+    function dispatch(){ try{ window.dispatchEvent(new CustomEvent('core:progress-updated',{detail:{source:'shop'}})); }catch(e){} }
+    var RAR={ Common:'var(--common)', Rare:'var(--rare)', Epic:'var(--epic)', Legendary:'var(--legendary)', Mythic:'var(--mythic)' };
+
+    // ── free chest cooldown ──
+    var FREE_COOLDOWN_MS=8*60*60*1000; // claimable every 8h
+    function freeChestRemaining(){ var next=parseInt(lget('coreFreeChestNextAt','0'),10)||0; return Math.max(0, next-Date.now()); }
+    function freeChestReady(){ return freeChestRemaining()<=0; }
+    // free chest floor rises with rank → higher ranks get better daily drops (can still uproll)
+    function freeChestFloor(){ var i=rankIdx(); if(i>=9) return 'Legendary'; if(i>=6) return 'Epic'; if(i>=3) return 'Rare'; return 'Common'; }
+    function fmtCountdown(ms){ var s=Math.ceil(ms/1000); var h=Math.floor(s/3600), m=Math.floor((s%3600)/60), ss=s%60; var p=function(n){return (n<10?'0':'')+n;}; return p(h)+':'+p(m)+':'+p(ss); }
+    // milliseconds until next local midnight (daily deals reset)
+    function msUntilMidnight(){ var n=new Date(); var mid=new Date(n.getFullYear(),n.getMonth(),n.getDate()+1,0,0,0,0); return mid-n; }
+    function dayKey(){ var n=new Date(); return n.getFullYear()*1000+(n.getMonth()*32+n.getDate()); }
+
+    // ── coin-spend feedback (counter handled by animateCoins; this adds punch) ──
+    function coinSpendFX(amount){
+      var chip=qs('.coinchip'); if(chip){ chip.classList.remove('spend'); void chip.offsetWidth; chip.classList.add('spend'); }
+      if(REDUCED || !chip) return;
+      var phone=qs('.phone'), pr=phone.getBoundingClientRect(), cr=chip.getBoundingClientRect();
+      var f=document.createElement('div'); f.className='coinfloat'; f.textContent='−'+amount.toLocaleString();
+      f.style.left=(cr.left-pr.left+cr.width/2-14)+'px'; f.style.top=(cr.top-pr.top+cr.height-4)+'px'; phone.appendChild(f);
+      f.animate([{transform:'translateY(0)',opacity:1},{transform:'translateY(26px)',opacity:0}],{duration:850,easing:'cubic-bezier(.2,.7,.3,1)'}).onfinish=function(){ f.remove(); };
+    }
+
+    var toastT; function toast(m,kind){ var t=qs('#toast'); var ic = kind==='good'?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l4 4 10-11"/></svg>':kind==='warn'?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>':''; t.className='toast show'+(kind?' '+kind:''); t.innerHTML=ic+'<span>'+m+'</span>'; clearTimeout(toastT); toastT=setTimeout(function(){t.classList.remove('show');},1800); }
+
+    function animateCoins(to){ ['#coinTop','#curCoins'].forEach(function(sel){ var el=qs(sel); var from=parseInt((el.textContent||'0').replace(/[^0-9]/g,''),10)||0; if(from===to){ el.textContent=to.toLocaleString(); return; }
+      var start=null,dur=600; if(el._raf) cancelAnimationFrame(el._raf);
+      function step(ts){ if(!start) start=ts; var p=Math.min(1,(ts-start)/dur); var v=Math.round(from+(to-from)*(1-Math.pow(1-p,3))); el.textContent=v.toLocaleString(); if(p<1) el._raf=requestAnimationFrame(step); }
+      el._raf=requestAnimationFrame(step); }); }
+    function animateOne(sel,to){ var el=qs(sel); if(!el) return; var from=parseInt((el.textContent||'0').replace(/[^0-9]/g,''),10)||0; if(from===to){ el.textContent=to.toLocaleString(); return; }
+      var start=null,dur=600; if(el._raf) cancelAnimationFrame(el._raf);
+      function step(ts){ if(!start) start=ts; var p=Math.min(1,(ts-start)/dur); var v=Math.round(from+(to-from)*(1-Math.pow(1-p,3))); el.textContent=v.toLocaleString(); if(p<1) el._raf=requestAnimationFrame(step); }
+      el._raf=requestAnimationFrame(step); }
+
+    // ── fx + sound + chest reward engine (shared feel with dashboard) ──────────
+    var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function SFX(name){ try{ if(typeof window.coreSfx==='function') window.coreSfx(name); }catch(e){} }
+    function burstAt(clientX, clientY, color, n){
+      if(REDUCED) return; var phone=qs('.phone'), pr=phone.getBoundingClientRect(); n=n||10;
+      for(var i=0;i<n;i++){ (function(){ var s=document.createElement('span'); s.className='spark'; s.style.background=color; s.style.boxShadow='0 0 8px '+color;
+        s.style.left=(clientX-pr.left)+'px'; s.style.top=(clientY-pr.top)+'px'; phone.appendChild(s);
+        var ang=Math.random()*Math.PI*2, dist=24+Math.random()*42, dx=Math.cos(ang)*dist, dy=Math.sin(ang)*dist-12, dur=600+Math.random()*500;
+        s.animate([{transform:'translate(0,0) scale(1)',opacity:1},{transform:'translate('+dx+'px,'+dy+'px) scale(.2)',opacity:0}],{duration:dur,easing:'cubic-bezier(.2,.7,.3,1)'}).onfinish=function(){ s.remove(); };
+      })(); }
+    }
+
+    // Chest rolling + opening now lives in core-state.js (S.rollChest/grantChest),
+    // played on the dedicated full-screen opener (28-chest.html). The Shop just
+    // routes "Open"/"Open Free Chest" there.
+
+    // ── SVG icons per kind ──────────────────────────────────────────────────
+    var IC={
+      frame:'<rect x="4" y="4" width="16" height="16" rx="3"/><rect x="8.5" y="8.5" width="7" height="7" rx="1.5"/>',
+      badge:'<path d="M12 3l7 3v5c0 4-3 7-7 9-4-2-7-5-7-9V6l7-3Z"/><path d="M9 11.5l2 2 4-4.5"/>',
+      aura:'<circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="8.5" stroke-dasharray="2.5 3"/>',
+      boost:'<path d="M13 2L3 14h7l-1 8 10-12h-7l1-8Z"/>',
+      chest:'<path d="M3 9l2-4h14l2 4M3 9v9a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V9M3 9h18M12 9v3"/>',
+      title:'<path d="M5 4h14v9l-7 4-7-4z"/><path d="M9 4v6l3 1.6L15 10V4"/>'
+    };
+    // colour maps for the live previews
+    var RARHEX={ Common:'#9AA1B7', Rare:'#4A8FFF', Epic:'#B388FF', Legendary:'#FFC56B', Mythic:'#FF5C8A' };
+    var FRAME_C={ Default:'#8a90a0', Blue:'#4A8FFF', Gold:'#FFD24D', Crystal:'#5eead4', Aurora:'#9b8cff', CORE:'#E6F0FF' };
+    var AURA_C={ aura_blue:'#4A8FFF', aura_ember:'#FF7A3D', aura_wind:'#5eead4', aura_core:'#7FB4FF' };
+    var AV='<svg class="av" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="3.3"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/></svg>';
+    var SHIELD='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4-3 7-7 9-4-2-7-5-7-9V6l7-3Z"/><path d="M9 11.5l2 2 4-4.5"/></svg>';
+
+    // a real visual preview of what each cosmetic looks like
+    function previewHTML(it){
+      if(it.kind==='frame'){ return '<div class="pv"><div class="pv-frame" style="--fc:'+(FRAME_C[it.frameKey]||'#8a90a0')+'">'+AV+'</div></div>'; }
+      if(it.kind==='aura'){  return '<div class="pv"><div class="pv-aura" style="--ac:'+(AURA_C[it.id]||'#4A8FFF')+'"><span class="glow"></span>'+AV+'</div></div>'; }
+      if(it.kind==='badge'){ return '<div class="pv"><div class="pv-badge" style="--bc:'+(RARHEX[it.rar]||RARHEX.Common)+'">'+SHIELD+'</div></div>'; }
+      if(it.kind==='title'){ return '<div class="pv"><div class="pv-title"><div class="nm">Player</div><div class="tt">'+it.titleName+'</div></div></div>'; }
+      if(it.kind==='chest'){ return '<div class="pv"><div class="pv-chest" style="--cc:'+(RARHEX[it.rar]||RARHEX.Common)+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 9l2-4h14l2 4M3 9v9a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V9M3 9h18M12 9v3"/></svg></div></div>'; }
+      if(it.kind==='boost'){ return '<div class="pv"><div class="pv-boost"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8Z"/></svg></div></div>'; }
+      return '';
+    }
+
+    // ── catalog ────────────────────────────────────────────────────────────
+    var CATS=['Frames','Badges','Auras','Boosts','Chests','Titles'];
+    var ITEMS=[
+      // Frames → equip via coreProfileTheme (profile FRAMES keys)
+      {id:'frame_default', cat:'Frames', name:'Default Frame', rar:'Common', cost:0,    kind:'frame', frameKey:'Default', desc:'The standard CORE profile border.'},
+      {id:'frame_blue',    cat:'Frames', name:'Blue Frame',    rar:'Common', cost:250,  kind:'frame', frameKey:'Blue',    desc:'A cool blue border for your card.'},
+      {id:'frame_gold',    cat:'Frames', name:'Gold Frame',    rar:'Rare',   cost:1000, kind:'frame', frameKey:'Gold',    lockRank:'Gold',   desc:'A premium gold border.'},
+      {id:'frame_crystal', cat:'Frames', name:'Crystal Frame', rar:'Epic',   cost:1500, kind:'frame', frameKey:'Crystal', desc:'A shimmering crystal border.'},
+      {id:'frame_aurora',  cat:'Frames', name:'Aurora Frame',  rar:'Epic',   cost:2500, kind:'frame', frameKey:'Aurora',  desc:'A glowing aurora border for standout cards.', featured:true},
+      // Badges → equip via coreEquippedBadge + added to inventory
+      {id:'badge_starter',    cat:'Badges', name:'Starter Badge',     rar:'Common', cost:0,    kind:'badge', earned:'starter', desc:'Earned from your first chest.'},
+      {id:'badge_focus',      cat:'Badges', name:'Focus Badge',       rar:'Common', cost:500,  kind:'badge', desc:'For disciplined focus sessions.'},
+      {id:'badge_discipline', cat:'Badges', name:'Discipline Badge',  rar:'Rare',   cost:750,  kind:'badge', desc:'Proof of consistent discipline.'},
+      {id:'badge_builder',    cat:'Badges', name:'Builder Badge',     rar:'Rare',   cost:750,  kind:'badge', desc:'For players who build their future.'},
+      {id:'badge_boss',       cat:'Badges', name:'Boss Slayer Badge', rar:'Epic',   cost:1500, kind:'badge', lockRank:'Ember', lockLabel:'Boss Quests', desc:'Unlocked when Boss Quests are available.'},
+      // Auras → equip via coreEquippedAura
+      {id:'aura_blue',  cat:'Auras', name:'Blue Aura',  rar:'Rare', cost:1200, kind:'aura', desc:'A subtle blue glow around your card.'},
+      {id:'aura_ember', cat:'Auras', name:'Ember Aura', rar:'Rare', cost:1500, kind:'aura', desc:'A warm ember glow.'},
+      {id:'aura_wind',  cat:'Auras', name:'Wind Aura',  rar:'Epic', cost:1800, kind:'aura', desc:'A flowing wind aura.'},
+      {id:'aura_core',  cat:'Auras', name:'CORE Aura',  rar:'Legendary', cost:5000, kind:'aura', lockRank:'CORE', desc:'The ultimate aura. Requires CORE rank.'},
+      // Boosts → coreState upgrades (sync with dashboard + quests + streak)
+      {id:'xpboost1',    cat:'Boosts', name:'XP Boost I',  rar:'Rare', cost:800,  kind:'boost', effect:'+5% XP from quests',  desc:'Earn 5% more XP from every quest.'},
+      {id:'chesthunter', cat:'Boosts', name:'Chest Hunter',rar:'Rare', cost:1000, kind:'boost', effect:'+3% rare chest chance', desc:'Improves your rare chest odds.'},
+      {id:'momentum',    cat:'Boosts', name:'Momentum',    rar:'Rare', cost:1200, kind:'boost', effect:'+1 streak shield', desc:'Adds a streak shield to protect your chain.'},
+      {id:'questmaster', cat:'Boosts', name:'Quest Master',rar:'Epic', cost:2000, kind:'boost', effect:'+1 daily quest slot', desc:'Unlocks a 4th daily quest.'},
+      // Chests → coreOwnedChests (repeatable)
+      {id:'chest_common',    cat:'Chests', name:'Common Chest',    rar:'Common', cost:500,  kind:'chest', desc:'A common reward chest.'},
+      {id:'chest_rare',      cat:'Chests', name:'Rare Chest',      rar:'Rare',   cost:1500, kind:'chest', desc:'A rare reward chest.'},
+      {id:'chest_epic',      cat:'Chests', name:'Epic Chest',      rar:'Epic',   cost:4000, kind:'chest', desc:'An epic reward chest.'},
+      {id:'chest_legendary', cat:'Chests', name:'Legendary Chest', rar:'Legendary', cost:8000, kind:'chest', lockRank:'Ascend', desc:'A legendary chest. Requires Ascend rank.'},
+      {id:'chest_mythic',    cat:'Chests', name:'Mythic Chest',    rar:'Mythic', cost:15000, kind:'chest', lockRank:'CORE', desc:'The rarest chest. Guarantees a Mythic pull. Requires CORE rank.'},
+      // Titles → coreProfileTitle
+      {id:'title_queststarter', cat:'Titles', name:'Quest Starter', rar:'Common', cost:300,  kind:'title', titleName:'Quest Starter', desc:'Show you have begun your journey.'},
+      {id:'title_disciplined',  cat:'Titles', name:'Disciplined',   rar:'Rare',   cost:700,  kind:'title', titleName:'Disciplined',   desc:'For the consistently disciplined.'},
+      {id:'title_unbreakable',  cat:'Titles', name:'Unbreakable',   rar:'Epic',   cost:1500, kind:'title', titleName:'Unbreakable',   desc:'Nothing breaks your momentum.'},
+      {id:'title_earlylegend',  cat:'Titles', name:'Early Legend',  rar:'Epic',   cost:2500, kind:'title', titleName:'Early Legend',  desc:'An early legend of CORE.'}
+    ];
+
+    // ── item state ───────────────────────────────────────────────────────────
+    function lockedReason(it){ if(!it.lockRank) return null; if(rankIdx()>=needIdx(it.lockRank)) return null; return 'Unlock at '+(it.lockLabel||it.lockRank); }
+    function isOwned(it){
+      if(it.kind==='chest') return false;                 // chests are repeatable purchases
+      if(it.earned==='starter') return starterOpened();
+      if(it.cost===0) return true;                        // free (Default Frame)
+      if(it.kind==='boost') return S.hasUpgrade(it.id) || jget('coreOwnedShopItems',[]).indexOf(it.id)>=0;
+      return jget('coreOwnedShopItems',[]).indexOf(it.id)>=0;
+    }
+    function isEquipped(it){
+      if(it.kind==='frame') return lget('coreProfileTheme','Default')===it.frameKey;
+      if(it.kind==='badge') return lget('coreEquippedBadge','')===it.id;
+      if(it.kind==='aura')  return lget('coreEquippedAura','')===it.id;
+      if(it.kind==='title') return lget('coreProfileTitle','')===it.titleName;
+      return false;
+    }
+    function equippable(it){ return it.kind==='frame'||it.kind==='badge'||it.kind==='aura'||it.kind==='title'; }
+    function ownedChest(it){ return it.kind==='chest' && jget('coreOwnedChests',[]).indexOf(it.id)>=0; }
+
+    // ── buy / equip ────────────────────────────────────────────────────────
+    var flash={};
+    function buy(it, priceOverride){
+      var price=(typeof priceOverride==='number')?priceOverride:it.cost;
+      if(lockedReason(it)){ toast(lockedReason(it),'warn'); return; }
+      if(isOwned(it)){ return; }
+      if(it.earned==='starter'){ toast('Open your first chest to earn this','warn'); return; }
+      if(coins() < price){ toast('Need more coins','warn'); return; }
+
+      if(it.kind==='boost'){
+        var r=S.buyUpgrade(it.id, price, 'coins');
+        if(!r || !r.ok){ toast('Need more coins','warn'); return; }
+        pushUniq('coreUnlockedPerks', it.name);
+        if(it.id==='momentum'){ lset('coreStreakShields', String(ig('coreStreakShields',0)+1)); }
+      } else {
+        var sp=S.spendCoins(price, 'shop:'+it.id);
+        if(!sp || !sp.ok){ toast('Need more coins','warn'); return; }
+        if(it.kind==='chest'){ pushUniq('coreOwnedChests', it.id); }
+        else { pushUniq('coreOwnedShopItems', it.id); }
+        if(it.kind==='badge'){ S.addItem({ id:it.id, name:it.name, type:'badge', rarity:it.rar.toLowerCase(), source:'Shop' }); }
+      }
+      if(price>0){ coinSpendFX(price); SFX('coin'); } else { SFX('confirm'); }
+      lset('coreCoins', String(coins()));               // mirror flat key
+      S.syncProgress(); dispatch();
+      flash={id:it.id, type:'bought'};
+      toast(it.kind==='chest'?'Chest added — tap Open':(it.kind==='badge'?'Added to Inventory':'Purchased'),'good');
+      render();
+      return true;
+    }
+    function equip(it){
+      if(it.kind==='frame'){ lset('coreProfileTheme', it.frameKey); lset('coreEquippedFrame', it.frameKey); }
+      else if(it.kind==='badge'){ lset('coreEquippedBadge', it.id); }
+      else if(it.kind==='aura'){ lset('coreEquippedAura', it.id); }
+      else if(it.kind==='title'){ lset('coreProfileTitle', it.titleName); }
+      else return;
+      S.syncProgress(); dispatch();
+      flash={id:it.id, type:'equipped-now'};
+      SFX('equip'); toast('Equipped','good'); render();
+    }
+
+    // ── free chest / daily deals / premium ──────────────────────────────────
+    function renderFreeChest(){
+      var host=qs('#freeChest'); if(!host) return;
+      var ready=freeChestReady(), floor=freeChestFloor();
+      var btn = ready
+        ? '<button class="btn free" data-act="claimfree"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l2-4h14l2 4M3 9v9h18V9M3 9h18M12 9v3"/></svg>Open Free Chest</button>'
+        : '<button class="btn free cooldown" data-act="freewait"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Next free chest in <span class="timer" id="freeTimer">'+fmtCountdown(freeChestRemaining())+'</span></button>';
+      host.innerHTML=
+        '<span class="ftag"><svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13"><path d="M12 2l2.4 6.8L21 9l-5.5 4 2 7-5.5-4.2L6.5 20l2-7L3 9l6.6-.2z"/></svg>Free · Daily</span>'+
+        '<div class="frow"><div class="fic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l2-4h14l2 4M3 9v9h18V9M3 9h18M12 9v3"/></svg></div>'+
+        '<div class="fb"><div class="fn">Free Chest</div>'+
+        '<div class="fmeta" style="margin-top:5px">'+rtagHTML(floor)+'</div>'+
+        '<div class="fsub">'+(ready?floor+'-tier floor · coins, XP & a surprise drop. Rises with your rank.':'Come back soon for your next free reward.')+'</div></div></div>'+
+        '<div class="fcta">'+btn+'</div>';
+    }
+
+    function dealItems(){
+      // deterministic per-day pick: 2 cosmetics/boosts + 1 rotating chest tier
+      var k=dayKey(), out=[];
+      var pool=ITEMS.filter(function(i){ return i.cost>0 && i.kind!=='chest' && !i.featured; });
+      var seen={};
+      for(var j=0;j<2 && out.length<2 && j<pool.length;j++){ var idx=(k*7+j*13)%pool.length, tries=0; while(seen[idx] && tries<pool.length){ idx=(idx+1)%pool.length; tries++; } seen[idx]=1; out.push(pool[idx]); }
+      // one discounted chest of the day (only tiers the player can actually open)
+      var chests=ITEMS.filter(function(i){ return i.kind==='chest' && !lockedReason(i); });
+      if(chests.length){ out.push(chests[(k*5)%chests.length]); }
+      return out;
+    }
+    function renderDeals(){
+      var host=qs('#dealsWrap'); if(!host) return;
+      var deals=dealItems();
+      if(!deals.length){ host.innerHTML=''; return; }
+      var cards=deals.map(function(it){
+        var price=Math.max(1, Math.round(it.cost*0.6)), owned=isOwned(it), lock=lockedReason(it);
+        var act = lock ? '<button class="btn locked" data-act="lock" data-id="'+it.id+'">'+lock+'</button>'
+          : owned ? '<button class="btn owned" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l4 4 10-11"/></svg>Owned</button>'
+          : '<button class="btn buy'+(coins()<price?' cant':'')+'" data-act="buydeal" data-id="'+it.id+'" data-price="'+price+'">Buy</button>';
+        return '<div class="deal r-'+it.rar.toLowerCase()+'"><span class="disc">-40%</span>'+
+          previewHTML(it)+
+          '<div class="dn">'+it.name+'</div>'+
+          '<div class="dprice"><span class="dnow">'+coinSvg()+price.toLocaleString()+'</span><span class="dwas">'+it.cost.toLocaleString()+'</span></div>'+
+          act+'</div>';
+      }).join('');
+      host.innerHTML=
+        '<div class="deals-head"><div class="dh"><svg class="fire" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3-1 4-1 6 0 1 1 2 1 2s2-1 2-3c2 2 3 4 3 7a5 5 0 0 1-10 0c0-3 2-5 3-7Z"/></svg>Daily Deals</div>'+
+        '<span class="deals-timer"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Ends in <span id="dealsTimer">'+fmtCountdown(msUntilMidnight())+'</span></span></div>'+
+        '<div class="deals">'+cards+'</div>';
+    }
+
+    function renderPremium(){
+      var host=qs('#premium'); if(!host) return;
+      var tick='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l4 4 10-11"/></svg>';
+      var feats=['2× coins & XP from every quest','Exclusive Plus-only frames & auras','A free Epic chest every week','Early access to new features'];
+      host.innerHTML=
+        '<span class="ptag"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M5 16l-2-9 6 4 3-6 3 6 6-4-2 9z"/></svg>CORE Plus</span>'+
+        '<div class="pt">Go Plus. Level up faster.</div>'+
+        '<div class="pp">Double rewards, exclusive cosmetics, and a weekly Epic chest. Cancel anytime.</div>'+
+        '<div class="pfeat">'+feats.map(function(f){ return '<div class="pf"><span class="pk">'+tick+'</span>'+f+'</div>'; }).join('')+'</div>'+
+        '<div class="pcta"><button class="btn premium-btn" data-act="premium">Unlock CORE Plus</button><span class="pprice">$7.99/mo</span></div>';
+    }
+
+    // ── render ────────────────────────────────────────────────────────────────
+    var activeCat='Frames';
+    function coinSvg(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/></svg>'; }
+    function rtagHTML(rar){ return '<span class="rtag" style="color:'+RAR[rar]+'"><span class="rd"></span>'+rar+'</span>'; }
+
+    // action button for a given item (shared by featured + grid)
+    function actionHTML(it){
+      var lock=lockedReason(it);
+      if(lock) return '<button class="btn locked" data-act="lock" data-id="'+it.id+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>'+lock+'</button>';
+      if(it.earned==='starter' && !starterOpened()) return '<button class="btn locked" data-act="lock" data-id="'+it.id+'">From first chest</button>';
+      if(ownedChest(it)) return '<button class="btn buy" data-act="open" data-id="'+it.id+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l2-4h14l2 4M3 9v9h18V9M3 9h18M12 9v3"/></svg>Open</button>';
+      if(isOwned(it)){
+        if(equippable(it)){ return isEquipped(it) ? '<button class="btn equipped" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l4 4 10-11"/></svg>Equipped</button>'
+                                                  : '<button class="btn equip" data-act="equip" data-id="'+it.id+'">Equip</button>'; }
+        return '<button class="btn owned" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l4 4 10-11"/></svg>Owned</button>';
+      }
+      var cant = coins() < it.cost;
+      return '<button class="btn buy'+(cant?' cant':'')+'" data-act="buy" data-id="'+it.id+'">Buy</button>';
+    }
+    function costHTML(it){ return it.cost===0 ? '<span class="cost free">Free</span>' : '<span class="cost">'+coinSvg()+it.cost.toLocaleString()+'</span>'; }
+
+    function render(){
+      var bal=coins();
+      animateCoins(bal);
+      animateOne('#curShards', S.read().shards||0);
+
+      // featured (Aurora frame)
+      var ft=ITEMS.filter(function(i){return i.featured;})[0];
+      var fl=lockedReason(ft);
+      var fact = fl ? '<button class="btn locked" data-act="lock" data-id="'+ft.id+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>'+fl+'</button>'
+        : isOwned(ft) ? (isEquipped(ft)?'<button class="btn equipped" disabled>Equipped</button>':'<button class="btn equip" data-act="equip" data-id="'+ft.id+'">Equip</button>')
+        : '<button class="btn buy'+(bal<ft.cost?' cant':'')+'" data-act="buy" data-id="'+ft.id+'">Buy</button>';
+      qs('#feat').innerHTML=
+        '<span class="ftag"><svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13"><path d="M12 2l2.4 6.8L21 9l-5.5 4 2 7-5.5-4.2L6.5 20l2-7L3 9l6.6-.2z"/></svg>Featured</span>'+
+        '<div class="frow"><div class="fic">'+AV+'</div>'+
+        '<div class="fb"><div class="fn">'+ft.name.replace('Frame','Profile Frame')+'</div><div class="fmeta">'+rtagHTML(ft.rar)+'</div></div></div>'+
+        '<div class="fd">'+ft.desc+'</div>'+
+        '<div class="fcta">'+costHTML(ft)+fact+'</div>';
+
+      // tabs
+      var tabs=qs('#tabs'); tabs.innerHTML='';
+      CATS.forEach(function(c){ var b=document.createElement('button'); b.className='tab'+(c===activeCat?' on':''); b.textContent=c; b.onclick=function(){ activeCat=c; render(); }; tabs.appendChild(b); });
+
+      // grid
+      var grid=qs('#grid'); grid.innerHTML='';
+      ITEMS.filter(function(i){return i.cat===activeCat;}).forEach(function(it){
+        var lock=lockedReason(it), owned=isOwned(it), equ=isEquipped(it);
+        var cls='item r-'+it.rar.toLowerCase()+(lock?' locked':'')+(owned&&!equippable(it)?' owned':'')+(owned&&equ?' owned':'');
+        if(flash.id===it.id) cls+=' '+flash.type;
+        var sub = it.kind==='boost' ? (it.effect||it.desc) : it.desc;
+        var el=document.createElement('div'); el.className=cls;
+        el.innerHTML=rtagHTML(it.rar)+
+          previewHTML(it)+
+          '<div class="in">'+it.name+'</div><div class="it">'+it.cat.replace(/s$/,'')+'</div>'+
+          '<div class="id2">'+sub+'</div>'+
+          '<div class="ifoot">'+costHTML(it)+actionHTML(it)+'</div>';
+        grid.appendChild(el);
+      });
+      flash={};
+
+      // additional sections (build before binding so their buttons get wired too)
+      renderFreeChest();
+      renderDeals();
+      renderPremium();
+
+      // bind actions
+      document.querySelectorAll('[data-act]').forEach(function(b){
+        var act=b.dataset.act;
+        var it=ITEMS.filter(function(x){return x.id===b.dataset.id;})[0];
+        b.addEventListener('click', function(){
+          var rect=b.getBoundingClientRect(), cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
+          // chest opening now happens on the dedicated full-screen opener (28-chest.html)
+          if(act==='claimfree'){ location.href='28-chest.html?source=shopfree&from=shop&rarity='+freeChestFloor().toLowerCase(); return; }
+          if(act==='freewait'){ toast('Free chest on cooldown','warn'); return; }
+          if(act==='premium'){ SFX('confirm'); location.href='29-core-plus.html?from=shop'; return; }
+          if(!it) return;
+          if(act==='buy'){ if(buy(it)) burstAt(cx, cy, it.cost===0?'#34D399':'#FFCB3D', 12); }
+          else if(act==='buydeal'){ var price=parseInt(b.dataset.price,10); if(isNaN(price)) price=it.cost; if(buy(it, price)) burstAt(cx, cy, '#FF7A3D', 12); }
+          else if(act==='equip'){ equip(it); burstAt(cx, cy, RARHEX[it.rar]||'#4A8FFF', 10); }
+          else if(act==='open'){ location.href='28-chest.html?chest='+encodeURIComponent(it.id)+'&from=shop'; }
+          else if(act==='lock'){ var l=lockedReason(it); toast(l||(it.earned==='starter'?'Open your first chest to earn this':'Locked'),'warn'); }
+        });
+      });
+    }
+
+    // ── live sync ───────────────────────────────────────────────────────────
+    window.addEventListener('coreStateChange', render);
+    window.addEventListener('core:progress-updated', function(){ render(); });
+    window.addEventListener('storage', function(e){ if(!e.key || /^core/.test(e.key)) render(); });
+
+    // countdowns: tick the free-chest + daily-deals timers every second
+    setInterval(function(){
+      var rem=freeChestRemaining(), ft=qs('#freeTimer');
+      if(ft && rem>0){ ft.textContent=fmtCountdown(rem); }
+      else if(ft && rem<=0){ render(); return; }      // free chest just became ready
+      var mm=msUntilMidnight(), dt=qs('#dealsTimer');
+      if(dt){ dt.textContent=fmtCountdown(mm); if(mm<=1200){ render(); } }   // new day → fresh deals
+    }, 1000);
+
+    render();
+    try{ var m=location.search.match(/cat=(\w+)/); if(m){ var c=CATS.filter(function(x){return x.toLowerCase()===m[1].toLowerCase();})[0]; if(c){ activeCat=c; render(); } } }catch(e){}
+    // deep-link to a scroll position (e.g. ?scrollY=1200) — used for section links + QA
+    try{ var sm=location.search.match(/scrollY=(\d+)/); if(sm){ var sc=qs('.scroll'); if(sc) sc.scrollTop=+sm[1]; } }catch(e){}
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,733 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8" />
+<title>CORE — Streak</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<style>
+  :root {
+    --bg-base:#02020A; --bg-card:rgba(255,255,255,0.035); --bg-card-2:rgba(255,255,255,0.06);
+    --border:rgba(255,255,255,0.08); --text:#F8FAFE; --muted:#9AA1B7; --dim:#6B7390;
+    --accent:#4A8FFF; --grad-a:#4A8FFF; --grad-b:#6F70FF; --grad-c:#5BC8FF;
+    --good:#34D399; --warn:#FFB454; --bad:#FF6B6B;
+    /* dynamic tier vars (set per streak length in JS) — electric-blue family */
+    --tc:#6B7186; --tc2:#4F5570; --tglow:#6B7186;
+  }
+  * { box-sizing:border-box; }
+  html, body { margin:0; padding:0; height:100%; }
+  body { min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif;
+    color:var(--text); -webkit-font-smoothing:antialiased; padding:24px; overflow:hidden; }
+  .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden;
+    box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+  .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:60; }
+  .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:60; }
+
+  /* ambient backdrop */
+  .bg { position:absolute; inset:0; z-index:0; transition:background .8s ease; background:
+      radial-gradient(62% 40% at 50% 6%, color-mix(in srgb,var(--tglow) 20%,transparent) 0%, transparent 62%),
+      radial-gradient(60% 35% at 50% 98%, rgba(111,112,255,0.08) 0%, transparent 65%),
+      linear-gradient(180deg, #060a1c 0%, #02020A 58%, #050510 100%); }
+  .aurora { position:absolute; inset:0; z-index:1; pointer-events:none; opacity:0.4; mix-blend-mode:screen; }
+  .aurora::before, .aurora::after { content:""; position:absolute; border-radius:50%; filter:blur(72px); animation:auroraDrift 22s ease-in-out infinite; will-change:transform; }
+  .aurora::before { width:72%; height:42%; left:-12%; top:1%; background:radial-gradient(circle, color-mix(in srgb,var(--tglow) 34%,transparent), transparent 65%); transition:background .8s; }
+  .aurora::after { width:60%; height:35%; right:-8%; bottom:14%; background:radial-gradient(circle, rgba(91,200,255,0.16), transparent 65%); animation-delay:-11s; }
+  @keyframes auroraDrift { 0%,100%{transform:translate(0,0) scale(1);opacity:0.42;} 50%{transform:translate(16px,-12px) scale(1.06);opacity:0.62;} }
+  .stars { position:absolute; inset:-2%; pointer-events:none; z-index:2; }
+  .star { position:absolute; border-radius:50%; background:#fff; animation:twinkle var(--d,4s) ease-in-out var(--del,0s) infinite; }
+  @keyframes twinkle { 0%,100%{opacity:0.15;transform:scale(0.7);} 50%{opacity:0.8;transform:scale(1.1);} }
+
+  .frame { position:absolute; inset:0; z-index:10; display:flex; flex-direction:column; padding:54px 0 0; }
+  .scroll { flex:1; overflow-y:auto; padding:4px 18px 112px; -webkit-overflow-scrolling:touch; }
+  .scroll::-webkit-scrollbar{ display:none; }
+  .sec { margin:24px 4px 11px; display:flex; align-items:center; justify-content:space-between; }
+  .sec h2 { margin:0; font-size:12.5px; font-weight:800; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); }
+  .sec .meta { font-size:12px; font-weight:800; color:var(--dim); letter-spacing:.04em; }
+
+  /* header */
+  .topbar { position:relative; display:flex; align-items:center; justify-content:space-between; padding:6px 18px 4px; }
+  .back { width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; background:var(--bg-card); border:1px solid var(--border); color:var(--text); text-decoration:none; }
+  .back svg{ width:20px; height:20px; }
+  .topbar .ttl { position:absolute; left:50%; transform:translateX(-50%); font-size:13px; font-weight:800; letter-spacing:0.2em; text-transform:uppercase; color:var(--text); }
+  .topbar .best { display:inline-flex; align-items:center; gap:6px; height:38px; padding:0 13px; border-radius:999px; background:var(--bg-card); border:1px solid var(--border); font-size:12px; font-weight:800; color:#cfe0ff; }
+  .topbar .best svg{ width:14px; height:14px; color:var(--accent); }
+
+  /* ════ HERO ════ */
+  .hero { position:relative; margin-top:10px; min-height:368px; border-radius:30px; overflow:hidden; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+    background:linear-gradient(165deg, color-mix(in srgb,var(--tc) 20%,#0a0e1e), rgba(255,255,255,0.02) 70%);
+    border:1px solid color-mix(in srgb,var(--tc) 36%,transparent); box-shadow:0 26px 70px rgba(0,0,0,0.5), inset 0 0 60px color-mix(in srgb,var(--tglow) 8%,transparent);
+    transition:border-color .8s, box-shadow .8s, background .8s; }
+  .hero .auraLayer{ position:absolute; inset:0; z-index:0; pointer-events:none; background:radial-gradient(60% 55% at 50% 42%, color-mix(in srgb,var(--tglow) 34%,transparent), transparent 70%); animation:breathe 4.4s ease-in-out infinite; transition:background .8s; }
+  @keyframes breathe{ 0%,100%{ transform:scale(.95); opacity:.7; } 50%{ transform:scale(1.06); opacity:1; } }
+  .hero .rings{ position:absolute; inset:0; z-index:0; pointer-events:none; display:none; }
+  .hero.t14 .rings,.hero.t30 .rings,.hero.t60 .rings,.hero.t100 .rings{ display:block; }
+  .hero .rings i{ position:absolute; left:50%; top:42%; border-radius:50%; border:1.5px solid color-mix(in srgb,var(--tglow) 50%,transparent); transform:translate(-50%,-50%); }
+  .hero .rings i:nth-child(1){ width:212px; height:212px; animation:ringSpin 14s linear infinite; }
+  .hero .rings i:nth-child(2){ width:282px; height:282px; border-style:dashed; animation:ringSpin 22s linear infinite reverse; opacity:.6; }
+  .hero .rings i:nth-child(3){ width:352px; height:352px; opacity:.3; animation:ringSpin 30s linear infinite; }
+  @keyframes ringSpin{ to{ transform:translate(-50%,-50%) rotate(360deg); } }
+  .hero .heroParticles{ position:absolute; inset:0; z-index:1; pointer-events:none; overflow:hidden; }
+  .hero .hp{ position:absolute; bottom:-6%; width:5px; height:5px; border-radius:50%; background:radial-gradient(circle,#fff,color-mix(in srgb,var(--tglow) 80%,transparent)); opacity:0; box-shadow:0 0 7px color-mix(in srgb,var(--tglow) 80%,transparent); animation:hpRise var(--hd,6s) ease-in var(--hdl,0s) infinite; }
+  @keyframes hpRise{ 0%{ opacity:0; transform:translate(0,0) scale(.5);} 14%{ opacity:.9;} 80%{ opacity:.5;} 100%{ opacity:0; transform:translate(var(--hx,0),-330px) scale(.15);} }
+  .hero .rainbow{ position:absolute; inset:0; border-radius:30px; padding:2px; z-index:2; pointer-events:none; display:none;
+    background:linear-gradient(120deg,#5BC8FF,#4A8FFF,#6F70FF,#B388FF,#9FC0FF,#5BC8FF); background-size:300% 300%;
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; animation:rainbowShift 5s linear infinite; }
+  .hero.t100 .rainbow{ display:block; }
+  @keyframes rainbowShift{ to{ background-position:300% 0; } }
+  .hero .heroInner{ position:relative; z-index:3; display:flex; flex-direction:column; align-items:center; padding:30px 18px; }
+  /* flame mark */
+  .hero .flame{ width:46px; height:46px; margin-bottom:2px; color:color-mix(in srgb,var(--tglow) 80%,#fff); filter:drop-shadow(0 0 14px color-mix(in srgb,var(--tglow) 70%,transparent)); animation:flameFlick 3s ease-in-out infinite; }
+  @keyframes flameFlick{ 0%,100%{ transform:scale(1) translateY(0);} 50%{ transform:scale(1.06) translateY(-2px);} }
+  .hero .tierName{ margin-top:2px; font-size:10px; font-weight:900; letter-spacing:.22em; text-transform:uppercase; color:color-mix(in srgb,var(--tglow) 72%,#fff); }
+  .hero .bignum{ font-size:108px; font-weight:900; line-height:0.84; letter-spacing:-0.04em; margin:4px 0 0;
+    background:linear-gradient(180deg,#fff,color-mix(in srgb,var(--tglow) 62%,#fff)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+    filter:drop-shadow(0 0 18px color-mix(in srgb,var(--tglow) 55%,transparent)); transition:filter .4s; }
+  .hero .bignum.pop{ animation:numPop .8s cubic-bezier(.2,.9,.3,1.4); }
+  @keyframes numPop{ 0%{ transform:scale(1);} 35%{ transform:scale(1.22); filter:drop-shadow(0 0 40px color-mix(in srgb,var(--tglow) 90%,#fff));} 100%{ transform:scale(1);} }
+  .hero .daylab{ font-size:11px; font-weight:800; letter-spacing:.24em; text-transform:uppercase; color:var(--muted); margin-top:2px; }
+  .hero .multbadge{ margin-top:15px; display:inline-flex; align-items:center; gap:7px; padding:8px 15px; border-radius:999px; font-size:13.5px; font-weight:900;
+    color:color-mix(in srgb,var(--tglow) 78%,#fff); background:color-mix(in srgb,var(--tglow) 14%,rgba(0,0,0,.3)); border:1px solid color-mix(in srgb,var(--tglow) 40%,transparent);
+    box-shadow:0 0 22px color-mix(in srgb,var(--tglow) 22%,transparent); }
+  .hero .multbadge svg{ width:15px; height:15px; }
+  .hero .motivate{ margin-top:14px; font-size:13.5px; font-weight:600; color:#dfe6f5; max-width:270px; min-height:19px; transition:opacity .5s; }
+  .hero .statusPill{ margin-top:13px; display:inline-flex; align-items:center; gap:8px; padding:7px 13px; border-radius:999px; font-size:11px; font-weight:800; }
+  .hero .statusPill svg{ width:14px; height:14px; }
+  .hero .statusPill.on{ color:var(--good); background:rgba(52,211,153,.12); border:1px solid rgba(52,211,153,.34); }
+  .hero .statusPill.off{ color:var(--warn); background:rgba(255,180,84,.12); border:1px solid rgba(255,180,84,.3); }
+
+  /* ════ PRIMARY CTA ════ */
+  .cta{ display:flex; align-items:center; justify-content:center; gap:9px; margin-top:13px; width:100%; min-height:44px; padding:15px; border-radius:16px; border:none; cursor:pointer; font:inherit; font-size:15px; font-weight:800; color:#fff; text-decoration:none;
+    background:linear-gradient(135deg,var(--grad-a),var(--grad-b)); box-shadow:0 10px 26px rgba(74,143,255,.4); transition:transform .12s, filter .2s; }
+  .cta:active{ transform:scale(.985); }
+  .cta svg{ width:17px; height:17px; }
+  .cta.secured{ color:var(--good); background:rgba(52,211,153,.1); border:1px solid rgba(52,211,153,.34); box-shadow:none; cursor:default; }
+
+  /* recovery banner */
+  .recover{ display:flex; align-items:center; gap:13px; margin-top:13px; border-radius:18px; padding:14px 15px; background:linear-gradient(155deg, rgba(255,107,107,0.14), rgba(255,255,255,0.02)); border:1px solid rgba(255,107,107,0.3); }
+  .recover .ri{ width:42px; height:42px; flex:none; border-radius:12px; display:flex; align-items:center; justify-content:center; background:rgba(255,107,107,0.16); border:1px solid rgba(255,107,107,0.32); }
+  .recover .ri svg{ width:23px; height:23px; color:var(--bad); }
+  .recover .rb{ flex:1; min-width:0; } .recover .rt{ font-size:14px; font-weight:900; } .recover .rd{ font-size:11.5px; color:var(--muted); margin-top:2px; }
+  .recover .rbtn{ flex:none; border:none; cursor:pointer; font:inherit; font-size:12.5px; font-weight:800; color:#fff; padding:10px 14px; border-radius:12px; background:linear-gradient(135deg,var(--grad-a),var(--grad-b)); box-shadow:0 6px 16px rgba(74,143,255,.4); }
+  .recover .rbtn:active{ transform:scale(.96); }
+
+  /* ════ WEEK STRIP ════ */
+  .week{ border-radius:20px; padding:15px 13px; background:var(--bg-card); border:1px solid var(--border); }
+  .weekrow{ display:grid; grid-template-columns:repeat(7,1fr); gap:7px; }
+  .wd{ display:flex; flex-direction:column; align-items:center; gap:7px; }
+  .wd .wl{ font-size:10px; font-weight:800; letter-spacing:.02em; text-transform:uppercase; color:var(--dim); }
+  .wd .wc{ width:100%; aspect-ratio:1; border-radius:13px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); color:var(--dim); transition:.2s; }
+  .wd .wc svg{ width:16px; height:16px; }
+  .wd.done .wc{ background:linear-gradient(150deg, color-mix(in srgb,var(--accent) 28%,transparent), color-mix(in srgb,var(--accent) 8%,transparent)); border-color:color-mix(in srgb,var(--accent) 52%,transparent); color:#cfe0ff; box-shadow:0 0 14px color-mix(in srgb,var(--accent) 28%,transparent); }
+  .wd.today .wc{ border:2px solid var(--accent); color:#fff; box-shadow:0 0 16px rgba(74,143,255,.5); animation:nowPulse 2.2s ease-in-out infinite; }
+  @keyframes nowPulse{ 0%,100%{ box-shadow:0 0 10px rgba(74,143,255,.4);} 50%{ box-shadow:0 0 20px rgba(74,143,255,.72);} }
+  .wd.missed .wc{ color:var(--bad); border-color:rgba(255,107,107,.26); }
+  .wd.future .wc{ opacity:.4; }
+
+  /* ════ STATS ════ */
+  .stats{ display:grid; grid-template-columns:repeat(2,1fr); gap:11px; }
+  .stat{ position:relative; overflow:hidden; border-radius:18px; padding:15px; background:var(--bg-card); border:1px solid var(--border); cursor:default;
+    transition:transform .2s cubic-bezier(.2,.8,.2,1), border-color .25s, box-shadow .3s; }
+  .stat:hover{ transform:translateY(-4px); border-color:color-mix(in srgb,var(--sc,#4A8FFF) 45%,transparent); box-shadow:0 12px 30px -10px var(--sc,#4A8FFF); }
+  .stat .sic{ width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center; background:color-mix(in srgb,var(--sc,#4A8FFF) 14%,transparent); border:1px solid color-mix(in srgb,var(--sc,#4A8FFF) 30%,transparent); margin-bottom:11px; }
+  .stat .sic svg{ width:20px; height:20px; color:var(--sc,#4A8FFF); }
+  .stat .sv{ font-size:26px; font-weight:900; letter-spacing:-.02em; line-height:1; }
+  .stat .sl{ font-size:10.5px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--dim); margin-top:6px; }
+
+  /* ════ XP MULTIPLIER ════ */
+  .multbar{ position:relative; overflow:hidden; border-radius:20px; padding:16px; background:linear-gradient(155deg, color-mix(in srgb,var(--tglow) 14%,transparent), rgba(255,255,255,0.02)); border:1px solid color-mix(in srgb,var(--tglow) 30%,transparent); }
+  .multbar .mh{ display:flex; align-items:center; justify-content:space-between; }
+  .multbar .mnow{ font-size:24px; font-weight:900; color:color-mix(in srgb,var(--tglow) 78%,#fff); text-shadow:0 0 18px color-mix(in srgb,var(--tglow) 40%,transparent); }
+  .multbar .ml{ font-size:10px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); }
+  .multbar .mnext{ font-size:11.5px; font-weight:800; color:var(--muted); text-align:right; }
+  .multbar .mnext b{ color:var(--text); }
+  .multbar .track{ position:relative; height:8px; border-radius:999px; background:rgba(0,0,0,.4); overflow:hidden; margin-top:12px; }
+  .multbar .track .fill{ position:absolute; inset:0 auto 0 0; width:0%; border-radius:999px; background:linear-gradient(90deg,var(--tc),var(--tglow)); box-shadow:0 0 12px color-mix(in srgb,var(--tglow) 60%,transparent); transition:width 1s cubic-bezier(.2,.85,.25,1); }
+  .multbar .ticks{ display:flex; justify-content:space-between; margin-top:9px; }
+  .multbar .tk{ font-size:9px; font-weight:800; color:var(--dim); } .multbar .tk.on{ color:color-mix(in srgb,var(--tglow) 72%,#fff); }
+
+  /* ════ SHIELDS (compact) ════ */
+  .shield { position:relative; overflow:hidden; border-radius:20px; padding:15px; background:linear-gradient(155deg, rgba(74,143,255,0.12), rgba(111,112,255,0.05) 55%, rgba(255,255,255,0.02)); border:1px solid rgba(120,160,255,0.24); }
+  .shield::before{ content:""; position:absolute; inset:0; pointer-events:none; background:radial-gradient(130% 90% at 50% 0%, rgba(74,143,255,0.16), transparent 62%); }
+  .shield .shrow{ position:relative; z-index:1; display:flex; align-items:center; gap:13px; }
+  .shield .shi{ position:relative; width:48px; height:48px; flex:none; border-radius:14px; display:flex; align-items:center; justify-content:center; background:rgba(74,143,255,0.12); border:1px solid rgba(120,160,255,0.25); }
+  .shield .shi svg{ width:26px; height:26px; color:var(--accent); filter:drop-shadow(0 0 8px rgba(74,143,255,.6)); animation:shieldGlow 3.4s ease-in-out infinite; }
+  @keyframes shieldGlow{ 0%,100%{ filter:drop-shadow(0 0 6px rgba(74,143,255,.45)); } 50%{ filter:drop-shadow(0 0 15px rgba(120,170,255,.95)); } }
+  .shield .shb{ flex:1; min-width:0; }
+  .shield .shcount{ font-size:18px; font-weight:900; } .shield .shcount span{ font-size:12px; font-weight:800; color:var(--muted); }
+  .shield .shd{ font-size:11.5px; color:var(--muted); margin-top:3px; line-height:1.4; }
+  .shield .shdots{ position:relative; z-index:1; display:flex; gap:7px; margin-top:13px; }
+  .shield .shdot{ flex:1; height:8px; border-radius:999px; background:rgba(0,0,0,.28); border:1px solid var(--border); }
+  .shield .shdot.on{ background:linear-gradient(90deg,var(--accent),var(--grad-b)); border-color:transparent; box-shadow:0 0 12px rgba(74,143,255,.5); }
+  .shield .shreq{ position:relative; z-index:1; display:inline-flex; align-items:center; gap:6px; margin-top:12px; font-size:10.5px; font-weight:800; color:#9fc0ff; }
+  .shield .shreq svg{ width:13px; height:13px; flex:none; }
+  .shield.locked .shi svg{ color:var(--dim); animation:none; } .shield.locked .shi{ background:rgba(120,150,220,0.07); }
+
+  /* ════ NEXT REWARD (compact) ════ */
+  .nextrw{ display:flex; align-items:center; gap:13px; border-radius:18px; padding:14px 15px; background:linear-gradient(155deg, color-mix(in srgb,var(--rc,#4A8FFF) 14%,transparent), rgba(255,255,255,.02)); border:1px solid color-mix(in srgb,var(--rc,#4A8FFF) 30%,transparent); }
+  .nextrw .ni{ width:48px; height:46px; flex:none; border-radius:13px; display:flex; align-items:center; justify-content:center; background:color-mix(in srgb,var(--rc,#4A8FFF) 16%,transparent); border:1px solid color-mix(in srgb,var(--rc,#4A8FFF) 32%,transparent); color:var(--rc,#4A8FFF); }
+  .nextrw .ni svg{ width:24px; height:24px; }
+  .nextrw .nb{ flex:1; min-width:0; }
+  .nextrw .nt{ font-size:14px; font-weight:900; }
+  .nextrw .nd{ font-size:11.5px; color:var(--muted); margin-top:3px; line-height:1.35; }
+  .nextrw .nbtn{ flex:none; border:none; cursor:pointer; font:inherit; font-size:12.5px; font-weight:800; color:#fff; padding:11px 15px; border-radius:12px; min-height:44px; background:linear-gradient(135deg,var(--grad-a),var(--grad-b)); box-shadow:0 6px 16px rgba(74,143,255,.34); }
+  .nextrw .nbtn.claim{ color:#04130c; background:linear-gradient(135deg,#5ff0b0,var(--good)); box-shadow:0 6px 16px rgba(52,211,153,.34); animation:claimPulse 1.7s ease-in-out infinite; }
+  @keyframes claimPulse{ 0%,100%{ box-shadow:0 6px 16px rgba(52,211,153,.34);} 50%{ box-shadow:0 6px 22px rgba(52,211,153,.6);} }
+  .nextrw .nbtn:active{ transform:scale(.96); }
+  .nextrw .nwait{ flex:none; font-size:13px; font-weight:900; color:var(--rc,#4A8FFF); }
+
+  /* chest visuals (shared with celebration) */
+  .chestv{ position:relative; width:30px; height:28px; } .chestv svg{ width:100%; height:100%; }
+  .chestv.bronze{ color:#CD7F32; } .chestv.silver{ color:#C6CDDA; } .chestv.gold{ color:#FFD24D; } .chestv.legendary{ color:#9FC0FF; }
+
+  /* ════ CELEBRATION OVERLAY ════ */
+  .celebrate{ position:absolute; inset:0; z-index:80; display:none; align-items:center; justify-content:center; flex-direction:column;
+    background:radial-gradient(60% 50% at 50% 42%, color-mix(in srgb,var(--cpc,#4A8FFF) 22%,transparent), rgba(2,2,10,.95) 72%); backdrop-filter:blur(3px); }
+  .celebrate.show{ display:flex; }
+  .celebrate .cflash{ position:absolute; inset:0; background:#fff; opacity:0; pointer-events:none; }
+  .celebrate.show .cflash{ animation:cFlash .6s ease; }
+  @keyframes cFlash{ 0%{opacity:0;} 18%{opacity:.85;} 100%{opacity:0;} }
+  .celebrate .cglow{ position:absolute; inset:0; pointer-events:none; background:radial-gradient(44% 34% at 50% 40%, color-mix(in srgb,var(--cpc,#4A8FFF) 80%,transparent), transparent 70%); opacity:0; }
+  .celebrate.show .cglow{ animation:cGlow 2.4s ease forwards; }
+  @keyframes cGlow{ 0%{opacity:0;} 25%{opacity:.9;} 100%{opacity:.25;} }
+  .celebrate .crewic{ position:relative; z-index:2; width:130px; height:120px; display:flex; align-items:center; justify-content:center; transform:scale(.4); opacity:0; }
+  .celebrate.show .crewic{ animation:cReward .7s cubic-bezier(.2,.9,.3,1.5) .25s forwards; }
+  @keyframes cReward{ to{ transform:scale(1); opacity:1; } }
+  .celebrate .crewic > svg{ width:96px; height:96px; color:var(--cpc,#4A8FFF); filter:drop-shadow(0 8px 24px color-mix(in srgb,var(--cpc,#4A8FFF) 60%,transparent)); }
+  .celebrate .crewic .chestv{ width:96px; height:90px; }
+  .celebrate .ceyebrow{ z-index:2; margin-top:18px; font-size:11px; font-weight:900; letter-spacing:.22em; text-transform:uppercase; color:var(--cpc,#4A8FFF); opacity:0; }
+  .celebrate .ctitle{ z-index:2; font-size:23px; font-weight:900; margin-top:5px; opacity:0; text-align:center; padding:0 30px; }
+  .celebrate .creward{ z-index:2; font-size:13.5px; font-weight:700; color:#dfe6f5; margin-top:6px; opacity:0; text-align:center; padding:0 36px; }
+  .celebrate .cxp{ z-index:2; margin-top:10px; font-size:13px; font-weight:900; color:var(--good); opacity:0; }
+  .celebrate.show .ceyebrow{ animation:cFade .5s ease .55s forwards; } .celebrate.show .ctitle{ animation:cFade .5s ease .65s forwards; }
+  .celebrate.show .creward{ animation:cFade .5s ease .8s forwards; } .celebrate.show .cxp{ animation:cFade .5s ease .95s forwards; }
+  @keyframes cFade{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;} }
+  .celebrate .cbtn{ z-index:2; margin-top:26px; width:220px; padding:14px; border-radius:14px; border:none; cursor:pointer; font:inherit; font-size:15px; font-weight:900; color:#fff; background:linear-gradient(135deg,var(--grad-a),var(--grad-b)); box-shadow:0 10px 26px rgba(74,143,255,.45); opacity:0; }
+  .celebrate.show .cbtn{ animation:cFade .5s ease 1.1s forwards; } .celebrate .cbtn:active{ transform:scale(.98); }
+
+  /* fx */
+  .spark{ position:absolute; width:7px; height:7px; border-radius:50%; pointer-events:none; z-index:78; }
+
+  .reveal{ opacity:0; transform:translateY(16px); transition:opacity .6s ease, transform .6s cubic-bezier(.2,.8,.2,1); }
+  .reveal.in{ opacity:1; transform:none; }
+
+  /* nav */
+  .nav { position:absolute; left:0; right:0; bottom:0; z-index:50; padding:10px 12px 26px; display:flex; justify-content:space-around; align-items:flex-end; background:linear-gradient(180deg, rgba(5,6,14,0) 0%, rgba(5,6,14,0.88) 34%, #04040c 100%); backdrop-filter:blur(14px); }
+  .nav a { background:none; border:none; font:inherit; cursor:pointer; position:relative; display:flex; flex-direction:column; align-items:center; gap:4px; padding:6px 8px; min-width:48px; min-height:44px; text-decoration:none; color:var(--dim); transition:color .2s, transform .15s; }
+  .nav svg{ width:23px; height:23px; } .nav .nl{ font-size:10px; font-weight:800; } .nav .item:active{ transform:translateY(1px); }
+  .nav .item.active{ color:var(--text); } .nav .item.active svg{ color:var(--accent); filter:drop-shadow(0 0 8px rgba(74,143,255,.75)); }
+  .nav .item:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:10px; }
+
+  .toast{ position:absolute; left:50%; bottom:100px; transform:translateX(-50%) translateY(14px); z-index:70; background:rgba(20,22,34,0.96); border:1px solid var(--border); border-radius:14px; padding:11px 16px; font-size:13px; font-weight:700; opacity:0; pointer-events:none; transition:.3s; box-shadow:0 12px 30px rgba(0,0,0,.5); white-space:nowrap; }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  @media (prefers-reduced-motion: reduce){
+    .aurora::before,.aurora::after,.star,.hero .auraLayer,.hero .hp,.hero .rings i,.hero .rainbow,.hero .flame,
+    .hero .bignum,.shield .shi svg,.wd.today .wc,.spark,.nextrw .nbtn.claim,
+    .celebrate .cflash,.celebrate .cglow,.celebrate .crewic,.multbar .track .fill{ animation:none!important; }
+    .reveal{ opacity:1!important; transform:none!important; }
+  }
+</style>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg" id="bgEl"></div><div class="aurora" id="auroraEl"></div><div class="stars" id="stars"></div><div class="notch"></div>
+
+    <div class="frame">
+      <div class="topbar">
+        <a class="back" href="20-dashboard.html" aria-label="Back to dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></a>
+        <span class="ttl">Streak</span>
+        <span class="best"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5Z"/></svg>Best <span id="bestN">0</span></span>
+      </div>
+
+      <div class="scroll">
+        <!-- ════ HERO ════ -->
+        <div class="hero t0" id="hero">
+          <div class="auraLayer"></div>
+          <div class="rings"><i></i><i></i><i></i></div>
+          <div class="heroParticles" id="heroParticles"></div>
+          <div class="rainbow"></div>
+          <div class="heroInner">
+            <svg class="flame" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1.3 3.6-1 5-1 7.6 0 1.6 1 2.6 1 2.6s2-1 2-3.6c2 2 3 4.4 3 7.4a5 5 0 0 1-10 0c0-3.4 2.2-5.4 3-9 .9 2 2 2 2 2s0-2.6 0-7Z"/></svg>
+            <div class="tierName" id="tierName">Dormant</div>
+            <div class="bignum" id="streakN">0</div>
+            <div class="daylab" id="dayLab">Day Streak</div>
+            <div class="multbadge" id="multBadge"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8Z"/></svg><span id="multTxt">1.00x XP</span></div>
+            <div class="motivate" id="motivate">Your journey starts with day one.</div>
+            <div class="statusPill off" id="statusPill"></div>
+          </div>
+        </div>
+
+        <!-- primary CTA -->
+        <a class="cta" id="cta" href="21-quests.html"></a>
+
+        <!-- streak recovery -->
+        <div class="recover" id="recover" hidden></div>
+
+        <!-- ════ WEEK STRIP ════ -->
+        <div class="sec reveal"><h2>This week</h2><span class="meta" id="weekMeta"></span></div>
+        <div class="week reveal"><div class="weekrow" id="week"></div></div>
+
+        <!-- ════ NEXT REWARD ════ -->
+        <div class="sec reveal"><h2>Streak reward</h2><span class="meta" id="rewardMeta"></span></div>
+        <div class="nextrw reveal" id="nextReward"></div>
+
+        <!-- ════ STATS ════ -->
+        <div class="sec reveal"><h2>Lifetime stats</h2></div>
+        <div class="stats reveal" id="stats"></div>
+
+        <!-- ════ XP MULTIPLIER ════ -->
+        <div class="sec reveal"><h2>XP Multiplier</h2><span class="meta" id="multMeta"></span></div>
+        <div class="multbar reveal" id="multbar"></div>
+
+        <!-- ════ SHIELDS ════ -->
+        <div class="sec reveal"><h2>Streak shields</h2><span class="meta" id="shieldMeta"></span></div>
+        <div class="shield locked reveal" id="shield"></div>
+      </div>
+
+      <nav class="nav" aria-label="Primary">
+        <a class="item" href="20-dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 11l9-7 9 7M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/></svg><span class="nl">Home</span></a>
+        <a class="item" href="21-quests.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg><span class="nl">Quests</span></a>
+        <a class="item" href="27-shop.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M6 2L3 6v13a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"/></svg><span class="nl">Shop</span></a>
+        <a class="item" href="23-profile.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="nl">Profile</span></a>
+        <a class="item active" href="24-more.html" aria-current="page"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg><span class="nl">More</span></a>
+      </nav>
+      <div class="home-indicator"></div>
+    </div>
+
+    <!-- celebration overlay -->
+    <div class="celebrate" id="celebrate">
+      <div class="cflash"></div><div class="cglow"></div>
+      <div class="crewic" id="celIc"></div>
+      <div class="ceyebrow" id="celEyebrow">Milestone reached</div>
+      <div class="ctitle" id="celTitle"></div>
+      <div class="creward" id="celReward"></div>
+      <div class="cxp" id="celXp"></div>
+      <button class="cbtn" id="celBtn" type="button">Collect</button>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script src="_lib/core-sfx.js"></script>
+  <script src="_lib/core-state.js"></script>
+  <script>
+  (function(){
+    var S=window.coreState, qs=function(s){return document.querySelector(s);};
+    try{ if(/[?&]demo=1/.test(location.search) && S.seedDemo) S.seedDemo(); }catch(e){}
+    var REDUCED=false; try{ REDUCED=window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
+    function SFX(name){ try{ if(typeof window.coreSfx==='function') window.coreSfx(name); }catch(e){} }
+
+    // ── starfield ───────────────────────────────────────────────────────────────
+    (function(){ var h=document.getElementById('stars'); if(!h) return; var f=document.createDocumentFragment();
+      for(var i=0;i<58;i++){ var d=document.createElement('span'); d.className='star'; var sz=(i%7===0)?2.2:(i%3===0)?1.6:1.0;
+        d.style.width=sz+'px'; d.style.height=sz+'px'; d.style.left=((i*37)%100)+'%'; d.style.top=((i*53)%100)+'%';
+        d.style.setProperty('--d',(3+(i%5))+'s'); d.style.setProperty('--del',((i%9)*0.4)+'s'); if(i%11===0) d.style.boxShadow='0 0 6px rgba(150,195,255,0.8)'; f.appendChild(d); }
+      h.appendChild(f); })();
+
+    // ── storage helpers (preserved data plumbing) ────────────────────────────────
+    function lget(k,d){ try{ var v=localStorage.getItem(k); return (v===null)?d:v; }catch(e){ return d; } }
+    var _quotaToasted=false;
+    function lset(k,v){ try{ localStorage.setItem(k,v); return true; }catch(e){ return _onQuota(e,k,function(){ try{ localStorage.setItem(k,v); }catch(e2){} }); } }
+    function ig(k,d){ var v=parseInt(lget(k,''),10); return isNaN(v)?d:v; }
+    function jget(k,d){ try{ var v=JSON.parse(localStorage.getItem(k)||'null'); return Array.isArray(v)?v:(v||d); }catch(e){ return d; } }
+    function jset(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); return true; }catch(e){ return _onQuota(e,k,function(){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e2){} }); } }
+    function _onQuota(e,k,retry){ try{ var h=jget('coreStreakHistory',[]); if(h.length>200){ try{ localStorage.setItem('coreStreakHistory',JSON.stringify(h.slice(-200))); }catch(e2){} } retry(); if(!_quotaToasted){ _quotaToasted=true; toast('Storage full — trimmed old history'); } }catch(e3){} return false; }
+    function pushUniq(k,val){ var a=jget(k,[]); if(a.indexOf(val)<0){ a.push(val); jset(k,a); } }
+    function dkey(d){ return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
+    function todayKey(){ return dkey(new Date()); }
+    function addDays(d,n){ var x=new Date(d.getTime()); x.setDate(x.getDate()+n); return x; }
+    function cleanHistory(){ var raw=jget('coreStreakHistory',[]), tk=todayKey(), seen={}, out=[];
+      for(var i=0;i<raw.length;i++){ var k=raw[i]; if(typeof k==='string' && k<=tk && !seen[k]){ seen[k]=1; out.push(k); } }
+      out.sort();
+      if(out.length!==raw.length){ jset('coreStreakHistory',out); } return out; }
+    function bumpPerfect(){ var n=ig('corePerfectDaysCount',0)+1; lset('corePerfectDaysCount',String(n)); return n; }
+    function perfectDays(){ return Math.max(ig('corePerfectDaysCount',0), cleanHistory().length); }
+    function clockOk(){ var now=Date.now(), seen=ig('coreLastSeenEpoch',0); if(now < seen-60000){ lset('coreClockSuspect','1'); return false; } if(now>seen) lset('coreLastSeenEpoch',String(now)); return true; }
+    function dispatch(){ try{ window.dispatchEvent(new CustomEvent('core:progress-updated',{detail:{source:'streak'}})); }catch(e){} }
+    var toastT; function toast(m){ var t=qs('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(function(){t.classList.remove('show');},1800); }
+    function waterIdx(){ try{ var i=S.RANKS.findIndex(function(r){return r.name==='Water';}); return i<0?3:i; }catch(e){ return 3; } }
+    function questDoneToday(s){ try{ var today=new Date().toDateString(); if(s.quests && s.quests.dateKey===today){ return (s.quests.daily||[]).some(function(q){return q.done;}); } }catch(e){} return lget('coreTodayActive','0')==='1'; }
+
+    // ── #FIX: self-healing streak repair ──────────────────────────────────────────
+    // The displayed streak is derived from REAL consecutive history, never a free-floating
+    // counter — so a stale/inflated stored value (e.g. 1390) is corrected down to the truth.
+    function consecutiveFrom(hist, active){
+      var set={}; for(var i=0;i<hist.length;i++) set[hist[i]]=1;
+      var today=new Date(), tk=dkey(today), start;
+      if(set[tk] || active){ start=today; }
+      else { var y=addDays(today,-1); if(set[dkey(y)]) start=y; else return 0; }
+      var count=0, cur=start;
+      while(set[dkey(cur)] || (dkey(cur)===tk && active)){ count++; cur=addDays(cur,-1); }
+      return count;
+    }
+    function longestRun(hist){
+      var set={}; for(var i=0;i<hist.length;i++) set[hist[i]]=1; var best=0;
+      for(var j=0;j<hist.length;j++){ var p=hist[j].split('-'); var d=new Date(+p[0],+p[1]-1,+p[2]);
+        if(!set[dkey(addDays(d,-1))]){ var c=0, cur=d; while(set[dkey(cur)]){ c++; cur=addDays(cur,1); } if(c>best) best=c; } }
+      return best;
+    }
+    function repairStreak(){
+      var hist=cleanHistory();
+      var s=S.read(), active=questDoneToday(s);
+      var real=consecutiveFrom(hist, active);
+      var lr=Math.max(real, longestRun(hist)); // strongest real evidence of any run
+      var changed=false;
+      // Current streak: tolerance 2 covers legitimate shield-protected gaps; beyond that is corruption.
+      if(((s.streak&&s.streak.days)||0) > real+2){
+        S.update(function(st){ st.streak.days=real; return st; });
+        lset('coreStreak',String(real)); changed=true;
+      }
+      // Best streak: clamp only egregious corruption (>30 days past the longest evidenced run),
+      // so a genuine past high that predates the history window is preserved.
+      var bestStored=Math.max((S.read().bestStreak||0), ig('coreBestStreak',0));
+      if(bestStored > lr+30){
+        S.update(function(st){ st.bestStreak=lr; return st; });
+        lset('coreBestStreak',String(lr)); changed=true;
+      }
+      if(changed){ try{ S.syncProgress(); }catch(e){} }
+    }
+    function migrate(){ if(lget('coreStreakSchemaV','')==='2'){ cleanHistory(); repairStreak(); return; }
+      cleanHistory();
+      var cl=jget('coreStreakRewardsClaimed',[]).map(function(x){return +x;}).filter(function(x){return !isNaN(x);}); jset('coreStreakRewardsClaimed',cl);
+      if(ig('corePerfectDaysCount',0)===0){ lset('corePerfectDaysCount',String(jget('coreStreakHistory',[]).length)); }
+      if(ig('coreLastSeenEpoch',0)===0) lset('coreLastSeenEpoch',String(Date.now()));
+      repairStreak();
+      lset('coreStreakSchemaV','2'); }
+
+    // ── scroll reveal ─────────────────────────────────────────────────────────────
+    var painted=false;
+    var revObs=(!REDUCED && 'IntersectionObserver' in window)
+      ? new IntersectionObserver(function(es){ es.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add('in'); revObs.unobserve(en.target); } }); }, { root:qs('.scroll'), threshold:0.08 })
+      : null;
+    function observeReveal(el){ if(!revObs){ el.classList.add('in'); return; } revObs.observe(el); }
+
+    // ── particle fx ───────────────────────────────────────────────────────────────
+    function burstAt(cx, cy, color, n){ if(REDUCED) return; var phone=qs('.phone'), pr=phone.getBoundingClientRect(); n=n||12;
+      for(var i=0;i<n;i++){ (function(){ var sp=document.createElement('span'); sp.className='spark'; sp.style.background=color; sp.style.boxShadow='0 0 8px '+color;
+        sp.style.left=(cx-pr.left)+'px'; sp.style.top=(cy-pr.top)+'px'; phone.appendChild(sp);
+        var ang=Math.random()*Math.PI*2, dist=30+Math.random()*70, dx=Math.cos(ang)*dist, dy=Math.sin(ang)*dist-16, dur=700+Math.random()*600;
+        sp.animate([{transform:'translate(0,0) scale(1)',opacity:1},{transform:'translate('+dx+'px,'+dy+'px) scale(.2)',opacity:0}],{duration:dur,easing:'cubic-bezier(.2,.7,.3,1)'}).onfinish=function(){ sp.remove(); };
+      })(); } }
+
+    function countUp(el, to){ if(!el) return; var from=parseInt((el.textContent||'0').replace(/[^0-9-]/g,''),10)||0; if(from===to){ el.textContent=to.toLocaleString(); return; }
+      var start=null,dur=850; if(el._raf) cancelAnimationFrame(el._raf);
+      function step(ts){ if(!start) start=ts; var p=Math.min(1,(ts-start)/dur); var v=Math.round(from+(to-from)*(1-Math.pow(1-p,3))); el.textContent=v.toLocaleString(); if(p<1) el._raf=requestAnimationFrame(step); }
+      el._raf=requestAnimationFrame(step); }
+
+    // ── streak engine (PRESERVED — real local-date streak maintenance) ────────────
+    function logShield(reason){ try{ var l=jget('coreShieldLog',[]); l.unshift({ts:Date.now(),reason:reason}); if(l.length>30) l=l.slice(0,30); jset('coreShieldLog',l); }catch(e){} }
+    function maintain(){
+      var s=S.read();
+      var todayK=todayKey(), yK=dkey(addDays(new Date(),-1));
+      var last=lget('coreLastActiveDate',null); if(last==='') last=null;
+      var active=questDoneToday(s);
+      var days=(s.streak&&s.streak.days)||0;
+      var changed=false, usedShield=false, justLost=false;
+      var okClock=clockOk();
+      if(active){
+        lset('coreTodayActive','1');
+        if(last!==todayK && okClock){
+          if(last===yK){ days=days+1; }
+          else if(last===null){ days=Math.max(days,1); }
+          else { var sh=ig('coreStreakShields',0); if(sh>0){ sh--; lset('coreStreakShields',String(sh)); days=days+1; usedShield=true; logShield('gap-protected'); } else { days=1; } }
+          S.update(function(st){ st.streak.days=days; if(days>(st.bestStreak||0)) st.bestStreak=days; st.streak.lastCleanAt=Date.now(); st.streak.lostAt=null; return st; });
+          lset('coreLastActiveDate',todayK);
+          var hist=cleanHistory(); if(hist.indexOf(todayK)<0){ hist.push(todayK); hist.sort(); if(hist.length>800) hist=hist.slice(-800); jset('coreStreakHistory',hist); bumpPerfect(); }
+          changed=true;
+        }
+      } else {
+        lset('coreTodayActive','0');
+        if(last && last!==todayK && last!==yK && okClock){
+          var sh2=ig('coreStreakShields',0);
+          if(sh2>0 && days>0){
+            sh2--; lset('coreStreakShields',String(sh2)); logShield('miss-protected');
+            S.update(function(st){ st.streak.lastCleanAt=Date.now(); return st; });
+            lset('coreLastActiveDate',yK);
+            usedShield=true; changed=true;
+          } else if(days>0){
+            S.update(function(st){ st.streak.previousDays=days; st.streak.days=0; st.streak.lostAt=Date.now(); return st; });
+            days=0; changed=true; justLost=true;
+          }
+        }
+      }
+      var best=Math.max(ig('coreBestStreak',0),(S.read().bestStreak||0),days);
+      lset('coreStreak',String(days)); lset('coreBestStreak',String(best));
+      if(usedShield) toast('Streak shield used — chain protected');
+      if(changed){ S.syncProgress(); dispatch(); }
+      var st2=S.read().streak||{}; var recoverable=false;
+      try{ recoverable=(typeof S.isStreakRecoverable==='function') ? S.isStreakRecoverable(S.read()) : ((st2.lostAt && (st2.previousDays||0)>0 && (Date.now()-st2.lostAt)/3600000<=48)); }catch(e){}
+      return { days:days, active:active, lost:justLost, recoverable:recoverable, prevDays:(st2.previousDays||0) };
+    }
+
+    // ── tier + multiplier (electric-blue Jarvis family) ───────────────────────────
+    function evo(days){
+      if(days>=100) return {k:100,cls:'t100',name:'Prestige', tc:'#EAF2FF',tc2:'#9FC0FF',glow:'#7FB0FF',p:30};
+      if(days>=60)  return {k:60, cls:'t60', name:'Legendary',tc:'#B388FF',tc2:'#6F70FF',glow:'#8E7BFF',p:24};
+      if(days>=30)  return {k:30, cls:'t30', name:'Surge',    tc:'#6F70FF',tc2:'#4A8FFF',glow:'#6F8BFF',p:20};
+      if(days>=14)  return {k:14, cls:'t14', name:'Ascendant',tc:'#5BC8FF',tc2:'#4A8FFF',glow:'#5BC8FF',p:16};
+      if(days>=7)   return {k:7,  cls:'t7',  name:'Charged',  tc:'#4A8FFF',tc2:'#6F70FF',glow:'#4A8FFF',p:12};
+      if(days>=1)   return {k:1,  cls:'t1',  name:'Kindled',  tc:'#CFE0FF',tc2:'#9FC0FF',glow:'#BCD6FF',p:8};
+      return            {k:0,  cls:'t0',  name:'Dormant',  tc:'#6B7186',tc2:'#4F5570',glow:'#6B7186',p:4};
+    }
+    var MTABLE=[{at:7,m:1.10},{at:14,m:1.15},{at:30,m:1.25},{at:60,m:1.50},{at:100,m:2.00}];
+    function multFor(days){ var m=1.00; MTABLE.forEach(function(t){ if(days>=t.at) m=t.m; }); return m; }
+    function nextMult(days){ for(var i=0;i<MTABLE.length;i++){ if(days<MTABLE[i].at) return MTABLE[i]; } return null; }
+
+    var MOTIVATE=['Consistency creates legends.','One day at a time.',"Today's actions shape tomorrow.",'Keep your streak alive.','Show up. Every single day.','Discipline beats motivation.'];
+    var MOTIVATE0=['Your journey starts with day one.','Complete a quest to ignite your streak.','Every legend starts at zero.','Light the flame today.'];
+
+    // ── hero particle field ───────────────────────────────────────────────────────
+    var lastPCount=-1;
+    function buildParticles(n){ if(n===lastPCount) return; lastPCount=n; var h=qs('#heroParticles'); h.innerHTML='';
+      var f=document.createDocumentFragment();
+      for(var i=0;i<n;i++){ var p=document.createElement('span'); p.className='hp'; p.style.left=(6+(i*89)%88)+'%';
+        p.style.setProperty('--hx',(((i*53)%11)-5)*8+'px'); p.style.setProperty('--hd',(4.5+(i%6)*0.7)+'s'); p.style.setProperty('--hdl',((i%9)*0.5)+'s');
+        var sz=(i%5===0)?6:(i%2===0)?4:3; p.style.width=sz+'px'; p.style.height=sz+'px'; f.appendChild(p); }
+      h.appendChild(f); }
+
+    // ── reward milestones (economy preserved) ─────────────────────────────────────
+    var IC={
+      bolt:'<path d="M13 2L3 14h7l-1 8 10-12h-7l1-8Z"/>',
+      frame:'<rect x="4" y="4" width="16" height="16" rx="3"/><rect x="8.5" y="8.5" width="7" height="7" rx="1.5"/>',
+      effect:'<path d="M12 3l2.2 6L20 11l-5.8 2L12 21l-2.2-8L4 11l5.8-2z"/>',
+      legendary:'<path d="M12 2c1.5 4-1 5-1 8 0 2 1 3 1 3s2-1 2-4c2 2 3 5 3 8a5 5 0 0 1-10 0c0-4 3-6 5-15z"/>',
+      badge:'<path d="M12 3l7 3v5c0 4-3 7-7 9-4-2-7-5-7-9V6l7-3Z"/><path d="M9 11.5l2 2 4-4.5"/>',
+      trophy:'<path d="M7 4h10v4a5 5 0 0 1-10 0z M5 5H3v2a3 3 0 0 0 3 3 M19 5h2v2a3 3 0 0 1-3 3 M9 15h6 M12 11v4 M8 20h8 M10 20l.5-3M14 20l-.5-3"/>'
+    };
+    function chestSVG(tier){ return '<div class="chestv '+tier+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M3 9l2-4h14l2 4M3 9v9a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V9M3 9h18M12 9v3m-2.4 0h4.8" fill="currentColor" fill-opacity="0.14"/></svg></div>'; }
+    var MILES=[
+      {d:1,   title:'Day 1',   reward:'+50 XP',                   type:'xp',     xp:50,   coins:10,  rc:'#9FC0FF', ic:IC.bolt,    where:'Added to your XP'},
+      {d:3,   title:'Day 3',   reward:'Bronze Chest',             type:'chest',  chest:'bronze',      coins:20,  rc:'#CD7F32', where:'Openable in the Shop'},
+      {d:7,   title:'Day 7',   reward:'Exclusive Profile Border', type:'cosmetic', sub:'frame', xp:100, coins:30, rc:'#4A8FFF', ic:IC.frame, where:'Equip on your Profile'},
+      {d:14,  title:'Day 14',  reward:'Silver Chest',             type:'chest',  chest:'silver',      coins:40,  rc:'#C6CDDA', where:'Openable in the Shop'},
+      {d:30,  title:'Day 30',  reward:'Animated Card Effect',     type:'cosmetic', sub:'effect', xp:300, coins:60, rc:'#B388FF', ic:IC.effect, where:'Active on your player card'},
+      {d:60,  title:'Day 60',  reward:'Gold Chest',               type:'chest',  chest:'gold',        coins:80,  rc:'#FFD24D', where:'Openable in the Shop'},
+      {d:100, title:'Day 100', reward:'Legendary Card Animation', type:'cosmetic', sub:'legendary', xp:1000, coins:150, rc:'#5BC8FF', ic:IC.legendary, where:'Active on your player card'},
+      {d:180, title:'Day 180', reward:'Prestige Badge',           type:'badge',  coins:200, rc:'#B388FF', ic:IC.badge, where:'Shown in Achievements'},
+      {d:365, title:'Day 365', reward:"Founder's Trophy",         type:'trophy', coins:365, rc:'#FFC56B', ic:IC.trophy, where:'Permanent profile decoration'}
+    ];
+    var CHEST_SHOP={ bronze:'chest_common', silver:'chest_rare', gold:'chest_epic', legendary:'chest_legendary' };
+    function reachedDay(m){ var s=S.read(); var best=Math.max(s.bestStreak||0, ig('coreBestStreak',0), (s.streak&&s.streak.days)||0); return best>=m.d; }
+    function mileIconHTML(m){ return m.type==='chest' ? chestSVG(m.chest) : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+(m.ic||IC.bolt)+'</svg>'; }
+
+    function claim(m){
+      var claimed=jget('coreStreakRewardsClaimed',[]);
+      if(claimed.indexOf(m.d)>=0) return;
+      if(!reachedDay(m)) return;
+      var xpGain=m.xp||0;
+      if(m.type==='xp'){ }
+      else if(m.type==='chest'){ pushUniq('coreOwnedChests', CHEST_SHOP[m.chest]); S.addItem({id:'streakchest_'+m.chest+'_'+m.d, name:(m.chest.charAt(0).toUpperCase()+m.chest.slice(1))+' Chest', type:'chest', rarity:(m.chest==='legendary'?'legendary':m.chest==='gold'?'epic':m.chest==='silver'?'rare':'common'), source:'Streak'}); }
+      else if(m.type==='cosmetic' && m.sub==='frame'){ lset('coreStreakFrameUnlocked','1'); pushUniq('coreOwnedShopItems','frame_aurora'); pushUniq('coreProfileFrames','Streak Border'); S.addItem({id:'streak_border_'+m.d, name:'Streak Border', type:'border', rarity:'rare', slot:'frame', source:'Streak'}); }
+      else if(m.type==='cosmetic' && m.sub==='effect'){ pushUniq('coreUnlockedEffects','Streak Card Effect'); pushUniq('coreOwnedShopItems','aura_wind'); S.addItem({id:'streak_effect_'+m.d, name:'Animated Card Effect', type:'effect', rarity:'epic', slot:'aura', source:'Streak'}); }
+      else if(m.type==='cosmetic' && m.sub==='legendary'){ lset('coreLegendaryCardAnim','1'); pushUniq('coreUnlockedEffects','Legendary Card Animation'); S.addItem({id:'streak_legend_'+m.d, name:'Legendary Card Animation', type:'effect', rarity:'legendary', slot:'aura', source:'Streak'}); }
+      else if(m.type==='badge'){ pushUniq('coreAchievements','Prestige Badge'); pushUniq('coreOwnedBadges','Prestige Badge'); S.addItem({id:'streak_prestige_'+m.d, name:'Prestige Badge', type:'badge', rarity:'mythic', source:'Streak'}); }
+      else if(m.type==='trophy'){ lset('coreFoundersTrophy','1'); pushUniq('coreTitles','Founder'); pushUniq('coreProfileDecorations',"Founder's Trophy"); S.addItem({id:'streak_founder', name:"Founder's Trophy", type:'trophy', rarity:'mythic', source:'Streak'}); }
+      if(xpGain) S.addXp(xpGain,'streak_d'+m.d);
+      claimed.push(m.d); jset('coreStreakRewardsClaimed',claimed);
+      S.syncProgress(); dispatch();
+      celebrate(m, xpGain);
+    }
+
+    function celebrate(m, xpGain){
+      var cel=qs('#celebrate'); var color=m.rc||'#4A8FFF';
+      cel.style.setProperty('--cpc', color);
+      qs('#celIc').innerHTML = m.type==='chest' ? chestSVG(m.chest) : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+(m.ic||IC.bolt)+'</svg>';
+      var big=[7,30,60,100,365].indexOf(m.d)>=0;
+      qs('#celEyebrow').textContent = m.d>=100 ? 'Prestige milestone' : (big?'Milestone reached':'Reward unlocked');
+      qs('#celTitle').textContent = m.title+' · '+m.reward;
+      qs('#celReward').textContent = m.type==='chest' ? 'Added to your chests — open it in the Shop.' : (m.type==='trophy' ? 'Permanent profile decoration unlocked.' : 'Unlocked on your profile.');
+      qs('#celXp').textContent = xpGain ? ('+'+xpGain+' XP') : '';
+      cel.classList.add('show'); SFX(big?'streak_milestone_big':'streak_reward');
+      if(!REDUCED){ var pr=qs('.phone').getBoundingClientRect(); setTimeout(function(){ burstAt(pr.left+pr.width/2, pr.top+pr.height*0.4, color, big?34:20); },300); }
+      qs('#celBtn').onclick=function(){ cel.classList.remove('show'); SFX('reward_collect'); toast('Claimed · '+m.reward); render(); };
+    }
+
+    // ── motivational rotation ─────────────────────────────────────────────────────
+    var motIdx=0, motTimer=null;
+    function startMotivate(days){ if(motTimer) clearInterval(motTimer); var pool=days>0?MOTIVATE:MOTIVATE0; var el=qs('#motivate');
+      el.textContent=pool[motIdx%pool.length];
+      if(REDUCED) return;
+      motTimer=setInterval(function(){ motIdx++; el.style.opacity='0'; setTimeout(function(){ el.textContent=pool[motIdx%pool.length]; el.style.opacity='1'; },400); }, 4200); }
+
+    // ── recovery banner ───────────────────────────────────────────────────────────
+    var lossToasted=false;
+    function renderRecover(st){
+      var el=qs('#recover'); if(!el) return;
+      if(st && st.recoverable && typeof S.restoreStreak==='function'){
+        el.hidden=false;
+        el.innerHTML='<div class="ri" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v3.5H6.5"/></svg></div>'+
+          '<div class="rb"><div class="rt">Streak lost — restore it</div><div class="rd">Bring back your '+st.prevDays+'-day streak (within 48h).</div></div>'+
+          '<button class="rbtn" id="recoverBtn" type="button" aria-label="Restore your '+st.prevDays+' day streak">Restore</button>';
+        qs('#recoverBtn').onclick=function(){ try{ S.restoreStreak(); }catch(e){} lossToasted=false; toast('Streak restored'); SFX('streak_restore'); render(); };
+      } else { el.hidden=true; el.innerHTML=''; }
+    }
+
+    // ── week strip ────────────────────────────────────────────────────────────────
+    function firstActiveTime(hist){ if(!hist.length) return Infinity; var min=hist.slice().sort()[0]; var p=min.split('-'); return new Date(+p[0],+p[1]-1,+p[2]).getTime(); }
+    var DOW=['M','T','W','T','F','S','S'];
+    var CHECK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2"><path d="M5 12l4 4 10-11"/></svg>';
+    var CROSS='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+    function renderWeek(hist, active){
+      var now=new Date(), todayK=dkey(now), nowT=now.getTime();
+      var dow=(now.getDay()+6)%7; var monday=addDays(now,-dow);
+      var firstAct=firstActiveTime(hist), done=0, html='';
+      for(var i=0;i<7;i++){
+        var date=addDays(monday,i), dk=dkey(date), t=date.getTime();
+        var isToday=(dk===todayK), isDone=(hist.indexOf(dk)>=0)||(isToday&&active);
+        var cls='wd', inner=String(date.getDate());
+        if(isToday) cls+=' today';
+        if(isDone){ cls+=' done'; inner=CHECK; done++; }
+        else if(t>nowT){ cls+=' future'; }
+        else if(t>=firstAct){ cls+=' missed'; inner=CROSS; }
+        html+='<div class="'+cls+'"><span class="wl">'+DOW[i]+'</span><span class="wc">'+inner+'</span></div>';
+      }
+      qs('#week').innerHTML=html;
+      qs('#weekMeta').textContent=done+'/7 active';
+    }
+
+    // ── next reward (compact, preserves claim economy) ────────────────────────────
+    function renderNextReward(days, claimed){
+      var el=qs('#nextReward'), meta=qs('#rewardMeta');
+      var claimable=MILES.filter(function(m){ return reachedDay(m) && claimed.indexOf(m.d)<0; }).sort(function(a,b){return a.d-b.d;})[0];
+      if(claimable){
+        el.style.setProperty('--rc',claimable.rc);
+        el.innerHTML='<div class="ni">'+mileIconHTML(claimable)+'</div>'+
+          '<div class="nb"><div class="nt">'+claimable.title+' · '+claimable.reward+'</div><div class="nd">Reward ready — '+claimable.where+'</div></div>'+
+          '<button class="nbtn claim" id="rewardBtn" data-d="'+claimable.d+'">Claim</button>';
+        meta.textContent='Ready';
+        qs('#rewardBtn').onclick=function(){ claim(claimable); };
+        return;
+      }
+      var next=MILES.filter(function(m){ return m.d>days; }).sort(function(a,b){return a.d-b.d;})[0];
+      if(!next){
+        el.style.setProperty('--rc','#34D399');
+        el.innerHTML='<div class="ni" style="color:var(--good);background:rgba(52,211,153,.14);border-color:rgba(52,211,153,.34)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4 10-11"/></svg></div>'+
+          '<div class="nb"><div class="nt">All rewards claimed</div><div class="nd">You’ve unlocked every streak reward. Legend.</div></div>';
+        meta.textContent='Complete';
+        return;
+      }
+      var togo=next.d-days;
+      el.style.setProperty('--rc',next.rc);
+      el.innerHTML='<div class="ni">'+mileIconHTML(next)+'</div>'+
+        '<div class="nb"><div class="nt">Next · '+next.title+'</div><div class="nd">'+next.reward+' — '+next.where+'</div></div>'+
+        '<div class="nwait">'+togo+'d</div>';
+      meta.textContent='Day '+next.d;
+    }
+
+    function statCard(color, ic, val, label){
+      return '<div class="stat" style="--sc:'+color+'"><div class="sic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'+ic+'</svg></div><div class="sv">'+val.toLocaleString()+'</div><div class="sl">'+label+'</div></div>';
+    }
+
+    // ── main render ───────────────────────────────────────────────────────────────
+    var lastDays=null, initialDone=false;
+    function render(){
+      var st=maintain(); var s=S.read();
+      var days=st.days, active=st.active;
+      var best=Math.max(s.bestStreak||0, ig('coreBestStreak',0), days);
+      var rankIdx=S.rankFor(s.xp||0).idx;
+      var claimed=jget('coreStreakRewardsClaimed',[]);
+      var hist=cleanHistory();
+      var e=evo(days);
+
+      if(st.lost && !lossToasted){ lossToasted=true; toast('Streak lost — you can still restore it'); SFX('streak_lost'); }
+      renderRecover(st);
+
+      // theme vars
+      var root=document.documentElement.style; root.setProperty('--tc',e.tc); root.setProperty('--tc2',e.tc2); root.setProperty('--tglow',e.glow);
+      var hero=qs('#hero'); hero.className='hero '+e.cls;
+      qs('#tierName').textContent=e.name+' Streak';
+      buildParticles(e.p);
+
+      // hero number
+      qs('#bestN').textContent=best;
+      if(!initialDone){ countUp(qs('#streakN'), days); initialDone=true; }
+      else { qs('#streakN').textContent=days; }
+      if(lastDays!==null && days>lastDays){
+        var nEl=qs('#streakN'); nEl.classList.remove('pop'); void nEl.offsetWidth; nEl.classList.add('pop');
+        if(!REDUCED){ var hr=hero.getBoundingClientRect(); burstAt(hr.left+hr.width/2, hr.top+hr.height*0.42, e.glow, 22); }
+        SFX('streak_grow');
+      }
+      lastDays=days;
+
+      // multiplier badge
+      var mult=multFor(days);
+      qs('#multTxt').textContent=mult.toFixed(2)+'x XP';
+
+      // status pill + primary CTA
+      var sp=qs('#statusPill'), cta=qs('#cta');
+      if(active){
+        sp.className='statusPill on'; sp.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12l4 4 10-11"/></svg>Secured for today';
+        cta.className='cta secured'; cta.removeAttribute('href');
+        cta.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12l4 4 10-11"/></svg>Locked in for today';
+      } else {
+        sp.className='statusPill off'; sp.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>Complete a quest to keep it alive';
+        cta.className='cta'; cta.setAttribute('href','21-quests.html');
+        cta.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8Z"/></svg>'+(days>0?'Keep your streak alive':'Light your streak')+'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>';
+      }
+
+      startMotivate(days);
+
+      // WEEK
+      renderWeek(hist, active);
+
+      // NEXT REWARD
+      renderNextReward(days, claimed);
+
+      // STATS
+      var perfect=perfectDays(), xpEarned=s.xp||0, rewards=claimed.length;
+      qs('#stats').innerHTML=
+        statCard('#4A8FFF','<path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5Z"/>', best, 'Best streak')+
+        statCard('#34D399','<circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/>', perfect, 'Perfect days')+
+        statCard('#5BC8FF','<path d="M13 2L3 14h7l-1 8 10-12h-7l1-8Z"/>', xpEarned, 'XP earned')+
+        statCard('#6F70FF','<path d="M20 12v8H4v-8M2 8h20v4H2zM12 8v12M12 8a2.5 2.5 0 1 0-2.5-2.5C9.5 7 12 8 12 8zM12 8a2.5 2.5 0 1 1 2.5-2.5C14.5 7 12 8 12 8z"/>', rewards, 'Rewards claimed');
+      var svals=[best,perfect,xpEarned,rewards]; document.querySelectorAll('#stats .sv').forEach(function(el,i){ el.textContent='0'; countUp(el, svals[i]); });
+
+      // XP MULTIPLIER bar
+      var nm=nextMult(days);
+      var mfrom=(function(){ var f=0; MTABLE.forEach(function(t){ if(days>=t.at) f=t.at; }); return f; })();
+      var mpct = nm ? Math.max(0,Math.min(100, Math.round((days-mfrom)/(nm.at-mfrom)*100))) : 100;
+      qs('#multMeta').textContent = nm ? ('Next at '+nm.at+' days') : 'Maxed';
+      qs('#multbar').innerHTML=
+        '<div class="mh"><div><div class="ml">Active multiplier</div><div class="mnow">'+mult.toFixed(2)+'x</div></div>'+
+        '<div class="mnext">'+(nm?('Reach <b>'+nm.at+' days</b><br>for '+nm.m.toFixed(2)+'x'):'Maximum reached')+'</div></div>'+
+        '<div class="track"><div class="fill" id="multFill"></div></div>'+
+        '<div class="ticks">'+MTABLE.map(function(t){ return '<span class="tk'+(days>=t.at?' on':'')+'">'+t.at+'d · '+t.m.toFixed(2)+'x</span>'; }).join('')+'</div>';
+      requestAnimationFrame(function(){ var f=qs('#multFill'); if(f) f.style.width=mpct+'%'; });
+
+      // SHIELDS
+      var unlocked=rankIdx>=waterIdx();
+      if(unlocked && lget('coreStreakShields',null)===null){ lset('coreStreakShields','1'); }
+      var totalShields=unlocked? ig('coreStreakShields',0) : 0;
+      var sh=qs('#shield'); sh.className='shield reveal'+(sh.classList.contains('in')?' in':'')+(unlocked?'':' locked');
+      var shieldSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3l7 3v5c0 4-3 7-7 9-4-2-7-5-7-9V6l7-3Z"/></svg>';
+      var dots=''; for(var i=0;i<4;i++){ dots+='<div class="shdot'+(i<totalShields?' on':'')+'"></div>'; }
+      sh.innerHTML=
+        '<div class="shrow"><div class="shi">'+shieldSvg+'</div><div class="shb">'+
+          '<div class="shcount">'+totalShields+' <span>shield'+(totalShields===1?'':'s')+' available</span></div>'+
+          '<div class="shd">Each shield auto-protects your streak through one missed day.</div></div></div>'+
+        '<div class="shdots">'+dots+'</div>'+
+        (unlocked
+          ? '<div class="shreq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12l4 4 10-11"/></svg>Unlocked · earn more at higher ranks</div>'
+          : '<div class="shreq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Unlocks at Water rank</div>');
+      qs('#shieldMeta').textContent=unlocked?(totalShields+' ready'):'Locked';
+
+      if(!painted){ Array.prototype.forEach.call(document.querySelectorAll('.scroll .reveal:not(.in)'), observeReveal); painted=true; }
+    }
+
+    // ── live sync ─────────────────────────────────────────────────────────────────
+    migrate();
+    var renderT; function scheduleRender(){ clearTimeout(renderT); renderT=setTimeout(render,60); }
+    var STREAK_KEYS=/^core(Streak|LastActiveDate|TodayActive|BestStreak|StreakShields|StreakRewardsClaimed|OwnedChests|Coins|Xp|Rank|PerfectDays|ShieldLog)/i;
+    window.addEventListener('coreStateChange', scheduleRender);
+    window.addEventListener('core:progress-updated', scheduleRender);
+    window.addEventListener('storage', function(ev){ if(!ev.key || STREAK_KEYS.test(ev.key)) scheduleRender(); });
+    var midT; function scheduleMidnight(){ var n=new Date(); var next=new Date(n.getFullYear(),n.getMonth(),n.getDate()+1,0,0,8).getTime()-n.getTime(); clearTimeout(midT); midT=setTimeout(function(){ lastDays=null; render(); scheduleMidnight(); }, Math.max(1000,Math.min(next,2147483647))); }
+    scheduleMidnight();
+    window.addEventListener('pagehide', function(){ if(motTimer) clearInterval(motTimer); clearTimeout(midT); clearTimeout(renderT); });
+    render();
+    try{ var mm=location.search.match(/scrollY=(\d+)/); if(mm){ var sc=qs('.scroll'); if(sc) sc.scrollTop=+mm[1]; } }catch(e){}
+  })();
+  </script>
+</body>
+</html>

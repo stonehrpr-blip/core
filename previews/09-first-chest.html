@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8" />
+<title>CORE — First Chest</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<style>
+  :root {
+    --bg-base:#02020A;
+    --bg-card:rgba(255,255,255,0.03);
+    --bg-card-2:rgba(255,255,255,0.05);
+    --border:rgba(255,255,255,0.08);
+    --text:#F8FAFE;
+    --muted:#9AA1B7;
+    --dim:#4F5570;
+    --accent:#4A8FFF;
+    --grad-a:#4A8FFF;
+    --grad-b:#6F70FF;
+    --grad-c:#B388FF;
+    --good:#34D399;
+    --rar:#9AA1B7;                 /* common rarity grey — matches dashboard RAR.common */
+    --rank-c:#b8c0cf;             /* overwritten by JS from the 08 rank ladder (default Stone) */
+    --rank-glow:rgba(184,192,207,0.6);
+  }
+  * { box-sizing:border-box; }
+  html, body { margin:0; padding:0; height:100%; }
+  body {
+    min-height:100vh; background:#0A0A14;
+    display:flex; align-items:center; justify-content:center;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif;
+    color:var(--text); -webkit-font-smoothing:antialiased; padding:24px; overflow:hidden;
+  }
+  .phone {
+    position:relative; width:390px; height:844px; background:var(--bg-base);
+    border-radius:56px; overflow:hidden;
+    box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38;
+  }
+  .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:60; }
+  .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:60; }
+
+  /* Atmospheric bg — same family as dashboard / trial */
+  .bg {
+    position:absolute; inset:0; z-index:0;
+    background:
+      radial-gradient(60% 35% at 50% 14%, rgba(91,177,255,0.18) 0%, transparent 65%),
+      radial-gradient(60% 35% at 50% 92%, rgba(159,143,255,0.10) 0%, transparent 65%),
+      linear-gradient(180deg, #050518 0%, #02020A 55%, #050510 100%);
+  }
+  .aurora { position:absolute; inset:0; z-index:1; pointer-events:none; opacity:0.45; mix-blend-mode:screen; transition:opacity .6s ease; }
+  .aurora::before, .aurora::after {
+    content:""; position:absolute; border-radius:50%; filter:blur(70px);
+    animation:auroraDrift 22s ease-in-out infinite; will-change:transform;
+  }
+  .aurora::before { width:70%; height:40%; left:-10%; top:6%; background:radial-gradient(circle, rgba(91,177,255,0.30), transparent 65%); }
+  .aurora::after { width:60%; height:35%; right:-8%; bottom:14%; background:radial-gradient(circle, rgba(159,143,255,0.26), transparent 65%); animation-delay:-11s; }
+  @keyframes auroraDrift { 0%,100%{transform:translate(0,0) scale(1);opacity:0.5;} 50%{transform:translate(18px,-14px) scale(1.06);opacity:0.75;} }
+  body.phase-reveal .aurora{ opacity:0.65; }
+  .stars { position:absolute; inset:-2%; pointer-events:none; z-index:2; }
+  .star { position:absolute; border-radius:50%; background:#fff; animation:twinkle var(--d,4s) ease-in-out var(--del,0s) infinite; }
+  @keyframes twinkle { 0%,100%{opacity:0.15;transform:scale(0.7);} 50%{opacity:0.8;transform:scale(1.1);} }
+  @media (prefers-reduced-motion: reduce){ .aurora::before,.aurora::after,.star{animation:none;} }
+
+  /* layout */
+  .frame { position:absolute; inset:0; z-index:10; display:flex; flex-direction:column; padding:56px 22px 22px; }
+
+  /* top identity */
+  .topbar { display:flex; align-items:center; justify-content:space-between; padding:6px 2px 0; }
+  .brand { display:flex; align-items:center; gap:8px; }
+  .brand .dot { width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 10px var(--accent); }
+  .brand .wm { font-size:12px; font-weight:800; letter-spacing:0.34em; }
+  .who { display:flex; align-items:center; gap:8px; }
+  .pill { display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 12px; border-radius:999px;
+          background:var(--bg-card); border:1px solid var(--border); font-size:12px; font-weight:700; color:var(--muted); }
+  .pill .lv { color:var(--accent); font-weight:800; letter-spacing:0.08em; }
+  .rankchip { display:inline-flex; align-items:center; gap:9px; height:34px; padding:0 13px 0 9px; border-radius:999px;
+              background:var(--bg-card); border:1px solid var(--border); }
+  .rankchip .gem { width:21px; height:21px; flex:none; color:var(--rank-c); filter:drop-shadow(0 0 6px var(--rank-glow)); animation:gemFloat 4.6s ease-in-out infinite; }
+  .rankchip .gem svg { width:21px; height:21px; display:block; }
+  @keyframes gemFloat { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-1.5px); } }
+  .rankchip .rtext { display:flex; flex-direction:column; line-height:1.04; }
+  .rankchip .rk-lab { font-size:8px; font-weight:800; letter-spacing:0.2em; text-transform:uppercase; color:var(--dim); }
+  .rankchip .rk-name { font-size:13px; font-weight:800; letter-spacing:0.05em; color:var(--rank-c); }
+  @media (prefers-reduced-motion: reduce){ .rankchip .gem{ animation:none; } }
+
+  /* main stage */
+  .stage { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; position:relative; }
+
+  /* heading */
+  .eyebrow { font-size:11px; font-weight:800; letter-spacing:0.22em; text-transform:uppercase; color:var(--accent);
+             opacity:0; transform:translateY(8px); animation:rise .7s .1s cubic-bezier(.2,.8,.2,1) forwards; }
+  .title { margin:9px 0 0; font-size:25px; font-weight:800; letter-spacing:-0.02em; line-height:1.12;
+           opacity:0; transform:translateY(10px); animation:rise .7s .2s cubic-bezier(.2,.8,.2,1) forwards; }
+  .subtitle { margin:8px 0 0; font-size:14px; color:var(--muted); max-width:280px; line-height:1.45;
+              opacity:0; transform:translateY(10px); animation:rise .7s .3s cubic-bezier(.2,.8,.2,1) forwards; }
+  @keyframes rise { to { opacity:1; transform:translateY(0); } }
+
+  /* SECTION 1 — compact player info */
+  .pinfo { display:flex; align-items:stretch; gap:0; width:100%; max-width:300px; margin:16px 0 2px; border-radius:16px; overflow:hidden;
+           background:var(--bg-card); border:1px solid var(--border);
+           opacity:0; transform:translateY(10px); animation:rise .7s .4s cubic-bezier(.2,.8,.2,1) forwards; }
+  .pinfo .pi { flex:1; padding:11px 10px; display:flex; flex-direction:column; gap:3px; min-width:0; }
+  .pinfo .pi + .pi { border-left:1px solid var(--border); }
+  .pinfo .pl { font-size:8.5px; font-weight:800; letter-spacing:0.18em; text-transform:uppercase; color:var(--dim); }
+  .pinfo .pv { font-size:13.5px; font-weight:800; letter-spacing:-0.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  body.phase-reveal .pinfo, body.phase-reveal .eyebrow, body.phase-reveal .title, body.phase-reveal .subtitle { display:none; }
+
+  /* SECTION 2 — simple iconic chest */
+  .chest-area { position:relative; width:240px; height:232px; margin:22px 0 6px; display:flex; align-items:center; justify-content:center;
+                opacity:0; transform:translateY(14px) scale(.96); animation:rise .8s .45s cubic-bezier(.2,.8,.2,1) forwards; }
+  body.phase-reveal .chest-area{ display:none; }
+  .halo { position:absolute; width:212px; height:212px; border-radius:50%;
+          background:radial-gradient(circle, rgba(74,143,255,0.28), rgba(159,143,255,0.12) 46%, transparent 70%);
+          filter:blur(6px); animation:haloPulse 3.4s ease-in-out infinite; }
+  @keyframes haloPulse { 0%,100%{opacity:.55;transform:scale(.94);} 50%{opacity:.95;transform:scale(1.04);} }
+  body.phase-opening .halo{ animation:haloBuild 1.5s ease-in forwards; }
+  @keyframes haloBuild { 0%{opacity:.6;transform:scale(.94);} 55%{opacity:1;transform:scale(1.14);} 100%{opacity:1;transform:scale(1.4); background:radial-gradient(circle, rgba(140,180,255,0.6), rgba(179,136,255,0.28) 46%, transparent 72%);} }
+
+  .chest-svg { position:relative; z-index:2; width:160px; height:auto; filter:drop-shadow(0 18px 30px rgba(0,0,0,0.5)); }
+  body.phase-locked .chest-svg{ animation:chestIdle 3.6s ease-in-out infinite; }
+  @keyframes chestIdle { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-4px); } }
+  body.phase-opening .chest-svg{ animation:chestShake .42s 0s cubic-bezier(.36,.07,.19,.97); }
+  @keyframes chestShake { 10%,90%{transform:translateX(-1px);} 20%,80%{transform:translateX(2px);} 30%,50%,70%{transform:translateX(-3px) rotate(-.6deg);} 40%,60%{transform:translateX(3px) rotate(.6deg);} }
+  .chest-lid { transform-box:fill-box; transform-origin:50% 100%; transition:transform .5s cubic-bezier(.3,1.1,.4,1); }
+  body.phase-opening .chest-lid{ animation:lidOpen .55s .42s cubic-bezier(.3,1.1,.4,1) forwards; }
+  @keyframes lidOpen { 0%{transform:translateY(0) rotate(0);} 100%{transform:translateY(-12px) rotate(-11deg);} }
+  .chest-inner { opacity:0; }
+  body.phase-opening .chest-inner{ animation:innerGlow .8s .5s ease-out forwards; }
+  @keyframes innerGlow { 0%{opacity:0;} 40%{opacity:1;} 100%{opacity:.55;} }
+
+  /* particle burst + flash */
+  .particles { position:absolute; left:50%; top:46%; width:0; height:0; z-index:3; pointer-events:none; }
+  .pt { position:absolute; left:0; top:0; width:6px; height:6px; border-radius:50%; opacity:0; background:radial-gradient(circle, #cfe0ff, #6f70ff); }
+  body.phase-opening .pt{ animation:burst 1s .5s cubic-bezier(.15,.7,.3,1) forwards; }
+  @keyframes burst { 0%{opacity:0; transform:translate(0,0) scale(.4);} 14%{opacity:1;} 100%{opacity:0; transform:translate(var(--tx),var(--ty)) scale(1);} }
+  .flash { position:absolute; inset:0; z-index:40; pointer-events:none; opacity:0;
+           background:radial-gradient(circle at 50% 46%, rgba(200,220,255,0.9), rgba(150,190,255,0.22) 40%, transparent 70%); }
+  body.phase-opening .flash{ animation:flash .8s .48s ease-out; }
+  @keyframes flash { 0%{opacity:0;} 22%{opacity:.8;} 100%{opacity:0;} }
+
+  /* primary button — same style as 07-trial.html .cta */
+  .cta-wrap { width:100%; }
+  .btn { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:18px 24px; border:none;
+         border-radius:999px; font-family:inherit; font-size:17px; font-weight:700; letter-spacing:-0.32px; color:#fff; cursor:pointer;
+         text-decoration:none; text-shadow:0 1px 2px rgba(0,0,0,0.40);
+         background:linear-gradient(135deg, #1F4FA8 0%, #4B2E94 50%, #8A1F4E 100%); background-size:200% 200%;
+         animation:gradShift 6s ease infinite;
+         box-shadow:0 16px 40px rgba(31,79,168,0.40), 0 0 60px rgba(75,46,148,0.28), 0 1px 0 rgba(255,255,255,0.16) inset, 0 -1px 0 rgba(0,0,0,0.30) inset;
+         transition:transform .12s cubic-bezier(0.4,0,0.2,1), filter .2s; -webkit-tap-highlight-color:transparent; }
+  .btn:hover{ filter:brightness(1.20) saturate(1.10); }
+  .btn:active{ transform:scale(0.985); filter:brightness(0.85); }
+  .btn:focus-visible{ outline:2px solid #fff; outline-offset:3px; }
+  .btn[disabled]{ opacity:.45; cursor:default; pointer-events:none; box-shadow:none; filter:none; animation:none; }
+  .btn svg{ width:18px; height:18px; }
+  @keyframes gradShift { 0%,100% { background-position:0% 50%; } 50% { background-position:100% 50%; } }
+  @media (prefers-reduced-motion: reduce){ .btn{ animation:none; } }
+  .open-cta{ opacity:0; transform:translateY(10px); animation:rise .7s .55s cubic-bezier(.2,.8,.2,1) forwards; }
+  body.phase-opening .open-cta, body.phase-reveal .open-cta{ display:none; }
+
+  /* ── REVEAL (sections 4-6) — top-aligned, fits without scroll ── */
+  .reveal { display:none; flex-direction:column; align-items:center; width:100%; }
+  body.phase-reveal .reveal{ display:flex; }
+  body.phase-reveal .stage{ flex:0 0 auto; justify-content:flex-start; padding-top:2px; }
+
+  .reveal .eyebrow2 { font-size:11px; font-weight:800; letter-spacing:0.22em; text-transform:uppercase; color:var(--accent); margin:2px 0 12px;
+                      opacity:0; animation:rise .6s .45s cubic-bezier(.2,.8,.2,1) forwards; }
+
+  /* SECTION 4 — item card */
+  .item-card { position:relative; width:100%; max-width:300px; border-radius:22px; padding:18px 18px 18px; text-align:center;
+               background:linear-gradient(168deg, rgba(74,143,255,0.10), rgba(159,143,255,0.05) 60%, rgba(255,255,255,0.02));
+               border:1px solid rgba(140,170,230,0.26);
+               box-shadow:0 18px 48px rgba(20,40,90,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
+               opacity:0; transform:translateY(20px) scale(.95); animation:cardIn .7s .25s cubic-bezier(.2,.9,.25,1) forwards; }
+  @keyframes cardIn { to { opacity:1; transform:translateY(0) scale(1); } }
+  .item-card::after { content:""; position:absolute; inset:-1px; border-radius:22px; padding:1px; pointer-events:none;
+                      background:linear-gradient(130deg, rgba(74,143,255,0), rgba(74,143,255,0.6), rgba(179,136,255,0.6), rgba(74,143,255,0));
+                      -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude;
+                      opacity:0; animation:ringIn .8s .9s ease forwards, ringGlow 3.4s 1.7s ease-in-out infinite; }
+  @keyframes ringIn { to { opacity:1; } }
+  @keyframes ringGlow { 0%,100%{ filter:drop-shadow(0 0 4px rgba(110,150,255,.4)); } 50%{ filter:drop-shadow(0 0 11px rgba(150,190,255,.8)); } }
+
+  .added { display:inline-flex; align-items:center; gap:6px; height:26px; padding:0 12px; border-radius:999px; margin-bottom:14px;
+           background:rgba(52,211,153,0.12); border:1px solid rgba(52,211,153,0.35); color:var(--good);
+           font-size:10.5px; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; }
+  .added svg{ width:13px; height:13px; }
+
+  .item-emblem { width:84px; height:84px; margin:0 auto 13px; border-radius:22px; position:relative;
+                 display:flex; align-items:center; justify-content:center;
+                 background:linear-gradient(150deg, #232a3b, #11151f); border:1px solid rgba(154,161,183,0.3);
+                 box-shadow:0 0 28px rgba(154,161,183,0.26), inset 0 2px 0 rgba(255,255,255,0.12); }
+  .item-emblem svg{ width:42px; height:42px; color:#CFD8E6; filter:drop-shadow(0 2px 4px rgba(0,0,0,.4)); }
+  .item-emblem .spark { position:absolute; inset:-6px; border-radius:26px; pointer-events:none;
+                        background:radial-gradient(circle, rgba(180,190,210,0.32), transparent 66%); animation:haloPulse 3s ease-in-out infinite; }
+
+  .rarity { display:inline-flex; align-items:center; gap:6px; height:22px; padding:0 10px; border-radius:999px; margin-bottom:9px;
+            background:rgba(154,161,183,0.14); border:1px solid rgba(154,161,183,0.4); color:var(--rar);
+            font-size:10px; font-weight:800; letter-spacing:0.14em; text-transform:uppercase; }
+  .rarity .rdot{ width:6px; height:6px; border-radius:50%; background:var(--rar); box-shadow:0 0 8px var(--rar); }
+  .item-name { font-size:20px; font-weight:800; letter-spacing:-0.01em; }
+  .item-type { margin-top:4px; font-size:11.5px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:var(--muted); }
+  .bonus { display:inline-flex; align-items:center; gap:7px; margin-top:12px; padding:8px 13px; border-radius:12px;
+           background:rgba(74,143,255,0.12); border:1px solid rgba(74,143,255,0.32); }
+  .bonus svg{ width:15px; height:15px; color:var(--accent); }
+  .bonus .v{ font-size:13.5px; font-weight:800; color:var(--accent); }
+  .item-desc { margin:12px 6px 0; font-size:12.5px; line-height:1.45; color:var(--muted); }
+
+  /* SECTION 5 — how rewards work */
+  .loop-card { width:100%; max-width:330px; margin-top:16px; padding:13px 14px 14px; border-radius:18px;
+               background:var(--bg-card); border:1px solid var(--border);
+               opacity:0; transform:translateY(12px); animation:rise .6s .7s cubic-bezier(.2,.8,.2,1) forwards; }
+  .loop-card h3 { margin:0 0 11px; font-size:11px; font-weight:800; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); text-align:left; }
+  .loop { display:flex; align-items:flex-start; justify-content:space-between; gap:2px; }
+  .loop .step { display:flex; flex-direction:column; align-items:center; gap:6px; flex:1; min-width:0; }
+  .loop .si { width:34px; height:34px; border-radius:11px; display:flex; align-items:center; justify-content:center;
+              background:linear-gradient(150deg, rgba(74,143,255,0.16), rgba(255,255,255,0.02)); border:1px solid rgba(120,160,255,0.22); }
+  .loop .si svg{ width:18px; height:18px; color:var(--accent); }
+  .loop .sl { font-size:9px; font-weight:700; letter-spacing:0.01em; color:var(--muted); text-align:center; line-height:1.2; }
+  .loop .arr { flex:none; display:flex; align-items:center; padding-top:9px; color:var(--dim); }
+  .loop .arr svg{ width:13px; height:13px; }
+
+  /* SECTION 6 — next step */
+  .reveal-cta { width:100%; margin-top:18px; opacity:0; transform:translateY(10px); animation:rise .7s .85s cubic-bezier(.2,.8,.2,1) forwards; }
+  .nextsub { display:block; text-align:center; margin-top:11px; font-size:12px; font-weight:600; color:var(--muted); }
+  .nextsub b { color:var(--good); font-weight:700; }
+</style>
+</head>
+<body class="phase-locked">
+  <div class="phone">
+    <div class="bg"></div>
+    <div class="aurora"></div>
+    <div class="stars" id="stars"></div>
+    <div class="notch"></div>
+    <div class="flash"></div>
+
+    <div class="frame">
+      <!-- identity -->
+      <div class="topbar">
+        <div class="brand"><span class="dot"></span><span class="wm">CORE</span></div>
+        <div class="who">
+          <span class="rankchip">
+            <span class="gem" aria-hidden="true">
+              <svg viewBox="0 0 100 100" fill="none">
+                <polygon points="50,11 21,40 50,91 79,40" fill="currentColor" stroke="rgba(8,10,16,0.55)" stroke-width="2.4" stroke-linejoin="round"/>
+                <polygon points="50,11 21,40 50,47" fill="#ffffff" fill-opacity="0.34"/>
+                <polygon points="50,11 79,40 50,47" fill="#ffffff" fill-opacity="0.14"/>
+                <polygon points="21,40 50,91 50,47" fill="#000000" fill-opacity="0.26"/>
+                <polygon points="79,40 50,91 50,47" fill="#000000" fill-opacity="0.06"/>
+              </svg>
+            </span>
+            <span class="rtext"><span class="rk-lab">Rank</span><span class="rk-name" id="rankName">Stone</span></span>
+          </span>
+          <span class="pill"><span class="lv">LV</span>&nbsp;<span id="levelN">1</span></span>
+        </div>
+      </div>
+
+      <div class="stage">
+        <!-- SECTION 1 — reward ready -->
+        <div class="eyebrow">Starter Chest Ready</div>
+        <h1 class="title">STARTER CHEST<br>READY</h1>
+        <p class="subtitle">Your first reward has been unlocked.</p>
+        <div class="pinfo">
+          <div class="pi"><span class="pl">Name</span><span class="pv" id="piName">Player</span></div>
+          <div class="pi"><span class="pl">Rank</span><span class="pv" id="piRank" style="color:var(--rank-c)">Stone</span></div>
+          <div class="pi"><span class="pl">Level</span><span class="pv" id="piLevel">1</span></div>
+        </div>
+
+        <!-- SECTION 2 — chest hero (simple, iconic, reusable) -->
+        <div class="chest-area" id="chestArea">
+          <div class="halo"></div>
+          <div class="particles" id="particles"></div>
+          <svg class="chest-svg" viewBox="0 0 160 150" fill="none" aria-label="Starter chest">
+            <defs>
+              <linearGradient id="cBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#252c3e"/><stop offset="1" stop-color="#0d111b"/></linearGradient>
+              <linearGradient id="cLid"  x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2e3650"/><stop offset="1" stop-color="#161b2a"/></linearGradient>
+              <linearGradient id="cSeam" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4A8FFF"/><stop offset="1" stop-color="#B388FF"/></linearGradient>
+            </defs>
+            <!-- interior glow (revealed as lid lifts) -->
+            <rect class="chest-inner" x="34" y="60" width="92" height="20" rx="6" fill="url(#cSeam)"/>
+            <!-- body -->
+            <rect x="26" y="64" width="108" height="66" rx="16" fill="url(#cBody)" stroke="rgba(150,180,240,0.20)" stroke-width="1.5"/>
+            <rect x="70" y="64" width="20" height="66" fill="rgba(255,255,255,0.05)"/>
+            <!-- lid -->
+            <g class="chest-lid">
+              <path d="M26 78 V58 a24 24 0 0 1 24 -24 h60 a24 24 0 0 1 24 24 V78 a8 8 0 0 1 -8 8 H34 a8 8 0 0 1 -8 -8 Z"
+                    fill="url(#cLid)" stroke="rgba(150,180,240,0.24)" stroke-width="1.5"/>
+              <rect x="34" y="74" width="92" height="6" rx="3" fill="url(#cSeam)" opacity="0.9"/>
+              <!-- latch -->
+              <rect x="70" y="68" width="20" height="22" rx="6" fill="#11151f" stroke="rgba(150,180,240,0.4)" stroke-width="1.5"/>
+              <circle cx="80" cy="79" r="3.4" fill="#7FB0FF"/>
+            </g>
+          </svg>
+        </div>
+
+        <!-- ── REVEAL ── -->
+        <div class="reveal" id="reveal">
+          <div class="eyebrow2">Reward Claimed</div>
+
+          <!-- SECTION 4 — item card -->
+          <div class="item-card">
+            <span class="added">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l4 4 10-11"/></svg>
+              Added to Inventory
+            </span>
+            <div class="item-emblem">
+              <span class="spark"></span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 3l7 3v5c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6l7-3Z"/>
+                <path d="M9 12l2 2 4-4.5"/>
+              </svg>
+            </div>
+            <span class="rarity"><span class="rdot"></span>Common</span>
+            <div class="item-name">Starter Badge</div>
+            <div class="item-type">Badge</div>
+            <div class="bonus">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8Z"/></svg>
+              <span class="v">+5 CORE Power</span>
+            </div>
+            <p class="item-desc">Proof your CORE journey has started.</p>
+          </div>
+
+          <!-- SECTION 5 — how rewards work -->
+          <div class="loop-card">
+            <h3>How rewards work</h3>
+            <div class="loop">
+              <div class="step"><span class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2"/></svg></span><span class="sl">Complete<br>quests</span></div>
+              <span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+              <div class="step"><span class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8Z"/></svg></span><span class="sl">Earn<br>XP</span></div>
+              <span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+              <div class="step"><span class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l2-4h14l2 4M3 9v9a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V9M3 9h18M12 9v3"/></svg></span><span class="sl">Unlock<br>chests</span></div>
+              <span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+              <div class="step"><span class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4-3 7-7 9-4-2-7-5-7-9V6l7-3Z"/></svg></span><span class="sl">Collect<br>items</span></div>
+              <span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+              <div class="step"><span class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8M21 7v5h-5"/></svg></span><span class="sl">Upgrade<br>profile</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 3 trigger -->
+      <div class="cta-wrap open-cta">
+        <button class="btn" id="openBtn" type="button">
+          OPEN CHEST
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+
+      <!-- SECTION 6 — next step -->
+      <div class="cta-wrap reveal-cta" id="revealCta" style="display:none">
+        <a class="btn" href="20-dashboard.html">
+          ENTER DASHBOARD
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <span class="nextsub"><b>Daily quests</b> are now unlocked.</span>
+      </div>
+
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+
+  <!-- shared state: keeps dashboard + profile + inventory in sync -->
+  <script src="_lib/core-sfx.js"></script>
+  <script src="_lib/core-state.js"></script>
+  <script>
+  (function(){
+    var body = document.body;
+
+    // ── star field ───────────────────────────────────────────────────────
+    (function stars(){
+      var host = document.getElementById('stars'); if(!host) return;
+      var frag = document.createDocumentFragment();
+      for(var i=0;i<70;i++){
+        var d = document.createElement('span'); d.className='star';
+        var sz = (i%7===0)?2.4:(i%3===0)?1.8:1.1;
+        d.style.width=sz+'px'; d.style.height=sz+'px';
+        d.style.left=((i*37)%100)+'%'; d.style.top=((i*53)%100)+'%';
+        d.style.setProperty('--d',(3+(i%5))+'s'); d.style.setProperty('--del',((i%9)*0.4)+'s');
+        if(i%11===0) d.style.boxShadow='0 0 6px rgba(150,195,255,0.8)';
+        frag.appendChild(d);
+      }
+      host.appendChild(frag);
+    })();
+
+    // ── particle burst geometry ────────────────────────────────────────────
+    (function particles(){
+      var host = document.getElementById('particles'); if(!host) return;
+      var COLORS = ['radial-gradient(circle,#cfe0ff,#6f70ff)','radial-gradient(circle,#dbe9ff,#4a8fff)','radial-gradient(circle,#e8dcff,#b388ff)'];
+      var frag = document.createDocumentFragment();
+      for(var i=0;i<22;i++){
+        var p = document.createElement('span'); p.className='pt';
+        var ang = (Math.PI*2) * (i/22) + (Math.random()*0.4);
+        var dist = 64 + Math.random()*72;
+        p.style.setProperty('--tx', Math.cos(ang)*dist + 'px');
+        p.style.setProperty('--ty', (Math.sin(ang)*dist - 28) + 'px');
+        var sz = 4 + Math.random()*5; p.style.width=sz+'px'; p.style.height=sz+'px';
+        p.style.background = COLORS[i % COLORS.length];
+        frag.appendChild(p);
+      }
+      host.appendChild(frag);
+    })();
+
+    // ── rank ladder (mirrors 08-rank-reveal.html) ──────────────────────────
+    var RANK_COLORS = {
+      Stone:'#b8c0cf', Leaf:'#5fd47e', Water:'#4fb8ff', Crystal:'#9f8fff', Gold:'#ffc857',
+      Ember:'#ff6b4a', Wind:'#5be0d0', Aurora:'#ff8fd0', Ascend:'#b388ff', Coreborn:'#6a8bff', CORE:'#4A8FFF'
+    };
+    function hexA(hex, a){
+      var h = String(hex).replace('#',''); if (h.length===3) h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+      var n = parseInt(h,16); return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+a+')';
+    }
+    function val(k){ try{ var v=localStorage.getItem(k); return (v===null||v==='')?null:v; }catch(e){ return null; } }
+    function readName(){
+      var n = val('coreName'); if(n) return n;
+      try{ var t=JSON.parse(localStorage.getItem('coreOnboardTrial')||'{}'); if(t.name) return t.name; if(t.firstName) return t.firstName; }catch(e){}
+      return 'Player';
+    }
+
+    // ── apply identity (Name / Rank / Level) ───────────────────────────────
+    var name = readName();
+    var rankKey = val('coreRank') || 'Stone';
+    var rankNorm = rankKey.charAt(0).toUpperCase() + rankKey.slice(1).toLowerCase();
+    var rankColor = RANK_COLORS[rankNorm] || RANK_COLORS[rankKey] || RANK_COLORS.Stone;
+    var level = val('coreLevel') || '1';
+
+    body.style.setProperty('--rank-c', rankColor);
+    body.style.setProperty('--rank-glow', hexA(rankColor, 0.6));
+    document.getElementById('rankName').textContent = rankNorm.toUpperCase();
+    document.getElementById('levelN').textContent   = level;
+    document.getElementById('piName').textContent   = name;
+    document.getElementById('piRank').textContent   = rankNorm;
+    document.getElementById('piLevel').textContent  = level;
+
+    // ── persist the opened chest — shared format (coreState) + spec flat keys ──
+    function persistOpen(){
+      var item = { name:"Starter Badge", rarity:"Common", type:"Badge", bonus:"+5 CORE Power", source:"Starter Chest" };
+      // 1) authoritative coreState blob → dashboard + profile read this (item shows, "Starter Chest" badge unlocks, power rises)
+      try{
+        if(window.coreState){
+          coreState.openStarterChest({ id:'starter_badge', name:item.name, type:'badge', rarity:'common',
+            bonus:item.bonus, source:item.source, icon:'badge' });
+        }
+      }catch(e){}
+      // 2) flat shared keys (spec) — for any page reading these directly + future 22-inventory
+      try{
+        localStorage.setItem('coreFirstChestOpened','1');
+        localStorage.setItem('coreStarterItem', item.name);
+        localStorage.setItem('coreChestReady','0');
+        var inv=[]; try{ inv=JSON.parse(localStorage.getItem('coreInventory')||'[]'); if(!Array.isArray(inv)) inv=[]; }catch(e){ inv=[]; }
+        if(!inv.some(function(i){ return i && i.name===item.name; })) inv.push(item);
+        localStorage.setItem('coreInventory', JSON.stringify(inv));
+        var ach=[]; try{ ach=JSON.parse(localStorage.getItem('coreAchievements')||'[]'); if(!Array.isArray(ach)) ach=[]; }catch(e){ ach=[]; }
+        ['First Chest','Starter Item'].forEach(function(a){ if(ach.indexOf(a)<0) ach.push(a); });
+        localStorage.setItem('coreAchievements', JSON.stringify(ach));
+        var p=parseInt(localStorage.getItem('coreCorePower')||'0',10); if(isNaN(p)) p=0;
+        localStorage.setItem('coreCorePower', String(p+5));
+      }catch(e){}
+      // Preserve coreName / coreClass / coreRank / coreLevel / coreXP / corePlayerId — untouched above.
+    }
+
+    function goReveal(){
+      body.classList.remove('phase-locked','phase-opening');
+      body.classList.add('phase-reveal');
+      document.getElementById('revealCta').style.display = '';
+    }
+
+    // already opened? jump straight to the reveal (idempotent)
+    var opened = false;
+    try{ opened = val('coreFirstChestOpened')==='1' || (window.coreState && coreState.read().chests && coreState.read().chests.starterOpened); }catch(e){}
+    if(opened){ goReveal(); }
+
+    // ── OPEN CHEST → ~1.5s sequence → persist → reveal ─────────────────────
+    var btn = document.getElementById('openBtn');
+    var reduce = false; try{ reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
+    btn.addEventListener('click', function(){
+      if(body.classList.contains('phase-opening')||body.classList.contains('phase-reveal')) return;
+      btn.disabled = true;
+      persistOpen();
+      if(reduce){ goReveal(); return; }
+      body.classList.remove('phase-locked');
+      body.classList.add('phase-opening');
+      setTimeout(goReveal, 1500);
+    });
+  })();
+  </script>
+</body>
+</html>

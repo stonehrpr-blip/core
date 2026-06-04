@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8" />
+<title>CORE — Ranks</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<style>
+  :root { --bg-base:#02020A; --bg-card:rgba(255,255,255,0.035); --border:rgba(255,255,255,0.08); --text:#F8FAFE; --muted:#9AA1B7; --dim:#4F5570; --accent:#4A8FFF; --good:#34D399; }
+  * { box-sizing:border-box; } html,body{ margin:0; padding:0; height:100%; }
+  body { min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text); -webkit-font-smoothing:antialiased; padding:24px; overflow:hidden; }
+  .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+  .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:60; }
+  .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:60; }
+
+  /* per-rank animated background */
+  .bg { position:absolute; inset:0; z-index:0; background:
+    radial-gradient(70% 40% at 50% 6%, color-mix(in srgb,var(--rk,#4A8FFF) 20%,transparent) 0%, transparent 60%),
+    radial-gradient(60% 40% at 50% 100%, color-mix(in srgb,var(--rk,#4A8FFF) 10%,transparent) 0%, transparent 60%),
+    linear-gradient(180deg, #070a18 0%, #02020A 60%); transition:background .8s; }
+  .bgfx{ position:absolute; inset:0; z-index:1; pointer-events:none; overflow:hidden; }
+  .bgfx span{ position:absolute; border-radius:50%; background:var(--rk,#4A8FFF); opacity:0; }
+  .bgfx span{ animation:bgrise var(--d,9s) linear var(--del,0s) infinite; }
+  @keyframes bgrise{ 0%{opacity:0;transform:translateY(20px) scale(.6);} 15%{opacity:.5;} 85%{opacity:.3;} 100%{opacity:0;transform:translateY(-120px) scale(1);} }
+  .bgglow{ position:absolute; left:50%; top:-12%; width:320px; height:320px; transform:translateX(-50%); z-index:1; border-radius:50%; pointer-events:none;
+    background:radial-gradient(circle, color-mix(in srgb,var(--rk,#4A8FFF) 30%,transparent), transparent 60%); filter:blur(20px); animation:bgpulse 5s ease-in-out infinite; }
+  @keyframes bgpulse{ 0%,100%{ opacity:.5; transform:translateX(-50%) scale(.92);} 50%{ opacity:.9; transform:translateX(-50%) scale(1.08);} }
+  @media (prefers-reduced-motion: reduce){ .bgfx span,.bgglow{ animation:none!important; } }
+
+  .frame { position:absolute; inset:0; z-index:10; display:flex; flex-direction:column; padding:54px 0 0; }
+  .hdr { display:flex; align-items:center; gap:12px; padding:2px 18px 8px; }
+  .back { width:38px; height:38px; border-radius:50%; border:none; background:rgba(255,255,255,0.06); color:var(--text); display:flex; align-items:center; justify-content:center; text-decoration:none; flex:none; } .back svg{ width:19px; height:19px; }
+  .hdr .ttl { font-size:19px; font-weight:900; } .hdr .sub{ font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); }
+  .scroll { flex:1; overflow-y:auto; padding:6px 16px 110px; } .scroll::-webkit-scrollbar{ display:none; }
+  .season{ display:flex; align-items:center; gap:9px; padding:11px 13px; border-radius:13px; background:rgba(255,255,255,0.04); border:1px solid var(--border); margin-bottom:14px; font-size:11.5px; font-weight:700; color:var(--muted); }
+  .season svg{ width:15px; height:15px; color:var(--accent); flex:none; }
+
+  .grid{ display:grid; grid-template-columns:1fr 1fr; gap:9px; align-content:start; }
+  .rk{ position:relative; border-radius:16px; padding:9px 8px 11px; background:var(--bg-card); border:1px solid var(--border); text-align:center; overflow:hidden; transition:.25s; min-height:108px; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; }
+  .rk.cur{ border-color:color-mix(in srgb,var(--c) 60%,transparent); box-shadow:0 0 22px color-mix(in srgb,var(--c) 22%,transparent); background:linear-gradient(170deg, color-mix(in srgb,var(--c) 14%,transparent), rgba(255,255,255,0.015)); }
+  .rk.locked{ opacity:.5; }
+  .rk .num{ position:absolute; top:8px; left:10px; font-size:11px; font-weight:900; color:color-mix(in srgb,var(--c) 70%,#fff); opacity:.6; }
+  .rk .st{ position:absolute; top:8px; right:9px; }
+  .rk .st .now{ font-size:7.5px; font-weight:900; letter-spacing:.04em; padding:3px 6px; border-radius:999px; color:#04040c; background:var(--c); }
+  .rk .st svg{ width:13px; height:13px; } .rk .st .have{ color:var(--good); } .rk .st .lock{ color:var(--dim); }
+  .rk .gem{ width:52px; height:52px; margin:9px auto 1px; color:var(--c); position:relative; display:flex; align-items:center; justify-content:center; }
+  .rk .gem svg, .rk .gem img{ width:100%; height:100%; object-fit:contain; object-position:center; display:block; filter:drop-shadow(0 2px 5px rgba(0,0,0,0.45)); }
+  .rk.cur .gem{ animation:var(--anim,float 4s ease-in-out infinite); }
+  @keyframes float{ 0%,100%{transform:translateY(-3px);} 50%{transform:translateY(4px);} }
+  /* CORE = centered full-width apex card */
+  .rk.core{ grid-column:1 / -1; padding:12px 8px 13px; min-height:0; }
+  .rk.core .gem{ width:56px; height:56px; }
+  @keyframes pulse{ 0%,100%{transform:scale(1);filter:brightness(1);} 50%{transform:scale(1.06);filter:brightness(1.3);} }
+  @keyframes spin3d{ 0%,100%{transform:rotateY(0);} 50%{transform:rotateY(22deg);} }
+  @keyframes flick{ 0%,100%{filter:brightness(1);} 35%{filter:brightness(1.4);} 60%{filter:brightness(.92);} }
+  @keyframes twk{ 0%,100%{transform:rotate(0) scale(1);} 50%{transform:rotate(18deg) scale(1.07);} }
+  .rk .nm{ font-size:12.5px; font-weight:900; letter-spacing:.04em; color:var(--c); margin-top:3px; }
+  .rk .tg{ font-size:9px; font-weight:600; color:var(--muted); line-height:1.25; margin-top:3px; }
+  .rk.core .tg{ margin-top:1px; }
+  .rk .pips{ display:flex; gap:4px; justify-content:center; margin-top:9px; } .rk .pips i{ width:14px; height:4px; border-radius:999px; background:rgba(255,255,255,0.12); } .rk .pips i.on{ background:var(--c); box-shadow:0 0 6px color-mix(in srgb,var(--c) 70%,transparent); }
+  .rk .xp{ font-size:9px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:var(--dim); margin-top:7px; }
+  .rk .prog{ height:5px; border-radius:999px; background:rgba(0,0,0,.4); overflow:hidden; margin-top:7px; } .rk .pf{ height:100%; border-radius:999px; background:var(--c); box-shadow:0 0 6px color-mix(in srgb,var(--c) 60%,transparent); }
+
+  .nav { position:absolute; left:0; right:0; bottom:0; z-index:50; padding:10px 12px 26px; display:flex; justify-content:space-around; align-items:flex-end; background:linear-gradient(180deg, rgba(5,6,14,0) 0%, rgba(5,6,14,0.88) 34%, #04040c 100%); backdrop-filter:blur(14px); }
+  .nav a{ display:flex; flex-direction:column; align-items:center; gap:4px; padding:6px 8px; min-width:48px; min-height:44px; text-decoration:none; color:var(--dim); } .nav svg{ width:23px; height:23px; } .nav .nl{ font-size:10px; font-weight:800; }
+  .nav .item.active{ color:var(--text); } .nav .item.active svg{ color:var(--accent); filter:drop-shadow(0 0 8px rgba(74,143,255,.75)); }
+  .rk{ cursor:pointer; } .rk:active{ transform:scale(.985); }
+
+  /* ── rank detail overlay + preview card ── */
+  .dt{ position:absolute; inset:0; z-index:80; display:none; } .dt.open{ display:block; }
+  .dt .scrim{ position:absolute; inset:0; background:rgba(2,2,8,0.74); backdrop-filter:blur(8px); }
+  .dt .sheet{ position:absolute; left:0; right:0; bottom:0; max-height:94%; overflow-y:auto; border-radius:30px 30px 0 0; background:linear-gradient(180deg,#0c0e1a,#05060e); border-top:1px solid var(--border); padding:14px 18px 30px; animation:rise .3s cubic-bezier(.2,.8,.2,1); }
+  .dt .sheet::-webkit-scrollbar{ display:none; } @keyframes rise{ from{transform:translateY(60px);opacity:0;} to{transform:translateY(0);opacity:1;} }
+  .dt .grab{ width:42px; height:5px; border-radius:999px; background:rgba(255,255,255,0.18); margin:2px auto 12px; }
+  .dt .close{ position:absolute; top:16px; right:16px; width:34px; height:34px; border-radius:50%; border:none; background:rgba(255,255,255,0.08); color:var(--text); cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:2; } .dt .close svg{ width:18px; height:18px; }
+  .dhead{ text-align:center; margin-bottom:13px; } .dhead .dnum{ font-size:12px; font-weight:900; color:var(--c); opacity:.7; letter-spacing:.1em; } .dhead .dname{ font-size:22px; font-weight:900; letter-spacing:.04em; color:var(--c); margin-top:2px; } .dhead .dtag{ font-size:12px; color:var(--muted); margin-top:4px; }
+  /* ════ LARGE COLLECTIBLE PLAYER CARD · Rank=theme · Tier=intensity · Level=badge ════ */
+  @property --ang{ syntax:'<angle>'; initial-value:0deg; inherits:false; }
+  .pcard{ position:relative; border-radius:26px; padding:18px 15px 16px; overflow:hidden; isolation:isolate;
+    --lt:var(--c1,#fff); --dk:var(--c2,#0a0b14);
+    background:
+      radial-gradient(135% 80% at 50% -10%, color-mix(in srgb,var(--c) 24%,transparent), transparent 58%),
+      radial-gradient(90% 55% at 50% 116%, color-mix(in srgb,var(--dk) 65%,transparent), transparent 72%),
+      linear-gradient(165deg, #12131f 0%, #0a0b14 46%, #050610 100%);
+    box-shadow:0 30px 66px rgba(0,0,0,.62), inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -34px 64px rgba(0,0,0,.42);
+    transform:perspective(1100px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)); transform-style:preserve-3d; transition:transform .25s cubic-bezier(.2,.7,.3,1); }
+  .pcard.t2{ box-shadow:0 30px 66px rgba(0,0,0,.62), inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -34px 64px rgba(0,0,0,.42), 0 0 34px color-mix(in srgb,var(--c) 14%,transparent); }
+  .pcard.t3{ box-shadow:0 32px 70px rgba(0,0,0,.64), inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -34px 64px rgba(0,0,0,.42), 0 0 50px color-mix(in srgb,var(--c) 22%,transparent); }
+  /* ── BORDER SYSTEM — thin silver (t1) → glowing (t2) → animated metallic (t3) ── */
+  .pcard::before{ content:''; position:absolute; inset:0; border-radius:26px; padding:1.2px; z-index:7; pointer-events:none; opacity:.7;
+    background:linear-gradient(160deg, #cfd4dd, color-mix(in srgb,var(--c) 42%,#6b7079) 45%, #2f333d 76%, #aeb4c0);
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; }
+  .pcard.t2::before{ padding:1.5px; opacity:.92; background:linear-gradient(160deg, #e9edf4, color-mix(in srgb,var(--c) 52%,#7b818c) 45%, #3a3f4b 78%, #cfd4dd); }
+  .pcard.t3::before{ padding:1.9px; opacity:1; animation:angspin 8s linear infinite;
+    background:conic-gradient(from var(--ang), #e9edf4, color-mix(in srgb,var(--c) 65%,#fff), #5b616d, #23262f, color-mix(in srgb,var(--c) 82%,#fff), #aeb4c0, #2f333d, #cfd4dd, #e9edf4); }
+  @keyframes angspin{ to{ --ang:360deg; } }
+  /* corner frames — hidden (t1), subtle pulse (t2), strong (t3) */
+  .pcard .corners i{ position:absolute; width:14px; height:14px; z-index:8; pointer-events:none; border:1.5px solid color-mix(in srgb,var(--c) 62%,#fff); opacity:0; box-shadow:0 0 8px color-mix(in srgb,var(--c) 45%,transparent); }
+  .pcard .corners .tl{ top:10px; left:10px; border-right:0; border-bottom:0; border-radius:7px 0 0 0; }
+  .pcard .corners .tr{ top:10px; right:10px; border-left:0; border-bottom:0; border-radius:0 7px 0 0; }
+  .pcard .corners .bl{ bottom:10px; left:10px; border-right:0; border-top:0; border-radius:0 0 0 7px; }
+  .pcard .corners .br{ bottom:10px; right:10px; border-left:0; border-top:0; border-radius:0 0 7px 0; }
+  .pcard.t2 .corners i{ opacity:.5; animation:cornpulse 4s ease-in-out infinite; }
+  .pcard.t3 .corners i{ opacity:.85; width:19px; height:19px; border-width:1.6px; box-shadow:0 0 13px color-mix(in srgb,var(--c) 60%,transparent); animation:cornpulse 2.6s ease-in-out infinite; }
+  @keyframes cornpulse{ 0%,100%{ opacity:.38; } 50%{ opacity:.9; } }
+  /* ── BACKGROUND SYSTEM — fog (all) + cracks (t2/t3) ── */
+  .pcard .patmos{ position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden; border-radius:26px; }
+  .pcard .patmos i{ position:absolute; border-radius:50%; filter:blur(28px); opacity:.4; mix-blend-mode:screen; }
+  .pcard .patmos .f1{ width:200px; height:200px; left:-44px; top:-34px; background:radial-gradient(circle, color-mix(in srgb,var(--c) 55%,transparent), transparent 70%); animation:fog1 17s ease-in-out infinite; }
+  .pcard .patmos .f2{ width:250px; height:250px; right:-66px; bottom:-44px; background:radial-gradient(circle, color-mix(in srgb,var(--dk) 75%,transparent), transparent 70%); animation:fog2 21s ease-in-out infinite; }
+  .pcard.t2 .patmos i{ opacity:.55; } .pcard.t3 .patmos i{ opacity:.72; }
+  .pcard.t3 .patmos .f1{ animation-duration:12s; } .pcard.t3 .patmos .f2{ animation-duration:15s; }
+  @keyframes fog1{ 0%,100%{ transform:translate(0,0); } 50%{ transform:translate(32px,20px); } }
+  @keyframes fog2{ 0%,100%{ transform:translate(0,0); } 50%{ transform:translate(-28px,-22px); } }
+  .pcard .cracks{ position:absolute; inset:0; z-index:1; pointer-events:none; border-radius:26px; opacity:0; mix-blend-mode:screen;
+    background:
+      linear-gradient(118deg, transparent 37%, color-mix(in srgb,var(--c) 34%,transparent) 38.4%, transparent 39.6%),
+      linear-gradient(72deg, transparent 54%, color-mix(in srgb,var(--c) 26%,transparent) 55%, transparent 56%),
+      linear-gradient(150deg, transparent 63%, color-mix(in srgb,var(--c) 22%,transparent) 64%, transparent 65%); }
+  .pcard.t2 .cracks{ opacity:.22; }
+  .pcard.t3 .cracks{ opacity:.5; filter:brightness(1.7) saturate(.55); animation:crackglow 5s ease-in-out infinite; }
+  @keyframes crackglow{ 0%,100%{ opacity:.36; } 50%{ opacity:.62; } }
+  /* ── particle field (parametric per rank; density set in JS by tier) ── */
+  .pcard .pfx{ position:absolute; inset:0; z-index:1; pointer-events:none; overflow:hidden; border-radius:26px; transform:translate3d(calc(var(--px,0)*-9px),calc(var(--py,0)*-9px),0); }
+  .pcard .pfx span{ position:absolute; opacity:0; background:var(--c); box-shadow:0 0 6px color-mix(in srgb,var(--c) 80%,transparent); }
+  .pcard .pfx .dust{ border-radius:50%; animation:p_rise var(--d,6s) linear var(--del,0s) infinite; }
+  .pcard .pfx .ember{ border-radius:50%; animation:p_riseF var(--d,4s) ease-in var(--del,0s) infinite; }
+  .pcard .pfx .shard{ border-radius:1px; animation:p_riseR var(--d,7s) linear var(--del,0s) infinite; }
+  .pcard .pfx .streak{ border-radius:2px; animation:p_riseS var(--d,5s) linear var(--del,0s) infinite; }
+  .pcard .pfx .orbit{ border-radius:50%; animation:p_orbit var(--d,8s) linear var(--del,0s) infinite; }
+  @keyframes p_rise{ 0%{opacity:0;transform:translateY(16px) scale(.5);} 18%{opacity:.7;} 100%{opacity:0;transform:translateY(-160px) scale(1);} }
+  @keyframes p_riseF{ 0%{opacity:0;transform:translateY(12px) scale(.4);} 14%{opacity:.95;filter:brightness(1.5);} 100%{opacity:0;transform:translateY(-180px) scale(1.1);} }
+  @keyframes p_riseR{ 0%{opacity:0;transform:translateY(18px) rotate(0) scale(.5);} 20%{opacity:.8;} 100%{opacity:0;transform:translateY(-170px) rotate(240deg) scale(1);} }
+  @keyframes p_riseS{ 0%{opacity:0;transform:translateY(22px) scaleY(.6);} 20%{opacity:.55;} 100%{opacity:0;transform:translateY(-190px) scaleY(1.3);} }
+  @keyframes p_orbit{ 0%{opacity:0;transform:rotate(0) translateX(72px) scale(.5);} 14%{opacity:.85;} 84%{opacity:.55;} 100%{opacity:0;transform:rotate(360deg) translateX(72px) scale(1);} }
+  /* ── shimmer sweep (t3 only) + scanlines ── */
+  .pcard .sweep{ position:absolute; inset:0; z-index:6; pointer-events:none; border-radius:26px; overflow:hidden; }
+  .pcard .sweep::after{ content:''; position:absolute; top:-50%; left:0; width:46%; height:200%; transform:translateX(-130px) rotate(18deg); opacity:0;
+    background:linear-gradient(90deg, transparent, color-mix(in srgb,var(--c) 22%,rgba(255,255,255,0.2)), transparent); }
+  .pcard.t3 .sweep::after{ animation:sweep 5.5s ease-in-out infinite; }
+  @keyframes sweep{ 0%,68%{ transform:translateX(-130px) rotate(18deg); opacity:0; } 76%{ opacity:1; } 100%{ transform:translateX(440px) rotate(18deg); opacity:0; } }
+  .pcard .scan{ position:absolute; inset:0; z-index:6; pointer-events:none; border-radius:26px; opacity:.4; mix-blend-mode:overlay; background:repeating-linear-gradient(0deg, transparent 0 2px, rgba(255,255,255,.03) 2px 3px); }
+  /* ── UNLOCKED certification stamp ── */
+  .pcard .ownrow{ display:flex; justify-content:center; position:relative; z-index:5; margin-bottom:10px; }
+  .lockpill{ display:inline-flex; align-items:center; gap:5px; font-size:8px; font-weight:900; letter-spacing:.18em; text-transform:uppercase; padding:4px 11px; border-radius:999px; }
+  .lockpill svg{ width:10px; height:10px; }
+  .lockpill.have{ color:color-mix(in srgb,var(--good) 92%,#fff); background:rgba(52,211,153,.1); border:1px solid rgba(52,211,153,.42); box-shadow:0 0 12px rgba(52,211,153,.28); }
+  .lockpill.lk{ color:color-mix(in srgb,var(--c) 72%,#fff); background:color-mix(in srgb,var(--c) 8%,transparent); border:1px solid color-mix(in srgb,var(--c) 32%,transparent); }
+  /* ── ZONE 1 · identity ── */
+  .pcard .crow{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; position:relative; z-index:5; }
+  .pcard .who .nm{ font-size:19px; font-weight:900; letter-spacing:.01em; line-height:1; text-shadow:0 2px 8px rgba(0,0,0,.55); }
+  .pcard .who .sub{ display:flex; align-items:center; gap:7px; margin-top:6px; }
+  .pcard .who .cls{ font-size:9.5px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; color:color-mix(in srgb,var(--c) 72%,#fff); }
+  .pcard .who .dot{ width:3px; height:3px; border-radius:50%; background:var(--dim); }
+  .pcard .who .pid{ font-size:9.5px; font-weight:700; letter-spacing:.04em; color:var(--muted); font-variant-numeric:tabular-nums; }
+  /* ── LEVEL BADGE — prestige evolves lp1→lp5 ── */
+  .pcard .lvlbadge{ position:relative; flex:none; width:50px; height:56px; display:flex; align-items:center; justify-content:center; transform:translate3d(calc(var(--px,0)*7px),calc(var(--py,0)*7px),0); }
+  .pcard .lvlbadge .hex{ position:absolute; inset:0; z-index:1; clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+    background:linear-gradient(160deg, color-mix(in srgb,var(--c) 50%,#fff), color-mix(in srgb,var(--c) 30%,#1a1d27) 55%, #0c0e16);
+    box-shadow:0 4px 12px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.4); }
+  .pcard .lvlbadge .hex::before{ content:''; position:absolute; inset:2px; clip-path:inherit; background:linear-gradient(160deg, rgba(24,26,36,.45), rgba(8,9,14,.9)); }
+  .pcard .lvlbadge .aura{ position:absolute; inset:-4px; z-index:0; clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); opacity:0;
+    background:conic-gradient(from var(--ang), transparent, color-mix(in srgb,var(--c) 72%,#fff), transparent 42%); }
+  .pcard .lvlbadge .spk{ position:absolute; width:3px; height:3px; border-radius:50%; background:var(--lt); box-shadow:0 0 6px var(--c); opacity:0; z-index:4; }
+  .pcard .lvlbadge .lk{ position:relative; z-index:3; font-size:6.5px; font-weight:900; letter-spacing:.16em; color:color-mix(in srgb,var(--c) 72%,#fff); margin-bottom:-2px; margin-top:6px; }
+  .pcard .lvlbadge .lv{ position:relative; z-index:3; font-size:20px; font-weight:900; line-height:.9; color:#fff; text-shadow:0 0 8px color-mix(in srgb,var(--c) 60%,transparent); }
+  .pcard .lvlbadge.col{ flex-direction:column; }
+  .pcard .lvlbadge.lp2{ width:54px; height:60px; } .pcard .lvlbadge.lp2 .hex{ box-shadow:0 4px 12px rgba(0,0,0,.5), 0 0 14px color-mix(in srgb,var(--c) 35%,transparent), inset 0 1px 0 rgba(255,255,255,.42); }
+  .pcard .lvlbadge.lp3{ width:56px; height:62px; } .pcard .lvlbadge.lp3 .hex{ box-shadow:0 4px 14px rgba(0,0,0,.5), 0 0 18px color-mix(in srgb,var(--c) 45%,transparent), inset 0 1px 0 rgba(255,255,255,.5); } .pcard .lvlbadge.lp3 .aura{ opacity:.8; animation:angspin 6s linear infinite; }
+  .pcard .lvlbadge.lp4{ width:58px; height:64px; } .pcard .lvlbadge.lp4 .hex{ box-shadow:0 5px 16px rgba(0,0,0,.55), 0 0 24px color-mix(in srgb,var(--c) 55%,transparent), inset 0 1px 0 rgba(255,255,255,.55); } .pcard .lvlbadge.lp4 .aura{ opacity:.9; animation:angspin 4.5s linear infinite; } .pcard .lvlbadge.lp4 .spk{ animation:spark 2.4s ease-in-out infinite; }
+  .pcard .lvlbadge.lp5{ width:62px; height:69px; } .pcard .lvlbadge.lp5 .hex{ box-shadow:0 6px 18px rgba(0,0,0,.6), 0 0 32px color-mix(in srgb,var(--c) 70%,transparent), inset 0 1px 0 rgba(255,255,255,.6); }
+  .pcard .lvlbadge.lp5 .aura{ opacity:1; animation:angspin 3.2s linear infinite; background:conic-gradient(from var(--ang), transparent, #fff, color-mix(in srgb,var(--c) 82%,#fff), transparent 46%); }
+  .pcard .lvlbadge.lp5 .spk{ animation:spark 1.8s ease-in-out infinite; } .pcard .lvlbadge.lp5 .lv{ font-size:21px; text-shadow:0 0 12px color-mix(in srgb,var(--c) 82%,transparent); }
+  @keyframes spark{ 0%,100%{ opacity:0; transform:translateY(0) scale(.6); } 40%{ opacity:1; transform:translateY(-8px) scale(1); } }
+  /* ── ZONE 2 · artifact showcase (lighting/fragments scale by tier) ── */
+  .pcard .stg{ position:relative; height:152px; display:flex; align-items:center; justify-content:center; z-index:3; margin-top:2px; transform-style:preserve-3d; }
+  .pcard .rays{ position:absolute; inset:0; margin:auto; width:230px; height:230px; z-index:1; pointer-events:none; mix-blend-mode:screen; opacity:0;
+    background:conic-gradient(from 0deg, transparent 0deg, color-mix(in srgb,var(--c) 26%,transparent) 7deg, transparent 15deg, transparent 42deg, color-mix(in srgb,var(--c) 18%,transparent) 49deg, transparent 57deg, transparent 92deg, color-mix(in srgb,var(--c) 24%,transparent) 99deg, transparent 107deg, transparent 150deg, color-mix(in srgb,var(--c) 18%,transparent) 157deg, transparent 165deg, transparent 210deg, color-mix(in srgb,var(--c) 24%,transparent) 217deg, transparent 225deg, transparent 270deg, color-mix(in srgb,var(--c) 18%,transparent) 277deg, transparent 285deg, transparent 320deg, color-mix(in srgb,var(--c) 24%,transparent) 327deg, transparent 335deg);
+    -webkit-mask:radial-gradient(circle, #000 6%, transparent 60%); mask:radial-gradient(circle, #000 6%, transparent 60%); animation:rayspin 24s linear infinite; }
+  .pcard.t2 .rays{ opacity:.45; } .pcard.t3 .rays{ opacity:.72; filter:brightness(1.3); animation-duration:18s; }
+  @keyframes rayspin{ to{ transform:rotate(360deg); } }
+  .pcard .halo{ position:absolute; inset:0; margin:auto; width:128px; height:128px; border-radius:50%; z-index:2; background:radial-gradient(circle, color-mix(in srgb,var(--c) 44%,transparent) 0%, color-mix(in srgb,var(--c) 18%,transparent) 38%, transparent 66%); filter:blur(10px); animation:halo 3.8s ease-in-out infinite; }
+  .pcard.t2 .halo{ width:158px; height:158px; background:radial-gradient(circle, color-mix(in srgb,var(--c) 50%,transparent) 0%, color-mix(in srgb,var(--c) 22%,transparent) 40%, transparent 68%); }
+  .pcard.t3 .halo{ width:182px; height:182px; background:radial-gradient(circle, color-mix(in srgb,var(--c) 60%,transparent) 0%, color-mix(in srgb,var(--c) 26%,transparent) 42%, transparent 70%); animation-duration:3s; }
+  @keyframes halo{ 0%,100%{ transform:scale(.9); opacity:.5; } 50%{ transform:scale(1.07); opacity:.95; } }
+  .pcard .frags{ position:absolute; inset:0; z-index:3; pointer-events:none; }
+  .pcard .frags i{ position:absolute; top:50%; left:50%; width:5px; height:5px; margin:-2.5px 0 0 -2.5px; border-radius:1.5px; background:linear-gradient(160deg, var(--lt), color-mix(in srgb,var(--c) 45%,#000)); box-shadow:0 0 7px color-mix(in srgb,var(--c) 70%,transparent); animation:fragorbit var(--fd,7s) linear infinite; }
+  @keyframes fragorbit{ from{ transform:rotate(0) translateX(var(--fr,62px)) rotate(0); } to{ transform:rotate(360deg) translateX(var(--fr,62px)) rotate(-360deg); } }
+  .pcard .pshadow{ position:absolute; bottom:12px; left:50%; width:118px; height:20px; z-index:2; border-radius:50%; background:radial-gradient(ellipse, rgba(0,0,0,.6), transparent 70%); filter:blur(4px); animation:pshad 5s ease-in-out infinite; }
+  .pcard.t3 .pshadow{ width:128px; height:23px; }
+  @keyframes pshad{ 0%,100%{ transform:translateX(-50%) scale(1); opacity:.6; } 50%{ transform:translateX(-50%) scale(.82); opacity:.4; } }
+  .pcard .gem{ width:124px; height:124px; position:relative; z-index:4; display:flex; align-items:center; justify-content:center; transform:translate3d(calc(var(--px,0)*14px),calc(var(--py,0)*14px),0); }
+  .pcard .gemfloat{ width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
+  .pcard.t2 .gemfloat{ animation:lift 4.5s ease-in-out infinite; } .pcard.t3 .gemfloat{ animation:liftHi 4s ease-in-out infinite; }
+  @keyframes lift{ 0%,100%{ transform:translateY(2px); } 50%{ transform:translateY(-6px); } }
+  @keyframes liftHi{ 0%,100%{ transform:translateY(4px) rotate(-1.2deg); } 50%{ transform:translateY(-12px) rotate(1.2deg); } }
+  .pcard .gemspin{ width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
+  .pcard .gem img{ width:100%; height:100%; object-fit:contain; object-position:center; display:block; -webkit-mask:radial-gradient(circle at 50% 47%, #000 64%, transparent 93%); mask:radial-gradient(circle at 50% 47%, #000 64%, transparent 93%); filter:drop-shadow(0 6px 16px rgba(0,0,0,.42)) drop-shadow(0 0 18px color-mix(in srgb,var(--c) 42%,transparent)); }
+  .pcard.t2 .gem img{ filter:drop-shadow(0 7px 18px rgba(0,0,0,.42)) drop-shadow(0 0 22px color-mix(in srgb,var(--c) 54%,transparent)); }
+  .pcard.t3 .gem img{ filter:drop-shadow(0 9px 22px rgba(0,0,0,.46)) drop-shadow(0 0 30px color-mix(in srgb,var(--c) 68%,transparent)) brightness(1.08); }
+  /* ── ZONE 3 · rank title + tier badge ── */
+  .pcard .rl{ text-align:center; position:relative; z-index:5; margin-top:4px; }
+  .pcard .r1{ font-size:30px; font-weight:900; letter-spacing:.06em; line-height:1; color:var(--c); text-shadow:0 0 12px color-mix(in srgb,var(--c) 30%,transparent), 0 2px 4px rgba(0,0,0,.5); }
+  .pcard.t2 .r1, .pcard.t3 .r1{ animation:titleglow 4s ease-in-out infinite; }
+  .pcard.t3 .r1{ font-size:31px; }
+  @keyframes titleglow{ 0%,100%{ text-shadow:0 0 16px color-mix(in srgb,var(--c) 42%,transparent), 0 2px 4px rgba(0,0,0,.5); } 50%{ text-shadow:0 0 30px color-mix(in srgb,var(--c) 75%,transparent), 0 2px 4px rgba(0,0,0,.5); } }
+  .pcard .tier{ display:inline-flex; align-items:center; gap:5px; margin-top:9px; font-size:8.5px; font-weight:900; letter-spacing:.18em; text-transform:uppercase; padding:4px 11px; border-radius:999px; position:relative; overflow:hidden; }
+  .pcard .tier .tp{ width:4px; height:4px; flex:none; transform:rotate(45deg); background:color-mix(in srgb,var(--c) 70%,#fff); box-shadow:0 0 5px color-mix(in srgb,var(--c) 60%,transparent); }
+  .pcard .tier svg{ width:11px; height:11px; flex:none; }
+  .pcard.t1 .tier{ color:color-mix(in srgb,var(--c) 80%,#fff); background:transparent; border:1px solid color-mix(in srgb,var(--c) 30%,transparent); }
+  .pcard.t2 .tier{ color:color-mix(in srgb,var(--c) 84%,#fff); background:color-mix(in srgb,var(--c) 14%,transparent); border:1px solid color-mix(in srgb,var(--c) 42%,transparent); }
+  .pcard.t3 .tier{ color:#0a0b12; background:linear-gradient(180deg, color-mix(in srgb,var(--c) 86%,#fff), var(--c)); border:1px solid color-mix(in srgb,var(--c) 60%,#fff); box-shadow:0 0 16px color-mix(in srgb,var(--c) 45%,transparent); }
+  .pcard.t3 .tier .tp{ background:#0a0b12; box-shadow:none; }
+  .pcard.t3 .tier::after{ content:''; position:absolute; inset:0; background:linear-gradient(90deg, transparent, rgba(255,255,255,.75), transparent); transform:translateX(-120%); animation:tiershine 3.6s ease-in-out infinite; }
+  @keyframes tiershine{ 0%,55%{ transform:translateX(-120%); } 100%{ transform:translateX(120%); } }
+  .pcard .r2{ font-size:9.5px; font-weight:600; color:var(--muted); margin-top:8px; line-height:1.3; }
+  /* ── ZONE 4 · stat attributes (premium glass) ── */
+  .pcard .sbar{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:16px; position:relative; z-index:5; }
+  .pcard .stat{ display:flex; flex-direction:column; align-items:center; gap:5px; padding:11px 5px 10px; border-radius:14px; background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.015)); border:1px solid rgba(255,255,255,.09); box-shadow:inset 0 1px 0 rgba(255,255,255,.1), 0 6px 14px rgba(0,0,0,.25); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); transition:.2s; }
+  .pcard.t2 .stat, .pcard.t3 .stat{ border-color:color-mix(in srgb,var(--c) 22%,rgba(255,255,255,.09)); }
+  .pcard.t3 .stat{ box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 6px 16px rgba(0,0,0,.3), 0 0 12px color-mix(in srgb,var(--c) 13%,transparent); }
+  .pcard .stat:hover{ border-color:color-mix(in srgb,var(--c) 50%,transparent); box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 0 16px color-mix(in srgb,var(--c) 24%,transparent); transform:translateY(-2px); }
+  .pcard .stat .ic{ width:14px; height:14px; color:color-mix(in srgb,var(--c) 72%,#fff); opacity:.92; }
+  .pcard .stat .v{ font-size:14px; font-weight:900; line-height:1; font-variant-numeric:tabular-nums; }
+  .pcard .stat .k{ font-size:7.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--dim); }
+  .pcard .stat.pw .v{ color:var(--c); text-shadow:0 0 10px color-mix(in srgb,var(--c) 50%,transparent); }
+  @media (prefers-reduced-motion: reduce){ .pcard, .pcard *, .pcard::before{ animation:none!important; } .pcard{ transform:none!important; } }
+  .dt .perks{ margin-top:16px; } .dt .perks .ph{ font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); margin-bottom:9px; } .dt .perk{ display:flex; align-items:center; gap:9px; font-size:13.5px; font-weight:600; color:var(--text); padding:12px; border-radius:13px; background:var(--bg-card); border:1px solid var(--border); margin-bottom:8px; } .dt .perk svg{ width:15px; height:15px; flex:none; color:var(--c); }
+  .dt .status{ margin-top:14px; display:flex; align-items:center; justify-content:center; gap:8px; padding:14px; border-radius:14px; font-size:13px; font-weight:800; } .dt .status svg{ width:16px; height:16px; } .dt .status.lock{ color:var(--c); background:color-mix(in srgb,var(--c) 10%,transparent); border:1px solid color-mix(in srgb,var(--c) 30%,transparent); } .dt .status.have{ color:var(--good); background:rgba(52,211,153,.1); border:1px solid rgba(52,211,153,.35); }
+  .dt .note{ text-align:center; font-size:11.5px; color:var(--dim); margin-top:10px; font-weight:600; line-height:1.5; }
+</style>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg" id="bgEl"></div><div class="bgglow" id="bgGlow"></div><div class="bgfx" id="bgfx"></div><div class="notch"></div>
+    <div class="frame">
+      <div class="hdr"><a class="back" href="23-profile.html" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"/></svg></a><div><div class="ttl">Ranks</div><div class="sub" id="curSub">Stone I</div></div></div>
+      <div class="scroll">
+        <div class="season"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 3v18M3 12h18M6 6l12 12M18 6L6 18"/></svg>11 ranks · each has 3 tiers (I·II·III). CORE is the apex — it resets every season.</div>
+        <div class="grid" id="grid"></div>
+      </div>
+      <nav class="nav" aria-label="Primary">
+        <a class="item" href="20-dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 11l9-7 9 7M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/></svg><span class="nl">Home</span></a>
+        <a class="item" href="21-quests.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg><span class="nl">Quests</span></a>
+        <a class="item" href="27-shop.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M6 2L3 6v13a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"/></svg><span class="nl">Shop</span></a>
+        <a class="item active" href="23-profile.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="nl">Profile</span></a>
+        <a class="item active" href="24-more.html" aria-current="page"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg><span class="nl">More</span></a>
+      </nav>
+      <div class="home-indicator"></div>
+    </div>
+    <div class="dt" id="dt" role="dialog" aria-modal="true">
+      <div class="scrim" id="dtScrim"></div>
+      <div class="sheet"><div class="grab"></div><button class="close" id="dtClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 6l12 12M18 6L6 18"/></svg></button><div id="dtBody"></div></div>
+    </div>
+  </div>
+  <script src="_lib/core-sfx.js"></script>
+  <script src="_lib/core-state.js"></script>
+  <script>
+  (function(){
+    var S=window.coreState, qs=function(s){return document.querySelector(s);};
+    try{ if(/[?&]demo=1/.test(location.search)) S.seedDemo(); }catch(e){}
+    var ICON=S.RANK_ICONS;
+    var ANIM={Stone:'pulse 4s ease-in-out infinite',Earth:'float 5s ease-in-out infinite',Leaf:'float 4s ease-in-out infinite',Water:'float 3.4s ease-in-out infinite',Crystal:'pulse 2.8s ease-in-out infinite',Gold:'spin3d 6s ease-in-out infinite',Ember:'flick 1.6s ease-in-out infinite',Wind:'float 3.6s ease-in-out infinite',Aurora:'twk 4.4s ease-in-out infinite',Ascend:'float 4s ease-in-out infinite',CORE:'pulse 2.4s ease-in-out infinite'};
+    var CHECK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12l4 4 10-11"/></svg>';
+    var LOCK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+
+    function pad(n){ return (n<10?'0':'')+n; }
+    function playerName(){ var n=''; try{ var t=JSON.parse(localStorage.getItem('coreOnboardTrial')||'{}'); n=t.name||t.firstName||''; }catch(e){} return n||'Player'; }
+    function playerId(){ try{ return localStorage.getItem('corePlayerId')||'CORE-XXXX-XXXX'; }catch(e){ return 'CORE-XXXX-XXXX'; } }
+
+    // Per-rank rarity particle system (single design, evolves by rank).
+    var FX={ Stone:{c:'dust',n:16,a:1,b:2.4,s0:6,s1:10}, Earth:{c:'shard',n:13,a:1.6,b:3.2,s0:6,s1:9}, Leaf:{c:'dust',n:15,a:1.4,b:3,s0:5,s1:9}, Water:{c:'streak',n:14,a:1.3,b:2,s0:4,s1:7}, Crystal:{c:'shard',n:15,a:1.6,b:3.4,s0:5,s1:8}, Gold:{c:'ember',n:16,a:1.2,b:2.6,s0:4,s1:7}, Ember:{c:'ember',n:20,a:1.4,b:3,s0:3,s1:5.5}, Wind:{c:'streak',n:16,a:1.2,b:2,s0:3.5,s1:6}, Aurora:{c:'streak',n:16,a:1.6,b:2.6,s0:5,s1:9}, Ascend:{c:'shard',n:17,a:1.6,b:3.4,s0:4,s1:7}, CORE:{c:'orbit',n:22,a:1.4,b:3,s0:6,s1:11} };
+    function particles(name,tier){
+      var f=FX[name]||FX.Stone, mul=tier===1?0.7:tier===2?1:1.4, n=Math.round(f.n*mul), html='';
+      for(var i=0;i<n;i++){
+        var t=i/n, sz=(f.a+t*(f.b-f.a)).toFixed(1), sp=(f.s0+((i*37)%100)/100*(f.s1-f.s0)).toFixed(1), del=((i%9)*0.6).toFixed(1);
+        var left=(i*53)%100, top=(f.c==='orbit')?46:(56+((i*29)%44)), w=sz, h=(f.c==='streak')?(sz*7).toFixed(1):sz;
+        html+='<span class="'+f.c+'" style="left:'+left+'%;top:'+top+'%;width:'+w+'px;height:'+h+'px;--d:'+sp+'s;--del:'+del+'s"></span>';
+      }
+      return html;
+    }
+    // Previewed tier for rank `idx`: current rank → real tier · owned → III (mastered) · locked → I (starter) · apex → III.
+    function tierFor(idx){
+      var cur=S.rankTier(S.read().xp||0); if(!S.RANKS[idx+1]) return 2;
+      if(idx===cur.idx) return Math.max(0,Math.min(2,cur.sub||0));
+      return idx<cur.idx?2:0;
+    }
+    var TIEREMBLEM='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 8l4.5 3.5L12 4l4.5 7.5L21 8l-2 11H5z"/></svg>';
+    var SI={
+      lvl:'<svg class="ic" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg>',
+      xp:'<svg class="ic" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l2.5 5.6 6.1.6-4.6 4.1 1.4 6L12 16.8 6.6 19.3 8 13.3 3.4 9.2l6.1-.6z"/></svg>',
+      streak:'<svg class="ic" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c.5 3-1.8 4.3-1.8 7A1.8 1.8 0 0 0 12 9.2c.3-1.6 1-2 1-2 .8 1.2 3 2.8 3 6a4 4 0 0 1-8 0c0-3.5 3-5 4-11z"/></svg>',
+      power:'<svg class="ic" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l7 3v6c0 4.2-3 7.5-7 9-4-1.5-7-4.8-7-9V5z"/></svg>'
+    };
+
+    // Build the player card AS IT WOULD LOOK at rank `idx`, with the player's real stats.
+    // Rank = element/theme · Tier = evolution/intensity · Level = badge prestige.
+    function buildPreview(idx){
+      var s=S.read(), r=S.RANKS[idx], isCore=!S.RANKS[idx+1];
+      var level=S.levelFor(s.xp||0), xp=s.xp||0, power=S.corePower(), streak=(s.streak&&s.streak.days)||0;
+      var cur=S.rankTier(s.xp||0).idx, owned=idx<=cur, here=idx===cur;
+      var tIdx=tierFor(idx), tier=tIdx+1, ROM=['I','II','III'], roman=ROM[tIdx];
+      var lp=level>=50?5:level>=21?4:level>=11?3:level>=6?2:1;
+      var rname=isCore?'CORE':r.name.toUpperCase();
+      var cls=(s.class||'Warrior').replace(/^\w/,function(c){return c.toUpperCase();});
+      var pill = here ? '<span class="lockpill have">'+CHECK+'Your rank</span>' : owned ? '<span class="lockpill have">'+CHECK+'Unlocked</span>' : '<span class="lockpill lk">'+LOCK+'Locked preview</span>';
+      var sv='--c:'+r.color+';--c1:'+(r.c1||r.color)+';--c2:'+(r.c2||'#0a0b14');
+      // tier badge: emblem (t3) + pips(×tier) + label
+      var pips=''; for(var p=0;p<tier;p++){ pips+='<i class="tp"></i>'; }
+      var tierBadge='<span class="tier">'+(tier===3?TIEREMBLEM:'')+pips+'<span>'+(isCore?'APEX':'TIER '+roman)+'</span></span>';
+      // level prestige badge
+      var sparks=''; if(lp>=4){ var SP=[[16,22],[80,28],[50,6]], ns=lp>=5?3:2; for(var k=0;k<ns;k++){ sparks+='<span class="spk" style="left:'+SP[k][0]+'%;top:'+SP[k][1]+'%;animation-delay:'+(k*0.6)+'s"></span>'; } }
+      var lvlBadge='<div class="lvlbadge col lp'+lp+'"><div class="aura"></div><div class="hex"></div>'+sparks+'<span class="lk">LVL</span><span class="lv">'+level+'</span></div>';
+      // orbiting artifact fragments (t2/t3)
+      var fr=''; if(tier>=2){ var fn=tier===3?6:3; for(var g=0;g<fn;g++){ var rad=58+(g%3)*9, fd=6+(g%4), delay=-(fd*(g/fn)); fr+='<i style="--fr:'+rad+'px;--fd:'+fd+'s;animation-delay:'+delay.toFixed(2)+'s"></i>'; } }
+      return '<div class="pcard t'+tier+'" style="'+sv+'">'+
+        '<div class="patmos"><i class="f1"></i><i class="f2"></i></div>'+
+        '<div class="cracks"></div>'+
+        '<div class="pfx">'+particles(r.name,tier)+'</div>'+
+        '<div class="sweep"></div><div class="scan"></div>'+
+        '<div class="corners"><i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i></div>'+
+        '<div class="ownrow">'+pill+'</div>'+
+        '<div class="crow"><div class="who"><div class="nm">'+playerName()+'</div><div class="sub"><span class="cls">'+cls+'</span><span class="dot"></span><span class="pid">'+playerId()+'</span></div></div>'+lvlBadge+'</div>'+
+        '<div class="stg"><div class="rays"></div><div class="halo"></div><div class="frags">'+fr+'</div><div class="pshadow"></div>'+
+          '<div class="gem"><div class="gemfloat"><div class="gemspin" style="animation:'+(ANIM[r.name]||ANIM.Stone)+'"><img src="assets/ranks/'+r.name.toLowerCase()+'.png" alt="'+r.name+'"></div></div></div></div>'+
+        '<div class="rl"><div class="r1">'+rname+'</div>'+tierBadge+'<div class="r2">'+(r.tagline||'')+'</div></div>'+
+        '<div class="sbar">'+
+          '<div class="stat">'+SI.lvl+'<span class="v">'+level+'</span><span class="k">Level</span></div>'+
+          '<div class="stat">'+SI.xp+'<span class="v">'+xp.toLocaleString()+'</span><span class="k">XP</span></div>'+
+          '<div class="stat">'+SI.streak+'<span class="v">'+streak+'</span><span class="k">Streak</span></div>'+
+          '<div class="stat pw">'+SI.power+'<span class="v">'+power.toLocaleString()+'</span><span class="k">Power</span></div>'+
+        '</div>'+
+      '</div>';
+    }
+    function openDetail(idx){
+      var s=S.read(), r=S.RANKS[idx], isCore=!S.RANKS[idx+1], cur=S.rankTier(s.xp||0).idx, owned=idx<=cur, here=idx===cur;
+      var status, note='';
+      if(here){ status='<div class="status have">'+CHECK+'This is your current rank</div>'; }
+      else if(owned){ status='<div class="status have">'+CHECK+'Unlocked</div>'; }
+      else { var need=Math.max(0,r.min-(s.xp||0)); status='<div class="status lock">'+LOCK+need.toLocaleString()+' XP to reach '+r.name+'</div>'; note='<div class="note">This is a preview of your card at '+r.name+' using your current stats.<br>You’ll own this look once you hit '+r.min.toLocaleString()+' XP.</div>'; }
+      var perks='<div class="perks"><div class="ph">Unlocks at '+r.name+'</div>'+(r.unlocks||[]).map(function(u){return '<div class="perk">'+(owned?CHECK:LOCK)+u+'</div>';}).join('')+'</div>';
+      qs('#dtBody').innerHTML='<div class="dhead" style="--c:'+r.color+'"><div class="dnum">'+pad(idx+1)+(isCore?' · APEX':'')+'</div><div class="dname">'+r.name.toUpperCase()+'</div><div class="dtag">'+(r.tagline||'')+'</div></div>'+buildPreview(idx)+status+perks+note;
+      qs('#dt').classList.add('open');
+    }
+    function closeDetail(){ qs('#dt').classList.remove('open'); }
+    qs('#dtScrim').addEventListener('click', closeDetail); qs('#dtClose').addEventListener('click', closeDetail);
+
+    function buildBgFx(color){
+      var host=qs('#bgfx'); host.innerHTML=''; var f=document.createDocumentFragment();
+      for(var i=0;i<16;i++){ var s=document.createElement('span'); var sz=1.5+(i%4); s.style.width=sz+'px'; s.style.height=sz+'px'; s.style.left=((i*61)%100)+'%'; s.style.top=(60+(i%40))+'%'; s.style.setProperty('--d',(7+(i%6))+'s'); s.style.setProperty('--del',((i%9)*0.7)+'s'); f.appendChild(s); }
+      host.appendChild(f);
+    }
+
+    var builtBg=null;
+    function render(){
+      var s=S.read(), xp=s.xp||0, t=S.rankTier(xp), curIdx=t.idx, ranks=S.RANKS;
+      qs('#bgEl').style.setProperty('--rk',t.color); qs('#bgGlow').style.setProperty('--rk',t.color); qs('#bgfx').style.setProperty('--rk',t.color);
+      qs('#curSub').textContent='Currently '+t.full;
+      if(builtBg!==t.color){ buildBgFx(t.color); builtBg=t.color; }
+      var html='';
+      ranks.forEach(function(r,i){
+        var state=i<curIdx?'have':i===curIdx?'cur':'locked', isCore=!ranks[i+1];
+        var st = i===curIdx?'<span class="now">Current</span>': i<curIdx?'<span class="have">'+CHECK+'</span>':'<span class="lock">'+LOCK+'</span>';
+        html+='<div class="rk'+(state==='cur'?' cur':state==='locked'?' locked':'')+(isCore?' core':'')+'" style="--c:'+r.color+';--anim:'+(ANIM[r.name]||ANIM.Stone)+'">'+
+          '<div class="num">'+pad(i+1)+'</div><div class="st">'+st+'</div>'+
+          '<div class="gem"><img src="assets/ranks/'+r.name.toLowerCase()+'.png" alt="'+r.name+'"></div>'+
+          '<div class="nm">'+r.name.toUpperCase()+'</div><div class="tg">'+(r.tagline||'')+'</div></div>';
+      });
+      qs('#grid').innerHTML=html;
+      qs('#grid').querySelectorAll('.rk').forEach(function(el,i){ el.setAttribute('role','button'); el.setAttribute('tabindex','0'); el.addEventListener('click',function(){ openDetail(i); }); el.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openDetail(i); } }); });
+    }
+    S.syncProgress(); window.addEventListener('coreStateChange',render); window.addEventListener('core:progress-updated',render); render();
+  })();
+  </script>
+</body>
+</html>
