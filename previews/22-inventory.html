@@ -242,37 +242,8 @@
 
   /* fx particles + chest cinematic (ported from Shop) */
   .spark{ position:absolute; width:7px; height:7px; border-radius:50%; pointer-events:none; z-index:85; will-change:transform,opacity; }
-  .cine{ position:absolute; inset:0; z-index:90; display:none; align-items:center; justify-content:center; flex-direction:column;
-    background:radial-gradient(60% 50% at 50% 42%, rgba(40,30,8,.6), rgba(2,2,10,.94) 70%); backdrop-filter:blur(3px); }
-  .cine.show{ display:flex; }
-  .cine .glow{ position:absolute; inset:0; opacity:0; background:radial-gradient(45% 35% at 50% 42%, color-mix(in srgb,var(--pullc,#FFD98A) 90%,transparent), rgba(255,160,60,.3) 40%, transparent 70%); pointer-events:none; }
-  .cine.s-leak .glow{ opacity:.55; transition:opacity .5s; } .cine.s-burst .glow{ opacity:1; transition:opacity .15s; } .cine.s-reveal .glow{ opacity:.18; transition:opacity .8s; }
-  .cine .flash{ position:absolute; inset:0; background:#fff; opacity:0; pointer-events:none; }
-  .cine.rare-pull.s-burst .flash{ animation:rareFlash .55s ease; }
-  @keyframes rareFlash{ 0%{opacity:0;} 26%{opacity:.9;} 100%{opacity:0;} }
-  .cine .cbox{ position:relative; width:130px; height:130px; display:flex; align-items:center; justify-content:center; }
-  .cine .cbox svg{ width:118px; height:118px; color:var(--pullc,#FFD98A); filter:drop-shadow(0 10px 30px rgba(255,150,50,.55)); }
-  .cine.s-shake .cbox{ animation:cShake .12s linear infinite; }
-  @keyframes cShake{ 0%{transform:translate(0,0) rotate(0);} 25%{transform:translate(-3px,1px) rotate(-2deg);} 50%{transform:translate(3px,-1px) rotate(2deg);} 75%{transform:translate(-2px,2px) rotate(-1deg);} 100%{transform:translate(2px,0) rotate(1deg);} }
-  .cine.s-leak .cbox{ animation:cBreathe 1s ease-in-out infinite; }
-  @keyframes cBreathe{ 0%,100%{transform:scale(1);} 50%{transform:scale(1.06);} }
-  .cine.s-burst .cbox{ animation:cBurst .5s cubic-bezier(.3,.8,.3,1) forwards; }
-  @keyframes cBurst{ 0%{transform:scale(1);} 40%{transform:scale(1.35);} 100%{transform:scale(2.4); opacity:0;} }
-  .cine .cap{ margin-top:30px; text-align:center; opacity:0; transform:translateY(10px); }
-  .cine.s-reveal .cap{ opacity:1; transform:translateY(0); transition:.5s .1s; }
-  .cine .cap .cct{ font-size:11px; font-weight:900; letter-spacing:.2em; text-transform:uppercase; color:var(--pullc,#FFD98A); }
-  .cine .cap .ccs{ font-size:22px; font-weight:900; margin-top:4px; }
-  .cine .reveals{ display:flex; flex-direction:column; gap:9px; margin-top:22px; width:240px; }
-  .cine .rv{ display:flex; align-items:center; gap:11px; padding:11px 13px; border-radius:14px; background:rgba(255,255,255,.05); border:1px solid var(--rc,var(--border)); box-shadow:0 0 18px -6px var(--rc,transparent); opacity:0; transform:translateY(14px) scale(.95); }
-  .cine.s-reveal .rv{ animation:rvIn .5s cubic-bezier(.2,.9,.3,1.3) forwards; }
-  @keyframes rvIn{ to{ opacity:1; transform:translateY(0) scale(1); } }
-  .cine .rv.hi{ box-shadow:0 0 30px -4px var(--rc); } .cine .rv.hi .rvname::after{ content:" ★"; color:var(--rc); }
-  .cine .rv .rvi{ width:36px; height:36px; flex:none; border-radius:11px; display:flex; align-items:center; justify-content:center; background:color-mix(in srgb,var(--rc,#fff) 16%,transparent); border:1px solid var(--rc,var(--border)); }
-  .cine .rv .rvi svg{ width:20px; height:20px; color:var(--rc,#fff); }
-  .cine .rv .rvname{ font-size:13.5px; font-weight:800; } .cine .rv .rvr{ font-size:9px; font-weight:900; letter-spacing:.1em; text-transform:uppercase; color:var(--rc,var(--muted)); margin-top:2px; }
-  .cine .ccollect{ margin-top:24px; width:240px; padding:14px; border-radius:14px; border:none; cursor:pointer; font:inherit; font-size:15px; font-weight:900; color:#1a1206; background:linear-gradient(135deg,#FFD98A,#FF9F45); box-shadow:0 10px 26px rgba(255,150,60,.45); opacity:0; }
-  .cine.s-reveal .ccollect{ opacity:1; transition:opacity .5s .5s; } .cine .ccollect:active{ transform:scale(.98); }
-  @media (prefers-reduced-motion: reduce){ .cine .cbox,.cine.s-shake .cbox,.cine.s-leak .cbox,.spark{ animation:none!important; } }
+  /* chest opening now lives on the dedicated full-screen opener (28-chest.html) */
+  @media (prefers-reduced-motion: reduce){ .spark{ animation:none!important; } }
 
   /* nav */
   .nav { position:absolute; left:0; right:0; bottom:0; z-index:50; padding:10px 12px 26px; display:flex; justify-content:space-around; align-items:flex-end; background:linear-gradient(180deg, rgba(5,6,14,0) 0%, rgba(5,6,14,0.88) 34%, #04040c 100%); backdrop-filter:blur(14px); }
@@ -344,15 +315,6 @@
       <div class="sheet-bd" id="sheetBd"></div>
       <div class="sheet" id="sheet"></div>
 
-      <!-- chest opening cinematic (ported from Shop) -->
-      <div class="cine" id="cine">
-        <div class="glow"></div>
-        <div class="flash"></div>
-        <div class="cbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 9l2.2-4.4A1 1 0 0 1 6.1 4h11.8a1 1 0 0 1 .9.6L21 9M3 9v9a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V9M3 9h18M12 9v4m-2.2 0h4.4"/></svg></div>
-        <div class="cap"><div class="cct" id="cineTag">Chest</div><div class="ccs" id="cineTitle">Rewards unlocked</div></div>
-        <div class="reveals" id="cineReveals"></div>
-        <button class="ccollect" id="cineCollect" type="button">Collect</button>
-      </div>
     </div>
     <div class="toast" id="toast"></div>
   </div>
@@ -420,32 +382,11 @@
       })(); }
     }
     function burstFromEl(el, color, n){ if(!el) return; var r=el.getBoundingClientRect(); burstAt(r.left+r.width/2, r.top+r.height/2, color, n); }
-    var RAR_ORDER=['common','rare','epic','legendary','mythic'];
-    var CHEST_ITEMS={
-      common:   {name:'Iron Trinket', type:'item',   slot:null,    ic:'<circle cx="12" cy="12" r="7"/>'},
-      rare:     {name:'Azure Border', type:'border', slot:'frame', ic:'<rect x="4" y="4" width="16" height="16" rx="3"/><rect x="8" y="8" width="8" height="8" rx="1.5"/>'},
-      epic:     {name:'Aurora Effect',type:'effect', slot:'aura',  ic:'<path d="M12 3l2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5z"/>'},
-      legendary:{name:'Golden Aura',  type:'effect', slot:'aura',  ic:'<circle cx="12" cy="12" r="5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>'},
-      mythic:   {name:'CORE Sigil',   type:'effect', slot:'aura',  ic:'<path d="M12 3l7 6-3 11H8L5 9z"/><path d="M12 3v18"/>'}
-    };
+    // rarity colour (chests now open on 28-chest.html; only this helper is still used locally)
     function rarColor(r){ var m={common:'#9AA1B7',rare:'#4A8FFF',epic:'#B388FF',legendary:'#FFD98A',mythic:'#FF5C8A'}; return m[r]||'#FFD98A'; }
-    function rollChest(floorRar){
-      var floor=RAR_ORDER.indexOf(floorRar), bonus=(S.hasUpgrade&&S.hasUpgrade('chesthunter'))?0.04:0, r=Math.random(), up=0;
-      if(r > 0.92 - bonus) up=2; else if(r > 0.62 - bonus) up=1;
-      var tier=Math.min(4, Math.max(0,floor)+up), rar=RAR_ORDER[tier], item=CHEST_ITEMS[rar];
-      var mult=(S.xpMultiplier?S.xpMultiplier():1);
-      var xp=Math.round((60 + tier*25) * mult), coinsR=40 + tier*30, shards=tier>=1 ? tier*2 : 1;
-      var reveals=[
-        {n:'+'+xp+' XP',        r:'rare',   ic:'<path d="M13 2L3 14h7l-1 8 10-12h-7l1-8Z"/>'},
-        {n:'+'+coinsR+' Coins', r:'common', ic:'<circle cx="12" cy="12" r="9"/><path d="M12 7v10"/>'},
-        {n:'+'+shards+' Shards',r:'epic',   ic:'<path d="M12 2l4 7-4 13-4-13z"/>'},
-        {n:item.name, r:rar, ic:item.ic, hi:true}
-      ];
-      return { rar:rar, tier:tier, item:item, rid:'chest_'+rar+'_'+(Object.keys(jget('coreOwnedChests',[])).length)+'_'+xp, xp:xp, coins:coinsR, shards:shards, reveals:reveals };
-    }
 
     // ── catalog (same ids as Shop so ownership + equips stay in sync) ──
-    var CATS=['Frames','Badges','Auras','Titles','Boosts','Chests'];
+    var CATS=['Rewards','Frames','Badges','Auras','Titles','Boosts','Chests'];
     var COLLECT_CATS=['Frames','Badges','Auras','Titles','Boosts']; // chests are consumables, excluded from collection %
     var ITEMS=[
       {id:'frame_default', cat:'Frames', name:'Default Frame', rar:'Common', kind:'frame', frameKey:'Default', free:true, desc:'The standard CORE profile border.'},
@@ -512,34 +453,8 @@
       else return;
       S.syncProgress(); dispatch(); flash={id:it.id, type:'bought'}; SFX('tick'); toast('Unequipped'); render();
     }
-    function openChest(it){
-      if(ownedChestCount(it.id)<1) return;
-      closeSheet();
-      var cine=qs('#cine'), floor=it.rar.toLowerCase(), roll=rollChest(floor), rarePull=roll.tier>=3;
-      cine.style.setProperty('--pullc', rarColor(roll.rar));
-      qs('#cineTag').textContent=it.name;
-      qs('#cineTitle').textContent = rarePull ? (roll.rar==='mythic'?'MYTHIC PULL':'LEGENDARY PULL') : 'Rewards unlocked';
-      qs('#cineReveals').innerHTML = roll.reveals.map(function(r,i){ var c='var(--'+r.r+')'; return '<div class="rv'+(r.hi?' hi':'')+'" style="--rc:'+c+';animation-delay:'+(i*0.16)+'s"><div class="rvi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">'+r.ic+'</svg></div><div><div class="rvname">'+r.n+'</div><div class="rvr">'+r.r.charAt(0).toUpperCase()+r.r.slice(1)+'</div></div></div>'; }).join('');
-      cine.className='cine show'+(rarePull?' rare-pull':'');
-      var pdens=18+roll.tier*10;
-      function reveal(){ cine.classList.add('s-reveal'); SFX('chest_reveal'); var pr=qs('.phone').getBoundingClientRect(); burstAt(pr.left+pr.width/2, pr.top+270, rarColor(roll.rar), pdens); }
-      if(REDUCED){ cine.classList.add('s-reveal'); }
-      else {
-        SFX('chest_shake'); cine.classList.add('s-shake');
-        setTimeout(function(){ cine.classList.remove('s-shake'); cine.classList.add('s-leak'); SFX('chest_leak'); }, 850);
-        setTimeout(function(){ cine.classList.remove('s-leak'); cine.classList.add('s-burst'); SFX(rarePull?'chest_burst_rare':'chest_burst'); }, 1650);
-        setTimeout(function(){ cine.classList.remove('s-burst'); reveal(); }, rarePull?2300:2050);
-      }
-      qs('#cineCollect').onclick=function(){
-        try{ if(S.addXp) S.addXp(roll.xp,'chest:inventory'); }catch(e){}
-        try{ if(S.earnCoins) S.earnCoins(roll.coins,'chest:inventory'); }catch(e){}
-        try{ if(S.update) S.update(function(st){ st.shards=(st.shards||0)+roll.shards; return st; }); }catch(e){}
-        try{ if(S.addItem) S.addItem({id:roll.rid, name:roll.item.name, type:roll.item.type, rarity:roll.rar, slot:roll.item.slot||undefined}); }catch(e){}
-        var owned=jget('coreOwnedChests',[]); var i=owned.indexOf(it.id); if(i>=0){ owned.splice(i,1); jset('coreOwnedChests',owned); }
-        cine.className='cine'; SFX('chest_collect'); lset('coreCoins', String(coins())); S.syncProgress(); dispatch();
-        toast('Claimed '+roll.item.name+' · +'+roll.shards+'◆','good'); render();
-      };
-    }
+    // Chests open on the dedicated full-screen opener (28-chest.html); the buttons
+    // here route there. Won items then surface in the "Rewards" tab below.
 
     // ── NEW-item tracking (Shop/chest acquisitions surface here) ──
     function ownedNow(it){ return it.cat==='Chests'? ownedChestCount(it.id)>0 : isOwned(it); }
@@ -547,7 +462,22 @@
     (function initSeen(){ if(jget('coreInvSeen',null)===null){ jset('coreInvSeen', ownedIdsNow()); } })();
     function isNewItem(it){ return ownedNow(it) && jget('coreInvSeen',[]).indexOf(it.id)<0; }
     function markSeen(id){ var s=jget('coreInvSeen',[]); if(s.indexOf(id)<0){ s.push(id); jset('coreInvSeen',s); } }
-    function newCountInCat(cat){ return ITEMS.filter(function(i){return i.cat===cat && isNewItem(i);}).length; }
+    function newCountInCat(cat){ if(cat==='Rewards') return newRpgCount(); return ITEMS.filter(function(i){return i.cat===cat && isNewItem(i);}).length; }
+
+    // ── Won rewards: the RPG items pulled from chests (coreState.inventory) ──
+    function rpgItems(){ try{ var a=S.read().inventory; return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+    function rpgSeen(){ return jget('coreRpgSeen',[]); }
+    function isNewRpg(it){ return rpgSeen().indexOf(it.id)<0; }
+    function newRpgCount(){ var seen=rpgSeen(); return rpgItems().filter(function(it){return seen.indexOf(it.id)<0;}).length; }
+    function markRpgSeenAll(){ var seen=rpgSeen(); rpgItems().forEach(function(it){ if(seen.indexOf(it.id)<0) seen.push(it.id); }); jset('coreRpgSeen',seen); }
+    function rpgEquipped(it){ try{ return it.slot && S.read().equipped && S.read().equipped[it.slot]===it.id; }catch(e){ return false; } }
+    var RPG_IC={
+      border:'<rect x="4" y="4" width="16" height="16" rx="3"/><rect x="8" y="8" width="8" height="8" rx="1.5"/>',
+      effect:'<path d="M12 3l2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5z"/>',
+      badge:'<path d="M12 3l7 3v5c0 4-3 7-7 9-4-2-7-5-7-9V6l7-3Z"/><path d="M9 11.5l2 2 4-4.5"/>',
+      armour:'<path d="M12 3l7 3v5c0 4-3 7-7 9-4-2-7-5-7-9V6l7-3Z"/>',
+      item:'<circle cx="12" cy="12" r="7"/>'
+    };
 
     // ── collection milestones ──
     var MILESTONES=[ {pct:25, coins:100}, {pct:50, coins:250}, {pct:100, coins:1000} ];
@@ -599,7 +529,7 @@
         var a=btn.dataset.sheetAct;
         if(a==='equip'){ equip(it); openSheet(it); }
         else if(a==='unequip'){ unequip(it); openSheet(it); }
-        else if(a==='open'){ openChest(it); }
+        else if(a==='open'){ location.href='28-chest.html?chest='+encodeURIComponent(it.id)+'&from=inventory'; }
         else { closeSheet(); }
       }); });
       b.classList.add('show'); s.classList.add('show');
@@ -667,7 +597,7 @@
       var tabs=qs('#tabs'); tabs.innerHTML='';
       CATS.forEach(function(c){
         var b=document.createElement('button'); b.className='tab'+(c===activeCat?' on':'');
-        var cnt = c==='Chests' ? String(ownedInCat(c)) : ownedInCat(c)+'/'+totalInCat(c);
+        var cnt = c==='Rewards' ? String(rpgItems().length) : c==='Chests' ? String(ownedInCat(c)) : ownedInCat(c)+'/'+totalInCat(c);
         var dot = newCountInCat(c)>0 ? '<span class="dot"></span>' : '';
         b.innerHTML=c+'<span class="cnt">'+cnt+'</span>'+dot;
         b.onclick=function(){ activeCat=c; render(); };
@@ -679,7 +609,30 @@
       function sectHead(label,count){ var d=document.createElement('div'); d.className='sect'; d.innerHTML='<span class="st">'+label+'</span><span class="sc">'+count+'</span><span class="sl"></span>'; return d; }
       function attachCard(el,it){ el.addEventListener('click',function(){ openSheet(it); }); }
 
-      if(activeCat==='Chests'){
+      if(activeCat==='Rewards'){
+        var won=rpgItems();
+        if(!won.length){
+          grid.innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l7 3v5c0 4-3 7-7 9-4-2-7-5-7-9V6l7-3Z"/><path d="M9 11.5l2 2 4-4.5"/></svg><div class="et">No rewards yet</div><div class="ed">Open chests to win cosmetics — they land here.</div><a href="27-shop.html?cat=Chests">Open Shop</a></div>';
+        } else {
+          won.forEach(function(it){
+            var rl=String(it.rarity||'common'), rcap=rl.charAt(0).toUpperCase()+rl.slice(1);
+            var equ=rpgEquipped(it), ic=RPG_IC[it.type]||RPG_IC.item;
+            var el=document.createElement('div'); el.className='item r-'+rl+(equ?' equipped':'');
+            var foot = it.slot
+              ? (equ ? '<button class="btn unequip" data-rpg-act="unequip" data-rid="'+it.id+'" data-slot="'+it.slot+'">Unequip</button>'
+                     : '<button class="btn equip" data-rpg-act="equip" data-rid="'+it.id+'" data-slot="'+it.slot+'">Equip</button>')
+              : '<button class="btn active" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 3l2.4 7.4H20l-6 4.4 2.3 7.2L12 17.6 5.7 22l2.3-7.2-6-4.4h7.6z"/></svg>Trophy</button>';
+            el.innerHTML=(isNewRpg(it)?'<span class="newtag">NEW</span>':'')+
+              '<span class="rtag" style="color:'+rarColor(rl)+'"><span class="rd"></span>'+rcap+'</span>'+
+              '<div class="pv"><div class="pv-badge" style="--bc:'+rarColor(rl)+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+ic+'</svg></div></div>'+
+              '<div class="in">'+it.name+'</div><div class="it">'+(it.slot?it.slot.charAt(0).toUpperCase()+it.slot.slice(1):'Trophy')+'</div>'+
+              '<div class="id2">'+(it.source?'From '+it.source+' chest':'Chest reward')+'</div>'+
+              '<div class="ifoot">'+foot+'</div>';
+            grid.appendChild(el);
+          });
+          setTimeout(markRpgSeenAll, 1800); // let the NEW glow show this visit, clear next
+        }
+      } else if(activeCat==='Chests'){
         var held=jget('coreOwnedChests',[]);
         var uniq={}; held.forEach(function(id){ uniq[id]=(uniq[id]||0)+1; });
         var ids=Object.keys(uniq);
@@ -731,7 +684,15 @@
           var act=b.dataset.act;
           if(act==='equip') equip(it);
           else if(act==='unequip') unequip(it);
-          else if(act==='open') openChest(it);
+          else if(act==='open'){ location.href='28-chest.html?chest='+encodeURIComponent(it.id)+'&from=inventory'; }
+        });
+      });
+      // Won-rewards equip/unequip (coreState.equipped[slot] = item id)
+      document.querySelectorAll('[data-rpg-act]').forEach(function(b){
+        b.addEventListener('click', function(e){ e.stopPropagation();
+          var act=b.dataset.rpgAct, rid=b.dataset.rid, slot=b.dataset.slot;
+          try{ if(act==='equip') S.equipItem(rid, slot); else if(act==='unequip') S.equipItem(null, slot); }catch(err){}
+          SFX(act==='equip'?'equip':'tick'); S.syncProgress&&S.syncProgress(); dispatch(); toast(act==='equip'?'Equipped':'Unequipped'); render();
         });
       });
       document.querySelectorAll('[data-stop]').forEach(function(a){ a.addEventListener('click',function(e){ e.stopPropagation(); }); });

@@ -23,8 +23,14 @@
   const STORAGE_KEY = 'coreState.v1';
   const FREEZE_PER_WEEK = 1;
   const STAT_MIN = 0, STAT_MAX = 100;
-  const STAT_DECAY = { lungs: 0.3, brain: 0.3, wallet: 0.3, willpower: 0.35, body: 0.4, social: 0.5 };
-  const STAT_RECOVER = { lungs: 1.2, brain: 1.5, wallet: 1.0, willpower: 1.0, body: 0.8, social: 1.0 };
+  // Per-idle-day passive drift (pts/day, ×days capped 7, 24h grace after a raise). Pre-launch-gentle:
+  // recovery/resource stats stay sticky (lung recovery + money don't evaporate); maintenance-heavy
+  // stats (willpower/social/body) fade faster. Tunable — flagged to Stone 2026-06-04.
+  const STAT_DECAY = { lungs: 0.15, brain: 0.25, wallet: 0.1, willpower: 0.35, body: 0.3, social: 0.4 };
+  // Rebound multiplier: returning to a recently-decayed stat gains EXTRA (rate-1)
+  // on quest-driven gains, so neglected stats bounce back faster. All > 1 so every
+  // stat rewards a comeback (brain/social rebound hardest). Used by addStat().
+  const STAT_RECOVER = { lungs: 1.3, brain: 1.4, wallet: 1.2, willpower: 1.25, body: 1.15, social: 1.35 };
 
   // Rank ladder — 11 tiers, Stone → CORE. XP threshold → rank name.
   // Each rank carries c1/c2/glow for badge rendering + `unlocks` (2 perks) the
@@ -252,13 +258,31 @@
   function _statModel(key) { const d = STAT_DEFS.find((x) => x.key === key || x.model === key); return d ? d.model : key; }
   function statDef(key) { return STAT_DEFS.find((x) => x.key === key || x.model === key) || null; }
   function statValue(key) { const s = read(); return clamp((s.stats && s.stats[_statModel(key)]) || 0, STAT_MIN, STAT_MAX); }
+  // Projected recovery rebound for a would-be quest gain (extra (rate-1)*amount if the
+  // stat decayed in the last 7 days). Shared by addStat (grant) + rewardBundle (preview).
+  function recoverBonus(key, amount) {
+    if ((amount || 0) <= 0) return 0;
+    const model = _statModel(key);
+    const since = Date.now() - 7 * 86400000;
+    const decayed = (read().statLedger || []).some((e) => e.stat === model && e.reason === 'decay' && e.delta < 0 && e.ts >= since);
+    return decayed ? Math.round(amount * Math.max(0, (STAT_RECOVER[model] || 1) - 1)) : 0;
+  }
   function addStat(key, amount, reason) {
     const model = _statModel(key);
+    // Recovery rebound — a quest gain to a stat that decayed in the last 7 days
+    // rebounds faster (×STAT_RECOVER), logged separately as 'recover'.
+    let bonus = 0;
+    if ((amount || 0) > 0 && reason && reason.indexOf('quest:') === 0) {
+      const since = Date.now() - 7 * 86400000;
+      const decayed = (read().statLedger || []).some((e) => e.stat === model && e.reason === 'decay' && e.delta < 0 && e.ts >= since);
+      if (decayed) bonus = Math.round(amount * Math.max(0, (STAT_RECOVER[model] || 1) - 1));
+    }
     const r = update((s) => {
       if (!s.stats) s.stats = {};
-      s.stats[model] = clamp((s.stats[model] || 0) + (amount || 0), STAT_MIN, STAT_MAX);
+      s.stats[model] = clamp((s.stats[model] || 0) + (amount || 0) + bonus, STAT_MIN, STAT_MAX);
       s.statLedger = s.statLedger || [];
       s.statLedger.unshift({ ts: Date.now(), stat: model, delta: amount || 0, reason: reason || '' });
+      if (bonus > 0) s.statLedger.unshift({ ts: Date.now(), stat: model, delta: bonus, reason: 'recover' });
       if (s.statLedger.length > 200) s.statLedger.length = 200;
       return s;
     });
@@ -274,6 +298,9 @@
   function applyStatTick() {
     return update((s) => {
       const now = Date.now();
+      // Pause passive decay during onboarding — no drift until ~Level 3 (xp >= 600). Keep the
+      // tick timestamp current so decay starts fresh (not retroactively) once they cross it.
+      if ((s.xp || 0) < 600) { s.lastStatTickAt = now; return s; }
       const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
       const last = s.lastStatTickAt || now;
       const lastStart = new Date(last); lastStart.setHours(0, 0, 0, 0);
@@ -562,11 +589,35 @@
   // ─── CORE Plus (subscription) — dev toggle until real billing is wired ──────
   // Perks: 2× XP + 2× coins, and a weekly Epic chest. Enabled from the paywall's
   // dev toggle; stored as a flat flag so every page picks it up instantly.
-  function corePlusActive() { try { return localStorage.getItem('corePlusActive') === '1'; } catch (e) { return false; } }
+  // Active only while flagged AND not past the expiry (simulates a real sub period).
+  function corePlusActive() {
+    try {
+      if (localStorage.getItem('corePlusActive') !== '1') return false;
+      const until = parseInt(localStorage.getItem('corePlusUntil') || '0', 10) || 0;
+      if (until && Date.now() >= until) {            // lapsed → auto-cancel
+        localStorage.setItem('corePlusActive', '0');
+        return false;
+      }
+      return true;
+    } catch (e) { return false; }
+  }
+  // Days remaining on the current CORE Plus period (0 if inactive/none).
+  function corePlusDaysLeft() {
+    try {
+      if (!corePlusActive()) return 0;
+      const until = parseInt(localStorage.getItem('corePlusUntil') || '0', 10) || 0;
+      return until ? Math.max(0, Math.ceil((until - Date.now()) / 86400000)) : 0;
+    } catch (e) { return 0; }
+  }
   function setCorePlus(on) {
     try {
       localStorage.setItem('corePlusActive', on ? '1' : '0');
-      if (on) grantPlusWeekly(true); // drop the first weekly chest immediately
+      if (on) {
+        localStorage.setItem('corePlusUntil', String(Date.now() + 30 * 86400000)); // 30-day period
+        grantPlusWeekly(true); // drop the first weekly chest immediately
+      } else {
+        localStorage.removeItem('corePlusUntil');
+      }
     } catch (e) {}
     return corePlusActive();
   }
@@ -738,7 +789,7 @@
   // its tier); `noUp` keeps the small free/daily chest at floor. Chest Hunter
   // upgrade nudges the up-roll odds.
   const CHEST_RAR_ORDER = ['common', 'rare', 'epic', 'legendary', 'mythic'];
-  const CHEST_PITY = 10; // guaranteed rare+ at least once every CHEST_PITY pulls
+  const CHEST_PITY = 8; // guaranteed rare+ at least once every CHEST_PITY pulls
   const CHEST_ITEMS = {
     common:    { name: 'Iron Trinket',  type: 'item',   slot: null,    ic: '<circle cx="12" cy="12" r="7"/>' },
     rare:      { name: 'Azure Border',  type: 'border', slot: 'frame', ic: '<rect x="4" y="4" width="16" height="16" rx="3"/><rect x="8" y="8" width="8" height="8" rx="1.5"/>' },
@@ -790,6 +841,8 @@
       s.chests = s.chests || { opened: [] }; s.chests.opened = s.chests.opened || [];
       s.chests.opened.unshift(source + '_' + Date.now());
       // pity counter: reset on a rare+ pull, otherwise increment
+      // NOTE: free/daily (noUp) chests increment pity but are excluded from the forced
+      // upgrade above — pity only PAYS OUT on a paid pull. Intentional (flagged 2026-06-04).
       s.chestPity = (roll.tier >= 1) ? 0 : (s.chestPity || 0) + 1;
       return s;
     });
@@ -800,7 +853,7 @@
   window.coreState = {
     read, write, update,
     lifeScore, rankFor, corePower, achievementsUnlocked,
-    STAT_DEFS, statDef, statValue, addStat, applyStatTick,
+    STAT_DEFS, statDef, statValue, addStat, applyStatTick, recoverBonus,
     levelFor, unlockedPerks, rankTier, syncProgress, pendingRankUp, clearPendingRankUp,
     streakLost, isStreakRecoverable, trialDay,
     logSlip, restoreStreak, useFreeze,
@@ -809,7 +862,7 @@
     setClass, addItem, equipItem, openStarterChest, ensureDailyQuests, completeQuest,
     buyUpgrade, hasUpgrade, xpMultiplier,
     rollChest, grantChest, chestRarColor,
-    corePlusActive, setCorePlus, grantPlusWeekly, freeChestFloor,
+    corePlusActive, setCorePlus, grantPlusWeekly, freeChestFloor, corePlusDaysLeft,
     resetAll, bind, seedDemo,
     RANKS, RANK_ICONS, RESTORE_COIN_COST, CHEST_ITEMS, CHEST_RAR_ORDER,
   };
