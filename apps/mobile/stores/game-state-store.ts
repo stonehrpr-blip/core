@@ -39,6 +39,12 @@ export type Streak = {
 
 const STAT_MIN = 0;
 const STAT_MAX = 100;
+// Passive daily decay rates + recovery-rebound multipliers, mirrored from
+// previews/_lib/core-state.js so RN matches the HTML stat economy. Stats drift
+// down slowly when idle; a quest gain to a recently-decayed stat rebounds faster
+// (× STAT_RECOVER). (No 'social' here — it isn't a habit-backed StatKey in RN.)
+const STAT_DECAY: Record<StatKey, number> = { lungs: 0.15, brain: 0.25, wallet: 0.1, willpower: 0.35, body: 0.3 };
+const STAT_RECOVER: Record<StatKey, number> = { lungs: 1.3, brain: 1.4, wallet: 1.2, willpower: 1.25, body: 1.15 };
 const FREEZE_PER_WEEK = 1;
 const TRIAL_DAYS = 7;
 
@@ -99,6 +105,7 @@ type GameState = {
   level: number;
   slips: Slip[];
   lastSeenAt: string | null;
+  lastStatTickAt: number | null;
   xpLedger: XpLedgerEntry[];
   statLedger: StatLedgerEntry[];
   rankHistory: RankHistoryEntry[];
@@ -114,6 +121,7 @@ type GameState = {
   // actions
   logSlip: (habit: string, opts?: { magnitude?: number }) => void;
   addStat: (stat: StatKey, amount: number, reason?: string) => void;
+  applyStatTick: () => void;
   restoreStreak: () => void;
   useFreeze: () => boolean;
   addXp: (amount: number, reason?: string) => void;
@@ -121,7 +129,7 @@ type GameState = {
   resetAll: () => void;
 };
 
-const DEFAULTS: Pick<GameState, "stats" | "streak" | "xp" | "level" | "slips" | "lastSeenAt" | "xpLedger" | "statLedger" | "rankHistory"> = {
+const DEFAULTS: Pick<GameState, "stats" | "streak" | "xp" | "level" | "slips" | "lastSeenAt" | "lastStatTickAt" | "xpLedger" | "statLedger" | "rankHistory"> = {
   stats: { lungs: 64, brain: 78, wallet: 58, willpower: 81, body: 67 },
   streak: {
     days: 14,
@@ -135,6 +143,7 @@ const DEFAULTS: Pick<GameState, "stats" | "streak" | "xp" | "level" | "slips" | 
   level: 3,
   slips: [],
   lastSeenAt: null,
+  lastStatTickAt: null,
   xpLedger: [],
   // Demo slip history so the profile stat-detail sheet shows real recent activity.
   // Slips lower stats (RN has no positive stat-gain action yet), so all deltas are
@@ -242,15 +251,55 @@ export const useGameStateStore = create<GameState>()(
       addStat: (stat, amount, reason) => {
         if (!amount) return;
         set((s) => {
+          const now = Date.now();
+          // Recovery rebound — a quest gain to a stat that decayed in the last 7 days
+          // rebounds faster (× STAT_RECOVER), logged separately as 'recover'. Mirrors
+          // addStat() in previews/_lib/core-state.js.
+          let bonus = 0;
+          if (amount > 0 && reason?.startsWith("quest")) {
+            const since = now - 7 * 86400000;
+            const decayed = s.statLedger.some((e) => e.stat === stat && e.reason === "decay" && e.delta < 0 && e.ts >= since);
+            if (decayed) bonus = Math.round(amount * Math.max(0, (STAT_RECOVER[stat] || 1) - 1));
+          }
           const next: Stats = { ...s.stats };
-          next[stat] = clamp(next[stat] + amount, STAT_MIN, STAT_MAX);
+          next[stat] = clamp(next[stat] + amount + bonus, STAT_MIN, STAT_MAX);
           const applied = Math.round(next[stat] - s.stats[stat]);
           if (applied === 0) return {} as Partial<GameState>;
-          const statLedger: StatLedgerEntry[] = [
-            { ts: Date.now(), stat, delta: applied, reason: reason || "gain" },
-            ...s.statLedger,
-          ].slice(0, 200);
+          const entries: StatLedgerEntry[] = [{ ts: now, stat, delta: amount, reason: reason || "gain" }];
+          if (bonus > 0) entries.unshift({ ts: now, stat, delta: bonus, reason: "recover" });
+          const statLedger: StatLedgerEntry[] = [...entries, ...s.statLedger].slice(0, 200);
           return { stats: next, statLedger };
+        });
+      },
+
+      // Passive daily stat drift — stats in STAT_DECAY drop per idle calendar day
+      // (capped at 7), with a 24h grace if raised recently. Paused during onboarding
+      // (xp < 600). Idempotent within a day — safe to call on every mount. Mirrors
+      // applyStatTick() in previews/_lib/core-state.js.
+      applyStatTick: () => {
+        set((s) => {
+          const now = Date.now();
+          if (s.xp < 600) return { lastStatTickAt: now };
+          const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+          const lastStart = new Date(s.lastStatTickAt ?? now); lastStart.setHours(0, 0, 0, 0);
+          let days = Math.floor((todayStart.getTime() - lastStart.getTime()) / 86400000);
+          if (days <= 0) return s.lastStatTickAt ? {} as Partial<GameState> : { lastStatTickAt: now };
+          days = Math.min(days, 7);
+          const next: Stats = { ...s.stats };
+          const decayEntries: StatLedgerEntry[] = [];
+          (Object.keys(STAT_DECAY) as StatKey[]).forEach((k) => {
+            const dec = STAT_DECAY[k];
+            if (dec <= 0) return;
+            const raisedRecently = s.statLedger.some((e) => e.stat === k && e.delta > 0 && now - e.ts < 86400000);
+            if (raisedRecently) return;
+            const after = clamp(next[k] - dec * days, STAT_MIN, STAT_MAX);
+            if (after !== next[k]) {
+              decayEntries.push({ ts: now, stat: k, delta: Math.round((after - next[k]) * 10) / 10, reason: "decay" });
+              next[k] = after;
+            }
+          });
+          const statLedger = decayEntries.length ? [...decayEntries, ...s.statLedger].slice(0, 200) : s.statLedger;
+          return { stats: next, statLedger, lastStatTickAt: now };
         });
       },
 
