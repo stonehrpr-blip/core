@@ -2,2178 +2,855 @@
 <html lang="en">
 <head>
   <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
-  <meta charset="utf-8" />
-  <title>Core — Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <script>
-    // Gate: must complete onboarding (index → trial → quiz) before dashboard unlocks.
-    // Bypass with ?preview=1 OR localStorage.coreDevBypass=1 for design QA.
-    (function() {
-      try {
-        var p = new URLSearchParams(location.search);
-        var local = location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-        if (local && p.get('preview') === '1') { localStorage.setItem('coreDevBypass','1'); window.__coreDemoMode = true; return; }
-        if (local && localStorage.getItem('coreDevBypass') === '1') { window.__coreDemoMode = true; return; }
-        try{(function(){var h=location.hostname;window.__corePreview=window.__corePreview||(location.protocol==='file:'||h==='localhost'||h==='127.0.0.1'||/[?&]preview=1/.test(location.search));})();}catch(e){}if(!window.__corePreview){if (localStorage.getItem('coreOnboardComplete') !== '1') {
-          location.replace('01-index.html');
-        }}
-      } catch(e){}
-    })();
-  </script>
-  <link rel="stylesheet" href="_lib/core-theme.css">
-  <link rel="stylesheet" href="_lib/core-responsive.css">
-  <link rel="stylesheet" href="_lib/core-buttons.css">
-  <script src="_lib/core-state.js"></script>
-  <script src="_lib/restore-banner.js"></script>
-  <script src="_lib/analytics.js"></script>
-  <script src="_lib/core-back.js"></script>
-  <script src="_lib/core-toast.js"></script>
-  <script src="_lib/core-theme.js" defer></script>
-  <script src="_lib/core-settings-menu.js" defer></script>
-  <style>
-    /* ==========================================================
-       CORE DASHBOARD — visual shell v2 (2026-05-30)
-       Tokens from core-theme.css. No raw hex in this file.
-       Hierarchy: hero ring DOMINANT → life score + alerts → stat
-       strip → streak → check-in → secondary cards.
-       ========================================================== */
+<meta charset="utf-8" />
+<title>CORE — Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<style>
+  :root {
+    --bg-base:#02020A; --bg-card:rgba(255,255,255,0.035); --bg-card-2:rgba(255,255,255,0.06);
+    --border:rgba(255,255,255,0.08); --text:#F8FAFE; --muted:#9AA1B7; --dim:#4F5570;
+    --accent:#4A8FFF; --grad-a:#4A8FFF; --grad-b:#6F70FF; --grad-c:#B388FF; --good:#34D399; --gold:#FFC56B;
+    --easy:#34D399; --med:#FFB454; --hard:#FF6B6B;
+    /* rarity ladder — drives upgrade nodes + chest rewards */
+    --r-common:#9AA1B7; --r-rare:#4A8FFF; --r-epic:#B388FF; --r-legendary:#FFC56B; --r-mythic:#FF5C8A;
+  }
+  * { box-sizing:border-box; }
+  html, body { margin:0; padding:0; height:100%; }
+  body { min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif;
+    color:var(--text); -webkit-font-smoothing:antialiased; padding:24px; overflow:hidden; }
+  .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden;
+    box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+  .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:60; }
+  .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:60; }
 
-    * { box-sizing: border-box; }
-    html, body { margin:0; padding:0; height:100%; }
-    body {
-      min-height:100vh; background:#0A0A14;
-      display:flex; align-items:center; justify-content:center;
-      font-family: 'Chakra Petch','SF Pro Display','SF Pro Text',-apple-system,BlinkMacSystemFont,Inter,sans-serif;
-      color: var(--text-primary); -webkit-font-smoothing: antialiased; padding:24px; overflow:hidden;
-    }
-    .phone {
-      position:relative; width:390px; height:844px;
-      background: var(--bg-page);
-      border-radius:56px; overflow:hidden;
-      box-shadow:
-        0 40px 100px rgba(0,0,0,0.6),
-        0 0 0 1px var(--border-subtle),
-        0 0 0 10px #0a0a12,
-        0 0 0 11px #2b2b38;
-    }
-    .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:30; }
-    .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:30; }
+  .bg { position:absolute; inset:0; z-index:0; background:
+      radial-gradient(60% 35% at 50% 12%, color-mix(in srgb,var(--rk,#4A8FFF) 14%,transparent) 0%, transparent 65%),
+      radial-gradient(60% 35% at 50% 94%, rgba(159,143,255,0.10) 0%, transparent 65%),
+      linear-gradient(180deg, #060620 0%, #02020A 55%, #050510 100%); transition:background .6s; }
+  .aurora { position:absolute; inset:0; z-index:1; pointer-events:none; opacity:0.38; mix-blend-mode:screen; }
+  .aurora::before, .aurora::after { content:""; position:absolute; border-radius:50%; filter:blur(70px); animation:auroraDrift 22s ease-in-out infinite; will-change:transform; }
+  .aurora::before { width:70%; height:40%; left:-10%; top:4%; background:radial-gradient(circle, color-mix(in srgb,var(--rk,#4A8FFF) 30%,transparent), transparent 65%); }
+  .aurora::after { width:60%; height:35%; right:-8%; bottom:12%; background:radial-gradient(circle, rgba(159,143,255,0.24), transparent 65%); animation-delay:-11s; }
+  @keyframes auroraDrift { 0%,100%{transform:translate(0,0) scale(1);opacity:0.45;} 50%{transform:translate(18px,-14px) scale(1.06);opacity:0.68;} }
+  .stars { position:absolute; inset:-2%; pointer-events:none; z-index:2; }
+  .star { position:absolute; border-radius:50%; background:#fff; animation:twinkle var(--d,4s) ease-in-out var(--del,0s) infinite; }
+  @keyframes twinkle { 0%,100%{opacity:0.15;transform:scale(0.7);} 50%{opacity:0.8;transform:scale(1.1);} }
+  @media (prefers-reduced-motion: reduce){
+    .aurora::before,.aurora::after,.star,.xpfill::after,.pfill,.shine,.gem-float,.dchest .cimg,
+    .dchest .emit,.spark,.flyxp,.qbonus.live::after,.mythic-ring,.pgain.pulse{ animation:none!important; }
+  }
 
-    /* ── Atmosphere — stronger animated background ── */
-    .bg {
-      position:absolute; inset:0; z-index:0;
-      background:
-        radial-gradient(70% 40% at 50% 0%, rgba(47,143,255,0.20) 0%, transparent 60%),
-        radial-gradient(50% 30% at 20% 100%, rgba(232,199,126,0.10) 0%, transparent 65%),
-        radial-gradient(40% 30% at 90% 60%, rgba(159,143,255,0.16) 0%, transparent 65%),
-        linear-gradient(180deg, #0A1230 0%, #050518 40%, #02020A 100%);
-    }
-    /* Mesh gradient layer — slow rotating color wash */
-    .mesh {
-      position:absolute; inset:-20%; z-index:1;
-      background:
-        radial-gradient(circle at 30% 20%, rgba(47,143,255,0.25), transparent 40%),
-        radial-gradient(circle at 70% 80%, rgba(159,143,255,0.20), transparent 45%),
-        radial-gradient(circle at 80% 30%, rgba(232,199,126,0.10), transparent 35%);
-      filter: blur(50px);
-      animation: meshSpin 40s linear infinite;
-      opacity: 0.55;
-      mix-blend-mode: screen;
-      pointer-events: none;
-    }
-    @keyframes meshSpin {
-      0%   { transform: rotate(0deg) scale(1.05); }
-      100% { transform: rotate(360deg) scale(1.05); }
-    }
-    .aurora { position:absolute; inset:0; pointer-events:none; opacity:0.55; mix-blend-mode:screen; z-index:2; }
-    .aurora::before, .aurora::after {
-      content:""; position:absolute; border-radius:50%; filter:blur(70px);
-    }
-    .aurora::before {
-      width:80%; height:50%; left:-10%; top:6%;
-      background: radial-gradient(circle, rgba(47,143,255,0.55), transparent 65%);
-      animation: aDriftA 22s ease-in-out infinite;
-    }
-    .aurora::after {
-      width:70%; height:45%; right:-8%; bottom:14%;
-      background: radial-gradient(circle, rgba(159,143,255,0.45), transparent 65%);
-      animation: aDriftB 28s ease-in-out infinite -14s;
-    }
-    @keyframes aDriftA { 0%,100% { transform: translate(0,0) scale(1); opacity:0.55; } 50% { transform: translate(40px,-30px) scale(1.10); opacity:0.85; } }
-    @keyframes aDriftB { 0%,100% { transform: translate(0,0) scale(1); opacity:0.50; } 50% { transform: translate(-30px,20px) scale(1.12); opacity:0.80; } }
-    /* Scanlines — Jarvis HUD feel */
-    .scanlines {
-      position:absolute; inset:0; pointer-events:none; z-index:3;
-      background: repeating-linear-gradient(
-        180deg,
-        transparent 0,
-        transparent 2px,
-        rgba(91,177,255,0.025) 2px,
-        rgba(91,177,255,0.025) 3px
-      );
-      mix-blend-mode: screen;
-      opacity: 0.35;
-    }
-    .stars { position:absolute; inset:0; pointer-events:none; z-index:3; }
-    .star { position:absolute; border-radius:50%; background:#fff; animation: twk var(--d,4s) ease-in-out var(--del,0s) infinite; }
-    .star.s1 { width:1px; height:1px; opacity:0.35; }
-    .star.s2 { width:1.5px; height:1.5px; opacity:0.55; }
-    @keyframes twk { 0%,100% { opacity:var(--min,0.10); transform:scale(0.7); } 50% { opacity:var(--max,0.70); transform:scale(1.20); } }
+  .frame { position:absolute; inset:0; z-index:10; display:flex; flex-direction:column; padding:54px 0 0; }
+  .scroll { flex:1; overflow-y:auto; padding:6px 18px 110px; -webkit-overflow-scrolling:touch; }
+  .scroll::-webkit-scrollbar{ display:none; }
+  .sec { margin:24px 4px 11px; display:flex; align-items:center; justify-content:space-between; }
+  .sec h2 { margin:0; font-size:12.5px; font-weight:800; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); }
+  .sec .meta { font-size:12px; font-weight:800; color:var(--dim); letter-spacing:.04em; }
+  .card-tap{ transition:transform .18s cubic-bezier(.2,.8,.2,1), border-color .2s, background .2s; }
+  .card-tap:active{ transform:scale(.985); }
 
-    /* ── Frame layout ──────────────────────────
-       Single scrollable column with safe-area aware padding.
-       Bottom tab bar (height 72px) is fixed; .scroll has bottom
-       padding to clear it. */
-    .frame {
-      position:absolute; inset:0; z-index:10;
-      display:flex; flex-direction:column;
-      padding: 52px 0 0;
-    }
-    .scroll {
-      flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch;
-      padding: 0 18px 96px;
-    }
-    .scroll::-webkit-scrollbar { display:none; }
+  /* top status */
+  .topbar { display:flex; align-items:center; justify-content:space-between; padding:6px 20px 10px; }
+  .brand { display:flex; align-items:center; gap:8px; } .brand .dot { width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 10px var(--accent); }
+  .brand .wm { font-size:12px; font-weight:800; letter-spacing:0.34em; }
+  .chips { display:flex; gap:7px; }
+  .chip { display:inline-flex; align-items:center; gap:5px; height:30px; padding:0 10px; border-radius:999px; background:var(--bg-card); border:1px solid var(--border); font-size:13px; font-weight:800; }
+  .chip svg { width:14px; height:14px; }
+  .chip.flame { color:#FFC56B; } .chip.flame svg{ color:#FF8A3D; }
+  .chip.coin  { color:#FFE07A; } .chip.coin svg{ color:#FFCB3D; }
+  .chip.shard { color:#C7B3FF; } .chip.shard svg{ color:#B388FF; }
 
-    /* ── Bottom tab bar — sits above frame at the bottom of phone ── */
-    .tabbar {
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      z-index: 20;
-      padding: 8px 12px calc(12px + env(safe-area-inset-bottom, 12px));
-      background: linear-gradient(180deg, rgba(2,2,10,0.0) 0%, rgba(2,2,10,0.85) 30%, rgba(2,2,10,0.95) 100%);
-      backdrop-filter: blur(18px) saturate(180%);
-      -webkit-backdrop-filter: blur(18px) saturate(180%);
-      border-top: 1px solid rgba(91,177,255,0.10);
-    }
+  /* hero — command center */
+  .hero { position:relative; border-radius:26px; padding:20px; overflow:hidden;
+    background:linear-gradient(160deg, color-mix(in srgb,var(--rk,#4A8FFF) 18%,transparent), rgba(159,143,255,0.06) 60%, rgba(255,255,255,0.02));
+    border:1px solid color-mix(in srgb,var(--rk,#4A8FFF) 28%,transparent); box-shadow:0 22px 60px rgba(20,40,90,0.4); }
+  .hero .shine { position:absolute; top:-40%; left:-30%; width:60%; height:180%; transform:rotate(20deg); background:linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent); animation:shine 7s ease-in-out infinite; }
+  @keyframes shine { 0%,100%{transform:translateX(0) rotate(20deg);} 50%{transform:translateX(260px) rotate(20deg);} }
+  .hero .top { display:flex; align-items:flex-start; justify-content:space-between; position:relative; z-index:1; }
+  .hero .greet{ font-size:12.5px; font-weight:700; color:var(--muted); }
+  .hero .lvl { font-size:12px; font-weight:800; letter-spacing:0.16em; color:var(--muted); text-transform:uppercase; margin-top:6px; }
+  .hero .lvnum { font-size:44px; font-weight:900; line-height:0.9; letter-spacing:-0.02em; margin-top:2px; background:linear-gradient(180deg,#fff,#c7d6ff); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+  .hero .rankpill { display:inline-flex; align-items:center; gap:7px; padding:7px 12px; border-radius:999px; background:rgba(0,0,0,0.3); border:1px solid var(--border); font-size:13px; font-weight:800; letter-spacing:.04em; color:var(--rk,#dbe9ff); }
+  .hero .rankpill svg{ width:15px; height:15px; }
 
-    /* ── Top header ───────────────────────────── */
-    .topbar {
-      display:flex; align-items:center; justify-content:space-between;
-      padding: 0 20px 14px;
-      position:relative; z-index:11;
-    }
-    .greet {
-      display:flex; flex-direction:column; gap:1px;
-    }
-    .greet-line {
-      font-size:11px; letter-spacing:0.18em; text-transform:uppercase;
-      color: var(--text-soft); font-weight:600;
-    }
-    .greet-name {
-      font-size:22px; font-weight:700; letter-spacing:-0.4px;
-      color: var(--text-primary);
-      line-height:1.1;
-    }
-    .top-right {
-      display:flex; align-items:center; gap:8px;
-    }
-    .rank-chip, .trial-pill, .today-pill, .demo-pill, .double-xp-pill {
-      display:none; align-items:center; gap:4px;
-      padding: 5px 10px; border-radius: var(--radius-pill);
-      font-size:10px; font-weight:700; letter-spacing:0.12em;
-      font-family: inherit;
-    }
-    .rank-chip {
-      background: rgba(47,143,255,0.10);
-      border: 1px solid rgba(47,143,255,0.35);
-      color: var(--core-blue-300);
-    }
-    .trial-pill {
-      background: rgba(255,200,87,0.10);
-      border: 1px solid rgba(255,200,87,0.35);
-      color: var(--core-amber-500);
-      cursor:pointer;
-    }
-    .today-pill {
-      background: rgba(47,143,255,0.14);
-      border: 1px solid rgba(47,143,255,0.40);
-      color: var(--core-blue-300);
-      cursor:pointer;
-    }
-    .demo-pill {
-      background: rgba(255,79,107,0.10);
-      border: 1px solid rgba(255,79,107,0.35);
-      color: var(--core-red-500);
-    }
-    .double-xp-pill {
-      background: rgba(159,143,255,0.10);
-      border: 1px solid rgba(159,143,255,0.35);
-      color: var(--core-violet-500);
-    }
-    .icon-btn {
-      width: 38px; height: 38px;
-      min-width: 38px; min-height: 38px; /* lock the circle */
-      flex: 0 0 38px;
-      display:flex; align-items:center; justify-content:center;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(91,177,255,0.18);
-      border-radius: 50%;
-      cursor: pointer;
-      transition: background var(--dur-fast) var(--ease-default), box-shadow var(--dur-fast) var(--ease-default);
-      position: relative;
-      padding: 0;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
-    }
-    .icon-btn::before {
-      /* Subtle inner glow ring — Jarvis look */
-      content:""; position:absolute; inset:2px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 25%, rgba(255,255,255,0.10), transparent 60%);
-      pointer-events:none;
-    }
-    .icon-btn:hover { background: rgba(91,177,255,0.10); box-shadow: 0 0 16px rgba(47,143,255,0.30), inset 0 1px 0 rgba(255,255,255,0.08); }
-    .icon-btn:active { background: rgba(91,177,255,0.16); transform: scale(0.94); }
-    .icon-btn svg { width:18px; height:18px; stroke: var(--text-primary); fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; position:relative; z-index:1; }
+  /* rank progress path: EARTH ➜ LEAF */
+  .rankpath{ display:flex; align-items:center; gap:6px; margin-top:16px; padding:13px 14px; border-radius:16px; background:rgba(0,0,0,0.3); border:1px solid color-mix(in srgb,var(--rk,#4A8FFF) 24%,transparent); position:relative; z-index:1; }
+  .rankpath .node{ display:flex; flex-direction:column; align-items:center; gap:5px; width:50px; flex:none; }
+  .rankpath .gem{ width:38px; height:38px; display:flex; align-items:center; justify-content:center; }
+  .rankpath .gem svg{ width:100%; height:100%; }
+  .rankpath .node.cur .gem{ color:var(--rk,#8FB4FF); filter:drop-shadow(0 0 7px color-mix(in srgb,var(--rk,#4A8FFF) 75%,transparent)); }
+  .rankpath .node.nxt .gem{ color:var(--nk,#8FB4FF); filter:drop-shadow(0 0 10px color-mix(in srgb,var(--nk,#4A8FFF) 85%,transparent)); }
+  .gem-float{ animation:gemFloat 3.2s ease-in-out infinite; }
+  @keyframes gemFloat{ 0%,100%{transform:translateY(0) scale(1);} 50%{transform:translateY(-4px) scale(1.05);} }
+  .rankpath .nlabel{ font-size:9px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; white-space:nowrap; }
+  .rankpath .node.cur .nlabel{ color:var(--rk,#cfe0ff); } .rankpath .node.nxt .nlabel{ color:var(--nk,#cfe0ff); }
+  .rankpath .track{ flex:1; height:7px; border-radius:999px; background:rgba(255,255,255,.08); position:relative; align-self:center; margin-top:-14px; }
+  .rankpath .track .pfillbar{ position:absolute; inset:0 auto 0 0; width:0%; border-radius:999px; background:linear-gradient(90deg,var(--rk,#4A8FFF),var(--nk,#B388FF)); box-shadow:0 0 10px color-mix(in srgb,var(--rk,#4A8FFF) 60%,transparent); transition:width 1s cubic-bezier(.2,.85,.25,1); }
+  .rankpath .togo{ position:absolute; top:-26px; left:50%; transform:translateX(-50%); font-size:9.5px; font-weight:900; letter-spacing:.04em; color:var(--text); background:rgba(0,0,0,.55); border:1px solid var(--border); padding:2px 8px; border-radius:999px; white-space:nowrap; }
 
-    /* ── Hero ring — dominant streak progress ─────
-       Replaces the cluttered top zone with a single
-       commanding ring. Days-clean is the headline. */
-    .hero-zone {
-      display:flex; flex-direction:column; align-items:center;
-      padding: 8px 0 14px;
-      position: relative;
-      cursor: pointer;
-    }
-    .hero-meta {
-      display: flex; gap: 6px; align-items: center;
-      margin-top: 14px;
-    }
-    .life-chip {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 8px 14px;
-      border-radius: var(--radius-pill);
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--border-subtle);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
-      cursor: pointer;
-      transition: background var(--dur-fast) var(--ease-default);
-    }
-    .life-chip:hover { background: rgba(255,255,255,0.07); }
-    .life-chip-label {
-      font-size: 9px; letter-spacing: 0.20em; text-transform: uppercase;
-      color: var(--text-soft); font-weight: 700;
-    }
-    .life-chip-value {
-      font-size: 18px; font-weight: 700; color: var(--text-primary);
-      font-variant-numeric: tabular-nums;
-      line-height: 1;
-    }
-    .life-chip-delta {
-      font-size: 10px; color: var(--text-secondary); font-weight: 600;
-      font-variant-numeric: tabular-nums;
-    }
-    .life-chip-delta.up { color: var(--core-green-500); }
-    .life-chip-delta.down { color: var(--core-red-500); }
-    .streak-sub {
-      font-size: 11px; color: var(--text-soft); margin-top: 10px;
-      text-align: center;
-    }
-    .hero-ring {
-      width: 224px; height: 224px;
-      position: relative;
-      display:flex; align-items:center; justify-content:center;
-    }
-    .hero-ring svg { width:100%; height:100%; transform: rotate(-90deg); }
-    .hero-ring .ring-track { fill:none; stroke: var(--border-subtle); stroke-width: 6; }
-    .hero-ring .ring-fill {
-      fill:none; stroke: var(--core-blue-300); stroke-width: 6;
-      stroke-linecap: round;
-      transition: stroke-dashoffset 1.4s var(--ease-out);
-      filter: drop-shadow(0 0 8px rgba(91,177,255,0.50));
-    }
-    .hero-ring .ring-fill.gold-flash {
-      animation: ringGoldFlash 1.5s ease-out;
-    }
-    @keyframes ringGoldFlash {
-      0%, 100% { stroke: var(--core-blue-300); filter: drop-shadow(0 0 8px rgba(91,177,255,0.50)); }
-      50% { stroke: var(--core-amber-500); filter: drop-shadow(0 0 18px rgba(255,200,87,0.85)); }
-    }
-    .hero-center {
-      position:absolute; inset:0;
-      display:flex; flex-direction:column; align-items:center; justify-content:center;
-      gap: 4px;
-    }
-    .ring-day-label {
-      font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase;
-      color: var(--text-soft); font-weight: 700;
-    }
-    .ring-num {
-      font-size: 64px; font-weight: 700; letter-spacing: -2.5px;
-      color: var(--text-primary); line-height: 1;
-      font-variant-numeric: tabular-nums;
-      transition: transform var(--dur-base) var(--ease-back);
-    }
-    .ring-num.gold-spark {
-      animation: numSpark 1.5s ease-out;
-    }
-    @keyframes numSpark {
-      0%, 100% { color: var(--text-primary); text-shadow: none; }
-      50% { color: var(--core-amber-500); text-shadow: 0 0 24px rgba(255,200,87,0.85); transform: scale(1.04); }
-    }
-    .ring-num-suffix {
-      font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
-      color: var(--text-soft); font-weight: 600;
-      margin-top: 1px;
-    }
-    .ring-to-next {
-      font-size: 11px; color: var(--text-secondary);
-      margin-top: 2px;
-      font-weight: 500;
-    }
+  .powerrow{ display:flex; align-items:center; justify-content:space-between; margin-top:12px; padding:11px 14px; border-radius:14px; background:rgba(0,0,0,0.28); border:1px solid color-mix(in srgb,var(--rk,#4A8FFF) 30%,transparent); position:relative; z-index:1; }
+  .powerrow .pl{ display:flex; align-items:center; gap:8px; font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+  .powerrow .pl svg{ width:16px; height:16px; color:var(--rk,#4A8FFF); }
+  .powerrow .pright{ display:flex; align-items:center; gap:10px; }
+  .powerrow .pv{ font-size:21px; font-weight:900; color:var(--rk,#8FB4FF); letter-spacing:.01em; }
+  .powerrow .pgain{ display:inline-flex; align-items:center; gap:3px; font-size:11px; font-weight:900; color:var(--good); padding:3px 7px; border-radius:999px; background:rgba(52,211,153,.12); border:1px solid rgba(52,211,153,.28); }
+  .powerrow .pgain svg{ width:11px; height:11px; }
+  .pgain.pulse{ animation:gainPulse 1.4s ease; }
+  @keyframes gainPulse{ 0%{transform:scale(1);} 30%{transform:scale(1.14); box-shadow:0 0 14px rgba(52,211,153,.5);} 100%{transform:scale(1);} }
 
-    /* ── Alert slots ──
-       All hidden by default. JS reveals when relevant.
-       Each is a glass card with subtle accent. */
-    #insightCards {
-      display:flex; flex-direction:column; gap: 8px;
-      margin-top: 10px;
-    }
-    .alert-slot {
-      display:none;
-      padding: 12px 14px;
-      border-radius: var(--radius-lg);
-      background: rgba(255,255,255,0.03);
-      border: 1px solid var(--border-subtle);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
-      gap: 10px;
-      align-items:flex-start;
-    }
-    .alert-slot.on { display:flex; }
-    .alert-ico {
-      width: 32px; height: 32px;
-      flex-shrink: 0;
-      border-radius: 9px;
-      display:flex; align-items:center; justify-content:center;
-    }
-    .alert-ico svg { width: 16px; height: 16px; stroke: #fff; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-    .alert-body { flex:1; min-width:0; }
-    .alert-title { font-size: 13px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.1px; }
-    .alert-text { font-size: 11px; color: var(--text-secondary); margin-top: 2px; line-height: 16px; }
-    .alert-cta {
-      background: none; border:none; color: var(--text-soft);
-      font-size: 18px; cursor: pointer; padding: 0 4px;
-    }
-    .alert-cta:hover { color: var(--text-primary); }
+  .xpwrap { margin-top:14px; position:relative; z-index:1; }
+  .xpwrap .lab { display:flex; justify-content:space-between; font-size:12px; font-weight:800; color:var(--muted); margin-bottom:7px; }
+  .xpwrap .lab .now{ color:var(--text); }
+  .xpbar { position:relative; height:12px; border-radius:999px; background:rgba(0,0,0,0.4); overflow:hidden; box-shadow:inset 0 1px 2px rgba(0,0,0,.4); }
+  .xpfill { position:relative; height:100%; border-radius:999px; width:0%; background:linear-gradient(90deg, var(--rk,#4A8FFF), var(--grad-c)); box-shadow:0 0 14px color-mix(in srgb,var(--rk,#4A8FFF) 60%,transparent); transition:width 1s cubic-bezier(.2,.85,.25,1); overflow:hidden; }
+  .xpfill::after{ content:""; position:absolute; top:0; bottom:0; left:0; width:46px; background:linear-gradient(90deg,transparent,rgba(255,255,255,.6),transparent); animation:xptravel 2.6s linear infinite; }
+  @keyframes xptravel{ 0%{transform:translateX(-60px);} 100%{transform:translateX(320px);} }
 
-    /* Specific alert tints */
-    #witnessPing .alert-ico { background: rgba(91,177,255,0.20); box-shadow: 0 0 14px rgba(91,177,255,0.50); }
-    #promiseLetterTeaser .alert-ico {
-      background: linear-gradient(135deg, var(--core-letter-gold), #fff);
-      box-shadow: 0 0 14px rgba(232,199,126,0.55);
-    }
-    #promiseLetterTeaser { border-color: rgba(232,199,126,0.30); }
-    #lifetimeOffer .alert-ico {
-      background: var(--grad-cta);
-      box-shadow: var(--glow-blue-md);
-    }
-    #lifetimeOffer { border-color: rgba(47,143,255,0.30); }
-    #bodyReceiptPrompt .alert-ico { background: rgba(91,177,255,0.20); box-shadow: 0 0 14px rgba(91,177,255,0.50); }
+  .stats { display:flex; gap:9px; margin-top:14px; position:relative; z-index:1; }
+  .stat { flex:1; padding:10px 8px; border-radius:13px; background:rgba(0,0,0,0.22); border:1px solid var(--border); text-align:center; }
+  .stat svg{ width:17px; height:17px; margin-bottom:5px; } .stat .v{ font-size:15px; font-weight:900; } .stat .k{ font-size:9px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:var(--dim); margin-top:2px; }
+  .stat.flame svg{ color:#FF8A3D; } .stat.sword svg{ color:#8FB4FF; } .stat.box svg{ color:var(--gold); }
 
-    /* ── Life Score card ─────────────────────────
-       Number is the focal. Chart sits below, muted. */
-    .life-card {
-      margin-top: 14px;
-      padding: 16px 18px;
-      border-radius: var(--radius-xl);
-      background: rgba(255,255,255,0.03);
-      border: 1px solid var(--border-subtle);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
-      cursor: pointer;
-      position: relative;
-      transition: background var(--dur-fast) var(--ease-default);
-    }
-    .life-card:hover { background: rgba(255,255,255,0.05); }
-    .life-card.empty { opacity: 0.65; }
-    .life-head {
-      display:flex; align-items:baseline; justify-content:space-between;
-    }
-    .life-label {
-      font-size: 10px; letter-spacing: 0.20em; text-transform: uppercase;
-      color: var(--text-soft); font-weight: 700;
-    }
-    .life-delta-chip {
-      font-size: 11px; font-weight: 600;
-      color: var(--text-secondary);
-    }
-    .life-delta-chip.up { color: var(--core-green-500); }
-    .life-delta-chip.up::before { content: '▲ +'; }
-    .life-number-row {
-      display:flex; align-items:baseline; gap: 6px;
-      margin-top: 4px;
-    }
-    .life-number {
-      font-size: 44px; font-weight: 700; letter-spacing: -1.6px;
-      color: var(--text-primary); line-height: 1;
-      font-variant-numeric: tabular-nums;
-    }
-    .life-out-of {
-      font-size: 14px; color: var(--text-soft);
-      font-variant-numeric: tabular-nums;
-    }
-    .life-trend-foot {
-      font-size: 11px; color: var(--text-secondary);
-      margin-top: 6px;
-    }
-    .life-empty-note {
-      font-size: 11px; color: var(--core-amber-500);
-      margin-top: 6px; font-weight: 500;
-    }
-    .chart-wrap {
-      margin-top: 10px;
-      height: 64px;
-    }
-    .chart-svg { width: 100%; height: 100%; }
-    .chart-svg .chart-line {
-      stroke: var(--core-blue-300); stroke-width: 1.8; fill: none;
-      filter: drop-shadow(0 0 4px rgba(91,177,255,0.45));
-    }
-    .chart-svg .chart-fill {
-      fill: url(#chartGrad); opacity: 0.55;
-    }
-    .chart-svg circle {
-      fill: var(--core-blue-300); opacity: 0.85;
-    }
+  /* ── LIFE SCORES (6 player stats) ── */
+  .lifegrid{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:6px; }
+  .lifecard{ position:relative; display:block; text-decoration:none; color:inherit; cursor:pointer; padding:13px 14px 12px; border-radius:16px; overflow:hidden;
+    background:linear-gradient(155deg, color-mix(in srgb,var(--sc,#4A8FFF) 9%,transparent), rgba(255,255,255,0.012));
+    border:1px solid color-mix(in srgb,var(--sc,#4A8FFF) 26%,var(--border)); transition:transform .14s ease, border-color .2s, box-shadow .3s; }
+  .lifecard:active{ transform:scale(.97); }
+  .lifecard::after{ content:""; position:absolute; inset:0; border-radius:16px; pointer-events:none; box-shadow:inset 0 0 22px -12px var(--sc,#4A8FFF); }
+  .lifecard .lhead{ display:flex; align-items:center; gap:9px; }
+  .lifecard .lic{ width:30px; height:30px; flex:none; border-radius:9px; display:flex; align-items:center; justify-content:center; background:color-mix(in srgb,var(--sc,#4A8FFF) 16%,transparent); border:1px solid color-mix(in srgb,var(--sc,#4A8FFF) 34%,transparent); }
+  .lifecard .lic svg{ width:17px; height:17px; color:var(--sc,#4A8FFF); }
+  .lifecard .ln{ font-size:12.5px; font-weight:800; letter-spacing:.02em; }
+  .lifecard .llvl{ font-size:9.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--dim); margin-top:1px; }
+  .lifecard .lval{ margin-left:auto; font-size:18px; font-weight:900; color:var(--sc,#4A8FFF); letter-spacing:.01em; }
+  .lifecard .lbar{ height:6px; border-radius:999px; background:rgba(0,0,0,0.42); overflow:hidden; margin-top:11px; }
+  .lifecard .lfill{ height:100%; border-radius:999px; width:0; background:linear-gradient(90deg, color-mix(in srgb,var(--sc,#4A8FFF) 55%,#000), var(--sc,#4A8FFF)); box-shadow:0 0 9px color-mix(in srgb,var(--sc,#4A8FFF) 70%,transparent); transition:width .7s cubic-bezier(.2,.8,.2,1); }
+  .lifecard .lup{ position:absolute; top:11px; right:13px; font-size:10px; font-weight:900; color:var(--good); opacity:0; transform:translateY(-3px); transition:.3s; }
+  .lifecard.gain .lup{ opacity:1; transform:translateY(0); }
+  .lifecard.levelup{ animation:lcLvl 1s cubic-bezier(.2,.85,.25,1); }
+  @keyframes lcLvl{ 0%{box-shadow:0 0 0 rgba(0,0,0,0);} 32%{box-shadow:0 0 30px -3px var(--sc,#4A8FFF), inset 0 0 0 1.5px color-mix(in srgb,var(--sc,#4A8FFF) 75%,transparent);} 100%{box-shadow:0 0 0 rgba(0,0,0,0);} }
+  @media (prefers-reduced-motion: reduce){ .lifecard .lfill{ transition:none; } .lifecard.levelup{ animation:none; } }
+  #lsMeta b{ color:var(--accent); font-variant-numeric:tabular-nums; }
+  #lsMeta.lsbump{ display:inline-block; animation:lsPulse .9s ease; }
+  @keyframes lsPulse{ 0%,100%{ transform:scale(1); text-shadow:none; } 35%{ transform:scale(1.1); text-shadow:0 0 12px var(--accent); } }
 
-    /* ── 5-stat strip — mini rings with per-stat pulse ─── */
-    .stat-strip {
-      display:grid; grid-template-columns: repeat(5, 1fr);
-      gap: 6px; margin-top: 14px;
-    }
-    .stat-cell {
-      position: relative;
-      display: flex; flex-direction: column; align-items: center;
-      gap: 6px;
-      padding: 10px 4px;
-      border-radius: var(--radius-lg);
-      background: rgba(255,255,255,0.025);
-      border: 1px solid var(--border-subtle);
-      cursor: pointer;
-      transition: background var(--dur-fast) var(--ease-default);
-    }
-    .stat-cell:hover { background: rgba(255,255,255,0.05); }
-    .stat-cell:active { transform: scale(0.97); }
-    .stat-ring-wrap {
-      width: 54px; height: 54px;
-      position: relative;
-      display:flex; align-items:center; justify-content:center;
-    }
-    .stat-ring-wrap svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-    .stat-ring-bg { fill: none; stroke: var(--border-subtle); stroke-width: 3.5; }
-    .stat-ring-fill {
-      fill: none; stroke-width: 3.5;
-      stroke-linecap: round;
-      transition: stroke-dashoffset var(--dur-slow) var(--ease-default);
-    }
-    /* Stat rings — all electric blue. No rainbow dots. Labels clean. */
-    .stat-ring-fill { stroke: var(--core-blue-300); filter: drop-shadow(0 0 5px rgba(91,177,255,0.55)); }
-    .stat-cell .stat-color-dot { display: none; }
-    /* Per-stat idle animations — subtle, unique character per stat */
-    .stat-cell[data-stat="lungs"] .stat-ring-wrap { animation: lungBreath 16s ease-in-out infinite; }
-    @keyframes lungBreath {
-      0%, 100% { transform: scale(1); filter: brightness(1); }
-      25% { transform: scale(1.05); filter: brightness(1.15); }
-      50% { transform: scale(1.05); filter: brightness(1.15); }
-      75% { transform: scale(1); filter: brightness(1); }
-    }
-    .stat-cell[data-stat="brain"] .stat-ring-wrap { animation: brainPulse 1s ease-in-out infinite; }
-    @keyframes brainPulse { 0%, 100% { opacity: 0.85; } 50% { opacity: 1; } }
-    .stat-cell[data-stat="wallet"] .stat-ring-wrap { animation: walletPulse 2s ease-in-out infinite; }
-    @keyframes walletPulse { 0%, 100% { opacity: 0.85; } 50% { opacity: 1; } }
-    .stat-cell[data-stat="willpower"] .stat-ring-wrap { animation: willpowerTick 0.83s cubic-bezier(.4, .0, .6, 1) infinite; }
-    @keyframes willpowerTick {
-      0%, 40%, 100% { transform: scale(1); }
-      45% { transform: scale(1.08); }
-    }
-    /* Body: no animation, steady. */
+  /* current goal — mission control */
+  .goal{ border-radius:20px; padding:16px; background:linear-gradient(155deg, color-mix(in srgb,var(--nk,#4A8FFF) 16%,transparent), rgba(255,255,255,0.02)); border:1px solid color-mix(in srgb,var(--nk,#4A8FFF) 30%,transparent); }
+  .goal .ghead{ display:flex; align-items:center; gap:14px; }
+  .goal .gring{ width:66px; height:66px; flex:none; position:relative; }
+  .goal .gring svg{ width:100%; height:100%; transform:rotate(-90deg); }
+  .goal .gring .gpcttxt{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:900; color:var(--nk,#8FB4FF); }
+  .goal .gmid{ flex:1; min-width:0; }
+  .goal .gl{ font-size:10px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); }
+  .goal .gt{ font-size:18px; font-weight:900; margin-top:3px; display:flex; align-items:center; gap:7px; }
+  .goal .gt .gtgem{ width:18px; height:18px; color:var(--nk,#8FB4FF); }
+  .goal .gmeta{ display:flex; gap:8px; margin-top:8px; }
+  .goal .gmeta span{ font-size:10.5px; font-weight:800; color:var(--muted); display:inline-flex; align-items:center; gap:4px; background:rgba(0,0,0,.28); border:1px solid var(--border); padding:4px 8px; border-radius:999px; }
+  .goal .gmeta b{ color:var(--text); } .goal .gmeta svg{ width:11px; height:11px; color:var(--nk,#8FB4FF); }
+  .goal .unl{ font-size:10px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); margin:14px 0 7px; }
+  .goal ul{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:6px; }
+  .goal li{ display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:var(--muted); }
+  .goal li svg{ width:14px; height:14px; flex:none; color:var(--nk,#8FB4FF); }
 
-    .stat-value {
-      position: absolute; inset: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 14px; font-weight: 700; color: var(--text-primary);
-      font-variant-numeric: tabular-nums;
-    }
-    .stat-label {
-      font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
-      color: var(--text-soft);
-    }
-    .stat-cell .trend {
-      position: absolute; top: 4px; right: 4px;
-      font-size: 9px; font-weight: 700;
-      padding: 1px 4px;
-      border-radius: var(--radius-sm);
-      letter-spacing: 0.04em;
-      font-variant-numeric: tabular-nums;
-    }
-    .stat-cell .trend.up { color: var(--core-green-500); background: rgba(61,220,151,0.08); }
-    .stat-cell .trend.down { color: var(--core-red-500); background: rgba(255,79,107,0.08); }
-    .stat-cell .trend.flat { color: var(--text-soft); background: rgba(255,255,255,0.04); }
+  /* quest streak bonus */
+  .qbonus{ position:relative; overflow:hidden; display:flex; align-items:center; gap:11px; padding:12px 13px; border-radius:16px; margin-bottom:12px; background:linear-gradient(90deg, rgba(74,143,255,.12), rgba(179,136,255,.05)); border:1px dashed rgba(120,160,255,.4); }
+  .qbonus .qbi{ width:34px; height:34px; flex:none; border-radius:11px; display:flex; align-items:center; justify-content:center; background:rgba(74,143,255,.16); border:1px solid rgba(120,160,255,.3); }
+  .qbonus .qbi svg{ width:19px; height:19px; color:var(--accent); }
+  .qbonus .qbb{ flex:1; min-width:0; } .qbonus .qbt{ font-size:13px; font-weight:900; } .qbonus .qbs{ font-size:11px; color:var(--muted); margin-top:3px; display:flex; flex-wrap:wrap; gap:6px; }
+  .qbonus .qbs i{ font-style:normal; font-weight:800; color:var(--accent); }
+  .qbonus .qbc{ flex:none; font-size:11px; font-weight:900; color:var(--muted); }
+  .qbonus.done{ background:linear-gradient(90deg, rgba(52,211,153,.14), rgba(255,255,255,.02)); border:1px solid rgba(52,211,153,.4); }
+  .qbonus.done .qbi{ background:rgba(52,211,153,.16); border-color:rgba(52,211,153,.32); } .qbonus.done .qbi svg{ color:var(--good); }
+  .qbonus.done .qbs i, .qbonus.done .qbc{ color:var(--good); }
+  .qbonus.live::after{ content:""; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(120,160,255,.18),transparent); transform:translateX(-100%); animation:bonusSweep 3.4s ease-in-out infinite; }
+  @keyframes bonusSweep{ 0%,60%{transform:translateX(-100%);} 100%{transform:translateX(100%);} }
 
-    /* Reduce motion: kill all idle pulses */
-    @media (prefers-reduced-motion: reduce) {
-      .stat-cell .stat-ring-wrap,
-      .aurora::before, .aurora::after,
-      .star { animation: none !important; }
-      .ring-num, .ring-fill { transition: none !important; }
-    }
+  /* quests */
+  .quest { position:relative; display:flex; align-items:center; gap:13px; padding:14px 15px 14px 17px; border-radius:18px; margin-bottom:11px;
+    background:var(--bg-card); border:1px solid var(--border); overflow:hidden; transition:border-color .25s, background .25s, opacity .3s, transform .15s; --qaccent:var(--med); }
+  .quest::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--qaccent); opacity:.8; }
+  .quest:active{ transform:scale(.99); }
+  .quest .qic { width:44px; height:44px; flex:none; border-radius:13px; display:flex; align-items:center; justify-content:center; background:rgba(74,143,255,0.12); border:1px solid rgba(120,160,255,0.22); }
+  .quest .qic svg{ width:23px; height:23px; color:var(--accent); }
+  .quest .qb{ flex:1; min-width:0; }
+  .quest .qt{ font-size:10.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+  .quest .qd{ font-size:14.5px; font-weight:600; margin-top:2px; }
+  .quest .qmeta{ display:flex; align-items:center; gap:7px; margin-top:6px; }
+  .quest .pill{ font-size:9.5px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; padding:3px 7px; border-radius:999px; border:1px solid currentColor; }
+  .quest .pill.easy{ color:var(--easy); } .quest .pill.medium{ color:var(--med); } .quest .pill.hard{ color:var(--hard); }
+  .quest .time{ font-size:11px; font-weight:700; color:var(--dim); display:inline-flex; align-items:center; gap:4px; } .quest .time svg{ width:12px; height:12px; }
+  .quest .xp{ font-size:11px; font-weight:900; color:var(--accent); }
+  .quest .cta{ flex:none; width:40px; height:40px; border-radius:12px; border:none; cursor:pointer; background:linear-gradient(150deg,var(--grad-a),var(--grad-b)); color:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 16px rgba(74,143,255,.4); transition:.2s; }
+  .quest .cta svg{ width:20px; height:20px; } .quest .cta:hover{ filter:brightness(1.08); } .quest .cta:active{ transform:scale(.9); } .quest .cta:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
+  /* difficulty emphasis — hard quests feel heavier */
+  .quest.easy{ --qaccent:var(--easy); opacity:.94; }
+  .quest.medium{ --qaccent:var(--med); }
+  .quest.hard{ --qaccent:var(--hard); border-color:rgba(255,107,107,.28); box-shadow:0 8px 26px rgba(255,80,80,.12); }
+  .quest.hard .qic{ background:rgba(255,107,107,.13); border-color:rgba(255,107,107,.3); } .quest.hard .qic svg{ color:var(--hard); }
+  .quest.hard .cta{ background:linear-gradient(150deg,#FF6B6B,#FF8A3D); box-shadow:0 6px 18px rgba(255,90,70,.45); }
+  .quest.hard .xp{ font-size:13px; color:var(--hard); }
+  .quest.done{ border-color:rgba(52,211,153,0.35); background:linear-gradient(150deg, rgba(52,211,153,0.10), rgba(255,255,255,0.02)); --qaccent:var(--good); }
+  .quest.done .qic{ background:rgba(52,211,153,0.14); border-color:rgba(52,211,153,0.3); } .quest.done .qic svg{ color:var(--good); }
+  .quest.done .qd{ color:var(--muted); } .quest.done .cta{ background:rgba(52,211,153,0.18); box-shadow:none; color:var(--good); cursor:default; }
+  .quest.done.hard .xp{ color:var(--good); }
+  .quest .sweep{ position:absolute; inset:0; pointer-events:none; background:linear-gradient(90deg,transparent,rgba(52,211,153,.4),transparent); transform:translateX(-110%); }
+  .quest.flash{ animation:qflash .7s ease; } .quest.flash .sweep{ animation:sweepX .7s ease; }
+  @keyframes qflash { 0%{box-shadow:0 0 0 rgba(52,211,153,0);} 30%{box-shadow:0 0 30px rgba(52,211,153,.6);} 100%{box-shadow:0 0 0 rgba(52,211,153,0);} }
+  @keyframes sweepX{ to{ transform:translateX(110%); } }
 
-    /* ── Streak strip ───────────────────────────── */
-    .streak-strip {
-      display:flex; align-items:center; gap:10px;
-      margin-top: 14px;
-      padding: 12px 16px;
-      border-radius: var(--radius-lg);
-      background: rgba(255,255,255,0.03);
-      border: 1px solid var(--border-subtle);
-      cursor: pointer;
-      transition: background var(--dur-fast) var(--ease-default);
-    }
-    .streak-strip:hover { background: rgba(255,255,255,0.05); }
-    .streak-strip.empty { opacity: 0.75; }
-    .streak-ico {
-      width: 32px; height: 32px;
-      flex-shrink: 0;
-      border-radius: 9px;
-      background: rgba(255,79,107,0.14);
-      display:flex; align-items:center; justify-content:center;
-    }
-    .streak-ico svg { width:16px; height:16px; fill: var(--core-red-500); }
-    .streak-body { flex:1; min-width:0; display:flex; flex-direction:column; gap:1px; }
-    .streak-line { display:flex; align-items:baseline; gap:4px; }
-    .streak-num { font-size: 18px; font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums; }
-    .streak-suffix { font-size: 12px; color: var(--text-secondary); }
-    .streak-sub { font-size: 11px; color: var(--text-soft); margin-top: 1px; }
-    .streak-pills { display:flex; gap:6px; align-items:center; }
-    .freeze-pill, .slip-today-pill {
-      display:inline-flex; align-items:center; gap:5px;
-      padding: 8px 12px; border-radius: var(--radius-pill);
-      font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
-      cursor: pointer;
-      font-variant-numeric: tabular-nums;
-    }
-    .freeze-pill {
-      background: rgba(91,177,255,0.10);
-      border: 1px solid rgba(91,177,255,0.30);
-      color: var(--core-blue-300);
-    }
-    .freeze-pill.exhausted { opacity: 0.40; }
-    .freeze-pill svg { width: 12px; height: 12px; stroke: var(--core-blue-300); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-    .slip-today-pill {
-      background: rgba(255,200,87,0.10);
-      border: 1px solid rgba(255,200,87,0.30);
-      color: var(--core-amber-500);
-      display: none;
-    }
-    .slip-today-pill.on { display: inline-flex; }
+  /* daily chest */
+  .dchest { position:relative; border-radius:22px; padding:18px; overflow:hidden; background:linear-gradient(160deg, rgba(255,197,107,0.10), rgba(255,138,61,0.04) 60%, rgba(255,255,255,0.02)); border:1px solid rgba(255,197,107,0.20); transition:box-shadow .4s, border-color .4s; }
+  .dchest.ready{ border-color:rgba(255,197,107,0.55); box-shadow:0 0 42px rgba(255,160,70,0.28); }
+  .dchest .ch{ display:flex; align-items:center; gap:14px; position:relative; }
+  .dchest .cimg{ width:58px; height:58px; flex:none; display:flex; align-items:center; justify-content:center; border-radius:16px; background:rgba(0,0,0,0.25); border:1px solid rgba(255,197,107,0.25); animation:bob 2.8s ease-in-out infinite; transition:.3s; }
+  .dchest.ready .cimg{ box-shadow:0 0 26px rgba(255,170,70,.55); animation:bobReady 2s ease-in-out infinite; }
+  @keyframes bob { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-4px);} }
+  @keyframes bobReady { 0%,100%{transform:translateY(0) scale(1);} 50%{transform:translateY(-6px) scale(1.04);} }
+  .dchest .cimg svg{ width:33px; height:33px; color:var(--gold); }
+  .dchest .emit{ position:absolute; left:18px; top:0; width:58px; height:58px; pointer-events:none; }
+  .dchest.ready .emit i{ position:absolute; bottom:6px; left:50%; width:4px; height:4px; border-radius:50%; background:var(--gold); box-shadow:0 0 6px var(--gold); animation:emitUp 2.4s ease-in infinite; }
+  @keyframes emitUp{ 0%{transform:translate(-50%,0) scale(1); opacity:0;} 20%{opacity:.9;} 100%{transform:translate(var(--ex,-50%),-46px) scale(.3); opacity:0;} }
+  .dchest .cb{ flex:1; } .dchest .ct{ font-size:16px; font-weight:900; } .dchest .cs{ font-size:12.5px; color:var(--muted); margin-top:2px; }
+  .dchest .dots{ display:flex; gap:6px; margin-top:8px; } .dchest .dots i{ width:26px; height:5px; border-radius:999px; background:rgba(255,255,255,0.1); } .dchest .dots i.on{ background:linear-gradient(90deg,var(--gold),#FF8A3D); box-shadow:0 0 8px rgba(255,160,70,.6); }
+  .dchest .rew{ margin-top:14px; } .dchest .rl{ font-size:9.5px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); margin-bottom:8px; }
+  .dchest .rchips{ display:flex; flex-wrap:wrap; gap:7px; }
+  .dchest .rchip{ display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; color:var(--muted); padding:5px 9px; border-radius:999px; background:rgba(0,0,0,0.25); border:1px solid var(--rc,var(--border)); }
+  .dchest .rchip svg{ width:13px; height:13px; color:var(--rc,var(--gold)); }
+  .dchest .open{ display:none; margin-top:14px; width:100%; padding:14px; border-radius:14px; border:none; cursor:pointer; font:inherit; font-size:15px; font-weight:800; color:#1a1206; background:linear-gradient(135deg,#FFD98A,#FF9F45); box-shadow:0 8px 22px rgba(255,150,60,.4); text-align:center; box-sizing:border-box; }
+  .dchest.ready .open{ display:block; } .dchest .open:active{ transform:scale(.98); }
+  .dchest .open.claimed{ background:rgba(255,255,255,.05); color:var(--muted); box-shadow:none; cursor:default; }
 
-    /* ── Check-in section — daily +50 XP ─────────── */
-    .checkin-card {
-      margin-top: 14px;
-      padding: 16px 18px;
-      border-radius: var(--radius-xl);
-      background:
-        linear-gradient(135deg, rgba(47,143,255,0.06), rgba(159,143,255,0.04));
-      border: 1px solid rgba(91,177,255,0.22);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
-      position: relative;
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.08),
-        0 4px 24px rgba(0,0,0,0.30);
-      overflow: hidden;
-    }
-    .checkin-card::before {
-      content:""; position:absolute; top:0; left:0; right:0; height:1px;
-      background: linear-gradient(90deg, transparent, rgba(91,177,255,0.50), transparent);
-    }
-    .checkin-head {
-      display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
-    }
-    .checkin-text { flex:1; min-width:0; }
-    .checkin-title { font-size: 15px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.2px; }
-    .checkin-sub { font-size: 12px; color: var(--text-secondary); margin-top: 3px; line-height: 17px; }
-    .checkin-streak-badge {
-      display: none;
-      align-items:center; gap:4px;
-      padding: 4px 9px; border-radius: var(--radius-pill);
-      background: rgba(255,200,87,0.12);
-      border: 1px solid rgba(255,200,87,0.35);
-      color: var(--core-amber-500);
-      font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
-      margin-top: 8px;
-    }
-    .checkin-frozen {
-      display: none;
-      align-items:center; gap: 4px;
-      padding: 4px 9px; border-radius: var(--radius-pill);
-      background: rgba(91,177,255,0.10);
-      border: 1px solid rgba(91,177,255,0.30);
-      color: var(--core-blue-300);
-      font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
-      margin-top: 8px; margin-left: 6px;
-    }
-    .checkin-btn {
-      margin-top: 14px;
-      width: 100%;
-      padding: 14px;
-      border-radius: var(--radius-md);
-      border: none;
-      background: var(--grad-cta);
-      color: #fff;
-      font-family: inherit;
-      font-size: 15px; font-weight: 600; letter-spacing: -0.2px;
-      cursor: pointer;
-      box-shadow: var(--glow-blue-md);
-      display:flex; align-items:center; justify-content:center; gap:8px;
-      transition: transform var(--dur-fast) var(--ease-default);
-    }
-    .checkin-btn:hover { transform: translateY(-1px); }
-    .checkin-btn:active { transform: translateY(0); }
-    .checkin-btn:disabled { opacity: 1; cursor: default; transform: none; }
-    .checkin-btn.checked {
-      background: rgba(61,220,151,0.10);
-      box-shadow: none;
-      color: var(--core-green-500);
-      border: 1px solid rgba(61,220,151,0.30);
-    }
-    .checkin-btn.risk-pulse { animation: riskPulse 1.6s ease-in-out infinite; }
-    @keyframes riskPulse {
-      0%, 100% { box-shadow: var(--glow-blue-md); }
-      50% { box-shadow: 0 0 28px rgba(255,200,87,0.65); }
-    }
-    .checkin-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+  /* chest opening now lives on the dedicated full-screen opener (28-chest.html) */
 
-    .week-strip {
-      display:flex; gap:6px; margin-top: 14px;
-      justify-content: space-between;
-    }
-    .week-dot {
-      flex:1; height: 8px;
-      border-radius: 999px;
-      background: var(--border-subtle);
-      position: relative;
-    }
-    .week-dot.done { background: var(--core-green-500); }
-    .week-dot.today { box-shadow: 0 0 0 2px rgba(91,177,255,0.55), 0 0 8px rgba(91,177,255,0.6); }
-    .week-count {
-      font-size: 11px; color: var(--text-secondary);
-      margin-top: 8px;
-    }
-    .week-count strong { color: var(--text-primary); font-weight: 700; font-variant-numeric: tabular-nums; }
+  /* streak card + milestone path */
+  .streak{ display:block; border-radius:20px; padding:16px; background:linear-gradient(155deg, rgba(255,138,61,0.12), rgba(255,255,255,0.02)); border:1px solid rgba(255,138,61,0.22); }
+  .streak .srow{ display:flex; align-items:center; gap:14px; }
+  .streak .si{ width:50px; height:50px; flex:none; border-radius:15px; display:flex; align-items:center; justify-content:center; background:rgba(255,138,61,0.16); border:1px solid rgba(255,138,61,0.3); }
+  .streak .si svg{ width:28px; height:28px; color:#FF8A3D; }
+  .streak .sb{ flex:1; } .streak .sd{ font-size:18px; font-weight:900; } .streak .sd small{ font-size:12px; font-weight:700; color:var(--muted); }
+  .streak .sn{ font-size:12px; color:var(--muted); margin-top:3px; } .streak .sn b{ color:var(--gold); font-weight:800; }
+  .streak .best{ flex:none; text-align:center; padding:8px 12px; border-radius:13px; background:rgba(0,0,0,0.25); border:1px solid var(--border); }
+  .streak .best .v{ font-size:17px; font-weight:900; } .streak .best .k{ font-size:9px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--dim); margin-top:2px; }
+  .spath{ position:relative; margin-top:16px; padding:0 6px; }
+  .spath .line{ position:absolute; left:21px; right:21px; top:15px; height:4px; border-radius:999px; background:rgba(255,255,255,.08); }
+  .spath .line .lf{ position:absolute; inset:0 auto 0 0; width:0%; border-radius:999px; background:linear-gradient(90deg,#FF8A3D,var(--gold)); box-shadow:0 0 10px rgba(255,150,60,.55); transition:width 1s cubic-bezier(.2,.85,.25,1); }
+  .spath .nodes{ display:flex; justify-content:space-between; position:relative; }
+  .spath .mn{ display:flex; flex-direction:column; align-items:center; gap:6px; width:38px; }
+  .spath .mdot{ width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,.45); border:2px solid rgba(255,255,255,.12); color:var(--dim); }
+  .spath .mdot svg{ width:15px; height:15px; }
+  .spath .mn.reached .mdot{ background:linear-gradient(150deg,#FF8A3D,var(--gold)); border-color:transparent; color:#1a1206; box-shadow:0 0 12px rgba(255,160,70,.55); }
+  .spath .mn.next .mdot{ border-color:var(--gold); color:var(--gold); box-shadow:0 0 0 4px rgba(255,197,107,.14); animation:nextPulse 1.8s ease-in-out infinite; }
+  @keyframes nextPulse{ 0%,100%{box-shadow:0 0 0 3px rgba(255,197,107,.12);} 50%{box-shadow:0 0 0 7px rgba(255,197,107,.05);} }
+  .spath .md{ font-size:9.5px; font-weight:900; color:var(--muted); } .spath .mn.reached .md{ color:var(--text); }
+  .spath .mr{ font-size:8px; font-weight:800; letter-spacing:.02em; color:var(--dim); text-transform:uppercase; }
 
-    .heatmap-wrap {
-      margin-top: 14px;
-      padding-top: 14px;
-      border-top: 1px solid var(--border-subtle);
-    }
-    .heatmap-head {
-      display:flex; align-items:baseline; justify-content:space-between;
-      margin-bottom: 8px;
-    }
-    .heatmap-label { font-size: 10px; letter-spacing: 0.20em; text-transform: uppercase; color: var(--text-soft); font-weight: 700; }
-    .heatmap-pct { font-size: 11px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
-    .heatmap-pct strong { color: var(--text-primary); font-weight: 700; }
-    .heatmap {
-      display: grid; grid-template-columns: repeat(15, 1fr); gap: 3px;
-    }
-    .hcell {
-      aspect-ratio: 1; border-radius: 2px;
-      background: var(--border-subtle);
-    }
-    .hcell.done { background: var(--core-green-500); opacity: 0.85; }
-    .hcell.today { box-shadow: 0 0 0 1.5px var(--core-blue-300); }
+  /* upgrades — skill tree nodes */
+  .upg{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+  .ucard{ position:relative; border-radius:18px; padding:14px; background:var(--bg-card); border:1px solid var(--border); display:flex; flex-direction:column; min-height:170px; cursor:pointer; transition:border-color .2s, transform .15s, box-shadow .3s; }
+  .ucard:active{ transform:scale(.985); }
+  .ucard[data-r]{ border-color:color-mix(in srgb,var(--rc) 38%,transparent); box-shadow:0 0 22px -10px var(--rc); }
+  .ucard.owned{ border-color:rgba(52,211,153,0.4); background:linear-gradient(160deg, rgba(52,211,153,0.08), rgba(255,255,255,0.015)); box-shadow:0 0 20px -10px rgba(52,211,153,.6); }
+  .ucard.reveal{ animation:reveal .5s cubic-bezier(.2,.9,.3,1.2); }
+  @keyframes reveal{ 0%{transform:scale(.9);box-shadow:0 0 0 rgba(52,211,153,0);} 50%{box-shadow:0 0 26px rgba(52,211,153,.45);} 100%{transform:scale(1);} }
+  .ucard .rbadge{ position:absolute; top:11px; right:11px; font-size:8px; font-weight:900; letter-spacing:.1em; text-transform:uppercase; padding:3px 6px; border-radius:999px; color:var(--rc,var(--muted)); border:1px solid currentColor; }
+  .ucard.owned .rbadge{ opacity:.55; }
+  .ucard.mythic .rbadge{ animation:none; }
+  .ucard.mythic::after{ content:""; position:absolute; inset:0; border-radius:18px; padding:1px; pointer-events:none; background:linear-gradient(120deg,var(--r-mythic),transparent,var(--r-epic),transparent,var(--r-mythic)); background-size:300% 300%; -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; animation:mythShift 4s linear infinite; }
+  @keyframes mythShift{ to{ background-position:300% 0; } }
+  .ucard .ui{ width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center; background:color-mix(in srgb,var(--rc,#4A8FFF) 14%,transparent); border:1px solid color-mix(in srgb,var(--rc,#4A8FFF) 28%,transparent); margin-bottom:9px; }
+  .ucard .ui svg{ width:21px; height:21px; color:var(--rc,var(--accent)); }
+  .ucard.owned .ui{ background:rgba(52,211,153,0.16); border-color:rgba(52,211,153,0.3); } .ucard.owned .ui svg{ color:var(--good); }
+  .ucard .un{ font-size:13.5px; font-weight:800; line-height:1.1; }
+  .ucard .ue{ font-size:11.5px; font-weight:600; color:var(--muted); margin-top:4px; flex:1; }
+  .ucard .urow{ display:flex; align-items:center; justify-content:space-between; margin-top:8px; }
+  .ucard .ulv{ font-size:9.5px; font-weight:900; letter-spacing:.04em; color:var(--dim); }
+  .ucard .ulv b{ color:var(--rc,var(--text)); } .ucard.owned .ulv b{ color:var(--good); }
+  .ucard .upow{ font-size:9.5px; font-weight:900; color:var(--rk,#8FB4FF); display:inline-flex; align-items:center; gap:3px; }
+  .ucard .upow svg{ width:10px; height:10px; }
+  .ucard .ubtn{ margin-top:9px; width:100%; padding:9px; border-radius:11px; border:none; font:inherit; font-size:12.5px; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px; transition:.2s; }
+  .ucard .ubtn svg{ width:13px; height:13px; }
+  .ubtn.buy{ background:linear-gradient(135deg,var(--grad-a),var(--grad-b)); color:#fff; } .ubtn.buy:active{ transform:scale(.97); }
+  .ucard[data-r] .ubtn.buy{ background:linear-gradient(135deg,color-mix(in srgb,var(--rc) 90%,#000),color-mix(in srgb,var(--rc) 55%,#6F70FF)); }
+  .ubtn.locked{ background:rgba(255,255,255,0.04); color:var(--dim); border:1px solid var(--border); cursor:not-allowed; }
+  .ubtn.ownedb{ background:rgba(52,211,153,0.14); color:var(--good); cursor:default; }
+  .ubtn .scoin{ color:#FFCB3D; } .ubtn .sshard{ color:#B388FF; }
 
-    /* ── Pact strip ──────────────────────────────── */
-    .pact-strip {
-      display: none;
-      margin-top: 14px;
-      padding: 12px 14px;
-      border-radius: var(--radius-lg);
-      background: rgba(61,220,151,0.05);
-      border: 1px solid rgba(61,220,151,0.20);
-      gap: 10px; align-items: center;
-      cursor: pointer;
-    }
-    .pact-strip.on { display: flex; }
-    .pact-strip:hover { background: rgba(61,220,151,0.08); }
-    .pact-avatar {
-      width: 36px; height: 36px;
-      border-radius: 50%;
-      background: var(--grad-pact);
-      border: 1.5px solid rgba(61,220,151,0.45);
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      color: #fff; font-weight: 700; font-size: 13px;
-    }
-    .pact-text { flex: 1; min-width: 0; }
-    .pact-title { font-size: 13px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.1px; }
-    .pact-meta { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
-    .pact-status-dots { display:flex; gap:4px; align-items:center; }
-    .pact-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--core-green-500); box-shadow: 0 0 4px rgba(61,220,151,0.7); }
-    .pact-dot.slipped { background: var(--core-red-500); box-shadow: 0 0 4px rgba(255,79,107,0.7); }
+  /* upgrade detail sheet */
+  .sheet-scrim{ position:absolute; inset:0; z-index:75; background:rgba(2,2,10,.6); backdrop-filter:blur(3px); opacity:0; pointer-events:none; transition:opacity .25s; }
+  .sheet-scrim.show{ opacity:1; pointer-events:auto; }
+  .sheet{ position:absolute; left:0; right:0; bottom:0; z-index:76; transform:translateY(100%); transition:transform .32s cubic-bezier(.2,.8,.2,1);
+    background:linear-gradient(180deg, #0c0d1a, #07080f); border-top:1px solid var(--border); border-radius:26px 26px 0 0; padding:20px 20px 30px; box-shadow:0 -20px 50px rgba(0,0,0,.6); }
+  .sheet.show{ transform:translateY(0); }
+  .sheet .grip{ width:38px; height:5px; border-radius:999px; background:rgba(255,255,255,.18); margin:0 auto 16px; }
+  .sheet .shead{ display:flex; align-items:center; gap:13px; }
+  .sheet .shi{ width:50px; height:50px; flex:none; border-radius:14px; display:flex; align-items:center; justify-content:center; background:color-mix(in srgb,var(--rc,#4A8FFF) 16%,transparent); border:1px solid color-mix(in srgb,var(--rc,#4A8FFF) 32%,transparent); }
+  .sheet .shi svg{ width:27px; height:27px; color:var(--rc,var(--accent)); }
+  .sheet .shn{ font-size:18px; font-weight:900; } .sheet .shr{ font-size:10px; font-weight:900; letter-spacing:.1em; text-transform:uppercase; color:var(--rc,var(--muted)); margin-top:3px; }
+  .sheet .stiers{ margin-top:18px; display:flex; flex-direction:column; gap:9px; }
+  .sheet .tier{ display:flex; align-items:center; gap:11px; padding:11px 13px; border-radius:13px; background:rgba(255,255,255,.03); border:1px solid var(--border); }
+  .sheet .tier.now{ border-color:color-mix(in srgb,var(--rc,#4A8FFF) 45%,transparent); background:color-mix(in srgb,var(--rc,#4A8FFF) 10%,transparent); }
+  .sheet .tier .tl{ font-size:9.5px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; color:var(--dim); width:54px; flex:none; }
+  .sheet .tier.now .tl{ color:var(--rc,var(--accent)); }
+  .sheet .tier .tv{ font-size:13px; font-weight:700; color:var(--text); }
+  .sheet .spow{ display:flex; align-items:center; justify-content:space-between; margin-top:16px; padding:12px 14px; border-radius:13px; background:rgba(0,0,0,.3); border:1px solid var(--border); }
+  .sheet .spow .pl{ font-size:11px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+  .sheet .spow .pv{ font-size:16px; font-weight:900; color:var(--rk,#8FB4FF); }
+  .sheet .sbuy{ margin-top:18px; width:100%; padding:15px; border-radius:14px; border:none; font:inherit; font-size:15px; font-weight:900; cursor:pointer; color:#fff; background:linear-gradient(135deg,var(--grad-a),var(--grad-b)); box-shadow:0 10px 26px rgba(74,143,255,.4); }
+  .sheet .sbuy:active{ transform:scale(.98); } .sheet .sbuy.owned{ background:rgba(52,211,153,.16); color:var(--good); box-shadow:none; }
+  .sheet .sbuy.cant{ background:rgba(255,255,255,.05); color:var(--dim); box-shadow:none; }
 
-    /* ── Today's quest ───────────────────────────── */
-    .quest-card {
-      margin-top: 14px;
-      padding: 14px 16px;
-      border-radius: var(--radius-lg);
-      background: rgba(159,143,255,0.05);
-      border: 1px solid rgba(159,143,255,0.25);
-      display:flex; align-items:center; gap:12px;
-      cursor: pointer;
-      transition: background var(--dur-fast) var(--ease-default);
-    }
-    .quest-card:hover { background: rgba(159,143,255,0.08); }
-    .quest-ico {
-      width: 36px; height: 36px;
-      flex-shrink: 0;
-      border-radius: 9px;
-      background: rgba(159,143,255,0.15);
-      box-shadow: 0 0 10px rgba(159,143,255,0.30);
-      display: flex; align-items: center; justify-content: center;
-    }
-    .quest-ico svg { width: 18px; height: 18px; stroke: var(--core-violet-500); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-    .quest-text { flex: 1; min-width: 0; }
-    .quest-kicker {
-      font-size: 9px; letter-spacing: 0.20em; text-transform: uppercase;
-      color: var(--core-violet-500); font-weight: 700;
-    }
-    .quest-title { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-top: 2px; line-height: 17px; }
-    .quest-chev { color: var(--text-soft); font-size: 18px; flex-shrink: 0; }
+  /* coming soon — preview cards */
+  .locked-row{ display:flex; gap:12px; overflow-x:auto; padding:2px 0 8px; } .locked-row::-webkit-scrollbar{ display:none; }
+  .soon{ flex:none; width:210px; border-radius:20px; overflow:hidden; position:relative; border:1px solid var(--border);
+    background:linear-gradient(160deg, color-mix(in srgb,var(--sk,#4A8FFF) 14%,transparent), rgba(255,255,255,.015)); }
+  .soon .prev{ position:relative; height:90px; display:flex; align-items:center; justify-content:center; overflow:hidden;
+    background:radial-gradient(70% 80% at 50% 30%, color-mix(in srgb,var(--sk,#4A8FFF) 30%,transparent), transparent 70%); }
+  .soon .prev .big{ width:42px; height:42px; color:var(--sk,#8FB4FF); filter:drop-shadow(0 0 12px color-mix(in srgb,var(--sk,#4A8FFF) 70%,transparent)); }
+  .soon .prev::after{ content:""; position:absolute; inset:0; background:rgba(2,2,10,.32); }
+  .soon .lockb{ position:absolute; top:10px; right:10px; z-index:2; display:inline-flex; align-items:center; gap:4px; font-size:8.5px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; color:var(--text); background:rgba(0,0,0,.55); border:1px solid var(--border); padding:4px 7px; border-radius:999px; }
+  .soon .lockb svg{ width:11px; height:11px; }
+  .soon .sbody{ padding:13px; }
+  .soon .stt{ font-size:14px; font-weight:900; letter-spacing:.02em; }
+  .soon .sds{ font-size:11.5px; font-weight:600; color:var(--muted); margin-top:5px; line-height:1.35; min-height:31px; }
+  .soon .shint{ font-size:10px; font-weight:700; color:var(--gold); margin-top:8px; display:flex; align-items:center; gap:5px; } .soon .shint svg{ width:12px; height:12px; }
+  .soon .req{ display:inline-flex; align-items:center; gap:6px; margin-top:11px; font-size:10px; font-weight:900; letter-spacing:.04em; text-transform:uppercase; color:var(--sk,#8FB4FF); background:color-mix(in srgb,var(--sk,#4A8FFF) 14%,transparent); border:1px solid color-mix(in srgb,var(--sk,#4A8FFF) 34%,transparent); padding:5px 9px; border-radius:999px; }
+  .soon .req .rg{ width:14px; height:14px; }
+  .soon.unlockable .req{ color:var(--good); background:rgba(52,211,153,.12); border-color:rgba(52,211,153,.34); }
 
-    /* ── Coach line of the day ────────────────────── */
-    .coach-line {
-      margin-top: 14px;
-      padding: 10px 14px;
-      border-left: 2px solid var(--core-blue-300);
-      background: linear-gradient(90deg, rgba(91,177,255,0.06), transparent);
-      cursor: pointer;
-    }
-    .coach-line .label {
-      font-size: 9px; letter-spacing: 0.20em; text-transform: uppercase;
-      color: var(--core-blue-300); font-weight: 700;
-    }
-    .coach-line .body {
-      font-size: 13px; color: var(--text-primary); margin-top: 3px;
-      line-height: 19px; font-style: italic;
-    }
+  /* nav */
+  .nav { position:absolute; left:0; right:0; bottom:0; z-index:50; padding:10px 12px 26px; display:flex; justify-content:space-around; align-items:flex-end; background:linear-gradient(180deg, rgba(5,6,14,0) 0%, rgba(5,6,14,0.88) 34%, #04040c 100%); backdrop-filter:blur(14px); }
+  .nav a, .nav button { background:none; border:none; font:inherit; cursor:pointer; position:relative; display:flex; flex-direction:column; align-items:center; gap:4px; padding:6px 8px; min-width:48px; min-height:44px; text-decoration:none; color:var(--dim); transition:color .2s, transform .15s; }
+  .nav svg{ width:23px; height:23px; } .nav .nl{ font-size:10px; font-weight:800; } .nav .item:active{ transform:translateY(1px); }
+  .nav .item.active{ color:var(--text); } .nav .item.active svg{ color:var(--accent); filter:drop-shadow(0 0 8px rgba(74,143,255,.75)); }
+  .nav .item.active::before{ content:""; position:absolute; top:-2px; width:5px; height:5px; border-radius:50%; background:var(--accent); box-shadow:0 0 8px var(--accent); }
+  .nav .item:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:10px; }
 
-    /* ── Quick actions row — SOS dominant + 3 secondary ─── */
-    .quick-actions {
-      display: grid; grid-template-columns: 1.7fr 1fr 1fr 1fr;
-      gap: 8px; margin-top: 14px;
-    }
-    .action {
-      padding: 14px 8px;
-      border-radius: var(--radius-md);
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(91,177,255,0.15);
-      display:flex; flex-direction:column; align-items:center; justify-content:center;
-      gap:8px;
-      cursor: pointer;
-      transition: background var(--dur-fast) var(--ease-default), border-color var(--dur-fast) var(--ease-default), transform var(--dur-fast) var(--ease-default);
-      color: var(--text-primary);
-      text-decoration: none;
-      position: relative;
-      overflow: hidden;
-    }
-    .action::after {
-      /* inner highlight, glass feel */
-      content:""; position:absolute; inset:0;
-      background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 35%);
-      pointer-events:none;
-    }
-    .action:hover { background: rgba(91,177,255,0.10); border-color: rgba(91,177,255,0.35); transform: translateY(-1px); }
-    .action:active { transform: translateY(0) scale(0.97); }
-    .action svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; position:relative; z-index:1; }
-    .action-label { font-size: 11px; font-weight: 700; color: var(--text-primary); letter-spacing: 0.04em; text-transform: uppercase; position:relative; z-index:1; }
-    .action.sos {
-      background: linear-gradient(135deg, rgba(255,79,107,0.18), rgba(255,79,107,0.06));
-      border-color: rgba(255,79,107,0.45);
-      color: var(--core-red-500);
-      box-shadow: 0 0 24px rgba(255,79,107,0.25), inset 0 1px 0 rgba(255,255,255,0.10);
-      animation: sosPulse 2.4s ease-in-out infinite;
-    }
-    @keyframes sosPulse {
-      0%, 100% { box-shadow: 0 0 24px rgba(255,79,107,0.25), inset 0 1px 0 rgba(255,255,255,0.10); }
-      50%      { box-shadow: 0 0 36px rgba(255,79,107,0.50), inset 0 1px 0 rgba(255,255,255,0.14); }
-    }
-    .action.sos:hover { background: linear-gradient(135deg, rgba(255,79,107,0.28), rgba(255,79,107,0.10)); border-color: rgba(255,79,107,0.70); }
-    .action.sos svg { width: 26px; height: 26px; stroke: var(--core-red-500); stroke-width: 2.2; filter: drop-shadow(0 0 6px rgba(255,79,107,0.55)); }
-    .action.sos .action-label { color: var(--core-red-500); font-weight: 800; letter-spacing: 0.12em; }
+  /* fx particles */
+  .spark{ position:absolute; width:7px; height:7px; border-radius:50%; pointer-events:none; z-index:8; will-change:transform,opacity; }
+  .flyxp{ position:absolute; font-size:15px; font-weight:900; pointer-events:none; z-index:9; will-change:transform,opacity; text-shadow:0 2px 8px rgba(0,0,0,.5); }
 
-    /* ── Achievement teaser ───────────────────────── */
-    .achievement-teaser {
-      margin-top: 14px;
-      padding: 12px 14px;
-      border-radius: var(--radius-lg);
-      background: rgba(255,255,255,0.025);
-      border: 1px solid var(--border-subtle);
-      display:flex; align-items:center; gap:12px;
-      cursor: pointer;
-    }
-    .achievement-teaser:hover { background: rgba(255,255,255,0.045); }
-    .ach-ico {
-      width: 32px; height: 32px;
-      flex-shrink: 0;
-      border-radius: 9px;
-      background: var(--grad-milestone);
-      display:flex; align-items:center; justify-content:center;
-      box-shadow: 0 0 10px rgba(255,200,87,0.30);
-    }
-    .ach-ico svg { width: 16px; height: 16px; stroke: #fff; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-    .ach-text { flex:1; min-width:0; }
-    .ach-title { font-size: 12px; color: var(--text-primary); font-weight: 600; }
-    .ach-progress {
-      font-size: 10px; color: var(--text-secondary);
-      margin-top: 2px; font-variant-numeric: tabular-nums;
-    }
-    .ach-chev { color: var(--text-soft); font-size: 16px; }
-
-    /* ── Settings dropdown menu ──────────────────── */
-    .sm-back {
-      position: absolute; inset: 0; z-index: 40;
-      background: rgba(0,0,0,0.50);
-      backdrop-filter: blur(4px);
-      opacity: 0; pointer-events: none;
-      transition: opacity 0.2s ease;
-    }
-    .sm-back.on { opacity: 1; pointer-events: auto; }
-    .sm-menu {
-      position: absolute; top: 60px; right: 14px; z-index: 41;
-      width: 220px;
-      background: rgba(20,20,30,0.95);
-      backdrop-filter: blur(24px) saturate(180%);
-      -webkit-backdrop-filter: blur(24px) saturate(180%);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-lg);
-      padding: 8px;
-      opacity: 0; pointer-events: none;
-      transform: translateY(-6px);
-      transition: opacity 0.18s ease, transform 0.18s ease;
-      box-shadow: 0 12px 36px rgba(0,0,0,0.7);
-    }
-    .sm-menu.on { opacity: 1; pointer-events: auto; transform: translateY(0); }
-    .sm-user {
-      padding: 10px 12px;
-      border-bottom: 1px solid var(--border-subtle);
-      margin-bottom: 4px;
-    }
-    .sm-user-name { font-size: 13px; font-weight: 700; color: var(--text-primary); }
-    .sm-user-meta { font-size: 10px; color: var(--text-soft); margin-top: 2px; letter-spacing: 0.08em; }
-    .sm-row {
-      display: flex; align-items: center; gap: 10px;
-      padding: 9px 12px;
-      border-radius: var(--radius-md);
-      color: var(--text-primary);
-      font-size: 12px;
-      cursor: pointer;
-      text-decoration: none;
-      transition: background var(--dur-fast) var(--ease-default);
-    }
-    .sm-row:hover { background: rgba(255,255,255,0.06); }
-    .sm-row svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
-    .sm-row.danger { color: var(--core-red-500); }
-
-    /* ── Haptic flash + reward overlays (preserved from legacy) ── */
-    .haptic-flash {
-      position: absolute; inset: 0; z-index: 50; pointer-events: none;
-      background: rgba(61,220,151,0.30);
-      opacity: 0;
-    }
-    .haptic-flash.fire {
-      animation: hapticFire 0.6s ease-out;
-    }
-    .haptic-flash.warn { background: rgba(255,79,107,0.30); }
-    @keyframes hapticFire {
-      0% { opacity: 0; }
-      30% { opacity: 1; }
-      100% { opacity: 0; }
-    }
-    .reward-overlay, .perfect-week {
-      position: absolute; inset: 0; z-index: 51; pointer-events: none;
-      display: flex; align-items: center; justify-content: center;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-    .reward-overlay.on, .perfect-week.on { opacity: 1; }
-    .reward-overlay i, .perfect-week i {
-      position: absolute;
-      width: 8px; height: 12px;
-      background: var(--core-blue-500);
-      opacity: 0;
-      animation: confetti 1.6s ease-out forwards;
-    }
-    @keyframes confetti {
-      0% { opacity: 1; transform: translate(0,0) rotate(0deg); }
-      100% { opacity: 0; transform: translate(var(--dx,0), var(--dy,0)) rotate(var(--r,0deg)); }
-    }
-
-    /* ── Footer scripts target tab bar at bottom ── */
-    /* core-tabbar.js injects its own DOM */
-
-    /* ── Small screen tweaks ─── */
-    @media (max-height: 760px) {
-      .hero-ring { width: 196px; height: 196px; }
-      .ring-num { font-size: 56px; }
-      .life-number { font-size: 36px; }
-    }
-  </style>
-  <link rel="stylesheet" href="_lib/core-background.css">
-  <script src="_lib/core-background.js"></script>
+  .toast{ position:absolute; left:50%; bottom:100px; transform:translateX(-50%) translateY(14px); z-index:70; background:rgba(20,22,34,0.96); border:1px solid var(--border); border-radius:14px; padding:11px 16px; font-size:13px; font-weight:700; opacity:0; pointer-events:none; transition:.3s; box-shadow:0 12px 30px rgba(0,0,0,.5); white-space:nowrap; }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); } .toast.levelup{ background:linear-gradient(135deg,#4A8FFF,#6F70FF); border-color:transparent; }
+</style>
 </head>
 <body>
-<div class="phone">
-  <div class="bg"></div>
-  <div class="mesh"></div>
-  <div class="aurora"></div>
-  <div class="scanlines"></div>
-  <div class="stars" id="stars"></div>
-  <div class="notch"></div>
-  <div class="home-indicator"></div>
+  <div class="phone">
+    <div class="bg" id="bgEl"></div><div class="aurora" id="auroraEl"></div><div class="stars" id="stars"></div><div class="notch"></div>
 
-  <div class="frame">
-
-    <!-- ── Top header ─── -->
-    <div class="topbar">
-      <div class="greet">
-        <div class="greet-line">Morning,</div>
-        <div class="greet-name"><span id="greet">friend</span></div>
-      </div>
-      <div class="top-right">
-        <span id="dateText" style="font-size:10px; letter-spacing:0.10em; color:var(--text-soft); font-weight:600; text-transform:uppercase;"></span>
-        <span class="rank-chip" id="rankChip"><span data-core="rank.label">—</span></span>
-        <span class="trial-pill" id="trialPill">DAY · </span>
-        <span class="today-pill" id="todayPill" onclick="openCheckin()"><span id="todayLabel">TODAY ›</span></span>
-        <span class="demo-pill" id="demoPill">DEMO</span>
-        <span class="double-xp-pill" id="doubleXpPill">2× XP <span id="doubleXpLeft"></span></span>
-        <button class="icon-btn" id="notifBtn" onclick="window.location.href='71-notifications.html'" aria-label="Notifications">
-          <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 1 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
-        </button>
-        <button class="icon-btn" id="settingsCog" onclick="toggleSettingsMenu(event)" aria-label="Settings" aria-expanded="false">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        </button>
-      </div>
-    </div>
-
-    <!-- ── Scrollable column ─── -->
-    <div class="scroll">
-
-      <!-- Hero ring — dominant streak progress -->
-      <div class="hero-zone" id="streakStrip" onclick="onStreakClick(event)">
-        <div class="hero-ring">
-          <svg viewBox="0 0 220 220">
-            <circle class="ring-track" cx="110" cy="110" r="100" />
-            <circle class="ring-fill" id="heroRingFill" cx="110" cy="110" r="100" stroke-dasharray="628" stroke-dashoffset="628" />
-          </svg>
-          <div class="hero-center">
-            <div class="ring-day-label" id="heroDayLabel">DAY</div>
-            <div class="ring-num"><span data-core="streak.days">0</span></div>
-            <div class="ring-num-suffix" id="streakSuffix">day clean</div>
-            <div class="ring-to-next" id="heroToNext">—</div>
-          </div>
-        </div>
-        <!-- Life Score chip + freeze + slip-today pills sit below the hero ring -->
-        <div class="hero-meta">
-          <div class="life-chip" id="lifeChip" onclick="event.stopPropagation(); onLifeClick();">
-            <span class="life-chip-label">LIFE SCORE</span>
-            <span class="life-chip-value"><span data-core="lifeScore">0</span></span>
-            <span class="life-chip-delta" id="lifeChipDelta">—</span>
-          </div>
-          <div class="freeze-pill" id="freezePill" title="Use weekly streak freeze">
-            <svg viewBox="0 0 24 24"><path d="M12 2v20M5 5l14 14M19 5L5 19M3 12h18"/></svg>
-            <span data-core="streak.freezes.availableThisWeek">1</span>
-          </div>
-          <div class="slip-today-pill" id="slipTodayPill"><span id="slipTodayN">0</span> TODAY</div>
-        </div>
-        <div class="streak-sub" id="streakSubText">Keep it alive</div>
-      </div>
-
-      <!-- Alert slots — Witness, Promise Letter, Body Receipt prompt, Lifetime offer + insight cards -->
-      <div id="insightCards"></div>
-
-      <div class="alert-slot" id="witnessPing">
-        <div class="alert-ico">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/></svg>
-        </div>
-        <div class="alert-body">
-          <div class="alert-title">Coach is watching</div>
-          <div class="alert-text">This is one of your slip windows. I'm here.</div>
-        </div>
-        <button class="alert-cta" onclick="document.getElementById('witnessPing').classList.remove('on');">×</button>
-      </div>
-
-      <div class="alert-slot" id="promiseLetterTeaser" onclick="window.location.href='71-notifications.html'" title="Promise Letter — coming soon">
-        <div class="alert-ico">
-          <svg viewBox="0 0 24 24" style="stroke:#13131D;"><path d="M5 8l7 5 7-5M5 8v9h14V8M5 8l3-3h8l3 3"/></svg>
-        </div>
-        <div class="alert-body">
-          <div class="alert-title">A letter from you</div>
-          <div class="alert-text">You wrote this on day 7. Read it again.</div>
-        </div>
-        <span class="alert-cta">›</span>
-      </div>
-
-      <div class="alert-slot" id="bodyReceiptPrompt" onclick="window.location.href='24-weekly-review.html'" title="Body Receipt — coming soon">
-        <div class="alert-ico">
-          <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
-        </div>
-        <div class="alert-body">
-          <div class="alert-title">Your week is wrapping up</div>
-          <div class="alert-text">Quick Body Receipt — 3 minutes.</div>
-        </div>
-        <span class="alert-cta">›</span>
-      </div>
-
-      <div class="alert-slot" id="lifetimeOffer" onclick="window.location.href='76-pricing.html#lifetime'">
-        <div class="alert-ico">
-          <svg viewBox="0 0 24 24"><path d="M12 2l2.5 6 6 .5-4.5 4 1.5 6L12 15l-5.5 3.5L8 12.5 3.5 8.5l6-.5z"/></svg>
-        </div>
-        <div class="alert-body">
-          <div class="alert-title">30 days with Core. We see you.</div>
-          <div class="alert-text">Buy Lifetime — $89 once, never another bill.</div>
-        </div>
-        <span class="alert-cta">›</span>
-      </div>
-
-      <!-- Life Score card REMOVED — Life Score chip lives in hero zone above.
-           Chart moved to 24-weekly-review.html per spec. Hidden stubs below
-           keep existing JS try/catch paths happy without rendering. -->
-      <div id="lifeCard" style="display:none;"></div>
-      <span id="lifeDeltaChip" style="display:none;"></span>
-      <div id="lifeTrendFoot" style="display:none;"></div>
-      <div id="lifeTrend" style="display:none;">
-        <svg class="chart-svg" viewBox="0 0 150 80" style="display:none;">
-          <defs>
-            <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#5BB1FF" stop-opacity="0.5"/>
-              <stop offset="100%" stop-color="#5BB1FF" stop-opacity="0"/>
-            </linearGradient>
-          </defs>
-          <path class="chart-fill" id="chartFill" d="" />
-          <path class="chart-line" id="chartLine" d="" />
-          <circle cx="0" cy="0" r="0"/><circle cx="0" cy="0" r="0"/><circle cx="0" cy="0" r="0"/>
-          <circle cx="0" cy="0" r="0"/><circle cx="0" cy="0" r="0"/><circle cx="0" cy="0" r="0"/>
-          <circle cx="0" cy="0" r="0"/>
-        </svg>
-      </div>
-
-      <!-- 5-stat strip — mini rings -->
-      <div class="stat-strip">
-        <div class="stat-cell" data-stat="lungs" onclick="window.location.href='30-stat.html#lungs'">
-          <div class="stat-ring-wrap">
-            <svg viewBox="0 0 60 60">
-              <circle class="stat-ring-bg" cx="30" cy="30" r="22" />
-              <circle class="stat-ring-fill" data-ring="lungs" cx="30" cy="30" r="22" stroke-dasharray="138.23" stroke-dashoffset="138.23" />
-            </svg>
-            <div class="stat-value" data-bar="lungs" data-stat-val="lungs">0</div>
-          </div>
-          <div class="stat-label"><span class="stat-color-dot"></span>Lungs</div>
-          <span class="trend flat" data-trend="lungs">—</span>
-        </div>
-        <div class="stat-cell" data-stat="brain" onclick="window.location.href='30-stat.html#brain'">
-          <div class="stat-ring-wrap">
-            <svg viewBox="0 0 60 60">
-              <circle class="stat-ring-bg" cx="30" cy="30" r="22" />
-              <circle class="stat-ring-fill" data-ring="brain" cx="30" cy="30" r="22" stroke-dasharray="138.23" stroke-dashoffset="138.23" />
-            </svg>
-            <div class="stat-value" data-bar="brain" data-stat-val="brain">0</div>
-          </div>
-          <div class="stat-label"><span class="stat-color-dot"></span>Brain</div>
-          <span class="trend flat" data-trend="brain">—</span>
-        </div>
-        <div class="stat-cell" data-stat="wallet" onclick="window.location.href='30-stat.html#wallet'">
-          <div class="stat-ring-wrap">
-            <svg viewBox="0 0 60 60">
-              <circle class="stat-ring-bg" cx="30" cy="30" r="22" />
-              <circle class="stat-ring-fill" data-ring="wallet" cx="30" cy="30" r="22" stroke-dasharray="138.23" stroke-dashoffset="138.23" />
-            </svg>
-            <div class="stat-value" data-bar="wallet" data-stat-val="wallet">0</div>
-          </div>
-          <div class="stat-label"><span class="stat-color-dot"></span>Wallet</div>
-          <span class="trend flat" data-trend="wallet">—</span>
-        </div>
-        <div class="stat-cell" data-stat="willpower" onclick="window.location.href='30-stat.html#willpower'">
-          <div class="stat-ring-wrap">
-            <svg viewBox="0 0 60 60">
-              <circle class="stat-ring-bg" cx="30" cy="30" r="22" />
-              <circle class="stat-ring-fill" data-ring="willpower" cx="30" cy="30" r="22" stroke-dasharray="138.23" stroke-dashoffset="138.23" />
-            </svg>
-            <div class="stat-value" data-bar="willpower" data-stat-val="willpower">0</div>
-          </div>
-          <div class="stat-label"><span class="stat-color-dot"></span>Will</div>
-          <span class="trend flat" data-trend="willpower">—</span>
-        </div>
-        <div class="stat-cell" data-stat="body" onclick="window.location.href='30-stat.html#body'">
-          <div class="stat-ring-wrap">
-            <svg viewBox="0 0 60 60">
-              <circle class="stat-ring-bg" cx="30" cy="30" r="22" />
-              <circle class="stat-ring-fill" data-ring="body" cx="30" cy="30" r="22" stroke-dasharray="138.23" stroke-dashoffset="138.23" />
-            </svg>
-            <div class="stat-value" data-bar="body" data-stat-val="body">0</div>
-          </div>
-          <div class="stat-label"><span class="stat-color-dot"></span>Body</div>
-          <span class="trend flat" data-trend="body">—</span>
+    <div class="frame">
+      <div class="topbar">
+        <div class="brand"><span class="dot"></span><span class="wm">CORE</span></div>
+        <div class="chips">
+          <a class="chip flame" href="26-streak.html" style="text-decoration:none" aria-label="View streak"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3-1 4-1 6 0 1 1 2 1 2s2-1 2-3c2 2 3 4 3 7a5 5 0 0 1-10 0c0-3 2-5 3-7 1 2 2 2 2 2s0-3 0-7Z"/></svg><span id="cStreak">0</span></a>
+          <a class="chip coin" href="27-shop.html" style="text-decoration:none" aria-label="Open shop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/></svg><span id="cCoins">0</span></a>
+          <span class="chip shard"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l4 7-4 13-4-13z"/></svg><span id="cShards">0</span></span>
         </div>
       </div>
 
-      <!-- Pact strip — visible only when active pacts exist -->
-      <div class="pact-strip" id="pactStrip">
-        <div class="pact-avatar">A</div>
-        <div class="pact-text">
-          <div class="pact-title">Pact with Alex</div>
-          <div class="pact-meta">Day 4 / 14 · $5 stake</div>
-        </div>
-        <div class="pact-status-dots">
-          <span class="pact-dot" title="You — clean"></span>
-          <span class="pact-dot" title="Alex — clean"></span>
-        </div>
-      </div>
-
-      <!-- Daily check-in -->
-      <div class="checkin-card">
-        <div class="checkin-head">
-          <div class="checkin-text">
-            <div class="checkin-title" id="checkinTitle">Daily check-in</div>
-            <div class="checkin-sub" id="checkinSub">Tap once to lock today in. +50 XP.</div>
-            <div style="display:flex; flex-wrap:wrap;">
-              <div class="checkin-streak-badge" id="checkinStreakBadge">
-                <svg viewBox="0 0 24 24" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 2c1 3 3 4.5 3 7a3 3 0 1 1-6 0c0-1 .5-1.8 1-2.5"/></svg>
-                <span id="checkinStreakText">3 days in a row</span>
-              </div>
-              <div class="checkin-frozen" id="checkinFrozen">
-                <svg viewBox="0 0 24 24" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 2v20M5 5l14 14M19 5L5 19M3 12h18"/></svg>
-                Freeze used yesterday
-              </div>
+      <div class="scroll">
+        <!-- HERO / COMMAND CENTER -->
+        <div class="hero" id="hero">
+          <div class="shine"></div>
+          <div class="top">
+            <div>
+              <div class="greet" id="greet">Welcome back</div>
+              <div class="lvl">Level</div>
+              <div class="lvnum" id="heroLvl">1</div>
             </div>
+            <div class="rankpill" id="rankPill"><svg id="rankPillGem" viewBox="0 0 100 100"></svg><span id="rankPillT">Stone I</span></div>
+          </div>
+
+          <div class="rankpath" id="rankPath"></div>
+
+          <div class="powerrow">
+            <span class="pl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8Z"/></svg>CORE Power</span>
+            <span class="pright">
+              <span class="pgain" id="powerGain"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 15l7-7 7 7"/></svg><span id="powerGainV">+0</span> today</span>
+              <span class="pv" id="heroPower">0</span>
+            </span>
+          </div>
+
+          <div class="xpwrap">
+            <div class="lab"><span class="now" id="xpNow">0 / 300 XP</span><span id="xpToGo">300 XP to level up</span></div>
+            <div class="xpbar"><div class="xpfill" id="xpfill"></div></div>
+          </div>
+
+          <div class="stats">
+            <div class="stat flame"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3-1 4-1 6 0 1 1 2 1 2s2-1 2-3c2 2 3 4 3 7a5 5 0 0 1-10 0c0-3 2-5 3-7 1 2 2 2 2 2s0-3 0-7Z"/></svg><div class="v" id="stStreak">0</div><div class="k">Day streak</div></div>
+            <div class="stat sword"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14.5 4H20v5.5L9 20.5l-5.5-5.5L14.5 4ZM14 10l-4-4M4 20l3-3"/></svg><div class="v" id="stQuests">0</div><div class="k">Quests done</div></div>
+            <div class="stat box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l2-4h14l2 4M3 9v9a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V9M3 9h18M12 9v3"/></svg><div class="v" id="stChest">0</div><div class="k">Chest ready</div></div>
           </div>
         </div>
-        <button class="checkin-btn" id="checkinBtn" onclick="doCheckin()">
-          Check in · +50 XP
-        </button>
-        <div class="week-strip" id="weekDots">
-          <div class="week-dot" data-d="0"></div>
-          <div class="week-dot" data-d="1"></div>
-          <div class="week-dot" data-d="2"></div>
-          <div class="week-dot" data-d="3"></div>
-          <div class="week-dot" data-d="4"></div>
-          <div class="week-dot" data-d="5"></div>
-          <div class="week-dot" data-d="6"></div>
-        </div>
-        <div class="week-count" id="weekCount"><strong>0/7</strong> days this week</div>
 
-        <div class="heatmap-wrap">
-          <div class="heatmap-head">
-            <span class="heatmap-label">30-day consistency</span>
-            <span class="heatmap-pct"><strong id="hmPct">0</strong>%</span>
+        <!-- LIFE SCORES -->
+        <div class="sec"><h2>Life scores</h2><span class="meta" id="lsMeta">Life Score 0</span></div>
+        <div class="lifegrid" id="lifeGrid"></div>
+
+        <!-- CURRENT GOAL -->
+        <div class="sec"><h2>Next rank objective</h2></div>
+        <div class="goal" id="goal"></div>
+
+        <!-- QUESTS -->
+        <div class="sec"><h2>Today's quests</h2><span class="meta" id="qMeta">0/3</span></div>
+        <div class="qbonus" id="qbonus"></div>
+        <div id="quests"></div>
+
+        <!-- DAILY CHEST -->
+        <div class="sec"><h2>Daily chest</h2></div>
+        <div class="dchest" id="dchest">
+          <div class="ch">
+            <div class="emit" id="chestEmit"></div>
+            <div class="cimg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 9l2.2-4.4A1 1 0 0 1 6.1 4h11.8a1 1 0 0 1 .9.6L21 9M3 9v9a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V9M3 9h18M12 9v4m-2.2 0h4.4"/></svg></div>
+            <div class="cb"><div class="ct" id="chestT">Daily chest</div><div class="cs" id="chestS">Complete 3 quests to unlock</div>
+              <div class="dots" id="chestDots"><i></i><i></i><i></i></div></div>
           </div>
-          <div class="heatmap" id="heatmap"></div>
+          <div class="rew"><div class="rl">Possible rewards</div><div class="rchips" id="chestRewards"></div></div>
+          <button class="open" id="chestOpen" type="button">Open chest</button>
         </div>
+
+        <!-- STREAK -->
+        <div class="sec"><h2>Daily streak</h2><span class="meta">View →</span></div>
+        <a class="streak card-tap" id="streak" href="26-streak.html" style="text-decoration:none;color:inherit"></a>
+
+        <!-- UPGRADES -->
+        <div class="sec"><h2>Skill tree</h2><span class="meta" id="upgMeta"></span></div>
+        <div class="upg" id="upg"></div>
+
+        <!-- COMING SOON -->
+        <div class="sec"><h2>Coming soon</h2><span class="meta">Unlock by ranking up</span></div>
+        <div class="locked-row" id="locked"></div>
       </div>
 
-      <!-- Today's quest -->
-      <div class="quest-card" onclick="window.location.href='42-panic.html'" title="Calm Library — coming soon, opens Panic for now">
-        <div class="quest-ico">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-        </div>
-        <div class="quest-text">
-          <div class="quest-kicker">Today</div>
-          <div class="quest-title">Try a 60-second box breath.</div>
-        </div>
-        <span class="quest-chev">›</span>
-      </div>
-
-      <!-- Coach line of the day -->
-      <div class="coach-line" onclick="window.location.href='39-coach.html'">
-        <div class="label">Coach says</div>
-        <div class="body" id="coachLineBody">Just being here counts.</div>
-      </div>
-
-      <!-- Quick actions row — SOS dominant + 3 secondary -->
-      <div class="quick-actions">
-        <a class="action sos" href="42-panic.html">
-          <svg viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2z"/><path d="M12 9v5M12 17h.01"/></svg>
-          <span class="action-label">SOS</span>
-        </a>
-        <a class="action" href="60-compose.html">
-          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-          <span class="action-label">Post</span>
-        </a>
-        <a class="action" href="24-weekly-review.html" title="Body Receipt — coming soon">
-          <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
-          <span class="action-label">Receipt</span>
-        </a>
-        <a class="action" href="42-panic.html" title="Calm Library — coming soon">
-          <svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
-          <span class="action-label">Calm</span>
-        </a>
-      </div>
-
-      <!-- Achievement teaser -->
-      <a class="achievement-teaser" href="49-achievements.html">
-        <div class="ach-ico">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M9 14l-1 8 4-3 4 3-1-8"/></svg>
-        </div>
-        <div class="ach-text">
-          <div class="ach-title">Next achievement</div>
-          <div class="ach-progress">Spark — 3 days to go</div>
-        </div>
-        <span class="ach-chev">›</span>
-      </a>
-
+      <nav class="nav" aria-label="Primary">
+        <a class="item active" href="20-dashboard.html" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 11l9-7 9 7M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/></svg><span class="nl">Home</span></a>
+        <a class="item" href="21-quests.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg><span class="nl">Quests</span></a>
+        <a class="item" href="22-inventory.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span class="nl">Inventory</span></a>
+        <a class="item" href="23-profile.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="nl">Profile</span></a>
+        <a class="item" href="24-more.html"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg><span class="nl">More</span></a>
+      </nav>
+      <div class="home-indicator"></div>
     </div>
 
+    <!-- upgrade detail sheet -->
+    <div class="sheet-scrim" id="sheetScrim"></div>
+    <div class="sheet" id="sheet"></div>
+
+    <div class="toast" id="toast"></div>
   </div>
 
-  <!-- Settings dropdown menu -->
-  <div class="sm-back" id="settingsMenuBack"></div>
-  <div class="sm-menu" id="settingsMenu" aria-hidden="true" role="menu">
-    <div class="sm-user">
-      <div class="sm-user-name" id="smUserName">—</div>
-      <div class="sm-user-meta" id="smUserMeta">—</div>
-    </div>
-    <a class="sm-row" href="62-profile.html">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg>
-      <span>Profile</span>
-    </a>
-    <a class="sm-row" href="80-settings.html">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
-      <span>Settings</span>
-    </a>
-    <a class="sm-row" href="76-pricing.html">
-      <svg viewBox="0 0 24 24"><path d="M12 2l2.5 6 6 .5-4.5 4 1.5 6L12 15l-5.5 3.5L8 12.5 3.5 8.5l6-.5z"/></svg>
-      <span>Manage subscription</span>
-    </a>
-    <a class="sm-row" href="72-referral.html">
-      <svg viewBox="0 0 24 24"><path d="M20 12v9H4v-9M2 7h20v5H2zM12 22V7M12 7H8a2.5 2.5 0 1 1 0-5c3 0 4 5 4 5zM12 7h4a2.5 2.5 0 1 0 0-5c-3 0-4 5-4 5z"/></svg>
-      <span>Refer a friend</span>
-    </a>
-    <a class="sm-row" href="82-legal.html">
-      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
-      <span>Legal</span>
-    </a>
-    <div class="sm-row danger" onclick="signOut()">
-      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-      <span>Sign out</span>
-    </div>
-  </div>
-
-  <!-- Bottom tab bar — core-tabbar.js fills this in -->
-  <div class="tabbar" data-active="home"></div>
-
-  <!-- Haptic flash + reward overlays (preserved IDs for existing JS) -->
-  <div class="haptic-flash" id="hapticFlash"></div>
-  <div class="reward-overlay" id="rewardOverlay" aria-hidden="true"></div>
-  <div class="perfect-week" id="perfectWeek" aria-hidden="true"></div>
-
-  <!-- Undo toast (kept for downstream — minimal styling) -->
-  <div id="undoToast" style="display:none; position:absolute; bottom:80px; left:14px; right:14px; padding:12px 14px; border-radius:12px; background:rgba(20,20,30,0.95); border:1px solid var(--border-subtle); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); z-index:42; align-items:center; gap:10px;">
-    <span id="undoText" style="flex:1; font-size:13px; color:var(--text-primary);"></span>
-    <button id="undoBtn" style="background:none; border:none; color:var(--core-blue-300); font-weight:700; font-size:12px; cursor:pointer; letter-spacing:0.08em;">UNDO</button>
-  </div>
+  <script src="_lib/core-sfx.js"></script>
+  <script src="_lib/core-state.js"></script>
   <script>
-    document.getElementById('undoToast').classList = '';
-    // Lightweight on/off class for the kept-undo toast.
-    (function(){
-      const el = document.getElementById('undoToast');
-      if (!el) return;
-      const _orig = el.classList.add.bind(el.classList);
-      el.classList.add = function(){ _orig.apply(null, arguments); el.style.display='flex'; };
-      const _orig2 = el.classList.remove.bind(el.classList);
-      el.classList.remove = function(){ _orig2.apply(null, arguments); el.style.display='none'; };
-    })();
-  </script>
+  (function(){
+    var S=window.coreState, qs=function(s){return document.querySelector(s);};
+    var XP_PER_LEVEL=300;
+    var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-</div>
+    // rarity ladder
+    var RARITY={
+      common:   {c:'var(--r-common)',    l:'Common'},
+      rare:     {c:'var(--r-rare)',      l:'Rare'},
+      epic:     {c:'var(--r-epic)',      l:'Epic'},
+      legendary:{c:'var(--r-legendary)', l:'Legendary'},
+      mythic:   {c:'var(--r-mythic)',    l:'Mythic'}
+    };
 
-<!-- =====================================================
-     MAIN JS BLOCK — preserves all working dashboard logic
-     from the previous version (INSIGHT_RULES, hero ring,
-     check-in, week strip, heatmap, freeze pill, trial pill,
-     life score chart, settings dropdown, milestone redirect).
-     Routine widget cut — moved to routine.html.
-     New: alert-slot logic for Witness / Promise Letter /
-     Body Receipt prompt / Lifetime offer.
-     New: per-stat ring stroke-dashoffset updater.
-     ===================================================== -->
-  <script>
-    // Auto-mark Stone as owner on his device so the admin row shows in settings.
-    // In production this is gated server-side via email match against the owner record.
-    (function() {
-      try {
-        const t = JSON.parse(localStorage.getItem('coreOnboardTrial') || '{}');
-        if (!localStorage.getItem('coreOwnerEmail')) {
-          const p = new URLSearchParams(location.search);
-          if (p.get('owner') === '1') localStorage.setItem('coreOwnerEmail', 'stonehrprzilo@gmail.com');
-        }
-      } catch(e){}
-    })();
+    (function(){ var h=document.getElementById('stars'); if(!h) return; var f=document.createDocumentFragment();
+      for(var i=0;i<60;i++){ var d=document.createElement('span'); d.className='star'; var sz=(i%7===0)?2.2:(i%3===0)?1.6:1.0;
+        d.style.width=sz+'px'; d.style.height=sz+'px'; d.style.left=((i*37)%100)+'%'; d.style.top=((i*53)%100)+'%';
+        d.style.setProperty('--d',(3+(i%5))+'s'); d.style.setProperty('--del',((i%9)*0.4)+'s'); if(i%11===0) d.style.boxShadow='0 0 6px rgba(150,195,255,0.8)'; f.appendChild(d); }
+      h.appendChild(f); })();
 
-    // Free-tier feature locks — dim Coach + Scan when user chose Free at trial step 4.
-    (function() {
-      try {
-        if (localStorage.getItem('coreFreeTier') !== '1') return;
-        document.body.classList.add('core-free-tier');
-        const css = document.createElement('style');
-        css.textContent = `
-          .core-free-tier .action[data-feature="coach"],
-          .core-free-tier .action[data-feature="scan"],
-          .core-free-tier .tab[data-tab="coach"] { opacity: 0.45; filter: saturate(0.5); position: relative; }
-        `;
-        document.head.appendChild(css);
-        document.addEventListener('click', function(e) {
-          const locked = e.target.closest('[data-feature="coach"], [data-feature="scan"]');
-          if (!locked) return;
-          e.preventDefault(); e.stopPropagation();
-          window.location.href = '76-pricing.html';
-        }, true);
-      } catch(e){}
-    })();
+    // chest emit particles (ambient when ready)
+    (function(){ var e=qs('#chestEmit'); if(!e) return; for(var i=0;i<5;i++){ var p=document.createElement('i'); p.style.animationDelay=(i*0.45)+'s'; p.style.setProperty('--ex',(-50+(i-2)*16)+'%'); e.appendChild(p); } })();
 
-    // Preview mode: seed demo state once per session so screenshots look alive
-    (function() {
-      try {
-        if (window.__coreDemoMode && window.coreState && typeof coreState.seedDemo === 'function') {
-          if (!sessionStorage.getItem('coreDemoSeeded')) {
-            coreState.seedDemo();
-            sessionStorage.setItem('coreDemoSeeded', '1');
-          }
-        }
-      } catch(e){}
-    })();
+    try{ if(/[?&]demo=1/.test(location.search)){ S.seedDemo();
+      if(!S.read().inventory.length){ S.addItem({id:'iron-chestplate',name:'Iron Chestplate',type:'Armour',rarity:'common',slot:'chest'}); }
+      if(!S.read().class){ S.setClass('warrior'); }
+      if(!S.read().chests.starterOpened){ S.update(function(st){ st.chests.starterOpened=true; if(st.chests.opened.indexOf('starter')<0) st.chests.opened.unshift('starter'); return st; }); }
+    } }catch(e){}
 
-    // Date chip
-    (function() {
-      try {
-        var t = document.getElementById('dateText');
-        if (!t) return;
-        var d = new Date();
-        var DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-        var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        t.textContent = DAYS[d.getDay()] + ' · ' + MONTHS[d.getMonth()] + ' ' + d.getDate();
-      } catch(e){}
-    })();
+    // daily passive stat decay (idempotent per day; dashboard is the canonical daily entry)
+    try{ if(S.applyStatTick) S.applyStatTick(); }catch(e){}
 
-    // Star field
-    (function() {
-      var sl = document.getElementById('stars');
-      if (!sl) return;
-      for (var i = 0; i < 50; i++) {
-        var s = document.createElement('div');
-        var r = Math.random();
-        s.className = 'star ' + (r < 0.7 ? 's1' : 's2');
-        s.style.left = (Math.random()*100) + '%';
-        s.style.top  = (Math.random()*100) + '%';
-        s.style.setProperty('--d',   (2.5 + Math.random()*5) + 's');
-        s.style.setProperty('--del', (Math.random()*5) + 's');
-        s.style.setProperty('--min', (0.08 + Math.random()*0.15).toFixed(2));
-        s.style.setProperty('--max', (0.40 + Math.random()*0.30).toFixed(2));
-        sl.appendChild(s);
-      }
-    })();
+    S.ensureDailyQuests(function(){
+      var base=[
+        {id:'body',       title:'Complete a workout',                kind:'STRENGTH QUEST',   xp:35, diff:'hard',   time:'30 min', stat:'strength', statGain:3},
+        {id:'discipline', title:'Complete one focused work session', kind:'FOCUS QUEST',       xp:30, diff:'medium', time:'15 min', stat:'focus',    statGain:2},
+        {id:'health',     title:'Drink water & take a real break',   kind:'HEALTH QUEST',     xp:15, diff:'easy',   time:'5 min',  stat:'health',   statGain:2},
+        {id:'wealth',     title:'Take one step toward your income',  kind:'WEALTH QUEST',     xp:30, diff:'medium', time:'15 min', stat:'wealth',   statGain:2},
+        {id:'social',     title:'Reach out to someone you care about', kind:'SOCIAL QUEST',   xp:20, diff:'easy',   time:'10 min', stat:'social',   statGain:2},
+        {id:'growth',     title:'Do one task that improves your future', kind:'PURPOSE QUEST', xp:40, diff:'medium', time:'20 min', stat:'purpose',  statGain:3}
+      ];
+      if(S.hasUpgrade('questmaster')) base.push({id:'bonus', title:'Read 10 pages', kind:'BONUS QUEST', xp:30, diff:'easy', time:'10 min', stat:'focus', statGain:1});
+      return base;
+    });
 
-    // Greeting + demo pill + time-of-day line
-    (function() {
-      try {
-        var t = JSON.parse(localStorage.getItem('coreOnboardTrial') || '{}');
-        if (t.name) {
-          var g = document.getElementById('greet');
-          if (g) g.textContent = t.name;
-        }
-        var h = new Date().getHours();
-        var part = h < 12 ? 'Good morning,' : (h < 18 ? 'Good afternoon,' : 'Good evening,');
-        var greetLine = document.querySelector('.greet-line');
-        if (greetLine) greetLine.textContent = part;
-        if (window.__coreDemoMode) {
-          var pill = document.getElementById('demoPill');
-          if (pill) pill.style.display = 'inline-flex';
-        }
-      } catch(e){}
-    })();
+    var QICONS={ body:'<path d="M6.5 6.5l11 11M4 9l2-2 2 2-2 2-2-2ZM15 18l2 2 2-2-2-2-2 2Z"/>', discipline:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/>', health:'<path d="M12 20s-7-4.5-7-9.5A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 7 3.5C19 15.5 12 20 12 20Z"/>', wealth:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v9M9.6 10h4a1.6 1.6 0 0 1 0 3.2h-3.2a1.6 1.6 0 0 0 0 3.2h4.2"/>', social:'<circle cx="9" cy="8" r="3.2"/><path d="M3.4 20a5.6 5.6 0 0 1 11.2 0M16 5.2a3.2 3.2 0 0 1 0 6M18.7 20a5.6 5.6 0 0 0-3.1-5"/>', growth:'<path d="M3 17l5-5 4 4 8-8M21 8v5h-5"/>', bonus:'<path d="M4 7h16v13H4zM4 7l2-3h12l2 3M9 4v3M15 4v3"/>' };
+    var CLOCK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+    var BOLT='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8Z"/></svg>';
 
-    // Qualitative labels per stat score (preserved for downstream)
-    function qualLabel(score) {
-      if (score <= 0) return 'Tap to start';
-      if (score >= 80) return 'Strong';
-      if (score >= 65) return 'Good';
-      if (score >= 45) return 'Average';
-      if (score >= 25) return 'Below';
-      return 'Critical';
-    }
-
-    // Today-delta: slips in the last 24h aggregated per primary stat
-    var HABIT_PRIMARY = { vape:'lungs', doomscroll:'brain', spend:'wallet', drink:'willpower', porn:'willpower', weed:'lungs', junk_food:'body', nicotine_pouch:'lungs' };
-    function computeTodayDeltas(s) {
-      var cutoff = Date.now() - 24*60*60*1000;
-      var d = { lungs:0, brain:0, wallet:0, willpower:0, body:0 };
-      (s.slips || []).forEach(function(sl) {
-        if (sl.ts < cutoff) return;
-        var primary = HABIT_PRIMARY[sl.habit] || 'willpower';
-        d[primary]   -= (sl.magnitude || 1) * 2.5;
-        d.willpower  -= (sl.magnitude || 1) * 1.5;
-      });
-      Object.keys(d).forEach(function(k){ d[k] = Math.round(d[k]); });
-      return d;
-    }
-    function renderTrendChip(el, delta) {
-      el.className = 'trend ' + (delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat');
-      var sym = delta > 0 ? '▲ +' : delta < 0 ? '▼ ' : '— ';
-      el.textContent = sym + Math.abs(delta);
-    }
-
-    function openCheckin() {
-      if (window.__todayTarget) window.location.href = window.__todayTarget;
-    }
-
-    function onStreakClick(e) {
-      if (e.target.closest('#freezePill') || e.target.closest('#todayPill')) return;
-      try {
-        var s = coreState.read();
-        var days = (s.streak && s.streak.days) || 0;
-        var prev = (s.streak && s.streak.previousDays) || 0;
-        if (days > 0) { window.location.href = '50-streak-board.html'; return; }
-        if (prev > 0) { window.location.href = '52-restore-streak.html'; return; }
-        window.location.href = '26-habit.html';
-      } catch(e2) { window.location.href = '50-streak-board.html'; }
-    }
-
-    function onLifeClick() {
-      try {
-        var s = coreState.read();
-        var lf = (typeof coreState.lifeScore === 'function') ? coreState.lifeScore(s) : (s.lifeScore || 0);
-        if (lf <= 0) { window.location.href = '30-stat.html#brain'; return; }
-        window.location.href = '24-weekly-review.html';
-      } catch(e) { window.location.href = '24-weekly-review.html'; }
-    }
-
-    // Threshold-cross insight cards
-    function measured(s, k) { return (s.statWizardsDone && s.statWizardsDone[k]) || s.stats[k] > 0; }
-    var INSIGHT_RULES = [
-      { id:'lungs_climb',  test: function(s) { return measured(s,'lungs') && s.stats.lungs >= 80; },
-        c:'#FF6BAA', icon:'<path d="M12 4v12"/><path d="M12 16c0 2-1.2 4-3 4-2.5 0-4-2-4-5 0-3 1-7 3-9"/><path d="M12 16c0 2 1.2 4 3 4 2.5 0 4-2 4-5 0-3-1-7-3-9"/>',
-        title:'Lungs in the green',
-        body:'Capacity 80+ for the first time. That\'s the pivot — small wins compound from here.' },
-      { id:'will_dip',     test: function(s) { return measured(s,'willpower') && s.stats.willpower < 30; },
-        c:'#FF4F6B', icon:'<path d="M12 2c1 3 3 4.5 3 7a3 3 0 1 1-6 0c0-1 .5-1.8 1-2.5"/>',
-        title:'Willpower low',
-        body:'Below 30 — that\'s the slip zone. One honest log feeds it back.' },
-      { id:'brain_climb',  test: function(s) { return measured(s,'brain') && s.stats.brain >= 85; },
-        c:'#9F8FFF', icon:'<path d="M9 3a3 3 0 0 0-3 3v0a3 3 0 0 0-3 3v1a3 3 0 0 0 1 2.2A3 3 0 0 0 4 14v1a3 3 0 0 0 3 3 3 3 0 0 0 3 3"/>',
-        title:'Brain over 85',
-        body:'Sleep + Mind sessions are stacking. Protect tonight\'s wind-down.' },
-      { id:'wallet_low',   test: function(s) { return measured(s,'wallet') && s.stats.wallet < 40; },
-        c:'#FFC857', icon:'<rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18"/>',
-        title:'Wallet drifting',
-        body:'Spend creeping past budget. Try the 24h cart rule for the next order.' },
-      { id:'streak_close', test: function(s) { return s.streak.days >= 6 && s.streak.days < 7; },
-        c:'#FFC857', icon:'<path d="M12 2c0 4 4 5 4 9a4 4 0 0 1-8 0c0-1 .5-2 1-3"/>',
-        title:'One day from week one',
-        body:'Day 7 unlocks the first milestone screen + share card.' },
+    // UPGRADES — skill-tree nodes (rarity + power rating + tier previews)
+    var UPGRADES=[
+      {id:'xpboost1',   n:'XP Boost I',   r:'rare',      pow:20,  cost:150, cur:'coins',  ic:'<path d="M13 2L3 14h7l-1 8 10-12h-7l1-8Z"/>',
+        e:'+5% XP from quests', cur_e:'No XP bonus', next_e:'+5% XP from all quests', max_e:'+5% XP from all quests'},
+      {id:'xpboost2',   n:'XP Boost II',  r:'epic',      pow:40,  cost:300, cur:'coins',  ic:'<path d="M13 2L3 14h7l-1 8 10-12h-7l1-8Z"/>',
+        e:'+10% XP from quests', cur_e:'+5% XP (Boost I)', next_e:'+10% XP from all quests', max_e:'+10% XP from all quests'},
+      {id:'chesthunter',n:'Chest Hunter', r:'rare',      pow:15,  cost:80,  cur:'shards', ic:'<path d="M3 9l2-4h14l2 4M3 9v9h18V9M3 9h18M12 9v3"/>',
+        e:'+3% rare chest chance', cur_e:'Base chest odds', next_e:'+3% rare drop chance', max_e:'+3% rare drop chance'},
+      {id:'momentum',   n:'Momentum',     r:'epic',      pow:30,  cost:200, cur:'coins',  ic:'<path d="M3 12h12M11 6l6 6-6 6M21 5v14"/>',
+        e:'+1 streak shield / week', cur_e:'1 shield / week', next_e:'2 shields / week', max_e:'2 shields / week'},
+      {id:'focuscore',  n:'Focus Core',   r:'rare',      pow:20,  cost:120, cur:'shards', ic:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>',
+        e:'+10% focus quest reward', cur_e:'Base focus reward', next_e:'+10% focus rewards', max_e:'+10% focus rewards'},
+      {id:'questmaster',n:'Quest Master', r:'legendary', pow:60,  cost:400, cur:'coins',  ic:'<path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2"/>',
+        e:'+1 daily quest slot', cur_e:'3 daily quests', next_e:'4 daily quests', max_e:'4 daily quests'},
+      {id:'powercore',  n:'Power Core',   r:'mythic',    pow:100, cost:250, cur:'coins',  ic:'<path d="M12 3l7 3v5c0 4-3 7-7 9-4-2-7-5-7-9V6l7-3Z"/>',
+        e:'+100 CORE Power', cur_e:'No flat Power', next_e:'+100 flat CORE Power', max_e:'+100 flat CORE Power'}
     ];
-    function renderInsightCards(s) {
-      try {
-        var slot = document.getElementById('insightCards');
-        if (!slot) return;
-        slot.innerHTML = '';
-        var dismissed = JSON.parse(localStorage.getItem('coreInsightDismissed') || '{}');
-        var EXPIRY = 3 * 24 * 60 * 60 * 1000;
-        Object.keys(dismissed).forEach(function(k){ if (Date.now() - (dismissed[k] || 0) > EXPIRY) delete dismissed[k]; });
-        localStorage.setItem('coreInsightDismissed', JSON.stringify(dismissed));
-        INSIGHT_RULES.forEach(function(r) {
-          if (!r.test(s)) return;
-          if (dismissed[r.id]) return;
-          var card = document.createElement('div');
-          card.className = 'alert-slot on';
-          card.style.cssText = 'background:rgba(255,255,255,0.03);';
-          card.innerHTML = '' +
-            '<div class="alert-ico" style="background:' + r.c + '; box-shadow:0 0 14px ' + r.c + ';">' +
-              '<svg viewBox="0 0 24 24" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">' + r.icon + '</svg>' +
-            '</div>' +
-            '<div class="alert-body">' +
-              '<div class="alert-title">' + r.title + '</div>' +
-              '<div class="alert-text">' + r.body + '</div>' +
-            '</div>' +
-            '<button class="alert-cta" data-dismiss="' + r.id + '" aria-label="Dismiss">×</button>';
-          card.querySelector('button[data-dismiss]').onclick = function(e) {
-            e.stopPropagation();
-            dismissed[r.id] = Date.now();
-            localStorage.setItem('coreInsightDismissed', JSON.stringify(dismissed));
-            if (window.coreTrack) coreTrack('insight_dismissed', { id: r.id });
-            renderInsightCards(coreState.read());
-          };
-          slot.appendChild(card);
-        });
-      } catch(e){ console.error(e); }
+
+    // chest reward pool (display preview + cinematic) — rarity-coloured
+    var CHEST_POOL=[
+      {n:'XP Boost',     r:'rare',      ic:'<path d="M13 2L3 14h7l-1 8 10-12h-7l1-8Z"/>'},
+      {n:'Coin Bundle',  r:'common',    ic:'<circle cx="12" cy="12" r="9"/><path d="M12 7v10"/>'},
+      {n:'Rare Border',  r:'epic',      ic:'<rect x="4" y="4" width="16" height="16" rx="3"/><rect x="8" y="8" width="8" height="8" rx="1.5"/>'},
+      {n:'Profile Effect',r:'epic',     ic:'<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>'},
+      {n:'Upgrade Shard',r:'rare',      ic:'<path d="M12 2l4 7-4 13-4-13z"/>'},
+      {n:'Title Unlock', r:'legendary', ic:'<path d="M4 20h16M7 16l5-12 5 12"/>'},
+      {n:'Badge',        r:'common',    ic:'<circle cx="12" cy="8" r="5"/><path d="M9 13l-1 8 4-3 4 3-1-8"/>'}
+    ];
+
+    var toastT; function toast(m,cls){ var t=qs('#toast'); t.textContent=m; t.className='toast show'+(cls?' '+cls:''); clearTimeout(toastT); toastT=setTimeout(function(){t.classList.remove('show');},1700); }
+
+    // smooth count-up
+    function animateCount(el, to){
+      if(!el) return;
+      var from=parseInt((el.textContent||'0').replace(/[^0-9-]/g,''),10)||0; if(from===to){ el.textContent=to.toLocaleString(); return; }
+      var start=null, dur=600; if(el._raf) cancelAnimationFrame(el._raf);
+      function step(ts){ if(!start) start=ts; var p=Math.min(1,(ts-start)/dur); var v=Math.round(from+(to-from)*(1-Math.pow(1-p,3))); el.textContent=v.toLocaleString(); if(p<1) el._raf=requestAnimationFrame(step); }
+      el._raf=requestAnimationFrame(step);
     }
 
-    // Re-shape the line chart based on 7-day score history
-    function renderChart(s) {
-      try {
-        var line = document.getElementById('chartLine');
-        var fill = document.getElementById('chartFill');
-        if (!line || !fill) return;
-        var current = (typeof coreState.lifeScore === 'function') ? coreState.lifeScore(s) : (s.lifeScore || 70);
-        var slips = s.slips || [];
-        var slipByDay = [0,0,0,0,0,0,0];
-        var dayMs = 24 * 60 * 60 * 1000;
-        var todayStart = new Date(); todayStart.setHours(0,0,0,0);
-        slips.forEach(function(sl) {
-          var diff = Math.floor((todayStart.getTime() - sl.ts) / dayMs);
-          if (diff >= 0 && diff < 7) slipByDay[6 - diff]++;
-        });
-        var scores = new Array(7);
-        scores[6] = current;
-        for (var i = 5; i >= 0; i--) {
-          var daysAgo = 6 - i;
-          var base = current - (daysAgo * 3);
-          var jitter = Math.sin(i * 1.1 + daysAgo * 0.3) * 2.5;
-          var slipBump = -slipByDay[i] * 4;
-          scores[i] = Math.max(15, Math.min(98, Math.round(base + jitter + slipBump)));
-        }
-        var pts = scores.map(function(v, i) {
-          var x = 5 + (i / 6) * 140;
-          var y = 76 - (v / 100) * 68;
-          return { x: x, y: y };
-        });
-        var d = pts.map(function(p, i) { return (i === 0 ? 'M' : 'L') + p.x + ' ' + p.y; }).join(' ');
-        line.setAttribute('d', d);
-        fill.setAttribute('d', d + ' L' + pts[pts.length-1].x + ' 76 L' + pts[0].x + ' 76 Z');
-        var dots = document.querySelectorAll('.chart-svg circle');
-        if (dots.length >= 7) {
-          for (var j = 0; j < 7; j++) {
-            dots[j].setAttribute('cx', pts[j].x);
-            dots[j].setAttribute('cy', pts[j].y);
-          }
-        }
-      } catch(e) {}
+    // particle burst inside a positioned host (host must be position:relative)
+    function burst(host, x, y, color, n){
+      if(REDUCED||!host) return; n=n||10;
+      for(var i=0;i<n;i++){ (function(){ var s=document.createElement('span'); s.className='spark'; s.style.background=color; s.style.left=x+'px'; s.style.top=y+'px'; s.style.boxShadow='0 0 8px '+color;
+        var ang=Math.random()*Math.PI*2, dist=24+Math.random()*40, dx=Math.cos(ang)*dist, dy=Math.sin(ang)*dist-14, dur=600+Math.random()*500;
+        host.appendChild(s); s.animate([{transform:'translate(0,0) scale(1)',opacity:1},{transform:'translate('+dx+'px,'+dy+'px) scale(.2)',opacity:0}],{duration:dur,easing:'cubic-bezier(.2,.7,.3,1)'}).onfinish=function(){ s.remove(); };
+      })(); }
+    }
+    function flyText(host, x, y, txt, color){
+      if(REDUCED||!host) return; var f=document.createElement('span'); f.className='flyxp'; f.textContent=txt; f.style.color=color; f.style.left=x+'px'; f.style.top=y+'px'; f.style.transform='translateX(-50%)';
+      host.appendChild(f); f.animate([{transform:'translate(-50%,0)',opacity:0},{transform:'translate(-50%,-12px)',opacity:1,offset:.2},{transform:'translate(-50%,-52px)',opacity:0}],{duration:1000,easing:'ease-out'}).onfinish=function(){ f.remove(); };
     }
 
-    // NEW — Per-stat ring stroke-dashoffset updater
-    var RING_C = 2 * Math.PI * 22; // ≈138.23
-    function updateStatRings(s) {
-      ['lungs','brain','wallet','willpower','body'].forEach(function(k) {
-        var ring = document.querySelector('.stat-ring-fill[data-ring="' + k + '"]');
-        if (!ring) return;
-        var val = Math.max(0, Math.min(100, s.stats[k] || 0));
-        var off = RING_C * (1 - val/100);
-        ring.setAttribute('stroke-dasharray', RING_C);
-        ring.setAttribute('stroke-dashoffset', off.toFixed(2));
-        var num = document.querySelector('[data-stat-val="' + k + '"]');
-        if (num) num.textContent = val;
+    function startOfToday(){ var d=new Date(); d.setHours(0,0,0,0); return d.getTime(); }
+    function xpToday(s){ var t=startOfToday(); return (s.xpLedger||[]).filter(function(e){return e.ts>=t && e.delta>0;}).reduce(function(a,e){return a+e.delta;},0); }
+    function avgXpDay(s){ var L=(s.xpLedger||[]).filter(function(e){return e.delta>0;}); if(!L.length) return 150; var wk=Date.now()-7*86400000; var sum=L.filter(function(e){return e.ts>=wk;}).reduce(function(a,e){return a+e.delta;},0); return sum>0?Math.max(60,Math.round(sum/7)):150; }
+
+    function rankInfo(xp){ var t=S.rankTier(xp); return {r:S.rankFor(xp), idx:t.idx, cur:t.full, next:t.next, nextRank:t.nextRank, bandPct:t.bandPct, subPct:t.subPct, isMax:t.isMax}; }
+    function gemSVG(name, cls){ var ic=(S.RANK_ICONS&&S.RANK_ICONS[name])||''; return '<svg class="gem '+(cls||'')+'" viewBox="0 0 100 100">'+ic+'</svg>'; }
+
+    var lastLevel=null, lastXp=null, lastPower=null, lastLife=null;
+
+    // ── LIFE SCORES grid ──
+    var STAT_IC={
+      strength:'<path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/>',
+      focus:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/><path d="M12 1.5v3M12 19.5v3M22.5 12h-3M4.5 12h-3"/>',
+      wealth:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v9M9.6 10h4a1.6 1.6 0 0 1 0 3.2h-3.2a1.6 1.6 0 0 0 0 3.2h4.2"/>',
+      health:'<path d="M12 20.5s-7.2-4.6-7.2-9.8A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 7.2 3.7c0 5.2-7.2 9.8-7.2 9.8Z"/>',
+      social:'<circle cx="9" cy="8" r="3.2"/><path d="M3.4 20a5.6 5.6 0 0 1 11.2 0M16 5.2a3.2 3.2 0 0 1 0 6M18.7 20a5.6 5.6 0 0 0-3.1-5"/>',
+      purpose:'<circle cx="12" cy="12" r="8.5"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z"/>'
+    };
+    function statLevel(v){ return Math.floor((v||0)/15)+1; }
+    function celebrateStat(card, d, lvl){
+      try{ toast(d.name+' reached Level '+lvl+'!','levelup'); }catch(e){}
+      try{ SFX('levelup'); }catch(e){}
+      try{ var host=qs('.frame'), hr=host.getBoundingClientRect(), cr=card.getBoundingClientRect();
+        var x=cr.left-hr.left+cr.width/2, y=cr.top-hr.top+cr.height/2;
+        burst(host, x, y, d.color, 18); flyText(host, x, cr.top-hr.top+8, d.name.toUpperCase()+' LV '+lvl, d.color);
+      }catch(e){}
+      card.classList.remove('levelup'); void card.offsetWidth; card.classList.add('levelup');
+      setTimeout(function(){ card.classList.remove('levelup'); }, 1100);
+    }
+    function renderLifeScores(){
+      var host=qs('#lifeGrid'); if(!host || !S.STAT_DEFS) return;
+      var defs=S.STAT_DEFS, built=host.children.length===defs.length;
+      defs.forEach(function(d,i){
+        var v=S.statValue(d.key), lvl=statLevel(v), card;
+        if(built){ card=host.children[i]; }
+        else {
+          card=document.createElement('a'); card.className='lifecard'; card.href='stat.html?s='+d.key; card.style.setProperty('--sc',d.color);
+          card.setAttribute('aria-label',d.name+' life score');
+          card.innerHTML='<span class="lup">+</span>'+
+            '<div class="lhead"><div class="lic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'+(STAT_IC[d.key]||'')+'</svg></div>'+
+            '<div><div class="ln">'+d.name+'</div><div class="llvl" data-lvl>Level '+lvl+'</div></div>'+
+            '<div class="lval" data-val>0</div></div>'+
+            '<div class="lbar"><div class="lfill" data-fill></div></div>';
+          host.appendChild(card);
+        }
+        var valEl=card.querySelector('[data-val]'), fillEl=card.querySelector('[data-fill]'), lvlEl=card.querySelector('[data-lvl]'), upEl=card.querySelector('.lup');
+        var prev=parseInt(card.dataset.v||'-1',10), prevLvl=parseInt(card.dataset.lvl||'-1',10);
+        if(prev>=0 && v>prev){ card.classList.remove('gain'); void card.offsetWidth; upEl.textContent='+'+(v-prev); card.classList.add('gain'); try{SFX('xp');}catch(e){} setTimeout(function(){card.classList.remove('gain');},1500); }
+        if(prevLvl>=0 && lvl>prevLvl){ celebrateStat(card, d, lvl); }
+        card.dataset.v=v; card.dataset.lvl=lvl;
+        animateCount(valEl, v); lvlEl.textContent='Level '+lvl;
+        requestAnimationFrame(function(){ fillEl.style.width=v+'%'; });
       });
+      var ls=S.lifeScore(), m=qs('#lsMeta');
+      if(m){ if(!m.querySelector('#lsVal')) m.innerHTML='Life Score <b id="lsVal">'+ls+'</b>';
+        var lv=m.querySelector('#lsVal');
+        if(lastLife!=null && ls>lastLife){ m.classList.remove('lsbump'); void m.offsetWidth; m.classList.add('lsbump'); try{SFX('xp');}catch(e){} }
+        animateCount(lv, ls); lastLife=ls;
+      }
     }
 
-    // NEW — Alert slot mounting (Witness, Promise Letter, Body Receipt, Lifetime)
-    function mountAlertSlots(s) {
-      try {
-        var trial = JSON.parse(localStorage.getItem('coreOnboardTrial') || '{}');
+    function render(){
+      var s=S.read(), xp=s.xp||0, level=Math.floor(xp/XP_PER_LEVEL)+1, into=xp%XP_PER_LEVEL;
+      if((s.level||1)!==level){ S.update(function(st){ st.level=level; return st; }); }
+      if(lastLevel!==null && level>lastLevel){ toast('LEVEL UP — Level '+level,'levelup'); } lastLevel=level;
+      var ri=rankInfo(xp), power=S.corePower();
+      var rk=ri.r.color||'#9aa0aa', nk=(ri.nextRank&&ri.nextRank.color)||rk;
 
-        // Promise Letter teaser — day 7, 30, 60, 100 of current streak
-        var days = (s.streak && s.streak.days) || 0;
-        var letterTiers = [7, 30, 60, 100];
-        var teaser = document.getElementById('promiseLetterTeaser');
-        if (teaser) {
-          var hasLetter = !!localStorage.getItem('corePromiseLetter');
-          var isLetterTier = letterTiers.indexOf(days) !== -1;
-          teaser.classList.toggle('on', hasLetter && isLetterTier);
-        }
+      // rank glow theming
+      [qs('#hero'),qs('#bgEl'),qs('#auroraEl')].forEach(function(el){ el.style.setProperty('--rk',rk); });
+      qs('#hero').style.setProperty('--rk',rk); qs('#hero').style.setProperty('--nk',nk);
+      qs('#rankPill').style.color=rk;
+      qs('#goal').style.setProperty('--nk',nk);
+      qs('#rankPath').style.setProperty('--rk',rk); qs('#rankPath').style.setProperty('--nk',nk);
 
-        // Body Receipt prompt — Sunday afternoon (12:00 - 18:00) + streak.days >= 21
-        var br = document.getElementById('bodyReceiptPrompt');
-        if (br) {
-          var now = new Date();
-          var isSunPM = now.getDay() === 0 && now.getHours() >= 12 && now.getHours() < 18;
-          var hasReceipts = (s.bodyReceipts && s.bodyReceipts.length) || 0;
-          var dismissedToday = sessionStorage.getItem('coreBodyReceiptDismissedToday') === now.toDateString();
-          br.classList.toggle('on', isSunPM && days >= 21 && !dismissedToday);
-        }
+      // top chips
+      animateCount(qs('#cStreak'),(s.streak&&s.streak.days)||0); animateCount(qs('#cCoins'),s.coins||0); animateCount(qs('#cShards'),s.shards||0);
 
-        // Lifetime offer — account age >= 30 + not purchased + not offered too recently
-        var lt = document.getElementById('lifetimeOffer');
-        if (lt) {
-          var installedAt = parseInt(localStorage.getItem('coreInstalledAt') || '0', 10);
-          if (!installedAt && trial.trialStartedAt) {
-            // Approximate install from trial start
-            installedAt = trial.trialStartedAt;
-            localStorage.setItem('coreInstalledAt', String(installedAt));
-          }
-          var accountAgeDays = installedAt ? (Date.now() - installedAt) / (24*60*60*1000) : 0;
-          var purchased = localStorage.getItem('coreLifetimePurchased') === '1';
-          var offeredCount = JSON.parse(localStorage.getItem('coreLifetimeOfferedAt') || '[]').length;
-          var dismissedToday = sessionStorage.getItem('coreLifetimeDismissedToday') === new Date().toDateString();
-          var shouldOffer = !purchased && !dismissedToday && (
-            (accountAgeDays >= 30 && accountAgeDays < 31 && offeredCount === 0) ||
-            (accountAgeDays >= 90 && accountAgeDays < 91 && offeredCount === 1)
-          );
-          lt.classList.toggle('on', shouldOffer);
-        }
+      // hero head
+      qs('#heroLvl').textContent=level; qs('#rankPillT').textContent=ri.cur;
+      qs('#rankPillGem').innerHTML=(S.RANK_ICONS&&S.RANK_ICONS[ri.r.name])||'';
 
-        // Pact strip — visible if any active pacts in state
-        var pact = document.getElementById('pactStrip');
-        if (pact) {
-          var pacts = (s.pacts || []).filter(function(p){ return p.status === 'active'; });
-          pact.classList.toggle('on', pacts.length > 0);
-        }
-      } catch(e) {}
-    }
+      // power + today's growth
+      animateCount(qs('#heroPower'),power);
+      var gained=xpToday(s); var pgEl=qs('#powerGain');
+      qs('#powerGainV').textContent='+'+gained;
+      if(lastPower!==null && power>lastPower){ pgEl.classList.remove('pulse'); void pgEl.offsetWidth; pgEl.classList.add('pulse'); }
+      pgEl.style.opacity = gained>0 ? '1' : '0.5';
+      lastPower=power;
 
-    function renderDashboardState() {
-      try {
-        var s = coreState.read();
-        // 5-stat strip rings + values
-        updateStatRings(s);
-        // legacy [data-bar] width support — for anything still wired to width
-        ['lungs','brain','wallet','willpower','body'].forEach(function(k) {
-          var bar = document.querySelector('[data-bar="' + k + '"]');
-          if (bar && bar.tagName !== 'DIV') bar.style.width = (s.stats[k]||0) + '%';
-        });
-        // today's deltas → trend chips
-        var d = computeTodayDeltas(s);
-        ['lungs','brain','wallet','willpower','body'].forEach(function(k) {
-          var chip = document.querySelector('[data-trend="' + k + '"]');
-          if (chip) renderTrendChip(chip, d[k]);
-        });
-        coreState.bind();
+      // life scores grid
+      renderLifeScores();
 
-        // Freeze pill dim when exhausted
-        try {
-          var fp = document.getElementById('freezePill');
-          if (fp) fp.classList.toggle('exhausted', (s.streak.freezes.availableThisWeek || 0) <= 0);
-        } catch(e){}
-
-        // Double-XP day pill
-        try {
-          var dxp = document.getElementById('doubleXpPill');
-          if (dxp) {
-            var until = s.doubleXpUntil || 0;
-            if (until > Date.now()) {
-              var hoursLeft = Math.max(0, Math.ceil((until - Date.now()) / 3600000));
-              dxp.style.display = 'inline-flex';
-              var left = document.getElementById('doubleXpLeft');
-              if (left) left.textContent = '· ' + hoursLeft + 'h';
-            } else {
-              dxp.style.display = 'none';
-            }
-          }
-        } catch(e){}
-
-        // Rank chip
-        try {
-          var rc = document.getElementById('rankChip');
-          if (rc && s.rank && s.rank.label) {
-            rc.style.display = 'inline-flex';
-          }
-        } catch(e){}
-
-        // Trial day pill
-        try {
-          var pill = document.getElementById('trialPill');
-          var td = (coreState.trialDay && coreState.trialDay()) || 0;
-          var subActive = localStorage.getItem('coreSubscriptionActive') === '1';
-          if (pill) {
-            if (td > 7 && !subActive) {
-              pill.style.display = 'inline-flex';
-              pill.style.background = 'rgba(255,79,107,0.16)';
-              pill.style.borderColor = 'rgba(255,79,107,0.50)';
-              pill.style.color = 'var(--core-red-500)';
-              pill.innerHTML = 'TRIAL ENDED · TAP TO RESUME';
-              pill.onclick = function(){ window.location.href = '78-trial-expired.html'; };
-            } else if (td > 0 && td <= 7 && !subActive) {
-              pill.style.display = 'inline-flex';
-              var daysLeft = Math.max(1, 7 - Math.floor(td));
-              if (daysLeft === 1) {
-                var hoursLeft = Math.max(1, Math.floor((7 - td) * 24));
-                pill.innerHTML = 'CHARGES IN ' + hoursLeft + 'H · $7.99';
-              } else {
-                pill.innerHTML = daysLeft + ' DAYS LEFT';
-              }
-              pill.onclick = function(){ window.location.href = '76-pricing.html'; };
-              if (td >= 5) {
-                try {
-                  if (!sessionStorage.getItem('coreMidTrialNudged') && window.coreToast) {
-                    coreToast('Trial ends in ' + Math.max(1, 7 - Math.floor(td)) + ' days · tap pill to upgrade', { kind: 'warn', ttl: 4000 });
-                    sessionStorage.setItem('coreMidTrialNudged', '1');
-                  }
-                } catch(e){}
-              }
-            } else {
-              pill.style.display = 'none';
-            }
-          }
-        } catch(e){}
-
-        // Today's slip count pill
-        try {
-          var slipsToday = (s.slips || []).filter(function(sl){ return sl.ts >= Date.now() - 24*60*60*1000; }).length;
-          var sp = document.getElementById('slipTodayPill');
-          if (sp) {
-            if (slipsToday > 0) {
-              sp.style.display = 'inline-flex';
-              document.getElementById('slipTodayN').textContent = slipsToday;
-            } else {
-              sp.style.display = 'none';
-            }
-          }
-        } catch(e){}
-
-        // Threshold-cross insight cards
-        renderInsightCards(s);
-        // Chart line — reshape from real history
-        renderChart(s);
-        // Alert slots — Witness, Promise Letter, Body Receipt, Lifetime, Pact
-        mountAlertSlots(s);
-
-        // TODAY pill — morning-checkin pre-11am or bedtime post-8:30pm if not yet logged
-        try {
-          var todayPillEl = document.getElementById('todayPill');
-          var todayLabel = document.getElementById('todayLabel');
-          if (todayPillEl && todayLabel) {
-            var now = new Date();
-            var key = now.toDateString();
-            var morningWant = (function(){ try { var t = JSON.parse(localStorage.getItem('coreOnboardTrial')||'{}'); return t.checkin === 'morning' || t.checkin === 'both'; } catch(e){ return false; } })();
-            var did = function(k){ try { return (JSON.parse(localStorage.getItem(k)||'[]')).some(function(e){ return e && new Date(e.ts).toDateString() === key; }); } catch(e){ return false; } };
-            var beforeNoon = now.getHours() < 11;
-            var afterEvening = now.getHours() > 20 || (now.getHours() === 20 && now.getMinutes() >= 30);
-            if (beforeNoon && morningWant && !did('coreMorningLog')) {
-              window.__todayTarget = '22-morning-checkin.html'; todayLabel.textContent = 'MORNING ›'; todayPillEl.style.display = 'inline-flex';
-            } else if (afterEvening && !did('coreBedtimeLog')) {
-              window.__todayTarget = '23-bedtime.html'; todayLabel.textContent = 'BEDTIME ›'; todayPillEl.style.display = 'inline-flex';
-            } else {
-              todayPillEl.style.display = 'none';
-            }
-          }
-        } catch(e){}
-
-        // Streak strip text — fresh / active states
-        var streakSub = document.getElementById('streakSubText');
-        var streakSuffix = document.getElementById('streakSuffix');
-        var fresh = (s.streak.days || 0) === 0 && !(s.streak.previousDays || 0);
-        if (fresh) {
-          if (streakSuffix) streakSuffix.textContent = 'Start today';
-          if (streakSub) streakSub.textContent = 'Tap to begin your first day';
-        } else {
-          if (streakSuffix) streakSuffix.textContent = (s.streak.days === 1 ? 'day clean' : 'days clean');
-          var TIERS_ASC = [3, 7, 14, 30, 60, 100, 365];
-          var nextTier = TIERS_ASC.find(function(t){ return t > s.streak.days; });
-          if (streakSub && nextTier) streakSub.textContent = (nextTier - s.streak.days) + ' more to day ' + nextTier;
-          else if (streakSub) streakSub.textContent = 'Keep it alive';
-        }
-
-        // Life Score chip in hero zone — update small delta indicator
-        var lifeChipDelta = document.getElementById('lifeChipDelta');
-        var lf = (typeof coreState.lifeScore === 'function') ? coreState.lifeScore(s) : 0;
-        if (lifeChipDelta) {
-          if (lf <= 0) {
-            lifeChipDelta.className = 'life-chip-delta';
-            lifeChipDelta.textContent = 'tap a stat';
-          } else {
-            var last = s.lastWeekLifeScore || 0;
-            var delta = lf - last;
-            if (delta > 0) {
-              lifeChipDelta.className = 'life-chip-delta up';
-              lifeChipDelta.textContent = '▲ ' + delta;
-            } else if (delta < 0) {
-              lifeChipDelta.className = 'life-chip-delta down';
-              lifeChipDelta.textContent = '▼ ' + Math.abs(delta);
-            } else {
-              lifeChipDelta.className = 'life-chip-delta';
-              lifeChipDelta.textContent = '— flat';
-            }
-          }
-        }
-
-        // Freeze pill click — confirm + use
-        var fp = document.getElementById('freezePill');
-        if (fp) fp.onclick = function(e) {
-          e.stopPropagation();
-          var fresh = coreState.read();
-          if (fresh.streak.freezes.availableThisWeek > 0) {
-            if (confirm('Use your weekly streak freeze? Today won\'t count against your streak.')) {
-              coreState.useFreeze();
-              if (window.coreTrack) coreTrack('streak_freeze_used', {});
-              renderDashboardState();
-            }
-          } else {
-            if (window.coreToast) coreToast('Out of freezes — buy +1 in the Shop', { kind: 'warn', ttl: 2400 });
-            if (window.coreTrack) coreTrack('freeze_out_of_stock', {});
-            setTimeout(function(){ window.location.href = '58-shop.html#freeze-extra'; }, 280);
-          }
-        };
-      } catch(e){ console.error(e); }
-    }
-    renderDashboardState();
-    window.addEventListener('coreStateChange', renderDashboardState);
-
-    // ── Settings dropdown ─────────────────────────────────────
-    (function() {
-      const menu = document.getElementById('settingsMenu');
-      const back = document.getElementById('settingsMenuBack');
-      const cog  = document.getElementById('settingsCog');
-      if (!menu || !back || !cog) return;
-      function open() {
-        menu.classList.add('on'); back.classList.add('on');
-        menu.setAttribute('aria-hidden', 'false');
-        cog.setAttribute('aria-expanded', 'true');
-        try {
-          const t = JSON.parse(localStorage.getItem('coreOnboardTrial') || '{}');
-          const s = (window.coreState && coreState.read()) || {};
-          const rank = (window.coreState && coreState.rankFor) ? coreState.rankFor(s.xp || 0) : null;
-          const nameEl = document.getElementById('smUserName');
-          const metaEl = document.getElementById('smUserMeta');
-          if (nameEl && t.name) nameEl.textContent = t.name;
-          if (metaEl && rank) metaEl.textContent = rank.name + ' · ' + (s.xp || 0).toLocaleString() + ' XP';
-        } catch (e) {}
+      // rank progress path (current ➜ next)
+      var rp=qs('#rankPath');
+      if(ri.nextRank){
+        rp.innerHTML=
+          '<div class="node cur"><div class="gem">'+gemSVG(ri.r.name)+'</div><div class="nlabel">'+ri.r.name+'</div></div>'+
+          '<div class="track"><div class="togo" id="rpToGo">'+(ri.nextRank.min-xp)+' XP</div><div class="pfillbar" id="rpFill"></div></div>'+
+          '<div class="node nxt"><div class="gem">'+gemSVG(ri.nextRank.name,'gem-float')+'</div><div class="nlabel">'+ri.nextRank.name+'</div></div>';
+        requestAnimationFrame(function(){ var f=qs('#rpFill'); if(f) f.style.width=ri.bandPct+'%'; });
+      } else {
+        rp.innerHTML='<div class="node cur"><div class="gem">'+gemSVG(ri.r.name,'gem-float')+'</div><div class="nlabel">'+ri.r.name+'</div></div>'+
+          '<div class="track"><div class="togo">APEX REACHED</div><div class="pfillbar" style="width:100%"></div></div>'+
+          '<div class="node nxt"><div class="gem">'+gemSVG('CORE')+'</div><div class="nlabel">MAX</div></div>';
       }
-      function close() {
-        menu.classList.remove('on'); back.classList.remove('on');
-        menu.setAttribute('aria-hidden', 'true');
-        cog.setAttribute('aria-expanded', 'false');
-      }
-      window.toggleSettingsMenu = function(e) {
-        if (e) e.stopPropagation();
-        if (menu.classList.contains('on')) close(); else open();
-      };
-      back.addEventListener('click', close);
-      menu.querySelectorAll('.sm-row').forEach(r => r.addEventListener('click', close));
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && menu.classList.contains('on')) close();
-      });
-      window.signOut = function() {
-        try {
-          localStorage.removeItem('coreOnboardComplete');
-          localStorage.removeItem('coreOnboardTrial');
-        } catch (e) {}
-        try { if (window.coreTrack) coreTrack('sign_out', {}); } catch (e) {}
-        window.location.href = '04-sign-in.html';
-      };
-    })();
 
-    // ── Daily check-in — +50 XP, confetti, week strip, heatmap ─
-    (function() {
-      const TODAY_KEY  = 'coreCheckedInOn';
-      const LEDGER_KEY = 'coreCheckinLedger';
-      const REWARD_XP  = 50;
-      const OVERLAY_MS = 3500;
+      // xp bar + count + particle burst on gain
+      qs('#xpNow').textContent=into+' / '+XP_PER_LEVEL+' XP'; qs('#xpToGo').textContent=(XP_PER_LEVEL-into)+' XP to level up';
+      requestAnimationFrame(function(){ qs('#xpfill').style.width=Math.round((into/XP_PER_LEVEL)*100)+'%'; });
+      if(lastXp!==null && xp>lastXp){
+        var wrap=qs('.xpwrap'); var bar=qs('.xpbar'); var pct=Math.round((into/XP_PER_LEVEL)*100);
+        var bx=bar.offsetLeft + bar.offsetWidth*(pct/100), by=bar.offsetTop+6;
+        burst(wrap, bx, by, rk, 12);
+        flyText(wrap, bar.offsetLeft+bar.offsetWidth/2, bar.offsetTop, '+'+(xp-lastXp)+' XP', '#fff');
+      }
+      lastXp=xp;
 
-      function todayStr() {
-        const d = new Date();
-        return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-      }
-      function isCheckedInToday() {
-        try { return localStorage.getItem(TODAY_KEY) === todayStr(); } catch (e) { return false; }
-      }
-      function readLedger() {
-        try { return JSON.parse(localStorage.getItem(LEDGER_KEY) || '[]'); } catch (e) { return []; }
-      }
-      function pushLedger(date) {
-        const l = readLedger();
-        if (l.indexOf(date) === -1) l.push(date);
-        if (l.length > 90) l.splice(0, l.length - 90);
-        try { localStorage.setItem(LEDGER_KEY, JSON.stringify(l)); } catch (e) {}
-      }
-      function thisWeekDates() {
-        const out = [];
-        const today = new Date();
-        const dow = (today.getDay() + 6) % 7;
-        const monday = new Date(today);
-        monday.setDate(today.getDate() - dow);
-        for (let i = 0; i < 7; i++) {
-          const d = new Date(monday);
-          d.setDate(monday.getDate() + i);
-          out.push(d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'));
-        }
-        return out;
-      }
-      function paintWeekStrip() {
-        const dots = document.querySelectorAll('#weekDots .week-dot');
-        if (!dots.length) return;
-        const ledger = readLedger();
-        const today  = todayStr();
-        const dates  = thisWeekDates();
-        let count = 0;
-        dates.forEach((d, i) => {
-          dots[i].classList.toggle('done', ledger.indexOf(d) !== -1);
-          dots[i].classList.toggle('today', d === today);
-          if (ledger.indexOf(d) !== -1) count++;
-        });
-        const wc = document.getElementById('weekCount');
-        if (wc) wc.innerHTML = '<strong>' + count + '/7</strong> days this week';
-      }
-      function paintState() {
-        const btn   = document.getElementById('checkinBtn');
-        const title = document.getElementById('checkinTitle');
-        const sub   = document.getElementById('checkinSub');
-        if (!btn) return;
-        if (isCheckedInToday()) {
-          btn.classList.add('checked');
-          btn.classList.remove('risk-pulse');
-          btn.disabled = true;
-          btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg> Checked in today';
-          if (title) title.textContent = "You're locked in for today.";
-          if (sub)   sub.textContent   = 'Come back tomorrow for another +50 XP.';
-        } else {
-          const now = new Date();
-          const isWedAfternoon = now.getDay() === 3 && now.getHours() >= 14 && now.getHours() < 17;
-          btn.classList.toggle('risk-pulse', isWedAfternoon);
-        }
-      }
-      function consecutiveStreak() {
-        const ledger = readLedger();
-        if (!ledger.length) return 0;
-        const set = new Set(ledger);
-        let count = 0;
-        const d = new Date();
-        if (!set.has(todayStr())) d.setDate(d.getDate() - 1);
-        while (true) {
-          const k = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-          if (set.has(k)) { count++; d.setDate(d.getDate() - 1); }
-          else break;
-        }
-        return count;
-      }
-      function paintStreakBadge() {
-        const badge = document.getElementById('checkinStreakBadge');
-        const txt = document.getElementById('checkinStreakText');
-        if (!badge || !txt) return;
-        const c = consecutiveStreak();
-        if (c >= 3) {
-          badge.style.display = 'inline-flex';
-          txt.textContent = c + ' days in a row';
-        } else {
-          badge.style.display = 'none';
-        }
-      }
-      function maybeRolloverNudge() {
-        try {
-          const now = new Date();
-          const past9 = now.getHours() >= 21;
-          const shownKey = 'coreRolloverNudge.' + todayStr();
-          if (past9 && !isCheckedInToday() && !localStorage.getItem(shownKey)) {
-            localStorage.setItem(shownKey, '1');
-            const flash = document.getElementById('hapticFlash');
-            if (flash) {
-              flash.classList.remove('fire', 'warn');
-              void flash.offsetWidth;
-              flash.classList.add('warn', 'fire');
-            }
-          }
-        } catch (e) {}
-      }
-      function paintHeatmap() {
-        const wrap = document.getElementById('heatmap');
-        const pct  = document.getElementById('hmPct');
-        if (!wrap) return;
-        const today = new Date();
-        const todayK = todayStr();
-        const set = new Set(readLedger());
-        wrap.innerHTML = '';
-        let done = 0;
-        for (let i = 29; i >= 0; i--) {
-          const d = new Date(today); d.setDate(today.getDate() - i);
-          const k = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-          const cell = document.createElement('div');
-          cell.className = 'hcell';
-          if (set.has(k)) { cell.classList.add('done'); done++; }
-          if (k === todayK) cell.classList.add('today');
-          cell.title = k;
-          wrap.appendChild(cell);
-        }
-        if (pct) pct.textContent = Math.round((done / 30) * 100);
-      }
-      function paintFrozenIndicator() {
-        const el = document.getElementById('checkinFrozen');
-        if (!el) return;
-        try {
-          const s = (window.coreState && coreState.read()) || {};
-          const freezes = s.streak && s.streak.freezes;
-          if (!freezes || !freezes.lastUsedAt) { el.style.display = 'none'; return; }
-          const ago = Date.now() - freezes.lastUsedAt;
-          if (ago > 0 && ago < 36 * 3600 * 1000) {
-            el.style.display = 'inline-flex';
-          } else {
-            el.style.display = 'none';
-          }
-        } catch (e) { el.style.display = 'none'; }
-      }
-      paintState();
-      paintWeekStrip();
-      paintStreakBadge();
-      paintHeatmap();
-      paintFrozenIndicator();
-      maybeRolloverNudge();
-      window.addEventListener('coreStateChange', () => {
-        paintWeekStrip(); paintStreakBadge(); paintHeatmap(); paintFrozenIndicator();
+      var qd=(s.quests&&s.quests.daily)||[], doneToday=qd.filter(function(q){return q.done;}).length;
+      var goalCount=qd.length||3;
+      var lifeQuests=(s.xpLedger||[]).filter(function(e){return (e.reason||'').indexOf('quest:')===0;}).length;
+      animateCount(qs('#stStreak'),(s.streak&&s.streak.days)||0); animateCount(qs('#stQuests'),lifeQuests);
+      qs('#stChest').textContent=(doneToday>=goalCount&&goalCount>0)?1:0;
+
+      // ── CURRENT GOAL (mission control) ──
+      var g=qs('#goal');
+      if(ri.nextRank){
+        var remaining=ri.nextRank.min-xp, days=Math.max(1,Math.ceil(remaining/avgXpDay(s))), pct=ri.bandPct;
+        var C=2*Math.PI*26, off=C*(1-pct/100);
+        g.innerHTML=
+          '<div class="ghead">'+
+            '<div class="gring"><svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="26" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="6"/>'+
+              '<circle cx="30" cy="30" r="26" fill="none" stroke="'+nk+'" stroke-width="6" stroke-linecap="round" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="'+C.toFixed(1)+'" id="goalRing" style="filter:drop-shadow(0 0 4px '+nk+')"/></svg>'+
+              '<div class="gpcttxt">'+pct+'%</div></div>'+
+            '<div class="gmid">'+
+              '<div class="gl">Reach next rank</div>'+
+              '<div class="gt"><span class="gtgem">'+gemSVG(ri.nextRank.name)+'</span>'+ri.nextRank.name+'</div>'+
+              '<div class="gmeta"><span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8Z"/></svg><b>'+remaining+'</b> XP left</span>'+
+                '<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>~<b>'+days+'</b> days</span></div>'+
+            '</div>'+
+          '</div>'+
+          '<div class="unl">Unlocks at '+ri.nextRank.name+'</div><ul>'+(ri.nextRank.unlocks||[]).map(function(u){return '<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4 10-11"/></svg>'+u+'</li>';}).join('')+'</ul>';
+        requestAnimationFrame(function(){ var r=document.getElementById('goalRing'); if(r) r.style.strokeDashoffset=off.toFixed(1); });
+      } else { g.innerHTML='<div class="ghead"><div class="gmid"><div class="gl">Final rank reached</div><div class="gt">You are CORE</div></div></div><div class="unl">Everything unlocked</div>'; }
+
+      // ── QUEST STREAK BONUS ──
+      var qb=qs('#qbonus'); var allDone=doneToday>=goalCount && goalCount>0;
+      qb.className='qbonus'+(allDone?' done':' live');
+      qb.innerHTML='<div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">'+(allDone?'<path d="M5 12l4 4 10-11"/>':'<path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.2L12 16.6 5.7 21l2.3-7.2-6-4.4h7.6z"/>')+'</svg></div>'+
+        '<div class="qbb"><div class="qbt">'+(allDone?'Daily clear bonus earned':'Complete all '+goalCount+' today')+'</div>'+
+        '<div class="qbs"><i>+100 XP</i><i>+25 Coins</i><i>+1 Chest Roll</i></div></div>'+
+        '<div class="qbc">'+doneToday+'/'+goalCount+'</div>';
+
+      // ── QUESTS ──
+      qs('#qMeta').textContent=doneToday+'/'+qd.length;
+      var qhost=qs('#quests'); qhost.innerHTML='';
+      qd.forEach(function(q){
+        var el=document.createElement('div'); var diff=q.diff||'medium'; el.className='quest '+diff+(q.done?' done':''); var ic=QICONS[q.id]||QICONS.growth;
+        var dlabel=diff.charAt(0).toUpperCase()+diff.slice(1);
+        el.innerHTML='<div class="sweep"></div><div class="qic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">'+ic+'</svg></div>'+
+          '<div class="qb"><div class="qt">'+(q.kind||'QUEST')+'</div><div class="qd">'+q.title+'</div>'+
+          '<div class="qmeta"><span class="pill '+diff+'">'+dlabel+'</span><span class="time">'+CLOCK+(q.time||'10 min')+'</span><span class="xp">+'+(q.xp||10)+' XP</span></div></div>'+
+          '<button class="cta" type="button" '+(q.done?'tabindex="-1" aria-label="Completed"':'aria-label="Complete '+q.title+'"')+'>'+
+          (q.done?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l4 4 10-11"/></svg>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12h14M12 5v14"/></svg>')+'</button>';
+        if(!q.done){ el.querySelector('.cta').addEventListener('click', function(){
+          el.classList.add('flash');
+          var award=Math.round((q.xp||10)*S.xpMultiplier());
+          // localized celebration: coin particles + flying XP from the card
+          var r=el.getBoundingClientRect();
+          burst(el, el.offsetWidth-30, el.offsetHeight/2, '#34D399', 10);
+          burst(el, el.offsetWidth-30, el.offsetHeight/2, '#FFCB3D', 6);
+          flyText(el, el.offsetWidth/2, el.offsetHeight/2-10, '+'+award+' XP', '#34D399');
+          S.completeQuest(q.id);
+          toast('+'+award+' XP · '+(q.kind||'Quest'));
+        }); }
+        qhost.appendChild(el);
       });
 
-      window.doCheckin = function() {
-        if (isCheckedInToday()) return;
-        const today = todayStr();
-        try { localStorage.setItem(TODAY_KEY, today); } catch (e) {}
-        pushLedger(today);
-        try {
-          if (window.coreState && typeof coreState.addXp === 'function') {
-            coreState.addXp(REWARD_XP, 'daily_checkin');
-          } else if (window.coreState) {
-            const s = coreState.read();
-            s.xp = (s.xp || 0) + REWARD_XP;
-            coreState.write(s);
-          }
-        } catch (e) {}
-        try { if (window.coreTrack) coreTrack('daily_checkin', { xp: REWARD_XP }); } catch (e) {}
-        const flash = document.getElementById('hapticFlash');
-        if (flash) {
-          flash.classList.remove('fire');
-          void flash.offsetWidth;
-          flash.classList.add('fire');
-        }
-        const overlay = document.getElementById('rewardOverlay');
-        if (overlay) {
-          overlay.querySelectorAll('i').forEach(n => n.remove());
-          const COLORS = ['#3DDC97', '#2F8FFF', '#FFC857', '#FF6BAA', '#9F8FFF'];
-          for (let i = 0; i < 24; i++) {
-            const p = document.createElement('i');
-            const dx = (Math.random() - 0.5) * 280;
-            const dy = 80 + Math.random() * 80;
-            const r  = (Math.random() - 0.5) * 720;
-            p.style.background = COLORS[i % COLORS.length];
-            p.style.left = (50 + (Math.random() - 0.5) * 30) + '%';
-            p.style.top  = '50%';
-            p.style.setProperty('--dx', dx + 'px');
-            p.style.setProperty('--dy', dy + 'px');
-            p.style.setProperty('--r',  r  + 'deg');
-            p.style.animationDelay = (Math.random() * 0.18) + 's';
-            p.style.animationDuration = (1.4 + Math.random() * 0.6) + 's';
-            overlay.appendChild(p);
-          }
-          overlay.classList.add('on');
-          overlay.setAttribute('aria-hidden', 'false');
-          setTimeout(() => {
-            overlay.classList.remove('on');
-            overlay.setAttribute('aria-hidden', 'true');
-            paintState();
-            paintWeekStrip();
-            paintStreakBadge();
-            try { window.dispatchEvent(new Event('coreStateChange')); } catch (e) {}
-            maybePerfectWeek();
-          }, OVERLAY_MS);
-        } else {
-          paintState();
-          paintWeekStrip();
-          paintStreakBadge();
-          maybePerfectWeek();
-        }
-      };
+      // ── DAILY CHEST ──
+      var dc=qs('#dchest'), ready=allDone;
+      var dots=qs('#chestDots'); dots.innerHTML=''; for(var i=0;i<goalCount;i++){ var dd=document.createElement('i'); if(i<doneToday) dd.className='on'; dots.appendChild(dd); }
+      // possible reward chips (rarity coloured)
+      var rh=qs('#chestRewards'); if(!rh.dataset.built){ rh.innerHTML=CHEST_POOL.slice(0,5).map(function(r){ var c=RARITY[r.r].c; return '<span class="rchip" style="--rc:'+c+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">'+r.ic+'</svg>'+r.n+'</span>'; }).join(''); rh.dataset.built='1'; }
+      var claimedToday=(localStorage.getItem('coreDashChestDay')||'')===String(startOfToday());
+      var openBtn=qs('#chestOpen');
+      if(ready){ dc.classList.add('ready');
+        if(claimedToday){ qs('#chestT').textContent='Chest claimed'; qs('#chestS').textContent='Come back tomorrow for more'; openBtn.textContent='Claimed today'; openBtn.classList.add('claimed'); }
+        else { qs('#chestT').textContent='Chest ready'; qs('#chestS').textContent='Your daily reward is unlocked'; openBtn.textContent='Open chest'; openBtn.classList.remove('claimed'); }
+      } else { dc.classList.remove('ready'); qs('#chestT').textContent='Daily chest'; qs('#chestS').textContent=doneToday+' / '+goalCount+' quests complete'; }
 
-      function maybePerfectWeek() {
-        const dates = thisWeekDates();
-        const ledger = new Set(readLedger());
-        const filledCount = dates.filter(d => ledger.has(d)).length;
-        if (filledCount < 7) return;
-        const today = new Date();
-        const dow = (today.getDay() + 6) % 7;
-        const thursday = new Date(today); thursday.setDate(today.getDate() - dow + 3);
-        const year = thursday.getFullYear();
-        const yearStart = new Date(year, 0, 1);
-        const weekNum = Math.ceil(((thursday - yearStart) / 86400000 + 1) / 7);
-        const wkKey = 'corePerfectWeek.' + year + '-W' + weekNum;
-        if (localStorage.getItem(wkKey)) return;
-        try { localStorage.setItem(wkKey, '1'); } catch (e) {}
-        try {
-          if (window.coreState && typeof coreState.addXp === 'function') {
-            coreState.addXp(100, 'perfect_week_bonus');
-          }
-        } catch (e) {}
-        try { if (window.coreTrack) coreTrack('perfect_week_bonus', { xp: 100 }); } catch (e) {}
-        const pw = document.getElementById('perfectWeek');
-        if (!pw) return;
-        pw.classList.add('on');
-        pw.setAttribute('aria-hidden', 'false');
-        pw.querySelectorAll('i').forEach(n => n.remove());
-        for (let i = 0; i < 30; i++) {
-          const p = document.createElement('i');
-          const dx = (Math.random() - 0.5) * 320;
-          const dy = 100 + Math.random() * 100;
-          const r  = (Math.random() - 0.5) * 720;
-          p.style.position = 'absolute'; p.style.width = '7px'; p.style.height = '11px';
-          p.style.background = i % 2 === 0 ? '#FFC857' : '#FFE0A8';
-          p.style.left = (50 + (Math.random() - 0.5) * 30) + '%';
-          p.style.top  = '50%';
-          p.style.opacity = '0';
-          p.style.animation = 'confetti 1.6s ease-out forwards';
-          p.style.animationDelay = (Math.random() * 0.25) + 's';
-          p.style.setProperty('--dx', dx + 'px');
-          p.style.setProperty('--dy', dy + 'px');
-          p.style.setProperty('--r',  r  + 'deg');
-          pw.appendChild(p);
-        }
-        setTimeout(() => {
-          pw.classList.remove('on');
-          pw.setAttribute('aria-hidden', 'true');
-          try { window.dispatchEvent(new Event('coreStateChange')); } catch (e) {}
-        }, 3800);
-      }
+      // ── STREAK + milestone path ──
+      var days=(s.streak&&s.streak.days)||0, best=Math.max(s.bestStreak||0,days);
+      var MILES=[{d:3,r:'Bonus Chest'},{d:7,r:'Rare Chest'},{d:14,r:'Epic Chest'},{d:30,r:'Gold Chest'},{d:90,r:'Legendary'}];
+      var nextM=MILES.filter(function(m){return m.d>days;})[0]||MILES[MILES.length-1];
+      var maxD=MILES[MILES.length-1].d, fillPct=Math.min(100,Math.round(days/maxD*100));
+      var chestMini='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 9l1.5-3h13L20 9M4 9v9h16V9M4 9h16M12 9v3"/></svg>';
+      qs('#streak').innerHTML=
+        '<div class="srow"><div class="si"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3-1 4-1 6 0 1 1 2 1 2s2-1 2-3c2 2 3 4 3 7a5 5 0 0 1-10 0c0-3 2-5 3-7 1 2 2 2 2 2s0-3 0-7Z"/></svg></div>'+
+        '<div class="sb"><div class="sd">'+days+' <small>Day streak</small></div><div class="sn">Next: <b>'+nextM.d+'-day '+nextM.r+'</b></div></div>'+
+        '<div class="best"><div class="v">'+best+'</div><div class="k">Best</div></div></div>'+
+        '<div class="spath"><div class="line"><div class="lf" id="streakFill"></div></div><div class="nodes">'+
+          MILES.map(function(m){ var st=days>=m.d?'reached':(m===nextM?'next':''); return '<div class="mn '+st+'"><div class="mdot">'+chestMini+'</div><div class="md">'+m.d+'d</div><div class="mr">'+m.r+'</div></div>'; }).join('')+
+        '</div></div>';
+      requestAnimationFrame(function(){ var sf=qs('#streakFill'); if(sf) sf.style.width=fillPct+'%'; });
+
+      // ── UPGRADES (skill tree) ──
+      var owned=0;
+      var uhost=qs('#upg'); uhost.innerHTML='';
+      UPGRADES.forEach(function(u){
+        var isOwned=S.hasUpgrade(u.id), bal=(u.cur==='shards')?(s.shards||0):(s.coins||0), afford=bal>=u.cost;
+        if(isOwned) owned++;
+        var rc=RARITY[u.r].c;
+        var el=document.createElement('div'); el.className='ucard'+(isOwned?' owned':'')+(u.r==='mythic'?' mythic':''); el.dataset.id=u.id; if(!isOwned) el.dataset.r=u.r; el.style.setProperty('--rc',rc);
+        var btn = isOwned ? '<button class="ubtn ownedb" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l4 4 10-11"/></svg>Owned</button>'
+          : afford ? '<button class="ubtn buy" data-id="'+u.id+'" data-cost="'+u.cost+'" data-cur="'+u.cur+'">Buy · '+u.cost+' <span class="'+(u.cur==='shards'?'sshard':'scoin')+'">'+(u.cur==='shards'?'◆':'●')+'</span></button>'
+          : '<button class="ubtn locked" disabled>'+u.cost+' '+(u.cur==='shards'?'shards':'coins')+'</button>';
+        el.innerHTML='<span class="rbadge">'+RARITY[u.r].l+'</span>'+
+          '<div class="ui"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">'+u.ic+'</svg></div>'+
+          '<div class="un">'+u.n+'</div><div class="ue">'+u.e+'</div>'+
+          '<div class="urow"><span class="ulv">Lv <b>'+(isOwned?1:0)+'</b> / 1</span><span class="upow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8Z"/></svg>+'+u.pow+'</span></div>'+
+          btn;
+        uhost.appendChild(el);
+      });
+      qs('#upgMeta').textContent=owned+'/'+UPGRADES.length+' nodes';
+      uhost.querySelectorAll('.ucard').forEach(function(card){
+        card.addEventListener('click', function(e){ if(e.target.closest('.ubtn')) return; openSheet(card.dataset.id); });
+      });
+      uhost.querySelectorAll('.ubtn.buy').forEach(function(b){ b.addEventListener('click', function(e){ e.stopPropagation(); doBuy(b.dataset.id, +b.dataset.cost, b.dataset.cur); }); });
+    }
+
+    function doBuy(id, cost, cur){
+      var r=S.buyUpgrade(id, cost, cur);
+      if(r.ok){ toast('Upgrade unlocked'); render();
+        var idx=UPGRADES.findIndex(function(x){return x.id===id;}); var nc=qs('#upg').children[idx]; if(nc) nc.classList.add('reveal');
+      } else if(r.reason==='insufficient'){ toast('Not enough '+cur); }
+    }
+
+    // ── upgrade detail sheet ──
+    function openSheet(id){
+      var u=UPGRADES.find(function(x){return x.id===id;}); if(!u) return;
+      var s=S.read(), isOwned=S.hasUpgrade(u.id), rc=RARITY[u.r].c;
+      var bal=(u.cur==='shards')?(s.shards||0):(s.coins||0), afford=bal>=u.cost;
+      var sheet=qs('#sheet'); sheet.style.setProperty('--rc',rc);
+      var buyBtn = isOwned ? '<button class="sbuy owned" disabled>Owned</button>'
+        : afford ? '<button class="sbuy" id="sheetBuy">Unlock · '+u.cost+' '+(u.cur==='shards'?'shards':'coins')+'</button>'
+        : '<button class="sbuy cant" disabled>Need '+u.cost+' '+(u.cur==='shards'?'shards':'coins')+'</button>';
+      sheet.innerHTML='<div class="grip"></div>'+
+        '<div class="shead"><div class="shi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">'+u.ic+'</svg></div>'+
+          '<div><div class="shn">'+u.n+'</div><div class="shr">'+RARITY[u.r].l+' Node</div></div></div>'+
+        '<div class="stiers">'+
+          '<div class="tier'+(isOwned?'':' now')+'"><span class="tl">Current</span><span class="tv">'+u.cur_e+'</span></div>'+
+          '<div class="tier'+(isOwned?' now':'')+'"><span class="tl">Next</span><span class="tv">'+u.next_e+'</span></div>'+
+          '<div class="tier"><span class="tl">Max</span><span class="tv">'+u.max_e+'</span></div>'+
+        '</div>'+
+        '<div class="spow"><span class="pl">CORE Power</span><span class="pv">+'+u.pow+'</span></div>'+
+        buyBtn;
+      qs('#sheetScrim').classList.add('show'); sheet.classList.add('show');
+      var bb=document.getElementById('sheetBuy'); if(bb){ bb.addEventListener('click', function(){ doBuy(u.id,u.cost,u.cur); closeSheet(); }); }
+    }
+    function closeSheet(){ qs('#sheet').classList.remove('show'); qs('#sheetScrim').classList.remove('show'); }
+    qs('#sheetScrim').addEventListener('click', closeSheet);
+
+    // Chest rolling + opening now lives in core-state.js (S.rollChest/grantChest),
+    // played on the dedicated full-screen opener (28-chest.html). The daily chest
+    // button just routes there.
+
+    // sound-cue hook — native/RN layer can wire window.coreSfx(name); core-sfx.js fills it in.
+    function SFX(name){ try{ if(typeof window.coreSfx==='function') window.coreSfx(name); }catch(e){} }
+
+    qs('#chestOpen').addEventListener('click', function(){
+      if(this.classList.contains('claimed')) return;
+      if((localStorage.getItem('coreDashChestDay')||'')===String(startOfToday())){ toast('Already claimed today'); return; }
+      // open on the dedicated full-screen opener; it grants rewards + sets coreDashChestDay
+      location.href='28-chest.html?source=daily&from=dashboard&rarity=common';
+    });
+
+    // ── COMING SOON — preview cards (rank-gated) ──
+    (function(){
+      var FUT=[
+        {t:'Leaderboards', rank:'Water',   d:'M4 20h4v-7H4v7ZM10 20h4V6h-4v14ZM16 20h4v-10h-4v10Z', desc:'Compete globally. Climb the Power rankings each season.', hint:'Top 100 → Exclusive border'},
+        {t:'Boss Raids',   rank:'Crystal', d:'M5 19l7-14 7 14M8 19l4-8 4 8', desc:'Fight weekly bosses with other players for huge XP.', hint:'Raid loot · Epic chests'},
+        {t:'Guilds',       rank:'Gold',    d:'M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3 20a6 6 0 0 1 12 0M17 11a3 3 0 1 0-2-5M21 20a6 6 0 0 0-6-6', desc:'Create teams. Earn shared rewards together.', hint:'Guild perks · Shared chests'},
+        {t:'Seasons',      rank:'Ember',   d:'M12 3v18M3 12h18M6 6l12 12M18 6L6 18', desc:'Limited seasonal tracks with exclusive cosmetics.', hint:'Season pass rewards'},
+        {t:'Trading',      rank:'Wind',    d:'M7 8h11l-3-3M17 16H6l3 3', desc:'Trade items and shards with other players.', hint:'Player market access'}
+      ];
+      var host=qs('#locked');
+      var s=S.read(), curIdx=S.rankFor(s.xp||0).idx;
+      var rankIdxByName={}; (S.RANKS||[]).forEach(function(r,i){ rankIdxByName[r.name]=i; });
+      host.innerHTML=FUT.map(function(f){
+        var rObj=(S.RANKS||[]).find(function(r){return r.name===f.rank;})||{color:'#4A8FFF'};
+        var unlockable=curIdx>=(rankIdxByName[f.rank]!==undefined?rankIdxByName[f.rank]:99);
+        var gem=(S.RANK_ICONS&&S.RANK_ICONS[f.rank])||'';
+        return '<div class="soon'+(unlockable?' unlockable':'')+'" style="--sk:'+rObj.color+'">'+
+          '<div class="prev"><span class="lockb">'+(unlockable?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12l4 4 10-11"/></svg>Unlocked':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Locked')+'</span>'+
+            '<svg class="big" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="'+f.d+'"/></svg></div>'+
+          '<div class="sbody"><div class="stt">'+f.t+'</div><div class="sds">'+f.desc+'</div>'+
+            '<div class="shint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 9l2-4h14l2 4M3 9v9h18V9M3 9h18M12 9v3"/></svg>'+f.hint+'</div>'+
+            '<span class="req"><svg class="rg" viewBox="0 0 100 100">'+gem+'</svg>'+(unlockable?'Ready at '+f.rank:'Unlock at '+f.rank)+'</span></div>'+
+        '</div>';
+      }).join('');
     })();
 
-    // ── Hero ring — fills from 0 → current% on each load + on state change ─
-    (function() {
-      const TIERS = [7, 14, 30, 60, 100, 365];
-      const C = 628;
-      let _renderedOnce = false;
-      function renderHero() {
-        try {
-          const s = (window.coreState && coreState.read()) || {};
-          const days = (s.streak && s.streak.days) || 0;
-          const nextTier = TIERS.find(t => t > days) || TIERS[TIERS.length - 1];
-          const prevTier = [0, ...TIERS].filter(t => t <= days).pop();
-          const pct = nextTier ? Math.max(0, Math.min(1, (days - prevTier) / (nextTier - prevTier))) : 1;
-          const fill = document.getElementById('heroRingFill');
-          if (fill) {
-            fill.setAttribute('stroke-dasharray', String(C));
-            if (!_renderedOnce) {
-              fill.setAttribute('stroke-dashoffset', String(C));
-              _renderedOnce = true;
-              requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                  fill.setAttribute('stroke-dashoffset', String(Math.round(C - C * pct)));
-                });
-              });
-            } else {
-              fill.setAttribute('stroke-dashoffset', String(Math.round(C - C * pct)));
-            }
-          }
-          const dayEl = document.getElementById('heroDayLabel');
-          if (dayEl) dayEl.textContent = days === 0 ? 'START TODAY' : 'DAY';
-          const toNext = Math.max(0, nextTier - days);
-          const tn = document.getElementById('heroToNext');
-          if (tn) tn.textContent = toNext === 0 ? 'Milestone hit' : (toNext + ' more to day ' + nextTier);
-        } catch (e) {}
-      }
-      renderHero();
-      window.addEventListener('coreStateChange', renderHero);
-    })();
-
-    // ── Auto-trigger milestone celebration once per tier (7/14/30/60/100/365) ──
-    (function() {
-      try {
-        const TIERS = [365, 100, 60, 30, 14, 7];
-        const s = coreState.read();
-        const d = s.streak.days || 0;
-        const hit = TIERS.find(t => d >= t);
-        if (!hit) return;
-        const key = 'coreMilestoneSeen.' + hit;
-        if (localStorage.getItem(key) === '1') return;
-        localStorage.setItem(key, '1');
-        try { coreState.earnCoins(50, 'milestone_' + hit); } catch(e){}
-        if (window.coreTrack) coreTrack('milestone_auto_triggered', { tier: hit, days: d });
-        setTimeout(() => { location.href = '51-streak-celebration.html?days=' + d; }, 400);
-      } catch(e){}
-    })();
+    window.addEventListener('coreStateChange', render);
+    render();
+    try{ var m=location.search.match(/scrollY=(\d+)/); if(m){ var sc=qs('.scroll'); if(sc) sc.scrollTop=+m[1]; } }catch(e){}
+  })();
   </script>
-
-<script src="_lib/core-header.js"></script>
-<script src="_lib/core-tabbar.js"></script>
 </body>
 </html>
