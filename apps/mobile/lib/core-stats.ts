@@ -12,7 +12,7 @@
  * the habit-decay model). The persisted 6th `social` slug (migrations 0004/0005)
  * is for cross-device sync, not local mechanics.
  */
-import type { Stats } from "@/stores/game-state-store";
+import type { Stats, StatKey } from "@/stores/game-state-store";
 
 export type CoreStat = {
   key: string;
@@ -22,23 +22,24 @@ export type CoreStat = {
   value: number;
   blurb: string; // what the stat means
   tip: string; // how to raise it
+  model: StatKey | null; // backing game-state stat (null = derived, e.g. Social)
 };
 
 const clamp = (v: number) => Math.max(0, Math.min(100, Math.round(v)));
 
 export function coreStats(stats: Stats, ctx: { friends: number; streakDays: number }): CoreStat[] {
   return [
-    { key: "strength", name: "Strength", emoji: "⚔️", color: "#FF6B6B", value: clamp(stats.body),
+    { key: "strength", name: "Strength", emoji: "⚔️", color: "#FF6B6B", value: clamp(stats.body), model: "body",
       blurb: "Train your body and push your physical limits.", tip: "Log workouts and physical quests to build Strength." },
-    { key: "focus", name: "Focus", emoji: "🧠", color: "#4A8FFF", value: clamp(stats.brain),
+    { key: "focus", name: "Focus", emoji: "🧠", color: "#4A8FFF", value: clamp(stats.brain), model: "brain",
       blurb: "Deep work, learning and sharp attention.", tip: "Deep work and learning quests sharpen your Focus." },
-    { key: "wealth", name: "Wealth", emoji: "💰", color: "#FFC56B", value: clamp(stats.wallet),
+    { key: "wealth", name: "Wealth", emoji: "💰", color: "#FFC56B", value: clamp(stats.wallet), model: "wallet",
       blurb: "Earn, save and build your resources.", tip: "Save, earn and clear money quests to grow Wealth." },
-    { key: "health", name: "Health", emoji: "❤️", color: "#34D399", value: clamp(stats.lungs),
+    { key: "health", name: "Health", emoji: "❤️", color: "#34D399", value: clamp(stats.lungs), model: "lungs",
       blurb: "Recovery, sleep, nutrition and breath.", tip: "Sleep, breathe and recover — health quests raise this." },
-    { key: "social", name: "Social", emoji: "👥", color: "#B388FF", value: clamp(ctx.friends * 4),
+    { key: "social", name: "Social", emoji: "👥", color: "#B388FF", value: clamp(ctx.friends * 4), model: null,
       blurb: "Connection, relationships and community.", tip: "Add friends and finish social quests to level up." },
-    { key: "purpose", name: "Purpose", emoji: "🎯", color: "#5EEAD4", value: clamp(stats.willpower + ctx.streakDays),
+    { key: "purpose", name: "Purpose", emoji: "🎯", color: "#5EEAD4", value: clamp(stats.willpower + ctx.streakDays), model: "willpower",
       blurb: "Discipline, meaning and direction.", tip: "Hold your streak and complete daily quests for Purpose." },
   ];
 }

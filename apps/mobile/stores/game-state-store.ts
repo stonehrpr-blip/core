@@ -68,6 +68,7 @@ const RANKS: Rank[] = [
 ];
 
 export type XpLedgerEntry = { ts: number; delta: number; reason: string };
+export type StatLedgerEntry = { ts: number; stat: StatKey; delta: number; reason: string };
 export type RankHistoryEntry = { rankName: string; ts: number; xp: number };
 
 const HABIT_PRIMARY: Record<string, StatKey> = {
@@ -99,6 +100,7 @@ type GameState = {
   slips: Slip[];
   lastSeenAt: string | null;
   xpLedger: XpLedgerEntry[];
+  statLedger: StatLedgerEntry[];
   rankHistory: RankHistoryEntry[];
 
   // selectors
@@ -118,7 +120,7 @@ type GameState = {
   resetAll: () => void;
 };
 
-const DEFAULTS: Pick<GameState, "stats" | "streak" | "xp" | "level" | "slips" | "lastSeenAt" | "xpLedger" | "rankHistory"> = {
+const DEFAULTS: Pick<GameState, "stats" | "streak" | "xp" | "level" | "slips" | "lastSeenAt" | "xpLedger" | "statLedger" | "rankHistory"> = {
   stats: { lungs: 64, brain: 78, wallet: 58, willpower: 81, body: 67 },
   streak: {
     days: 14,
@@ -133,6 +135,18 @@ const DEFAULTS: Pick<GameState, "stats" | "streak" | "xp" | "level" | "slips" | 
   slips: [],
   lastSeenAt: null,
   xpLedger: [],
+  // Demo slip history so the profile stat-detail sheet shows real recent activity.
+  // Slips lower stats (RN has no positive stat-gain action yet), so all deltas are
+  // negative — each stat sheet shows what hurt it + when.
+  statLedger: [
+    { ts: Date.now() - 2 * 3600000, stat: "brain", delta: -8, reason: "slip_doomscroll" },
+    { ts: Date.now() - 2 * 3600000, stat: "willpower", delta: -5, reason: "slip_doomscroll" },
+    { ts: Date.now() - 30 * 3600000, stat: "body", delta: -10, reason: "slip_junk_food" },
+    { ts: Date.now() - 30 * 3600000, stat: "willpower", delta: -6, reason: "slip_junk_food" },
+    { ts: Date.now() - 54 * 3600000, stat: "lungs", delta: -12, reason: "slip_vape" },
+    { ts: Date.now() - 54 * 3600000, stat: "willpower", delta: -7, reason: "slip_vape" },
+    { ts: Date.now() - 78 * 3600000, stat: "wallet", delta: -9, reason: "slip_spend" },
+  ],
   rankHistory: [],
 };
 
@@ -198,13 +212,24 @@ export const useGameStateStore = create<GameState>()(
           }
           const delta = -mag * 8;
           const newXp = Math.max(0, s.xp + delta);
-          const ledger: XpLedgerEntry[] = [{ ts: Date.now(), delta, reason: "slip_" + habit }, ...s.xpLedger].slice(0, 200);
+          const ts = Date.now();
+          const ledger: XpLedgerEntry[] = [{ ts, delta, reason: "slip_" + habit }, ...s.xpLedger].slice(0, 200);
+          // Record the actual per-stat hits so the profile stat-detail sheet has history.
+          const statEntries: StatLedgerEntry[] = [];
+          const pd = Math.round(next[primary] - s.stats[primary]);
+          if (pd !== 0) statEntries.push({ ts, stat: primary, delta: pd, reason: "slip_" + habit });
+          if (primary !== "willpower") {
+            const wd = Math.round(next.willpower - s.stats.willpower);
+            if (wd !== 0) statEntries.push({ ts, stat: "willpower", delta: wd, reason: "slip_" + habit });
+          }
+          const statLedger: StatLedgerEntry[] = [...statEntries, ...s.statLedger].slice(0, 200);
           return {
             stats: next,
             streak,
             xp: newXp,
-            slips: [...s.slips, { habit, ts: Date.now(), magnitude: mag }],
+            slips: [...s.slips, { habit, ts, magnitude: mag }],
             xpLedger: ledger,
+            statLedger,
           };
         });
       },

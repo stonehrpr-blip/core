@@ -10,6 +10,20 @@
 import { useEffect, useRef, useState } from "react";
 import { Animated, Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import type { CoreStat } from "@/lib/core-stats";
+import type { StatLedgerEntry } from "@/stores/game-state-store";
+
+function prettyReason(r: string): string {
+  const base = r.startsWith("slip_") ? r.slice(5) : r;
+  return base.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+function relTime(ts: number): string {
+  const m = Math.round((Date.now() - ts) / 60000);
+  if (m < 1) return "just now";
+  if (m < 60) return `${m}m ago`;
+  const h = Math.round(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.round(h / 24)}d ago`;
+}
 
 function Bar({ item, onPress }: { item: CoreStat; onPress: (s: CoreStat) => void }) {
   const anim = useRef(new Animated.Value(0)).current;
@@ -44,7 +58,7 @@ function Bar({ item, onPress }: { item: CoreStat; onPress: (s: CoreStat) => void
   );
 }
 
-function DetailSheet({ stat, onClose }: { stat: CoreStat | null; onClose: () => void }) {
+function DetailSheet({ stat, entries, onClose }: { stat: CoreStat | null; entries: StatLedgerEntry[]; onClose: () => void }) {
   const anim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     if (stat) Animated.timing(anim, { toValue: 1, duration: 700, useNativeDriver: false }).start();
@@ -76,9 +90,22 @@ function DetailSheet({ stat, onClose }: { stat: CoreStat | null; onClose: () => 
           <Text style={d.tipText}>{stat.tip}</Text>
         </View>
         <Text style={d.logHead}>Recent activity</Text>
-        <View style={d.empty}>
-          <Text style={d.emptyText}>No activity yet — complete {stat.name} quests to raise this stat.</Text>
-        </View>
+        {entries.length ? (
+          entries.slice(0, 6).map((e, i) => {
+            const up = e.delta > 0;
+            return (
+              <View key={`${e.ts}-${i}`} style={d.logRow}>
+                <Text style={[d.logDelta, { color: up ? "#34D399" : "#FF6B6B" }]}>{up ? `+${e.delta}` : e.delta}</Text>
+                <Text style={d.logName} numberOfLines={1}>{prettyReason(e.reason)}</Text>
+                <Text style={d.logWhen}>{relTime(e.ts)}</Text>
+              </View>
+            );
+          })
+        ) : (
+          <View style={d.empty}>
+            <Text style={d.emptyText}>No activity yet — complete {stat.name} quests to raise this stat.</Text>
+          </View>
+        )}
         <Pressable style={d.close} onPress={onClose}>
           <Text style={d.closeText}>Got it</Text>
         </Pressable>
@@ -87,14 +114,15 @@ function DetailSheet({ stat, onClose }: { stat: CoreStat | null; onClose: () => 
   );
 }
 
-export function CoreStatBars({ items }: { items: CoreStat[] }) {
+export function CoreStatBars({ items, ledger = [] }: { items: CoreStat[]; ledger?: StatLedgerEntry[] }) {
   const [active, setActive] = useState<CoreStat | null>(null);
+  const entries = active?.model ? ledger.filter((e) => e.stat === active.model) : [];
   return (
     <View style={{ gap: 9 }}>
       {items.map((it) => (
         <Bar key={it.key} item={it} onPress={setActive} />
       ))}
-      <DetailSheet stat={active} onClose={() => setActive(null)} />
+      <DetailSheet stat={active} entries={entries} onClose={() => setActive(null)} />
     </View>
   );
 }
@@ -154,6 +182,21 @@ const d = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.025)",
   },
   emptyText: { color: "#9AA1B7", fontSize: 12.5, fontWeight: "600", textAlign: "center" },
+  logRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 11,
+    paddingVertical: 9,
+    paddingHorizontal: 11,
+    borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.035)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.08)",
+    marginBottom: 7,
+  },
+  logDelta: { minWidth: 38, textAlign: "center", fontSize: 13, fontWeight: "900" },
+  logName: { flex: 1, minWidth: 0, color: "#F8FAFE", fontSize: 12.5, fontWeight: "700" },
+  logWhen: { color: "#4F5570", fontSize: 11, fontWeight: "700" },
   close: { marginTop: 18, minHeight: 46, borderRadius: 14, borderWidth: 1, borderColor: "rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.04)", alignItems: "center", justifyContent: "center" },
   closeText: { color: "#F8FAFE", fontSize: 14, fontWeight: "800" },
 });

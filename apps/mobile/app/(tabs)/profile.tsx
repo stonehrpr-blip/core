@@ -53,6 +53,7 @@ export default function Profile() {
   const statsObj = useGameStateStore((s) => s.stats);
   const streak = useGameStateStore((s) => s.streak);
   const xpLedger = useGameStateStore((s) => s.xpLedger);
+  const statLedger = useGameStateStore((s) => s.statLedger);
   const rank = useGameStateStore((s) => s.rankFor());
   const lifeScore = useGameStateStore((s) => s.lifeScore());
 
@@ -135,7 +136,7 @@ export default function Profile() {
           </Pressable>
 
           <Section title="Core Stats" />
-          <CoreStatBars items={core} />
+          <CoreStatBars items={core} ledger={statLedger} />
 
           <Section title="Current perks" />
           <PerksList currentIdx={rank.idx} />
