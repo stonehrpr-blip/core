@@ -13,7 +13,7 @@ import type { CoreStat } from "@/lib/core-stats";
 import type { StatLedgerEntry } from "@/stores/game-state-store";
 
 function prettyReason(r: string): string {
-  const base = r.startsWith("slip_") ? r.slice(5) : r;
+  const base = r.replace(/^(slip_|quest_)/, "");
   return base.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 function relTime(ts: number): string {

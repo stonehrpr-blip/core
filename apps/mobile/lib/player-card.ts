@@ -45,6 +45,14 @@ export type PublicCard = {
   xp: number;
   streak_days: number;
   power: number;
+  // Core Stat values (0-100) from list_friend_cards / lookup_player_by_code (0006).
+  // Optional so pre-0006 RPC responses still type-check.
+  strength?: number;
+  focus?: number;
+  wealth?: number;
+  health?: number;
+  social?: number;
+  purpose?: number;
 };
 
 export type FriendCard = PublicCard & {

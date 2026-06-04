@@ -28,7 +28,7 @@ const STAT_SLUGS: StatKey[] = ["lungs", "brain", "wallet", "willpower", "body"];
 // 0004_stat_slug_social + 0005_social_stat_catalog are applied. Flip this to TRUE
 // AFTER applying them — until then, including 'social' would reject the WHOLE
 // upsert and break the working 5-stat sync, so it stays off.
-const SOCIAL_SYNC_ENABLED = false;
+const SOCIAL_SYNC_ENABLED = true;
 
 type SyncSlug = StatKey | "social";
 type StatRow = { user_id: string; stat_slug: SyncSlug; value: number; level: number };

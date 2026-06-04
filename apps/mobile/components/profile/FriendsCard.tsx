@@ -10,6 +10,36 @@ import Svg, { Circle, Path } from "react-native-svg";
 
 import { useFriendsStore } from "@/stores/friends-store";
 import { useAuthStore } from "@/stores/auth-store";
+import type { FriendCard } from "@/lib/player-card";
+
+// Core Stat fields (from list_friend_cards, migration 0006) → bar colours.
+const STAT_FIELDS: { key: keyof FriendCard; color: string }[] = [
+  { key: "strength", color: "#FF6B6B" },
+  { key: "focus", color: "#4A8FFF" },
+  { key: "wealth", color: "#FFC56B" },
+  { key: "health", color: "#34D399" },
+  { key: "social", color: "#B388FF" },
+  { key: "purpose", color: "#5EEAD4" },
+];
+
+function FriendRow({ f }: { f: FriendCard }) {
+  const hasStats = STAT_FIELDS.some(({ key }) => typeof f[key] === "number");
+  return (
+    <View style={s.fr}>
+      <View style={s.frTop}>
+        <Text style={s.frName} numberOfLines={1}>{f.display_name ?? f.player_id}</Text>
+        <Text style={s.frMeta}>Lv {f.level} · {f.power.toLocaleString()}⚡</Text>
+      </View>
+      {hasStats && (
+        <View style={s.strip}>
+          {STAT_FIELDS.map(({ key, color }) => (
+            <View key={String(key)} style={{ flex: Math.max(1, (f[key] as number) ?? 0), height: 6, borderRadius: 999, backgroundColor: color }} />
+          ))}
+        </View>
+      )}
+    </View>
+  );
+}
 
 export function FriendsCard() {
   const userId = useAuthStore((s) => s.userId);
@@ -68,6 +98,14 @@ export function FriendsCard() {
         </View>
       </View>
 
+      {friends.length > 0 && (
+        <View style={{ gap: 8 }}>
+          {friends.map((f) => (
+            <FriendRow key={f.id} f={f} />
+          ))}
+        </View>
+      )}
+
       <View style={s.addRow}>
         <TextInput
           value={code}
@@ -105,6 +143,12 @@ const s = StyleSheet.create({
   iconBg: { width: 44, height: 44, borderRadius: 12, backgroundColor: "rgba(74,143,255,0.12)", alignItems: "center", justifyContent: "center" },
   count: { color: "#F8FAFE", fontSize: 15, fontWeight: "800", letterSpacing: -0.2 },
   sub: { color: "#9AA1B7", fontSize: 12, marginTop: 3 },
+
+  fr: { padding: 12, borderRadius: 13, backgroundColor: "rgba(255,255,255,0.03)", borderWidth: 1, borderColor: "rgba(255,255,255,0.06)", gap: 9 },
+  frTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 },
+  frName: { flex: 1, minWidth: 0, color: "#F8FAFE", fontSize: 13.5, fontWeight: "800" },
+  frMeta: { color: "#9AA1B7", fontSize: 12, fontWeight: "700" },
+  strip: { flexDirection: "row", gap: 3 },
 
   addRow: { flexDirection: "row", gap: 8 },
   input: { flex: 1, paddingHorizontal: 14, paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: "rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.04)", color: "#fff", fontSize: 14, letterSpacing: 1, minHeight: 44 },

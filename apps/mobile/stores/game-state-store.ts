@@ -113,6 +113,7 @@ type GameState = {
 
   // actions
   logSlip: (habit: string, opts?: { magnitude?: number }) => void;
+  addStat: (stat: StatKey, amount: number, reason?: string) => void;
   restoreStreak: () => void;
   useFreeze: () => boolean;
   addXp: (amount: number, reason?: string) => void;
@@ -139,6 +140,8 @@ const DEFAULTS: Pick<GameState, "stats" | "streak" | "xp" | "level" | "slips" | 
   // Slips lower stats (RN has no positive stat-gain action yet), so all deltas are
   // negative — each stat sheet shows what hurt it + when.
   statLedger: [
+    { ts: Date.now() - 1 * 3600000, stat: "brain", delta: 6, reason: "quest_deep_work" },
+    { ts: Date.now() - 4 * 3600000, stat: "body", delta: 5, reason: "quest_workout" },
     { ts: Date.now() - 2 * 3600000, stat: "brain", delta: -8, reason: "slip_doomscroll" },
     { ts: Date.now() - 2 * 3600000, stat: "willpower", delta: -5, reason: "slip_doomscroll" },
     { ts: Date.now() - 30 * 3600000, stat: "body", delta: -10, reason: "slip_junk_food" },
@@ -231,6 +234,23 @@ export const useGameStateStore = create<GameState>()(
             xpLedger: ledger,
             statLedger,
           };
+        });
+      },
+
+      // Positive stat growth (quests, clean days). Mirrors logSlip's ledger so the
+      // stat-detail sheet shows gains (+) alongside slips (−).
+      addStat: (stat, amount, reason) => {
+        if (!amount) return;
+        set((s) => {
+          const next: Stats = { ...s.stats };
+          next[stat] = clamp(next[stat] + amount, STAT_MIN, STAT_MAX);
+          const applied = Math.round(next[stat] - s.stats[stat]);
+          if (applied === 0) return {} as Partial<GameState>;
+          const statLedger: StatLedgerEntry[] = [
+            { ts: Date.now(), stat, delta: applied, reason: reason || "gain" },
+            ...s.statLedger,
+          ].slice(0, 200);
+          return { stats: next, statLedger };
         });
       },
 
