@@ -257,6 +257,7 @@
         <a class="back" href="20-dashboard.html" aria-label="Back to dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></a>
         <span class="ttl">Shop</span>
         <div style="display:flex;align-items:center;gap:9px">
+          <span id="plusBadge" hidden style="display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:999px;font-size:10px;font-weight:900;letter-spacing:.08em;color:#06122b;background:linear-gradient(135deg,#6BA9FF,#B388FF);box-shadow:0 0 14px rgba(120,140,255,.5)">PLUS</span>
           <button class="back" data-sfx-toggle type="button"></button>
           <span class="coinchip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/></svg><span id="coinTop">0</span></span>
         </div>
@@ -590,6 +591,7 @@
       var bal=coins();
       animateCoins(bal);
       animateOne('#curShards', S.read().shards||0);
+      var pb=qs('#plusBadge'); if(pb){ try{ pb.hidden = !(S.corePlusActive && S.corePlusActive()); }catch(e){ pb.hidden=true; } }
 
       // featured (Aurora frame)
       var ft=ITEMS.filter(function(i){return i.featured;})[0];

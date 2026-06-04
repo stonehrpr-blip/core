@@ -189,6 +189,7 @@
   /* the open button glows in the chest's rarity colour */
   .btn.open { color:#fff; background:linear-gradient(135deg, color-mix(in srgb, var(--rar) 75%, #1F4FA8), color-mix(in srgb, var(--rar) 60%, #4B2E94));
               box-shadow:0 14px 36px color-mix(in srgb, var(--rar) 40%, transparent), 0 1px 0 rgba(255,255,255,0.18) inset; text-shadow:0 1px 2px rgba(0,0,0,0.4); }
+  .btn.equipped-done{ color:var(--good); background:rgba(52,211,153,0.14); border:1px solid rgba(52,211,153,0.4); box-shadow:none; text-shadow:none; cursor:default; }
   body.phase-opening .open-cta{ opacity:0; pointer-events:none; transition:opacity .3s; }
   body.phase-reveal .open-cta{ display:none; }
   .open-cta{ opacity:0; transform:translateY(10px); animation:rise .6s .45s cubic-bezier(.2,.8,.2,1) forwards; }
@@ -274,6 +275,10 @@
 
       <!-- CONTINUE -->
       <div class="cta-wrap reveal-cta" id="revealCta">
+        <button class="btn open" id="equipBtn" type="button" style="display:none; margin-bottom:11px;">
+          EQUIP NOW
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6l7-3Z"/><path d="M9 12l2 2 4-4.5"/></svg>
+        </button>
         <a class="btn" id="continueBtn" href="20-dashboard.html">
           CONTINUE
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
@@ -388,10 +393,10 @@
     }
 
     // ── grant + consume exactly once ──────────────────────────────────────────
-    var granted = false;
+    var granted = false, grantedItem = null;
     function bankRewards(roll){
       if(granted) return; granted = true;
-      try{ if(S.grantChest) S.grantChest(roll, source); }catch(e){}
+      try{ if(S.grantChest) grantedItem = S.grantChest(roll, source); }catch(e){}
       // consume the chest so the Shop / Dashboard won't offer it again
       if(source==='daily'){
         try{ localStorage.setItem('coreDashChestDay', String(startOfToday())); }catch(e){}
@@ -408,6 +413,21 @@
           var idx = owned.indexOf(chestId); if(idx>=0){ owned.splice(idx,1); localStorage.setItem('coreOwnedChests', JSON.stringify(owned)); }
         }catch(e){}
       }
+    }
+
+    // ── quick-equip the won item straight from the reveal ─────────────────────
+    function setupEquip(roll){
+      var btn = qs('#equipBtn'); if(!btn) return;
+      var slot = roll && roll.item && roll.item.slot;   // frame / aura / badge — common 'item' has none
+      if(!slot || !grantedItem || !S.equipItem){ btn.style.display='none'; return; }
+      btn.style.display='';
+      btn.onclick = function(){
+        if(btn.dataset.done==='1') return;
+        try{ S.equipItem(grantedItem.id, slot); }catch(e){}
+        SFX('equip'); S.syncProgress && S.syncProgress();
+        btn.dataset.done='1'; btn.classList.add('equipped-done');
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l4 4 10-11"/></svg> EQUIPPED';
+      };
     }
 
     // ── the opening cinematic ─────────────────────────────────────────────────
@@ -432,6 +452,7 @@
 
       // bank the rewards as soon as the chest commits to opening (survives an early exit)
       bankRewards(roll);
+      setupEquip(roll);
 
       if(REDUCED){
         body.className = 'phase-reveal' + (rarePull ? ' rare-pull' : '');

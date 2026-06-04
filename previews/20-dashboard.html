@@ -428,7 +428,7 @@
       <nav class="nav" aria-label="Primary">
         <a class="item active" href="20-dashboard.html" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 11l9-7 9 7M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/></svg><span class="nl">Home</span></a>
         <a class="item" href="21-quests.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg><span class="nl">Quests</span></a>
-        <a class="item" href="22-inventory.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span class="nl">Inventory</span></a>
+        <a class="item" href="27-shop.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M6 2L3 6v13a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"/></svg><span class="nl">Shop</span></a>
         <a class="item" href="23-profile.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="nl">Profile</span></a>
         <a class="item" href="24-more.html"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg><span class="nl">More</span></a>
       </nav>
@@ -587,7 +587,7 @@
           card=document.createElement('a'); card.className='lifecard'; card.href='stat.html?s='+d.key; card.style.setProperty('--sc',d.color);
           card.setAttribute('aria-label',d.name+' life score');
           card.innerHTML='<span class="lup">+</span>'+
-            '<div class="lhead"><div class="lic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'+(STAT_IC[d.key]||'')+'</svg></div>'+
+            '<div class="lhead"><div class="lic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'+(d.icon||STAT_IC[d.key]||'')+'</svg></div>'+
             '<div><div class="ln">'+d.name+'</div><div class="llvl">'+(d.sub?'<span class="lsub">'+d.sub+'</span> · ':'')+'<span data-lvl>Level '+lvl+'</span></div></div>'+
             '<div class="lval" data-val>0</div></div>'+
             '<div class="lbar"><div class="lfill" data-fill></div></div>';
@@ -822,8 +822,10 @@
     qs('#chestOpen').addEventListener('click', function(){
       if(this.classList.contains('claimed')) return;
       if((localStorage.getItem('coreDashChestDay')||'')===String(startOfToday())){ toast('Already claimed today'); return; }
-      // open on the dedicated full-screen opener; it grants rewards + sets coreDashChestDay
-      location.href='28-chest.html?source=daily&from=dashboard&rarity=common';
+      // open on the dedicated full-screen opener; it grants rewards + sets coreDashChestDay.
+      // rarity floor scales with rank — shared with the Shop free chest via S.freeChestFloor.
+      var floor='common'; try{ if(window.coreState&&window.coreState.freeChestFloor) floor=window.coreState.freeChestFloor(); }catch(e){}
+      location.href='28-chest.html?source=daily&from=dashboard&rarity='+floor;
     });
 
     // ── COMING SOON — preview cards (rank-gated) ──

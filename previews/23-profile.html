@@ -263,6 +263,11 @@
   @keyframes statBump{ 0%{transform:scale(1);} 22%{transform:scale(1.03); box-shadow:0 0 26px -6px var(--sc,#4A8FFF), inset 0 0 0 1px color-mix(in srgb,var(--sc,#4A8FFF) 60%,transparent);} 100%{transform:scale(1);} }
   @keyframes statIcon{ 0%,100%{transform:scale(1) rotate(0);} 30%{transform:scale(1.22) rotate(-8deg);} 60%{transform:scale(1.1) rotate(6deg);} }
   @media (prefers-reduced-motion: reduce){ .cstat.bump,.cstat.bump .ci{ animation:none!important; } }
+  /* floating "+N" stat-gain chip that flies up when a stat increases */
+  .cstat{ position:relative; }
+  .gainchip{ position:absolute; right:14px; top:50%; transform:translateY(-50%); pointer-events:none; z-index:5; font-size:13px; font-weight:900; color:var(--gc,#4A8FFF); text-shadow:0 0 10px var(--gc,#4A8FFF); font-variant-numeric:tabular-nums; opacity:0; animation:gainFly 1.15s cubic-bezier(.2,.85,.25,1) forwards; }
+  @keyframes gainFly{ 0%{opacity:0; transform:translateY(-50%) scale(.7);} 18%{opacity:1; transform:translateY(-115%) scale(1.05);} 100%{opacity:0; transform:translateY(-235%) scale(1);} }
+  @media (prefers-reduced-motion: reduce){ .gainchip{ animation:none!important; opacity:0; } }
   /* compact mini-stats — used inside the expand card & share card */
   .minstats{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:7px; margin-top:13px; position:relative; z-index:3; }
   .minstats .ms{ background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:11px; padding:8px 7px; text-align:center; }
@@ -548,7 +553,8 @@
       social:'Add friends and finish social quests to level up.',
       purpose:'Hold your streak and complete daily quests for Purpose.'
     };
-    var CORE_STATS=(S.STAT_DEFS||[]).map(function(d){ return { key:d.key, name:d.name, sc:d.color, emo:(STAT_EMO[d.key]||'⭐'), blurb:d.blurb||'', tip:(STAT_TIP[d.key]||'') }; });
+    // STAT_EMO/STAT_TIP retained only as fallback; STAT_DEFS (core-state) is now the source of truth.
+    var CORE_STATS=(S.STAT_DEFS||[]).map(function(d){ return { key:d.key, name:d.name, sc:d.color, emo:(d.emoji||STAT_EMO[d.key]||'⭐'), blurb:d.blurb||'', tip:(d.tip||STAT_TIP[d.key]||'') }; });
     function statVal(cs){ var base=S.statValue(cs.key)||0, bonus=0;
       // gameplay flavor on top of the real attribute: friends boost Social, streak boosts Purpose
       if(cs.key==='social'){ try{ bonus=(JSON.parse(localStorage.getItem('coreFriends')||'[]').length||0)*4; }catch(e){} }
@@ -581,6 +587,11 @@
     function inlineOk(btn,label){ var span=btn.querySelector('span')||btn,prev=span.textContent; span.textContent=label; btn.classList.add('ok'); setTimeout(function(){ span.textContent=prev; btn.classList.remove('ok'); },1500); }
     function copyText(t,cb){ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(cb,fb);} else fb(); function fb(){ try{var ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);}catch(e){} cb&&cb(); } }
     var toastT; function toast(m){ var t=qs('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(function(){t.classList.remove('show');},1600); }
+    // floating "+N" gain chip + a stat-name toast when a Core Stat increases (mirrors the dashboard reward feel)
+    function floatGain(row, delta, cs){ if(!row||delta<=0) return;
+      var chip=document.createElement('span'); chip.className='gainchip'; chip.style.setProperty('--gc',cs.sc); chip.textContent='+'+delta; row.appendChild(chip);
+      setTimeout(function(){ if(chip.parentNode) chip.parentNode.removeChild(chip); },1200);
+      toast(cs.emo+'  '+cs.name+' +'+delta); }
 
     function rankInfo(xp){ var t=S.rankTier(xp); return {r:S.rankFor(xp), idx:t.idx, cur:t.full, next:t.next, nextRank:t.nextRank, bandPct:t.bandPct, subPct:t.subPct, isMax:t.isMax}; }
 
@@ -687,7 +698,7 @@
         var cs=CORE_STATS[+row.getAttribute('data-stat')], v=statVal(cs);
         row.querySelector('.cval').textContent=v; // set before countUp re-zeroes
         var prev=lastStatVals[cs.key];
-        if(prev!=null && v>prev){ row.classList.remove('bump'); void row.offsetWidth; row.classList.add('bump'); }
+        if(prev!=null && v>prev){ row.classList.remove('bump'); void row.offsetWidth; row.classList.add('bump'); floatGain(row, v-prev, cs); }
         lastStatVals[cs.key]=v;
         row.onclick=function(){ openStat(cs); };
         row.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openStat(cs); } };
@@ -765,9 +776,9 @@
       qs('#spBig').textContent=v; qs('#spBlurb').textContent=cs.blurb; qs('#spTipText').textContent=cs.tip;
       // recent activity ledger — entries that raised THIS stat (matched by its model key)
       var model=(S.statDef&&S.statDef(cs.key)||{}).model||cs.key;
-      var log=((S.read().statLedger)||[]).filter(function(e){ return e.stat===model && (e.delta||0)>0; }).slice(0,6);
+      var log=((S.read().statLedger)||[]).filter(function(e){ return e.stat===model && (e.delta||0)!==0; }).slice(0,6);
       var rows = log.length
-        ? log.map(function(e){ return '<div class="lgrow"><div class="lgd">+'+e.delta+'</div><div class="lgt">'+prettyReason(e.reason)+'</div><div class="lgw">'+relTime(e.ts)+'</div></div>'; }).join('')
+        ? log.map(function(e){ var d=e.delta||0, down=d<0; return '<div class="lgrow"><div class="lgd'+(down?' down':'')+'">'+(d>0?'+':'')+d+'</div><div class="lgt">'+prettyReason(e.reason)+'</div><div class="lgw">'+relTime(e.ts)+'</div></div>'; }).join('')
         : '<div class="lgempty">No activity yet — complete '+cs.name+' quests to raise this stat.</div>';
       qs('#spLog').innerHTML='<div class="lgh">Recent activity</div>'+rows;
       sp.classList.add('open'); var f=qs('#spFill'); f.style.width='0%'; requestAnimationFrame(function(){ requestAnimationFrame(function(){ f.style.width=v+'%'; }); }); }

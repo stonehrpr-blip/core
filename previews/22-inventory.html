@@ -207,7 +207,11 @@
 
   /* ── NEW: per-item "NEW" ribbon + tappable card ── */
   .item{ cursor:pointer; }
-  .item .newtag{ position:absolute; top:0; left:0; z-index:4; font-size:8.5px; font-weight:900; letter-spacing:.1em; color:#fff; padding:3px 9px 3px 8px; background:linear-gradient(135deg,#FF5C8A,#B388FF); border-bottom-right-radius:12px; box-shadow:0 4px 12px rgba(255,92,138,.4); }
+  .item .newtag{ position:absolute; top:0; left:0; z-index:4; font-size:8.5px; font-weight:900; letter-spacing:.1em; color:#fff; padding:3px 9px 3px 8px; background:linear-gradient(135deg,#FF5C8A,#B388FF); border-bottom-right-radius:12px; box-shadow:0 4px 12px rgba(255,92,138,.4); animation:newPulse 1.8s ease-in-out infinite; }
+  @keyframes newPulse{ 0%,100%{ box-shadow:0 4px 12px rgba(255,92,138,.4); } 50%{ box-shadow:0 4px 20px rgba(255,92,138,.85); } }
+  /* spotlight the whole card while an item is still NEW */
+  .item:has(.newtag){ border-color:rgba(255,92,138,.5); box-shadow:0 0 24px -6px rgba(255,92,138,.55); }
+  @media (prefers-reduced-motion: reduce){ .item .newtag{ animation:none; } }
   .item:hover{ border-color:rgba(255,255,255,0.18); }
 
   /* ── NEW: item detail bottom sheet ── */
