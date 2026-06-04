@@ -239,13 +239,15 @@
   // ── Life Scores: the 6 player stats shown on the dashboard (display key → model key) ──
   // `sub` = the underlying body-stat identity (the vape-quit model) shown as a dual-label
   // alongside the RPG-6 `name` — keeps lungs/brain/etc. visible. '' = no body heritage (social).
+  // Single source of truth for the 6 stats. `emoji`/`icon`(SVG inner paths)/`tip` live here so
+  // profile, dashboard, stat.html and friends all render identical stat identity — no per-page copies.
   const STAT_DEFS = [
-    { key: 'strength', model: 'body',      name: 'Strength', sub: 'Body',      color: '#FF6B6B', blurb: 'Train your body and push your physical limits.' },
-    { key: 'focus',    model: 'brain',     name: 'Focus',    sub: 'Brain',     color: '#4A8FFF', blurb: 'Deep work, learning and sharp attention.' },
-    { key: 'wealth',   model: 'wallet',    name: 'Wealth',   sub: 'Wallet',    color: '#FFCB3D', blurb: 'Earn, save and build your resources.' },
-    { key: 'health',   model: 'lungs',     name: 'Health',   sub: 'Lungs',     color: '#34D399', blurb: 'Recovery, sleep, nutrition and breath.' },
-    { key: 'social',   model: 'social',    name: 'Social',   sub: '',          color: '#B388FF', blurb: 'Connection, relationships and community.' },
-    { key: 'purpose',  model: 'willpower', name: 'Purpose',  sub: 'Willpower', color: '#5EEAD4', blurb: 'Discipline, meaning and direction.' },
+    { key: 'strength', model: 'body',      name: 'Strength', sub: 'Body',      color: '#FF6B6B', emoji: '⚔️', blurb: 'Train your body and push your physical limits.', tip: 'Log workouts and physical quests to build Strength.', icon: '<path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/>' },
+    { key: 'focus',    model: 'brain',     name: 'Focus',    sub: 'Brain',     color: '#4A8FFF', emoji: '🧠', blurb: 'Deep work, learning and sharp attention.', tip: 'Deep work and learning quests sharpen your Focus.', icon: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/><path d="M12 1.5v3M12 19.5v3M22.5 12h-3M4.5 12h-3"/>' },
+    { key: 'wealth',   model: 'wallet',    name: 'Wealth',   sub: 'Wallet',    color: '#FFCB3D', emoji: '💰', blurb: 'Earn, save and build your resources.', tip: 'Save, earn and clear money quests to grow Wealth.', icon: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v9M9.6 10h4a1.6 1.6 0 0 1 0 3.2h-3.2a1.6 1.6 0 0 0 0 3.2h4.2"/>' },
+    { key: 'health',   model: 'lungs',     name: 'Health',   sub: 'Lungs',     color: '#34D399', emoji: '❤️', blurb: 'Recovery, sleep, nutrition and breath.', tip: 'Sleep, breathe and recover — health quests raise this.', icon: '<path d="M12 20.5s-7.2-4.6-7.2-9.8A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 7.2 3.7c0 5.2-7.2 9.8-7.2 9.8Z"/>' },
+    { key: 'social',   model: 'social',    name: 'Social',   sub: '',          color: '#B388FF', emoji: '👥', blurb: 'Connection, relationships and community.', tip: 'Add friends and finish social quests to level up.', icon: '<circle cx="9" cy="8" r="3.2"/><path d="M3.4 20a5.6 5.6 0 0 1 11.2 0M16 5.2a3.2 3.2 0 0 1 0 6M18.7 20a5.6 5.6 0 0 0-3.1-5"/>' },
+    { key: 'purpose',  model: 'willpower', name: 'Purpose',  sub: 'Willpower', color: '#5EEAD4', emoji: '🎯', blurb: 'Discipline, meaning and direction.', tip: 'Hold your streak and complete daily quests for Purpose.', icon: '<circle cx="12" cy="12" r="8.5"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z"/>' },
   ];
   function _statModel(key) { const d = STAT_DEFS.find((x) => x.key === key || x.model === key); return d ? d.model : key; }
   function statDef(key) { return STAT_DEFS.find((x) => x.key === key || x.model === key) || null; }
@@ -549,6 +551,14 @@
     }).quests.daily;
   }
 
+  // Free/daily chest floor rarity — rises with rank so loyal players get better
+  // free drops. Shared by the Shop free chest + Dashboard daily chest so both
+  // scale identically. Returns a lowercase rarity ('common'..'legendary').
+  function freeChestFloor(xp) {
+    const i = rankFor(xp == null ? (read().xp || 0) : xp).idx;
+    return i >= 9 ? 'legendary' : i >= 6 ? 'epic' : i >= 3 ? 'rare' : 'common';
+  }
+
   // ─── CORE Plus (subscription) — dev toggle until real billing is wired ──────
   // Perks: 2× XP + 2× coins, and a weekly Epic chest. Enabled from the paywall's
   // dev toggle; stored as a flat flag so every page picks it up instantly.
@@ -728,6 +738,7 @@
   // its tier); `noUp` keeps the small free/daily chest at floor. Chest Hunter
   // upgrade nudges the up-roll odds.
   const CHEST_RAR_ORDER = ['common', 'rare', 'epic', 'legendary', 'mythic'];
+  const CHEST_PITY = 10; // guaranteed rare+ at least once every CHEST_PITY pulls
   const CHEST_ITEMS = {
     common:    { name: 'Iron Trinket',  type: 'item',   slot: null,    ic: '<circle cx="12" cy="12" r="7"/>' },
     rare:      { name: 'Azure Border',  type: 'border', slot: 'frame', ic: '<rect x="4" y="4" width="16" height="16" rx="3"/><rect x="8" y="8" width="8" height="8" rx="1.5"/>' },
@@ -744,7 +755,10 @@
     const r = Math.random();
     let up = 0;
     if (!noUp) { if (r > 0.92 - bonus) up = 2; else if (r > 0.62 - bonus) up = 1; }
-    const tier = Math.min(4, floor + up);
+    let tier = Math.min(4, floor + up);
+    // pity: after CHEST_PITY-1 consecutive sub-rare pulls, force at least rare.
+    const pity = read().chestPity || 0;
+    if (!noUp && tier < 1 && pity >= CHEST_PITY - 1) tier = 1;
     const rar = CHEST_RAR_ORDER[tier];
     const item = CHEST_ITEMS[rar];
     const xp = Math.round((60 + tier * 25) * xpMultiplier());
@@ -772,7 +786,13 @@
       it = addItem({ id: roll.rid || ('chest_' + roll.rar + '_' + Date.now()), name: roll.item.name,
         type: roll.item.type, rarity: roll.rar, slot: roll.item.slot || undefined, source: source });
     } catch (e) {}
-    update((s) => { s.chests = s.chests || { opened: [] }; s.chests.opened = s.chests.opened || []; s.chests.opened.unshift(source + '_' + Date.now()); return s; });
+    update((s) => {
+      s.chests = s.chests || { opened: [] }; s.chests.opened = s.chests.opened || [];
+      s.chests.opened.unshift(source + '_' + Date.now());
+      // pity counter: reset on a rare+ pull, otherwise increment
+      s.chestPity = (roll.tier >= 1) ? 0 : (s.chestPity || 0) + 1;
+      return s;
+    });
     syncProgress();
     return it;
   }
@@ -789,7 +809,7 @@
     setClass, addItem, equipItem, openStarterChest, ensureDailyQuests, completeQuest,
     buyUpgrade, hasUpgrade, xpMultiplier,
     rollChest, grantChest, chestRarColor,
-    corePlusActive, setCorePlus, grantPlusWeekly,
+    corePlusActive, setCorePlus, grantPlusWeekly, freeChestFloor,
     resetAll, bind, seedDemo,
     RANKS, RANK_ICONS, RESTORE_COIN_COST, CHEST_ITEMS, CHEST_RAR_ORDER,
   };

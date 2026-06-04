@@ -386,7 +386,7 @@
           <div class="cardaura"></div><div class="xlayer"></div><div class="sweep"></div><div class="fx" id="fx"></div><div class="cardeffect"></div><div class="founder" id="founderDeco"></div>
           <div class="crow">
             <div><div class="nm" id="pName">Player</div><div class="tt" id="pTitle">First Step</div><div class="cls" id="pClass">Warrior</div></div>
-            <div class="pidchip"><span id="pId">CORE-XXXX-XXXX</span><span class="lvl" id="pLvlChip">LVL 1</span></div>
+            <div class="pidchip"><span id="pId">CORE-XXXX-XXXX</span><span id="plusBadge" hidden style="display:inline-block;margin-top:5px;margin-right:6px;padding:2px 7px;border-radius:999px;font-size:9px;font-weight:900;letter-spacing:.08em;color:#06122b;background:linear-gradient(135deg,#6BA9FF,#B388FF);box-shadow:0 0 12px rgba(120,140,255,.5)">PLUS</span><span class="lvl" id="pLvlChip">LVL 1</span></div>
           </div>
           <div class="stage" id="stage"><div class="halo"></div><div class="ringfx"></div><div class="core" id="core"></div></div>
           <div class="ranklbl"><div class="r1" id="rankBig">Stone I</div><div class="r2" id="rankNext">Next: Stone II</div></div>
@@ -648,6 +648,7 @@
       qs('#pName').textContent=name; qs('#pTitle').textContent=pget('coreProfileTitle',TITLES[0]); qs('#pClass').textContent=cls;
       qs('#pId').textContent=pid;
       var lc=qs('#pLvlChip'); lc.textContent='LVL '+level;
+      var ppb=qs('#plusBadge'); if(ppb){ try{ ppb.hidden=!(S.corePlusActive&&S.corePlusActive()); }catch(e){ ppb.hidden=true; } }
       var lt = level>=300?'t4' : level>=200?'t3' : level>=100?'t2' : level>=10?'t1' : '';
       lc.className='lvl'+(lt?' '+lt:'');
       qs('#rankBig').textContent=ri.cur; qs('#rankNext').textContent= ri.next==='MAX'?'Max rank':('Next: '+ri.next);
