@@ -265,7 +265,7 @@
     const model = _statModel(key);
     const since = Date.now() - 7 * 86400000;
     const decayed = (read().statLedger || []).some((e) => e.stat === model && e.reason === 'decay' && e.delta < 0 && e.ts >= since);
-    return decayed ? Math.ceil(amount * Math.max(0, (STAT_RECOVER[model] || 1) - 1)) : 0;
+    return decayed ? Math.min(3, Math.ceil(amount * Math.max(0, (STAT_RECOVER[model] || 1) - 1))) : 0;
   }
   function addStat(key, amount, reason) {
     const model = _statModel(key);
@@ -668,10 +668,12 @@
       // Life Score gain — completing a quest raises its matching stat
       if (q.stat) {
         const m = _statModel(q.stat), gain = q.statGain || 2;
+        const reb = recoverBonus(m, gain); // rebound if this stat decayed recently
         if (!s.stats) s.stats = {};
-        s.stats[m] = clamp((s.stats[m] || 0) + gain, STAT_MIN, STAT_MAX);
+        s.stats[m] = clamp((s.stats[m] || 0) + gain + reb, STAT_MIN, STAT_MAX);
         s.statLedger = s.statLedger || [];
         s.statLedger.unshift({ ts: Date.now(), stat: m, delta: gain, reason: 'quest:' + id });
+        if (reb > 0) s.statLedger.unshift({ ts: Date.now(), stat: m, delta: reb, reason: 'recover' });
         if (s.statLedger.length > 200) s.statLedger.length = 200;
       }
       s.chests.progress = clamp((s.chests.progress || 0) + 0.25, 0, 1);
