@@ -789,7 +789,8 @@
   // its tier); `noUp` keeps the small free/daily chest at floor. Chest Hunter
   // upgrade nudges the up-roll odds.
   const CHEST_RAR_ORDER = ['common', 'rare', 'epic', 'legendary', 'mythic'];
-  const CHEST_PITY = 8; // guaranteed rare+ at least once every CHEST_PITY pulls
+  const CHEST_PITY = 8;       // guaranteed rare+ at least once every CHEST_PITY pulls
+  const CHEST_EPIC_PITY = 30; // guaranteed epic+ at least once every CHEST_EPIC_PITY pulls
   const CHEST_ITEMS = {
     common:    { name: 'Iron Trinket',  type: 'item',   slot: null,    ic: '<circle cx="12" cy="12" r="7"/>' },
     rare:      { name: 'Azure Border',  type: 'border', slot: 'frame', ic: '<rect x="4" y="4" width="16" height="16" rx="3"/><rect x="8" y="8" width="8" height="8" rx="1.5"/>' },
@@ -807,9 +808,11 @@
     let up = 0;
     if (!noUp) { if (r > 0.92 - bonus) up = 2; else if (r > 0.62 - bonus) up = 1; }
     let tier = Math.min(4, floor + up);
-    // pity: after CHEST_PITY-1 consecutive sub-rare pulls, force at least rare.
-    const pity = read().chestPity || 0;
-    if (!noUp && tier < 1 && pity >= CHEST_PITY - 1) tier = 1;
+    // pity: force at least rare after CHEST_PITY-1 sub-rare pulls, and at least
+    // epic after CHEST_EPIC_PITY-1 sub-epic pulls (the stronger guarantee wins).
+    const st = read();
+    if (!noUp && tier < 1 && (st.chestPity || 0) >= CHEST_PITY - 1) tier = 1;
+    if (!noUp && tier < 2 && (st.chestEpicPity || 0) >= CHEST_EPIC_PITY - 1) tier = 2;
     const rar = CHEST_RAR_ORDER[tier];
     const item = CHEST_ITEMS[rar];
     const xp = Math.round((60 + tier * 25) * xpMultiplier());
@@ -844,6 +847,7 @@
       // NOTE: free/daily (noUp) chests increment pity but are excluded from the forced
       // upgrade above — pity only PAYS OUT on a paid pull. Intentional (flagged 2026-06-04).
       s.chestPity = (roll.tier >= 1) ? 0 : (s.chestPity || 0) + 1;
+      s.chestEpicPity = (roll.tier >= 2) ? 0 : (s.chestEpicPity || 0) + 1;
       return s;
     });
     syncProgress();

@@ -536,7 +536,7 @@
     }
 
     // ── render ──
-    var activeCat='Frames';
+    var activeCat = newRpgCount()>0 ? 'Rewards' : 'Frames'; // fresh pulls → open on Rewards
     function rtagHTML(rar){ return '<span class="rtag" style="color:'+RAR[rar]+'"><span class="rd"></span>'+rar+'</span>'; }
 
     function renderLoadout(){
@@ -546,6 +546,16 @@
       var titleNm=lget('coreProfileTitle','');
       var frameName=(byId('frame_'+fk.toLowerCase())||{}).name || (fk==='Default'?'Default':fk+' Frame');
       var auraName=auraId?(byId(auraId)||{}).name:null;
+      // Won items (coreState.equipped) take precedence in their slot, with the
+      // shop-cosmetic equip as fallback — one loadout for both equip systems.
+      var _eq={}; try{ _eq=S.read().equipped||{}; }catch(e){}
+      var _rinv=rpgItems();
+      function _rpgEq(sl){ var idv=_eq[sl]; return idv?(_rinv.filter(function(x){return x.id===idv;})[0]||null):null; }
+      var _rf=_rpgEq('frame'), _ra=_rpgEq('aura');
+      var frameNameFinal = _rf ? _rf.name : (fk==='Default'?null:frameName);
+      if(_rf) fc = rarColor(_rf.rarity);
+      var auraNameFinal = _ra ? _ra.name : auraName;
+      if(_ra) ac = rarColor(_ra.rarity);
       var slot=function(key,kind,val){ var filled=!!val; return '<button class="slot '+(filled?'filled':'empty')+'" data-jump="'+kind+'" '+(filled?'style="--sc:'+ (kind==='Auras'&&ac?ac:kind==='Badges'&&bc?bc:kind==='Frames'?fc:'#4A8FFF') +'"':'')+'><div class="sk">'+key+'</div><div class="sv">'+(filled?val:'Empty')+'</div></button>'; };
       qs('#lo').style.setProperty('--fc',fc); qs('#lo').style.setProperty('--ac',ac||'transparent'); qs('#lo').style.setProperty('--bc',bc||'#9aa1b7');
       qs('#lo').innerHTML=
@@ -559,8 +569,8 @@
             '<div class="lo-meta">Level '+level()+' · '+rankName()+'</div></div>'+
         '</div>'+
         '<div class="slots">'+
-          slot('Frame','Frames',fk==='Default'?null:frameName)+
-          slot('Aura','Auras',auraName)+
+          slot('Frame','Frames',frameNameFinal)+
+          slot('Aura','Auras',auraNameFinal)+
           slot('Badge','Badges',badgeIt?badgeIt.name.replace(' Badge',''):null)+
           slot('Title','Titles',titleNm||null)+
         '</div>';
