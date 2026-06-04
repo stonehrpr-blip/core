@@ -60,6 +60,7 @@
   .chip.flame { color:#FFC56B; } .chip.flame svg{ color:#FF8A3D; }
   .chip.coin  { color:#FFE07A; } .chip.coin svg{ color:#FFCB3D; }
   .chip.shard { color:#C7B3FF; } .chip.shard svg{ color:#B388FF; }
+  .chip.mute { padding:0 9px; color:var(--muted); cursor:pointer; } .chip.mute svg{ color:var(--muted); width:16px; height:16px; }
 
   /* hero — command center */
   .hero { position:relative; border-radius:26px; padding:20px; overflow:hidden;
@@ -125,6 +126,7 @@
   .lifecard .ln{ font-size:12.5px; font-weight:800; letter-spacing:.02em; }
   .lifecard .llvl{ font-size:9.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--dim); margin-top:1px; }
   .lifecard .ldn{ margin-left:5px; color:#FF7A85; font-weight:900; letter-spacing:0; }
+  .lifecard .lrec{ margin-left:5px; color:#34D399; font-weight:900; letter-spacing:0; }
   .lifecard .lsub{ color:color-mix(in srgb,var(--sc,#4A8FFF) 72%,#cfd6e6); }
   .lifecard .lval{ margin-left:auto; font-size:18px; font-weight:900; color:var(--sc,#4A8FFF); letter-spacing:.01em; }
   .lifecard .lbar{ height:6px; border-radius:999px; background:rgba(0,0,0,0.42); overflow:hidden; margin-top:11px; }
@@ -345,7 +347,9 @@
       <div class="topbar">
         <div class="brand"><span class="dot"></span><span class="wm">CORE</span></div>
         <div class="chips">
+          <button class="chip mute" data-sfx-toggle type="button" aria-label="Toggle sound"></button>
           <a class="chip flame" href="26-streak.html" style="text-decoration:none" aria-label="View streak"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3-1 4-1 6 0 1 1 2 1 2s2-1 2-3c2 2 3 4 3 7a5 5 0 0 1-10 0c0-3 2-5 3-7 1 2 2 2 2 2s0-3 0-7Z"/></svg><span id="cStreak">0</span></a>
+          <span class="chip" id="plus2x" hidden style="background:linear-gradient(135deg,#6BA9FF,#B388FF);color:#06122b;font-weight:900" aria-label="CORE Plus 2x rewards active">2×</span>
           <a class="chip coin" href="27-shop.html" style="text-decoration:none" aria-label="Open shop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/></svg><span id="cCoins">0</span></a>
           <span class="chip shard"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l4 7-4 13-4-13z"/></svg><span id="cShards">0</span></span>
         </div>
@@ -405,7 +409,7 @@
           <div class="ch">
             <div class="emit" id="chestEmit"></div>
             <div class="cimg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 9l2.2-4.4A1 1 0 0 1 6.1 4h11.8a1 1 0 0 1 .9.6L21 9M3 9v9a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V9M3 9h18M12 9v4m-2.2 0h4.4"/></svg></div>
-            <div class="cb"><div class="ct" id="chestT">Daily chest</div><div class="cs" id="chestS">Complete 3 quests to unlock</div>
+            <div class="cb"><div class="ct" id="chestT">Daily chest</div><span id="chestTier" style="display:none;font-size:9px;font-weight:900;letter-spacing:.06em;padding:2px 7px;border-radius:999px;margin-top:4px;width:fit-content;color:#06122b"></span><div class="cs" id="chestS">Complete 3 quests to unlock</div>
               <div class="dots" id="chestDots"><i></i><i></i><i></i></div></div>
           </div>
           <div class="rew"><div class="rl">Possible rewards</div><div class="rchips" id="chestRewards"></div></div>
@@ -566,6 +570,7 @@
       purpose:'<circle cx="12" cy="12" r="8.5"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z"/>'
     };
     function statLevel(v){ return Math.floor((v||0)/15)+1; }
+    function recentRecover(model){ try{ var c=Date.now()-48*3600000; var sum=(S.read().statLedger||[]).reduce(function(a,e){ return (e.stat===model && e.reason==='recover' && e.delta>0 && e.ts>=c)? a+e.delta : a; },0); return Math.round(sum*10)/10; }catch(e){ return 0; } }
     function recentDecay(model){ try{ var c=Date.now()-48*3600000; var sum=(S.read().statLedger||[]).reduce(function(a,e){ return (e.stat===model && e.reason==='decay' && e.delta<0 && e.ts>=c)? a+(-e.delta) : a; },0); return Math.round(sum*10)/10; }catch(e){ return 0; } }
     function celebrateStat(card, d, lvl){
       try{ toast(d.name+' reached Level '+lvl+'!','levelup'); }catch(e){}
@@ -600,7 +605,9 @@
         card.dataset.v=v; card.dataset.lvl=lvl;
         animateCount(valEl, v);
         // recent passive decay (last 48h) → subtle ▼ indicator
-        var dn=recentDecay(d.model); lvlEl.innerHTML='Level '+lvl+(dn>0?' <span class="ldn" title="Decayed from inactivity">▼'+(dn%1?dn.toFixed(1):dn)+'</span>':'');
+        var dn=recentDecay(d.model), rcv=recentRecover(d.model);
+        var dtag = rcv>0 ? ' <span class="lrec" title="Recovered by getting back on it">▲'+(rcv%1?rcv.toFixed(1):rcv)+'</span>' : (dn>0 ? ' <span class="ldn" title="Decayed from inactivity">▼'+(dn%1?dn.toFixed(1):dn)+'</span>' : '');
+        lvlEl.innerHTML='Level '+lvl+dtag;
         requestAnimationFrame(function(){ fillEl.style.width=v+'%'; });
       });
       var ls=S.lifeScore(), m=qs('#lsMeta');
@@ -627,6 +634,7 @@
 
       // top chips
       animateCount(qs('#cStreak'),(s.streak&&s.streak.days)||0); animateCount(qs('#cCoins'),s.coins||0); animateCount(qs('#cShards'),s.shards||0);
+      var p2=qs('#plus2x'); if(p2){ try{ p2.hidden=!(S.corePlusActive&&S.corePlusActive()); }catch(e){ p2.hidden=true; } }
 
       // hero head
       qs('#heroLvl').textContent=level; qs('#rankPillT').textContent=ri.cur;
@@ -739,6 +747,8 @@
         if(claimedToday){ qs('#chestT').textContent='Chest claimed'; qs('#chestS').textContent='Come back tomorrow for more'; openBtn.textContent='Claimed today'; openBtn.classList.add('claimed'); }
         else { qs('#chestT').textContent='Chest ready'; qs('#chestS').textContent='Your daily reward is unlocked'; openBtn.textContent='Open chest'; openBtn.classList.remove('claimed'); }
       } else { dc.classList.remove('ready'); qs('#chestT').textContent='Daily chest'; qs('#chestS').textContent=doneToday+' / '+goalCount+' quests complete'; }
+      // rank-scaled tier tag (shared floor with the Shop free chest)
+      var tierEl=qs('#chestTier'); if(tierEl){ try{ var CS=window.coreState, fl=(CS&&CS.freeChestFloor)?CS.freeChestFloor():'common', fc=(CS&&CS.chestRarColor)?CS.chestRarColor(fl):'#9AA1B7'; tierEl.textContent=fl.charAt(0).toUpperCase()+fl.slice(1)+' tier'; tierEl.style.background=fc; tierEl.style.display='inline-block'; }catch(e){} }
 
       // ── STREAK + milestone path ──
       var days=(s.streak&&s.streak.days)||0, best=Math.max(s.bestStreak||0,days);

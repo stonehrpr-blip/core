@@ -255,6 +255,7 @@
   .cstat .ci{ width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:18px; line-height:1; background:color-mix(in srgb,var(--sc,#4A8FFF) 16%,transparent); border:1px solid color-mix(in srgb,var(--sc,#4A8FFF) 32%,transparent); box-shadow:inset 0 0 12px color-mix(in srgb,var(--sc,#4A8FFF) 18%,transparent); }
   .cstat .cmid{ min-width:0; }
   .cstat .cname{ font-size:13px; font-weight:800; letter-spacing:.01em; }
+  .cstat .cname .csub{ font-size:9.5px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; color:color-mix(in srgb,var(--sc,#4A8FFF) 68%,#cfd6e6); margin-left:5px; }
   .cstat .ctrack{ height:7px; border-radius:999px; background:rgba(0,0,0,0.42); overflow:hidden; margin-top:7px; position:relative; }
   .cstat .cfill{ height:100%; width:0%; border-radius:999px; background:linear-gradient(90deg,var(--sc,#4A8FFF),color-mix(in srgb,var(--sc,#4A8FFF) 35%,#fff)); box-shadow:0 0 10px color-mix(in srgb,var(--sc,#4A8FFF) 60%,transparent); transition:width 1.1s cubic-bezier(.2,.85,.25,1); }
   .cstat .cval{ font-size:17px; font-weight:900; text-align:right; color:var(--sc,#8FB4FF); font-variant-numeric:tabular-nums; }
@@ -289,6 +290,7 @@
   .sp .splog .lgh{ font-size:11px; font-weight:800; letter-spacing:.13em; text-transform:uppercase; color:var(--dim); margin:0 2px 9px; }
   .sp .lgrow{ display:flex; align-items:center; gap:11px; padding:9px 11px; border-radius:12px; background:rgba(255,255,255,0.035); border:1px solid var(--border); margin-bottom:7px; }
   .sp .lgrow .lgd{ flex:none; min-width:36px; height:26px; display:flex; align-items:center; justify-content:center; border-radius:8px; font-size:12.5px; font-weight:900; color:var(--sc,#8FB4FF); background:color-mix(in srgb,var(--sc,#4A8FFF) 14%,transparent); }
+  .sp .lgrow .lgd.down{ color:#FF7A85; background:rgba(255,90,110,0.12); }
   .sp .lgrow .lgt{ flex:1; min-width:0; font-size:12.5px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .sp .lgrow .lgw{ flex:none; font-size:11px; font-weight:700; color:var(--dim); }
   .sp .lgempty{ padding:15px; text-align:center; font-size:12.5px; font-weight:600; color:var(--muted); background:rgba(255,255,255,0.025); border:1px dashed var(--border); border-radius:12px; }
@@ -305,7 +307,11 @@
   .shov .shclose{ position:absolute; top:14px; right:16px; width:34px; height:34px; border-radius:50%; border:1px solid var(--border); background:rgba(255,255,255,0.05); color:var(--muted); display:flex; align-items:center; justify-content:center; cursor:pointer; } .shov .shclose svg{ width:17px; height:17px; }
   .shov .shtitle{ font-size:13px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); text-align:center; margin-bottom:14px; }
   .shov .shimgwrap{ position:relative; border-radius:20px; overflow:hidden; border:1px solid var(--border); background:#05060d; min-height:200px; display:flex; align-items:center; justify-content:center; }
-  .shov .shimgwrap img{ display:block; width:100%; height:auto; }
+  .shov .shimgwrap img{ display:block; width:100%; height:auto; opacity:0; transform:scale(.95); transition:opacity .5s ease, transform .6s cubic-bezier(.2,.85,.25,1); }
+  .shov .shimgwrap img.in{ opacity:1; transform:scale(1); }
+  .shov .shimgwrap.revealing{ animation:shGlow 1.1s ease; }
+  @keyframes shGlow{ 0%{box-shadow:0 0 0 0 transparent;} 45%{box-shadow:0 0 46px -4px var(--accent), inset 0 0 0 1px color-mix(in srgb,var(--accent) 60%,transparent);} 100%{box-shadow:0 0 0 0 transparent;} }
+  @media (prefers-reduced-motion: reduce){ .shov .shimgwrap img{ transition:none; opacity:1; transform:none; } .shov .shimgwrap.revealing{ animation:none; } }
   .shov .shspin{ position:absolute; width:32px; height:32px; border-radius:50%; border:3px solid rgba(255,255,255,0.14); border-top-color:var(--accent); animation:spin .8s linear infinite; }
   @keyframes spin{ to{ transform:rotate(360deg); } }
   .shov .shacts{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px; }
@@ -554,7 +560,7 @@
       purpose:'Hold your streak and complete daily quests for Purpose.'
     };
     // STAT_EMO/STAT_TIP retained only as fallback; STAT_DEFS (core-state) is now the source of truth.
-    var CORE_STATS=(S.STAT_DEFS||[]).map(function(d){ return { key:d.key, name:d.name, sc:d.color, emo:(d.emoji||STAT_EMO[d.key]||'⭐'), blurb:d.blurb||'', tip:(d.tip||STAT_TIP[d.key]||'') }; });
+    var CORE_STATS=(S.STAT_DEFS||[]).map(function(d){ return { key:d.key, name:d.name, sub:d.sub||'', sc:d.color, emo:(d.emoji||STAT_EMO[d.key]||'⭐'), blurb:d.blurb||'', tip:(d.tip||STAT_TIP[d.key]||'') }; });
     function statVal(cs){ var base=S.statValue(cs.key)||0, bonus=0;
       // gameplay flavor on top of the real attribute: friends boost Social, streak boosts Purpose
       if(cs.key==='social'){ try{ bonus=(JSON.parse(localStorage.getItem('coreFriends')||'[]').length||0)*4; }catch(e){} }
@@ -688,7 +694,7 @@
       qs('#corestats').innerHTML=CORE_STATS.map(function(cs,i){ var v=statVal(cs);
         return '<div class="cstat" style="--sc:'+cs.sc+'" role="button" tabindex="0" data-stat="'+i+'" aria-label="'+cs.name+' '+v+' of 100">'+
           '<div class="ci">'+cs.emo+'</div>'+
-          '<div class="cmid"><div class="cname">'+cs.name+'</div><div class="ctrack"><div class="cfill" data-v="'+v+'"></div></div></div>'+
+          '<div class="cmid"><div class="cname">'+cs.name+(cs.sub?' <span class="csub">'+cs.sub+'</span>':'')+'</div><div class="ctrack"><div class="cfill" data-v="'+v+'"></div></div></div>'+
           '<div class="cval">'+v+'</div></div>'; }).join('');
       var csAvg=Math.round(CORE_STATS.reduce(function(a,cs){return a+statVal(cs);},0)/CORE_STATS.length);
       qs('#cstatMeta').textContent='Avg '+csAvg;
@@ -878,8 +884,10 @@
     }); }
     function dataURLtoBlob(d){ var a=d.split(','), m=a[0].match(/:(.*?);/)[1], b=atob(a[1]), n=b.length, u=new Uint8Array(n); while(n--) u[n]=b.charCodeAt(n); return new Blob([u],{type:m}); }
     var _shareURL=null;
-    function openShareCard(){ var ov=qs('#shareOv'), img=qs('#shImg'), spin=qs('#shSpin'); img.removeAttribute('src'); spin.style.display='block'; ov.classList.add('open');
-      buildShareCard().then(function(url){ _shareURL=url; if(url){ img.src=url; } spin.style.display='none'; }); }
+    function openShareCard(){ var ov=qs('#shareOv'), img=qs('#shImg'), spin=qs('#shSpin'), wrap=img.parentNode;
+      img.classList.remove('in'); wrap.classList.remove('revealing'); img.removeAttribute('src'); spin.style.display='block'; ov.classList.add('open');
+      buildShareCard().then(function(url){ _shareURL=url; spin.style.display='none';
+        if(url){ img.onload=function(){ requestAnimationFrame(function(){ img.classList.add('in'); wrap.classList.add('revealing'); }); }; img.src=url; } }); }
     function closeShareCard(){ qs('#shareOv').classList.remove('open'); }
     function doShare(){ var s=S.read(), ri=rankInfo(s.xp||0), lvl=S.levelFor(s.xp||0), power=S.corePower();
       var txt='Join me on CORE — '+ri.cur+', Level '+lvl+', CORE Power '+Number(power).toLocaleString()+'. My ID: '+pid;
@@ -903,7 +911,7 @@
     render();
     var pend=S.pendingRankUp(); if(pend) showRankUp(pend);
 
-    try{ var m=location.search.match(/scrollY=(\d+)/); if(m){ var sc=qs('.scroll'); if(sc) sc.scrollTop=+m[1]; } if(/[?&]ov=1/.test(location.search)) openOv(); var rum=location.search.match(/rankup=(\d+)/); if(rum){ var ni=+rum[1]; showRankUp({oldIndex:Math.max(0,ni-1),newIndex:ni,perks:S.RANKS[ni].unlocks}); } var sm=location.search.match(/stat=([a-z]+)/i); if(sm){ var scs=CORE_STATS.filter(function(c){return c.key===sm[1].toLowerCase();})[0]; if(scs) openStat(scs); } if(/[?&]share=1/.test(location.search)) openShareCard(); }catch(e){}
+    try{ var m=location.search.match(/scrollY=(\d+)/); if(m){ var sc=qs('.scroll'); if(sc) sc.scrollTop=+m[1]; } if(/[?&]ov=1/.test(location.search)) openOv(); var rum=location.search.match(/rankup=(\d+)/); if(rum){ var ni=+rum[1]; showRankUp({oldIndex:Math.max(0,ni-1),newIndex:ni,perks:S.RANKS[ni].unlocks}); } var sm=location.search.match(/stat=([a-z]+)/i); if(sm){ var scs=CORE_STATS.filter(function(c){return c.key===sm[1].toLowerCase();})[0]; if(scs) openStat(scs); } if(/[?&]share=1/.test(location.search)) openShareCard(); var gm=location.search.match(/[?&]gain=([a-z]+)(?::(\d+))?/i); if(gm && S.addStat){ var gk=gm[1].toLowerCase(), gn=+(gm[2]||5); setTimeout(function(){ S.addStat(gk, gn, 'demo:gain'); },350); } }catch(e){}
   })();
   </script>
 </body>

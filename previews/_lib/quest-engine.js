@@ -412,7 +412,8 @@
     if (q.coins) rows.push({ type: 'coin', label: 'Coins', value: q.coins });
     var sg = statForQuest(q);
     if (sg) { var sd = (window.coreState && coreState.statDef) ? coreState.statDef(sg.key) : null;
-      rows.push({ type: 'stat', label: (sd && sd.name) || sg.key, sub: 'Life Score', value: sg.gain, color: (sd && sd.color) || '#4A8FFF' }); }
+      var reb = (window.coreState && coreState.recoverBonus) ? coreState.recoverBonus(sg.key, sg.gain) : 0;
+      rows.push({ type: 'stat', label: (sd && sd.name) || sg.key, sub: 'Life Score' + (reb > 0 ? ' · +' + reb + ' rebound' : ''), value: sg.gain + reb, color: (sd && sd.color) || '#4A8FFF' }); }
     (q.items || []).forEach(function (it) { rows.push({ type: 'item', label: it.name, sub: (RARITY[it.rarity] || RARITY.common).l + ' item', rarity: it.rarity }); });
     if (q.chest) rows.push({ type: 'item', label: (RARITY[q.chest.rarity] || RARITY.epic).l + ' Chest', sub: 'Reward chest', rarity: q.chest.rarity, chest: true });
     return rows;

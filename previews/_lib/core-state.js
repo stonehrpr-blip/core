@@ -265,7 +265,7 @@
     const model = _statModel(key);
     const since = Date.now() - 7 * 86400000;
     const decayed = (read().statLedger || []).some((e) => e.stat === model && e.reason === 'decay' && e.delta < 0 && e.ts >= since);
-    return decayed ? Math.round(amount * Math.max(0, (STAT_RECOVER[model] || 1) - 1)) : 0;
+    return decayed ? Math.ceil(amount * Math.max(0, (STAT_RECOVER[model] || 1) - 1)) : 0;
   }
   function addStat(key, amount, reason) {
     const model = _statModel(key);
