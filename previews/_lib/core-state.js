@@ -23,7 +23,7 @@
   const STORAGE_KEY = 'coreState.v1';
   const FREEZE_PER_WEEK = 1;
   const STAT_MIN = 0, STAT_MAX = 100;
-  const STAT_DECAY = { lungs: 0, brain: 0, wallet: 0, willpower: 0, body: 0.2, social: 0 };
+  const STAT_DECAY = { lungs: 0.3, brain: 0.3, wallet: 0.3, willpower: 0.35, body: 0.4, social: 0.5 };
   const STAT_RECOVER = { lungs: 1.2, brain: 1.5, wallet: 1.0, willpower: 1.0, body: 0.8, social: 1.0 };
 
   // Rank ladder — 11 tiers, Stone → CORE. XP threshold → rank name.
@@ -237,13 +237,15 @@
   }
 
   // ── Life Scores: the 6 player stats shown on the dashboard (display key → model key) ──
+  // `sub` = the underlying body-stat identity (the vape-quit model) shown as a dual-label
+  // alongside the RPG-6 `name` — keeps lungs/brain/etc. visible. '' = no body heritage (social).
   const STAT_DEFS = [
-    { key: 'strength', model: 'body',      name: 'Strength', color: '#FF6B6B', blurb: 'Train your body and push your physical limits.' },
-    { key: 'focus',    model: 'brain',     name: 'Focus',    color: '#4A8FFF', blurb: 'Deep work, learning and sharp attention.' },
-    { key: 'wealth',   model: 'wallet',    name: 'Wealth',   color: '#FFCB3D', blurb: 'Earn, save and build your resources.' },
-    { key: 'health',   model: 'lungs',     name: 'Health',   color: '#34D399', blurb: 'Recovery, sleep, nutrition and breath.' },
-    { key: 'social',   model: 'social',    name: 'Social',   color: '#B388FF', blurb: 'Connection, relationships and community.' },
-    { key: 'purpose',  model: 'willpower', name: 'Purpose',  color: '#5EEAD4', blurb: 'Discipline, meaning and direction.' },
+    { key: 'strength', model: 'body',      name: 'Strength', sub: 'Body',      color: '#FF6B6B', blurb: 'Train your body and push your physical limits.' },
+    { key: 'focus',    model: 'brain',     name: 'Focus',    sub: 'Brain',     color: '#4A8FFF', blurb: 'Deep work, learning and sharp attention.' },
+    { key: 'wealth',   model: 'wallet',    name: 'Wealth',   sub: 'Wallet',    color: '#FFCB3D', blurb: 'Earn, save and build your resources.' },
+    { key: 'health',   model: 'lungs',     name: 'Health',   sub: 'Lungs',     color: '#34D399', blurb: 'Recovery, sleep, nutrition and breath.' },
+    { key: 'social',   model: 'social',    name: 'Social',   sub: '',          color: '#B388FF', blurb: 'Connection, relationships and community.' },
+    { key: 'purpose',  model: 'willpower', name: 'Purpose',  sub: 'Willpower', color: '#5EEAD4', blurb: 'Discipline, meaning and direction.' },
   ];
   function _statModel(key) { const d = STAT_DEFS.find((x) => x.key === key || x.model === key); return d ? d.model : key; }
   function statDef(key) { return STAT_DEFS.find((x) => x.key === key || x.model === key) || null; }
@@ -275,6 +277,8 @@
       const lastStart = new Date(last); lastStart.setHours(0, 0, 0, 0);
       let days = Math.floor((todayStart.getTime() - lastStart.getTime()) / 86400000);
       if (days <= 0) { if (!s.lastStatTickAt) s.lastStatTickAt = now; return s; }
+      // Active streak freeze pauses decay — forgive this run entirely (no drift while frozen).
+      if (s.streak && s.streak.frozenUntil && s.streak.frozenUntil > now) { s.lastStatTickAt = now; return s; }
       days = Math.min(days, 7);
       if (!s.stats) s.stats = {};
       Object.keys(STAT_DECAY).forEach((k) => {
@@ -408,7 +412,7 @@
     earnCoins(amount, reason);
     return true;
   }
-  const DAILY_SPEND_CAP = 500;
+  const DAILY_SPEND_CAP = 20000; // headroom for chest purchases (Mythic = 15000)
   function spendCoins(amount, reason) {
     const s = read();
     const have = s.coins || 0;
@@ -442,6 +446,8 @@
       s.streak.freezes.availableThisWeek -= 1;
       // Freeze "protects" the streak — bump lastCleanAt forward so today doesn't break it.
       s.streak.lastCleanAt = Date.now();
+      // ...and pauses passive stat decay through the end of today (see applyStatTick).
+      var eod = new Date(); eod.setHours(23, 59, 59, 999); s.streak.frozenUntil = eod.getTime();
       return s;
     });
   }

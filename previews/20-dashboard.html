@@ -124,6 +124,8 @@
   .lifecard .lic svg{ width:17px; height:17px; color:var(--sc,#4A8FFF); }
   .lifecard .ln{ font-size:12.5px; font-weight:800; letter-spacing:.02em; }
   .lifecard .llvl{ font-size:9.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--dim); margin-top:1px; }
+  .lifecard .ldn{ margin-left:5px; color:#FF7A85; font-weight:900; letter-spacing:0; }
+  .lifecard .lsub{ color:color-mix(in srgb,var(--sc,#4A8FFF) 72%,#cfd6e6); }
   .lifecard .lval{ margin-left:auto; font-size:18px; font-weight:900; color:var(--sc,#4A8FFF); letter-spacing:.01em; }
   .lifecard .lbar{ height:6px; border-radius:999px; background:rgba(0,0,0,0.42); overflow:hidden; margin-top:11px; }
   .lifecard .lfill{ height:100%; border-radius:999px; width:0; background:linear-gradient(90deg, color-mix(in srgb,var(--sc,#4A8FFF) 55%,#000), var(--sc,#4A8FFF)); box-shadow:0 0 9px color-mix(in srgb,var(--sc,#4A8FFF) 70%,transparent); transition:width .7s cubic-bezier(.2,.8,.2,1); }
@@ -564,6 +566,7 @@
       purpose:'<circle cx="12" cy="12" r="8.5"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z"/>'
     };
     function statLevel(v){ return Math.floor((v||0)/15)+1; }
+    function recentDecay(model){ try{ var c=Date.now()-48*3600000; var sum=(S.read().statLedger||[]).reduce(function(a,e){ return (e.stat===model && e.reason==='decay' && e.delta<0 && e.ts>=c)? a+(-e.delta) : a; },0); return Math.round(sum*10)/10; }catch(e){ return 0; } }
     function celebrateStat(card, d, lvl){
       try{ toast(d.name+' reached Level '+lvl+'!','levelup'); }catch(e){}
       try{ SFX('levelup'); }catch(e){}
@@ -585,7 +588,7 @@
           card.setAttribute('aria-label',d.name+' life score');
           card.innerHTML='<span class="lup">+</span>'+
             '<div class="lhead"><div class="lic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'+(STAT_IC[d.key]||'')+'</svg></div>'+
-            '<div><div class="ln">'+d.name+'</div><div class="llvl" data-lvl>Level '+lvl+'</div></div>'+
+            '<div><div class="ln">'+d.name+'</div><div class="llvl">'+(d.sub?'<span class="lsub">'+d.sub+'</span> · ':'')+'<span data-lvl>Level '+lvl+'</span></div></div>'+
             '<div class="lval" data-val>0</div></div>'+
             '<div class="lbar"><div class="lfill" data-fill></div></div>';
           host.appendChild(card);
@@ -595,7 +598,9 @@
         if(prev>=0 && v>prev){ card.classList.remove('gain'); void card.offsetWidth; upEl.textContent='+'+(v-prev); card.classList.add('gain'); try{SFX('xp');}catch(e){} setTimeout(function(){card.classList.remove('gain');},1500); }
         if(prevLvl>=0 && lvl>prevLvl){ celebrateStat(card, d, lvl); }
         card.dataset.v=v; card.dataset.lvl=lvl;
-        animateCount(valEl, v); lvlEl.textContent='Level '+lvl;
+        animateCount(valEl, v);
+        // recent passive decay (last 48h) → subtle ▼ indicator
+        var dn=recentDecay(d.model); lvlEl.innerHTML='Level '+lvl+(dn>0?' <span class="ldn" title="Decayed from inactivity">▼'+(dn%1?dn.toFixed(1):dn)+'</span>':'');
         requestAnimationFrame(function(){ fillEl.style.width=v+'%'; });
       });
       var ls=S.lifeScore(), m=qs('#lsMeta');
