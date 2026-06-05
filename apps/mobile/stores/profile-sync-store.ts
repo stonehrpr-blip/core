@@ -19,6 +19,7 @@ import { useAuthStore } from "@/stores/auth-store";
 import { useGameStateStore, type StatKey } from "@/stores/game-state-store";
 import { useFriendsStore } from "@/stores/friends-store";
 import { levelFor, corePower } from "@/lib/player-card";
+import { shouldAdoptServerProgress, buildRestoreStats } from "@/lib/progress-sync";
 import { DEFAULT_TITLE, DEFAULT_FRAME, DEFAULT_CLASS } from "@/constants/cosmetics";
 
 // The five Core Stats that exist server-side today (public.stats / stat_slug enum).
@@ -162,7 +163,7 @@ export const useProfileSyncStore = create<ProfileSyncState>()(
 
           let { data, error } = await supabase
             .from("profiles")
-            .select("player_id, class, title, frame")
+            .select("player_id, class, title, frame, xp, streak_days")
             .eq("id", userId)
             .maybeSingle();
 
@@ -180,7 +181,7 @@ export const useProfileSyncStore = create<ProfileSyncState>()(
                 id: userId,
                 display_name: auth.trial.name || auth.displayName || "New user",
               })
-              .select("player_id, class, title, frame")
+              .select("player_id, class, title, frame, xp, streak_days")
               .single();
             if (ins.error) {
               console.error("[profile-sync] insert failed", ins.error.message);
@@ -196,6 +197,36 @@ export const useProfileSyncStore = create<ProfileSyncState>()(
             frame: data.frame ?? DEFAULT_FRAME,
             hydrated: true,
           });
+
+          // Pull-before-push: on a reinstall (local reset to DEFAULTS, behind the
+          // server, no local activity yet) adopt the server's core progress
+          // instead of clobbering it on the push below. The empty-ledger guard in
+          // shouldAdoptServerProgress() also avoids undoing a just-logged slip —
+          // see lib/progress-sync.ts. Otherwise local is current/ahead → just push.
+          const g = useGameStateStore.getState();
+          const serverXp = (data as { xp?: number }).xp ?? 0;
+          if (
+            shouldAdoptServerProgress({
+              localXp: g.xp,
+              serverXp,
+              localLedgerCount: g.xpLedger.length,
+            })
+          ) {
+            let stats: Partial<Record<StatKey, number>> | undefined;
+            const sres = await supabase
+              .from("user_stats")
+              .select("stat_slug, value")
+              .eq("user_id", userId)
+              .in("stat_slug", STAT_SLUGS);
+            if (!sres.error && sres.data?.length) {
+              stats = buildRestoreStats(sres.data as { stat_slug: string; value: number }[]);
+            }
+            g.restoreFromServer({
+              xp: serverXp,
+              streakDays: (data as { streak_days?: number }).streak_days ?? 0,
+              stats,
+            });
+          }
 
           // Push current local progress + stats up so the freshly-read row reflects reality.
           get().pushProgress();

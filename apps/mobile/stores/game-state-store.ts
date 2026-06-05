@@ -120,6 +120,16 @@ type GameState = {
 
   // actions
   logSlip: (habit: string, opts?: { magnitude?: number }) => void;
+  // Restore slips pulled from Supabase on sign-in. Unions into slips[] by
+  // (ts, habit) WITHOUT re-applying stat/xp damage — logSlip already did that
+  // on the device that recorded them; core xp/streak/stats restore via
+  // profile-sync. This only rebuilds the visible slip ledger (todayDeltas etc).
+  mergeRemoteSlips: (incoming: Slip[]) => void;
+  // Adopt server-authoritative core progress on sign-in when the server is ahead
+  // (reinstall case) — prevents profile-sync from clobbering real progress with
+  // post-reinstall DEFAULTS. Sets xp / streak-days / core stats directly; no
+  // ledger entries (these events already happened on the device that earned them).
+  restoreFromServer: (snap: { xp: number; streakDays: number; stats?: Partial<Stats> }) => void;
   addStat: (stat: StatKey, amount: number, reason?: string) => void;
   applyStatTick: () => void;
   restoreStreak: () => void;
@@ -244,6 +254,25 @@ export const useGameStateStore = create<GameState>()(
             statLedger,
           };
         });
+      },
+
+      mergeRemoteSlips: (incoming) => {
+        if (!incoming?.length) return;
+        set((s) => {
+          const seen = new Set(s.slips.map((sl) => `${sl.ts}:${sl.habit}`));
+          const add = incoming.filter((sl) => !seen.has(`${sl.ts}:${sl.habit}`));
+          if (!add.length) return {} as Partial<GameState>;
+          const slips = [...s.slips, ...add].sort((a, b) => a.ts - b.ts);
+          return { slips };
+        });
+      },
+
+      restoreFromServer: (snap) => {
+        set((s) => ({
+          xp: snap.xp,
+          stats: snap.stats ? { ...s.stats, ...snap.stats } : s.stats,
+          streak: { ...s.streak, days: snap.streakDays },
+        }));
       },
 
       // Positive stat growth (quests, clean days). Mirrors logSlip's ledger so the
