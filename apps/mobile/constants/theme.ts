@@ -24,6 +24,17 @@ export const colors = {
     info: "#60A5FA",
   },
   decay: "#3A3D4A",
+  // Canonical rarity ladder — single source of truth, mirrors the web
+  // tokens in previews/_lib/core-theme.css (--rarity-*). Keep these hexes
+  // in lockstep with that file so item/chest rarity renders identically
+  // across web previews and the RN app.
+  rarity: {
+    common: "#9AA1B7",
+    rare: "#4A8FFF",
+    epic: "#B388FF",
+    legendary: "#FFC56B",
+    mythic: "#FF5C8A",
+  },
 } as const;
 
 export const motion = {
