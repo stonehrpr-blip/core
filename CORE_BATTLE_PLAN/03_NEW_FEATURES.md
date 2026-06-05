@@ -517,7 +517,7 @@ For v1.0 SHIP, if backend isn't ready: ship Pacts with **placeholder $0 stakes**
 
 ### Why
 
-Reload's "Recovery Goals" are text-based. Lock In tracks habits but doesn't track *bodies*. CORE's wedge is vape, and vape recovery has a *physical* dimension: lungs heal, breath returns, skin clears, sleep deepens, weight stabilizes.
+Reload's "Recovery Goals" are text-based. Lock In tracks habits but doesn't track *bodies*. CORE's wedge is vape, and vape recovery has a *physical* dimension many people notice: breathing can feel easier, skin and sleep can improve, energy returns. (Frame as subjective, individual experience — never a guaranteed medical outcome.)
 
 Body Receipts are **weekly snapshots of the user's body changing** — a visual report card that proves the work is working. This is what no quit-vape app does in this depth.
 
@@ -612,7 +612,7 @@ The breath-hold test:
 - User taps START → timer starts. Big number counts up: 1, 2, 3, ...
 - A SVG ring fills as time progresses. Color shifts cyan → blue → red gradient as time extends.
 - User taps LET GO → timer stops. Time recorded.
-- Comparison shown: "Last week: 44s. This week: 47s. +3s — your lungs are healing."
+- Comparison shown: "Last week: 44s. This week: 47s. +3s — keep watching this number move."
 
 **Calibration:**
 - First receipt: no comparison shown. Just "47 seconds. We'll watch this grow."

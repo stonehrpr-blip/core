@@ -13,7 +13,7 @@ These two models need to coexist during migration and converge over time.
 
 The legacy 14-module model is great for *depth* (a serious user gets granular feedback per area) but bad for:
 - **Glanceability** — 14 numbers don't fit a home-screen widget or an at-a-glance dashboard
-- **Visceral storytelling** — "your gym score is 67" doesn't trigger the same response as "your lungs are healing"
+- **Visceral storytelling** — "your gym score is 67" doesn't trigger the same response as "your lungs avatar is coming back to pink"
 - **Onboarding** — picking 14 things to track at sign-up is overwhelming
 - **Sharing** — TikTok-ready share cards need ONE strong number, not 14
 

@@ -62,10 +62,10 @@ Both Reload and The Lock In launched in 2025. They are growing fast. They share 
 - **Lifetime pricing** ($24.99–$49.99 — devastating to subscription LTV)
 - **10 languages** (Reload), **7 languages** (Lock In) vs CORE's 1
 
-Both are priced lower:
+Competitor pricing for reference:
 - Reload: $39.99–$49.99/year + lifetime tier
 - Lock In: $44.99/year
-- CORE (current): $59.99/year ← **most expensive, fewest features**
+- CORE: $44.99/year ← **now matches Lock In's anchor** (was $59.99)
 
 This spec closes the feature gaps **while keeping CORE's unique advantages**:
 - Vape-specific niche (neither competitor goes there)

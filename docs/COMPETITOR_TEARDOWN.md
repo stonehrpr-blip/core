@@ -15,7 +15,7 @@
 | **Pivot Breathe** | clinic only | enterprise | n/a | Real clinical backing · employer-paid | Locked to enterprise · no consumer access |
 | **Cal AI** | $9.99/mo | 500k+ | 4.7 (28k) | Calorie scan UX · GenZ aesthetic · viral TikTok | Not quit-related — relevant as ASPIRATIONAL PMF model |
 | **Headspace / Calm** | $12.99/mo | 5M+ | 4.8 (1M+) | Premium price tolerated · big content moat | Generic — not quit-specific |
-| **CORE** | $9.99/mo or $59.99/yr | — | — pre-launch | Visceral slip mechanic · AI coach with actions · 7-tier rank · home widget | Untested PMF · no community yet · only 1 person building |
+| **CORE** | $7.99/mo or $44.99/yr | — | — pre-launch | Visceral slip mechanic · AI coach with actions · 7-tier rank · home widget | Untested PMF · no community yet · only 1 person building |
 
 ---
 
@@ -72,7 +72,7 @@
 **Wellness category gravity. Not direct competition but pricing ceiling.**
 
 - **What works:** $12.99/mo accepted norm. Massive content moats. Celebrity endorsements.
-- **Reference:** Our $9.99 sits BELOW their $12.99 — psychologically a steal vs their anchor.
+- **Reference:** Our $7.99 sits well below their $12.99 — psychologically a steal vs their anchor.
 - **Where we win:** Specificity. Headspace is "general wellness." Core is "I'm quitting vape." Niche = higher conversion at lower CAC.
 
 ---
@@ -86,7 +86,7 @@ $10-13/mo ── Smoke Free, Headspace, Calm
 $15-30/mo ── Whoop (hardware), MyFitnessPal Premium
 ```
 
-Core's $9.99 is **right at the cluster's center**. Visible value justifies it. Going to $14.99 would put us in Headspace territory — too brand-rich for indie founder. Going to $4.99 would mean we're competing on price, which we'd lose.
+Core's $7.99 sits **just below the cluster's center**. Visible value justifies it. Going to $14.99 would put us in Headspace territory — too brand-rich for indie founder. Going to $4.99 would mean we're competing on price, which we'd lose.
 
 ---
 

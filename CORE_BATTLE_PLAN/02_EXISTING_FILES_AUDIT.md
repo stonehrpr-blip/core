@@ -432,8 +432,8 @@ This is one of the most important screens in the app. **Read it carefully.**
 2. **PROMISE input accepts pasted text.** Currently does. **Should reject paste** — typing is part of the commitment. Add `paste` event handler that prevents and shows a toast: "Type it. Don't paste."
 3. **Tone card descriptions are too long.** Each card has body copy that's 3 lines. Shorten to 1 line + a 2-word vibe tag.
 4. **Check-in time picker** — "Both-recommended" should have a small badge "Most users pick this" that lights up after 1.5s.
-5. **Step 4 trial pitch** — currently the price ($9.99/mo) is visible. Update to new pricing ($7.99/mo or $44.99/yr) per `01_STRATEGY.md` §3.
-6. **Exit intent bottom sheet** — copy currently says "$9.99/mo." Update to new price.
+5. **Step 4 trial pitch** — ✅ done. Now shows the canonical $7.99/mo · $44.99/yr per `01_STRATEGY.md` §3.
+6. **Exit intent bottom sheet** — ✅ done. Now shows $7.99/mo.
 7. **Analytics events** — verify all 5 step views fire `trial_step_view {step}` and all 5 completions fire `trial_step_complete {step}`.
 
 **Additions required:**
@@ -558,9 +558,9 @@ Each permission gets a dedicated card:
    - CTA: Set up places / Skip
    - On allow: open `witness-places.html`.
 
-4. **Health (lung function tracking)** (new — for Body Receipts)
-   - Title: "Track your lungs"
-   - Body: "Weekly breath-hold timer + optional Apple Health sync. Your lungs heal; you should see it."
+4. **Health (breath tracking)** (new — for Body Receipts)
+   - Title: "Track your breath"
+   - Body: "Weekly breath-hold timer + optional Apple Health sync. Watch your own numbers over time."
    - CTA: Connect Health / Skip
 
 5. **Contacts** (optional — for Pacts)

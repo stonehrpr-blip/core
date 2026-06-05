@@ -66,7 +66,7 @@ Specifics:
 - Home-screen widget shows your streak so you see it without opening
 - Local-first — your data stays on your phone unless you sync
 
-Pricing (because someone will ask): free tier (1 habit + basic stats), $9.99/mo or $59.99/yr for the full thing. Anti-cheap by design — most $4.99 habit apps are surface-level. I wanted something that costs enough that you actually use it.
+Pricing (because someone will ask): free tier (1 habit + basic stats), $7.99/mo or $44.99/yr for the full thing. Anti-cheap by design — most $4.99 habit apps are surface-level. I wanted something that costs enough that you actually use it.
 
 This isn't a "quit in 7 days" promise. Slips happen. Honesty is what builds the loop.
 
@@ -113,7 +113,7 @@ core.app
 - 3 features cut from the original spec
 - Highest-rated mechanic
 
-**Month 2:** "Why I priced Core at $9.99 instead of $4.99 (honest breakdown)"
+**Month 2:** "Why I priced Core at $7.99 instead of $4.99 (honest breakdown)"
 - The retention curve for free vs paid
 - What it costs to run the AI per user
 - Why higher prices = better outcomes for users

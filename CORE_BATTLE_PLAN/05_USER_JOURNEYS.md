@@ -336,7 +336,7 @@ Maya is on day 30. It's Sunday afternoon. The Body Receipt prompt fires.
 6. **14:02** Instructions. Maya taps START.
 7. **14:02** Ring fills. Maya holds breath.
 8. **14:03** Maya taps LET GO at 52 seconds.
-9. **14:03** Comparison shown: "Last week: 47s. This week: 52s. +5s — your lungs are healing."
+9. **14:03** Comparison shown: "Last week: 47s. This week: 52s. +5s — keep watching this number move."
 10. **14:04** Step 3: Apple Health sync. Maya has it connected → auto-pulls last week's data.
 11. **14:04** Sleep avg 7.3hrs, weight 162lbs (-3 from last week), HRV 55 (+3), mindfulness 18 min.
 12. **14:05** Maya edits weight to 161 (she just weighed today, 1lb less). Save.
@@ -354,7 +354,7 @@ Maya is on day 30. It's Sunday afternoon. The Body Receipt prompt fires.
 
 - Maya sees objective evidence her body is changing. This is irreplaceable for retention.
 - The 5-second breath improvement makes the work feel tangible.
-- The Coach quote in summary is calm: "Your lungs are healing. You're doing the work."
+- The Coach quote in summary is calm: "You're stacking clean days. You're doing the work."
 
 ### Analytics
 

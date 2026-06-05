@@ -27,9 +27,9 @@ export default function TrialExpired() {
     router.replace("/(tabs)");
   };
 
-  const price = plan === "monthly" ? "$9.99" : "$59.99";
-  const unit = plan === "monthly" ? "/ month" : "/ year ($4.99/mo)";
-  const label = plan === "monthly" ? "Monthly" : "Yearly · save 50%";
+  const price = plan === "monthly" ? "$7.99" : "$44.99";
+  const unit = plan === "monthly" ? "/ month" : "/ year ($3.75/mo)";
+  const label = plan === "monthly" ? "Monthly" : "Yearly · save 53%";
   const swap = plan === "monthly" ? "switch to yearly →" : "switch to monthly →";
 
   return (

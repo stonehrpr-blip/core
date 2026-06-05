@@ -237,8 +237,8 @@ Required words: "you," "steady," "witness," "watch," "promise," "mean it," "beco
 
 #### Health
 
-- Title: "Track your lungs"
-- Body: "Weekly breath-hold timer + optional Apple Health sync. Your lungs heal; you should see it."
+- Title: "Track your breath"
+- Body: "Weekly breath-hold timer + optional Apple Health sync. Watch your own numbers over time."
 - Allow CTA: "Connect Health"
 - Skip CTA: "Skip"
 
@@ -345,13 +345,13 @@ Required words: "you," "steady," "witness," "watch," "promise," "mean it," "beco
 Examples (Gentle tone):
 - "Just being here counts."
 - "Today doesn't need to be perfect."
-- "Your lungs are working better than yesterday."
+- "You're giving your lungs a break today."
 - "I see you, {name}."
 
 (Direct tone equivalents)
 - "Show up. That's all."
 - "Today's just today. No drama."
-- "Lung function up. Keep going."
+- "Another clean day logged. Keep going."
 - "{name}. Steady."
 
 ---
@@ -808,10 +808,12 @@ Stay locked.
 ### "Why it's worth it" bank (tailored to quiz goals)
 
 For goal "Quit vape":
-1. "You said you wanted to feel like yourself again. You said you wanted to breathe deep without a wheeze. That's not gone. It's coming."
-2. "Your lungs heal faster than you'd believe. By month 3 your breath capacity climbs noticeably. By month 9 you're not coughing in the cold."
+1. "You said you wanted to feel like yourself again — to breathe easier without that catch in your chest. A lot of people say that feeling comes back."
+2. "Many people report their breathing feels easier within a few months, and that the cough they'd gotten used to settles over time. Everyone's different, but it's worth staying for."
 3. "Money you save buys time. Time off the chain."
-4. "Kissing is better. Tasting is better. Smelling is better. Your senses come back."
+4. "Many people say taste and smell come back sharper. Your senses might surprise you."
+
+> **Compliance note:** These are subjective, individualised statements ("many people report…"), not guarantees of a specific medical outcome or timeline. Keep them that way — do not reintroduce absolute claims ("your lungs heal," "breath capacity climbs by month 3"). TGA/ACCC risk in Australia.
 
 (More options per goal type.)
 
@@ -1032,8 +1034,8 @@ Generated similarly with tier-appropriate content. Reflects on the year.
 - Start CTA: "START"
 - During: "{N}s"
 - Stop CTA: "LET GO"
-- Result (no prior): "{N} seconds. We'll watch this grow."
-- Result (with prior): "Last week: {prev}s. This week: {N}s. {delta} — your lungs are healing."
+- Result (no prior): "{N} seconds. We'll watch this number over time."
+- Result (with prior): "Last week: {prev}s. This week: {N}s. {delta} — keep watching this number move."
 
 #### Apple Health (if connected)
 
@@ -1209,6 +1211,7 @@ Eyes close.
 - "Download your data"
 - "Privacy Policy" → legal.html
 - "Terms of Use" → legal.html
+- "Refund & Cancellation" → refund-policy.html
 - "Community Guidelines" → community-guidelines.html
 - "Help & FAQ" → support.html
 - "Contact support"
@@ -1554,7 +1557,7 @@ Eyes close.
 
 ### Body Receipt share
 
-- "Lungs healing. {breath-hold delta}s gained this week."
+- "Breath-hold up {breath-hold delta}s this week."
 - (Photo NEVER included in share unless user explicit toggle.)
 
 ### Pact win share
@@ -1584,7 +1587,7 @@ Eyes close.
   - "4 Coach voices. Pick the one that lands."
   - "Witness watches before the slip — not after."
   - "Pacts: $5 on the line with a friend."
-  - "Body Receipts: see your lungs heal."
+  - "Body Receipts: track your breath-hold week over week."
   - "The Promise Letter: from you, to you, when you need it."
 
 ### Pricing on landing

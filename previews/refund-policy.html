@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+  <meta charset="utf-8" />
+  <title>Core — Refund &amp; Cancellation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <style>
+    :root { --bg-base:#02020A; --text-primary:#F8FAFE; --text-muted:#9AA1B7; --text-dim:#4F5570; --accent:#4A8FFF; }
+    * { box-sizing: border-box; }
+    html, body { margin:0; padding:0; height:100%; }
+    body { min-height:100vh; background:#000; display:flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text-primary); -webkit-font-smoothing:antialiased; padding:24px; overflow:hidden; }
+    .phone { position:relative; width:390px; height:844px; background:#000; border-radius:56px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+    .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:10; }
+    .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:10; }
+
+    .bg { position:absolute; inset:0; z-index:0; background: #000; }
+    .grain { position:absolute; inset:0; opacity:0.04; mix-blend-mode:overlay; z-index:2; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.7 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); pointer-events:none; }
+
+    .topbar { position:absolute; top:60px; left:0; right:0; padding:0 20px; display:flex; align-items:center; justify-content:space-between; z-index:10; }
+    .back {
+      width: 38px !important; height: 38px !important;
+      min-width: 38px !important; min-height: 38px !important;
+      max-width: 38px !important; max-height: 38px !important;
+      aspect-ratio: 1 / 1; flex: 0 0 38px; align-self: center;
+      border-radius: 50% !important;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.10);
+      display: flex !important; align-items: center !important; justify-content: center !important;
+      cursor: pointer; padding: 0; font-family: inherit; box-sizing: border-box;
+      transition: background .15s, border-color .15s, transform .12s;
+    }
+    .back:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }
+    .back:active { transform: scale(0.94); }
+    .back svg { width:14px; height:14px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex-shrink: 0; }
+    .topbar-title { font-size:17px; font-weight:600; letter-spacing:-0.2px; }
+
+    .scroll { position:absolute; top:110px; left:0; right:0; bottom:0; padding:0 24px 28px; overflow-y:auto; z-index:5; }
+    .scroll::-webkit-scrollbar { display:none; }
+
+    h1 { margin: 0 0 6px; font-size: 24px; font-weight: 600; letter-spacing:-0.6px; line-height:1.15; }
+    .meta { font-size: 10px; color: var(--text-muted); letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 18px; font-family: ui-monospace,"SF Mono",Menlo,monospace; }
+
+    h2 { margin: 22px 0 10px; font-size: 14px; font-weight: 600; letter-spacing:-0.2px; color: var(--accent); }
+    p { margin: 0 0 12px; font-size: 13px; line-height: 19px; color: var(--text-muted); letter-spacing:-0.05px; }
+    p strong { color: var(--text-primary); font-weight: 600; }
+    ul { margin: 0 0 12px; padding-left: 18px; }
+    li { font-size: 13px; line-height: 19px; color: var(--text-muted); margin-bottom: 6px; letter-spacing:-0.05px; }
+    li strong { color: var(--text-primary); }
+
+    .highlight-box { padding: 12px 14px; border-radius: 12px; background: rgba(74,143,255,0.08); border: 1px solid rgba(74,143,255,0.25); margin: 14px 0; }
+    .highlight-box-l { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: 4px; }
+    .highlight-box-t { font-size: 12px; color: var(--text-primary); line-height: 17px; letter-spacing:-0.05px; }
+
+    .footer-meta { text-align:center; font-size: 11px; color: var(--text-dim); letter-spacing: 0.06em; padding: 22px 0 8px; font-family:ui-monospace,"SF Mono",Menlo,monospace; }
+
+    .preview-label { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); color:#4A5060; font-size:11px; letter-spacing:0.16em; text-transform:uppercase; font-family:ui-monospace,"SF Mono",Menlo,monospace; }
+    @media (max-width:460px){ body{padding:0;} .phone{width:100vw; height:100vh; border-radius:0; box-shadow:none;} .notch,.home-indicator{display:none;} .preview-label{display:none;} }
+  </style>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div>
+    <div class="grain"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="topbar">
+      <button class="back" type="button" onclick="window.location.href='25-settings.html'" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18L9 12l6-6"/></svg></button>
+      <div class="topbar-title">Refund</div>
+      <div style="width:36px;"></div>
+    </div>
+
+    <div class="scroll">
+      <h1>Refund &amp; Cancellation</h1>
+      <div class="meta">Last updated 2026-06-05</div>
+
+      <div class="highlight-box">
+        <div class="highlight-box-l">Summary</div>
+        <div class="highlight-box-t">You can cancel any time from your device's subscription settings — your access continues until the end of the period you've paid for. Purchases are processed by the Apple App Store or Google Play, and refunds are handled under their policies. Nothing here limits the consumer guarantees you have under the Australian Consumer Law or other mandatory consumer-protection laws.</div>
+      </div>
+
+      <h2>1. Free trial</h2>
+      <p>Core offers a 7-day free trial. You will not be charged during the trial. If you do not cancel before the trial ends, your subscription begins and the first payment is taken automatically by the app store. You can cancel at any time during the trial to avoid being charged.</p>
+
+      <h2>2. How to cancel</h2>
+      <p>You manage and cancel your subscription through the app store you bought it from. We cannot cancel an app-store subscription on your behalf.</p>
+      <ul>
+        <li><strong>Apple (iOS):</strong> Settings → tap your name → Subscriptions → Core → Cancel Subscription. You can also open the App Store, tap your profile, then Subscriptions.</li>
+        <li><strong>Google Play (Android):</strong> Open Google Play → tap your profile → Payments &amp; subscriptions → Subscriptions → Core → Cancel subscription.</li>
+      </ul>
+      <p>Cancelling stops future renewals. Your Pro access continues until the end of the billing period you have already paid for; it is not cut off immediately.</p>
+
+      <h2>3. Auto-renewal</h2>
+      <p>Subscriptions renew automatically at the end of each billing period unless you cancel at least 24 hours before the period ends, in line with the relevant app store's rules. The renewal price and period are shown in the app before you subscribe and in your app-store account.</p>
+
+      <h2>4. Refunds</h2>
+      <p>Because purchases are made through the Apple App Store or Google Play, those platforms — not Core — process payments and handle refunds under their own published policies:</p>
+      <ul>
+        <li><strong>Apple:</strong> request a refund at reportaproblem.apple.com.</li>
+        <li><strong>Google Play:</strong> request a refund through your Google Play order history or at play.google.com.</li>
+      </ul>
+      <p>If you believe you are entitled to a refund and are having trouble with the app store, email us at <strong>corestudiosupport@gmail.com</strong> and we will do what we reasonably can to help, including liaising with the platform where appropriate.</p>
+
+      <h2>5. Your consumer rights are not excluded</h2>
+      <p>Nothing in this policy excludes, restricts, or modifies any consumer guarantee, right, or remedy that you have under law and that cannot be excluded.</p>
+      <p><strong>Australian Consumer Law:</strong> If you are a consumer in Australia, our services come with guarantees that cannot be excluded under the ACL. If a service fails to meet a consumer guarantee, you may be entitled to a remedy — including, where the failure is major, a refund — and to compensation for any other reasonably foreseeable loss or damage. These rights apply in addition to, and are not limited by, the app store's refund policy or any time limit it sets.</p>
+      <p><strong>Other regions:</strong> If you are a consumer in the EU, UK, or another jurisdiction with mandatory consumer-protection rules (including any statutory withdrawal or "cooling-off" period that applies to your purchase), those rights continue to apply and are not waived by this policy.</p>
+
+      <h2>6. Restores, freezes, and one-off purchases</h2>
+      <p>Some in-app items (for example, a streak restore or streak freeze) are optional one-off purchases. As they are delivered to your account immediately, they are generally non-refundable once used, except where a consumer guarantee or other mandatory law gives you a right to a refund.</p>
+
+      <h2>7. Questions</h2>
+      <p>For any billing, cancellation, or refund question, email <strong>corestudiosupport@gmail.com</strong>. Please write from the email associated with your account so we can help faster.</p>
+
+      <div class="footer-meta">corestudiosupport@gmail.com · © Core 2026</div>
+    </div>
+  </div>
+  <div class="preview-label">core · refund · cancellation</div>
+</body>
+</html>

@@ -191,11 +191,11 @@ Legend:
 
 ## §3. Pricing strategy
 
-Current CORE pricing: $9.99/mo · $59.99/yr.
+Current CORE pricing: $7.99/mo · $44.99/yr.
 Reload: $39.99–$49.99/yr + lifetime.
 Lock In: $44.99/yr.
 
-**Problem:** CORE is the most expensive with the fewest features. After this spec, CORE has the most features. Pricing should still come down to fight Lock In's anchor.
+**Resolved:** CORE now prices at $7.99/mo · $44.99/yr — matching Lock In's annual anchor while (after this spec) carrying the most features. No longer the most expensive.
 
 **New CORE pricing:**
 

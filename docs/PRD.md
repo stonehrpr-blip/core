@@ -98,7 +98,7 @@ Widget updates via WidgetKit timeline (15-min refresh + manual reload on slip).
 ### S1.8 Subscription
 
 - Free tier: 1 habit, basic stats, no widget
-- **Pro tier ($9.99/mo or $59.99/yr):** unlimited habits, all stats, widget, AI coach, recovery quests
+- **Pro tier ($7.99/mo or $44.99/yr):** unlimited habits, all stats, widget, AI coach, recovery quests
 - Via RevenueCat (iOS + Android IAP unified)
 - 7-day free trial
 

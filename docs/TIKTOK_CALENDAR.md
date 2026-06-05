@@ -27,7 +27,7 @@
 | Day | Date | Slot | Hook | Notes |
 |-----|------|------|------|-------|
 | 8 | Mon Jun 2 | 7am | "Core vs Smoke Free — which actually works" | Competitor diss with specifics |
-| 9 | Tue Jun 3 | 7pm | "Day 21 lung healing science" | "Here's what's happening biologically" |
+| 9 | Tue Jun 3 | 7pm | "Day 21 — why people say they feel different" | Experiential, not medical: "what users report at 3 weeks" |
 | 10 | Wed Jun 4 | 12pm | "I asked the app to set a nudge for my biggest trigger" | Coach actions demo |
 | 11 | Thu Jun 5 | 7pm | "What 'honesty streak' means" | Counter-intuitive mechanic |
 | 12 | Fri Jun 6 | 7am | "I logged my craving without slipping" | Honest-log feature reveal |
@@ -45,8 +45,8 @@
 | 17 | Wed Jun 11 | 12pm | "Tier up to Flow — full animation" | Rank-up celebration screen |
 | 18 | Thu Jun 12 | 7pm | "What 90 days clean does to your face" | Before/after format |
 | 19 | Fri Jun 13 | 7am | "I was wrong about quitting cold-turkey" | Vulnerability + lesson |
-| 20 | Sat Jun 14 | 12pm | "Storyboard V3 — lungs heal in real-time" | Re-shoot with better light |
-| 21 | Sun Jun 15 | 7pm | "Why I priced Core at $9.99" | Founder story format |
+| 20 | Sat Jun 14 | 12pm | "Storyboard V3 — lungs avatar comes back in real-time" | Re-shoot with better light |
+| 21 | Sun Jun 15 | 7pm | "Why I priced Core at $7.99" | Founder story format |
 
 ---
 
@@ -94,7 +94,7 @@
 Spend 30 min one day recording these on your phone via Control Center screen-record. Then cut into 30+ unique videos:
 
 - **Tap to smoke** — 5 seconds — used in 10+ videos
-- **Lungs healing pink** — 8 seconds — used in 8+ videos
+- **Lungs avatar filling pink** — 8 seconds — used in 8+ videos
 - **Coach typing back a long message** — 15 seconds
 - **Recovery quest start-to-finish** — 60 seconds — split into clips
 - **Rank-up celebration** — 8 seconds

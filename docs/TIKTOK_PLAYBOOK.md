@@ -13,7 +13,7 @@
 **The 3 video archetypes** (rotate through these):
 
 1. **Mechanic reveals** — "Watch what happens when I tap when I vape." Smoke pours out of phone, XP drops, lungs darken. People stop scrolling.
-2. **Progress show-offs** — "Day 14. Watch my lungs heal back to pink." Time-lapse of the lung avatar healing.
+2. **Progress show-offs** — "Day 14. Watch my lungs avatar come back to pink." Time-lapse of the lung avatar filling back in.
 3. **Coach screenshots** — Show the AI coach calling out a slip pattern. People love seeing AI being smart about them.
 
 ---

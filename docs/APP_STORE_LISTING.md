@@ -25,10 +25,10 @@
 **Alternatives:**
 - "Track, breathe, level up clean" *(29ch — verb-heavy, sticky)*
 - "Smoke-free with AI coach" *(24ch)*
-- "Real lung healing, gamified" *(27ch)*
-- "Quit vaping. Heal your lungs." *(29ch — strong but Apple flags "heal")*
+- ~~"Real lung healing, gamified"~~ *(DO NOT USE — absolute health claim, TGA/ACCC + Apple risk)*
+- ~~"Quit vaping. Heal your lungs."~~ *(DO NOT USE — health claim; Apple flags "heal")*
 
-**Go with #1.** Avoids "heal" (regulatory caution), captures core mechanics.
+**Go with #1.** Avoids "heal" and any health-outcome claim (regulatory caution), captures core mechanics.
 
 ---
 
@@ -48,7 +48,7 @@ Tap to log a puff. Smoke pours out of your lungs avatar. Your XP drops. Your 14-
 WHAT'S DIFFERENT
 
 • Visceral feedback. Tap = smoke = damage. No abstract numbers.
-• Live lung visual. As you stay clean, the avatar heals back to pink. You can see it.
+• Live lung visual. As you stay clean, the avatar's lungs shift back to pink — a motivational illustration of your progress, not a medical depiction.
 • AI coach that notices your patterns. "You slip at 3pm — here's what to try."
 • Recovery quests. 60-second box-breath after a slip claws back up to 12 XP.
 • Streak protection. Burn XP to save your streak in a pinch (because life happens).
@@ -69,8 +69,8 @@ Local-first. Your data stays on your device unless you sync. We never sell. You 
 
 PRICING
 • Free — 1 habit, basic dashboard, read-only feed
-• Pro Monthly — $9.99 unlocks unlimited habits, all 5 stats, AI Coach, widget, recovery quests, social
-• Pro Annual — $59.99 ($4.99/mo, save 50%)
+• Pro Monthly — $7.99 unlocks unlimited habits, all 5 stats, AI Coach, widget, recovery quests, social
+• Pro Annual — $44.99 ($3.75/mo, save 53%)
 
 7-day free trial. No card to start.
 
@@ -126,7 +126,7 @@ quit,vape,smoking,nicotine,addiction,habit,streak,sober,coach,tracker,recovery,b
 | # | Screen | Headline (overlay) | Subhead |
 |---|--------|---------------------|---------|
 | 1 | Habit page mid-smoke-animation | "Slip happens. So does the consequence." | Live visual feedback every time. |
-| 2 | Dashboard with lung healing trend | "Watch your lungs come back to pink." | 30-day trend, in real time. |
+| 2 | Dashboard with lung-avatar trend | "Watch your lungs avatar shift back to pink." | Your clean-streak trend, visualised. |
 | 3 | AI Coach action card | "An AI coach that catches your patterns." | "You slip at 3pm. Here's what to try." |
 | 4 | Recovery quest breath orb | "60-second comeback after a slip." | Claw back XP. Honesty rewarded. |
 | 5 | Rank-up celebration | "Climb the 7-tier ladder." | Focus → Spark → Flow → Forge → Edge → Peak → Apex |
@@ -191,6 +191,6 @@ Typical review time: 24–72 hours.
 ## Post-launch ASO experiments (week 1)
 
 - A/B test subtitle: "Track, breathe, level up clean" vs "Quit vaping with an AI coach"
-- A/B test screenshot #1: smoke animation mid-action vs lung healing time-lapse
+- A/B test screenshot #1: smoke animation mid-action vs lung-avatar restoration time-lapse
 - Monitor keyword rank for "quit vaping" (target top 10 in 30 days), "vape" (top 50)
 - ASO tools: AppFigures or AppTweak (free tier)

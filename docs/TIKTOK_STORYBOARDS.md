@@ -50,7 +50,7 @@ Film these in order. Each is 15–25 seconds. Total filming time: ~2 hours if yo
 
 ---
 
-## Video 3 — "Watch my lungs heal in real-time" (proof, share-worthy)
+## Video 3 — "Watch my lungs avatar come back to pink" (proof, share-worthy)
 
 **Length:** 24 seconds · **Goal:** Make people want the visual progress. Most-shared archetype.
 
@@ -62,13 +62,13 @@ Film these in order. Each is 15–25 seconds. Total filming time: ~2 hours if yo
 | 2 | 2.0–4.5s | Left phone: lungs avatar grey/dark. Lungs stat: 28/100. | "Day 1. My capacity was 28." |
 | 3 | 4.5–7.0s | Right phone: lungs avatar pink, glowing. Lungs stat: 64/100. | "Today, day 14. It's 64." |
 | 4 | 7.0–10.5s | Cut to selfie: you running up a set of stairs. No edits. | "I couldn't do this two weeks ago." |
-| 5 | 10.5–14s | Cut to Core's 30-day trend graph. Lungs line curving up. Sparkline arrows pointing up. | "The app tracks this every day. Every clean day, the lungs heal a little." |
-| 6 | 14–18s | Coach card pops: "Lung capacity recovers ~30% in the first 3 weeks. You're ahead." | Subtle gold particle effect. |
+| 5 | 10.5–14s | Cut to Core's 30-day trend graph. Lungs line curving up. Sparkline arrows pointing up. | "The app tracks this every day. Every clean day, the lungs avatar fills back in a little." |
+| 6 | 14–18s | Coach card pops: "Day 14 — your longest clean streak yet. Keep going." | Subtle gold particle effect. |
 | 7 | 18–22s | Voiceover: "I'm not telling you to quit. But if you are — this is the only app I've seen where the visual hits this hard." | Music swells. |
 | 8 | 22–24s | Outro card: Core wordmark + "Day 14 with Core. Link in bio." | Music out. |
 
-**Caption:** "Day 14 with @coreapp · the visual healing tracker is unreal. Bio link."
-**Pinned comment:** "It's $9.99/mo or $59.99/yr after the 7-day trial. Cheapest thing I've spent on quitting."
+**Caption:** "Day 14 with @coreapp · the visual recovery tracker is unreal. Bio link."
+**Pinned comment:** "It's $7.99/mo or $44.99/yr after the 7-day trial. Cheapest thing I've spent on quitting."
 
 ---
 
@@ -77,7 +77,7 @@ Film these in order. Each is 15–25 seconds. Total filming time: ~2 hours if yo
 - **Phone:** Use whatever you have. iPhone 13+ is fine.
 - **Tripod:** Cheap one. Static phone shots > shaky handheld.
 - **Lighting:** Cinematic = one warm key light (kitchen lamp), dim room. Don't overlight.
-- **Screen recording:** iPhone has built-in screen recording in Control Center. Record clean clips of the app FIRST (the smoke tap, the coach chat, the lung healing animation) — these become your stock footage you'll reuse in 30+ videos.
+- **Screen recording:** iPhone has built-in screen recording in Control Center. Record clean clips of the app FIRST (the smoke tap, the coach chat, the lung-avatar animation) — these become your stock footage you'll reuse in 30+ videos.
 - **Voiceover:** Voice Memos app, hold phone 6 inches from your mouth. Or use AI voiceover (ElevenLabs) if you want anonymity.
 - **Music:** TikTok library for organic posts. SoundDesign on Splice if monetising elsewhere.
 - **Cuts:** Capcut on iPhone (free). Sharp cuts on beats. No fades except outro.

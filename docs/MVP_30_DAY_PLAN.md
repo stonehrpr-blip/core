@@ -22,7 +22,7 @@
 ### Day 2
 - [ ] Wire Supabase Auth (Apple + Google) — replace mock in `apps/mobile/lib/supabase.ts`
 - [ ] Test sign-in.tsx flow end-to-end (Apple-only is fine for v1)
-- [ ] Set up RevenueCat free account, create products: `core_pro_monthly` ($9.99) + `core_pro_annual` ($59.99)
+- [ ] Set up RevenueCat free account, create products: `core_pro_monthly` ($7.99) + `core_pro_annual` ($44.99)
 - [ ] Install `react-native-purchases` (already in package.json)
 
 ### Day 3
@@ -131,7 +131,7 @@
 - [ ] Coach responds with real Claude (Sonnet 4.6)
 - [ ] Feature gates work
 
-**End of Week 3:** App is monetizable. Coach works. You can actually charge $9.99.
+**End of Week 3:** App is monetizable. Coach works. You can actually charge $7.99.
 
 ---
 

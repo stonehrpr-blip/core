@@ -6,8 +6,8 @@
 |----------|-------|
 | Launch niche | **Vape quitting** |
 | Brand | **CORE** (umbrella) — positioned at launch as "Quit Vape with Core" |
-| Pro Monthly | **$9.99 / mo** |
-| Pro Annual | **$59.99 / yr** ($4.99/mo blended, save 50%) |
+| Pro Monthly | **$7.99 / mo** |
+| Pro Annual | **$44.99 / yr** ($3.75/mo blended, save 53%) |
 | Free tier | 1 habit, 1 stat visible, basic dashboard, read-only feed |
 | Trial | 7-day free, no card to start |
 | First platform | iOS only (App Store), Android post month 4 |
@@ -16,12 +16,12 @@
 
 ## The math
 
-**Blended ARPU at new pricing:** ~$7.50/mo (assumes 65% monthly / 35% annual mix)
+**Blended ARPU at new pricing:** ~$6.50/mo (assumes 65% monthly / 35% annual mix)
 
 | Revenue target | Paying subs needed | At 5% conversion | At 8% conversion (niche-focused) |
 |----------------|-------------------|------------------|----------------------------------|
-| $10k/mo | **1,333** | 26,667 users | 16,667 users |
-| $20k/mo | **2,667** | 53,333 users | 33,333 users |
+| $10k/mo | **1,538** | 30,800 users | 19,200 users |
+| $20k/mo | **3,077** | 61,500 users | 38,500 users |
 
 Niche conversion at 8% is realistic when the App Store listing literally says "Quit vaping in 30 days" and people search for that exact term.
 
@@ -45,14 +45,14 @@ Niche conversion at 8% is realistic when the App Store listing literally says "Q
 - $3.99 signals "cheap habit tracker" — undercuts perceived value
 - 250% price increase, expect ~40% conversion drop = 2.1× revenue per user
 
-**Why $9.99 specifically:**
-- Headspace anchor at $12.99 makes $9.99 feel like a steal
-- Below the "I need to think about this" psychological threshold (~$15)
-- Round-ish number, simple ASO pricing
+**Why $7.99 specifically:**
+- Headspace anchor at $12.99 makes $7.99 feel like a steal
+- Well below the "I need to think about this" psychological threshold (~$15)
+- Undercuts Lock In / Smoke Free at $9.99+ while still signalling more value than $4.99 trackers
 
-**Why $59.99 annual:**
-- Saves $60/year vs monthly → unmissable savings frame
-- Effective $4.99/mo → still feels cheap
+**Why $44.99 annual:**
+- Saves ~$51/year vs monthly → unmissable savings frame
+- Effective $3.75/mo → still feels cheap
 - Locks in 12 months of revenue (anti-churn)
 
 ---
@@ -75,7 +75,7 @@ Niche conversion at 8% is realistic when the App Store listing literally says "Q
 ### Path 3 — Paid acquisition (Meta + Google)
 - Target: "quit vaping" keyword + lookalike audiences
 - CAC budget: $4–8 per install
-- LTV at $9.99 + 25% annual conversion = $40/user → 5–8× LTV/CAC
+- LTV at $7.99 + 25% annual conversion = ~$32/user → 4–6× LTV/CAC
 - Needs ~$3k/mo ad spend at scale
 - Timeline: **$10k/mo by month 5 IF unit economics hold**
 
@@ -96,7 +96,7 @@ Niche conversion at 8% is realistic when the App Store listing literally says "Q
 
 ## My honest pick: combine Path 1 + Path 4
 
-**Primary (70% effort):** B2C TikTok-first launch for vape quitters at $9.99/mo
+**Primary (70% effort):** B2C TikTok-first launch for vape quitters at $7.99/mo
 **Secondary (30% effort):** B2B coach version sold to ~10 coaches in parallel
 
 This dual-track gets you to $10k/mo faster:
