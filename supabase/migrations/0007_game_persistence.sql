@@ -41,8 +41,10 @@ create unique index if not exists user_quests_user_client_key_uidx
 create index if not exists user_quests_user_completed_idx
   on public.user_quests (user_id, completed_at desc);
 alter table public.user_quests enable row level security;
+drop policy if exists "self_read_user_quests" on public.user_quests;
 create policy "self_read_user_quests" on public.user_quests
   for select using (auth.uid() = user_id);
+drop policy if exists "self_write_user_quests" on public.user_quests;
 create policy "self_write_user_quests" on public.user_quests
   for all using (auth.uid() = user_id);
 
@@ -69,8 +71,10 @@ create unique index if not exists chest_opens_user_client_key_uidx
 create index if not exists chest_opens_user_opened_idx
   on public.chest_opens (user_id, opened_at desc);
 alter table public.chest_opens enable row level security;
+drop policy if exists "self_read_chest_opens" on public.chest_opens;
 create policy "self_read_chest_opens" on public.chest_opens
   for select using (auth.uid() = user_id);
+drop policy if exists "self_write_chest_opens" on public.chest_opens;
 create policy "self_write_chest_opens" on public.chest_opens
   for all using (auth.uid() = user_id);
 
@@ -83,7 +87,9 @@ create table if not exists public.user_inventory (
   primary key (user_id, item_slug)
 );
 alter table public.user_inventory enable row level security;
+drop policy if exists "self_read_user_inventory" on public.user_inventory;
 create policy "self_read_user_inventory" on public.user_inventory
   for select using (auth.uid() = user_id);
+drop policy if exists "self_write_user_inventory" on public.user_inventory;
 create policy "self_write_user_inventory" on public.user_inventory
   for all using (auth.uid() = user_id);

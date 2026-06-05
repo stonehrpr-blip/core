@@ -54,12 +54,40 @@ so a reinstall could overwrite real server progress with DEFAULTS.
   `noUncheckedIndexedAccess` / `app.config.ts` errors are unrelated.)
 
 ## NOT verified here — manual steps required
-The RN bundler can't run locally and there's no `supabase` CLI / `psql` here, so:
-1. **Apply** `supabase/migrations/0007_game_persistence.sql` to project
-   `tqjpgknkbfaayrjuwoet`.
-2. **Device test (lane5 VERIFY):** log a slip → reinstall → re-sign-in → confirm
-   the ledger restores and `slip_logs` has the row (with `client_slip_key`).
-   Also confirm core xp/streak restores (clobber fix).
+No `supabase` CLI / `psql` in the build env, so the migration apply + device test
+are yours to run. (Bundling itself now works — see the mobile-bundler note.)
+
+> **Dependency:** the clobber-fix path reads `profiles.xp` / `profiles.streak_days`,
+> which are added by **`0003_profile_game_card.sql`**. Apply 0003 first if it
+> isn't live yet (see `supabase/APPLY-MIGRATIONS.md`). 0007's slip persistence +
+> scaffold tables do NOT need 0003 (`slip_logs`/`user_stats` shipped in 0001).
+
+### 1. Apply migration 0007 (Stone runs — mutates prod)
+```bash
+cd ~/Desktop/lifeos
+supabase link --project-ref tqjpgknkbfaayrjuwoet   # one-time
+supabase db push --dry-run                          # preview 0007 (+ any pending)
+supabase db push                                    # apply
+```
+0007 is **re-runnable**: tables use `create table if not exists` and the policies
+are now guarded with `drop policy if exists`.
+
+Sanity-check after applying:
+```sql
+select column_name from information_schema.columns
+  where table_name = 'slip_logs' and column_name = 'client_slip_key';   -- 1 row
+select table_name from information_schema.tables
+  where table_name in ('user_quests','chest_opens','user_inventory');   -- 3 rows
+```
+
+### 2. Device test (lane5 VERIFY)
+Log a slip → reinstall → re-sign-in → confirm the ledger restores and `slip_logs`
+has the row (with `client_slip_key`). Also confirm core xp/streak restores
+(clobber fix). Check rows in project `tqjpgknkbfaayrjuwoet`:
+```sql
+select logged_at, xp_lost, client_slip_key from public.slip_logs
+  where user_id = auth.uid() order by logged_at desc limit 10;
+```
 
 ## Future
 - When chests ship in RN: move the reward roll to a SECURITY DEFINER rpc / edge
