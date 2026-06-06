@@ -31,6 +31,7 @@
   // on quest-driven gains, so neglected stats bounce back faster. All > 1 so every
   // stat rewards a comeback (brain/social rebound hardest). Used by addStat().
   const STAT_RECOVER = { lungs: 1.3, brain: 1.4, wallet: 1.2, willpower: 1.25, body: 1.15, social: 1.35 };
+  const DECAY_START_XP = 600; // passive stat decay is paused until this XP (~Level 3) — onboarding grace
 
   // Rank ladder — 11 tiers, Stone → CORE. XP threshold → rank name.
   // Each rank carries c1/c2/glow for badge rendering + `unlocks` (2 perks) the
@@ -141,6 +142,7 @@
   function seedDemo() {
     write({
       stats: { lungs: 64, brain: 78, wallet: 58, willpower: 81, body: 67, social: 52 },
+      lastStatTickAt: Date.now(), // anchor the decay clock — demo scores never drift on plain reload
       streak: {
         days: 14,
         lastCleanAt: Date.now(),
@@ -248,9 +250,9 @@
   // Single source of truth for the 6 stats. `emoji`/`icon`(SVG inner paths)/`tip` live here so
   // profile, dashboard, stat.html and friends all render identical stat identity — no per-page copies.
   const STAT_DEFS = [
-    { key: 'strength', model: 'body',      name: 'Strength', sub: 'Body',      color: '#FF6B6B', emoji: '⚔️', blurb: 'Train your body and push your physical limits.', tip: 'Log workouts and physical quests to build Strength.', icon: '<path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/>' },
-    { key: 'focus',    model: 'brain',     name: 'Focus',    sub: 'Brain',     color: '#4A8FFF', emoji: '🧠', blurb: 'Deep work, learning and sharp attention.', tip: 'Deep work and learning quests sharpen your Focus.', icon: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/><path d="M12 1.5v3M12 19.5v3M22.5 12h-3M4.5 12h-3"/>' },
-    { key: 'wealth',   model: 'wallet',    name: 'Wealth',   sub: 'Wallet',    color: '#FFCB3D', emoji: '💰', blurb: 'Earn, save and build your resources.', tip: 'Save, earn and clear money quests to grow Wealth.', icon: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v9M9.6 10h4a1.6 1.6 0 0 1 0 3.2h-3.2a1.6 1.6 0 0 0 0 3.2h4.2"/>' },
+    { key: 'strength', page: 'gym.html',      model: 'body',      name: 'Strength', sub: 'Body',      color: '#FF6B6B', emoji: '⚔️', blurb: 'Train your body and push your physical limits.', tip: 'Log workouts and physical quests to build Strength.', icon: '<path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/>' },
+    { key: 'focus',    page: 'focus.html',    model: 'brain',     name: 'Focus',    sub: 'Brain',     color: '#4A8FFF', emoji: '🧠', blurb: 'Deep work, learning and sharp attention.', tip: 'Deep work and learning quests sharpen your Focus.', icon: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/><path d="M12 1.5v3M12 19.5v3M22.5 12h-3M4.5 12h-3"/>' },
+    { key: 'wealth',   page: 'wealth.html',   model: 'wallet',    name: 'Wealth',   sub: 'Wallet',    color: '#FFCB3D', emoji: '💰', blurb: 'Earn, save and build your resources.', tip: 'Save, earn and clear money quests to grow Wealth.', icon: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v9M9.6 10h4a1.6 1.6 0 0 1 0 3.2h-3.2a1.6 1.6 0 0 0 0 3.2h4.2"/>' },
     { key: 'health',   model: 'lungs',     name: 'Health',   sub: 'Lungs',     color: '#34D399', emoji: '❤️', blurb: 'Recovery, sleep, nutrition and breath.', tip: 'Sleep, breathe and recover — health quests raise this.', icon: '<path d="M12 20.5s-7.2-4.6-7.2-9.8A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 7.2 3.7c0 5.2-7.2 9.8-7.2 9.8Z"/>' },
     { key: 'social',   model: 'social',    name: 'Social',   sub: '',          color: '#B388FF', emoji: '👥', blurb: 'Connection, relationships and community.', tip: 'Add friends and finish social quests to level up.', icon: '<circle cx="9" cy="8" r="3.2"/><path d="M3.4 20a5.6 5.6 0 0 1 11.2 0M16 5.2a3.2 3.2 0 0 1 0 6M18.7 20a5.6 5.6 0 0 0-3.1-5"/>' },
     { key: 'purpose',  model: 'willpower', name: 'Purpose',  sub: 'Willpower', color: '#5EEAD4', emoji: '🎯', blurb: 'Discipline, meaning and direction.', tip: 'Hold your streak and complete daily quests for Purpose.', icon: '<circle cx="12" cy="12" r="8.5"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z"/>' },
@@ -296,36 +298,45 @@
   // within a day — safe to call on every page load. Most stats decay 0 by design
   // (only `body` currently has a non-zero rate); rates live in STAT_DECAY.
   function applyStatTick() {
-    return update((s) => {
-      const now = Date.now();
-      // Pause passive decay during onboarding — no drift until ~Level 3 (xp >= 600). Keep the
-      // tick timestamp current so decay starts fresh (not retroactively) once they cross it.
-      if ((s.xp || 0) < 600) { s.lastStatTickAt = now; return s; }
-      const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
-      const last = s.lastStatTickAt || now;
-      const lastStart = new Date(last); lastStart.setHours(0, 0, 0, 0);
-      let days = Math.floor((todayStart.getTime() - lastStart.getTime()) / 86400000);
-      if (days <= 0) { if (!s.lastStatTickAt) s.lastStatTickAt = now; return s; }
-      // Active streak freeze pauses decay — forgive this run entirely (no drift while frozen).
-      if (s.streak && s.streak.frozenUntil && s.streak.frozenUntil > now) { s.lastStatTickAt = now; return s; }
-      days = Math.min(days, 7);
-      if (!s.stats) s.stats = {};
-      Object.keys(STAT_DECAY).forEach((k) => {
-        const dec = STAT_DECAY[k] || 0; if (dec <= 0) return;
-        const raisedRecently = (s.statLedger || []).some((e) => e.stat === k && e.delta > 0 && (now - e.ts) < 86400000);
-        if (raisedRecently) return;
-        const before = s.stats[k] || 0;
-        const after = clamp(before - dec * days, STAT_MIN, STAT_MAX);
-        if (after !== before) {
-          s.statLedger = s.statLedger || [];
-          s.statLedger.unshift({ ts: now, stat: k, delta: Math.round((after - before) * 10) / 10, reason: 'decay' });
-          if (s.statLedger.length > 200) s.statLedger.length = 200;
-        }
-        s.stats[k] = after;
-      });
-      s.lastStatTickAt = now;
+    const s = read();
+    const now = Date.now();
+    // Pause passive decay during onboarding — no drift until ~Level 3 (xp >= 600). Anchor the
+    // tick clock once (so decay later starts fresh, not retroactively), then no-op.
+    if ((s.xp || 0) < DECAY_START_XP) {
+      if (s.lastStatTickAt == null) { s.lastStatTickAt = now; write(s); }
       return s;
+    }
+    const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+    const last = s.lastStatTickAt || now;
+    const lastStart = new Date(last); lastStart.setHours(0, 0, 0, 0);
+    let days = Math.floor((todayStart.getTime() - lastStart.getTime()) / 86400000);
+    // Same calendar day (the common reload/nav case) → TRUE no-op: no write, no coreStateChange,
+    // so scores never move on a plain reload. Only persist if the anchor was missing.
+    if (days <= 0) {
+      if (s.lastStatTickAt == null) { s.lastStatTickAt = now; write(s); }
+      return s;
+    }
+    // Active streak freeze pauses decay — forgive this run entirely (no drift while frozen).
+    if (s.streak && s.streak.frozenUntil && s.streak.frozenUntil > now) { s.lastStatTickAt = now; write(s); return s; }
+    days = Math.min(days, 7);
+    if (!s.stats) s.stats = {};
+    Object.keys(STAT_DECAY).forEach((k) => {
+      const dec = STAT_DECAY[k] || 0; if (dec <= 0) return;
+      const raisedRecently = (s.statLedger || []).some((e) => e.stat === k && e.delta > 0 && (now - e.ts) < 86400000);
+      if (raisedRecently) return;
+      const before = s.stats[k] || 0;
+      const after = clamp(before - dec * days, STAT_MIN, STAT_MAX);
+      if (after !== before) {
+        s.statLedger = s.statLedger || [];
+        s.statLedger.unshift({ ts: now, stat: k, delta: Math.round((after - before) * 10) / 10, reason: 'decay' });
+        if (s.statLedger.length > 200) s.statLedger.length = 200;
+        s.stats[k] = after;
+      }
     });
+    // A genuine day boundary was crossed — persist the advanced anchor (+ any decay) once.
+    s.lastStatTickAt = now;
+    write(s);
+    return s;
   }
 
   function rankFor(xp) {
