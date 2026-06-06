@@ -92,16 +92,15 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .gender-toggle{display:inline-flex;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:999px;padding:3px;margin:0 auto 12px;gap:2px;}
 .gt-opt{appearance:none;border:none;background:none;font:inherit;cursor:pointer;color:var(--muted);font-size:12px;font-weight:700;padding:6px 18px;border-radius:999px;transition:background .16s,color .16s;}
 .gt-opt.on{background:rgba(255,255,255,0.10);color:var(--text);}
-.figs{position:relative;width:100%;aspect-ratio:260 / 198;border-radius:14px;overflow:hidden;
-  background:radial-gradient(60% 58% at 50% 44%,rgba(255,255,255,0.04),transparent 72%);}
-.figwrap{position:absolute;inset:0;}
-.figwrap img{position:absolute;left:0;top:0;width:100%;height:auto;transform-origin:top center;
-  filter:invert(1) brightness(1.2) contrast(.96) opacity(.82);pointer-events:none;user-select:none;}
-.region{position:absolute;border:none;margin:0;padding:0;background:none;cursor:pointer;border-radius:50%;transition:transform .14s;}
-.region::before{content:"";position:absolute;inset:0;border-radius:50%;
-  background:radial-gradient(circle,var(--rc,#5A6072) 0%,transparent 68%);opacity:var(--ro,0.12);
-  mix-blend-mode:screen;filter:blur(2px);transition:opacity .5s ease,background .5s ease;}
-.region:active{transform:scale(1.08);}
+.figs{position:relative;width:100%;aspect-ratio:1 / 0.95;border-radius:14px;overflow:hidden;
+  background:radial-gradient(62% 60% at 50% 46%,rgba(255,255,255,0.035),transparent 72%);}
+.figwrap{position:absolute;inset:0;padding:8px 6px;display:flex;align-items:center;justify-content:center;gap:4px;}
+.bodysvg{flex:1;min-width:0;width:50%;height:100%;display:block;}
+.bodysvg path{stroke:rgba(255,255,255,0.34);stroke-width:1.6;vector-effect:non-scaling-stroke;stroke-linejoin:round;}
+.bodysvg .base{fill:rgba(255,255,255,0.022);}
+.bodysvg .mg{fill:rgba(255,255,255,0.05);cursor:pointer;transition:fill .55s ease,fill-opacity .55s ease;}
+.bodysvg .mg:active{fill-opacity:.85;}
+@media(prefers-reduced-motion:reduce){.bodysvg .mg{transition:none;}}
 .map-empty{text-align:center;font-size:11.5px;color:var(--dim);margin-top:9px;}
 .maplegend{display:flex;flex-wrap:wrap;justify-content:center;gap:7px 14px;margin-top:12px;padding-top:11px;border-top:1px solid rgba(255,255,255,0.06);}
 .maplegend i{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:700;letter-spacing:.02em;color:var(--muted);font-style:normal;}
@@ -240,7 +239,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
           </div>
         </div>
         <div class="figs" id="figs">
-          <div class="figwrap" id="figwrap"><img id="bodyImg" src="male-human-body-front-back-260nw-688347376.jpg.webp" alt="Muscle map, front and back" /></div>
+          <div class="figwrap" id="figwrap"></div>
         </div>
         <div class="map-empty" id="mapEmpty" style="display:none">Log a workout to light up your muscle map.</div>
         <div class="maplegend" id="maplegend"></div>
@@ -281,6 +280,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 
 <script src="_lib/core-sfx.js"></script>
 <script src="_lib/core-state.js"></script>
+<script src="_lib/core-bodymap.js"></script>
 <script src="_lib/core-back.js"></script>
 <script src="_lib/dash-ambient.js"></script>
 <script>
@@ -388,41 +388,34 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   function allIntensity(){ var o={}; MUSCLES.forEach(function(m){ o[m.id]=intensity(m.id); }); return o; }
   function levelLabel(l){ return l==='none'?'Untrained':l==='low'?'Started':l==='mid'?'Building':'Strong'; }
 
-  /* ───────── Muscle map — colour-coded by training intensity; male/female ───────── */
-  var BODY_IMG={ male:'male-human-body-front-back-260nw-688347376.jpg.webp', female:'muscular-young-woman-front-back-260nw-462228112.jpg.webp' };
-  // per-gender transform frames each figure-set in the .figs band (hides stock label + watermark)
-  var BODY_TF={ male:'translateY(-13%) scale(1.16)', female:'translateY(-7%) scale(1.22)' };
+  /* ───────── Muscle map — real anatomical SVG (react-native-body-highlighter data), colour-coded ───────── */
   function getGender(){ return store().gender==='female'?'female':'male'; }
   function setGender(g){ var s=store(); s.gender=(g==='female'?'female':'male'); save(s); }
   // heat scale (training intensity) — also drives the legend
   var HEAT=[ {k:'none',c:'#5A6072',label:'Untrained'},{k:'low',c:'#F4C24B',label:'Light'},{k:'mid',c:'#FF8A45',label:'Moderate'},{k:'high',c:'#FF5A5A',label:'Hard'} ];
   function heatFor(level){ for(var i=0;i<HEAT.length;i++) if(HEAT[i].k===level) return HEAT[i]; return HEAT[0]; }
-  // muscle regions in .figs % coords (front fig ~25% x, back fig ~74% x) — shared across genders
-  var REGIONS=[
-    {m:'shoulders',x:25,y:21,r:8}, {m:'chest',x:25,y:29,r:8}, {m:'core',x:25,y:41,r:7},
-    {m:'arms',x:13,y:34,r:5}, {m:'arms',x:37,y:34,r:5}, {m:'legs',x:25,y:64,r:9},
-    {m:'shoulders',x:74,y:21,r:8}, {m:'back',x:74,y:32,r:9}, {m:'arms',x:62,y:34,r:5},
-    {m:'arms',x:86,y:34,r:5}, {m:'legs',x:74,y:64,r:9}
-  ];
-  var ASP=260/198; // figs width/height ratio — keeps overlay circles round
+  var MGROUPS=['chest','back','shoulders','arms','legs','core']; // trainable groups drawn over the base silhouette
   function renderDiagram(){
     var g=getGender(), inten=allIntensity();
     Array.prototype.forEach.call(document.querySelectorAll('#genderToggle .gt-opt'),function(b){ b.classList.toggle('on', b.getAttribute('data-g')===g); });
-    var img=qs('#bodyImg'); if(img){ img.src=BODY_IMG[g]; img.style.transform=BODY_TF[g]; }
-    var fw=qs('#figwrap'); if(fw){ fw.querySelectorAll('.region').forEach(function(n){n.remove();}); }
-    var anyTrained=false;
-    REGIONS.forEach(function(rg){
-      var it=inten[rg.m]||{level:'none',t:0}; if(it.t>0) anyTrained=true;
-      var h=heatFor(it.level);
-      var b=document.createElement('button'); b.className='region';
-      b.style.left=(rg.x-rg.r)+'%'; b.style.top=(rg.y-rg.r*ASP)+'%';
-      b.style.width=(rg.r*2)+'%'; b.style.height=(rg.r*2*ASP)+'%';
-      b.style.setProperty('--rc',h.c);
-      b.style.setProperty('--ro', it.level==='none'?'0.10':(0.30+it.t*0.60).toFixed(2));
-      b.setAttribute('aria-label', mInfo(rg.m).name+' — '+levelLabel(it.level));
-      b.addEventListener('click',function(){ sfx('tick'); openSheet(rg.m); });
-      if(fw) fw.appendChild(b);
-    });
+    var fw=qs('#figwrap'), bm=window.CoreBodyMap && window.CoreBodyMap[g], anyTrained=false;
+    function sideSvg(side){
+      var parts=side.parts;
+      var s='<svg class="bodysvg" viewBox="'+side.vb+'" preserveAspectRatio="xMidYMid meet">';
+      if(parts.base) s+='<path class="base" d="'+parts.base+'"></path>';
+      MGROUPS.forEach(function(grp){
+        var d=parts[grp]; if(!d) return;
+        var it=inten[grp]||{level:'none',t:0}; if(it.t>0) anyTrained=true;
+        var st='';
+        if(it.level!=='none'){ var h=heatFor(it.level); st=' style="fill:'+h.c+';fill-opacity:'+(0.34+it.t*0.55).toFixed(2)+'"'; }
+        s+='<path class="mg" data-m="'+grp+'" d="'+d+'"'+st+'></path>';
+      });
+      return s+'</svg>';
+    }
+    if(fw && bm){
+      fw.innerHTML=sideSvg(bm.front)+sideSvg(bm.back);
+      Array.prototype.forEach.call(fw.querySelectorAll('.mg'),function(p){ p.addEventListener('click',function(){ sfx('tick'); openSheet(p.getAttribute('data-m')); }); });
+    }
     var me=qs('#mapEmpty'); if(me) me.style.display=anyTrained?'none':'block';
     var lg=qs('#maplegend'); if(lg) lg.innerHTML=HEAT.map(function(h){ return '<i><b style="background:'+h.c+'"></b>'+h.label+'</i>'; }).join('');
     renderInsight(inten);
