@@ -7,11 +7,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <style>
   :root{
-    --bg-base:#02020A; --bg-card:rgba(255,255,255,0.035); --bg-card-2:rgba(255,255,255,0.06);
-    --border:rgba(255,255,255,0.08); --text:#F8FAFE; --muted:#9AA1B7; --dim:#4F5570;
-    --good:#34D399; --warn:#FFCB3D; --orange:#FB923C; --bad:#F0463C; --coin:#FFCB3D;
-    /* live health colour + glow — JS drives these every frame */
-    --hc:#34D399; --hc2:#6ff5c0; --glow:0.55; --shake:0;
+    --bg-base:#02020A; --bg-card:rgba(255,255,255,0.022); --bg-card-2:rgba(255,255,255,0.06);
+    --border:rgba(255,255,255,0.07); --text:#F8FAFE; --muted:#9AA1B7; --dim:#4F5570;
+    --good:#0A84FF; --warn:#0A84FF; --orange:#9AA1B7; --bad:#F0463C; --coin:#9AA1B7;
+    /* live health colour + glow — neutralised to single blue accent */
+    --hc:#0A84FF; --hc2:#6FB4FF; --glow:0.55; --shake:0;
   }
   *{ box-sizing:border-box; }
   html,body{ margin:0; padding:0; height:100%; }
@@ -118,7 +118,7 @@
   .bmeta{ display:flex; justify-content:space-between; margin-top:8px; font-size:10.5px; font-weight:700; color:var(--muted); }
   .bmeta b{ color:var(--text); font-weight:900; }
   .bweaken{ margin-top:14px; width:100%; border:none; cursor:pointer; border-radius:14px; padding:13px; font-size:13px; font-weight:900; letter-spacing:.02em;
-    color:#04120c; background:linear-gradient(135deg, var(--good), #6ff5c0); box-shadow:0 8px 22px rgba(52,211,153,.32); transition:transform .12s, opacity .3s; }
+    color:#fff; background:var(--good); box-shadow:0 8px 20px rgba(10,132,255,.28); transition:transform .12s, opacity .3s; }
   .bweaken:active{ transform:scale(.985); }
   .bweaken:disabled{ opacity:.45; cursor:default; box-shadow:none; }
   .bweaken small{ display:block; font-size:10px; font-weight:700; opacity:.7; margin-top:2px; }
@@ -152,8 +152,8 @@
   .cbtn:active{ transform:scale(.985); }
   .cbtn .ct{ font-size:13px; font-weight:900; display:flex; align-items:center; gap:7px; }
   .cbtn .cs{ font-size:10.5px; font-weight:700; opacity:.8; margin-top:3px; display:block; }
-  .cfocus{ color:#06121f; background:linear-gradient(135deg,#4A8FFF,#7aa9ff); box-shadow:0 8px 22px rgba(74,143,255,.3); }
-  .cfocus.on{ background:linear-gradient(135deg,#34D399,#6ff5c0); box-shadow:0 8px 26px rgba(52,211,153,.4); color:#04120c; }
+  .cfocus{ color:#fff; background:#0A84FF; box-shadow:0 8px 20px rgba(10,132,255,.28); }
+  .cfocus.on{ background:#0A84FF; box-shadow:0 8px 22px rgba(10,132,255,.36); color:#fff; }
   .crelapse{ color:#f7dada; background:linear-gradient(135deg, rgba(240,70,60,.16), rgba(240,70,60,.05)); border:1px solid rgba(240,70,60,.4); }
 
   /* ── interconnections strip ────────────────────────────────── */
@@ -306,9 +306,9 @@
       moon:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px"><path d="M21 12.8A8 8 0 1 1 11.2 3a6 6 0 0 0 9.8 9.8z"/></svg>'
     };
     var BOSSES=[
-      { name:'Procrastination', emblem:SVG_BOSS.spiral, color:'#A78BFA' },
-      { name:'Doomscrolling',   emblem:SVG_BOSS.phone,  color:'#60A5FA' },
-      { name:'The Late Nights', emblem:SVG_BOSS.moon,   color:'#F472B6' }
+      { name:'Procrastination', emblem:SVG_BOSS.spiral, color:'#0A84FF' },
+      { name:'Doomscrolling',   emblem:SVG_BOSS.phone,  color:'#0A84FF' },
+      { name:'The Late Nights', emblem:SVG_BOSS.moon,   color:'#0A84FF' }
     ];
 
     function fresh(){
@@ -341,10 +341,10 @@
     }
     // health states
     function stateOf(h){
-      if(h>=80) return { k:'peak',  c:'#34D399', c2:'#6ff5c0', glow:1.0,  txt:'PEAK CONDITION',     crit:0 };
-      if(h>=50) return { k:'stable',c:'#FFCB3D', c2:'#ffe07a', glow:0.74, txt:'STABLE · VULNERABLE', crit:0 };
-      if(h>=20) return { k:'decl',  c:'#FB923C', c2:'#ffc591', glow:0.5,  txt:'DECLINING CONDITION', crit:0.35 };
-      return            { k:'crit',  c:'#F0463C', c2:'#ff8079', glow:0.36, txt:'CRITICAL STATE',     crit:1 };
+      if(h>=80) return { k:'peak',  c:'#0A84FF', c2:'#6FB4FF', glow:1.0,  txt:'PEAK CONDITION',     crit:0 };
+      if(h>=50) return { k:'stable',c:'#0A84FF', c2:'#6FB4FF', glow:0.74, txt:'STABLE · VULNERABLE', crit:0 };
+      if(h>=20) return { k:'decl',  c:'#0A84FF', c2:'#6FB4FF', glow:0.5,  txt:'DECLINING CONDITION', crit:0.35 };
+      return            { k:'crit',  c:'#0A84FF', c2:'#6FB4FF', glow:0.36, txt:'CRITICAL STATE',     crit:1 };
     }
 
     /* ── the live engine ───────────────────────────────────── */
@@ -510,10 +510,10 @@
       var d=derived();
       var SI='style="width:15px;height:15px;vertical-align:-2px"';
       var cards=[
-        { e:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" '+SI+'><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>', n:'Energy',     v:d.energy,     c:'#FFCB3D' },
-        { e:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" '+SI+'><path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-1 5 3 3 0 0 0 1 5 3 3 0 0 0 6 0V4a3 3 0 0 0-3 0zM15 4a3 3 0 0 1 3 3 3 3 0 0 1 1 5 3 3 0 0 1-1 5"/></svg>', n:'Focus',      v:d.focus,      c:'#4A8FFF' },
-        { e:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" '+SI+'><path d="M12 3c1.6 3.6 4 4.6 4 8a4 4 0 0 1-8 0c0-1.3.5-2.1 1-2.7C9 11 12 8 12 3z"/></svg>', n:'Discipline', v:d.discipline, c:'#FB923C' },
-        { e:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" '+SI+'><path d="M12 20.5s-7.2-4.6-7.2-9.8A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 7.2 3.7c0 5.2-7.2 9.8-7.2 9.8Z"/></svg>', n:'Recovery',   v:d.recovery,   c:'#34D399' }
+        { e:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" '+SI+'><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>', n:'Energy',     v:d.energy,     c:'#0A84FF' },
+        { e:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" '+SI+'><path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-1 5 3 3 0 0 0 1 5 3 3 0 0 0 6 0V4a3 3 0 0 0-3 0zM15 4a3 3 0 0 1 3 3 3 3 0 0 1 1 5 3 3 0 0 1-1 5"/></svg>', n:'Focus',      v:d.focus,      c:'#0A84FF' },
+        { e:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" '+SI+'><path d="M12 3c1.6 3.6 4 4.6 4 8a4 4 0 0 1-8 0c0-1.3.5-2.1 1-2.7C9 11 12 8 12 3z"/></svg>', n:'Discipline', v:d.discipline, c:'#0A84FF' },
+        { e:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" '+SI+'><path d="M12 20.5s-7.2-4.6-7.2-9.8A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 7.2 3.7c0 5.2-7.2 9.8-7.2 9.8Z"/></svg>', n:'Recovery',   v:d.recovery,   c:'#0A84FF' }
       ];
       var sw=$('stats');
       if(sw.children.length!==4){ sw.innerHTML=cards.map(function(c,i){

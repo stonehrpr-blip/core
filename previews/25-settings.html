@@ -6,13 +6,13 @@
 <title>CORE — Settings</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <style>
-  :root { --bg-base:#02020A; --bg-card:rgba(255,255,255,0.035); --bg-card-2:rgba(255,255,255,0.06); --border:rgba(255,255,255,0.08); --text:#F8FAFE; --muted:#9AA1B7; --dim:#4F5570; --accent:#4A8FFF; --grad-a:#4A8FFF; --grad-b:#6F70FF; --good:#34D399; --danger:#FF6B6B; }
+  :root { --bg-base:#02020A; --bg-card:rgba(255,255,255,0.022); --bg-card-2:rgba(255,255,255,0.06); --border:rgba(255,255,255,0.07); --text:#F8FAFE; --muted:#9AA1B7; --dim:#4F5570; --accent:#0A84FF; --grad-a:#0A84FF; --grad-b:#0A84FF; --good:#9AA1B7; --danger:#9AA1B7; }
   * { box-sizing:border-box; } html,body{ margin:0; padding:0; height:100%; }
   body { min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text); -webkit-font-smoothing:antialiased; padding:24px; overflow:hidden; }
   .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
   .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:60; }
   .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:60; }
-  .bg { position:absolute; inset:0; z-index:0; background: radial-gradient(60% 30% at 50% 8%, rgba(74,143,255,0.10), transparent 65%), linear-gradient(180deg, #060620 0%, #02020A 55%, #050510 100%); }
+  .bg { position:absolute; inset:0; z-index:0; background: radial-gradient(60% 30% at 50% 8%, rgba(10,132,255,0.10), transparent 65%), linear-gradient(180deg, #060a18 0%, #02020A 55%, #050510 100%); }
   .frame { position:absolute; inset:0; z-index:10; display:flex; flex-direction:column; padding:54px 0 0; }
   .hdr { display:flex; align-items:center; gap:12px; padding:2px 18px 10px; }
   .back { width:38px; height:38px; border-radius:50%; border:none; background:rgba(255,255,255,0.06); color:var(--text); display:flex; align-items:center; justify-content:center; text-decoration:none; flex:none; } .back svg{ width:19px; height:19px; }
@@ -22,18 +22,18 @@
   .group{ border-radius:18px; background:var(--bg-card); border:1px solid var(--border); overflow:hidden; }
   .row{ display:flex; align-items:center; gap:12px; padding:14px 15px; border-bottom:1px solid var(--border); }
   .row:last-child{ border-bottom:none; }
-  .row .ri{ width:34px; height:34px; flex:none; border-radius:10px; display:flex; align-items:center; justify-content:center; background:rgba(74,143,255,0.12); border:1px solid rgba(120,160,255,0.22); } .row .ri svg{ width:18px; height:18px; color:#8FB4FF; }
+  .row .ri{ width:34px; height:34px; flex:none; border-radius:10px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.05); border:1px solid var(--border); } .row .ri svg{ width:18px; height:18px; color:var(--muted); }
   .row .rb{ flex:1; min-width:0; } .row .rb b{ font-size:14px; font-weight:700; display:block; } .row .rb span{ font-size:12px; color:var(--muted); }
-  .row input.name{ flex:1; background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:10px; padding:9px 11px; color:var(--text); font:inherit; font-size:14px; font-weight:700; outline:none; } .row input.name:focus{ border-color:rgba(120,160,255,.5); }
+  .row input.name{ flex:1; background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:10px; padding:9px 11px; color:var(--text); font:inherit; font-size:14px; font-weight:700; outline:none; } .row input.name:focus{ border-color:var(--accent); }
   .row .val{ font-size:13px; font-weight:700; color:var(--muted); font-variant-numeric:tabular-nums; }
-  .row .mini{ border:1px solid var(--border); background:rgba(255,255,255,0.04); color:var(--text); font:inherit; font-size:12px; font-weight:800; padding:7px 12px; border-radius:10px; cursor:pointer; } .row .mini.ok{ color:var(--good); border-color:rgba(52,211,153,.4); }
+  .row .mini{ border:1px solid var(--border); background:rgba(255,255,255,0.04); color:var(--text); font:inherit; font-size:12px; font-weight:800; padding:7px 12px; border-radius:10px; cursor:pointer; } .row .mini.ok{ color:var(--accent); border-color:color-mix(in srgb,var(--accent) 45%,transparent); }
   /* toggle */
   .sw{ width:46px; height:28px; border-radius:999px; background:rgba(255,255,255,0.12); border:none; position:relative; cursor:pointer; flex:none; transition:.2s; }
   .sw::after{ content:""; position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:#fff; transition:.2s; }
   .sw.on{ background:linear-gradient(135deg,var(--grad-a),var(--grad-b)); } .sw.on::after{ transform:translateX(18px); }
-  .danger{ color:var(--danger); } .danger .ri{ background:rgba(255,107,107,0.12); border-color:rgba(255,107,107,0.25); } .danger .ri svg{ color:var(--danger); }
+  .danger{ color:var(--danger); } .danger .ri{ background:rgba(255,255,255,0.05); border-color:var(--border); } .danger .ri svg{ color:var(--danger); }
   .danger .rb b{ color:var(--danger); }
-  .confirm{ border:1px solid var(--danger); background:rgba(255,107,107,0.12); color:var(--danger); font:inherit; font-size:12px; font-weight:800; padding:8px 13px; border-radius:10px; cursor:pointer; }
+  .confirm{ border:1px solid var(--border); background:rgba(255,255,255,0.05); color:var(--text); font:inherit; font-size:12px; font-weight:800; padding:8px 13px; border-radius:10px; cursor:pointer; }
   .about{ text-align:center; font-size:11px; color:var(--dim); margin-top:24px; font-weight:600; }
   .toast{ position:absolute; left:50%; bottom:40px; transform:translateX(-50%) translateY(14px); z-index:90; background:rgba(20,22,34,0.96); border:1px solid var(--border); border-radius:14px; padding:11px 16px; font-size:13px; font-weight:700; opacity:0; pointer-events:none; transition:.3s; } .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
 </style>

@@ -8,17 +8,17 @@
 <style>
   :root {
     --bg-base:#02020A;
-    --bg-card:rgba(255,255,255,0.03);
-    --border:rgba(255,255,255,0.08);
+    --bg-card:rgba(255,255,255,0.022);
+    --border:rgba(255,255,255,0.07);
     --text:#F8FAFE;
     --muted:#9AA1B7;
     --dim:#4F5570;
-    --accent:#4A8FFF;
-    --good:#34D399;
-    --gold:#FFD98A;
+    --accent:#0A84FF;
+    --good:#0A84FF;
+    --gold:#0A84FF;
     /* rarity of THIS chest — overwritten by JS once the pull is rolled */
-    --rar:#9AA1B7;
-    --rarA:rgba(154,161,183,0.5);
+    --rar:#0A84FF;
+    --rarA:rgba(10,132,255,0.5);
   }
   * { box-sizing:border-box; }
   html, body { margin:0; padding:0; height:100%; }
@@ -178,18 +178,18 @@
   /* primary buttons — same family as the rest of the app */
   .cta-wrap { width:100%; }
   .btn { display:flex; align-items:center; justify-content:center; gap:9px; width:100%; padding:18px 24px; border:none;
-         border-radius:999px; font-family:inherit; font-size:17px; font-weight:800; letter-spacing:-0.32px; color:#1a1206; cursor:pointer;
-         text-decoration:none; background:linear-gradient(135deg, var(--gold), #FF9F45); background-size:160% 160%;
-         box-shadow:0 14px 36px rgba(255,150,60,0.4), 0 1px 0 rgba(255,255,255,0.3) inset;
+         border-radius:999px; font-family:inherit; font-size:17px; font-weight:800; letter-spacing:-0.32px; color:#fff; cursor:pointer;
+         text-decoration:none; background:var(--accent); background-size:160% 160%;
+         box-shadow:0 14px 36px rgba(10,132,255,0.35), 0 1px 0 rgba(255,255,255,0.18) inset;
          transition:transform .12s cubic-bezier(0.4,0,0.2,1), filter .2s; -webkit-tap-highlight-color:transparent; }
   .btn:hover{ filter:brightness(1.08); }
   .btn:active{ transform:scale(0.985); }
   .btn:focus-visible{ outline:2px solid #fff; outline-offset:3px; }
   .btn svg{ width:18px; height:18px; }
   /* the open button glows in the chest's rarity colour */
-  .btn.open { color:#fff; background:linear-gradient(135deg, color-mix(in srgb, var(--rar) 75%, #1F4FA8), color-mix(in srgb, var(--rar) 60%, #4B2E94));
+  .btn.open { color:#fff; background:var(--accent);
               box-shadow:0 14px 36px color-mix(in srgb, var(--rar) 40%, transparent), 0 1px 0 rgba(255,255,255,0.18) inset; text-shadow:0 1px 2px rgba(0,0,0,0.4); }
-  .btn.equipped-done{ color:var(--good); background:rgba(52,211,153,0.14); border:1px solid rgba(52,211,153,0.4); box-shadow:none; text-shadow:none; cursor:default; }
+  .btn.equipped-done{ color:var(--good); background:rgba(10,132,255,0.14); border:1px solid rgba(10,132,255,0.4); box-shadow:none; text-shadow:none; cursor:default; }
   body.phase-opening .open-cta{ opacity:0; pointer-events:none; transition:opacity .3s; }
   body.phase-reveal .open-cta{ display:none; }
   .open-cta{ opacity:0; transform:translateY(10px); animation:rise .6s .45s cubic-bezier(.2,.8,.2,1) forwards; }
@@ -197,7 +197,7 @@
   .reveal-cta { width:100%; margin-top:20px; display:none; }
   body.phase-reveal .reveal-cta{ display:block; opacity:0; transform:translateY(10px); animation:rise .6s cubic-bezier(.2,.8,.2,1) forwards; }
   .nextsub { display:block; text-align:center; margin-top:11px; font-size:12px; font-weight:600; color:var(--muted); }
-  .nextsub b{ color:var(--good); font-weight:700; }
+  .nextsub b{ color:var(--accent); font-weight:700; }
 </style>
 </head>
 <body class="phase-ready">
@@ -354,9 +354,10 @@
       ? 'Added to your <b>Inventory</b>. Back to the Shop.'
       : 'Added to your <b>Inventory</b>.';
 
-    // paint the chest in its floor rarity straight away (the closed chest shows its tier)
+    // Monochrome: rarity colours neutralised to the single electric-blue accent so
+    // the chest cinematic stays on-system. (rar arg kept for call-site compatibility.)
     function paintRarity(rar){
-      var c = S && S.chestRarColor ? S.chestRarColor(rar) : '#9AA1B7';
+      var c = '#0A84FF';
       body.style.setProperty('--rar', c);
       body.style.setProperty('--rarA', hexA(c, 0.5));
       return c;
@@ -369,11 +370,11 @@
     function mythicFlash(){
       var phone=document.querySelector('.phone'); if(!phone) return;
       var fl=document.createElement('div');
-      fl.style.cssText='position:absolute;inset:0;z-index:95;pointer-events:none;background:radial-gradient(60% 45% at 50% 42%,rgba(255,92,138,0.55),rgba(179,136,255,0.25) 45%,transparent 72%)';
+      fl.style.cssText='position:absolute;inset:0;z-index:95;pointer-events:none;background:radial-gradient(60% 45% at 50% 42%,rgba(10,132,255,0.45),rgba(10,132,255,0.18) 45%,transparent 72%)';
       phone.appendChild(fl);
       if(REDUCED){ setTimeout(function(){ fl.remove(); },500); return; }
       fl.animate([{opacity:0},{opacity:1,offset:.15},{opacity:0}],{duration:950,easing:'ease-out'}).onfinish=function(){ fl.remove(); };
-      var cols=['#FF5C8A','#FFC56B','#B388FF','#4A8FFF','#5EEAD4'];
+      var cols=['#0A84FF','#9AA1B7','#F8FAFE','#0A84FF','#9AA1B7'];
       for(var i=0;i<30;i++){ (function(){ var c=document.createElement('span'),col=cols[i%cols.length];
         c.style.cssText='position:absolute;left:50%;top:40%;width:8px;height:8px;border-radius:2px;z-index:96;pointer-events:none;background:'+col+';box-shadow:0 0 8px '+col;
         phone.appendChild(c);
@@ -385,7 +386,7 @@
       if(roll && roll.rar==='mythic') mythicFlash();
       var host = qs('#reveals'); host.innerHTML='';
       var nodes = roll.reveals.map(function(r){
-        var rc = S.chestRarColor(r.r);
+        var rc = r.hi ? '#0A84FF' : '#9AA1B7';
         var el = document.createElement('div');
         el.className = 'rv'+(r.hi?' hi':'');
         el.style.setProperty('--rc', rc);

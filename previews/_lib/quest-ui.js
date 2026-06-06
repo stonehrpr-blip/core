@@ -25,13 +25,13 @@
   // RPG-6 stat DISPLAY MAPPING — surfaces Strength/Focus/Wealth/Health/Social/Purpose on the
   // quest surface, backed by CORE's existing domains (no parallel stat model, no desync).
   var STAT_MAP = {
-    gym:      { l: 'Strength', c: '#FF6B6B', ic: '<path d="M4 9v6M7 8v8M17 8v8M20 9v6M7 12h10"/>' },
-    business: { l: 'Wealth',   c: '#FFC56B', ic: '<circle cx="12" cy="12" r="8"/><path d="M12 7.5v9M9.5 10.2h4a1.4 1.4 0 0 1 0 2.8h-3a1.4 1.4 0 0 0 0 2.8h4"/>' },
-    reading:  { l: 'Purpose',  c: '#5BC8FF', ic: '<circle cx="12" cy="12" r="9"/><path d="M15.6 8.4l-2.3 4.9-4.9 2.3 2.3-4.9z"/>' },
-    school:   { l: 'Focus',    c: '#4A8FFF', ic: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.4"/>' },
-    health:   { l: 'Health',   c: '#34D399', ic: '<path d="M12 20s-7-4.5-9-9a4.5 4.5 0 0 1 9-2 4.5 4.5 0 0 1 9 2c-2 4.5-9 9-9 9z"/>' },
-    social:   { l: 'Social',   c: '#B388FF', ic: '<circle cx="9" cy="9" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M16 6.5a3 3 0 0 1 0 5"/>' },
-    generic:  { l: 'Focus',    c: '#4A8FFF', ic: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.4"/>' }
+    gym:      { l: 'Strength', c: '#9AA1B7', ic: '<path d="M4 9v6M7 8v8M17 8v8M20 9v6M7 12h10"/>' },
+    business: { l: 'Wealth',   c: '#9AA1B7', ic: '<circle cx="12" cy="12" r="8"/><path d="M12 7.5v9M9.5 10.2h4a1.4 1.4 0 0 1 0 2.8h-3a1.4 1.4 0 0 0 0 2.8h4"/>' },
+    reading:  { l: 'Purpose',  c: '#9AA1B7', ic: '<circle cx="12" cy="12" r="9"/><path d="M15.6 8.4l-2.3 4.9-4.9 2.3 2.3-4.9z"/>' },
+    school:   { l: 'Focus',    c: '#9AA1B7', ic: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.4"/>' },
+    health:   { l: 'Health',   c: '#9AA1B7', ic: '<path d="M12 20s-7-4.5-9-9a4.5 4.5 0 0 1 9-2 4.5 4.5 0 0 1 9 2c-2 4.5-9 9-9 9z"/>' },
+    social:   { l: 'Social',   c: '#9AA1B7', ic: '<circle cx="9" cy="9" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M16 6.5a3 3 0 0 1 0 5"/>' },
+    generic:  { l: 'Focus',    c: '#9AA1B7', ic: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.4"/>' }
   };
   function statFor(q) {
     if (STAT_MAP[q.domain]) return STAT_MAP[q.domain];
@@ -68,7 +68,7 @@
     phone.appendChild(flash);
     if (REDUCED_M) { setTimeout(function () { flash.remove(); }, 500); return; }
     flash.animate([{ opacity: 0 }, { opacity: 1, offset: .15 }, { opacity: 0 }], { duration: 900, easing: 'ease-out' }).onfinish = function () { flash.remove(); };
-    var cols = ['#FF5C8A', '#FFC56B', '#B388FF', '#4A8FFF', '#34D399'];
+    var cols = ['#9AA1B7','#8A91A6','#B7BECE','#7E869C','#646B80'];
     for (var i = 0; i < 28; i++) {
       (function () {
         var c = document.createElement('span'); var col = cols[i % cols.length];
