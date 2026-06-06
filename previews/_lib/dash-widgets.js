@@ -127,7 +127,7 @@
           '<div class="w-quote">' +
           '<div class="w-quote-top">' +
           '<svg class="w-quote-mark" viewBox="0 0 24 24" fill="currentColor"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1zm12 0c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/></svg>' +
-          '<a href="24-ranks.html" class="w-quote-rank" style="color:' + (rank.color || '#AEB4BD') + '">' +
+          '<a href="24-ranks.html" class="w-quote-rank" style="color:var(--muted)">' +
           '<svg viewBox="0 0 24 24" fill="currentColor" width="9" height="9"><path d="M12 2L2 8l10 14L22 8z"/></svg>' +
           'Lv ' + lvl + ' \xb7 ' + (rank.name || 'Stone') +
           '</a>' +
@@ -168,13 +168,13 @@
             '<div class="w-ls-hero">' +
             '<div class="w-ls-score-num" id="wLsNum">0</div>' +
             '<div class="w-ls-score-label">Life Score</div>' +
-            '<a href="24-ranks.html" class="w-ls-rank-badge" style="color:' + (rank.color || '#AEB4BD') + '">' +
+            '<a href="24-ranks.html" class="w-ls-rank-badge" style="color:var(--text)">' +
               '<svg viewBox="0 0 24 24" fill="currentColor" width="11" height="11"><path d="M12 2L2 8l10 14L22 8z"/></svg>' +
               rank.name +
             '</a>' +
             '<div class="w-ls-xp">' +
               '<div class="w-ls-xp-head">' +
-                '<span class="w-ls-xp-rank" style="color:' + (rank.color || '#aaa') + '">Lv ' + lvl + '</span>' +
+                '<span class="w-ls-xp-rank">Lv ' + lvl + '</span>' +
                 '<span class="w-ls-xp-num">' + xp + ' XP</span>' +
               '</div>' +
               '<div class="w-ls-xp-bar"><div class="w-ls-xp-fill" id="wLsXpFill" style="width:0%"></div></div>' +
@@ -184,7 +184,7 @@
           defs.forEach(function (d) {
             var href = d.page || ('stat.html?s=' + d.key);
             html +=
-              '<a href="' + href + '" class="w-ls-card" style="--sc:' + d.color + '" aria-label="' + d.name + '">' +
+              '<a href="' + href + '" class="w-ls-card" aria-label="' + d.name + '">' +
               '<div class="w-ls-card-head">' +
                 '<div class="w-ls-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + (d.icon || STAT_IC[d.key] || '') + '</svg></div>' +
                 '<span class="w-ls-name">' + d.name + '</span>' +
