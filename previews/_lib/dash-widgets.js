@@ -5,6 +5,7 @@
 
   function S() { return window.coreState; }
 
+  // ── Quotes ──────────────────────────────────────────────────────────────────
   var QUOTES = [
     "Discipline is choosing between what you want now and what you want most.",
     "The secret of getting ahead is getting started.",
@@ -71,8 +72,36 @@
     if (!str) return 0;
     var m = String(str).match(/(\d+)\s*(min|hr|h)/i);
     if (!m) return 0;
-    var n = parseInt(m[1], 10);
-    return (m[2].toLowerCase()[0] === 'h') ? n * 60 : n;
+    return m[2].toLowerCase()[0] === 'h' ? parseInt(m[1], 10) * 60 : parseInt(m[1], 10);
+  }
+
+  // Count-up animation
+  function animCount(el, to) {
+    if (!el) return;
+    var from = parseInt((el.textContent || '0').replace(/\D/g, ''), 10) || 0;
+    if (from === to) { el.textContent = to; return; }
+    var start = null, dur = 700;
+    if (el._raf) cancelAnimationFrame(el._raf);
+    function step(ts) {
+      if (!start) start = ts;
+      var p = Math.min(1, (ts - start) / dur);
+      el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - p, 3)));
+      if (p < 1) el._raf = requestAnimationFrame(step);
+    }
+    el._raf = requestAnimationFrame(step);
+  }
+
+  // Get the page a task routes to, using STAT_DEFS where available
+  function getTaskPage(task) {
+    var cs = S();
+    if (!task.stat) return '21-quests.html';
+    var defs = (cs && cs.STAT_DEFS) || [];
+    for (var i = 0; i < defs.length; i++) {
+      if (defs[i].key === task.stat) {
+        return defs[i].page || ('stat.html?s=' + task.stat);
+      }
+    }
+    return 'stat.html?s=' + task.stat;
   }
 
   var STAT_IC = {
@@ -84,15 +113,15 @@
     purpose:  '<circle cx="12" cy="12" r="8.5"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z"/>',
   };
 
-  // ── REGISTRY ────────────────────────────────────────────────────────────────
-
+  // ── REGISTRY ─────────────────────────────────────────────────────────────────
   var REGISTRY = {
 
     quote: {
       id: 'quote', title: 'Daily Quote',
       icon: '<path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1zm12 0c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>',
       render: function (host) {
-        host.innerHTML = '<div class="w-quote">' +
+        host.innerHTML =
+          '<div class="w-quote">' +
           '<svg class="w-quote-mark" viewBox="0 0 24 24" fill="currentColor"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1zm12 0c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/></svg>' +
           '<p class="w-quote-text">' + dailyQuote() + '</p>' +
           '</div>';
@@ -106,41 +135,52 @@
         var cs = S();
         if (!cs) { host.innerHTML = '<div class="w-empty">Loading…</div>'; return; }
         var defs = cs.STAT_DEFS || [];
-        var ls = cs.lifeScore();
 
+        // Build HTML with values starting at 0 (animates in)
         var html = '<div class="w-ls-hero">' +
-          '<div class="w-ls-score-num" id="wLsNum">' + ls + '</div>' +
+          '<div class="w-ls-score-num" id="wLsNum">0</div>' +
           '<div class="w-ls-score-label">Life Score</div>' +
-          '</div>' +
-          '<div class="w-ls-grid">';
+          '</div><div class="w-ls-grid">';
 
         defs.forEach(function (d) {
-          var v = cs.statValue(d.key);
-          var lvl = statLevel(v);
           var href = d.page || ('stat.html?s=' + d.key);
-          html += '<a href="' + href + '" class="w-ls-card" style="--sc:' + d.color + '" aria-label="' + d.name + ' score">' +
+          html +=
+            '<a href="' + href + '" class="w-ls-card" style="--sc:' + d.color + '" aria-label="' + d.name + ' score">' +
             '<div class="w-ls-card-head">' +
               '<div class="w-ls-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + (d.icon || STAT_IC[d.key] || '') + '</svg></div>' +
               '<span class="w-ls-name">' + d.name + '</span>' +
-              '<span class="w-ls-val" data-sk="' + d.key + '">' + v + '</span>' +
+              '<span class="w-ls-val" data-sk="' + d.key + '">0</span>' +
             '</div>' +
-            '<div class="w-ls-bar"><div class="w-ls-fill" data-skf="' + d.key + '" style="width:' + v + '%"></div></div>' +
-            '<div class="w-ls-lvl">Lv ' + lvl + '</div>' +
-          '</a>';
+            '<div class="w-ls-bar"><div class="w-ls-fill" data-skf="' + d.key + '" style="width:0%"></div></div>' +
+            '<div class="w-ls-lvl" data-skl="' + d.key + '">Lv 1</div>' +
+            '</a>';
         });
         html += '</div>';
         host.innerHTML = html;
 
-        function onUpdate() {
-          var ls2 = cs.lifeScore();
-          var n = host.querySelector('#wLsNum');
-          if (n) n.textContent = ls2;
+        // Animate all values in after first paint
+        setTimeout(function () {
+          var ls = cs.lifeScore();
+          animCount(host.querySelector('#wLsNum'), ls);
           defs.forEach(function (d) {
-            var ve = host.querySelector('[data-sk="' + d.key + '"]');
+            var v = cs.statValue(d.key);
+            var lvl = statLevel(v);
+            animCount(host.querySelector('[data-sk="' + d.key + '"]'), v);
             var fe = host.querySelector('[data-skf="' + d.key + '"]');
-            var v2 = cs.statValue(d.key);
-            if (ve) ve.textContent = v2;
-            if (fe) fe.style.width = v2 + '%';
+            var le = host.querySelector('[data-skl="' + d.key + '"]');
+            if (fe) requestAnimationFrame(function () { fe.style.width = v + '%'; });
+            if (le) le.textContent = 'Lv ' + lvl;
+          });
+        }, 80);
+
+        function onUpdate() {
+          var ls = cs.lifeScore();
+          animCount(host.querySelector('#wLsNum'), ls);
+          defs.forEach(function (d) {
+            var v = cs.statValue(d.key);
+            animCount(host.querySelector('[data-sk="' + d.key + '"]'), v);
+            var fe = host.querySelector('[data-skf="' + d.key + '"]');
+            if (fe) fe.style.width = v + '%';
           });
         }
         window.addEventListener('coreStateChange', onUpdate);
@@ -158,13 +198,17 @@
           var s = cs ? cs.read() : {};
           var daily = (s.quests && s.quests.daily) || [];
           return daily.map(function (q) {
-            return { id: q.id, title: q.title, time: q.time || '10 min', deadline: q.deadline || null,
-              xp: q.xp || 10, stat: q.stat, statGain: q.statGain || 2, done: !!q.done, diff: q.diff || 'medium' };
+            return {
+              id: q.id, title: q.title,
+              time: q.time || '10 min', deadline: q.deadline || null,
+              xp: q.xp || 10, stat: q.stat, statGain: q.statGain || 2,
+              done: !!q.done, diff: q.diff || 'medium'
+            };
           });
         }
 
-        function countdownStr(deadline) {
-          var left = deadline - Date.now();
+        function countdownStr(dl) {
+          var left = dl - Date.now();
           if (left <= 0) return 'Due now';
           var m = Math.ceil(left / 60000);
           return m < 60 ? m + 'm left' : Math.ceil(m / 60) + 'h left';
@@ -174,31 +218,41 @@
           host.innerHTML = '';
           var tasks = getTasks();
           var done = tasks.filter(function (t) { return t.done; }).length;
-          var totalMin = tasks.filter(function (t) { return !t.done; }).reduce(function (a, t) { return a + parseMinutes(t.time); }, 0);
-          var budgetStr = totalMin >= 60 ? (Math.floor(totalMin/60) + 'h ' + (totalMin%60 ? totalMin%60 + 'm' : '')) : (totalMin + 'm');
+          var totalMin = tasks.filter(function (t) { return !t.done; })
+            .reduce(function (a, t) { return a + parseMinutes(t.time); }, 0);
+          var budgetStr = totalMin >= 60
+            ? Math.floor(totalMin / 60) + 'h ' + (totalMin % 60 ? totalMin % 60 + 'm' : '')
+            : totalMin + 'm';
 
           var header = document.createElement('div');
           header.className = 'w-tasks-header';
-          header.innerHTML = '<span class="w-tasks-progress"><b>' + done + '</b> / ' + tasks.length + ' done</span>' +
+          header.innerHTML =
+            '<span class="w-tasks-progress"><b>' + done + '</b> / ' + tasks.length + ' done</span>' +
             '<span class="w-tasks-budget">' + (totalMin > 0 ? budgetStr + ' left' : 'All done!') + '</span>' +
             '<a href="21-quests.html" class="w-tasks-viewall">All →</a>';
           host.appendChild(header);
 
           if (!tasks.length) {
-            var empty = document.createElement('div');
-            empty.className = 'w-empty';
-            empty.textContent = 'No quests today. Head to Quests to start.';
-            host.appendChild(empty);
-            return;
+            var e = document.createElement('div');
+            e.className = 'w-empty'; e.textContent = 'No quests today.';
+            host.appendChild(e); return;
           }
 
           tasks.forEach(function (task) {
-            var row = document.createElement('div');
-            row.className = 'w-task-row' + (task.done ? ' done' : '');
+            var isDone = task.done;
             var timeDisplay = task.deadline ? countdownStr(task.deadline) : (task.time || '10 min');
+            var page = getTaskPage(task);
+
+            // Row is a link — tapping the row navigates; checking stops propagation
+            var row = document.createElement('a');
+            row.href = isDone ? '#' : page;
+            row.className = 'w-task-row' + (isDone ? ' done' : '');
+            row.style.textDecoration = 'none';
+            row.setAttribute('aria-label', task.title);
+
             row.innerHTML =
-              '<button class="w-task-check' + (task.done ? ' checked' : '') + '" aria-label="' + (task.done ? 'Done' : 'Complete') + '">' +
-                (task.done
+              '<button class="w-task-check' + (isDone ? ' checked' : '') + '" aria-label="' + (isDone ? 'Done' : 'Complete') + '">' +
+                (isDone
                   ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l4 4 10-11"/></svg>'
                   : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>') +
               '</button>' +
@@ -207,16 +261,22 @@
                 '<span class="w-task-meta">' +
                   '<span class="w-task-chip">' + timeDisplay + '</span>' +
                   '<span class="w-task-xp">+' + task.xp + ' XP</span>' +
+                  '<span class="w-task-dest">' + page.replace('stat.html?s=', '').replace('.html', '') + ' →</span>' +
                 '</span>' +
               '</div>';
 
-            if (!task.done) {
-              row.querySelector('.w-task-check').addEventListener('click', function () {
+            if (!isDone) {
+              var btn = row.querySelector('.w-task-check');
+              btn.addEventListener('click', function (e) {
+                e.preventDefault(); e.stopPropagation();
                 if (cs) cs.completeQuest(task.id);
-                try { window.coreSfx && window.coreSfx('xp'); } catch(e) {}
+                try { window.coreSfx && window.coreSfx('xp'); } catch (err) {}
                 renderTasks();
               });
+            } else {
+              row.addEventListener('click', function (e) { e.preventDefault(); });
             }
+
             host.appendChild(row);
           });
         }
@@ -234,8 +294,9 @@
         var cs = S(), s = cs ? cs.read() : {};
         var days = (s.streak && s.streak.days) || 0;
         var best = Math.max(s.bestStreak || 0, days);
-        var next = [3,7,14,30,90].filter(function(n){ return n > days; })[0] || 90;
-        host.innerHTML = '<div class="w-streak">' +
+        var next = [3, 7, 14, 30, 90].filter(function (n) { return n > days; })[0] || 90;
+        host.innerHTML =
+          '<div class="w-streak">' +
           '<a href="26-streak.html" class="w-streak-inner" style="text-decoration:none;color:inherit">' +
             '<div class="w-streak-fire"><svg viewBox="0 0 24 24" fill="currentColor" style="width:26px;height:26px;color:#FF8A3D"><path d="M12 2c1 3-1 4-1 6 0 1 1 2 1 2s2-1 2-3c2 2 3 4 3 7a5 5 0 0 1-10 0c0-3 2-5 3-7 1 2 2 2 2 2s0-3 0-7Z"/></svg></div>' +
             '<div class="w-streak-body"><span class="w-streak-days">' + days + '<small> day streak</small></span><span class="w-streak-next">Next milestone: ' + next + ' days</span></div>' +
@@ -254,12 +315,14 @@
         var xp = s.xp || 0;
         var level = cs && cs.levelFor ? cs.levelFor(xp) : (Math.floor(xp / 300) + 1);
         var rank = cs && cs.rankFor ? cs.rankFor(xp) : { name: 'Stone', color: '#AEB4BD' };
-        host.innerHTML = '<div class="w-power">' +
-          '<div class="w-power-top"><span class="w-power-label">CORE Power</span><span class="w-power-val">' + power + '</span></div>' +
+        host.innerHTML =
+          '<div class="w-power">' +
+          '<div class="w-power-top"><span class="w-power-label">CORE Power</span><span class="w-power-val">0</span></div>' +
           '<div class="w-power-meta">' +
             '<span class="w-power-pill">Lv ' + level + '</span>' +
             '<span class="w-power-pill" style="color:' + (rank.color || '#aaa') + '">' + rank.name + '</span>' +
           '</div></div>';
+        setTimeout(function () { animCount(host.querySelector('.w-power-val'), power); }, 60);
       }
     },
 
@@ -268,10 +331,10 @@
       icon: '<path d="M4 6h16M4 12h16M4 18h7"/>',
       render: function (host) {
         var actions = [
-          { label:'Quests',  href:'21-quests.html',  icon:'<path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/>' },
-          { label:'Shop',    href:'27-shop.html',    icon:'<path d="M6 2L3 6v13a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"/>' },
-          { label:'Streak',  href:'26-streak.html',  icon:'<path d="M12 2c1 3-1 4-1 6 0 1 1 2 1 2s2-1 2-3c2 2 3 4 3 7a5 5 0 0 1-10 0c0-3 2-5 3-7 1 2 2 2 2 2s0-3 0-7Z"/>' },
-          { label:'Profile', href:'23-profile.html', icon:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>' },
+          { label: 'Quests',  href: '21-quests.html',  icon: '<path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/>' },
+          { label: 'Shop',    href: '27-shop.html',    icon: '<path d="M6 2L3 6v13a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"/>' },
+          { label: 'Streak',  href: '26-streak.html',  icon: '<path d="M12 2c1 3-1 4-1 6 0 1 1 2 1 2s2-1 2-3c2 2 3 4 3 7a5 5 0 0 1-10 0c0-3 2-5 3-7 1 2 2 2 2 2s0-3 0-7Z"/>' },
+          { label: 'Profile', href: '23-profile.html', icon: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>' },
         ];
         var html = '<div class="w-qa-grid">';
         actions.forEach(function (a) {
@@ -285,28 +348,26 @@
       id: 'weather', title: 'Weather',
       icon: '<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>',
       render: function (host) {
-        var ICONS  = { clear:'☀️', cloudy:'☁️', rain:'🌧️', snow:'❄️', fog:'🌫️' };
-        var LABELS = { clear:'Clear skies', cloudy:'Overcast', rain:'Raining', snow:'Snowing', fog:'Foggy' };
-        var TIME_LABELS = { sunrise:'Sunrise', day:'Daytime', afternoon:'Afternoon', sunset:'Sunset', night:'Night' };
+        var ICONS  = { clear: '☀️', cloudy: '☁️', rain: '🌧️', snow: '❄️', fog: '🌫️' };
+        var LABELS = { clear: 'Clear skies', cloudy: 'Overcast', rain: 'Raining', snow: 'Snowing', fog: 'Foggy' };
+        var TIMES  = { sunrise: 'Sunrise', day: 'Daytime', afternoon: 'Afternoon', sunset: 'Sunset', night: 'Night' };
         var amb = window.dashAmbient;
         var w = amb ? amb.getWeather() : 'clear';
-        var t = amb ? amb.getTime()    : 'day';
-
-        host.innerHTML = '<div class="w-weather">' +
+        var ti = amb ? amb.getTime() : 'day';
+        host.innerHTML =
+          '<div class="w-weather">' +
           '<span class="w-weather-icon" id="wWIcon">' + (ICONS[w] || '☀️') + '</span>' +
           '<span class="w-weather-label" id="wWLabel">' + (LABELS[w] || 'Clear') + '</span>' +
-          '<span class="w-weather-time" id="wWTime">' + (TIME_LABELS[t] || t) + '</span>' +
+          '<span class="w-weather-time" id="wWTime">' + (TIMES[ti] || ti) + '</span>' +
           '</div>';
-
-        function onAmbient(e) {
-          var we = e.detail.weather, te = e.detail.time;
+        function onAmb(e) {
           var ic = host.querySelector('#wWIcon'), lb = host.querySelector('#wWLabel'), tm = host.querySelector('#wWTime');
-          if (ic) ic.textContent = ICONS[we] || '☀️';
-          if (lb) lb.textContent = LABELS[we] || 'Clear';
-          if (tm) tm.textContent = TIME_LABELS[te] || te;
+          if (ic) ic.textContent = ICONS[e.detail.weather] || '☀️';
+          if (lb) lb.textContent = LABELS[e.detail.weather] || 'Clear';
+          if (tm) tm.textContent = TIMES[e.detail.time] || e.detail.time;
         }
-        window.addEventListener('dashAmbientChange', onAmbient);
-        host._cleanup = function () { window.removeEventListener('dashAmbientChange', onAmbient); };
+        window.addEventListener('dashAmbientChange', onAmb);
+        host._cleanup = function () { window.removeEventListener('dashAmbientChange', onAmb); };
       }
     },
 
@@ -325,8 +386,7 @@
           html += '<div class="w-friend-item">' +
             '<div class="w-friend-avatar">' + ((f.name || '?').charAt(0).toUpperCase()) + '</div>' +
             '<div class="w-friend-info"><span class="w-friend-name">' + (f.name || 'Unknown') + '</span><span class="w-friend-rank">' + (f.rank || 'Stone') + '</span></div>' +
-            '<span class="w-friend-power">' + (f.power || 0) + '</span>' +
-          '</div>';
+            '<span class="w-friend-power">' + (f.power || 0) + '</span></div>';
         });
         host.innerHTML = html + '</div>';
       }
@@ -337,7 +397,7 @@
       icon: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>',
       render: function (host) {
         var cs = S(), s = cs ? cs.read() : {};
-        var ledger = (s.xpLedger || []).filter(function(e){ return e.delta > 0; }).slice(0, 6);
+        var ledger = (s.xpLedger || []).filter(function (e) { return e.delta > 0; }).slice(0, 6);
         if (!ledger.length) {
           host.innerHTML = '<div class="w-empty">Complete quests to see activity here.</div>';
           return;
@@ -345,39 +405,33 @@
         var html = '<div class="w-activity-list">';
         ledger.forEach(function (e) {
           var ago = Math.round((Date.now() - e.ts) / 60000);
-          var agoStr = ago < 2 ? 'just now' : (ago < 60 ? ago + 'm ago' : (Math.round(ago / 60) + 'h ago'));
-          var label = (e.reason || 'XP').replace('quest:', 'Quest: ').replace('stat:', '');
+          var agoStr = ago < 2 ? 'just now' : ago < 60 ? ago + 'm ago' : Math.round(ago / 60) + 'h ago';
           html += '<div class="w-activity-item">' +
             '<span class="w-activity-dot"></span>' +
-            '<span class="w-activity-label">' + label + '</span>' +
+            '<span class="w-activity-label">' + (e.reason || 'XP').replace('quest:', 'Quest: ') + '</span>' +
             '<span class="w-activity-xp">+' + (e.delta || 0) + ' XP</span>' +
-            '<span class="w-activity-time">' + agoStr + '</span>' +
-          '</div>';
+            '<span class="w-activity-time">' + agoStr + '</span></div>';
         });
         host.innerHTML = html + '</div>';
       }
     },
 
-  }; // end REGISTRY
+  };
 
-  // ── Layout ──────────────────────────────────────────────────────────────────
-  var LAYOUT_KEY   = 'coreDashboard.v1';
+  // ── Layout ───────────────────────────────────────────────────────────────────
+  var LAYOUT_KEY = 'coreDashboard.v1';
   var DEFAULT_LAYOUT = ['quote', 'lifescore', 'tasks'];
 
   function readLayout() {
     try {
-      var stored = JSON.parse(localStorage.getItem(LAYOUT_KEY) || 'null');
-      if (Array.isArray(stored) && stored.length) return stored;
+      var s = JSON.parse(localStorage.getItem(LAYOUT_KEY) || 'null');
+      if (Array.isArray(s) && s.length) return s;
     } catch (e) {}
     return DEFAULT_LAYOUT.slice();
   }
-
-  function saveLayout(ids) {
-    try { localStorage.setItem(LAYOUT_KEY, JSON.stringify(ids)); } catch (e) {}
-  }
-
+  function saveLayout(ids) { try { localStorage.setItem(LAYOUT_KEY, JSON.stringify(ids)); } catch (e) {} }
   function getWidget(id) { return REGISTRY[id] || null; }
-  function getAll() { return Object.keys(REGISTRY).map(function(k){ return REGISTRY[k]; }); }
+  function getAll() { return Object.keys(REGISTRY).map(function (k) { return REGISTRY[k]; }); }
 
   window.dashWidgets = { REGISTRY: REGISTRY, getWidget: getWidget, getAll: getAll, readLayout: readLayout, saveLayout: saveLayout, DEFAULT_LAYOUT: DEFAULT_LAYOUT, dailyQuote: dailyQuote };
 })();
