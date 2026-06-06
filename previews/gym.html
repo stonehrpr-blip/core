@@ -88,17 +88,24 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .scan-arrow{color:var(--dim);flex:none;}.scan-arrow svg{width:18px;height:18px;}
 
 /* ── Body diagram (original image; whole card links to the gender question) ── */
-.diagram{padding:8px 6px 12px;}
-.bodylink{display:block;text-decoration:none;color:inherit;cursor:pointer;transition:transform .14s;}
-.bodylink:active{transform:scale(.99);}
-.figs{position:relative;width:100%;aspect-ratio:260 / 212;border-radius:14px;overflow:hidden;
-  background:radial-gradient(58% 54% at 50% 42%,rgba(47,143,255,0.10),transparent 72%);}
-.figwrap{position:absolute;left:0;top:0;width:100%;transform:translateY(-12.5%);} /* crop stock "HUMAN" header + bottom watermark */
-.figwrap img{display:block;width:100%;height:auto;
-  filter:invert(1) brightness(1.18) contrast(.95) opacity(.8);pointer-events:none;user-select:none;}
-.bodylink-hint{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:11px;
-  font-size:12px;font-weight:700;color:var(--blue-2);}
-.bodylink-hint svg{width:14px;height:14px;}
+.diagram{padding:11px 8px 13px;}
+.gender-toggle{display:inline-flex;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:999px;padding:3px;margin:0 auto 12px;gap:2px;}
+.gt-opt{appearance:none;border:none;background:none;font:inherit;cursor:pointer;color:var(--muted);font-size:12px;font-weight:700;padding:6px 18px;border-radius:999px;transition:background .16s,color .16s;}
+.gt-opt.on{background:rgba(255,255,255,0.10);color:var(--text);}
+.figs{position:relative;width:100%;aspect-ratio:260 / 198;border-radius:14px;overflow:hidden;
+  background:radial-gradient(60% 58% at 50% 44%,rgba(255,255,255,0.04),transparent 72%);}
+.figwrap{position:absolute;inset:0;}
+.figwrap img{position:absolute;left:0;top:0;width:100%;height:auto;transform-origin:top center;
+  filter:invert(1) brightness(1.2) contrast(.96) opacity(.82);pointer-events:none;user-select:none;}
+.region{position:absolute;border:none;margin:0;padding:0;background:none;cursor:pointer;border-radius:50%;transition:transform .14s;}
+.region::before{content:"";position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle,var(--rc,#5A6072) 0%,transparent 68%);opacity:var(--ro,0.12);
+  mix-blend-mode:screen;filter:blur(2px);transition:opacity .5s ease,background .5s ease;}
+.region:active{transform:scale(1.08);}
+.map-empty{text-align:center;font-size:11.5px;color:var(--dim);margin-top:9px;}
+.maplegend{display:flex;flex-wrap:wrap;justify-content:center;gap:7px 14px;margin-top:12px;padding-top:11px;border-top:1px solid rgba(255,255,255,0.06);}
+.maplegend i{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:700;letter-spacing:.02em;color:var(--muted);font-style:normal;}
+.maplegend i b{width:9px;height:9px;border-radius:50%;display:inline-block;}
 .insight{display:flex;align-items:center;gap:9px;margin-top:10px;padding:11px 13px;border-radius:13px;
   background:rgba(255,107,107,0.07);border:1px solid rgba(255,107,107,0.2);}
 .insight svg{width:16px;height:16px;color:var(--str);flex:none;}
@@ -223,14 +230,21 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
         <span class="scan-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
       </a>
 
-      <!-- 2. Body diagram — your physique; whole card links to the gender question (trial step 2) -->
-      <div class="sec"><h2>Your Body</h2><span class="meta" id="lastTrained"></span></div>
-      <a class="card diagram bodylink" href="07-trial.html?step=2" aria-label="Set your body type">
-        <div class="figs">
-          <div class="figwrap"><img src="male-human-body-front-back-260nw-688347376.jpg.webp" alt="Body, front and back" /></div>
+      <!-- 2. Muscle map — colour-coded by training; tiny inline body-type toggle -->
+      <div class="sec"><h2>Muscle Map</h2><span class="meta" id="lastTrained"></span></div>
+      <div class="card diagram">
+        <div style="display:flex;justify-content:center">
+          <div class="gender-toggle" id="genderToggle">
+            <button class="gt-opt" data-g="male" type="button">Male</button>
+            <button class="gt-opt" data-g="female" type="button">Female</button>
+          </div>
         </div>
-        <div class="bodylink-hint"><span>Tap to set your body type</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
-      </a>
+        <div class="figs" id="figs">
+          <div class="figwrap" id="figwrap"><img id="bodyImg" src="male-human-body-front-back-260nw-688347376.jpg.webp" alt="Muscle map, front and back" /></div>
+        </div>
+        <div class="map-empty" id="mapEmpty" style="display:none">Log a workout to light up your muscle map.</div>
+        <div class="maplegend" id="maplegend"></div>
+      </div>
       <div class="insight" id="insight" style="display:none">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2Z"/><path d="M9 21h6"/></svg>
         <span id="insightTx"></span>
@@ -286,6 +300,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     s.setup=s.setup||{done:false,place:null,equipment:null,goal:null,ts:0};
     s.muscles=s.muscles||{};
     s.history=Array.isArray(s.history)?s.history:[];
+    s.gender=(s.gender==='female')?'female':'male';
     return s;
   }
   function save(s){ try{ localStorage.setItem(KEY,JSON.stringify(s)); }catch(e){} }
@@ -373,9 +388,43 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   function allIntensity(){ var o={}; MUSCLES.forEach(function(m){ o[m.id]=intensity(m.id); }); return o; }
   function levelLabel(l){ return l==='none'?'Untrained':l==='low'?'Started':l==='mid'?'Building':'Strong'; }
 
-  /* ───────── Body diagram — original image; the card links to the gender question (trial step 2) ───────── */
+  /* ───────── Muscle map — colour-coded by training intensity; male/female ───────── */
+  var BODY_IMG={ male:'male-human-body-front-back-260nw-688347376.jpg.webp', female:'muscular-young-woman-front-back-260nw-462228112.jpg.webp' };
+  // per-gender transform frames each figure-set in the .figs band (hides stock label + watermark)
+  var BODY_TF={ male:'translateY(-13%) scale(1.16)', female:'translateY(-7%) scale(1.22)' };
+  function getGender(){ return store().gender==='female'?'female':'male'; }
+  function setGender(g){ var s=store(); s.gender=(g==='female'?'female':'male'); save(s); }
+  // heat scale (training intensity) — also drives the legend
+  var HEAT=[ {k:'none',c:'#5A6072',label:'Untrained'},{k:'low',c:'#F4C24B',label:'Light'},{k:'mid',c:'#FF8A45',label:'Moderate'},{k:'high',c:'#FF5A5A',label:'Hard'} ];
+  function heatFor(level){ for(var i=0;i<HEAT.length;i++) if(HEAT[i].k===level) return HEAT[i]; return HEAT[0]; }
+  // muscle regions in .figs % coords (front fig ~25% x, back fig ~74% x) — shared across genders
+  var REGIONS=[
+    {m:'shoulders',x:25,y:21,r:8}, {m:'chest',x:25,y:29,r:8}, {m:'core',x:25,y:41,r:7},
+    {m:'arms',x:13,y:34,r:5}, {m:'arms',x:37,y:34,r:5}, {m:'legs',x:25,y:64,r:9},
+    {m:'shoulders',x:74,y:21,r:8}, {m:'back',x:74,y:32,r:9}, {m:'arms',x:62,y:34,r:5},
+    {m:'arms',x:86,y:34,r:5}, {m:'legs',x:74,y:64,r:9}
+  ];
+  var ASP=260/198; // figs width/height ratio — keeps overlay circles round
   function renderDiagram(){
-    var inten=allIntensity();
+    var g=getGender(), inten=allIntensity();
+    Array.prototype.forEach.call(document.querySelectorAll('#genderToggle .gt-opt'),function(b){ b.classList.toggle('on', b.getAttribute('data-g')===g); });
+    var img=qs('#bodyImg'); if(img){ img.src=BODY_IMG[g]; img.style.transform=BODY_TF[g]; }
+    var fw=qs('#figwrap'); if(fw){ fw.querySelectorAll('.region').forEach(function(n){n.remove();}); }
+    var anyTrained=false;
+    REGIONS.forEach(function(rg){
+      var it=inten[rg.m]||{level:'none',t:0}; if(it.t>0) anyTrained=true;
+      var h=heatFor(it.level);
+      var b=document.createElement('button'); b.className='region';
+      b.style.left=(rg.x-rg.r)+'%'; b.style.top=(rg.y-rg.r*ASP)+'%';
+      b.style.width=(rg.r*2)+'%'; b.style.height=(rg.r*2*ASP)+'%';
+      b.style.setProperty('--rc',h.c);
+      b.style.setProperty('--ro', it.level==='none'?'0.10':(0.30+it.t*0.60).toFixed(2));
+      b.setAttribute('aria-label', mInfo(rg.m).name+' — '+levelLabel(it.level));
+      b.addEventListener('click',function(){ sfx('tick'); openSheet(rg.m); });
+      if(fw) fw.appendChild(b);
+    });
+    var me=qs('#mapEmpty'); if(me) me.style.display=anyTrained?'none':'block';
+    var lg=qs('#maplegend'); if(lg) lg.innerHTML=HEAT.map(function(h){ return '<i><b style="background:'+h.c+'"></b>'+h.label+'</i>'; }).join('');
     renderInsight(inten);
     var s=store(), last=s.history[0];
     qs('#lastTrained').textContent = last ? ('Last: '+mInfo(last.muscle).name+' · '+ago(last.ts)) : '';
@@ -566,6 +615,9 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   }catch(e){}
 
   /* ───────── init ───────── */
+  Array.prototype.forEach.call(document.querySelectorAll('#genderToggle .gt-opt'),function(b){
+    b.addEventListener('click',function(){ setGender(this.getAttribute('data-g')); sfx('tick'); renderDiagram(); });
+  });
   renderChip(); renderDiagram(); renderWorkout();
   window.addEventListener('coreStateChange',renderChip);
   window.addEventListener('focus',function(){ renderDiagram(); });
