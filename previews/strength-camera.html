@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8" />
+<title>CORE — Live Reps</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<style>
+  :root{
+    --bg-base:#02020A; --bg-card:rgba(255,255,255,0.035); --border:rgba(255,255,255,0.08);
+    --text:#F8FAFE; --muted:#9AA1B7; --dim:#4F5570; --good:#34D399; --str:#FF6B6B; --str2:#FF8A5B; --accent:#4A8FFF;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; height:100%; }
+  body{ min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text); -webkit-font-smoothing:antialiased; padding:24px; overflow:hidden; }
+  .phone{ position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden;
+    box-shadow:0 40px 100px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.06),0 0 0 10px #0a0a12,0 0 0 11px #2b2b38; }
+  .notch{ position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:60; }
+  .home-indicator{ position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.5); border-radius:999px; z-index:60; }
+  .frame{ position:absolute; inset:0; z-index:10; display:flex; flex-direction:column; }
+
+  .bg{ position:absolute; inset:0; z-index:0; background:radial-gradient(70% 40% at 50% 8%, rgba(255,107,107,0.10), transparent 60%), linear-gradient(180deg,#0c0712,#02020A 60%,#050510); }
+
+  .top{ display:flex; align-items:center; gap:12px; padding:54px 20px 6px; position:relative; z-index:12; }
+  .back{ width:36px; height:36px; border-radius:50%; border:1px solid var(--border); background:rgba(255,255,255,0.06); color:var(--text); font-size:20px; cursor:pointer; }
+  .top h1{ margin:0; font-size:20px; font-weight:800; letter-spacing:-0.6px; flex:1; }
+  .plusbadge{ font-size:9px; font-weight:800; letter-spacing:0.8px; padding:4px 9px; border-radius:999px; background:linear-gradient(135deg,#FFCB3D,#FF8A5B); color:#241600; }
+  .plusbadge.off{ background:rgba(255,255,255,0.06); color:var(--muted); border:1px solid var(--border); }
+
+  /* ----- select screen ----- */
+  .pick{ position:relative; z-index:12; padding:14px 20px 30px; flex:1; overflow-y:auto; }
+  .pick::-webkit-scrollbar{ display:none; }
+  .pick .lead{ font-size:13px; color:var(--muted); margin:4px 2px 16px; line-height:1.5; }
+  .exsel{ display:flex; flex-direction:column; gap:11px; }
+  .exo{ display:flex; align-items:center; gap:14px; padding:16px; border-radius:20px; border:1px solid var(--border); background:var(--bg-card); cursor:pointer; transition:transform .14s, border-color .2s; }
+  .exo:active{ transform:scale(0.97); }
+  .exo .ei{ width:54px; height:54px; flex:none; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; background:color-mix(in srgb,var(--c) 24%,#0c0c16); box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 45%,transparent), 0 0 16px color-mix(in srgb,var(--c) 35%,transparent); }
+  .exo .et{ flex:1; } .exo .et b{ font-size:16px; font-weight:800; letter-spacing:-0.3px; } .exo .et span{ display:block; font-size:11.5px; color:var(--muted); margin-top:2px; }
+  .exo .ego{ color:var(--dim); font-size:20px; }
+  .ratebar{ margin-top:18px; display:flex; align-items:center; gap:10px; padding:13px 15px; border-radius:16px; background:rgba(255,107,107,0.08); border:1px solid rgba(255,107,107,0.3); }
+  .ratebar .rr{ font-size:12px; color:var(--text); } .ratebar .rr b{ color:#FFA9A9; }
+
+  /* ----- live screen ----- */
+  .live{ position:absolute; inset:0; z-index:20; display:none; flex-direction:column; }
+  .live.on{ display:flex; }
+  .cam{ position:absolute; inset:0; z-index:0; background:#06060d; overflow:hidden; }
+  .cam video{ width:100%; height:100%; object-fit:cover; transform:scaleX(-1); opacity:0.55; }
+  .cam .silho{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+  .cam .scan{ position:absolute; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--str),transparent); box-shadow:0 0 14px var(--str); animation:scan 3s ease-in-out infinite; }
+  @keyframes scan{ 0%,100%{top:14%;} 50%{top:80%;} }
+  .camgrad{ position:absolute; inset:0; background:linear-gradient(180deg, rgba(2,2,10,0.5) 0%, transparent 25%, transparent 55%, rgba(2,2,10,0.85) 100%); }
+  .livetop{ position:relative; z-index:5; display:flex; align-items:center; justify-content:space-between; padding:56px 20px 0; }
+  .livetop .pill{ font-size:11px; font-weight:700; padding:6px 12px; border-radius:999px; background:rgba(0,0,0,0.5); border:1px solid var(--border); }
+  .livetop .pill .d{ display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--str); box-shadow:0 0 8px var(--str); margin-right:6px; animation:pulse 1.2s infinite; vertical-align:1px; } @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.3;} }
+
+  .counter{ position:relative; z-index:5; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .counter .clbl{ font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:2px; font-weight:700; }
+  .counter .cnum{ font-size:120px; font-weight:800; letter-spacing:-5px; line-height:0.9; font-variant-numeric:tabular-nums; text-shadow:0 0 40px rgba(255,107,107,0.4); }
+  .counter .cnum.bump{ animation:bump .25s ease; } @keyframes bump{ 0%{transform:scale(1);} 40%{transform:scale(1.18);} 100%{transform:scale(1);} }
+  .counter .cgain{ font-size:14px; color:#FFA9A9; font-weight:700; margin-top:4px; }
+  .counter .cfeed{ font-size:14px; color:var(--text); margin-top:14px; min-height:20px; font-weight:600; }
+
+  .livebtns{ position:relative; z-index:5; padding:0 20px 36px; display:flex; flex-direction:column; gap:11px; }
+  .repbtn{ width:100%; border:none; border-radius:22px; padding:24px; font-size:20px; font-weight:800; letter-spacing:-0.3px; color:#1a0606; cursor:pointer; background:linear-gradient(135deg,var(--str),var(--str2)); box-shadow:0 14px 36px rgba(255,107,107,0.4); transition:transform .08s; user-select:none; }
+  .repbtn:active{ transform:scale(0.96); }
+  .row2{ display:flex; gap:11px; } .row2 .gb{ flex:1; border:1px solid var(--border); background:rgba(255,255,255,0.05); color:var(--text); border-radius:16px; padding:14px; font-size:14px; font-weight:700; cursor:pointer; transition:transform .12s; } .row2 .gb:active{ transform:scale(0.96); }
+  .row2 .gb.fin{ background:linear-gradient(135deg,var(--accent),#6F70FF); border-color:transparent; color:#fff; }
+  .camhint{ text-align:center; font-size:10.5px; color:var(--dim); margin-top:-2px; }
+
+  /* summary */
+  .scrim{ position:absolute; inset:0; z-index:80; background:rgba(2,2,10,0.7); backdrop-filter:blur(8px); opacity:0; pointer-events:none; transition:.3s; } .scrim.show{ opacity:1; pointer-events:auto; }
+  .sheet{ position:absolute; left:0; right:0; bottom:0; z-index:81; background:#0E0E1B; border-top-left-radius:30px; border-top-right-radius:30px; border-top:1px solid rgba(255,255,255,0.09); transform:translateY(102%); transition:transform .42s cubic-bezier(.16,1,.3,1); } .sheet.show{ transform:translateY(0); }
+  .grab{ width:40px; height:5px; border-radius:999px; background:rgba(255,255,255,0.18); margin:11px auto 4px; }
+  .sb{ padding:6px 22px 28px; }
+  .sumhead{ text-align:center; } .sumhead .ring{ width:84px; height:84px; margin:6px auto 12px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:40px; background:radial-gradient(circle at 50% 40%, rgba(255,107,107,0.3), rgba(255,107,107,0.05)); box-shadow:0 0 0 2px rgba(255,107,107,0.4), 0 0 30px rgba(255,107,107,0.3); animation:pop .5s cubic-bezier(.2,1.4,.4,1) both; } @keyframes pop{ from{transform:scale(.3); opacity:0;} to{transform:scale(1); opacity:1;} }
+  .sumhead h2{ margin:0; font-size:23px; font-weight:800; letter-spacing:-0.6px; } .sumhead p{ margin:5px 0 0; font-size:12.5px; color:var(--muted); }
+  .big3{ display:flex; gap:9px; margin:18px 0; } .big3 .b{ flex:1; border-radius:18px; padding:16px 8px; text-align:center; border:1px solid var(--border); background:var(--bg-card); } .big3 .bn{ font-size:24px; font-weight:800; font-variant-numeric:tabular-nums; } .big3 .bl{ font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-top:3px; font-weight:700; } .big3 .b.str .bn{ color:#FFA9A9; } .big3 .b.xp .bn{ color:#9CC4FF; }
+  .bigbtn{ width:100%; border:none; border-radius:18px; padding:16px; font-size:15px; font-weight:800; cursor:pointer; color:#fff; background:linear-gradient(135deg,var(--str),var(--str2)); transition:transform .12s; } .bigbtn:active{ transform:scale(0.97); }
+  .againbtn{ width:100%; margin-top:9px; border:1px solid var(--border); background:rgba(255,255,255,0.05); color:var(--text); border-radius:16px; padding:13px; font-size:13px; font-weight:700; cursor:pointer; }
+  @media (prefers-reduced-motion:reduce){ .scan{ animation:none!important; } }
+</style>
+</head>
+<body>
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="bg"></div>
+
+    <div class="frame">
+      <div class="top">
+        <button class="back" id="backBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M15 6l-6 6 6 6"/></svg></button>
+        <h1>Live Rep Counter</h1>
+        <span class="plusbadge off" id="plusBadge">1× RATE</span>
+      </div>
+
+      <!-- SELECT -->
+      <div class="pick" id="pick">
+        <div class="lead">Pick an exercise, turn on your camera, and start repping. Every rep feeds your <b style="color:#FFA9A9">Strength</b> stat live.</div>
+        <div class="exsel" id="exsel"></div>
+        <div class="ratebar"><span style="display:inline-flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg></span><div class="rr">You earn <b id="rateTxt">0.01</b> Strength per rep. <span id="plusHint"></span></div></div>
+      </div>
+
+      <!-- LIVE -->
+      <div class="live" id="live">
+        <div class="cam" id="cam">
+          <video id="vid" autoplay playsinline muted></video>
+          <div class="silho" id="silho"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:64px;height:64px"><circle cx="12" cy="5" r="2.5"/><path d="M12 8v7M12 15l-3 6M12 15l3 6M7 11h10"/></svg></div>
+          <div class="scan"></div>
+        </div>
+        <div class="camgrad"></div>
+        <div class="livetop">
+          <span class="pill"><span class="d"></span><span id="liveEx">Push-ups</span></span>
+          <span class="pill" id="camState">Camera off</span>
+        </div>
+        <div class="counter">
+          <div class="clbl">Reps</div>
+          <div class="cnum" id="cnum">0</div>
+          <div class="cgain" id="cgain">+0.00 Strength</div>
+          <div class="cfeed" id="cfeed">Let's go</div>
+        </div>
+        <div class="livebtns">
+          <button class="repbtn" id="repBtn">+1 REP</button>
+          <div class="camhint" id="camHint">Tap to count each rep · auto-detect coming soon</div>
+          <div class="row2"><button class="gb" id="camToggle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px"><path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg> Turn on camera</button><button class="gb fin" id="finBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px"><path d="M5 12l4 4 10-11"/></svg> Finish</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scrim" id="sumScrim"></div>
+    <div class="sheet" id="sumSheet"><div class="grab"></div><div class="sb" id="sumBody"></div></div>
+    <div class="home-indicator"></div>
+  </div>
+
+  <script src="_lib/core-sfx.js"></script>
+  <script src="_lib/core-state.js"></script>
+  <script src="_lib/core-gym-data.js"></script>
+  <script src="_lib/core-strength.js"></script>
+  <script>
+  (function(){
+    "use strict";
+    var $=function(s){ return document.querySelector(s); };
+    var S=window.CoreStrength;
+    function sfx(n){ S.sfx(n); } function haptic(){ try{ navigator.vibrate&&navigator.vibrate(10); }catch(e){} }
+    function ic(d,s,st){ s=s||14; return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="'+(st||2)+'" stroke-linecap="round" stroke-linejoin="round" style="width:'+s+'px;height:'+s+'px;vertical-align:-2px">'+d+'</svg>'; }
+    var GI={
+      flame:    ic('<path d="M12 3c1.6 3.6 4 4.6 4 8a4 4 0 0 1-8 0c0-1.3.5-2.1 1-2.7C9 11 12 8 12 3z"/>',14),
+      dumbbell: ic('<path d="M4 9v6M7 7v10M17 7v10M20 9v6M7 12h10"/>',14),
+      bolt:     ic('<path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/>',14),
+      spark:    ic('<path d="M12 3v6M12 15v6M3 12h6M15 12h6M6 6l3 3M15 15l3 3M18 6l-3 3M9 15l-3 3"/>',14),
+      chevron:  ic('<path d="M9 6l6 6-6 6"/>',20,2),
+      camera:   ic('<path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/>',15),
+      person:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:64px;height:64px"><circle cx="12" cy="5" r="2.5"/><path d="M12 8v7M12 15l-3 6M12 15l3 6M7 11h10"/></svg>',
+      pushup:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:28px;height:28px"><circle cx="5" cy="8" r="1.6"/><path d="M5 10l4 3 7-1M9 13l5 4M3 18h18"/></svg>',
+      legs:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:28px;height:28px"><path d="M9 3v8l-2 10M15 3v8l2 10M9 7h6"/></svg>',
+      pullup:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:28px;height:28px"><path d="M4 4h16M8 4v3M16 4v3"/><circle cx="12" cy="11" r="2"/><path d="M12 13v5M12 18l-2 3M12 18l2 3"/></svg>',
+      dot:      '<svg viewBox="0 0 24 24" style="width:9px;height:9px;vertical-align:1px"><circle cx="12" cy="12" r="7" fill="currentColor"/></svg>'
+    };
+
+    var EXOS=[
+      { id:'pushups', name:'Push-ups', emoji:GI.pushup, muscle:'chest', c:'#FF6B6B', diff:'easy', sub:'Chest · triceps · core' },
+      { id:'squats',  name:'Squats',   emoji:GI.legs,   muscle:'legs',  c:'#34D399', diff:'medium', sub:'Quads · glutes' },
+      { id:'pullups', name:'Pull-ups', emoji:GI.pullup, muscle:'back',  c:'#4A8FFF', diff:'hard', sub:'Back · biceps' }
+    ];
+    var FEEDS=['Keep going '+GI.dumbbell,'Nice rep!','Stay tight','You\'ve got this '+GI.flame,'Strong! '+GI.spark,'Don\'t stop','Looking good','Push! '+GI.bolt];
+
+    var plus=S.isPlus(), rate=S.perRep();
+    var cur=null, reps=0, stream=null;
+
+    function initSelect(){
+      $('#plusBadge').textContent = plus ? '5× CORE+' : '1× RATE';
+      $('#plusBadge').classList.toggle('off', !plus);
+      $('#rateTxt').textContent = rate.toFixed(2);
+      $('#plusHint').innerHTML = plus ? '<b style="color:#FFCB3D">CORE+ 5× active.</b>' : 'CORE+ earns <b style="color:#FFCB3D">5×</b> (0.05/rep).';
+      $('#exsel').innerHTML = EXOS.map(function(e){
+        return '<div class="exo" data-id="'+e.id+'" style="--c:'+e.c+'"><div class="ei">'+e.emoji+'</div><div class="et"><b>'+e.name+'</b><span>'+e.sub+'</span></div><div class="ego">'+GI.chevron+'</div></div>';
+      }).join('');
+      Array.prototype.forEach.call(document.querySelectorAll('.exo'), function(x){ x.addEventListener('click', function(){ startSession(x.getAttribute('data-id')); }); });
+    }
+
+    function startSession(id){
+      cur=EXOS.find(function(e){ return e.id===id; }); reps=0;
+      sfx('confirm'); haptic();
+      document.documentElement.style.setProperty('--str', cur.c);
+      $('#liveEx').textContent=cur.name; $('#silho').innerHTML=cur.emoji;
+      $('#cnum').textContent='0'; $('#cgain').textContent='+0.00 Strength'; $('#cfeed').innerHTML="Let's go";
+      $('#pick').style.display='none'; $('#live').classList.add('on');
+    }
+
+    function addRep(){
+      reps++; sfx(reps%10===0?'coin':'tick'); haptic();
+      var n=$('#cnum'); n.textContent=reps; n.classList.remove('bump'); void n.offsetWidth; n.classList.add('bump');
+      $('#cgain').textContent='+'+(reps*rate).toFixed(2)+' Strength';
+      $('#cfeed').innerHTML = reps%5===0 ? FEEDS[Math.floor((reps/5)%FEEDS.length)] : $('#cfeed').innerHTML;
+    }
+
+    async function toggleCam(){
+      if(stream){ stopCam(); return; }
+      try{
+        stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:'user' }, audio:false });
+        $('#vid').srcObject=stream; $('#silho').style.display='none';
+        $('#camState').innerHTML=GI.dot+' Live'; $('#camToggle').innerHTML=GI.camera+' Camera on';
+        $('#camHint').textContent='Tap +1 REP for each rep · pose-detection upgrade later';
+      }catch(e){
+        $('#camState').textContent='Camera blocked'; $('#camHint').textContent='No camera access — tap counting still works';
+        sfx('warn');
+      }
+    }
+    function stopCam(){ if(stream){ stream.getTracks().forEach(function(t){ t.stop(); }); stream=null; } $('#vid').srcObject=null; $('#silho').style.display='flex'; $('#camState').textContent='Camera off'; $('#camToggle').innerHTML=GI.camera+' Turn on camera'; }
+
+    function finish(){
+      stopCam();
+      var res=S.addReps(cur.muscle, reps, { diff:cur.diff });
+      S.commitRepStrength(res.gain);
+      var xpGain=Math.round(res.gain*20);
+      sfx('reward');
+      $('#sumBody').innerHTML='<div class="sumhead"><div class="ring">'+cur.emoji+'</div><h2>'+reps+' reps done</h2><p>'+cur.name+' · logged to your Strength</p></div>'+
+        '<div class="big3"><div class="b"><div class="bn">'+reps+'</div><div class="bl">Total Reps</div></div>'+
+          '<div class="b str"><div class="bn">+'+res.gain.toFixed(2)+'</div><div class="bl">Strength</div></div>'+
+          '<div class="b xp"><div class="bn">+'+xpGain+'</div><div class="bl">XP</div></div></div>'+
+        '<button class="bigbtn" id="sumDone">Done</button>'+
+        '<button class="againbtn" id="sumAgain">Go again</button>';
+      $('#sumScrim').classList.add('show'); $('#sumSheet').classList.add('show');
+      $('#sumDone').addEventListener('click', function(){ location.href='strength.html'; });
+      $('#sumAgain').addEventListener('click', function(){ $('#sumScrim').classList.remove('show'); $('#sumSheet').classList.remove('show'); $('#live').classList.remove('on'); $('#pick').style.display='block'; cur=null; reps=0; });
+    }
+
+    function init(){
+      initSelect();
+      $('#repBtn').addEventListener('click', addRep);
+      $('#camToggle').addEventListener('click', toggleCam);
+      $('#finBtn').addEventListener('click', function(){ if(reps===0){ if(!confirm('No reps yet — leave?')) return; stopCam(); location.href='strength.html'; return; } finish(); });
+      $('#backBtn').addEventListener('click', function(){ stopCam(); sfx('tick'); if($('#live').classList.contains('on') && reps>0){ if(!confirm('Leave without saving these reps?')) return; } location.href='strength.html'; });
+      window.addEventListener('pagehide', stopCam);
+    }
+    if(document.readyState!=='loading') init(); else document.addEventListener('DOMContentLoaded', init);
+  })();
+  </script>
+</body>
+</html>

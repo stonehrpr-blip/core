@@ -32,7 +32,7 @@
 
     // Variant B = old copy. Walk text nodes and replace matched phrases.
     const SWAPS = [
-      // 3-day → 7-day framing
+      // 3-day -> 7-day framing
       [/\b3 days free\b/g,             '7 days free'],
       [/\bStart 3 days free\b/g,       'Start 7-day free trial'],
       [/\b3 days free · cancel any time\b/gi, '7 days free · cancel any time'],

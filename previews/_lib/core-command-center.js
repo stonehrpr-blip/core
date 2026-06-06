@@ -78,7 +78,7 @@
 
       <div class="cc-section-h">
         <span>Today's tasks</span>
-        <span class="right" onclick="window.location.href='34-tasks.html'">View all ›</span>
+        <span class="right" onclick="window.location.href='34-tasks.html'">View all <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-2px"><path d="M9 6l6 6-6 6"/></svg></span>
       </div>
       <div class="cc-list" id="ccTaskList"></div>
 

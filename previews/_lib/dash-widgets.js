@@ -269,7 +269,7 @@
           header.innerHTML =
             '<span class="w-tasks-progress"><b>' + done + '</b> / ' + tasks.length + ' done</span>' +
             '<span class="w-tasks-budget">' + (totalMin > 0 ? budgetStr + ' left' : 'All done!') + '</span>' +
-            '<a href="21-quests.html" class="w-tasks-viewall">All →</a>';
+            '<a href="21-quests.html" class="w-tasks-viewall">All<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;vertical-align:-1px;margin-left:3px"><path d="M9 6l6 6-6 6"/></svg></a>';
           host.appendChild(header);
 
           if (!tasks.length) {
@@ -387,7 +387,14 @@
       id: 'weather', title: 'Weather',
       icon: '<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>',
       render: function (host) {
-        var ICONS  = { clear: '☀️', cloudy: '☁️', rain: '🌧️', snow: '❄️', fog: '🌫️' };
+        var SVG_HEAD = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">';
+        var ICONS  = {
+          clear:  SVG_HEAD + '<circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2 12h2M20 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>',
+          cloudy: SVG_HEAD + '<path d="M7 18h10a4 4 0 0 0 .5-7.97A5.5 5.5 0 0 0 6.8 9.3 3.6 3.6 0 0 0 7 18z"/></svg>',
+          rain:   SVG_HEAD + '<path d="M7 18h10a4 4 0 0 0 .5-7.97A5.5 5.5 0 0 0 6.8 9.3 3.6 3.6 0 0 0 7 18z"/><path d="M8 20l-1 2M12 20l-1 2M16 20l-1 2"/></svg>',
+          snow:   SVG_HEAD + '<path d="M7 18h10a4 4 0 0 0 .5-7.97A5.5 5.5 0 0 0 6.8 9.3 3.6 3.6 0 0 0 7 18z"/><path d="M8 20h.01M12 21h.01M16 20h.01"/></svg>',
+          fog:    SVG_HEAD + '<path d="M3 10h18M5 14h14M4 18h16"/></svg>'
+        };
         var LABELS = { clear: 'Clear skies', cloudy: 'Overcast', rain: 'Raining', snow: 'Snowing', fog: 'Foggy' };
         var TIMES  = { sunrise: 'Sunrise', day: 'Daytime', afternoon: 'Afternoon', sunset: 'Sunset', night: 'Night' };
         var amb = window.dashAmbient;
@@ -395,13 +402,13 @@
         var ti = amb ? amb.getTime() : 'day';
         host.innerHTML =
           '<div class="w-weather">' +
-          '<span class="w-weather-icon" id="wWIcon">' + (ICONS[w] || '☀️') + '</span>' +
+          '<span class="w-weather-icon" id="wWIcon">' + (ICONS[w] || ICONS.clear) + '</span>' +
           '<span class="w-weather-label" id="wWLabel">' + (LABELS[w] || 'Clear') + '</span>' +
           '<span class="w-weather-time" id="wWTime">' + (TIMES[ti] || ti) + '</span>' +
           '</div>';
         function onAmb(e) {
           var ic = host.querySelector('#wWIcon'), lb = host.querySelector('#wWLabel'), tm = host.querySelector('#wWTime');
-          if (ic) ic.textContent = ICONS[e.detail.weather] || '☀️';
+          if (ic) ic.innerHTML = ICONS[e.detail.weather] || ICONS.clear;
           if (lb) lb.textContent = LABELS[e.detail.weather] || 'Clear';
           if (tm) tm.textContent = TIMES[e.detail.time] || e.detail.time;
         }
@@ -417,12 +424,12 @@
         var social = window.coreSocial;
         var friends = (social && social.friends && social.friends()) || [];
         if (!friends.length) {
-          host.innerHTML = '<div class="w-empty">No friends yet.<br><a href="23-profile.html" style="color:var(--blue);font-weight:700;text-decoration:none">Go to Profile →</a></div>';
+          host.innerHTML = '<div class="w-empty">No friends yet.<br><a href="23-profile.html" style="color:var(--blue);font-weight:700;text-decoration:none">Go to Profile<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;vertical-align:-1px;margin-left:3px"><path d="M9 6l6 6-6 6"/></svg></a></div>';
           return;
         }
         var html = '<a href="23-profile.html" class="w-friends-header">' +
           '<span class="w-friends-count">' + friends.length + ' ' + (friends.length === 1 ? 'friend' : 'friends') + '</span>' +
-          '<span class="w-friends-seeall">Profile →</span>' +
+          '<span class="w-friends-seeall">Profile<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;vertical-align:-1px;margin-left:3px"><path d="M9 6l6 6-6 6"/></svg></span>' +
           '</a><div class="w-friends-list">';
         friends.slice(0, 4).forEach(function (f) {
           html += '<a href="23-profile.html" class="w-friend-item" style="text-decoration:none;color:inherit">' +

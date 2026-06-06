@@ -58,8 +58,28 @@
     function step(ts) { if (!start) start = ts; var p = Math.min(1, (ts - start) / dur); node.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - p, 3))).toLocaleString(); if (p < 1) node._raf = requestAnimationFrame(step); }
     node._raf = requestAnimationFrame(step);
   }
-  function syncTop() { try { var s = S.read(); countUp(el('xpTop'), s.xp || 0); countUp(el('coinTop'), s.coins || 0); } catch (e) {} }
+  function syncTop() { try { var s = S.read(); countUp(el('xpTop'), s.xp || 0); countUp(el('coinTop'), s.coins || 0); var p2 = el('plus2x'); if (p2) { var a2 = S.corePlusActive && S.corePlusActive(), was2 = p2.hidden; p2.hidden = !a2; if (a2 && was2 && !p2.dataset.pulsed) { p2.dataset.pulsed = '1'; p2.animate([{ transform: 'scale(.5)', opacity: 0 }, { transform: 'scale(1.18)', opacity: 1, offset: .6 }, { transform: 'scale(1)', opacity: 1 }], { duration: 520, easing: 'cubic-bezier(.2,.8,.3,1)' }); } } } catch (e) {} }
   var REDUCED_M = false; try { REDUCED_M = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+  // Boss-defeat moment: a gold/mythic screen flash + confetti burst, matched to boss_win SFX.
+  function bossFlash() {
+    var phone = document.querySelector('.phone'); if (!phone) return;
+    var flash = document.createElement('div');
+    flash.style.cssText = 'position:absolute;inset:0;z-index:95;pointer-events:none;background:radial-gradient(60% 45% at 50% 42%,rgba(255,92,138,0.5),rgba(255,197,107,0.22) 45%,transparent 72%)';
+    phone.appendChild(flash);
+    if (REDUCED_M) { setTimeout(function () { flash.remove(); }, 500); return; }
+    flash.animate([{ opacity: 0 }, { opacity: 1, offset: .15 }, { opacity: 0 }], { duration: 900, easing: 'ease-out' }).onfinish = function () { flash.remove(); };
+    var cols = ['#FF5C8A', '#FFC56B', '#B388FF', '#4A8FFF', '#34D399'];
+    for (var i = 0; i < 28; i++) {
+      (function () {
+        var c = document.createElement('span'); var col = cols[i % cols.length];
+        c.style.cssText = 'position:absolute;left:50%;top:38%;width:8px;height:8px;border-radius:2px;z-index:96;pointer-events:none;background:' + col + ';box-shadow:0 0 8px ' + col;
+        phone.appendChild(c);
+        var ang = (Math.PI * 2) * (i / 28) + Math.random() * 0.4, dist = 90 + Math.random() * 150;
+        var dx = Math.cos(ang) * dist, dy = Math.sin(ang) * dist - 30, rot = (Math.random() * 720 - 360);
+        c.animate([{ transform: 'translate(0,0) rotate(0) scale(1)', opacity: 1 }, { transform: 'translate(' + dx + 'px,' + dy + 'px) rotate(' + rot + 'deg) scale(.4)', opacity: 0 }], { duration: 900 + Math.random() * 500, easing: 'cubic-bezier(.15,.7,.3,1)' }).onfinish = function () { c.remove(); };
+      })();
+    }
+  }
   // floating "+N XP" rising from the top XP chip — instant reward juice on completion
   function flyXp(amount) {
     if (!amount) return; var chip = el('xpTop'), phone = document.querySelector('.phone'); if (!chip || !phone) return;
@@ -153,7 +173,7 @@
   function mainQuestCard(m) {
     if (!m.main) return '';
     var mn = m.main; var pct = Math.min(100, mn.progress || 0);
-    var miles = (mn.milestones || []).map(function (ms) { return '<div class="ms' + (ms.done ? ' done' : '') + '"><div class="mn">' + esc(ms.n) + '</div><div class="mv">' + (ms.done ? '✓' : '·') + '</div></div>'; }).join('');
+    var miles = (mn.milestones || []).map(function (ms) { return '<div class="ms' + (ms.done ? ' done' : '') + '"><div class="mn">' + esc(ms.n) + '</div><div class="mv">' + (ms.done ? svg('<path d="M5 12l4 4 10-11"/>', 2.6) : '·') + '</div></div>'; }).join('');
     var rw = mn.reward || {};
     return '<div class="sec"><div class="sechd"><div class="l">' + svg('<path d="M12 2l2.4 6.8L21 9l-5.5 4 2 7-5.5-4.2L6.5 20l2-7L3 9z"/>') + '<h2>Main Questline</h2></div><span class="ct">Your big goal</span></div>' +
       '<div class="mainq"><div class="mtag">' + svg('<path d="M5 21V8l7-5 7 5v13"/>', 2) + 'Life Goal</div>' +
@@ -172,13 +192,14 @@
   function chainCard(chainId, name, steps) {
     var doneCount = steps.filter(function (s) { return s.status === 'claimed'; }).length;
     var dotsHtml = steps.map(function (s, i) {
-      var d = '<div class="cstep' + (s.status === 'claimed' ? ' done' : '') + '"><div class="cdot">' + svg(s.status === 'claimed' ? '<path d="M5 12l4 4 10-11"/>' : dom(s.domain), 2.2) + '</div><div class="cln">' + esc(s.title) + '</div></div>';
+      var sst = statFor(s);
+      var d = '<div class="cstep' + (s.status === 'claimed' ? ' done' : '') + '"><div class="cdot"' + (s.status === 'claimed' ? '' : ' style="color:' + sst.c + '"') + '>' + svg(s.status === 'claimed' ? '<path d="M5 12l4 4 10-11"/>' : sst.ic, 2.2) + '</div><div class="cln">' + esc(s.title) + '</div></div>';
       return d + (i < steps.length - 1 ? '<div class="carrow">' + svg('<path d="M9 6l6 6-6 6"/>', 2) + '</div>' : '');
     }).join('');
     var complete = doneCount === steps.length;
     return '<div class="chain"><div class="chd">' + svg('<path d="M9 12a3 3 0 0 0 3 3h2a3 3 0 0 0 0-6M15 12a3 3 0 0 0-3-3h-2a3 3 0 0 0 0 6"/>', 2) + esc(name) + ' Chain · ' + doneCount + '/' + steps.length + '</div>' +
       '<div class="csteps">' + dotsHtml + '</div>' +
-      '<div class="crew">' + svg('<path d="M3 9l2-4h14l2 4M3 9v9a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V9M3 9h18"/>', 1.8) + (complete ? 'Chain complete — bonus chest unlocked!' : 'Complete all ' + steps.length + ' → bonus chest + 200 XP') + '</div></div>';
+      '<div class="crew">' + svg('<path d="M3 9l2-4h14l2 4M3 9v9a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V9M3 9h18"/>', 1.8) + (complete ? 'Chain complete — bonus chest unlocked!' : 'Complete all ' + steps.length + ' ' + svg('<path d="M9 6l6 6-6 6"/>', 2.4) + ' bonus chest + 200 XP') + '</div></div>';
   }
 
   // ════════ RENDER ════════
@@ -316,7 +337,7 @@
     openOv('proofOv');
     var ta = el('pfTa'), btn = el('pfSubmit'), cnt = el('pfCount'), file = el('pfFile'), upl = el('pfUpl');
     var img = null;
-    function check() { var n = ta.value.trim().length; cnt.textContent = n + ' / 40 min · ' + (img ? 'photo added ✓' : 'photo required'); btn.disabled = !(n >= 40 && img); }
+    function check() { var n = ta.value.trim().length; cnt.textContent = n + ' / 40 min · ' + (img ? 'photo added ' + svg('<path d="M5 12l4 4 10-11"/>', 2.6) : 'photo required'); btn.disabled = !(n >= 40 && img); }
     ta.addEventListener('input', check);
     file.addEventListener('change', function () { var f = file.files && file.files[0]; if (!f) return; var rd = new FileReader(); rd.onload = function () { img = rd.result; upl.innerHTML = '<img src="' + img + '" alt="proof">'; check(); }; rd.readAsDataURL(f); });
     btn.addEventListener('click', async function () {
@@ -362,7 +383,7 @@
     rws.forEach(function (r, i) { setTimeout(function () { r.classList.add('in'); var v = r.querySelector('.rv'); var tg = v && parseInt(v.dataset.target, 10); if (v && !isNaN(tg)) countUp(v, tg, 600); SFX('coin'); }, 350 + i * 230); });
     el('rwdCollect').addEventListener('click', function () {
       var gained = (Q.findQuest(q.id) || q).xp || 0;
-      Q.claimQuest(q.id); el('rwdOv').classList.remove('on'); SFX('confirm');
+      Q.claimQuest(q.id); el('rwdOv').classList.remove('on'); SFX(q.cat === 'boss' ? 'boss_win' : 'quest_complete');
       render(); syncTop(); flyXp(gained); toast('Rewards collected', 'good');
     });
   }
@@ -541,7 +562,7 @@
       if (act.dataset.act === 'claimall') { claimAll(); return; }
       var q = Q.findQuest(act.dataset.qid); if (!q) return;
       if (act.dataset.act === 'start') startQuest(q);
-      else if (act.dataset.act === 'complete') { Q.markClaimable(q.id); SFX('tick'); claimFlow(q); }
+      else if (act.dataset.act === 'complete') { Q.markClaimable(q.id); if (q.cat === 'boss') { SFX('boss_win'); bossFlash(); } else SFX('tick'); claimFlow(q); }
       else if (act.dataset.act === 'claim') claimFlow(q);
       return;
     }

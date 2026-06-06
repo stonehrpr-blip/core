@@ -99,7 +99,7 @@
 
       <div class="scroll">
         <div class="crest"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 16l-2-9 6 4 3-6 3 6 6-4-2 9z"/><path d="M5 18h14v2H5z"/></svg></div>
-        <div class="htag">CORE Plus</div>
+        <div class="htag">CORE Plus <span id="heroPlus" hidden style="display:inline-block;margin-left:6px;padding:2px 8px;border-radius:999px;font-size:9px;letter-spacing:.1em;color:#06122b;background:linear-gradient(135deg,#5AF0B0,#34D399)">ACTIVE</span></div>
         <h1 class="h1">Level up <span class="g">twice as fast.</span></h1>
         <p class="sub">Double rewards, exclusive cosmetics, and a weekly Epic chest. Built for players who are serious about their CORE.</p>
 
@@ -168,7 +168,8 @@
     function plusActive(){ try{ return !!(S && S.corePlusActive && S.corePlusActive()); }catch(e){ return false; } }
     function paintCTA(){
       var on=plusActive(), btn=qs('#ctaBtn');
-      if(on){ btn.textContent='CORE Plus active ✓'; qs('#fineSub').innerHTML='On in this preview · 2× XP & coins + weekly Epic chest.'+(DEV?' <b style="color:#9CC0FF">Tap to turn off (dev)</b>.':''); }
+      var hp=qs('#heroPlus'); if(hp) hp.hidden=!on;
+      if(on){ var dl=0; try{ dl=(S&&S.corePlusDaysLeft)?S.corePlusDaysLeft():0; }catch(e){} btn.innerHTML='CORE Plus active <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.12em;display:inline-block"><path d="M5 12l4 4 10-11"/></svg>'; qs('#fineSub').innerHTML='On in this preview · 2× XP & coins + weekly Epic chest'+(dl?' · <b style="color:#9CC0FF">'+dl+' days left</b>':'')+'.'+(DEV?' <span style="color:#6B7488">Tap to turn off (dev)</span>':''); }
       else { btn.textContent='Start 7-day free trial'; qs('#fineSub').textContent=(DEV?'Dev mode · tap to activate CORE Plus.':PLANS[sel].fine); }
     }
     renderPlans();
@@ -177,6 +178,8 @@
       if(!DEV || !S || !S.setCorePlus){ SFX('confirm'); toast('Payments aren’t enabled yet — coming soon.'); return; }
       var on=plusActive();
       S.setCorePlus(!on);
+      // dev: ?expire=N shortens the period to N days so the ≤3-day dim/countdown is testable
+      try{ if(!on){ var em=location.search.match(/expire=(\d+)/); if(em) localStorage.setItem('corePlusUntil', String(Date.now()+parseInt(em[1],10)*86400000)); } }catch(e){}
       try{ S.syncProgress(); }catch(e){}
       if(!on){ SFX('reward'); toast('CORE Plus on <b style="color:var(--good)">(dev)</b> — 2× rewards + weekly Epic chest added.'); }
       else { SFX('tick'); toast('CORE Plus turned off.'); }

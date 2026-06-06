@@ -296,11 +296,26 @@
       </div>
 
       <nav class="nav" aria-label="Primary">
-        <a class="item" href="20-dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 11l9-7 9 7M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/></svg><span class="nl">Home</span></a>
-        <a class="item" href="21-quests.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg><span class="nl">Quests</span></a>
-        <a class="item active" href="27-shop.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M6 2L3 6v13a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"/></svg><span class="nl">Shop</span></a>
-        <a class="item" href="23-profile.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="nl">Profile</span></a>
-        <a class="item" href="24-more.html"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg><span class="nl">More</span></a>
+        <a class="item" href="20-dashboard.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 11l9-7 9 7M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/></svg>
+          <span class="nl">Home</span>
+        </a>
+        <a class="item" href="21-quests.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M9 5h11M9 12h11M9 19h11M4 5l1 1 2-2M4 12l1 1 2-2M4 19l1 1 2-2"/></svg>
+          <span class="nl">Quests</span>
+        </a>
+        <a class="item" href="coach.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+          <span class="nl">Coach</span>
+        </a>
+        <a class="item" href="community.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M7 8h10M7 11h7M7 14h5" stroke-linecap="round"/></svg>
+          <span class="nl">Community</span>
+        </a>
+        <a class="item active" href="24-more.html" aria-current="page">
+          <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2.5"/><circle cx="12" cy="12" r="2.5"/><circle cx="19" cy="12" r="2.5"/></svg>
+          <span class="nl">More</span>
+        </a>
       </nav>
       <div class="home-indicator"></div>
     </div>
@@ -338,7 +353,7 @@
     var FREE_COOLDOWN_MS=8*60*60*1000; // claimable every 8h
     function freeChestRemaining(){ var next=parseInt(lget('coreFreeChestNextAt','0'),10)||0; return Math.max(0, next-Date.now()); }
     function freeChestReady(){ return freeChestRemaining()<=0; }
-    // free chest floor rises with rank → higher ranks get better daily drops (can still uproll)
+    // free chest floor rises with rank -> higher ranks get better daily drops (can still uproll)
     function freeChestFloor(){ var i=rankIdx(); if(i>=9) return 'Legendary'; if(i>=6) return 'Epic'; if(i>=3) return 'Rare'; return 'Common'; }
     function fmtCountdown(ms){ var s=Math.ceil(ms/1000); var h=Math.floor(s/3600), m=Math.floor((s%3600)/60), ss=s%60; var p=function(n){return (n<10?'0':'')+n;}; return p(h)+':'+p(m)+':'+p(ss); }
     // milliseconds until next local midnight (daily deals reset)
@@ -412,35 +427,35 @@
     // ── catalog ────────────────────────────────────────────────────────────
     var CATS=['Frames','Badges','Auras','Boosts','Chests','Titles'];
     var ITEMS=[
-      // Frames → equip via coreProfileTheme (profile FRAMES keys)
+      // Frames -> equip via coreProfileTheme (profile FRAMES keys)
       {id:'frame_default', cat:'Frames', name:'Default Frame', rar:'Common', cost:0,    kind:'frame', frameKey:'Default', desc:'The standard CORE profile border.'},
       {id:'frame_blue',    cat:'Frames', name:'Blue Frame',    rar:'Common', cost:250,  kind:'frame', frameKey:'Blue',    desc:'A cool blue border for your card.'},
       {id:'frame_gold',    cat:'Frames', name:'Gold Frame',    rar:'Rare',   cost:1000, kind:'frame', frameKey:'Gold',    lockRank:'Gold',   desc:'A premium gold border.'},
       {id:'frame_crystal', cat:'Frames', name:'Crystal Frame', rar:'Epic',   cost:1500, kind:'frame', frameKey:'Crystal', desc:'A shimmering crystal border.'},
       {id:'frame_aurora',  cat:'Frames', name:'Aurora Frame',  rar:'Epic',   cost:2500, kind:'frame', frameKey:'Aurora',  desc:'A glowing aurora border for standout cards.', featured:true},
-      // Badges → equip via coreEquippedBadge + added to inventory
+      // Badges -> equip via coreEquippedBadge + added to inventory
       {id:'badge_starter',    cat:'Badges', name:'Starter Badge',     rar:'Common', cost:0,    kind:'badge', earned:'starter', desc:'Earned from your first chest.'},
       {id:'badge_focus',      cat:'Badges', name:'Focus Badge',       rar:'Common', cost:500,  kind:'badge', desc:'For disciplined focus sessions.'},
       {id:'badge_discipline', cat:'Badges', name:'Discipline Badge',  rar:'Rare',   cost:750,  kind:'badge', desc:'Proof of consistent discipline.'},
       {id:'badge_builder',    cat:'Badges', name:'Builder Badge',     rar:'Rare',   cost:750,  kind:'badge', desc:'For players who build their future.'},
       {id:'badge_boss',       cat:'Badges', name:'Boss Slayer Badge', rar:'Epic',   cost:1500, kind:'badge', lockRank:'Ember', lockLabel:'Boss Quests', desc:'Unlocked when Boss Quests are available.'},
-      // Auras → equip via coreEquippedAura
+      // Auras -> equip via coreEquippedAura
       {id:'aura_blue',  cat:'Auras', name:'Blue Aura',  rar:'Rare', cost:1200, kind:'aura', desc:'A subtle blue glow around your card.'},
       {id:'aura_ember', cat:'Auras', name:'Ember Aura', rar:'Rare', cost:1500, kind:'aura', desc:'A warm ember glow.'},
       {id:'aura_wind',  cat:'Auras', name:'Wind Aura',  rar:'Epic', cost:1800, kind:'aura', desc:'A flowing wind aura.'},
       {id:'aura_core',  cat:'Auras', name:'CORE Aura',  rar:'Legendary', cost:5000, kind:'aura', lockRank:'CORE', desc:'The ultimate aura. Requires CORE rank.'},
-      // Boosts → coreState upgrades (sync with dashboard + quests + streak)
+      // Boosts -> coreState upgrades (sync with dashboard + quests + streak)
       {id:'xpboost1',    cat:'Boosts', name:'XP Boost I',  rar:'Rare', cost:800,  kind:'boost', effect:'+5% XP from quests',  desc:'Earn 5% more XP from every quest.'},
       {id:'chesthunter', cat:'Boosts', name:'Chest Hunter',rar:'Rare', cost:1000, kind:'boost', effect:'+3% rare chest chance', desc:'Improves your rare chest odds.'},
       {id:'momentum',    cat:'Boosts', name:'Momentum',    rar:'Rare', cost:1200, kind:'boost', effect:'+1 streak shield', desc:'Adds a streak shield to protect your chain.'},
       {id:'questmaster', cat:'Boosts', name:'Quest Master',rar:'Epic', cost:2000, kind:'boost', effect:'+1 daily quest slot', desc:'Unlocks a 4th daily quest.'},
-      // Chests → coreOwnedChests (repeatable)
+      // Chests -> coreOwnedChests (repeatable)
       {id:'chest_common',    cat:'Chests', name:'Common Chest',    rar:'Common', cost:500,  kind:'chest', desc:'A common reward chest.'},
       {id:'chest_rare',      cat:'Chests', name:'Rare Chest',      rar:'Rare',   cost:1500, kind:'chest', desc:'A rare reward chest.'},
       {id:'chest_epic',      cat:'Chests', name:'Epic Chest',      rar:'Epic',   cost:4000, kind:'chest', desc:'An epic reward chest.'},
       {id:'chest_legendary', cat:'Chests', name:'Legendary Chest', rar:'Legendary', cost:8000, kind:'chest', lockRank:'Ascend', desc:'A legendary chest. Requires Ascend rank.'},
       {id:'chest_mythic',    cat:'Chests', name:'Mythic Chest',    rar:'Mythic', cost:15000, kind:'chest', lockRank:'CORE', desc:'The rarest chest. Guarantees a Mythic pull. Requires CORE rank.'},
-      // Titles → coreProfileTitle
+      // Titles -> coreProfileTitle
       {id:'title_queststarter', cat:'Titles', name:'Quest Starter', rar:'Common', cost:300,  kind:'title', titleName:'Quest Starter', desc:'Show you have begun your journey.'},
       {id:'title_disciplined',  cat:'Titles', name:'Disciplined',   rar:'Rare',   cost:700,  kind:'title', titleName:'Disciplined',   desc:'For the consistently disciplined.'},
       {id:'title_unbreakable',  cat:'Titles', name:'Unbreakable',   rar:'Epic',   cost:1500, kind:'title', titleName:'Unbreakable',   desc:'Nothing breaks your momentum.'},
@@ -591,7 +606,7 @@
       var bal=coins();
       animateCoins(bal);
       animateOne('#curShards', S.read().shards||0);
-      var pb=qs('#plusBadge'); if(pb){ try{ pb.hidden = !(S.corePlusActive && S.corePlusActive()); }catch(e){ pb.hidden=true; } }
+      var pb=qs('#plusBadge'); if(pb){ try{ var pa=S.corePlusActive&&S.corePlusActive(); pb.hidden=!pa; if(pa){ var dl=S.corePlusDaysLeft?S.corePlusDaysLeft():0, low=dl>0&&dl<=3; pb.style.opacity=low?'0.55':'1'; pb.title=dl?('CORE Plus · '+dl+' day'+(dl===1?'':'s')+' left'):'CORE Plus active'; } }catch(e){ pb.hidden=true; } }
 
       // featured (Aurora frame)
       var ft=ITEMS.filter(function(i){return i.featured;})[0];
@@ -663,7 +678,7 @@
       if(ft && rem>0){ ft.textContent=fmtCountdown(rem); }
       else if(ft && rem<=0){ render(); return; }      // free chest just became ready
       var mm=msUntilMidnight(), dt=qs('#dealsTimer');
-      if(dt){ dt.textContent=fmtCountdown(mm); if(mm<=1200){ render(); } }   // new day → fresh deals
+      if(dt){ dt.textContent=fmtCountdown(mm); if(mm<=1200){ render(); } }   // new day -> fresh deals
     }, 1000);
 
     render();

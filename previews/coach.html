@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script>try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8"/>
+<title>CORE — Coach</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<style>
+:root{
+  --bg-base:#02020A;--bg-card:rgba(255,255,255,0.035);--bg-card-2:rgba(255,255,255,0.07);
+  --border:rgba(255,255,255,0.08);--text:#F8FAFE;--muted:#9AA1B7;--dim:#4F5570;
+  --blue:#0A84FF;--purple:#9F8FFF;--green:#34D399;--gold:#FFC857;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify-content:center;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif;
+  color:var(--text);-webkit-font-smoothing:antialiased;padding:24px;overflow:hidden;}
+.phone{position:relative;width:390px;height:844px;background:var(--bg-base);border-radius:56px;overflow:hidden;
+  box-shadow:0 40px 100px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.06),0 0 0 10px #0a0a12,0 0 0 11px #2b2b38;}
+.notch{position:absolute;top:14px;left:50%;transform:translateX(-50%);width:124px;height:32px;background:#000;border-radius:20px;z-index:60;}
+.home-indicator{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;background:rgba(245,247,251,0.55);border-radius:999px;z-index:60;}
+#ambBg{position:absolute;inset:0;z-index:0;
+  background:
+    radial-gradient(60% 35% at 50% 30%,rgba(47,143,255,0.18) 0%,transparent 55%),
+    radial-gradient(50% 30% at 50% 100%,rgba(159,143,255,0.10) 0%,transparent 65%),
+    linear-gradient(180deg,#060B26 0%,#02020A 50%,#050510 100%);}
+#ambAurora{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0.45;mix-blend-mode:screen;}
+#ambAurora::before,#ambAurora::after{content:"";position:absolute;border-radius:50%;filter:blur(40px);will-change:transform,opacity;}
+#ambAurora::before{width:80%;height:45%;left:-10%;top:8%;background:radial-gradient(circle,rgba(47,143,255,0.55),transparent 70%);animation:driftA 24s ease-in-out infinite;}
+#ambAurora::after{width:70%;height:40%;right:-10%;bottom:16%;background:radial-gradient(circle,rgba(159,143,255,0.50),transparent 70%);animation:driftB 30s ease-in-out -15s infinite;}
+@keyframes driftA{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(40px,-22px) scale(1.12);}}
+@keyframes driftB{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-30px,18px) scale(1.10);}}
+#ambCelestial{position:absolute;inset:0;pointer-events:none;z-index:3;}
+@media(prefers-reduced-motion:reduce){#ambAurora::before,#ambAurora::after{animation:none!important;}}
+
+.frame{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;padding-top:54px;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:6px 20px 10px;flex-shrink:0;}
+.brand{display:flex;align-items:center;gap:8px;}
+.brand .dot{width:7px;height:7px;border-radius:50%;background:var(--blue);box-shadow:0 0 10px var(--blue);}
+.brand .wm{font-size:12px;font-weight:800;letter-spacing:0.34em;}
+.topbar-title{font-size:16px;font-weight:800;color:var(--text);}
+
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 0 20px;}
+.scroll::-webkit-scrollbar{display:none;}
+
+/* Section heading */
+.sec-head{padding:12px 20px 8px;font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);}
+
+/* Scanner grid */
+.scan-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 18px 6px;}
+.scan-card{border-radius:20px;overflow:hidden;padding:18px 16px 16px;
+  background:rgba(4,4,18,0.40);border:1px solid rgba(255,255,255,0.08);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  cursor:pointer;transition:transform .15s,border-color .2s;position:relative;}
+.scan-card:active{transform:scale(.97);}
+.scan-card.coming{opacity:.5;cursor:default;}
+.scan-icon{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
+.scan-icon svg{width:22px;height:22px;}
+.scan-name{font-size:13px;font-weight:800;margin-bottom:3px;}
+.scan-desc{font-size:10.5px;color:var(--muted);line-height:1.4;}
+.scan-badge{position:absolute;top:10px;right:10px;font-size:8.5px;font-weight:800;letter-spacing:.06em;
+  padding:2px 7px;border-radius:999px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);color:var(--dim);}
+.scan-badge.live{background:rgba(52,211,153,0.12);border-color:rgba(52,211,153,0.3);color:var(--green);}
+
+/* Chat preview */
+.chat-card{margin:0 18px 6px;border-radius:20px;overflow:hidden;
+  background:rgba(4,4,18,0.40);border:1px solid rgba(255,255,255,0.08);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}
+.chat-head{display:flex;align-items:center;gap:11px;padding:14px 16px 12px;border-bottom:1px solid rgba(255,255,255,0.05);}
+.chat-av{width:38px;height:38px;flex:none;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#0A84FF,#6F70FF);}
+.chat-av svg{width:20px;height:20px;color:#fff;}
+.chat-av-info{flex:1;}
+.chat-av-name{font-size:14px;font-weight:800;}
+.chat-av-sub{font-size:10px;color:var(--muted);}
+.chat-online{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);}
+.chat-msgs{padding:12px 14px;display:flex;flex-direction:column;gap:8px;}
+.chat-bubble{padding:9px 12px;border-radius:14px;font-size:12.5px;line-height:1.45;max-width:82%;}
+.chat-bubble.ai{background:rgba(10,132,255,0.12);border:1px solid rgba(10,132,255,0.22);align-self:flex-start;}
+.chat-bubble.user{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.09);align-self:flex-end;text-align:right;}
+.chat-input-row{display:flex;align-items:center;gap:9px;padding:10px 14px 14px;border-top:1px solid rgba(255,255,255,0.05);}
+.chat-input{flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);
+  border-radius:22px;padding:9px 14px;font:inherit;font-size:12.5px;color:var(--dim);}
+.chat-send{width:34px;height:34px;flex:none;border:none;border-radius:50%;background:var(--blue);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:.5;}
+.chat-send svg{width:14px;height:14px;color:#fff;}
+
+/* Coming soon banner */
+.coming-banner{margin:0 18px 16px;border-radius:16px;padding:14px 16px;
+  background:rgba(10,132,255,0.06);border:1px solid rgba(10,132,255,0.18);
+  display:flex;align-items:center;gap:10px;}
+.coming-banner svg{width:18px;height:18px;color:var(--blue);flex:none;}
+.coming-text{font-size:12px;color:var(--muted);line-height:1.4;}
+.coming-text strong{color:var(--blue);font-weight:700;}
+
+/* Nav */
+.nav{flex-shrink:0;padding:10px 12px 26px;display:flex;justify-content:space-around;align-items:flex-end;
+  background:rgba(3,3,14,0.42);backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6);
+  border-top:1px solid rgba(255,255,255,0.07);}
+.nav a{background:none;border:none;font:inherit;cursor:pointer;position:relative;
+  display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 8px;
+  min-width:48px;text-decoration:none;color:var(--dim);transition:color .2s;}
+.nav svg{width:23px;height:23px;}.nl{font-size:10px;font-weight:800;}
+.nav a.active{color:var(--text);}
+.nav a.active svg{color:var(--blue);filter:drop-shadow(0 0 8px rgba(10,132,255,.75));}
+.nav a.active::before{content:"";position:absolute;top:-2px;width:5px;height:5px;
+  border-radius:50%;background:var(--blue);box-shadow:0 0 8px var(--blue);}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div id="ambBg"></div>
+  <div id="ambAurora"></div>
+  <div id="ambCelestial"></div>
+  <div class="notch"></div>
+  <div class="home-indicator"></div>
+
+  <div class="frame">
+    <div class="topbar">
+      <div class="brand"><span class="dot"></span><span class="wm">CORE</span></div>
+      <span class="topbar-title">Coach</span>
+    </div>
+
+    <div class="scroll">
+
+      <!-- AI Chat preview -->
+      <div class="sec-head">Your Coach</div>
+      <div class="chat-card">
+        <div class="chat-head">
+          <div class="chat-av">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+          </div>
+          <div class="chat-av-info">
+            <div class="chat-av-name">CORE Coach</div>
+            <div class="chat-av-sub">Always here — no judgement</div>
+          </div>
+          <div class="chat-online"></div>
+        </div>
+        <div class="chat-msgs">
+          <div class="chat-bubble ai">Hey! How are you feeling today? I noticed you've kept your streak going — that takes real discipline.</div>
+          <div class="chat-bubble user">Had a craving earlier but pushed through it</div>
+          <div class="chat-bubble ai">That's huge. A craving means your brain is testing you — and you won. What helped you get through it?</div>
+        </div>
+        <div class="chat-input-row">
+          <div class="chat-input">Talk to your coach…</div>
+          <button class="chat-send" disabled aria-label="Send">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7Z"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Scanners -->
+      <div class="sec-head">Scanners</div>
+      <div class="scan-grid">
+        <div class="scan-card">
+          <span class="scan-badge coming">Soon</span>
+          <div class="scan-icon" style="background:rgba(255,107,107,0.12);border:1px solid rgba(255,107,107,0.22);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#FF6B6B" stroke-width="1.9"><path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/></svg>
+          </div>
+          <div class="scan-name">Physique</div>
+          <div class="scan-desc">Track body progress over time</div>
+        </div>
+        <div class="scan-card">
+          <span class="scan-badge coming">Soon</span>
+          <div class="scan-icon" style="background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.22);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="1.9"><path d="M12 20.5s-7.2-4.6-7.2-9.8A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 7.2 3.7c0 5.2-7.2 9.8-7.2 9.8Z"/></svg>
+          </div>
+          <div class="scan-name">Food</div>
+          <div class="scan-desc">Scan meals <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.1em;display:inline-block"><path d="M9 6l6 6-6 6"/></svg> Health score</div>
+        </div>
+        <div class="scan-card">
+          <span class="scan-badge coming">Soon</span>
+          <div class="scan-icon" style="background:rgba(179,136,255,0.12);border:1px solid rgba(179,136,255,0.22);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#B388FF" stroke-width="1.9"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/></svg>
+          </div>
+          <div class="scan-name">Outfit</div>
+          <div class="scan-desc">Style feedback + fit check</div>
+        </div>
+        <div class="scan-card">
+          <span class="scan-badge coming">Soon</span>
+          <div class="scan-icon" style="background:rgba(74,143,255,0.12);border:1px solid rgba(74,143,255,0.22);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#4A8FFF" stroke-width="1.9"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/><path d="M12 1.5v3M12 19.5v3M22.5 12h-3M4.5 12h-3"/></svg>
+          </div>
+          <div class="scan-name">Posture</div>
+          <div class="scan-desc">Alignment check + correction</div>
+        </div>
+        <div class="scan-card">
+          <span class="scan-badge coming">Soon</span>
+          <div class="scan-icon" style="background:rgba(255,203,61,0.12);border:1px solid rgba(255,203,61,0.22);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#FFCB3D" stroke-width="1.9"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/><path d="M12 12v4M9 16h6"/></svg>
+          </div>
+          <div class="scan-name">Looks</div>
+          <div class="scan-desc">Skin, symmetry + hair tips</div>
+        </div>
+        <div class="scan-card">
+          <span class="scan-badge coming">Soon</span>
+          <div class="scan-icon" style="background:rgba(94,234,212,0.12);border:1px solid rgba(94,234,212,0.22);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#5EEAD4" stroke-width="1.9"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>
+          </div>
+          <div class="scan-name">Voice</div>
+          <div class="scan-desc">Speaking drills + feedback</div>
+        </div>
+      </div>
+
+      <!-- Coming banner -->
+      <div class="coming-banner">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+        <div class="coming-text"><strong>Coach is coming.</strong> AI chat + all 6 scanners launch with the full app. Streak, quests, and community are live now.</div>
+      </div>
+
+    </div>
+
+    <!-- Nav -->
+    <nav class="nav" aria-label="Primary">
+      <a class="item" href="20-dashboard.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 11l9-7 9 7M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/></svg>
+        <span class="nl">Home</span>
+      </a>
+      <a class="item" href="21-quests.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M9 5h11M9 12h11M9 19h11M4 5l1 1 2-2M4 12l1 1 2-2M4 19l1 1 2-2"/></svg>
+        <span class="nl">Quests</span>
+      </a>
+      <a class="item active" href="coach.html" aria-current="page">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+        <span class="nl">Coach</span>
+      </a>
+      <a class="item" href="community.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M7 8h10M7 11h7M7 14h5" stroke-linecap="round"/></svg>
+        <span class="nl">Community</span>
+      </a>
+      <a class="item" href="24-more.html">
+        <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2.5"/><circle cx="12" cy="12" r="2.5"/><circle cx="19" cy="12" r="2.5"/></svg>
+        <span class="nl">More</span>
+      </a>
+    </nav>
+  </div>
+</div>
+
+<script src="_lib/core-state.js"></script>
+<script src="_lib/dash-ambient.js"></script>
+<script>if(window.dashAmbient)window.dashAmbient.init();</script>
+</body>
+</html>

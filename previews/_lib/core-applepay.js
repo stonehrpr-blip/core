@@ -100,17 +100,17 @@
     sheet.setAttribute('role', 'dialog'); sheet.setAttribute('aria-modal', 'true');
     sheet.innerHTML =
       '<div class="cap-grab"></div>' +
-      '<div class="cap-head"><div class="cap-logo">' + APPLE_SVG + ' Pay</div><div class="cap-close" id="capClose">✕</div></div>' +
+      '<div class="cap-head"><div class="cap-logo">' + APPLE_SVG + ' Pay</div><div class="cap-close" id="capClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:14px;height:14px;display:block;"><path d="M6 6l12 12M18 6L6 18"/></svg></div></div>' +
       '<div class="cap-merchant"><div class="cap-mlogo">C</div><div class="cap-mname">Core</div></div>' +
       '<div class="cap-rows" id="capRows">' + planRows() + '</div>' +
-      '<div class="cap-card" id="capCard"><span class="cap-card-mark" id="capCardMark">VISA</span><span id="capCardLine">···· 4242</span><span class="cap-default">DEFAULT</span><span class="cap-card-chev">›</span></div>' +
+      '<div class="cap-card" id="capCard"><span class="cap-card-mark" id="capCardMark">VISA</span><span id="capCardLine">···· 4242</span><span class="cap-default">DEFAULT</span><span class="cap-card-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;display:block;"><path d="M9 6l6 6-6 6"/></svg></span></div>' +
       '<button class="cap-pay" id="capPay">' +
         '<span class="cap-pay-default"><span class="cap-faceid">' + FACE_SVG + '</span> Hold to confirm with Face&nbsp;ID</span>' +
         '<span class="cap-pay-doing"><span class="cap-faceid-anim">' + FACE_SVG + '</span> Authenticating…</span>' +
         '<span class="cap-pay-done"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;"><path d="M5 13l4 4L19 7"/></svg> Done</span>' +
         '<span class="cap-hold-ring" id="capHoldRing"></span>' +
       '</button>' +
-      '<div class="cap-fineprint">Cancel any time at Settings → Apple ID → Subscriptions. First charge on day 7.</div>' +
+      '<div class="cap-fineprint">Cancel any time at Settings - Apple ID - Subscriptions. First charge on day 7.</div>' +
       '<div class="cap-decline" id="capDecline">Not now · continue free</div>';
 
     host.appendChild(back);

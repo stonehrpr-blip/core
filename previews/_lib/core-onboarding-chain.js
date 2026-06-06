@@ -1,10 +1,10 @@
-// Core onboarding chain — injects a "Continue →" CTA on pages that are part
+// Core onboarding chain — injects a "Continue ->" CTA on pages that are part
 // of the post-trial moment chain when `coreOnboardingChain === '1'`. When the
 // chain flag is absent, the script is a no-op and the page behaves normally.
 //
 // Chain order (must match finishOnboarding's redirect):
-//   trial pay → projection-90 → cost-saved → rating-ask
-//   → rank-reveal → leaderboard → find-friends → permissions → dashboard
+//   trial pay -> projection-90 -> cost-saved -> rating-ask
+//   -> rank-reveal -> leaderboard -> find-friends -> permissions -> dashboard
 //
 // Each page knows its OWN key via `window.CORE_CHAIN_KEY` set before this
 // script loads, OR auto-detected from the current pathname.

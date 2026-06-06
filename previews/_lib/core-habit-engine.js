@@ -6,8 +6,8 @@
  * the last 7 outcomes per habit-title. When the completion rate drops
  * below 50%, it lowers the difficulty by rewriting the title:
  *
- *   "Read 30 pages"  →  "Read 5 pages"   (3 fails)
- *   "Run 5 km"       →  "Walk 1 km"      (4 fails)
+ *   "Read 30 pages"  ->  "Read 5 pages"   (3 fails)
+ *   "Run 5 km"       ->  "Walk 1 km"      (4 fails)
  *
  * Adjustments are logged to coreHabitAdjustments and shown in coach.
  */
@@ -91,7 +91,7 @@
 
     // Surface to UI via toast if available
     if (window.coreToast) {
-      coreToast(`Habit eased: "${match.title}" → "${newTitle}"`, { kind: 'info', ttl: 4500 });
+      coreToast(`Habit eased: "${match.title}" -> "${newTitle}"`, { kind: 'info', ttl: 4500 });
     }
     try {
       if (window.coreAI) coreAI.logActivity('habit_adjusted', { from: match.title, to: newTitle, rate });

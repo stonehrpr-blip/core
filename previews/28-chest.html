@@ -171,7 +171,7 @@
   .rv.hi .rvi{ width:50px; height:50px; }
   .rv.hi .rvi svg{ width:27px; height:27px; }
   .rv.hi .rvname{ font-size:17px; }
-  .rv.hi .rvname::after{ content:" ★"; color:var(--rc); }
+  .rv.hi .rvname::after{ content:""; }
   .rv.hi .added{ display:inline-flex; align-items:center; gap:4px; font-size:9px; font-weight:900; letter-spacing:0.1em; text-transform:uppercase; color:var(--good); margin-top:5px; }
   .rv.hi .added svg{ width:11px; height:11px; }
 
@@ -365,7 +365,24 @@
     qs('#chestTagName').textContent = chestName;
 
     // ── reveal one reward card at a time — the dopamine beat ───────────────────
+    // Mythic-pull celebration — same flash+confetti language as a boss win.
+    function mythicFlash(){
+      var phone=document.querySelector('.phone'); if(!phone) return;
+      var fl=document.createElement('div');
+      fl.style.cssText='position:absolute;inset:0;z-index:95;pointer-events:none;background:radial-gradient(60% 45% at 50% 42%,rgba(255,92,138,0.55),rgba(179,136,255,0.25) 45%,transparent 72%)';
+      phone.appendChild(fl);
+      if(REDUCED){ setTimeout(function(){ fl.remove(); },500); return; }
+      fl.animate([{opacity:0},{opacity:1,offset:.15},{opacity:0}],{duration:950,easing:'ease-out'}).onfinish=function(){ fl.remove(); };
+      var cols=['#FF5C8A','#FFC56B','#B388FF','#4A8FFF','#5EEAD4'];
+      for(var i=0;i<30;i++){ (function(){ var c=document.createElement('span'),col=cols[i%cols.length];
+        c.style.cssText='position:absolute;left:50%;top:40%;width:8px;height:8px;border-radius:2px;z-index:96;pointer-events:none;background:'+col+';box-shadow:0 0 8px '+col;
+        phone.appendChild(c);
+        var a=(Math.PI*2)*(i/30)+Math.random()*0.4, d=100+Math.random()*150, dx=Math.cos(a)*d, dy=Math.sin(a)*d-30, rot=Math.random()*720-360;
+        c.animate([{transform:'translate(0,0) rotate(0) scale(1)',opacity:1},{transform:'translate('+dx+'px,'+dy+'px) rotate('+rot+'deg) scale(.4)',opacity:0}],{duration:1000+Math.random()*500,easing:'cubic-bezier(.15,.7,.3,1)'}).onfinish=function(){ c.remove(); };
+      })(); }
+    }
     function showReveals(roll){
+      if(roll && roll.rar==='mythic') mythicFlash();
       var host = qs('#reveals'); host.innerHTML='';
       var nodes = roll.reveals.map(function(r){
         var rc = S.chestRarColor(r.r);
@@ -435,7 +452,7 @@
     function open(){
       if(opening) return; opening = true;
       var roll = (S && S.rollChest) ? S.rollChest(floorRar, noUp) : null;
-      if(!roll){ // safety: no engine → just go back
+      if(!roll){ // safety: no engine -> just go back
         bankRewards(roll); location.href = backHref; return;
       }
       var rarePull = roll.tier >= 3;                       // legendary / mythic

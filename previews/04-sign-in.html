@@ -516,7 +516,7 @@
         </span>
         <span class="hold-ring" id="appleHoldRing"></span>
       </button>
-      <div class="sheet-fineprint">CORE will receive your name and email. You can change this any time in <strong style="color:rgba(255,255,255,0.85);">Settings → Apple ID</strong>.</div>
+      <div class="sheet-fineprint">CORE will receive your name and email. You can change this any time in <strong style="color:rgba(255,255,255,0.85);">Settings <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;vertical-align:-1px;display:inline-block;"><path d="M9 6l6 6-6 6"/></svg> Apple ID</strong>.</div>
     </div>
 
     <!-- ── Google account picker sheet (native Android replica) ── -->
@@ -601,14 +601,14 @@
   })();
 
   // Sign-in router.
-  //   Apple / Google → preview-stub the OAuth handshake and land in the dashboard.
-  //   Email          → route to the dedicated email + OTP flow (05-sign-in-email.html).
+  //   Apple / Google -> preview-stub the OAuth handshake and land in the dashboard.
+  //   Email          -> route to the dedicated email + OTP flow (05-sign-in-email.html).
   // In production Apple/Google fire native PassKit/GoogleSignIn; email hits
   // POST /api/auth/email/start which sends the 6-digit code.
   // ── Sign in router ─────────────────────────────────────────
-  // Apple → opens native-style Apple Sign In sheet w/ Face ID hold
-  // Google → opens account picker sheet
-  // Email → goes to email + OTP flow
+  // Apple -> opens native-style Apple Sign In sheet w/ Face ID hold
+  // Google -> opens account picker sheet
+  // Email -> goes to email + OTP flow
   // Back button — explicit handler that ALWAYS works.
   // Tries history.back(), falls back to 01-index.html if no history.
   function goBack() {
@@ -663,9 +663,9 @@
   // Persist sign-in state + route based on whether the account is new or
   // returning. Uses the coreAccounts store (_lib/core-accounts.js) which
   // simulates a backend in localStorage.
-  //   New account     → 07-trial.html  (full onboarding)
-  //   Existing + done → 20-dashboard.html  (welcome back)
-  //   Existing mid-trial → 07-trial.html  (their saved progress is restored)
+  //   New account     -> 07-trial.html  (full onboarding)
+  //   Existing + done -> 20-dashboard.html  (welcome back)
+  //   Existing mid-trial -> 07-trial.html  (their saved progress is restored)
   function completeSignIn(method, opts) {
     opts = opts || {};
     // Pick a stable identifier per provider so the same person mapping back
@@ -879,8 +879,8 @@
   if (window.coreTrack) coreTrack('screen_view', { screen: 'sign-in' });
 
   // ── Debug: auto-open a sheet via URL param so you can verify the popup ──
-  //   ?testSheet=apple  → opens Apple Sign In sheet immediately
-  //   ?testSheet=google → opens Google account picker
+  //   ?testSheet=apple  -> opens Apple Sign In sheet immediately
+  //   ?testSheet=google -> opens Google account picker
   (function autoTest() {
     try {
       const p = new URLSearchParams(location.search);

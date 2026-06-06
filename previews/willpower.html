@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+  <meta charset="utf-8" />
+  <title>CORE — Willpower</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<style>
+  :root{
+    --bg-base:#02020A; --bg-card:rgba(255,255,255,0.04); --bg-card-2:rgba(255,255,255,0.06);
+    --border:rgba(255,255,255,0.08); --border-hi:rgba(255,255,255,0.14);
+    --text:#F8FAFE; --muted:#9AA1B7; --dim:#4F5570; --accent:#4A8FFF;
+    --good:#34D399; --warn:#FACC15; --weak:#FF9A2F; --crit:#F0463C;
+    /* live state vars — driven by JS */
+    --wp:#34D399; --wp2:#0c6e4d; --boss:0; --coin:#FFCB3D;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; height:100%; }
+  body{ min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center;
+    color:var(--text); -webkit-font-smoothing:antialiased; padding:24px; overflow:hidden; }
+  .phone{ position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden;
+    box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+  .notch{ position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:60; }
+  .home-indicator{ position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:60; }
+
+  /* atmosphere — bg tinted by the live willpower colour */
+  .bg{ position:absolute; inset:0; z-index:0; transition:background 1.2s ease; background:
+      radial-gradient(60% 38% at 50% 4%, color-mix(in srgb,var(--wp) 20%,transparent) 0%, transparent 60%),
+      radial-gradient(70% 40% at 50% 100%, color-mix(in srgb,var(--crit) calc(var(--boss)*16%),transparent) 0%, transparent 62%),
+      linear-gradient(180deg,#06061a 0%,#02020A 55%,#050510 100%); }
+  .aurora{ position:absolute; inset:0; z-index:1; pointer-events:none; opacity:0.30; mix-blend-mode:screen; }
+  .aurora::before{ content:""; position:absolute; width:72%; height:42%; left:-12%; top:-2%; border-radius:50%; filter:blur(74px);
+    background:radial-gradient(circle, color-mix(in srgb,var(--wp) 34%,transparent), transparent 65%); animation:drift 24s ease-in-out infinite; transition:background 1.2s ease; }
+  @keyframes drift{ 0%,100%{transform:translate(0,0) scale(1);} 50%{transform:translate(16px,-12px) scale(1.06);} }
+  .stars{ position:absolute; inset:-2%; pointer-events:none; z-index:2; }
+  .star{ position:absolute; border-radius:50%; background:#fff; animation:tw var(--d,4s) ease-in-out var(--del,0s) infinite; }
+  @keyframes tw{ 0%,100%{opacity:0.14;transform:scale(0.7);} 50%{opacity:0.8;transform:scale(1.1);} }
+  /* HUD mesh */
+  .mesh{ position:absolute; inset:0; z-index:2; pointer-events:none; opacity:0.5;
+    background-image:linear-gradient(color-mix(in srgb,var(--wp) 5%,transparent) 1px,transparent 1px),linear-gradient(90deg,color-mix(in srgb,var(--wp) 5%,transparent) 1px,transparent 1px);
+    background-size:40px 40px; -webkit-mask-image:radial-gradient(ellipse at 50% 28%,#000 24%,transparent 76%); mask-image:radial-gradient(ellipse at 50% 28%,#000 24%,transparent 76%); transition:background-image 1.2s ease; }
+
+  .frame{ position:absolute; inset:0; z-index:10; display:flex; flex-direction:column; padding:54px 0 0; font-family:'Chakra Petch',-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif; }
+  .scroll{ flex:1; overflow-y:auto; padding:2px 16px 108px; -webkit-overflow-scrolling:touch; }
+  .scroll::-webkit-scrollbar{ display:none; }
+
+  .topbar{ position:relative; display:flex; align-items:center; justify-content:space-between; padding:6px 16px 8px; }
+  .back{ width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; background:var(--bg-card); border:1px solid var(--border); color:var(--text); text-decoration:none; }
+  .back svg{ width:20px; height:20px; }
+  .ttl{ position:absolute; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:8px; font-size:13px; font-weight:800; letter-spacing:0.24em; text-transform:uppercase; }
+  .live{ display:inline-flex; align-items:center; gap:5px; font-size:8.5px; font-weight:800; letter-spacing:0.14em; color:var(--wp); }
+  .live i{ width:6px; height:6px; border-radius:50%; background:var(--wp); box-shadow:0 0 8px var(--wp); animation:livePulse 1.8s ease-in-out infinite; }
+  @keyframes livePulse{ 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.35;transform:scale(0.7);} }
+  .mutebtn{ width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; background:var(--bg-card); border:1px solid var(--border); color:var(--muted); cursor:pointer; }
+  .mutebtn svg{ width:18px; height:18px; }
+
+  /* ── ENERGY CORE ─────────────────────────────────── */
+  .core{ position:relative; margin:8px 0 2px; border-radius:28px; padding:22px 18px 18px; text-align:center; overflow:hidden;
+    background:radial-gradient(120% 82% at 50% -6%, color-mix(in srgb,var(--wp) 16%,transparent), transparent 58%), linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.012));
+    border:1.5px solid color-mix(in srgb,var(--wp) 46%,transparent);
+    box-shadow:0 22px 54px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 30px color-mix(in srgb,var(--wp) calc(18% + var(--boss)*8%),transparent);
+    transition:border-color 1s ease, box-shadow 1s ease; }
+  /* shadow-pressure veil — darkens with boss strength */
+  .core .shadow{ position:absolute; inset:0; pointer-events:none; border-radius:28px; z-index:1; opacity:calc(var(--boss)*0.9);
+    background:radial-gradient(120% 90% at 50% 120%, rgba(8,2,4,0.9) 0%, rgba(8,2,4,0.35) 36%, transparent 60%); transition:opacity .9s ease; }
+  .core.shake{ animation:coreShake .5s cubic-bezier(.36,.07,.19,.97); }
+  @keyframes coreShake{ 10%,90%{transform:translateX(-1px);} 20%,80%{transform:translateX(2px);} 30%,50%,70%{transform:translateX(-4px);} 40%,60%{transform:translateX(4px);} }
+
+  .ringwrap{ position:relative; width:196px; height:196px; margin:2px auto 0; z-index:2; }
+  .ringwrap svg{ width:196px; height:196px; transform:rotate(-90deg); }
+  .ringbg{ fill:none; stroke:rgba(255,255,255,0.07); stroke-width:13; }
+  .ringtrack{ fill:none; stroke:color-mix(in srgb,var(--wp) 14%,transparent); stroke-width:13; }
+  .ringfill{ fill:none; stroke:var(--wp); stroke-width:13; stroke-linecap:round; filter:drop-shadow(0 0 9px color-mix(in srgb,var(--wp) 80%,transparent));
+    transition:stroke-dashoffset .9s cubic-bezier(.2,.8,.2,1), stroke .9s ease; }
+  .core.low .ringfill{ animation:ringPulse 1.6s ease-in-out infinite; }
+  .core.critical .ringfill{ animation:ringPulse .8s ease-in-out infinite; }
+  @keyframes ringPulse{ 0%,100%{filter:drop-shadow(0 0 7px color-mix(in srgb,var(--wp) 70%,transparent));} 50%{filter:drop-shadow(0 0 22px var(--wp));} }
+  .ringctr{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .ringctr .ic{ font-size:24px; line-height:1; margin-bottom:2px; filter:drop-shadow(0 0 8px color-mix(in srgb,var(--wp) 60%,transparent)); }
+  .ringctr .val{ font-size:54px; font-weight:900; line-height:0.92; letter-spacing:-0.03em; color:#fff; font-variant-numeric:tabular-nums; }
+  .ringctr .val small{ font-size:18px; font-weight:800; color:var(--dim); }
+  .ringctr .rate{ margin-top:4px; font-size:11px; font-weight:800; letter-spacing:0.04em; color:var(--muted); font-variant-numeric:tabular-nums; }
+  .ringctr .rate.up{ color:var(--good); } .ringctr .rate.down{ color:var(--crit); }
+
+  .statepill{ display:inline-flex; align-items:center; gap:7px; margin-top:13px; padding:6px 14px; border-radius:999px; font-size:11px; font-weight:800; letter-spacing:0.16em; text-transform:uppercase;
+    color:var(--wp); background:color-mix(in srgb,var(--wp) 10%,transparent); border:1px solid color-mix(in srgb,var(--wp) 40%,transparent); transition:.6s; z-index:2; position:relative; }
+  .coredesc{ margin:10px auto 0; max-width:280px; font-size:12.5px; line-height:1.5; color:var(--muted); z-index:2; position:relative; }
+
+  /* floating +/- indicators */
+  .floats{ position:absolute; left:50%; top:42%; transform:translateX(-50%); pointer-events:none; z-index:5; }
+  .flt{ position:absolute; left:0; top:0; transform:translateX(-50%); font-size:20px; font-weight:900; white-space:nowrap; animation:fltUp 1.25s cubic-bezier(.2,.8,.2,1) forwards; text-shadow:0 2px 10px rgba(0,0,0,0.6); }
+  .flt.pos{ color:var(--good); } .flt.neg{ color:var(--crit); }
+  @keyframes fltUp{ 0%{opacity:0;transform:translate(-50%,6px) scale(.8);} 18%{opacity:1;} 100%{opacity:0;transform:translate(-50%,-46px) scale(1.05);} }
+
+  /* ── section headers ── */
+  .sec{ display:flex; align-items:center; justify-content:space-between; margin:22px 2px 11px; }
+  .sec h2{ margin:0; font-size:12px; font-weight:800; letter-spacing:0.18em; text-transform:uppercase; color:var(--muted); }
+  .sec .meta{ font-size:11px; font-weight:800; color:var(--dim); font-variant-numeric:tabular-nums; }
+  .sec .meta.bad{ color:var(--crit); } .sec .meta.good{ color:var(--good); }
+
+  /* ── HABIT PRESSURE PANEL ── */
+  .boss{ border-radius:18px; padding:13px 14px; background:linear-gradient(160deg, color-mix(in srgb,var(--crit) calc(6% + var(--boss)*14%),rgba(255,255,255,0.03)), rgba(255,255,255,0.01));
+    border:1px solid color-mix(in srgb,var(--crit) calc(12% + var(--boss)*26%),var(--border)); transition:.8s;
+    box-shadow:0 0 calc(var(--boss)*26px) color-mix(in srgb,var(--crit) calc(var(--boss)*22%),transparent); }
+  .bosshead{ display:flex; align-items:center; gap:10px; margin-bottom:11px; }
+  .bossglyph{ width:34px; height:34px; flex:none; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px;
+    background:color-mix(in srgb,var(--crit) 16%,transparent); border:1px solid color-mix(in srgb,var(--crit) 34%,transparent); }
+  .bosshead .bt{ flex:1; min-width:0; } .bosshead .bt b{ font-size:13.5px; font-weight:800; display:block; }
+  .bosshead .bt span{ font-size:11px; color:var(--muted); }
+  .bossmeter{ font-size:11px; font-weight:900; color:var(--crit); padding:4px 9px; border-radius:999px; background:color-mix(in srgb,var(--crit) 12%,transparent); border:1px solid color-mix(in srgb,var(--crit) 28%,transparent); white-space:nowrap; }
+  .pstack{ display:flex; flex-direction:column; gap:8px; }
+  .pr{ display:flex; align-items:center; gap:11px; padding:9px 11px; border-radius:13px; background:var(--bg-card); border:1px solid var(--border); transition:.3s; }
+  .pr.idle{ opacity:0.45; }
+  .pr .pi{ width:28px; height:28px; flex:none; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:15px; background:rgba(255,255,255,0.04); border:1px solid var(--border); }
+  .pr .pmid{ flex:1; min-width:0; }
+  .pr .pmid .pn{ font-size:12.5px; font-weight:800; display:flex; align-items:center; gap:7px; }
+  .pr .pmid .ptag{ font-size:8px; font-weight:800; letter-spacing:0.1em; padding:2px 6px; border-radius:5px; text-transform:uppercase; }
+  .pr.active .ptag{ color:var(--crit); background:color-mix(in srgb,var(--crit) 14%,transparent); }
+  .pr.idle .ptag{ color:var(--dim); background:rgba(255,255,255,0.04); }
+  .pbar{ height:5px; border-radius:3px; margin-top:6px; background:rgba(255,255,255,0.06); overflow:hidden; }
+  .pbar i{ display:block; height:100%; border-radius:3px; background:linear-gradient(90deg,var(--weak),var(--crit)); transition:width .5s ease; }
+  .pr .pv{ font-size:12.5px; font-weight:900; color:var(--crit); white-space:nowrap; font-variant-numeric:tabular-nums; }
+  .pr.idle .pv{ color:var(--dim); }
+
+  /* ── URGE ── */
+  .urgebtn{ width:100%; display:flex; align-items:center; justify-content:center; gap:10px; padding:16px; border-radius:18px; cursor:pointer; border:none; color:#fff;
+    font-family:inherit; font-size:15px; font-weight:800; letter-spacing:0.02em; position:relative; overflow:hidden;
+    background:linear-gradient(135deg,var(--weak),var(--crit)); box-shadow:0 14px 34px color-mix(in srgb,var(--crit) 40%,transparent), inset 0 1px 0 rgba(255,255,255,0.18);
+    transition:transform .12s; }
+  .urgebtn:active{ transform:scale(.985); }
+  .urgebtn::after{ content:""; position:absolute; inset:0; background:radial-gradient(circle at 50% 120%, rgba(255,255,255,0.25), transparent 60%); opacity:0; }
+  .urgebtn.disabled{ background:var(--bg-card-2); color:var(--dim); box-shadow:none; cursor:not-allowed; }
+  .urgebtn svg{ width:20px; height:20px; }
+  .urgesub{ text-align:center; font-size:10.5px; color:var(--dim); margin-top:8px; letter-spacing:0.02em; }
+  .urgesub b{ color:var(--accent); }
+
+  .log{ display:flex; flex-direction:column; gap:7px; margin-top:12px; }
+  .le{ display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:12px; background:var(--bg-card); border:1px solid var(--border); }
+  .le .ld{ width:8px; height:8px; border-radius:50%; flex:none; }
+  .le.win .ld{ background:var(--good); box-shadow:0 0 8px var(--good); }
+  .le.loss .ld{ background:var(--crit); box-shadow:0 0 8px var(--crit); }
+  .le .lt{ flex:1; min-width:0; font-size:12.5px; font-weight:700; }
+  .le .lw{ font-size:10.5px; color:var(--dim); }
+  .le .lv{ font-size:12px; font-weight:900; font-variant-numeric:tabular-nums; }
+  .le.win .lv{ color:var(--good); } .le.loss .lv{ color:var(--crit); }
+  .logempty{ text-align:center; padding:20px; border-radius:14px; background:var(--bg-card); border:1px dashed var(--border); font-size:12px; color:var(--muted); }
+
+  /* ── RECOVERY GRID ── */
+  .grid{ display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+  .rec{ position:relative; display:flex; flex-direction:column; gap:8px; padding:13px; border-radius:16px; cursor:pointer; text-align:left;
+    background:linear-gradient(160deg, color-mix(in srgb,var(--good) 7%,rgba(255,255,255,0.03)), rgba(255,255,255,0.012)); border:1px solid color-mix(in srgb,var(--good) 18%,var(--border)); transition:transform .12s, border-color .2s; overflow:hidden; }
+  .rec:active{ transform:scale(.97); }
+  .rec.cool{ opacity:0.5; pointer-events:none; }
+  .rec .rico{ width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px;
+    background:color-mix(in srgb,var(--good) 14%,transparent); border:1px solid color-mix(in srgb,var(--good) 30%,transparent); }
+  .rec .rname{ font-size:13px; font-weight:800; }
+  .rec .rgain{ font-size:11px; font-weight:900; color:var(--good); }
+  .rec .cd{ position:absolute; right:10px; top:10px; font-size:10px; font-weight:900; color:var(--dim); font-variant-numeric:tabular-nums; }
+  .rec .rflash{ position:absolute; inset:0; background:radial-gradient(circle at 50% 50%, color-mix(in srgb,var(--good) 40%,transparent), transparent 60%); opacity:0; pointer-events:none; }
+  .rec.pulse .rflash{ animation:recFlash .7s ease; }
+  @keyframes recFlash{ 0%{opacity:0;} 30%{opacity:1;} 100%{opacity:0;} }
+
+  /* ── HISTORY GRAPH ── */
+  .graph{ border-radius:18px; padding:14px 12px 10px; background:var(--bg-card); border:1px solid var(--border); }
+  .graph svg{ width:100%; height:96px; display:block; }
+  .glabels{ display:flex; justify-content:space-between; margin-top:7px; padding:0 2px; font-size:9.5px; font-weight:700; letter-spacing:0.06em; color:var(--dim); }
+  .gstat{ display:flex; gap:14px; margin-top:10px; padding-top:10px; border-top:1px solid var(--border); }
+  .gstat div{ flex:1; } .gstat .gk{ font-size:9px; font-weight:800; letter-spacing:0.12em; text-transform:uppercase; color:var(--dim); }
+  .gstat .gv{ font-size:16px; font-weight:900; margin-top:2px; font-variant-numeric:tabular-nums; }
+
+  /* ── system links ── */
+  .links{ display:flex; flex-wrap:wrap; gap:7px; margin-top:11px; }
+  .lk{ display:inline-flex; align-items:center; gap:6px; font-size:10.5px; font-weight:800; color:var(--muted); text-decoration:none; padding:7px 11px; border-radius:999px; background:var(--bg-card); border:1px solid var(--border); }
+  .lk b{ color:var(--text); }
+
+  /* ── coping bottom sheet ── */
+  .sheetwrap{ position:absolute; inset:0; z-index:80; display:none; }
+  .sheetwrap.on{ display:block; }
+  .sheetbg{ position:absolute; inset:0; background:rgba(2,2,8,0.66); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px); animation:fade .25s ease; }
+  @keyframes fade{ from{opacity:0;} to{opacity:1;} }
+  .sheet{ position:absolute; left:0; right:0; bottom:0; background:linear-gradient(180deg,#0c0d18,#070710); border-top:1px solid var(--border-hi); border-radius:26px 26px 0 0; padding:14px 16px calc(20px + env(safe-area-inset-bottom)); animation:slideUp .32s cubic-bezier(.2,.9,.2,1); }
+  @keyframes slideUp{ from{transform:translateY(100%);} to{transform:translateY(0);} }
+  .sheet .grab{ width:38px; height:4px; border-radius:99px; background:rgba(255,255,255,0.18); margin:2px auto 12px; }
+  .sheet h3{ margin:0 0 3px; font-size:17px; font-weight:900; text-align:center; }
+  .sheet .ssub{ text-align:center; font-size:12px; color:var(--muted); margin-bottom:14px; }
+  .cope{ display:flex; align-items:center; gap:12px; width:100%; text-align:left; padding:13px; border-radius:15px; margin-bottom:8px; cursor:pointer;
+    background:var(--bg-card); border:1px solid var(--border); color:var(--text); font-family:inherit; transition:transform .1s, border-color .2s; }
+  .cope:active{ transform:scale(.985); }
+  .cope .ci{ width:38px; height:38px; flex:none; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:20px; background:color-mix(in srgb,var(--accent) 14%,transparent); border:1px solid color-mix(in srgb,var(--accent) 30%,transparent); }
+  .cope .ct{ flex:1; min-width:0; } .cope .ct b{ font-size:14px; font-weight:800; display:block; } .cope .ct span{ font-size:11.5px; color:var(--muted); }
+  .cope .cg{ font-size:11px; font-weight:900; color:var(--good); white-space:nowrap; }
+  .cope.disabled{ opacity:0.45; pointer-events:none; }
+  .cope.disabled .cg{ color:var(--dim); }
+  .sheetclose{ width:100%; padding:13px; border-radius:14px; margin-top:4px; background:transparent; border:none; color:var(--dim); font-family:inherit; font-size:13px; font-weight:700; cursor:pointer; }
+
+  /* breathing overlay */
+  .breath{ position:absolute; inset:0; z-index:90; display:none; flex-direction:column; align-items:center; justify-content:center; background:radial-gradient(circle at 50% 45%, #0a1530, #04040c 70%); }
+  .breath.on{ display:flex; }
+  .breathball{ width:120px; height:120px; border-radius:50%; background:radial-gradient(circle at 38% 32%, #fff, var(--accent) 55%, #1453A8 100%); box-shadow:0 0 60px var(--accent); animation:breathe 8s ease-in-out infinite; }
+  @keyframes breathe{ 0%,100%{transform:scale(0.7);} 50%{transform:scale(1.25);} }
+  .breathtxt{ margin-top:34px; font-size:16px; font-weight:800; letter-spacing:0.1em; color:#fff; min-height:22px; }
+  .breathskip{ margin-top:20px; background:none; border:1px solid var(--border-hi); color:var(--muted); padding:9px 18px; border-radius:999px; font-family:inherit; font-weight:700; cursor:pointer; }
+
+  /* nav */
+  .nav{ position:absolute; left:0; right:0; bottom:0; z-index:50; padding:10px 12px 26px; display:flex; justify-content:space-around; align-items:flex-end;
+    background:linear-gradient(180deg, rgba(5,6,14,0) 0%, rgba(5,6,14,0.88) 34%, #04040c 100%); backdrop-filter:blur(14px); }
+  .nav a{ display:flex; flex-direction:column; align-items:center; gap:4px; padding:6px 8px; min-width:48px; text-decoration:none; color:var(--dim); transition:color .2s; }
+  .nav svg{ width:23px; height:23px; } .nav .nl{ font-size:10px; font-weight:800; }
+  .nav .active{ color:var(--text); } .nav .active svg{ color:var(--wp); filter:drop-shadow(0 0 8px var(--wp)); }
+
+  @media (prefers-reduced-motion: reduce){
+    .aurora::before,.star,.live i,.ringfill,.breathball,.flt{ animation:none!important; }
+    .bg{ transition:none; }
+  }
+</style>
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div><div class="aurora"></div><div class="stars" id="stars"></div><div class="mesh"></div><div class="notch"></div>
+
+    <div class="frame">
+      <div class="topbar">
+        <a class="back" href="20-dashboard.html" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></a>
+        <span class="ttl">Willpower <span class="live"><i></i>LIVE</span></span>
+        <button class="mutebtn" id="mute" aria-label="Toggle sound"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19 12a7 7 0 0 0-3-5.7M16 9a3 3 0 0 1 0 6" id="muteOn"/></svg></button>
+      </div>
+
+      <div class="scroll">
+        <!-- ENERGY CORE -->
+        <section class="core" id="core">
+          <div class="shadow"></div>
+          <div class="floats" id="floats"></div>
+          <div class="ringwrap">
+            <svg viewBox="0 0 196 196"><circle class="ringbg" cx="98" cy="98" r="84"/><circle class="ringtrack" cx="98" cy="98" r="84"/><circle class="ringfill" id="ring" cx="98" cy="98" r="84"/></svg>
+            <div class="ringctr">
+              <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px;height:24px"><path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-1 5 3 3 0 0 0 1 5 3 3 0 0 0 6 0V4a3 3 0 0 0-3 0zM15 4a3 3 0 0 1 3 3 3 3 0 0 1 1 5 3 3 0 0 1-1 5"/></svg></div>
+              <div class="val"><span id="val">0</span><small>/100</small></div>
+              <div class="rate" id="rate">holding</div>
+            </div>
+          </div>
+          <div class="statepill" id="statepill">—</div>
+          <div class="coredesc" id="coredesc"></div>
+        </section>
+
+        <!-- HABIT PRESSURE -->
+        <div class="sec"><h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px;margin-right:3px"><path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></svg>Habit Pressure</h2><span class="meta bad" id="drainMeta">0%/h drain</span></div>
+        <div class="boss" id="boss">
+          <div class="bosshead">
+            <div class="bossglyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M5 10a7 7 0 0 1 14 0v4a7 7 0 0 1-14 0zM4 8l2 2M20 8l-2 2"/><path d="M9 13h.01M15 13h.01M9 17h6"/></svg></div>
+            <div class="bt"><b id="bossName">Habit Boss</b><span id="bossDesc">Feeding on your weak moments.</span></div>
+            <div class="bossmeter" id="bossMeter">PWR 0</div>
+          </div>
+          <div class="pstack" id="pstack"></div>
+        </div>
+
+        <!-- URGE -->
+        <div class="sec"><h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px;margin-right:3px"><path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-1 5 3 3 0 0 0 1 5 3 3 0 0 0 6 0V4a3 3 0 0 0-3 0zM15 4a3 3 0 0 1 3 3 3 3 0 0 1 1 5 3 3 0 0 1-1 5"/></svg>Urge & Resistance</h2><span class="meta" id="urgeMeta">0 today</span></div>
+        <button class="urgebtn" id="urge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg> I feel an urge</button>
+        <div class="urgesub">Naming an urge costs a little willpower — then you choose how to <b>resist</b>.</div>
+        <div class="log" id="log"></div>
+
+        <!-- RECOVERY -->
+        <div class="sec"><h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px;margin-right:3px"><path d="M12 3c1.6 3.6 4 4.6 4 8a4 4 0 0 1-8 0c0-1.3.5-2.1 1-2.7C9 11 12 8 12 3z"/></svg>Recovery Actions</h2><span class="meta good">restore energy</span></div>
+        <div class="grid" id="recovery"></div>
+
+        <!-- HISTORY -->
+        <div class="sec"><h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px;margin-right:3px"><path d="M4 20V4M4 20h16M8 16v-4M12 16V8M16 16v-7"/></svg>Willpower History</h2><span class="meta" id="histMeta">session</span></div>
+        <div class="graph">
+          <svg id="graph" viewBox="0 0 300 96" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="gline" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="#F0463C"/><stop offset="0.4" stop-color="#FF9A2F"/><stop offset="0.7" stop-color="#FACC15"/><stop offset="1" stop-color="#34D399"/>
+              </linearGradient>
+              <linearGradient id="gfill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="color-mix(in srgb,var(--wp) 34%,transparent)"/><stop offset="1" stop-color="transparent"/>
+              </linearGradient>
+            </defs>
+            <g id="gzones"></g>
+            <path id="garea" fill="url(#gfill)" stroke="none"></path>
+            <path id="gpath" fill="none" stroke="url(#gline)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path>
+            <circle id="gdot" r="3.5" fill="var(--wp)"></circle>
+          </svg>
+          <div class="glabels"><span>earlier</span><span>now</span></div>
+          <div class="gstat">
+            <div><div class="gk">Peak</div><div class="gv" id="gPeak" style="color:var(--good)">0</div></div>
+            <div><div class="gk">Low</div><div class="gv" id="gLow" style="color:var(--crit)">0</div></div>
+            <div><div class="gk">Stability</div><div class="gv" id="gStab">—</div></div>
+          </div>
+        </div>
+
+        <!-- ecosystem links -->
+        <div class="links">
+          <a class="lk" href="21-quests.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;vertical-align:-2px;margin-right:2px"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/></svg> <b>Quests</b> +restore</a>
+          <a class="lk" href="stat.html?s=health"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;vertical-align:-2px;margin-right:2px"><path d="M12 20.5s-7.2-4.6-7.2-9.8A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 7.2 3.7c0 5.2-7.2 9.8-7.2 9.8Z"/></svg> <b>Health</b> at risk</a>
+          <a class="lk" href="stat.html?s=focus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;vertical-align:-2px;margin-right:2px"><path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-1 5 3 3 0 0 0 1 5 3 3 0 0 0 6 0V4a3 3 0 0 0-3 0zM15 4a3 3 0 0 1 3 3 3 3 0 0 1 1 5 3 3 0 0 1-1 5"/></svg> <b>Focus</b> +regen</a>
+          <a class="lk" href="23-profile.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;vertical-align:-2px;margin-right:2px"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg> <b>CORE Score</b></a>
+        </div>
+      </div>
+
+      <!-- coping sheet -->
+      <div class="sheetwrap" id="sheetwrap">
+        <div class="sheetbg" id="sheetbg"></div>
+        <div class="sheet">
+          <div class="grab"></div>
+          <h3>You named the urge.</h3>
+          <div class="ssub">Pick a move. Resisting it is a win for your willpower.</div>
+          <div id="copeList"></div>
+          <button class="sheetclose" id="sheetclose">I gave in this time</button>
+        </div>
+      </div>
+
+      <!-- breathing -->
+      <div class="breath" id="breath">
+        <div class="breathball"></div>
+        <div class="breathtxt" id="breathtxt">Breathe in…</div>
+        <button class="breathskip" id="breathskip">Skip</button>
+      </div>
+
+      <nav class="nav" aria-label="Primary">
+        <a class="item active" href="20-dashboard.html" aria-current="page">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 11l9-7 9 7M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/></svg>
+          <span class="nl">Home</span>
+        </a>
+        <a class="item" href="21-quests.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M9 5h11M9 12h11M9 19h11M4 5l1 1 2-2M4 12l1 1 2-2M4 19l1 1 2-2"/></svg>
+          <span class="nl">Quests</span>
+        </a>
+        <a class="item" href="coach.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+          <span class="nl">Coach</span>
+        </a>
+        <a class="item" href="community.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M7 8h10M7 11h7M7 14h5" stroke-linecap="round"/></svg>
+          <span class="nl">Community</span>
+        </a>
+        <a class="item" href="24-more.html">
+          <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2.5"/><circle cx="12" cy="12" r="2.5"/><circle cx="19" cy="12" r="2.5"/></svg>
+          <span class="nl">More</span>
+        </a>
+      </nav>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+
+  <script src="_lib/core-sfx.js"></script>
+  <script src="_lib/core-state.js"></script>
+  <script>
+  (function(){
+    "use strict";
+    var S = window.coreState, SFX = window.coreSfx;
+    var $ = function(s,r){ return (r||document).querySelector(s); };
+    var now = function(){ return Date.now(); };
+    var clamp = function(v,a,b){ return Math.max(a,Math.min(b,v)); };
+    function sfx(n){ try{ if(SFX && typeof SFX[n]==='function') SFX[n](); }catch(e){} }
+    var reduce = false; try{ reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
+
+    function ic(d,s){ s=s||15; return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:'+s+'px;height:'+s+'px;vertical-align:-2px">'+d+'</svg>'; }
+    var GLYPH={
+      hourglass: ic('<path d="M7 4h10M7 20h10M8 4c0 5 8 5 8 12M16 4c0 5-8 5-8 12"/>'),
+      phone:     ic('<rect x="7" y="3" width="10" height="18" rx="2.4"/><path d="M11 18h2"/>'),
+      yawn:      ic('<circle cx="12" cy="12" r="9"/><path d="M9 10h.01M15 10h.01M9 15a3 3 0 0 1 6 0 3 3 0 0 1-6 0z"/>'),
+      target:    ic('<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/>'),
+      snow:      ic('<path d="M12 3v18M5 7l14 10M19 7L5 17M9 4l3 2 3-2M9 20l3-2 3 2M4 9l1 3-1 3M20 9l-1 3 1 3"/>'),
+      dumbbell:  ic('<path d="M4 9v6M7 7v10M17 7v10M20 9v6M7 12h10"/>'),
+      lotus:     ic('<circle cx="12" cy="6" r="2"/><path d="M12 9v5M5 20c2-4 5-4 7-4s5 0 7 4M8 14l4 2 4-2"/>'),
+      walk:      ic('<circle cx="13" cy="4" r="1.6"/><path d="M11 8l3 1 2 4M11 8l-2 5 2 6M14 9l-1 4"/>'),
+      noBell:    ic('<path d="M6 8a6 6 0 0 1 11-3M18 8v5l2 3H8M4 4l16 16M10 20a2 2 0 0 0 4 0"/>')
+    };
+
+    var KEY = 'coreWillpower.v1';
+    // Habit Boss pressure sources. A future Habit Boss page can write
+    // localStorage 'coreHabitPressures' (same shape) and this engine reads it.
+    var DEFAULT_PRESSURES = [
+      { id:'procrastination', name:'Procrastination', icon:GLYPH.hourglass, impact:10, active:true },
+      { id:'socialmedia',     name:'Social Media',    icon:GLYPH.phone,     impact:6,  active:true },
+      { id:'fatigue',         name:'Fatigue',         icon:GLYPH.yawn,      impact:8,  active:false }
+    ];
+    var STATES = [
+      { min:80, key:'strong',   label:'Strong Control', color:'#34D399', desc:'Your discipline is dominant. Urges bounce off — strike while resistance is high.' },
+      { min:50, key:'stable',   label:'Stable',         color:'#FACC15', desc:'Holding steady but vulnerable. One bad spiral could tip you. Bank a recovery action.' },
+      { min:20, key:'weak',     label:'Weak Resistance',color:'#FF9A2F', desc:'Resistance is thin. The Habit Boss is winning. Run a recovery action now.' },
+      { min:0,  key:'critical', label:'Critical',       color:'#F0463C', desc:'Control is collapsing. Do ONE small action — breathe, walk, move — to climb back.' }
+    ];
+    function stateFor(v){ for(var i=0;i<STATES.length;i++){ if(v>=STATES[i].min) return STATES[i]; } return STATES[3]; }
+
+    var RECOVERY = [
+      { id:'focus',  name:'Focus Session', icon:GLYPH.target,   gain:14, cd:25, weaken:'procrastination', msg:'Focus session' },
+      { id:'cold',   name:'Cold Reset',    icon:GLYPH.snow,     gain:9,  cd:20, weaken:'fatigue',         msg:'Cold exposure' },
+      { id:'workout',name:'Workout',       icon:GLYPH.dumbbell, gain:12, cd:30, weaken:'fatigue',         msg:'Workout' },
+      { id:'meditate',name:'Meditation',   icon:GLYPH.lotus,    gain:8,  cd:18, weaken:'socialmedia',     msg:'Meditation' }
+    ];
+    var COPING = [
+      { id:'breath', name:'30-sec breathing reset', icon:GLYPH.lotus,     save:5,  desc:'Ride the wave for half a minute' },
+      { id:'walk',   name:'Walk break',             icon:GLYPH.walk,      save:6,  desc:'Move your body, reset the loop' },
+      { id:'physical',name:'Quick physical action', icon:GLYPH.dumbbell,  save:7,  desc:'10 pushups / squats — break state' },
+      { id:'focusmode',name:'Focus mode',           icon:GLYPH.noBell,    save:6,  desc:'Lock distractions for 25 min' },
+      { id:'delay',  name:'Delay urge timer',       icon:GLYPH.hourglass, save:8,  desc:'10-min cooldown — urges fade' }
+    ];
+
+    // ── state ──
+    function freshSeed(){ var v = (S && S.statValue) ? S.statValue('willpower') : 0; return v>0 ? v : 72; }
+    function load(){ try{ var r=localStorage.getItem(KEY); if(r){ var o=JSON.parse(r); if(o&&typeof o.value==='number') return o; } }catch(e){} return null; }
+    var st = load();
+    if(!st){
+      st = { value:freshSeed(), pressures:DEFAULT_PRESSURES.map(function(p){return {id:p.id,name:p.name,icon:p.icon,impact:p.impact,active:p.active};}),
+             log:[], history:[], cooldowns:{}, urgesToday:0, lastTick:now(), boostUntil:0 };
+    }
+    // merge external pressures if a Habit Boss system published them
+    try{ var ext=localStorage.getItem('coreHabitPressures'); if(ext){ var arr=JSON.parse(ext); if(arr&&arr.length) st.pressures=arr; } }catch(e){}
+    if(!st.history.length){ // seed a believable last-hour curve
+      var base=st.value; for(var i=24;i>=1;i--){ var jitter=Math.sin(i*0.7)*7 + (i>14?10:-6); st.history.push({ t:now()-i*150000, v:clamp(Math.round(base - jitter + (Math.random()*6-3)),4,99) }); }
+      st.history.push({ t:now(), v:st.value });
+    }
+    function save(){ try{ st.lastTick=now(); localStorage.setItem(KEY, JSON.stringify(st)); }catch(e){} }
+
+    // ── engine maths ──
+    function totalDrain(){ return st.pressures.reduce(function(a,p){ return a + (p.active ? p.impact : 0); },0); }
+    function bossPower(){ return clamp(Math.round(totalDrain()*4), 0, 100); } // 0..100
+    function netRatePerSec(){
+      var drain = totalDrain();                       // ~0..30
+      var bossF = 1 + bossPower()/140;                // strong boss drains faster
+      var boosting = now() < st.boostUntil;
+      var regen = (boosting ? 1.7 : 0.55);            // recovery/coping leaves a regen tail
+      return regen - (drain * 0.05 * bossF);          // per second
+    }
+
+    // ── floating indicator ──
+    function floatVal(n){
+      if(reduce) return;
+      var f=document.createElement('div'); f.className='flt '+(n>=0?'pos':'neg');
+      f.textContent=(n>=0?'+':'')+n; f.style.left=(Math.random()*40-20)+'px';
+      $('#floats').appendChild(f); setTimeout(function(){ f.remove(); }, 1300);
+    }
+    function applyDelta(n, animate){ var b=st.value; st.value=clamp(st.value+n, 0, 100); var d=Math.round(st.value-b);
+      if(animate && d!==0) floatVal(d); return d; }
+
+    // ── shake on pressure spike / critical ──
+    var lastBoss = bossPower();
+    function maybeShake(){ var bp=bossPower(); if(!reduce && (bp-lastBoss>=14 || (st.value<20 && Math.random()<0.25))){ var c=$('#core'); c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake'); } lastBoss=bp; }
+
+    // ── render ──
+    var R=84, CIRC=2*Math.PI*R;
+    var ring=$('#ring'); ring.style.strokeDasharray=CIRC.toFixed(1);
+    var lastVal=Math.round(st.value);
+    function render(){
+      var v=st.value, vr=Math.round(v), state=stateFor(v);
+      document.documentElement.style.setProperty('--wp', state.color);
+      document.documentElement.style.setProperty('--boss', (bossPower()/100).toFixed(2));
+
+      // ring + value
+      ring.style.strokeDashoffset=(CIRC*(1-clamp(v,0,100)/100)).toFixed(1);
+      $('#val').textContent=vr;
+      var core=$('#core'); core.classList.toggle('low', v<50 && v>=20); core.classList.toggle('critical', v<20);
+
+      // rate
+      var rate=netRatePerSec(), rl=$('#rate');
+      rl.classList.remove('up','down');
+      if(rate>0.06){ rl.classList.add('up'); rl.innerHTML=ic('<path d="M6 15l6-6 6 6"/>',12)+' regenerating'; }
+      else if(rate<-0.06){ rl.classList.add('down'); rl.innerHTML=ic('<path d="M6 9l6 6 6-6"/>',12)+' draining'; }
+      else rl.textContent='holding steady';
+
+      // state pill + desc
+      $('#statepill').textContent=state.label;
+      $('#coredesc').textContent=state.desc;
+
+      // pressure panel
+      var drain=totalDrain(), bp=bossPower();
+      $('#drainMeta').textContent='−'+Math.round(drain*0.36)+'%/h drain';
+      $('#bossMeter').textContent='PWR '+bp;
+      $('#bossName').textContent = bp>=70?'Habit Boss — Raging' : bp>=35?'Habit Boss — Active' : 'Habit Boss — Subdued';
+      $('#bossDesc').textContent = bp>=70?'It is overpowering your discipline.' : bp>=35?'Feeding on your weak moments.' : 'Weakened. Your control is winning.';
+      var ps=$('#pstack'); ps.innerHTML='';
+      st.pressures.forEach(function(p){
+        var row=document.createElement('div'); row.className='pr '+(p.active?'active':'idle');
+        row.innerHTML='<div class="pi">'+p.icon+'</div>'+
+          '<div class="pmid"><div class="pn">'+p.name+' <span class="ptag">'+(p.active?'active':'idle')+'</span></div>'+
+          '<div class="pbar"><i style="width:'+clamp(p.impact*7,8,100)+'%"></i></div></div>'+
+          '<div class="pv">'+(p.active?'−'+p.impact:'·')+'</div>';
+        ps.appendChild(row);
+      });
+
+      // urge meta
+      $('#urgeMeta').textContent=st.urgesToday+' named today';
+
+      // log
+      var lg=$('#log');
+      if(!st.log.length){ lg.innerHTML='<div class="logempty">No urges logged yet. When one hits, name it above.</div>'; }
+      else { lg.innerHTML=''; st.log.slice(0,6).forEach(function(e){
+        var el=document.createElement('div'); el.className='le '+(e.win?'win':'loss');
+        el.innerHTML='<span class="ld"></span><div class="lt">'+e.t+'</div><div class="lw">'+timeAgo(e.ts)+'</div><div class="lv">'+(e.v>=0?'+':'')+e.v+'</div>';
+        lg.appendChild(el); }); }
+
+      // recovery cooldowns
+      renderRecovery();
+      // graph
+      renderGraph();
+    }
+
+    function timeAgo(ts){ var s=Math.max(1,Math.floor((now()-ts)/1000)); if(s<60)return s+'s ago'; var m=Math.floor(s/60); if(m<60)return m+'m ago'; var h=Math.floor(m/60); return h+'h ago'; }
+
+    function renderRecovery(){
+      var box=$('#recovery'); box.innerHTML='';
+      RECOVERY.forEach(function(a){
+        var until=st.cooldowns[a.id]||0, cooling=now()<until;
+        var el=document.createElement('button'); el.className='rec'+(cooling?' cool':''); el.dataset.id=a.id;
+        var cd=cooling?('<div class="cd">'+Math.ceil((until-now())/1000)+'s</div>'):'';
+        el.innerHTML='<div class="rflash"></div>'+cd+'<div class="rico">'+a.icon+'</div><div class="rname">'+a.name+'</div><div class="rgain">+'+a.gain+' willpower</div>';
+        box.appendChild(el);
+      });
+    }
+
+    function renderGraph(){
+      var h=st.history.slice(-40); if(h.length<2) return;
+      var W=300, H=96, pad=6;
+      var xs=function(i){ return pad + (W-2*pad)*(i/(h.length-1)); };
+      var ys=function(v){ return H-pad - (H-2*pad)*(clamp(v,0,100)/100); };
+      var line='', area='M'+xs(0).toFixed(1)+' '+H;
+      h.forEach(function(p,i){ var x=xs(i).toFixed(1), y=ys(p.v).toFixed(1); line+=(i?'L':'M')+x+' '+y+' '; area+='L'+x+' '+y+' '; });
+      area+='L'+xs(h.length-1).toFixed(1)+' '+H+' Z';
+      $('#gpath').setAttribute('d', line.trim());
+      $('#garea').setAttribute('d', area);
+      var last=h[h.length-1]; $('#gdot').setAttribute('cx', xs(h.length-1)); $('#gdot').setAttribute('cy', ys(last.v));
+      // zones (red <20, amber 20-50)
+      var z=$('#gzones'); z.innerHTML='';
+      var redY=ys(20), midY=ys(50);
+      z.innerHTML='<rect x="0" y="'+redY.toFixed(1)+'" width="'+W+'" height="'+(H-redY).toFixed(1)+'" fill="rgba(240,70,60,0.08)"/>'+
+                  '<rect x="0" y="'+midY.toFixed(1)+'" width="'+W+'" height="'+(redY-midY).toFixed(1)+'" fill="rgba(255,154,47,0.05)"/>'+
+                  '<line x1="0" y1="'+midY.toFixed(1)+'" x2="'+W+'" y2="'+midY.toFixed(1)+'" stroke="rgba(255,255,255,0.06)" stroke-dasharray="3 4"/>';
+      var vals=h.map(function(p){return p.v;});
+      $('#gPeak').textContent=Math.max.apply(null,vals);
+      $('#gLow').textContent=Math.min.apply(null,vals);
+      var avg=vals.reduce(function(a,b){return a+b;},0)/vals.length;
+      var variance=vals.reduce(function(a,b){return a+Math.pow(b-avg,2);},0)/vals.length;
+      var stab=clamp(Math.round(100-Math.sqrt(variance)*2.4),0,100);
+      var sEl=$('#gStab'); sEl.textContent=stab+'%'; sEl.style.color = stab>=66?'var(--good)':stab>=40?'var(--warn)':'var(--crit)';
+    }
+
+    // ── actions ──
+    function logEvent(text, val, win){ st.log.unshift({ t:text, v:Math.round(val), win:!!win, ts:now() }); if(st.log.length>20) st.log.pop(); }
+
+    function doRecovery(id){
+      var a=RECOVERY.filter(function(x){return x.id===id;})[0]; if(!a) return;
+      if(now() < (st.cooldowns[id]||0)) return;
+      st.cooldowns[id]=now()+a.cd*1000;
+      var d=applyDelta(a.gain, true);
+      // weaken the linked pressure (Habit Boss takes damage)
+      var p=st.pressures.filter(function(x){return x.id===a.weaken;})[0];
+      if(p){ p.impact=Math.max(0,p.impact-3); if(p.impact<=2){ p.active=false; } }
+      st.boostUntil=now()+45000;            // regen tail
+      logEvent(a.msg+' completed', d, true);
+      var el=$('.rec[data-id="'+id+'"]'); if(el && !reduce){ el.classList.add('pulse'); setTimeout(function(){ el && el.classList.remove('pulse'); },720); }
+      sfx(a.gain>=12?'levelup':'win'); maybeShake(); save(); render();
+    }
+
+    function openUrge(){
+      // naming an urge costs a little willpower (honest feedback loop)
+      var d=applyDelta(-4, true);
+      st.urgesToday++;
+      // urges feed a pressure
+      var p=st.pressures[Math.floor(Math.random()*st.pressures.length)]; if(p){ p.active=true; p.impact=Math.min(20,p.impact+2); }
+      st.pendingUrge=true; sfx('pop'); maybeShake(); save(); render();
+      buildCope(); $('#sheetwrap').classList.add('on');
+    }
+    function buildCope(){
+      var list=$('#copeList'); list.innerHTML='';
+      COPING.forEach(function(c){
+        var el=document.createElement('button'); el.className='cope'; el.dataset.id=c.id;
+        el.innerHTML='<div class="ci">'+c.icon+'</div><div class="ct"><b>'+c.name+'</b><span>'+c.desc+'</span></div><div class="cg">resist +'+c.save+'</div>';
+        list.appendChild(el);
+      });
+    }
+    function resist(id){
+      var c=COPING.filter(function(x){return x.id===id;})[0]; if(!c) return;
+      closeSheet();
+      if(id==='breath'){ runBreath(function(){ finishResist(c); }); return; }
+      finishResist(c);
+    }
+    function finishResist(c){
+      var d=applyDelta(c.save, true);
+      // resisting weakens the boss a touch
+      var act=st.pressures.filter(function(x){return x.active;}); if(act.length){ var t=act[Math.floor(Math.random()*act.length)]; t.impact=Math.max(0,t.impact-2); if(t.impact<=2) t.active=false; }
+      st.boostUntil=now()+30000; st.pendingUrge=false;
+      logEvent('Resisted — '+c.name.replace(/ \(.*\)/,''), d, true);
+      sfx('win'); save(); render();
+    }
+    function gaveIn(){
+      closeSheet();
+      var d=applyDelta(-7, true);
+      var p=st.pressures[0]; if(p){ p.active=true; p.impact=Math.min(22,p.impact+4); }
+      st.pendingUrge=false; logEvent('Gave in to the urge', d, false);
+      sfx('error'); maybeShake(); save(); render();
+    }
+    function closeSheet(){ $('#sheetwrap').classList.remove('on'); }
+
+    // breathing mini-overlay
+    var breathTimer=null;
+    function runBreath(done){
+      if(reduce){ done&&done(); return; }
+      var ov=$('#breath'), txt=$('#breathtxt'); ov.classList.add('on');
+      var phases=['Breathe in…','Hold…','Breathe out…','Hold…'], i=0; txt.textContent=phases[0];
+      breathTimer=setInterval(function(){ i=(i+1)%phases.length; txt.textContent=phases[i]; sfx('tick'); }, 2000);
+      var stop=function(){ clearInterval(breathTimer); ov.classList.remove('on'); done&&done(); };
+      $('#breathskip').onclick=stop;
+      setTimeout(stop, 8200);
+    }
+
+    // ── real-time tick ──
+    function tick(){
+      var dt=Math.min(5,(now()-(st.lastTick||now()))/1000); st.lastTick=now();
+      var before=st.value;
+      st.value=clamp(st.value + netRatePerSec()*dt, 0, 100);
+      // passive: ignored pressures slowly intensify; idle long -> a pressure wakes
+      if(Math.random()<0.04){ var dormant=st.pressures.filter(function(p){return !p.active;}); if(dormant.length && st.value<70){ var w=dormant[0]; w.active=true; w.impact=Math.max(5,w.impact); } }
+      // sample history
+      var lastH=st.history[st.history.length-1];
+      if(!lastH || now()-lastH.t>4000){ st.history.push({t:now(),v:Math.round(st.value)}); if(st.history.length>120) st.history.shift(); }
+      // count-up the headline number smoothly
+      var target=Math.round(st.value);
+      if(target!==lastVal){ lastVal=target; }
+      save(); render();
+    }
+
+    // ── wire events ──
+    $('#urge').addEventListener('click', function(){ if(!this.classList.contains('disabled')) openUrge(); });
+    $('#recovery').addEventListener('click', function(e){ var b=e.target.closest('.rec'); if(b) doRecovery(b.dataset.id); });
+    $('#copeList').addEventListener('click', function(e){ var b=e.target.closest('.cope'); if(b && !b.classList.contains('disabled')) resist(b.dataset.id); });
+    $('#sheetclose').addEventListener('click', gaveIn);
+    $('#sheetbg').addEventListener('click', closeSheet);
+    $('#mute').addEventListener('click', function(){ try{ if(SFX&&SFX.mute){ var m=SFX.isMuted&&SFX.isMuted(); SFX.mute(!m); this.style.color=(!m)?'var(--dim)':'var(--muted)'; } }catch(e){} });
+
+    // demo seeder
+    try{ if(/[?&]demo=1/.test(location.search) && S && S.seedDemo) S.seedDemo(); }catch(e){}
+
+    // stars
+    (function(){ var h=$('#stars'); var f=document.createDocumentFragment();
+      for(var i=0;i<44;i++){ var d=document.createElement('span'); d.className='star'; var sz=(i%7===0)?2.2:(i%3===0)?1.6:1.0;
+        d.style.width=sz+'px'; d.style.height=sz+'px'; d.style.left=((i*41)%100)+'%'; d.style.top=((i*57)%100)+'%';
+        d.style.setProperty('--d',(3+(i%5))+'s'); d.style.setProperty('--del',((i%9)*0.4)+'s'); f.appendChild(d); }
+      h.appendChild(f); })();
+
+    render();
+    setInterval(tick, 1000);
+    // cooldown ticking (visual)
+    setInterval(function(){ if(document.querySelector('.rec.cool')) renderRecovery(); }, 1000);
+  })();
+  </script>
+</body>
+</html>
