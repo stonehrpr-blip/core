@@ -589,7 +589,10 @@
         var v=S.statValue(d.key), lvl=statLevel(v), card;
         if(built){ card=host.children[i]; }
         else {
-          card=document.createElement('a'); card.className='lifecard'; card.href='stat.html?s='+d.key; card.style.setProperty('--sc',d.color);
+          // Routing is data-driven off STAT_DEFS (single source of truth): a stat with a bespoke
+          // `page` opens it; everything else falls back to the generic stat detail. Do NOT re-add
+          // per-stat ternaries here — add the page in core-state.js STAT_DEFS instead.
+          card=document.createElement('a'); card.className='lifecard'; card.href=(d.page || ('stat.html?s='+d.key)); card.style.setProperty('--sc',d.color);
           card.setAttribute('aria-label',d.name+' life score');
           card.innerHTML='<span class="lup">+</span>'+
             '<div class="lhead"><div class="lic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'+(d.icon||STAT_IC[d.key]||'')+'</svg></div>'+
