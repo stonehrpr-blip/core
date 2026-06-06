@@ -4,21 +4,23 @@
 <meta charset="utf-8" />
 <title>CORE — Become your core.</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="description" content="CORE is the honest life-OS. One Life Score across five stats, with an AI coach that knows your history. Quit any vice and watch yourself heal." />
+<meta name="description" content="CORE is the honest life-OS. One Life Score across five stats, with an AI coach that knows your history. Quit any vice and watch your recovery take shape. Join the waitlist." />
 <meta name="theme-color" content="#08090F" />
 <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
 <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
 <meta property="og:title" content="CORE — Become your core." />
-<meta property="og:description" content="The honest life-OS. One Life Score, an AI coach that knows your history." />
+<meta property="og:description" content="The honest life-OS. One Life Score, an AI coach that knows your history. Join the waitlist." />
 <meta property="og:image" content="assets/logo-512.png" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
 <style>
   :root{
-    --bg:#08090F; --text:#F4F6FB; --muted:#9094A3; --dim:#5C606E;
-    --accent:#4A8FFF; --border:rgba(255,255,255,0.08);
-    --head:"Space Grotesk",-apple-system,sans-serif; --body:"Inter",-apple-system,sans-serif;
+    --bg:#08090F; --bg2:#0C0E16; --text:#F4F6FB; --muted:#9094A3; --dim:#5C606E;
+    --accent:#4A8FFF; --accent2:#7AB0FF; --border:rgba(255,255,255,0.08); --card:rgba(255,255,255,0.025);
+    --head:"Space Grotesk",-apple-system,BlinkMacSystemFont,sans-serif; --body:"Inter",-apple-system,sans-serif;
   }
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
@@ -27,173 +29,356 @@
   a{color:inherit;text-decoration:none}
   img{max-width:100%;display:block}
   h1,h2,h3{font-family:var(--head);margin:0;font-weight:600;letter-spacing:-0.03em;line-height:1.05}
-  .wrap{max-width:980px;margin:0 auto;padding:0 28px}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 28px}
   .accent{color:var(--accent)}
+  button{font-family:inherit}
 
-  nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:22px 28px;background:rgba(8,9,15,0.7);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+  /* ===== reveal on scroll (Apple-style) ===== */
+  .reveal{opacity:0;transform:translateY(26px);transition:opacity .8s cubic-bezier(.22,.61,.36,1),transform .8s cubic-bezier(.22,.61,.36,1)}
+  .reveal.in{opacity:1;transform:none}
+  .reveal.d1{transition-delay:.08s}.reveal.d2{transition-delay:.16s}.reveal.d3{transition-delay:.24s}
+
+  /* ===== nav ===== */
+  nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:18px 28px;background:rgba(8,9,15,0.6);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid transparent;transition:border-color .3s,background .3s}
+  nav.scrolled{border-bottom:1px solid var(--border);background:rgba(8,9,15,0.82)}
   .brand{display:flex;align-items:center;gap:10px}
-  .brand img{width:22px;height:22px;border-radius:6px}
-  .brand .wm{font-family:var(--head);font-size:17px;font-weight:600;letter-spacing:0.02em}
+  .brand img{width:24px;height:24px;border-radius:7px}
+  .brand .wm{font-family:var(--head);font-size:17px;font-weight:600;letter-spacing:0.04em}
   .nav-links{display:flex;gap:30px}
   .nav-links a{font-size:14px;color:var(--muted);transition:color .2s}
   .nav-links a:hover{color:#fff}
-  .ndl{padding:9px 18px;border-radius:10px;font-size:13.5px;font-weight:500;color:#fff;background:var(--accent);transition:opacity .2s}
-  .ndl:hover{opacity:.9}
+  .ndl{padding:9px 18px;border-radius:11px;font-size:13.5px;font-weight:500;color:#fff;background:var(--accent);transition:transform .15s,box-shadow .2s;box-shadow:0 4px 18px rgba(74,143,255,.28)}
+  .ndl:hover{transform:translateY(-1px);box-shadow:0 6px 22px rgba(74,143,255,.4)}
   .nav-toggle{display:none;background:none;border:none;color:#fff;cursor:pointer;padding:4px}
 
-  /* hero — calm, lots of air */
-  .hero{position:relative;text-align:center;padding:120px 0 110px}
-  .hero::before{content:"";position:absolute;top:-120px;left:50%;transform:translateX(-50%);width:680px;height:480px;max-width:90vw;border-radius:50%;background:radial-gradient(circle,rgba(74,143,255,0.22),transparent 68%);filter:blur(20px);z-index:0;pointer-events:none}
+  /* ===== hero ===== */
+  .hero{position:relative;text-align:center;padding:130px 0 100px;overflow:hidden}
+  .glow{position:absolute;top:-160px;left:50%;transform:translateX(-50%);width:760px;height:540px;max-width:96vw;border-radius:50%;background:radial-gradient(circle,rgba(74,143,255,0.26),transparent 66%);filter:blur(26px);z-index:0;pointer-events:none;will-change:transform}
   .hero .wrap{position:relative;z-index:1}
-  .hero h1{font-size:clamp(44px,7vw,82px);font-weight:600;letter-spacing:-0.04em;line-height:1.02;max-width:16ch;margin:0 auto}
-  .hero p{font-size:clamp(17px,2vw,19px);color:var(--muted);font-weight:300;max-width:500px;margin:26px auto 0}
-  .cta-row{display:inline-flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:38px}
-  .store{display:inline-flex;align-items:center;gap:10px;padding:13px 20px;border-radius:13px;background:#fff;color:#000;transition:transform .15s}
-  .store:hover{transform:translateY(-1px)}
-  .store svg{width:21px;height:21px}
-  .store .t1{display:block;font-size:9.5px;opacity:.7}
-  .store .t2{display:block;font-family:var(--head);font-size:15px;font-weight:600;line-height:1.1}
-  .store.ghost{background:transparent;color:#fff;border:1px solid var(--border)}
-  .store.ghost svg{stroke:#fff;fill:none}
+  .pill{display:inline-flex;align-items:center;gap:8px;padding:7px 15px;border:1px solid var(--border);border-radius:999px;font-size:12.5px;color:var(--muted);background:var(--card);margin-bottom:30px}
+  .pill .dot{width:7px;height:7px;border-radius:50%;background:#3ED598;box-shadow:0 0 0 0 rgba(62,213,152,.5);animation:pulse 2.4s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(62,213,152,.45)}70%{box-shadow:0 0 0 8px rgba(62,213,152,0)}100%{box-shadow:0 0 0 0 rgba(62,213,152,0)}}
+  .hero h1{font-size:clamp(46px,7.4vw,88px);font-weight:600;letter-spacing:-0.045em;line-height:1.0;max-width:15ch;margin:0 auto}
+  .hero .sub{font-size:clamp(17px,2vw,20px);color:var(--muted);font-weight:300;max-width:540px;margin:26px auto 0}
+
+  /* email capture */
+  .capture{margin:40px auto 0;max-width:480px}
+  .field{display:flex;gap:9px;background:var(--card);border:1px solid var(--border);border-radius:15px;padding:7px 7px 7px 8px;transition:border-color .2s,box-shadow .2s}
+  .field:focus-within{border-color:rgba(74,143,255,.55);box-shadow:0 0 0 4px rgba(74,143,255,.12)}
+  .field input{flex:1;min-width:0;background:none;border:none;outline:none;color:var(--text);font-size:15.5px;font-family:var(--body);padding:11px 12px}
+  .field input::placeholder{color:var(--dim)}
+  .field button{white-space:nowrap;border:none;cursor:pointer;background:var(--accent);color:#fff;font-size:14.5px;font-weight:600;padding:0 22px;border-radius:11px;transition:transform .15s,opacity .2s}
+  .field button:hover{transform:translateY(-1px)}
+  .field button:disabled{opacity:.6;cursor:default;transform:none}
+  .msg{font-size:13px;margin-top:12px;min-height:18px;color:var(--dim);transition:color .2s}
+  .msg.err{color:#FF6B6B}.msg.ok{color:#3ED598}
+  .capture.done .field{display:none}
+  .done-card{display:none;align-items:center;gap:13px;text-align:left;background:rgba(62,213,152,.08);border:1px solid rgba(62,213,152,.3);border-radius:15px;padding:16px 18px}
+  .capture.done .done-card{display:flex}
+  .done-card .ck{flex-shrink:0;width:34px;height:34px;border-radius:50%;background:#3ED598;display:flex;align-items:center;justify-content:center}
+  .done-card .ck svg{width:18px;height:18px;stroke:#062416;stroke-width:3;fill:none}
+  .done-card b{font-family:var(--head);font-size:15px;font-weight:600;display:block}
+  .done-card span{font-size:13px;color:var(--muted)}
   .trust{margin-top:18px;font-size:12.5px;color:var(--dim)}
+  .trust b{color:var(--muted);font-weight:500}
 
-  /* one calm ring */
-  .ring{width:230px;height:230px;margin:70px auto 0;border-radius:50%;position:relative;background:conic-gradient(from -90deg,var(--accent) 0% 72%,rgba(255,255,255,0.06) 72%)}
-  .ring::before{content:"";position:absolute;inset:14px;border-radius:50%;background:var(--bg)}
+  /* life score ring */
+  .ring{width:230px;height:230px;margin:74px auto 0;position:relative}
+  .ring svg{transform:rotate(-90deg)}
+  .ring .track{fill:none;stroke:rgba(255,255,255,.06);stroke-width:10}
+  .ring .prog{fill:none;stroke:url(#g);stroke-width:10;stroke-linecap:round;stroke-dasharray:628;stroke-dashoffset:628;transition:stroke-dashoffset 1.6s cubic-bezier(.22,.61,.36,1)}
   .ring .v{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-  .ring .v b{font-family:var(--head);font-size:64px;font-weight:600;letter-spacing:-0.04em;line-height:1}
-  .ring .v span{font-size:10.5px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+  .ring .v b{font-family:var(--head);font-size:66px;font-weight:600;letter-spacing:-0.04em;line-height:1}
+  .ring .v span{font-size:10.5px;letter-spacing:0.24em;text-transform:uppercase;color:var(--muted);margin-top:7px}
 
-  section{padding:96px 0;border-top:1px solid var(--border)}
-  .lead-head{text-align:center;max-width:560px;margin:0 auto 64px}
-  .lead-head h2{font-size:clamp(28px,4vw,40px);font-weight:600;margin-bottom:14px}
-  .lead-head p{color:var(--muted);font-weight:300;font-size:16.5px}
+  /* ===== sections ===== */
+  section{padding:104px 0;border-top:1px solid var(--border);position:relative}
+  .lead-head{text-align:center;max-width:580px;margin:0 auto 66px}
+  .lead-head h2{font-size:clamp(30px,4.4vw,44px);font-weight:600;margin-bottom:14px}
+  .lead-head p{color:var(--muted);font-weight:300;font-size:17px}
+  .eyebrow{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:16px;display:block}
 
-  .three{display:grid;grid-template-columns:repeat(3,1fr);gap:48px}
-  .feat{text-align:center}
-  .feat .ico{width:44px;height:44px;border-radius:12px;margin:0 auto 18px;display:flex;align-items:center;justify-content:center;background:rgba(74,143,255,0.1);border:1px solid rgba(74,143,255,0.22)}
-  .feat .ico svg{width:21px;height:21px;stroke:var(--accent);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-  .feat h3{font-size:18px;font-weight:600;margin-bottom:8px}
-  .feat p{color:var(--muted);font-weight:300;font-size:14.5px;line-height:1.6;max-width:260px;margin:0 auto}
+  .three{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+  .feat{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:32px 28px;transition:transform .3s,border-color .3s,background .3s}
+  .feat:hover{transform:translateY(-4px);border-color:rgba(74,143,255,.3);background:rgba(74,143,255,.04)}
+  .feat .ico{width:48px;height:48px;border-radius:13px;margin-bottom:20px;display:flex;align-items:center;justify-content:center;background:rgba(74,143,255,0.1);border:1px solid rgba(74,143,255,0.22)}
+  .feat .ico svg{width:23px;height:23px;stroke:var(--accent);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .feat h3{font-size:19px;font-weight:600;margin-bottom:9px}
+  .feat p{color:var(--muted);font-weight:300;font-size:14.5px;line-height:1.65}
+
+  /* showcase */
+  .showcase .lead-head{margin-bottom:54px}
+  .screens{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:end}
+  .device{border-radius:30px;border:1px solid var(--border);background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01));padding:10px;box-shadow:0 30px 80px rgba(0,0,0,.5);transition:transform .4s cubic-bezier(.22,.61,.36,1)}
+  .device:hover{transform:translateY(-8px)}
+  .device.mid{transform:scale(1.06)}
+  .device.mid:hover{transform:scale(1.06) translateY(-8px)}
+  .device img{border-radius:22px;width:100%}
+  .device .cap{text-align:center;font-size:12.5px;color:var(--muted);padding:14px 0 6px;font-family:var(--head);font-weight:500;letter-spacing:.01em}
+
+  /* steps */
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+  .step{position:relative;padding-top:18px}
+  .step .n{font-family:var(--head);font-size:13px;font-weight:600;color:var(--accent);letter-spacing:.1em}
+  .step h3{font-size:17px;margin:12px 0 7px}
+  .step p{color:var(--muted);font-weight:300;font-size:14px;line-height:1.6}
+  .step::before{content:"";position:absolute;top:0;left:0;width:34px;height:2px;background:var(--accent);border-radius:2px}
 
   .quote{text-align:center}
-  .quote blockquote{font-family:var(--head);font-size:clamp(24px,3.6vw,38px);font-weight:600;letter-spacing:-0.03em;line-height:1.25;max-width:760px;margin:0 auto}
+  .quote blockquote{font-family:var(--head);font-size:clamp(26px,3.8vw,42px);font-weight:600;letter-spacing:-0.03em;line-height:1.22;max-width:820px;margin:0 auto}
 
-  .faq{max-width:680px;margin:0 auto}
+  .faq{max-width:720px;margin:0 auto}
   details{border-bottom:1px solid var(--border)}
-  summary{list-style:none;cursor:pointer;padding:22px 0;font-size:16px;font-weight:500;font-family:var(--head);display:flex;justify-content:space-between;align-items:center;gap:16px}
+  summary{list-style:none;cursor:pointer;padding:24px 0;font-size:16.5px;font-weight:500;font-family:var(--head);display:flex;justify-content:space-between;align-items:center;gap:16px;transition:color .2s}
+  summary:hover{color:#fff}
   summary::-webkit-details-marker{display:none}
   summary .pl{position:relative;width:14px;height:14px;flex-shrink:0}
-  summary .pl::before,summary .pl::after{content:"";position:absolute;background:var(--muted);border-radius:2px}
+  summary .pl::before,summary .pl::after{content:"";position:absolute;background:var(--muted);border-radius:2px;transition:transform .25s}
   summary .pl::before{top:6px;left:0;width:14px;height:2px}
-  summary .pl::after{left:6px;top:0;width:2px;height:14px;transition:opacity .2s}
-  details[open] .pl::after{opacity:0}
-  details .a{color:var(--muted);font-weight:300;font-size:14.5px;line-height:1.65;padding:0 0 22px;margin:0}
+  summary .pl::after{left:6px;top:0;width:2px;height:14px}
+  details[open] .pl::after{transform:scaleY(0)}
+  details[open] summary{color:#fff}
+  details .a{color:var(--muted);font-weight:300;font-size:14.5px;line-height:1.7;padding:0 0 24px;margin:0;max-width:90%}
 
-  .cta{text-align:center}
-  .cta h2{font-size:clamp(32px,5vw,56px);font-weight:600;letter-spacing:-0.04em;margin-bottom:16px}
-  .cta p{color:var(--muted);font-weight:300;font-size:17px;max-width:440px;margin:0 auto 32px}
+  /* final cta */
+  .cta{text-align:center;position:relative;overflow:hidden}
+  .cta .glow{top:auto;bottom:-220px;opacity:.7}
+  .cta h2{font-size:clamp(34px,5.2vw,60px);font-weight:600;letter-spacing:-0.045em;margin-bottom:16px;position:relative;z-index:1}
+  .cta>.wrap>p{color:var(--muted);font-weight:300;font-size:17px;max-width:460px;margin:0 auto 4px;position:relative;z-index:1}
 
-  footer{border-top:1px solid var(--border);padding:44px 0;display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--dim)}
-  footer .links{display:flex;gap:22px}
-  footer .links a{color:var(--muted)}
+  footer{border-top:1px solid var(--border);padding:46px 0;display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--dim)}
+  footer .links{display:flex;gap:22px;flex-wrap:wrap}
+  footer .links a{color:var(--muted);transition:color .2s}
   footer .links a:hover{color:#fff}
 
-  @media(max-width:760px){.three{grid-template-columns:1fr;gap:44px;max-width:320px;margin:0 auto}}
-  @media(max-width:600px){.nav-links{display:none}.nav-toggle{display:inline-flex}
-    .nav-links.open{display:flex;position:absolute;top:64px;left:14px;right:14px;flex-direction:column;gap:6px;padding:14px;background:rgba(12,13,20,0.97);border:1px solid var(--border);border-radius:14px}
-    section{padding:72px 0}.hero{padding:84px 0 80px}}
-  @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  @media(max-width:880px){.steps{grid-template-columns:repeat(2,1fr);gap:30px}}
+  @media(max-width:760px){
+    .three{grid-template-columns:1fr;max-width:360px;margin:0 auto}
+    .screens{grid-template-columns:1fr;max-width:300px;margin:0 auto}
+    .device.mid{transform:none}.device.mid:hover{transform:translateY(-8px)}
+  }
+  @media(max-width:600px){
+    .nav-links{display:none}.nav-toggle{display:inline-flex}
+    .nav-links.open{display:flex;position:absolute;top:62px;left:14px;right:14px;flex-direction:column;gap:6px;padding:14px;background:rgba(12,13,20,0.98);border:1px solid var(--border);border-radius:16px}
+    section{padding:78px 0}.hero{padding:96px 0 78px}
+    .field{flex-direction:column;padding:9px}.field button{padding:13px}
+  }
+  @media(prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    .reveal{opacity:1;transform:none;transition:none}
+    .glow{animation:none}.pill .dot{animation:none}
+  }
 </style>
 </head>
 <body>
-  <nav>
+
+  <!-- Hidden static form so Netlify detects & captures submissions at deploy -->
+  <form name="waitlist" netlify netlify-honeypot="bot-field" hidden>
+    <input type="email" name="email" />
+    <input type="text" name="bot-field" />
+  </form>
+
+  <nav id="nav">
     <a class="brand" href="#top"><img src="assets/logo.png" alt="CORE"/><span class="wm">CORE</span></a>
-    <div class="nav-links" id="navLinks"><a href="#how">How it works</a><a href="#faq">FAQ</a></div>
+    <div class="nav-links" id="navLinks"><a href="#how">How it works</a><a href="#inside">Inside</a><a href="#faq">FAQ</a></div>
     <div style="display:flex;align-items:center;gap:10px">
-      <a class="ndl" href="#download">Download</a>
+      <a class="ndl" href="#join">Join waitlist</a>
       <button class="nav-toggle" id="navToggle" aria-label="Menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
     </div>
   </nav>
 
   <header class="hero" id="top">
+    <div class="glow" id="glow"></div>
     <div class="wrap">
-      <h1>Become your <span class="accent">core.</span></h1>
-      <p>The honest life-OS. Quit any vice, climb one Life Score, and let an AI coach that knows your history hold the line.</p>
-      <div class="cta-row">
-        <a class="store" href="#download"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 4.2 4.6 8H7.4L12 6.2Z"/></svg><span><span class="t1">Join the beta on</span><span class="t2">TestFlight</span></span></a>
-        <a class="store ghost" href="#download"><svg viewBox="0 0 24 24" stroke-width="1.6"><path d="M16.5 3.5c.5 1.7-.2 3.4-1 4.4-.9 1.1-2.3 1.9-3.6 1.8-.2-1.6.5-3.3 1.4-4.3.9-1.1 2.5-1.9 3.2-1.9Z"/><path d="M19.5 17c-.5 1.2-1.1 2.3-2 3.3-.8.9-1.8 1.9-3 1.9-1.1 0-1.5-.7-2.9-.7-1.4 0-1.8.7-2.9.7-1.2 0-2.1-1-3-1.9C2 17.7 1 14 2.6 11.3c.9-1.5 2.4-2.4 4-2.4 1.2 0 2.3.8 3 .8.7 0 2-.9 3.4-.8.6 0 2.3.2 3.4 1.8-3 1.7-2.5 5.8.1 6.3Z"/></svg><span><span class="t1">Coming soon</span><span class="t2">App Store</span></span></a>
-      </div>
-      <div class="trust">7-day free trial · $7.99/mo · cancel any time</div>
+      <span class="pill reveal"><span class="dot"></span>Now in private beta · launching 2026</span>
+      <h1 class="reveal d1">Become your <span class="accent">core.</span></h1>
+      <p class="sub reveal d2">The honest life-OS. Quit any vice, climb one Life Score, and let an AI coach that knows your history hold the line.</p>
 
-      <div class="ring" aria-label="Life Score 72"><div class="v"><b>72</b><span>Life Score</span></div></div>
+      <form class="capture reveal d2" id="wlHero" name="waitlist" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+        <input type="hidden" name="form-name" value="waitlist" />
+        <p hidden><label>Don't fill this out: <input name="bot-field" /></label></p>
+        <div class="field">
+          <input type="email" name="email" placeholder="you@email.com" autocomplete="email" aria-label="Email address" required />
+          <button type="submit">Join the waitlist</button>
+        </div>
+        <div class="msg" id="msgHero" aria-live="polite"></div>
+        <div class="done-card"><span class="ck"><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></span><div><b>You're on the list.</b><span>We'll email you the moment your spot opens.</span></div></div>
+      </form>
+      <div class="trust reveal d3">Free to join · No spam · <b>Early members get founder pricing</b></div>
+
+      <div class="ring reveal d3" aria-label="Life Score 72">
+        <svg width="230" height="230" viewBox="0 0 230 230">
+          <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4A8FFF"/><stop offset="1" stop-color="#7AB0FF"/></linearGradient></defs>
+          <circle class="track" cx="115" cy="115" r="100"/>
+          <circle class="prog" id="prog" cx="115" cy="115" r="100"/>
+        </svg>
+        <div class="v"><b id="scoreNum">0</b><span>Life Score</span></div>
+      </div>
     </div>
   </header>
 
   <section id="how">
     <div class="wrap">
-      <div class="lead-head">
-        <h2>Built on honesty.</h2>
-        <p>Three simple things, working together.</p>
-      </div>
+      <div class="lead-head reveal"><span class="eyebrow">Why CORE</span><h2>Built on honesty.</h2><p>Three simple things, working together.</p></div>
       <div class="three">
-        <div class="feat">
+        <div class="feat reveal d1">
           <div class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
           <h3>One Life Score</h3>
-          <p>Five stats roll into a single score you can't fake and can't ignore.</p>
+          <p>Five stats — fitness, focus, money, mind and habits — roll into a single score you can't fake and can't ignore.</p>
         </div>
-        <div class="feat">
+        <div class="feat reveal d2">
           <div class="ico"><svg viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></div>
           <h3>An AI coach</h3>
-          <p>It knows your history and says the one thing you need, in your tone.</p>
+          <p>It knows your history and says the one thing you need, in the tone you choose. It remembers what you're working on.</p>
         </div>
-        <div class="feat">
+        <div class="feat reveal d3">
           <div class="ico"><svg viewBox="0 0 24 24"><path d="M3 12h4l2 6 4-13 2 7h6"/></svg></div>
           <h3>Visible recovery</h3>
-          <p>Log a slip honestly, keep your streak, and watch yourself heal daily.</p>
+          <p>Prove a real task, log a slip honestly, keep your streak — and watch your recovery take shape a little more every day.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="quote">
+  <section id="inside" class="showcase">
     <div class="wrap">
+      <div class="lead-head reveal"><span class="eyebrow">A look inside</span><h2>Your life, leveled up.</h2><p>Every screen is built to make real progress feel earned.</p></div>
+      <div class="screens">
+        <div class="device reveal d1"><img src="assets/screens/coach.png" alt="AI coach screen" loading="lazy"/><div class="cap">AI coach</div></div>
+        <div class="device mid reveal d2"><img src="assets/screens/dashboard.png" alt="Dashboard screen" loading="lazy"/><div class="cap">Dashboard</div></div>
+        <div class="device reveal d3"><img src="assets/screens/ranks.png" alt="Ranks screen" loading="lazy"/><div class="cap">Ranks</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="loop">
+    <div class="wrap">
+      <div class="lead-head reveal"><span class="eyebrow">The loop</span><h2>Prove it. Earn it. Climb.</h2><p>No tapping "done." You show the work — and the work pays off.</p></div>
+      <div class="steps">
+        <div class="step reveal d1"><span class="n">01</span><h3>Get your quests</h3><p>Daily goals across the areas you're working on, sized to your level.</p></div>
+        <div class="step reveal d1"><span class="n">02</span><h3>Prove it</h3><p>Snap a photo of the real thing — the gym, the desk, the clean room.</p></div>
+        <div class="step reveal d2"><span class="n">03</span><h3>AI verifies</h3><p>It checks your proof and decides if it counts. No faking your way up.</p></div>
+        <div class="step reveal d2"><span class="n">04</span><h3>Rank up</h3><p>Earn XP and coins, build streaks, and watch your card and rank evolve.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="quote">
+    <div class="wrap reveal">
       <blockquote>Every other app rewards the perfect streak. CORE rewards the <span class="accent">honest</span> one.</blockquote>
     </div>
   </section>
 
   <section id="faq">
     <div class="wrap">
-      <div class="lead-head"><h2>FAQ</h2></div>
-      <div class="faq">
-        <details open><summary>What can I quit with CORE?<span class="pl"></span></summary><p class="a">Anything you can slip on — vaping, alcohol, porn, doom-scrolling, junk food, overspending. It's built around honest slip-logging, so it works for any vice.</p></details>
-        <details><summary>Is the AI coach real?<span class="pl"></span></summary><p class="a">Yes — it reads your streak, slips and stats to respond in context, and you choose its tone. It remembers what you're working on.</p></details>
-        <details><summary>What if I break my streak?<span class="pl"></span></summary><p class="a">Logging a slip honestly keeps your streak alive. For genuine off-days there's a weekly freeze, and a $0.99 restore inside a 48-hour window.</p></details>
-        <details><summary>Who can see my data?<span class="pl"></span></summary><p class="a">You. CORE is local-first, we never sell your data, and social features are opt-in.</p></details>
+      <div class="lead-head reveal"><h2>FAQ</h2></div>
+      <div class="faq reveal">
+        <details open><summary>What can I improve with CORE?<span class="pl"></span></summary><p class="a">Anything real — training, focus, money habits, sleep, doom-scrolling, junk food. It's built around proving real tasks and honest slip-logging, so it works for any goal or vice.</p></details>
+        <details><summary>Is the AI coach real?<span class="pl"></span></summary><p class="a">Yes — it reads your streak, slips and stats to respond in context, and you choose its tone. It knows what page you're on and remembers what you're working on.</p></details>
+        <details><summary>How does proof work?<span class="pl"></span></summary><p class="a">You upload a photo of the real task and the AI checks whether it counts. It can pass it, ask for better proof, or reject it — so progress on your card is always earned.</p></details>
+        <details><summary>What if I break my streak?<span class="pl"></span></summary><p class="a">Logging a slip honestly keeps your streak alive. For genuine off-days there's a weekly freeze, and a short restore window.</p></details>
+        <details><summary>When does it launch?<span class="pl"></span></summary><p class="a">CORE is in private beta now. Join the waitlist and you'll be first in line when spots open — early members get founder pricing.</p></details>
+        <details><summary>Who can see my data?<span class="pl"></span></summary><p class="a">You. CORE is private by default, we never sell your data, and social features are opt-in.</p></details>
       </div>
     </div>
   </section>
 
-  <section class="cta" id="download">
+  <section class="cta" id="join">
+    <div class="glow"></div>
     <div class="wrap">
-      <h2>Become your <span class="accent">core.</span></h2>
-      <p>Join the TestFlight beta today. App Store launch coming soon.</p>
-      <div class="cta-row" style="margin-top:0">
-        <a class="store" href="https://testflight.apple.com/join/PLACEHOLDER"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 4.2 4.6 8H7.4L12 6.2Z"/></svg><span><span class="t1">Join the beta on</span><span class="t2">TestFlight</span></span></a>
-      </div>
+      <h2 class="reveal">Become your <span class="accent">core.</span></h2>
+      <p class="reveal d1">Join the waitlist and claim your spot in the beta.</p>
+      <form class="capture reveal d2" id="wlFoot" name="waitlist" method="POST" data-netlify="true" netlify-honeypot="bot-field" style="margin-top:32px">
+        <input type="hidden" name="form-name" value="waitlist" />
+        <p hidden><label>Don't fill this out: <input name="bot-field" /></label></p>
+        <div class="field">
+          <input type="email" name="email" placeholder="you@email.com" autocomplete="email" aria-label="Email address" required />
+          <button type="submit">Get my spot</button>
+        </div>
+        <div class="msg" id="msgFoot" aria-live="polite"></div>
+        <div class="done-card"><span class="ck"><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></span><div><b>You're on the list.</b><span>We'll email you the moment your spot opens.</span></div></div>
+      </form>
     </div>
   </section>
 
   <footer class="wrap">
     <a class="brand" href="#top"><img src="assets/logo.png" alt="CORE"/><span class="wm">CORE</span></a>
-    <div class="links"><a href="#how">How it works</a><a href="#faq">FAQ</a><a href="mailto:corestudiosupport@gmail.com">Contact</a></div>
+    <div class="links"><a href="#how">How it works</a><a href="#inside">Inside</a><a href="#faq">FAQ</a><a href="mailto:corestudiosupport@gmail.com">Contact</a></div>
     <span>© 2026 CORE</span>
   </footer>
 
 <script>
+(function(){
+  "use strict";
+  // --- mobile nav ---
   var t=document.getElementById('navToggle'),n=document.getElementById('navLinks');
   t.addEventListener('click',function(){n.classList.toggle('open');});
   n.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){n.classList.remove('open');});});
+
+  // --- nav shadow + hero glow parallax on scroll ---
+  var nav=document.getElementById('nav');
+  var onScroll=function(){
+    if(window.scrollY>12)nav.classList.add('scrolled');else nav.classList.remove('scrolled');
+    var g=document.getElementById('glow'); if(g)g.style.transform='translateX(-50%) translateY('+(window.scrollY*0.18)+'px)';
+  };
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+
+  // --- reveal on scroll ---
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);} });
+  },{threshold:0.12,rootMargin:'0px 0px -8% 0px'});
+  document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
+
+  // --- life score ring + count-up ---
+  var TARGET=72, played=false;
+  var ringIO=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting && !played){
+        played=true;
+        var prog=document.getElementById('prog'); // C = 2*pi*100 ≈ 628
+        prog.style.strokeDashoffset=628-(628*TARGET/100);
+        var num=document.getElementById('scoreNum'),cur=0;
+        var iv=setInterval(function(){cur+=2; if(cur>=TARGET){cur=TARGET;clearInterval(iv);} num.textContent=cur;},28);
+        ringIO.disconnect();
+      }
+    });
+  },{threshold:0.4});
+  var ringEl=document.querySelector('.ring'); if(ringEl)ringIO.observe(ringEl);
+
+  // --- waitlist forms ---
+  var EMAIL=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  function enc(d){return Object.keys(d).map(function(k){return encodeURIComponent(k)+'='+encodeURIComponent(d[k]);}).join('&');}
+  function wire(formId,msgId){
+    var form=document.getElementById(formId); if(!form)return;
+    var msg=document.getElementById(msgId);
+    var input=form.querySelector('input[type=email]');
+    var btn=form.querySelector('button[type=submit]');
+    var bot=form.querySelector('input[name=bot-field]');
+    input.addEventListener('input',function(){msg.textContent='';msg.className='msg';});
+    form.addEventListener('submit',function(ev){
+      ev.preventDefault();
+      var email=(input.value||'').trim();
+      if(!EMAIL.test(email)){msg.textContent='Please enter a valid email.';msg.className='msg err';input.focus();return;}
+      if(bot && bot.value){return;} // honeypot tripped
+      btn.disabled=true; var label=btn.textContent; btn.textContent='Joining…'; msg.textContent='';msg.className='msg';
+      fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:enc({'form-name':'waitlist',email:email})})
+        .then(function(r){
+          if(!r.ok)throw new Error('bad');
+          form.classList.add('done');
+        })
+        .catch(function(){
+          btn.disabled=false; btn.textContent=label;
+          // graceful fallback for local/preview where Netlify isn't handling POST
+          if(location.hostname==='localhost'||location.hostname==='127.0.0.1'||location.protocol==='file:'){
+            form.classList.add('done'); return;
+          }
+          msg.textContent='Something went wrong — try again in a moment.'; msg.className='msg err';
+        });
+    });
+  }
+  wire('wlHero','msgHero');
+  wire('wlFoot','msgFoot');
+})();
 </script>
 </body>
 </html>

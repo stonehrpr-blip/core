@@ -57,6 +57,13 @@
         <div class="lab">Privacy</div>
         <div class="group" id="privacy"></div>
 
+        <div class="lab">Legal</div>
+        <div class="group">
+          <a class="row" href="82-legal.html" style="text-decoration:none;color:inherit;"><div class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2h9l5 5v15a0 0 0 0 1 0 0H6a0 0 0 0 1 0 0V2Z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg></div><div class="rb"><b>Privacy &amp; Terms</b><span>Privacy Policy · Terms · EULA</span></div><svg class="val" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></a>
+          <a class="row" href="refund-policy.html" style="text-decoration:none;color:inherit;"><div class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7h18v10H3zM3 11h18"/><path d="M7 15h4"/></svg></div><div class="rb"><b>Refund &amp; Cancellation</b><span>How to cancel · refunds · your rights</span></div><svg class="val" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></a>
+          <a class="row" href="community-guidelines.html" style="text-decoration:none;color:inherit;"><div class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0M16 6a3 3 0 0 1 0 6M21 20a6 6 0 0 0-5-5.9"/></svg></div><div class="rb"><b>Community Guidelines</b><span>Be honest · be kind · keep it safe</span></div><svg class="val" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></a>
+        </div>
+
         <div class="lab">Data</div>
         <div class="group">
           <div class="row danger"><div class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13"/></svg></div><div class="rb"><b>Reset progress</b><span>Clears all XP, rank, items & perks</span></div><button class="confirm" id="resetBtn">Reset</button></div>
@@ -107,12 +114,28 @@
     toggleRow(PR,'coreSet.public',true,'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/>','Public profile','Others can find you by ID');
     toggleRow(PR,'coreSet.leaderboard',true,'<path d="M4 20h4v-7H4v7ZM10 20h4V6h-4v14ZM16 20h4v-10h-4v10Z"/>','Show on leaderboard','Appear in rankings (when live)');
 
+    // CORE Plus — status + days-left. Real billing isn't wired, so the in-app
+    // toggle only appears with ?dev=1; everyone else taps through to the paywall.
+    (function(){
+      var DEVm=/[?&]dev=1/.test(location.search);
+      function plusState(){ var a=false,d=0; try{ a=S.corePlusActive&&S.corePlusActive(); d=S.corePlusDaysLeft?S.corePlusDaysLeft():0; }catch(e){} return {a:a,d:d}; }
+      function subText(st){ if(!st.a) return '2× rewards + weekly Epic chest'; var extra=''; try{ var n=parseInt(localStorage.getItem('corePlusNextChestAt')||'0',10)||0; if(n){ var nd=Math.max(0,Math.ceil((n-Date.now())/86400000)); extra=' · chest in '+nd+'d'; } }catch(e){} return 'Active'+(st.d?(' · '+st.d+'d left'):'')+extra; }
+      var st=plusState();
+      var row=document.createElement('div'); row.className='row';
+      var ctrl = DEVm
+        ? '<button class="sw'+(st.a?' on':'')+'" id="plusSw" role="switch" aria-checked="'+st.a+'" aria-label="CORE Plus (dev)"></button>'
+        : '<a class="mini" href="29-core-plus.html?from=settings" style="text-decoration:none">'+(st.a?'Manage':'Upgrade')+'</a>';
+      row.innerHTML='<div class="ri"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 16l-2-9 6 4 3-6 3 6 6-4-2 9z"/><path d="M5 18h14v2H5z"/></svg></div><div class="rb"><b>CORE Plus</b><span id="plusSub">'+subText(st)+'</span></div>'+ctrl;
+      P.appendChild(row);
+      if(DEVm){ var sw=row.querySelector('#plusSw'); sw.addEventListener('click', function(){ var on=!(S.corePlusActive&&S.corePlusActive()); try{ S.setCorePlus(on); S.syncProgress(); }catch(e){} sw.classList.toggle('on',on); sw.setAttribute('aria-checked',on); qs('#plusSub').textContent=subText(plusState()); toast(on?'CORE Plus on (dev)':'CORE Plus off'); }); }
+    })();
+
     // reset (two-tap confirm — no native alert)
     var armed=false, rb=qs('#resetBtn'), rt;
     rb.addEventListener('click', function(){
       if(!armed){ armed=true; rb.textContent='Tap again to confirm'; clearTimeout(rt); rt=setTimeout(function(){ armed=false; rb.textContent='Reset'; },3000); return; }
       S.resetAll();
-      ['corePlayerId','coreFriends','coreAchievements','coreUnlockedPerks','coreProfileTheme','coreProfileTitle','coreEquippedBadge','coreEquippedFrame','coreLastRankIndex','corePendingRankUp','corePendingRankUpData','coreCorePower','coreRank','coreRankIndex','coreLevel','coreTotalXP','coreStreak'].forEach(function(k){ try{localStorage.removeItem(k);}catch(e){} });
+      ['corePlayerId','coreFriends','coreAchievements','coreUnlockedPerks','coreProfileTheme','coreProfileTitle','coreEquippedBadge','coreEquippedFrame','coreLastRankIndex','corePendingRankUp','corePendingRankUpData','coreCorePower','coreRank','coreRankIndex','coreLevel','coreTotalXP','coreStreak','corePlusActive','corePlusNextChestAt','coreFreeChestNextAt','coreDashChestDay','coreOwnedChests','coreOwnedShopItems'].forEach(function(k){ try{localStorage.removeItem(k);}catch(e){} });
       try{ S.syncProgress(); }catch(e){}
       armed=false; rb.textContent='Reset'; toast('Progress reset');
     });
