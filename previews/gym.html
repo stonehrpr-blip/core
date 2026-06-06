@@ -88,19 +88,18 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .scan-tx span{font-size:12px;color:var(--muted);}
 .scan-arrow{color:var(--dim);flex:none;}.scan-arrow svg{width:18px;height:18px;}
 
-/* ── Body diagram ── */
-.diagram{padding:12px 10px 14px;}
-.figs{display:flex;justify-content:space-around;align-items:flex-end;gap:8px;padding:2px;}
-.figcol{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;}
-.bodyfig{width:100%;height:auto;max-height:296px;display:block;overflow:visible;}
-.bodyfig .skin{fill:rgba(255,255,255,0.05);stroke:rgba(255,255,255,0.12);stroke-width:0.7;}
-.reg{cursor:pointer;}
-.reg .fill{fill:var(--c,#454b63);fill-opacity:var(--op,0.3);stroke:rgba(2,2,12,0.45);stroke-width:0.5;
-  transition:fill .55s ease,fill-opacity .55s ease;}
-.reg.glow .fill{filter:drop-shadow(0 0 2.5px var(--c));}
-.reg:active{opacity:.82;}
-.viewlbl{font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);}
-@media(prefers-reduced-motion:reduce){.reg .fill{transition:none;}}
+/* ── Body diagram (original image; whole card links to the gender question) ── */
+.diagram{padding:8px 6px 12px;}
+.bodylink{display:block;text-decoration:none;color:inherit;cursor:pointer;transition:transform .14s;}
+.bodylink:active{transform:scale(.99);}
+.figs{position:relative;width:100%;aspect-ratio:260 / 212;border-radius:14px;overflow:hidden;
+  background:radial-gradient(80% 60% at 50% 45%,rgba(255,255,255,0.03),transparent 70%);}
+.figwrap{position:absolute;left:0;top:0;width:100%;transform:translateY(-12.5%);} /* crop stock "HUMAN" header + bottom watermark */
+.figwrap img{display:block;width:100%;height:auto;
+  filter:invert(1) brightness(1.12) contrast(.92) opacity(.62);pointer-events:none;user-select:none;}
+.bodylink-hint{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:11px;
+  font-size:12px;font-weight:700;color:var(--blue-2);}
+.bodylink-hint svg{width:14px;height:14px;}
 .insight{display:flex;align-items:center;gap:9px;margin-top:10px;padding:11px 13px;border-radius:13px;
   background:rgba(255,107,107,0.07);border:1px solid rgba(255,107,107,0.2);}
 .insight svg{width:16px;height:16px;color:var(--str);flex:none;}
@@ -225,22 +224,17 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
         <span class="scan-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
       </a>
 
-      <!-- 2. Body diagram -->
-      <div class="sec"><h2>Muscle Map</h2><span class="meta" id="lastTrained"></span></div>
-      <div class="card diagram">
-        <div class="figs" id="figs">
-          <div class="figcol"><div id="figFront"></div><span class="viewlbl">Front</span></div>
-          <div class="figcol"><div id="figBack"></div><span class="viewlbl">Back</span></div>
+      <!-- 2. Body diagram — your physique; whole card links to the gender question (trial step 2) -->
+      <div class="sec"><h2>Your Body</h2><span class="meta" id="lastTrained"></span></div>
+      <a class="card diagram bodylink" href="07-trial.html?step=2" aria-label="Set your body type">
+        <div class="figs">
+          <div class="figwrap"><img src="male-human-body-front-back-260nw-688347376.jpg.webp" alt="Body, front and back" /></div>
         </div>
-        <div class="insight" id="insight" style="display:none">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2Z"/><path d="M9 21h6"/></svg>
-          <span id="insightTx"></span>
-        </div>
-        <div class="legend">
-          <i><b style="background:#4F5570"></b>Untrained</i>
-          <i><b style="background:#FFD05C"></b>Recent</i>
-          <i><b style="background:#FF6B6B;box-shadow:0 0 6px #FF6B6B"></b>Strong</i>
-        </div>
+        <div class="bodylink-hint"><span>Tap to set your body type</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+      </a>
+      <div class="insight" id="insight" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2Z"/><path d="M9 21h6"/></svg>
+        <span id="insightTx"></span>
       </div>
 
       <!-- 3. Workout section (setup OR active) -->
@@ -380,49 +374,9 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   function allIntensity(){ var o={}; MUSCLES.forEach(function(m){ o[m.id]=intensity(m.id); }); return o; }
   function levelLabel(l){ return l==='none'?'Untrained':l==='low'?'Started':l==='mid'?'Building':'Strong'; }
 
-  /* ───────── Body diagram — solid colour-coded SVG (front + back) ───────── */
-  function figFront(){
-    return '<svg class="bodyfig" viewBox="0 0 110 250" fill="none">'+
-      '<circle class="skin" cx="55" cy="18" r="12"/><rect class="skin" x="50" y="28" width="10" height="8" rx="3"/>'+
-      '<g class="reg" data-m="shoulders"><ellipse class="fill" cx="33" cy="46" rx="12" ry="9"/><ellipse class="fill" cx="77" cy="46" rx="12" ry="9"/></g>'+
-      '<g class="reg" data-m="chest"><rect class="fill" x="37" y="40" width="16" height="22" rx="7"/><rect class="fill" x="57" y="40" width="16" height="22" rx="7"/></g>'+
-      '<g class="reg" data-m="arms"><rect class="fill" x="22" y="50" width="11" height="42" rx="5"/><rect class="fill" x="77" y="50" width="11" height="42" rx="5"/><rect class="fill" x="20" y="92" width="10" height="36" rx="5"/><rect class="fill" x="80" y="92" width="10" height="36" rx="5"/></g>'+
-      '<g class="reg" data-m="core"><rect class="fill" x="42" y="64" width="26" height="46" rx="8"/></g>'+
-      '<g class="reg" data-m="legs"><rect class="fill" x="40" y="112" width="13" height="54" rx="6"/><rect class="fill" x="57" y="112" width="13" height="54" rx="6"/><rect class="fill" x="41" y="168" width="11" height="50" rx="5"/><rect class="fill" x="58" y="168" width="11" height="50" rx="5"/></g>'+
-    '</svg>';
-  }
-  function figBack(){
-    return '<svg class="bodyfig" viewBox="0 0 110 250" fill="none">'+
-      '<circle class="skin" cx="55" cy="18" r="12"/><rect class="skin" x="50" y="28" width="10" height="8" rx="3"/>'+
-      '<g class="reg" data-m="shoulders"><ellipse class="fill" cx="33" cy="46" rx="12" ry="9"/><ellipse class="fill" cx="77" cy="46" rx="12" ry="9"/><path class="fill" d="M44 38 h22 l-4 12 h-14 z"/></g>'+
-      '<g class="reg" data-m="back"><path class="fill" d="M38 50 h34 l-3 40 q-14 6 -28 0 z"/></g>'+
-      '<g class="reg" data-m="arms"><rect class="fill" x="22" y="50" width="11" height="42" rx="5"/><rect class="fill" x="77" y="50" width="11" height="42" rx="5"/><rect class="fill" x="20" y="92" width="10" height="36" rx="5"/><rect class="fill" x="80" y="92" width="10" height="36" rx="5"/></g>'+
-      '<g class="reg" data-m="core"><rect class="fill" x="44" y="92" width="22" height="20" rx="6"/></g>'+
-      '<g class="reg" data-m="legs"><rect class="fill" x="40" y="112" width="13" height="20" rx="6"/><rect class="fill" x="57" y="112" width="13" height="20" rx="6"/><rect class="fill" x="40" y="134" width="13" height="34" rx="6"/><rect class="fill" x="57" y="134" width="13" height="34" rx="6"/><rect class="fill" x="41" y="170" width="11" height="48" rx="5"/><rect class="fill" x="58" y="170" width="11" height="48" rx="5"/></g>'+
-    '</svg>';
-  }
-  function paintRegions(inten){
-    MUSCLES.forEach(function(m){
-      var it=inten[m.id], col=mColor(m.id);
-      var fillCol = it.level==='none' ? '#4a5066' : col;       // untrained = grey, trained = its colour
-      var op = it.level==='none' ? 0.30 : (0.42 + it.t*0.58);  // saturation grows with training
-      Array.prototype.forEach.call(document.querySelectorAll('.reg[data-m="'+m.id+'"]'),function(g){
-        g.style.setProperty('--c',fillCol); g.style.setProperty('--op',op.toFixed(2));
-        g.classList.toggle('glow', it.level==='high'||it.level==='mid');
-        g.setAttribute('aria-label', mInfo(m.id).name+' — '+levelLabel(it.level));
-        g.setAttribute('role','button'); g.setAttribute('tabindex','0');
-      });
-    });
-  }
+  /* ───────── Body diagram — original image; the card links to the gender question (trial step 2) ───────── */
   function renderDiagram(){
-    var ff=qs('#figFront'), fb=qs('#figBack');
-    if(ff) ff.innerHTML=figFront();
-    if(fb) fb.innerHTML=figBack();
     var inten=allIntensity();
-    paintRegions(inten);
-    Array.prototype.forEach.call(document.querySelectorAll('.reg'),function(g){
-      g.addEventListener('click',function(){ sfx('tick'); openSheet(g.getAttribute('data-m')); });
-    });
     renderInsight(inten);
     var s=store(), last=s.history[0];
     qs('#lastTrained').textContent = last ? ('Last: '+mInfo(last.muscle).name+' · '+ago(last.ts)) : '';
@@ -497,7 +451,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
             '<span class="ht"><b>'+mInfo(h.muscle).name+'</b><span>'+h.totalSets+' sets · '+h.exercises.length+' exercises · '+ago(h.ts)+'</span></span>'+
             '<span class="hv">+'+h.str+' STR</span></div>';
         }).join('')+'</div>'
-      : '<div class="card"><div class="empty">No workouts logged yet.<br>Tap a muscle or a suggestion to start.</div></div>';
+      : '<div class="card"><div class="empty">No workouts logged yet.<br>Tap a suggestion or Log a Workout to start.</div></div>';
     w.innerHTML=
       '<div class="sec"><h2>Suggested Today</h2><span class="meta">'+goalTip+'</span></div>'+
       '<div class="sugg fade">'+sug+'</div>'+
