@@ -31,39 +31,49 @@
   // on quest-driven gains, so neglected stats bounce back faster. All > 1 so every
   // stat rewards a comeback (brain/social rebound hardest). Used by addStat().
   const STAT_RECOVER = { lungs: 1.3, brain: 1.4, wallet: 1.2, willpower: 1.25, body: 1.15, social: 1.35 };
+  const DECAY_START_XP = 600; // passive stat decay is paused until this XP (~Level 3) — onboarding grace
 
-  // Rank ladder — 11 tiers, Stone → CORE. XP threshold → rank name.
+  // Rank ladder — 11 tiers, Stone -> CORE. XP threshold -> rank name.
   // Each rank carries c1/c2/glow for badge rendering + `unlocks` (2 perks) the
   // profile/rank pages surface to drive progression desire. CORE is the apex.
+  // ── NEW LADDER (2026-06-07) — 11 ranks × 3 tiers (I/II/III) = 33 steps.
+  // Material progression: matte (Sand/Clay) → metallic (Stone→Gold) → strong-identity
+  // gems (Emerald→Obsidian) → radiant apex (Solar→Celestial). Tiers are derived from
+  // each rank's [min,max] band by rankTier(); Celestial has a FINITE max so it tiers too.
   const RANKS = [
-    { name: 'Stone',   min: 0,     max: 299,    color: '#AEB4BD', c1: '#cdd2da', c2: '#4b515b', glow: '#AEB4BD', tagline: 'Every legend starts as nothing.',      unlocks: ['Profile Unlocked', 'Daily Quests Unlocked'] },
-    { name: 'Earth',   min: 300,   max: 799,    color: '#C08A4A', c1: '#d79c55', c2: '#5a3b18', glow: '#C08A4A', tagline: 'You build unshakable habits.',          unlocks: ['Inventory Unlocked', '+2% Chest Luck'] },
-    { name: 'Leaf',    min: 800,   max: 1499,   color: '#57D964', c1: '#7cf07f', c2: '#176b2d', glow: '#57D964', tagline: 'Growth begins with consistency.',       unlocks: ['Weekly Quests Unlocked', '+5% XP From Habit Quests'] },
-    { name: 'Water',   min: 1500,  max: 2499,   color: '#3FA9F5', c1: '#6cc4ff', c2: '#0c4a8e', glow: '#3FA9F5', tagline: 'Discipline flows, results follow.',     unlocks: ['Streak Shield Unlocked', '+5% XP From Discipline Quests'] },
-    { name: 'Crystal', min: 2500,  max: 3999,   color: '#A86BF0', c1: '#c79bff', c2: '#3b1568', glow: '#A86BF0', tagline: 'Clarity turns you into strength.',      unlocks: ['Badge Slot Unlocked', 'Rare Chest Chance +3%'] },
-    { name: 'Gold',    min: 4000,  max: 6499,   color: '#F5C518', c1: '#ffe27a', c2: '#7a5300', glow: '#F5C518', tagline: 'Commitment creates value.',            unlocks: ['Leaderboard Unlocked', 'Gold Profile Frame'] },
-    { name: 'Ember',   min: 6500,  max: 8999,   color: '#F0463C', c1: '#ff6f63', c2: '#6b1208', glow: '#F0463C', tagline: 'Passion fuels relentless action.',     unlocks: ['Boss Quests Unlocked', '+10% XP From Hard Quests'] },
-    { name: 'Wind',    min: 9000,  max: 12999,  color: '#2BD4C4', c1: '#64f0e2', c2: '#0f5a52', glow: '#2BD4C4', tagline: 'Adapt. Improve. Never settle.',        unlocks: ['Aura Slot Unlocked', 'Guild Access Preview'] },
-    { name: 'Aurora',  min: 13000, max: 17999,  color: '#5B8DEF', c1: '#86b0ff', c2: '#23306b', glow: '#5B8DEF', tagline: 'Excellence becomes your standard.',     unlocks: ['Custom Titles Unlocked', 'Epic Chest Chance +5%'] },
-    { name: 'Ascend',  min: 18000, max: 24999,  color: '#A05BE0', c1: '#c48cff', c2: '#4a1a8a', glow: '#A05BE0', tagline: 'You rise above the ordinary.',         unlocks: ['Elite Card Effects Unlocked', 'Advanced Stats Unlocked'] },
-    { name: 'CORE',    min: 25000, max: Infinity, color: '#BBD8FF', c1: '#EAF3FF', c2: '#2a4f9b', glow: '#9CC6FF', tagline: 'You embody the highest version.',      unlocks: ['Animated CORE Card', 'Endgame Rewards Unlocked'] },
+    { name: 'Sand',      min: 0,     max: 249,   color: '#D9C7A0', c1: '#efe3c4', c2: '#5b513a', glow: '#D9C7A0', tagline: 'The first grain.',      unlocks: ['Profile Unlocked', 'Daily Quests Unlocked'] },
+    { name: 'Clay',      min: 250,   max: 649,   color: '#C26B4A', c1: '#dd8a66', c2: '#4a2719', glow: '#C26B4A', tagline: 'Molded by effort.',                 unlocks: ['Inventory Unlocked', '+2% Chest Luck'] },
+    { name: 'Stone',     min: 650,   max: 1249,  color: '#9BA3AE', c1: '#c4cad3', c2: '#3c4047', glow: '#9BA3AE', tagline: 'Solid and steady.',             unlocks: ['Weekly Quests Unlocked', 'Streak Shield Unlocked'] },
+    { name: 'Copper',    min: 1250,  max: 2149,  color: '#CC7A3F', c1: '#ec9a5d', c2: '#54290f', glow: '#D9894F', tagline: 'Forged by commitment.',         unlocks: ['Badge Slot Unlocked', '+5% XP From Habit Quests'] },
+    { name: 'Silver',    min: 2150,  max: 3449,  color: '#C7D0DC', c1: '#f0f4fa', c2: '#4c535f', glow: '#D7DEE8', tagline: 'Strength in motion.',               unlocks: ['Leaderboard Unlocked', 'Silver Profile Frame'] },
+    { name: 'Gold',      min: 3450,  max: 5299,  color: '#F5C518', c1: '#ffe488', c2: '#6b4a00', glow: '#FFD23D', tagline: 'Excellence in action.',             unlocks: ['Boss Quests Unlocked', 'Gold Profile Frame'] },
+    { name: 'Emerald',   min: 5300,  max: 7899,  color: '#22D17E', c1: '#74f2b4', c2: '#0a5836', glow: '#2EE08C', tagline: 'Growth unstoppable.',              unlocks: ['Rare Chest Chance +5%', 'Custom Titles Unlocked'] },
+    { name: 'Sapphire',  min: 7900,  max: 11499, color: '#3D74F0', c1: '#86abff', c2: '#142c66', glow: '#4D84FF', tagline: 'Focus. Discipline. Power.',          unlocks: ['Aura Slot Unlocked', 'Epic Chest Chance +5%'] },
+    { name: 'Obsidian',  min: 11500, max: 16499, color: '#9B6CF0', c1: '#c6a3ff', c2: '#241247', glow: '#A87CFF', tagline: 'Darkness mastered.',               unlocks: ['Guild Access Unlocked', 'Advanced Stats Unlocked'] },
+    { name: 'Solar',     min: 16500, max: 23499, color: '#FF9A2E', c1: '#ffd486', c2: '#6e3200', glow: '#FFAE47', tagline: 'Radiate your strength.',          unlocks: ['Elite Card Effects', 'Legendary Chest Chance +8%'] },
+    { name: 'Celestial', min: 23500, max: 33400, color: '#C7B6FF', c1: '#ffffff', c2: '#272c63', glow: '#CFC0FF', tagline: 'Beyond limits.',     unlocks: ['Animated Celestial Card', 'Prestige · Seasonal Endgame Rewards'] },
   ];
 
   // Gem-style rank emblems (viewBox 0 0 100 100). Use currentColor (rank colour);
   // facet layers (#fff / #000 at low opacity) give the gem sheen. Shared so the
   // profile, ranks page and rank-up overlay all render identical icons.
+  // Gem-style rank emblems (viewBox 0 0 100 100), keyed by rank name. Use currentColor
+  // (the rank colour, set via `.gem{color:var(--c)}`) plus #fff/#000 opacity facets — NO
+  // gradient <defs> ids (many gems render at once on the ladder; shared ids would collide).
+  // Material progression: matte pebble/clay → metallic polygons → cut gems → shard/star.
+  // Rendered by _lib/core-gems.js (coreGems.svg) across the profile, ranks page & overlays.
   const RANK_ICONS = {
-    Stone:'<path d="M30 38 Q26 25 40 23 Q52 14 64 25 Q79 29 74 45 Q81 59 66 67 Q54 79 39 70 Q24 66 27 50 Q22 43 30 38Z" fill="currentColor"/><path d="M40 23 Q52 14 64 25 Q71 27 73 38 L50 47 Z" fill="#fff" opacity="0.22"/><path d="M50 47 L74 45 Q81 59 66 67 Q54 79 39 70 Z" fill="#000" opacity="0.22"/>',
-    Earth:'<path d="M44 15 L59 22 L71 41 L64 66 L47 78 L33 65 L29 40 L40 26 Z" fill="currentColor"/><path d="M44 15 L59 22 L52 45 L40 26 Z" fill="#fff" opacity="0.24"/><path d="M52 45 L71 41 L64 66 L47 78 Z" fill="#000" opacity="0.24"/>',
-    Leaf:'<path d="M50 13 C73 26 75 60 50 87 C25 60 27 26 50 13 Z" fill="currentColor"/><path d="M50 13 C73 26 75 60 50 87 Z" fill="#fff" opacity="0.14"/><path d="M50 21 L50 81 M50 38 L36 48 M50 53 L64 61 M50 66 L40 73" stroke="#003314" stroke-width="2.6" fill="none" opacity="0.4"/>',
-    Water:'<path d="M50 13 C50 30 75 47 75 65 A25 25 0 0 1 25 65 C25 47 50 30 50 13 Z" fill="currentColor"/><path d="M50 13 C50 30 50 47 50 65 A25 25 0 0 1 25 65 C25 47 50 30 50 13 Z" fill="#000" opacity="0.12"/><ellipse cx="40" cy="58" rx="6" ry="10" fill="#fff" opacity="0.4"/>',
-    Crystal:'<path d="M50 11 L67 40 L57 88 L43 88 L33 40 Z" fill="currentColor"/><path d="M50 11 L67 40 L50 47 Z" fill="#fff" opacity="0.26"/><path d="M50 11 L33 40 L50 47 Z" fill="#fff" opacity="0.10"/><path d="M50 47 L57 88 L43 88 Z" fill="#000" opacity="0.2"/>',
-    Gold:'<path d="M50 13 L79 30 L79 63 L50 80 L21 63 L21 30 Z" fill="currentColor"/><path d="M50 13 L79 30 L50 41 L21 30 Z" fill="#fff" opacity="0.28"/><path d="M50 41 L79 30 L79 63 L50 80 Z" fill="#000" opacity="0.16"/><path d="M50 41 L21 30 L21 63 L50 80 Z" fill="#000" opacity="0.26"/>',
-    Ember:'<path d="M50 11 C59 30 67 37 62 57 C60 76 50 85 50 85 C50 85 40 76 38 57 C33 37 41 30 50 11 Z" fill="currentColor"/><path d="M50 30 C55 43 57 51 50 66 C45 55 45 44 50 30 Z" fill="#fff" opacity="0.34"/>',
-    Wind:'<path d="M50 13 L73 50 L50 87 L27 50 Z" fill="currentColor"/><path d="M50 13 L73 50 L50 57 L27 50 Z" fill="#fff" opacity="0.24"/><path d="M50 57 L73 50 L50 87 Z" fill="#000" opacity="0.18"/><path d="M50 13 L50 87" stroke="#fff" stroke-width="1.4" opacity="0.25"/>',
-    Aurora:'<path d="M50 7 L58 42 L93 50 L58 58 L50 93 L42 58 L7 50 L42 42 Z" fill="currentColor"/><path d="M50 7 L58 42 L50 50 L42 42 Z" fill="#fff" opacity="0.3"/><circle cx="78" cy="26" r="2.4" fill="#fff" opacity="0.7"/><circle cx="24" cy="74" r="2" fill="#fff" opacity="0.6"/>',
-    Ascend:'<path d="M21 71 L25 37 L40 53 L50 27 L60 53 L75 37 L79 71 Z" fill="currentColor"/><rect x="21" y="71" width="58" height="9" rx="2.5" fill="currentColor"/><path d="M25 37 L40 53 L50 27 Z" fill="#fff" opacity="0.2"/><circle cx="50" cy="23" r="4" fill="#fff" opacity="0.7"/>',
-    CORE:'<path d="M50 15 L71 41 L50 86 L29 41 Z" fill="currentColor"/><path d="M50 15 L71 41 L50 49 L29 41 Z" fill="#fff" opacity="0.34"/><path d="M50 49 L71 41 L50 86 Z" fill="#000" opacity="0.12"/><path d="M50 15 L50 86 M29 41 L71 41" stroke="#fff" stroke-width="1.3" opacity="0.3"/><ellipse cx="50" cy="50" rx="44" ry="15" fill="none" stroke="#fff" stroke-width="2" opacity="0.45" transform="rotate(-22 50 50)"/>',
+    Sand:'<path d="M24 58 Q21 41 39 37 Q50 27 63 37 Q80 43 76 60 Q69 73 50 71 Q31 73 24 58Z" fill="currentColor"/><path d="M39 37 Q50 27 63 37 Q72 41 74 51 Q58 45 39 37Z" fill="#fff" opacity="0.16"/><path d="M50 71 Q31 73 24 58 Q40 64 50 61 Q64 65 76 60 Q69 73 50 71Z" fill="#000" opacity="0.16"/><circle cx="41" cy="53" r="1.4" fill="#000" opacity="0.12"/><circle cx="57" cy="57" r="1.6" fill="#000" opacity="0.1"/><circle cx="50" cy="47" r="1.2" fill="#fff" opacity="0.18"/>',
+    Clay:'<path d="M30 41 Q30 32 50 32 Q70 32 70 41 L66 66 Q64 74 50 74 Q36 74 34 66Z" fill="currentColor"/><path d="M30 41 Q30 32 50 32 Q70 32 70 41 L67 48 Q50 42 33 48Z" fill="#fff" opacity="0.18"/><path d="M34 66 Q36 74 50 74 Q64 74 66 66 L67 48 Q50 54 33 48Z" fill="#000" opacity="0.18"/><path d="M33 42 Q50 48 67 42" stroke="#000" stroke-width="1.4" opacity="0.16" fill="none"/>',
+    Stone:'<path d="M28 44 L40 30 L60 28 L74 42 L70 64 L54 74 L34 68 L24 54Z" fill="currentColor"/><path d="M40 30 L60 28 L74 42 L52 50Z" fill="#fff" opacity="0.2"/><path d="M52 50 L70 64 L54 74 L34 68 L24 54 L28 44Z" fill="#000" opacity="0.2"/><path d="M52 50 L28 44 M52 50 L70 64 M52 50 L42 31" stroke="#fff" stroke-width="1" opacity="0.12" fill="none"/>',
+    Copper:'<path d="M50 16 L78 32 L78 64 L50 80 L22 64 L22 32Z" fill="currentColor"/><path d="M50 16 L78 32 L50 44 L22 32Z" fill="#fff" opacity="0.3"/><path d="M50 44 L22 32 L22 64 L50 80Z" fill="#000" opacity="0.26"/><path d="M50 44 L78 32 L78 64 L50 80Z" fill="#000" opacity="0.14"/><path d="M50 16 L58 20 L34 33 L26 29Z" fill="#fff" opacity="0.2"/>',
+    Silver:'<path d="M38 18 L62 18 L82 38 L82 62 L62 82 L38 82 L18 62 L18 38Z" fill="currentColor"/><path d="M38 18 L62 18 L82 38 L50 50 L18 38Z" fill="#fff" opacity="0.34"/><path d="M50 50 L82 38 L82 62 L62 82 L38 82 L18 62 L18 38Z" fill="#000" opacity="0.18"/><path d="M38 18 L46 22 L26 38 L20 34Z" fill="#fff" opacity="0.42"/><circle cx="50" cy="50" r="2.4" fill="#fff" opacity="0.5"/>',
+    Gold:'<path d="M50 20 L74 38 L62 80 L38 80 L26 38Z" fill="currentColor"/><path d="M50 20 L74 38 L50 46 L26 38Z" fill="#fff" opacity="0.34"/><path d="M50 46 L74 38 L62 80 L50 80Z" fill="#000" opacity="0.14"/><path d="M50 46 L26 38 L38 80 L50 80Z" fill="#000" opacity="0.22"/><path d="M50 20 L50 46 M26 38 L74 38" stroke="#fff" stroke-width="1.1" opacity="0.25" fill="none"/>',
+    Emerald:'<path d="M34 24 L66 24 L76 34 L76 66 L66 76 L34 76 L24 66 L24 34Z" fill="currentColor"/><path d="M34 24 L66 24 L76 34 L62 38 L38 38 L24 34Z" fill="#fff" opacity="0.28"/><path d="M24 66 L34 76 L66 76 L76 66 L62 62 L38 62Z" fill="#000" opacity="0.22"/><path d="M24 34 L38 38 L38 62 L24 66Z" fill="#000" opacity="0.12"/><path d="M76 34 L62 38 L62 62 L76 66Z" fill="#000" opacity="0.12"/><rect x="38" y="38" width="24" height="24" fill="none" stroke="#fff" stroke-width="1.1" opacity="0.2"/>',
+    Sapphire:'<path d="M50 16 L72 40 L50 84 L28 40Z" fill="currentColor"/><path d="M50 16 L72 40 L50 48 L28 40Z" fill="#fff" opacity="0.32"/><path d="M28 40 L50 48 L50 84Z" fill="#000" opacity="0.24"/><path d="M72 40 L50 48 L50 84Z" fill="#000" opacity="0.12"/><path d="M50 16 L50 48 M28 40 L72 40 M50 48 L34 56 M50 48 L66 56" stroke="#fff" stroke-width="1" opacity="0.22" fill="none"/><path d="M67 25 l1.6 3.4 3.4 1.6 -3.4 1.6 -1.6 3.4 -1.6 -3.4 -3.4 -1.6 3.4 -1.6Z" fill="#fff" opacity="0.75"/>',
+    Obsidian:'<path d="M36 46 L24 40 L30 70 L44 84Z" fill="currentColor" opacity="0.88"/><path d="M64 46 L76 40 L70 70 L56 84Z" fill="currentColor" opacity="0.8"/><path d="M50 14 L64 46 L56 84 L44 84 L36 46Z" fill="currentColor"/><path d="M50 14 L64 46 L50 52Z" fill="#000" opacity="0.3"/><path d="M50 52 L56 84 L44 84Z" fill="#000" opacity="0.36"/><path d="M50 14 L36 46 L44 49Z" fill="#fff" opacity="0.3"/><path d="M50 18 L50 80" stroke="#fff" stroke-width="1" opacity="0.16" fill="none"/><circle cx="44" cy="40" r="1.6" fill="#fff" opacity="0.5"/>',
+    Solar:'<path d="M50 8 L56 30 L78 22 L66 42 L90 50 L66 58 L78 78 L56 70 L50 92 L44 70 L22 78 L34 58 L10 50 L34 42 L22 22 L44 30Z" fill="currentColor"/><circle cx="50" cy="50" r="16" fill="currentColor"/><circle cx="50" cy="50" r="16" fill="#fff" opacity="0.22"/><circle cx="45" cy="45" r="6" fill="#fff" opacity="0.5"/><circle cx="78" cy="30" r="1.8" fill="#fff" opacity="0.75"/><circle cx="24" cy="70" r="1.5" fill="#fff" opacity="0.6"/><circle cx="74" cy="72" r="1.4" fill="#fff" opacity="0.6"/>',
+    Celestial:'<path d="M50 6 C53 36 64 47 94 50 C64 53 53 64 50 94 C47 64 36 53 6 50 C36 47 47 36 50 6Z" fill="currentColor"/><circle cx="50" cy="50" r="16" fill="#fff" opacity="0.16"/><circle cx="50" cy="50" r="9" fill="#fff" opacity="0.8"/><path d="M79 23 l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2Z" fill="#fff" opacity="0.85"/><path d="M23 75 l1.6 4 4 1.6 -4 1.6 -1.6 4 -1.6 -4 -4 -1.6 4 -1.6Z" fill="#fff" opacity="0.7"/><circle cx="84" cy="60" r="1.6" fill="#fff" opacity="0.7"/><circle cx="18" cy="38" r="1.5" fill="#fff" opacity="0.6"/>',
   };
 
   function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
@@ -125,7 +135,7 @@
       restoresUsedFree: 0,  // first restore free, subsequent cost coins (Phase A)
       xpLedger: [],         // { ts, delta, reason }[] — Ranks page reads for +XP/day
       rankHistory: [],      // { rankName, ts, xp }[] — captured on rank-up via _xpDelta
-      // ── RPG layer (real-life quest loop: 08-rank-reveal → 09-first-chest → 20-dashboard) ──
+      // ── RPG layer (real-life quest loop: 08-rank-reveal -> 09-first-chest -> 20-dashboard) ──
       class: null,          // chosen class slug, e.g. 'sentinel' — set at onboarding/rank-reveal
       inventory: [],        // { id, name, type:'armour'|'item'|'badge', rarity, slot, icon, ts }
       equipped: {},         // slot -> item id — drives the dashboard armour preview
@@ -141,6 +151,7 @@
   function seedDemo() {
     write({
       stats: { lungs: 64, brain: 78, wallet: 58, willpower: 81, body: 67, social: 52 },
+      lastStatTickAt: Date.now(), // anchor the decay clock — demo scores never drift on plain reload
       streak: {
         days: 14,
         lastCleanAt: Date.now(),
@@ -242,18 +253,18 @@
     return Math.round(((v.lungs||0) * w.lungs + (v.brain||0) * w.brain + (v.wallet||0) * w.wallet + (v.willpower||0) * w.willpower + (v.body||0) * w.body + (v.social||0) * w.social) / total);
   }
 
-  // ── Life Scores: the 6 player stats shown on the dashboard (display key → model key) ──
+  // ── Life Scores: the 6 player stats shown on the dashboard (display key -> model key) ──
   // `sub` = the underlying body-stat identity (the vape-quit model) shown as a dual-label
   // alongside the RPG-6 `name` — keeps lungs/brain/etc. visible. '' = no body heritage (social).
   // Single source of truth for the 6 stats. `emoji`/`icon`(SVG inner paths)/`tip` live here so
   // profile, dashboard, stat.html and friends all render identical stat identity — no per-page copies.
   const STAT_DEFS = [
-    { key: 'strength', model: 'body',      name: 'Strength', sub: 'Body',      color: '#FF6B6B', emoji: '⚔️', blurb: 'Train your body and push your physical limits.', tip: 'Log workouts and physical quests to build Strength.', icon: '<path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/>' },
-    { key: 'focus',    model: 'brain',     name: 'Focus',    sub: 'Brain',     color: '#4A8FFF', emoji: '🧠', blurb: 'Deep work, learning and sharp attention.', tip: 'Deep work and learning quests sharpen your Focus.', icon: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/><path d="M12 1.5v3M12 19.5v3M22.5 12h-3M4.5 12h-3"/>' },
-    { key: 'wealth',   model: 'wallet',    name: 'Wealth',   sub: 'Wallet',    color: '#FFCB3D', emoji: '💰', blurb: 'Earn, save and build your resources.', tip: 'Save, earn and clear money quests to grow Wealth.', icon: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v9M9.6 10h4a1.6 1.6 0 0 1 0 3.2h-3.2a1.6 1.6 0 0 0 0 3.2h4.2"/>' },
-    { key: 'health',   model: 'lungs',     name: 'Health',   sub: 'Lungs',     color: '#34D399', emoji: '❤️', blurb: 'Recovery, sleep, nutrition and breath.', tip: 'Sleep, breathe and recover — health quests raise this.', icon: '<path d="M12 20.5s-7.2-4.6-7.2-9.8A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 7.2 3.7c0 5.2-7.2 9.8-7.2 9.8Z"/>' },
-    { key: 'social',   model: 'social',    name: 'Social',   sub: '',          color: '#B388FF', emoji: '👥', blurb: 'Connection, relationships and community.', tip: 'Add friends and finish social quests to level up.', icon: '<circle cx="9" cy="8" r="3.2"/><path d="M3.4 20a5.6 5.6 0 0 1 11.2 0M16 5.2a3.2 3.2 0 0 1 0 6M18.7 20a5.6 5.6 0 0 0-3.1-5"/>' },
-    { key: 'purpose',  model: 'willpower', name: 'Purpose',  sub: 'Willpower', color: '#5EEAD4', emoji: '🎯', blurb: 'Discipline, meaning and direction.', tip: 'Hold your streak and complete daily quests for Purpose.', icon: '<circle cx="12" cy="12" r="8.5"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z"/>' },
+    { key: 'strength', page: 'gym.html',      model: 'body',      name: 'Strength', sub: 'Body',      color: '#FF6B6B', emoji: '', blurb: 'Train your body and push your physical limits.', tip: 'Log workouts and physical quests to build Strength.', icon: '<path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/>' },
+    { key: 'focus',    page: 'focus.html',    model: 'brain',     name: 'Focus',    sub: 'Brain',     color: '#4A8FFF', emoji: '', blurb: 'Deep work, learning and sharp attention.', tip: 'Deep work and learning quests sharpen your Focus.', icon: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/><path d="M12 1.5v3M12 19.5v3M22.5 12h-3M4.5 12h-3"/>' },
+    { key: 'wealth',   page: 'wealth.html',   model: 'wallet',    name: 'Wealth',   sub: 'Wallet',    color: '#FFCB3D', emoji: '', blurb: 'Earn, save and build your resources.', tip: 'Save, earn and clear money quests to grow Wealth.', icon: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v9M9.6 10h4a1.6 1.6 0 0 1 0 3.2h-3.2a1.6 1.6 0 0 0 0 3.2h4.2"/>' },
+    { key: 'health',   model: 'lungs',     name: 'Health',   sub: 'Lungs',     color: '#34D399', emoji: '', blurb: 'Recovery, sleep, nutrition and breath.', tip: 'Sleep, breathe and recover — health quests raise this.', icon: '<path d="M12 20.5s-7.2-4.6-7.2-9.8A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 7.2 3.7c0 5.2-7.2 9.8-7.2 9.8Z"/>' },
+    { key: 'social',   model: 'social',    name: 'Social',   sub: '',          color: '#B388FF', emoji: '', blurb: 'Connection, relationships and community.', tip: 'Add friends and finish social quests to level up.', icon: '<circle cx="9" cy="8" r="3.2"/><path d="M3.4 20a5.6 5.6 0 0 1 11.2 0M16 5.2a3.2 3.2 0 0 1 0 6M18.7 20a5.6 5.6 0 0 0-3.1-5"/>' },
+    { key: 'purpose',  model: 'willpower', name: 'Purpose',  sub: 'Willpower', color: '#5EEAD4', emoji: '', blurb: 'Discipline, meaning and direction.', tip: 'Hold your streak and complete daily quests for Purpose.', icon: '<circle cx="12" cy="12" r="8.5"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z"/>' },
   ];
   function _statModel(key) { const d = STAT_DEFS.find((x) => x.key === key || x.model === key); return d ? d.model : key; }
   function statDef(key) { return STAT_DEFS.find((x) => x.key === key || x.model === key) || null; }
@@ -296,36 +307,45 @@
   // within a day — safe to call on every page load. Most stats decay 0 by design
   // (only `body` currently has a non-zero rate); rates live in STAT_DECAY.
   function applyStatTick() {
-    return update((s) => {
-      const now = Date.now();
-      // Pause passive decay during onboarding — no drift until ~Level 3 (xp >= 600). Keep the
-      // tick timestamp current so decay starts fresh (not retroactively) once they cross it.
-      if ((s.xp || 0) < 600) { s.lastStatTickAt = now; return s; }
-      const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
-      const last = s.lastStatTickAt || now;
-      const lastStart = new Date(last); lastStart.setHours(0, 0, 0, 0);
-      let days = Math.floor((todayStart.getTime() - lastStart.getTime()) / 86400000);
-      if (days <= 0) { if (!s.lastStatTickAt) s.lastStatTickAt = now; return s; }
-      // Active streak freeze pauses decay — forgive this run entirely (no drift while frozen).
-      if (s.streak && s.streak.frozenUntil && s.streak.frozenUntil > now) { s.lastStatTickAt = now; return s; }
-      days = Math.min(days, 7);
-      if (!s.stats) s.stats = {};
-      Object.keys(STAT_DECAY).forEach((k) => {
-        const dec = STAT_DECAY[k] || 0; if (dec <= 0) return;
-        const raisedRecently = (s.statLedger || []).some((e) => e.stat === k && e.delta > 0 && (now - e.ts) < 86400000);
-        if (raisedRecently) return;
-        const before = s.stats[k] || 0;
-        const after = clamp(before - dec * days, STAT_MIN, STAT_MAX);
-        if (after !== before) {
-          s.statLedger = s.statLedger || [];
-          s.statLedger.unshift({ ts: now, stat: k, delta: Math.round((after - before) * 10) / 10, reason: 'decay' });
-          if (s.statLedger.length > 200) s.statLedger.length = 200;
-        }
-        s.stats[k] = after;
-      });
-      s.lastStatTickAt = now;
+    const s = read();
+    const now = Date.now();
+    // Pause passive decay during onboarding — no drift until ~Level 3 (xp >= 600). Anchor the
+    // tick clock once (so decay later starts fresh, not retroactively), then no-op.
+    if ((s.xp || 0) < DECAY_START_XP) {
+      if (s.lastStatTickAt == null) { s.lastStatTickAt = now; write(s); }
       return s;
+    }
+    const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+    const last = s.lastStatTickAt || now;
+    const lastStart = new Date(last); lastStart.setHours(0, 0, 0, 0);
+    let days = Math.floor((todayStart.getTime() - lastStart.getTime()) / 86400000);
+    // Same calendar day (the common reload/nav case) -> TRUE no-op: no write, no coreStateChange,
+    // so scores never move on a plain reload. Only persist if the anchor was missing.
+    if (days <= 0) {
+      if (s.lastStatTickAt == null) { s.lastStatTickAt = now; write(s); }
+      return s;
+    }
+    // Active streak freeze pauses decay — forgive this run entirely (no drift while frozen).
+    if (s.streak && s.streak.frozenUntil && s.streak.frozenUntil > now) { s.lastStatTickAt = now; write(s); return s; }
+    days = Math.min(days, 7);
+    if (!s.stats) s.stats = {};
+    Object.keys(STAT_DECAY).forEach((k) => {
+      const dec = STAT_DECAY[k] || 0; if (dec <= 0) return;
+      const raisedRecently = (s.statLedger || []).some((e) => e.stat === k && e.delta > 0 && (now - e.ts) < 86400000);
+      if (raisedRecently) return;
+      const before = s.stats[k] || 0;
+      const after = clamp(before - dec * days, STAT_MIN, STAT_MAX);
+      if (after !== before) {
+        s.statLedger = s.statLedger || [];
+        s.statLedger.unshift({ ts: now, stat: k, delta: Math.round((after - before) * 10) / 10, reason: 'decay' });
+        if (s.statLedger.length > 200) s.statLedger.length = 200;
+        s.stats[k] = after;
+      }
     });
+    // A genuine day boundary was crossed — persist the advanced anchor (+ any decay) once.
+    s.lastStatTickAt = now;
+    write(s);
+    return s;
   }
 
   function rankFor(xp) {
@@ -335,9 +355,10 @@
     }
     const idx = RANKS.indexOf(r);
     const tier = idx + 1;
-    // Iron → Legend: name is enough — no numeral suffix
+    // Iron -> Legend: name is enough — no numeral suffix
     const nextR = RANKS[idx + 1];
-    const toNext = nextR ? Math.max(0, nextR.min - xp) : 0;
+    // Apex (Celestial) has a finite max so "XP to go" still counts down to completion.
+    const toNext = nextR ? Math.max(0, nextR.min - xp) : (isFinite(r.max) ? Math.max(0, (r.max + 1) - xp) : 0);
     return { ...r, idx, tier, label: r.name, toNext };
   }
 
@@ -594,7 +615,7 @@
     try {
       if (localStorage.getItem('corePlusActive') !== '1') return false;
       const until = parseInt(localStorage.getItem('corePlusUntil') || '0', 10) || 0;
-      if (until && Date.now() >= until) {            // lapsed → auto-cancel
+      if (until && Date.now() >= until) {            // lapsed -> auto-cancel
         localStorage.setItem('corePlusActive', '0');
         return false;
       }
@@ -730,17 +751,23 @@
     if (typeof xp !== 'number') xp = read().xp || 0;
     const r = rankFor(xp), idx = r.idx, ROMAN = ['I', 'II', 'III'];
     const nextRank = RANKS[idx + 1] || null;
-    if (!nextRank) { // apex (CORE) — no sub-tier
+    // Band high-water: the next rank's floor, or — for the apex — this rank's own
+    // finite ceiling so Celestial still splits into I/II/III (true 33 steps).
+    let hi;
+    if (nextRank) hi = nextRank.min;
+    else if (isFinite(r.max)) hi = r.max + 1;
+    else { // truly open-ended apex (legacy safety) — single capstone, no sub-tier
       return { name: r.name, idx: idx, roman: '', full: r.name, sub: 0, isMax: true,
         next: 'MAX', nextRank: null, bandPct: 100, subPct: 100, color: r.color, glow: r.glow, c1: r.c1, c2: r.c2, toNext: 0 };
     }
-    const lo = r.min, hi = xp + r.toNext, third = Math.max(1, (hi - lo) / 3);
+    const lo = r.min, third = Math.max(1, (hi - lo) / 3);
     const sub = Math.max(0, Math.min(2, Math.floor((xp - lo) / third)));
     const subInto = ((xp - lo) - sub * third) / third;
-    const full = r.name + ' ' + ROMAN[sub];
-    const next = sub < 2 ? (r.name + ' ' + ROMAN[sub + 1]) : (nextRank.name + ' I');
-    const bandPct = Math.round(((xp - lo) / Math.max(1, hi - lo)) * 100);
-    return { name: r.name, idx: idx, roman: ROMAN[sub], full: full, sub: sub, isMax: false,
+    const isMax = !nextRank && sub >= 2; // Celestial III == top of the ladder
+    const full = isMax ? (r.name + ' ' + ROMAN[2]) : (r.name + ' ' + ROMAN[sub]);
+    const next = isMax ? 'MAX' : (sub < 2 ? (r.name + ' ' + ROMAN[sub + 1]) : (nextRank.name + ' I'));
+    const bandPct = Math.round(Math.max(0, Math.min(1, (xp - lo) / Math.max(1, hi - lo))) * 100);
+    return { name: r.name, idx: idx, roman: ROMAN[sub], full: full, sub: sub, isMax: isMax,
       next: next, nextRank: nextRank, bandPct: bandPct, subPct: Math.round(Math.max(0, Math.min(1, subInto)) * 100),
       color: r.color, glow: r.glow, c1: r.c1, c2: r.c2, toNext: r.toNext };
   }
@@ -817,16 +844,24 @@
     if (!noUp && tier < 2 && (st.chestEpicPity || 0) >= CHEST_EPIC_PITY - 1) tier = 2;
     const rar = CHEST_RAR_ORDER[tier];
     const item = CHEST_ITEMS[rar];
-    const xp = Math.round((60 + tier * 25) * xpMultiplier());
-    const coinsR = 40 + tier * 30;
-    const shards = tier >= 1 ? tier * 2 : 1;
+    // Rewards scale hard with chest rank so higher chests feel genuinely worth it.
+    // Tickets (the loot currency) only drop from Epic+ chests — a small earned-only
+    // faucet that still nets a sink vs the ticket cost of opening them.
+    const COIN_TBL   = [90, 220, 500, 1100, 2500];
+    const SHARD_TBL  = [1, 4, 12, 30, 75];
+    const TICKET_TBL = [0, 0, 1, 2, 4];
+    const xp = Math.round((60 + tier * 40) * xpMultiplier());
+    const coinsR = COIN_TBL[tier];
+    const shards = SHARD_TBL[tier];
+    const ticketsR = TICKET_TBL[tier];
     const reveals = [
       { kind: 'xp',     n: '+' + xp + ' XP',         r: 'rare',   ic: '<path d="M13 2L3 14h7l-1 8 10-12h-7l1-8Z"/>' },
-      { kind: 'coins',  n: '+' + coinsR + ' Coins',  r: 'common', ic: '<circle cx="12" cy="12" r="9"/><path d="M12 7v10"/>' },
-      { kind: 'shards', n: '+' + shards + ' Shards', r: 'epic',   ic: '<path d="M12 2l4 7-4 13-4-13z"/>' },
-      { kind: 'item',   n: item.name, r: rar, ic: item.ic, hi: true },
+      { kind: 'coins',  n: '+' + coinsR + ' Coins',  r: 'common', ic: '<circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/>' },
     ];
-    return { rar: rar, tier: tier, floor: floor, item: item, rid: 'chest_' + rar + '_' + Date.now(), xp: xp, coins: coinsR, shards: shards, reveals: reveals };
+    if (shards > 0)   reveals.push({ kind: 'shards',  n: '+' + shards + ' Shards',   r: 'epic',      ic: '<path d="M6 3h12l3 6-9 12L3 9z"/><path d="M3 9h18"/>' });
+    if (ticketsR > 0) reveals.push({ kind: 'tickets', n: '+' + ticketsR + ' Tickets', r: 'legendary', ic: '<path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2 2 2 0 0 0 0 4 2 2 0 0 1-2 2H5a2 2 0 0 1-2-2 2 2 0 0 0 0-4z"/><path d="M14 6v12" stroke-dasharray="2 2.4"/>' });
+    reveals.push({ kind: 'item', n: item.name, r: rar, ic: item.ic, hi: true });
+    return { rar: rar, tier: tier, floor: floor, item: item, rid: 'chest_' + rar + '_' + Date.now(), xp: xp, coins: coinsR, shards: shards, tickets: ticketsR, reveals: reveals };
   }
 
   // Apply a rolled chest to state: XP + coins + shards + inventory item, record the
@@ -837,6 +872,11 @@
     try { addXp(roll.xp, 'chest:' + source); } catch (e) {}
     try { earnCoins(roll.coins, 'chest:' + source); } catch (e) {}
     if (roll.shards > 0) update((s) => { s.shards = (s.shards || 0) + roll.shards; return s; });
+    // Tickets live in the flat `coreTickets` key (shared with Shop + Wallet).
+    if (roll.tickets > 0) {
+      try { const t = parseInt(localStorage.getItem('coreTickets') || '0', 10) || 0;
+        localStorage.setItem('coreTickets', String(t + roll.tickets)); } catch (e) {}
+    }
     let it = null;
     try {
       it = addItem({ id: roll.rid || ('chest_' + roll.rar + '_' + Date.now()), name: roll.item.name,
