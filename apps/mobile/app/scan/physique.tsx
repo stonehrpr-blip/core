@@ -11,14 +11,14 @@
  * OUR edge function, analyzed in memory, and discarded — never persisted, never
  * shared, never logged. 18+. NO MEDICAL CLAIMS — fitness/aesthetic guidance only.
  */
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator, Alert, Image, Linking, Pressable, ScrollView,
   StyleSheet, Text, View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
-import { CameraView, useCameraPermissions } from "expo-camera";
+import * as ImagePicker from "expo-image-picker";
 import * as Haptics from "expo-haptics";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
@@ -41,62 +41,90 @@ type Step = "loading" | "consent" | "camera" | "analyzing" | "result" | "notbody
 
 export default function PhysiqueScannerScreen() {
   useCoreScreenView("physique_scan");
-  const [permission, requestPermission] = useCameraPermissions();
-  const camRef = useRef<CameraView>(null);
 
   const [step, setStep] = useState<Step>("loading");
-  const [consented, setConsented] = useState(false);
   const [result, setResult] = useState<PhysiqueResult | null>(null);
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [errMsg, setErrMsg] = useState<string>("");
   const [scoreDelta, setScoreDelta] = useState<number | null>(null);
-
-  const granted = permission?.granted ?? false;
-  const canAsk = permission?.canAskAgain ?? true;
 
   // Decide the opening step fast so it "opens instantly".
   useEffect(() => {
     (async () => {
       let ok = false;
       try { ok = (await AsyncStorage.getItem(CONSENT_KEY)) === "1"; } catch { /* default false */ }
-      setConsented(ok);
       setStep(ok ? "camera" : "consent");
     })();
   }, []);
 
   const acceptConsent = useCallback(async () => {
     try { await AsyncStorage.setItem(CONSENT_KEY, "1"); } catch { /* best effort */ }
-    setConsented(true);
-    if (!granted && canAsk) await requestPermission();
     setStep("camera");
-  }, [granted, canAsk, requestPermission]);
+  }, []);
 
-  const capture = useCallback(async () => {
-    if (!camRef.current) return;
+  // Process a chosen photo: on-device full-body gate → AI → persist.
+  const processPhoto = useCallback(async (base64: string | null | undefined, uri: string | null) => {
+    if (!base64) { setErrMsg("Couldn't read that photo."); setStep("error"); return; }
+    setPhotoUri(uri);
+    setStep("analyzing");
     try {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      const photo = await camRef.current.takePictureAsync({ base64: true, quality: 0.6, skipProcessing: true });
-      if (!photo?.base64) { setErrMsg("Couldn't read the photo."); setStep("error"); return; }
-      setPhotoUri(photo.uri ?? null);
-      setStep("analyzing");
-
       // On-device full-body gate (if TF deps present). If unavailable, fall back
       // to the server's isBody check — never block forever, never fake a body.
-      const check = await detectFullBody(photo.base64);
+      const check = await detectFullBody(base64);
       if (check.available && !check.isFullBody) { setStep("notbody"); return; }
 
-      const outcome = await runPhysiqueScan(photo.base64, "image/jpeg");
+      const outcome = await runPhysiqueScan(base64, "image/jpeg");
       if (outcome.kind === "not_body") { setStep("notbody"); return; }
       if (outcome.kind === "rate_limited") { setErrMsg("Too many scans — give it a minute and try again."); setStep("error"); return; }
       if (outcome.kind === "unavailable") { setErrMsg("The scanner isn't available right now. Try again later."); setStep("error"); return; }
       if (outcome.kind === "error") { setErrMsg("Something went wrong analyzing your scan."); setStep("error"); return; }
 
-      await applyResult(outcome.result, photo.uri ?? null);
+      await applyResult(outcome.result, uri);
     } catch (e) {
-      setErrMsg(e instanceof Error ? e.message : "Capture failed.");
+      setErrMsg(e instanceof Error ? e.message : "Scan failed.");
       setStep("error");
     }
   }, []);
+
+  // Take a photo OR pick from the library — each asks the OS for access via the
+  // system popup, then opens the system camera/library picker.
+  const pickFrom = useCallback(async (source: "camera" | "library") => {
+    try {
+      Haptics.selectionAsync();
+      let res: ImagePicker.ImagePickerResult;
+      if (source === "camera") {
+        const perm = await ImagePicker.requestCameraPermissionsAsync(); // OS access popup
+        if (!perm.granted) {
+          Alert.alert("Camera access needed", "Allow camera access to take a scan photo — you can enable it in Settings.",
+            [{ text: "Not now", style: "cancel" }, { text: "Open Settings", onPress: () => Linking.openSettings() }]);
+          return;
+        }
+        res = await ImagePicker.launchCameraAsync({ base64: true, quality: 0.6, allowsEditing: false });
+      } else {
+        const perm = await ImagePicker.requestMediaLibraryPermissionsAsync(); // OS access popup
+        if (!perm.granted) {
+          Alert.alert("Photo access needed", "Allow photo access to upload a scan photo — you can enable it in Settings.",
+            [{ text: "Not now", style: "cancel" }, { text: "Open Settings", onPress: () => Linking.openSettings() }]);
+          return;
+        }
+        res = await ImagePicker.launchImageLibraryAsync({ base64: true, quality: 0.6, allowsEditing: false });
+      }
+      if (res.canceled || !res.assets || !res.assets[0]) return;
+      await processPhoto(res.assets[0].base64, res.assets[0].uri ?? null);
+    } catch {
+      setErrMsg("Couldn't open the camera or library.");
+      setStep("error");
+    }
+  }, [processPhoto]);
+
+  // The popup that asks: take a photo or upload one.
+  const startScan = useCallback(() => {
+    Alert.alert("Add your photo", "Take a new photo or upload one from your library.", [
+      { text: "Take Photo", onPress: () => pickFrom("camera") },
+      { text: "Choose from Library", onPress: () => pickFrom("library") },
+      { text: "Cancel", style: "cancel" },
+    ]);
+  }, [pickFrom]);
 
   // Persist the result: muscle map + body-stat bump + local photo + history record.
   const applyResult = useCallback(async (res: PhysiqueResult, uri: string | null) => {
@@ -156,15 +184,7 @@ export default function PhysiqueScannerScreen() {
 
         {step === "consent" && <Consent onAccept={acceptConsent} onClose={() => router.back()} />}
 
-        {step === "camera" && (
-          <CameraStep
-            granted={granted}
-            canAsk={canAsk}
-            camRef={camRef}
-            onEnable={async () => { if (!granted && canAsk) await requestPermission(); else Linking.openSettings(); }}
-            onCapture={capture}
-          />
-        )}
+        {step === "camera" && <CameraStep onStart={startScan} />}
 
         {step === "analyzing" && (
           <Centered>
@@ -176,7 +196,7 @@ export default function PhysiqueScannerScreen() {
 
         {step === "notbody" && (
           <Centered>
-            <Text style={s.bigEmoji}>🧍</Text>
+            <Svg width={44} height={44} viewBox="0 0 24 24"><Path d="M12 2.5a2.4 2.4 0 1 0 0 4.8 2.4 2.4 0 0 0 0-4.8ZM12 8v8m0-5-5 2m5-2 5 2M9 21l3-5 3 5" stroke="#9AA1B7" strokeWidth={1.7} fill="none" strokeLinecap="round" strokeLinejoin="round" /></Svg>
             <Text style={s.notbodyTitle}>Couldn't detect a full body</Text>
             <Text style={s.notbodySub}>Line your whole body up in the frame, with good lighting and fitted clothing, then try again.</Text>
             <PrimaryBtn label="Try again" onPress={() => setStep("camera")} />
@@ -227,12 +247,27 @@ function openPrivacyMenu() {
 }
 
 // ── consent screen ───────────────────────────────────────────────────────────
+function ConsentIcon({ name }: { name: string }) {
+  // monochrome line icons (no emoji)
+  const paths: Record<string, string> = {
+    device: "M7 2.5h10a1.5 1.5 0 0 1 1.5 1.5v16a1.5 1.5 0 0 1-1.5 1.5H7A1.5 1.5 0 0 1 5.5 20V4A1.5 1.5 0 0 1 7 2.5ZM10.5 18.5h3",
+    lock: "M6.5 10.5V7a5.5 5.5 0 0 1 11 0v3.5M5.5 10.5h13v9h-13z",
+    fitness: "M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12",
+    shield: "M12 2.5 4.5 5.3v6c0 4.7 3.2 7.6 7.5 8.7 4.3-1.1 7.5-4 7.5-8.7v-6Z",
+  };
+  return (
+    <Svg width={20} height={20} viewBox="0 0 24 24">
+      <Path d={paths[name]} stroke={ACCENT} strokeWidth={1.7} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
 function Consent({ onAccept, onClose }: { onAccept: () => void; onClose: () => void }) {
-  const points = [
-    ["📵", "Stays on your device", "Your photo is saved only here, in CORE's private storage. It's never uploaded to a server or shared."],
-    ["🔒", "Private analysis", "To rate it, the image is sent securely to our own AI, analyzed in memory, and discarded immediately — never stored or logged."],
-    ["💪", "Fitness, not medical", "This is training guidance to help you improve — not a medical or body-composition diagnosis."],
-    ["🔞", "18+ and optional", "You're in control. You can delete every scan at any time from the shield icon."],
+  const points: [string, string, string][] = [
+    ["device", "Stays on your device", "Your photo is saved only here, in CORE's private storage. It's never uploaded to a server or shared."],
+    ["lock", "Private analysis", "To rate it, the image is sent securely to our own AI, analyzed in memory, and discarded immediately — never stored or logged."],
+    ["fitness", "Fitness, not medical", "This is training guidance to help you improve — not a medical or body-composition diagnosis."],
+    ["shield", "18+ and optional", "You're in control. You can delete every scan at any time from the shield icon."],
   ];
   return (
     <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
@@ -241,7 +276,7 @@ function Consent({ onAccept, onClose }: { onAccept: () => void; onClose: () => v
       <View style={{ height: 14 }} />
       {points.map(([icon, title, body]) => (
         <View key={title} style={s.consentRow}>
-          <Text style={s.consentIcon}>{icon}</Text>
+          <View style={s.consentIconWrap}><ConsentIcon name={icon} /></View>
           <View style={{ flex: 1 }}>
             <Text style={s.consentTitle}>{title}</Text>
             <Text style={s.consentBody}>{body}</Text>
@@ -258,28 +293,12 @@ function Consent({ onAccept, onClose }: { onAccept: () => void; onClose: () => v
   );
 }
 
-// ── camera step ──────────────────────────────────────────────────────────────
-function CameraStep({
-  granted, canAsk, camRef, onEnable, onCapture,
-}: {
-  granted: boolean; canAsk: boolean; camRef: React.RefObject<CameraView>;
-  onEnable: () => void; onCapture: () => void;
-}) {
-  if (!granted) {
-    return (
-      <Centered>
-        <Text style={s.bigEmoji}>📷</Text>
-        <Text style={s.notbodyTitle}>Camera access needed</Text>
-        <Text style={s.notbodySub}>The scanner uses your camera to take one full-body photo. It only opens when you tap capture.</Text>
-        <PrimaryBtn label={canAsk ? "Enable camera" : "Open Settings"} onPress={onEnable} />
-      </Centered>
-    );
-  }
+// ── camera step — blank camera frame; the popup asks take-photo vs upload ─────
+function CameraStep({ onStart }: { onStart: () => void }) {
   return (
     <View style={{ flex: 1 }}>
       <View style={s.cameraWrap}>
-        <CameraView ref={camRef} style={StyleSheet.absoluteFill} facing="back" />
-        {/* body-outline guide */}
+        {/* blank camera frame + body-outline guide (no live feed) */}
         <View pointerEvents="none" style={s.guideWrap}>
           <Svg width="60%" height="82%" viewBox="0 0 100 160">
             <Path
@@ -291,9 +310,9 @@ function CameraStep({
       </View>
       <View style={s.camFooter}>
         <Text style={s.tips}>Full body in frame · good lighting · fitted clothing</Text>
-        <Pressable onPress={onCapture} style={s.shutterOuter} accessibilityRole="button" accessibilityLabel="Capture">
-          <View style={s.shutterInner} />
-        </Pressable>
+        <View style={{ width: "100%", paddingHorizontal: 18 }}>
+          <PrimaryBtn label="Take or upload a photo" onPress={onStart} />
+        </View>
       </View>
     </View>
   );
@@ -428,7 +447,7 @@ const s = StyleSheet.create({
 
   // consent
   consentRow: { flexDirection: "row", gap: 13, padding: 14, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.03)", borderWidth: 1, borderColor: "rgba(255,255,255,0.07)", marginBottom: 10 },
-  consentIcon: { fontSize: 22 },
+  consentIconWrap: { width: 34, height: 34, borderRadius: 10, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(74,143,255,0.10)", borderWidth: 1, borderColor: "rgba(74,143,255,0.22)" },
   consentTitle: { color: "#F8FAFE", fontSize: 14.5, fontWeight: "800", marginBottom: 3 },
   consentBody: { color: "#9AA1B7", fontSize: 12.5, lineHeight: 18 },
 

@@ -38,7 +38,8 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 
 /* consent */
 .crow{display:flex;gap:13px;padding:14px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid var(--border);margin-bottom:10px;text-align:left;}
-.crow .ic{font-size:22px;}
+.crow .ic{width:34px;height:34px;flex:none;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  background:rgba(10,132,255,.10);border:1px solid rgba(10,132,255,.22);}
 .crow b{display:block;font-size:14px;font-weight:800;margin-bottom:3px;}
 .crow span{color:var(--muted);font-size:12.5px;line-height:1.45;}
 
@@ -145,15 +146,22 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   }catch(e){} }
 
   // ── screens ──
+  var ICON={
+    device:'M7 2.5h10a1.5 1.5 0 0 1 1.5 1.5v16a1.5 1.5 0 0 1-1.5 1.5H7A1.5 1.5 0 0 1 5.5 20V4A1.5 1.5 0 0 1 7 2.5ZM10.5 18.5h3',
+    lock:'M6.5 10.5V7a5.5 5.5 0 0 1 11 0v3.5M5.5 10.5h13v9h-13z',
+    fitness:'M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12',
+    shield:'M12 2.5 4.5 5.3v6c0 4.7 3.2 7.6 7.5 8.7 4.3-1.1 7.5-4 7.5-8.7v-6Z'
+  };
+  function svgIcon(name,color){ return '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="'+(color||'#0A84FF')+'" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="'+ICON[name]+'"/></svg>'; }
   function consent(){
     notice("");
-    var pts=[["📵","Stays on your device","Your photo is saved only here. It's never uploaded or shared."],
-      ["🔒","Private analysis","To rate it, the image is sent securely to our own AI, analyzed in memory, and discarded right after."],
-      ["💪","Fitness, not medical","Training guidance to help you improve — not a medical or body-composition diagnosis."],
-      ["🔞","18+ and optional","You're in control. Delete every scan any time."]];
+    var pts=[["device","Stays on your device","Your photo is saved only here. It's never uploaded or shared."],
+      ["lock","Private analysis","To rate it, the image is sent securely to our own AI, analyzed in memory, and discarded right after."],
+      ["fitness","Fitness, not medical","Training guidance to help you improve — not a medical or body-composition diagnosis."],
+      ["shield","18+ and optional","You're in control. Delete every scan any time."]];
     app.innerHTML='<div class="scroll"><div class="eyebrow" style="margin-top:6px">BEFORE YOUR FIRST SCAN</div>'+
       '<div class="h1" style="margin:6px 0 14px">How your photo is handled</div>'+
-      pts.map(function(p){return '<div class="crow"><div class="ic">'+p[0]+'</div><div><b>'+p[1]+'</b><span>'+p[2]+'</span></div></div>';}).join("")+
+      pts.map(function(p){return '<div class="crow"><div class="ic">'+svgIcon(p[0])+'</div><div><b>'+p[1]+'</b><span>'+p[2]+'</span></div></div>';}).join("")+
       '<div style="height:10px"></div><button class="btn" id="go">I understand — continue</button>'+
       '<div style="text-align:center"><button class="link" onclick="history.back()">Not now</button></div></div>';
     document.getElementById("go").onclick=camera;
@@ -161,20 +169,21 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 
   function camera(){
     notice("");
-    app.innerHTML='<div class="cam" id="cam"><div class="scanline"></div>'+
+    // Blank camera frame (no live feed) + a button that opens the OS popup to
+    // take a photo OR upload one. The native file picker handles the access prompt.
+    app.innerHTML='<div class="cam" id="cam">'+
       '<div class="guide"><svg width="58%" height="82%" viewBox="0 0 100 160"><path d="M50 6 a8 8 0 1 1 -.1 0 M34 30 Q50 22 66 30 L62 84 L58 150 L52 150 L50 100 L48 150 L42 150 L38 84 Z" fill="none" stroke="rgba(74,143,255,.55)" stroke-width="1.4" stroke-dasharray="4 3" stroke-linejoin="round"/></svg></div></div>'+
       '<div class="camfoot"><div class="tips">Full body in frame · good lighting · fitted clothing</div>'+
-      '<div class="shutter" id="shutter"><div class="in"></div></div></div>';
-    // try a real webcam (works on a real device/browser); harmless if it fails
-    try{
-      if(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){
-        navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}}).then(function(stream){
-          var v=document.createElement("video"); v.autoplay=true; v.playsInline=true; v.muted=true; v.srcObject=stream;
-          var cam=document.getElementById("cam"); if(cam){ cam.insertBefore(v,cam.firstChild); }
-        }).catch(function(){});
-      }
-    }catch(e){}
-    document.getElementById("shutter").onclick=function(){ analyze(null); };
+      '<div style="width:100%;padding:0 18px"><button class="btn" id="takeBtn">Take or upload a photo</button></div></div>'+
+      '<input type="file" id="fileInput" accept="image/*" style="display:none">';
+    var input=document.getElementById("fileInput");
+    document.getElementById("takeBtn").onclick=function(){ input.click(); };
+    input.onchange=function(e){
+      var file=e.target.files&&e.target.files[0]; if(!file) return;
+      var reader=new FileReader();
+      reader.onload=function(){ var b64=String(reader.result).split(",")[1]||""; analyze(b64); };
+      reader.readAsDataURL(file);
+    };
   }
 
   function analyze(base64){
@@ -192,7 +201,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   }
 
   function notbody(){
-    app.innerHTML='<div class="center"><div style="font-size:44px">🧍</div><div class="h1">Couldn\'t detect a full body</div><div class="muted">Line your whole body up in the frame with good lighting, then try again.</div><div style="height:8px"></div><button class="btn" id="retry">Try again</button></div>';
+    app.innerHTML='<div class="center"><svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="#9AA1B7" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5a2.4 2.4 0 1 0 0 4.8 2.4 2.4 0 0 0 0-4.8ZM12 8v8m0-5-5 2m5-2 5 2M9 21l3-5 3 5"/></svg><div class="h1">Couldn\'t detect a full body</div><div class="muted">Line your whole body up in the frame with good lighting, then try again.</div><div style="height:8px"></div><button class="btn" id="retry">Try again</button></div>';
     document.getElementById("retry").onclick=camera;
   }
 
