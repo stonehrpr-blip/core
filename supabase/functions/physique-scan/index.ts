@@ -22,8 +22,7 @@ import {
   callerKey,
   createRateLimiter,
   validateImage,
-  normalizeResult,
-  extractJSON,
+  analyzePhysique,
 } from "./helpers.ts";
 
 const CORS = {
@@ -46,19 +45,6 @@ const RATE_WINDOW_MS = 60_000;
 const RATE_MAX = 8; // scans per user per minute (vision is heavier than chat)
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // ~5MB decoded
 const underRateLimit = createRateLimiter({ windowMs: RATE_WINDOW_MS, max: RATE_MAX });
-
-const MUSCLE_LIST = "chest, back, shoulders, arms, legs, core";
-
-const SYSTEM =
-  "You are the Physique Scanner inside CORE, a fitness app. You look at a single full-body photo and give an encouraging, coach-style aesthetic/fitness read — like a strength coach sizing up training priorities. " +
-  "You are NOT a doctor. NEVER give medical or body-composition diagnosis, never estimate body-fat percentage or weight, never comment on health conditions, and never use shaming or demoralizing language. Frame everything as training guidance. " +
-  "If the image is NOT a clear, single, full human body (e.g. it's an object, a pet, an empty room, a face-only/cropped shot, or too dark to tell), set isBody=false and do not invent a rating. " +
-  "Assess these six muscle groups only: " + MUSCLE_LIST + ". For each give a development level 0-100 and a status of weak, ok, or strong. " +
-  "Pick the tier name from: Beginner, Developing, Athletic, Lean, Shredded, Elite. " +
-  "Respond with STRICT JSON ONLY — no prose, no markdown fences — exactly this shape: " +
-  '{"isBody":boolean,"rank":{"tier":string,"score":number 0-100},' +
-  '"muscles":{"chest":{"level":number,"status":"weak|ok|strong"},"back":{...},"shoulders":{...},"arms":{...},"legs":{...},"core":{...}},' +
-  '"weakPoints":[muscle keys to prioritize],"summary":"one or two short constructive sentences, no medical claims"}';
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
@@ -85,57 +71,15 @@ Deno.serve(async (req) => {
   if (!apiKey) return json({ error: "model_unavailable" }, 503);
 
   try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 700,
-        temperature: 0.4,
-        system: [{ type: "text", text: SYSTEM, cache_control: { type: "ephemeral" } }],
-        messages: [
-          {
-            role: "user",
-            content: [
-              {
-                type: "image",
-                source: { type: "base64", media_type: img.mediaType, data: img.data },
-              },
-              {
-                type: "text",
-                text: "Analyze this full-body photo and return the strict JSON. If it isn't a clear full body, set isBody=false.",
-              },
-            ],
-          },
-        ],
-      }),
-    });
-
-    if (!res.ok) {
-      // Log status ONLY — never the image or response body that could echo it.
-      console.error("anthropic_error", res.status);
-      return json({ error: "model_error", status: res.status }, 502);
+    const out = await analyzePhysique({ apiKey, base64: img.data, mediaType: img.mediaType, model: MODEL });
+    if (!out.ok) {
+      // Log status ONLY — never the image or any body that could echo it.
+      console.error("anthropic_error", out.status ?? "");
+      return json({ error: out.error, status: out.status }, 502);
     }
-
-    const data = await res.json();
-    const text: string = (data?.content ?? [])
-      .filter((b: { type: string }) => b.type === "text")
-      .map((b: { text: string }) => b.text)
-      .join("")
-      .trim();
-
-    const parsed = extractJSON(text);
-    if (!parsed) return json({ error: "empty_reply" }, 502);
-
-    const result = normalizeResult(parsed);
     // If the model flagged a non-body, surface that plainly (defense in depth).
-    if (!result.isBody) return json({ isBody: false });
-
-    return json(result);
+    if (!out.result.isBody) return json({ isBody: false });
+    return json(out.result);
   } catch (e) {
     console.error("physique_exception", String(e));
     return json({ error: "exception" }, 500);

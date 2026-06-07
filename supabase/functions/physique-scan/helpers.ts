@@ -123,6 +123,72 @@ export function normalizeResult(raw: unknown): ScanResult {
   return { isBody, rank: { tier, score }, muscles, weakPoints, summary };
 }
 
+export const MUSCLE_LIST = "chest, back, shoulders, arms, legs, core";
+
+export const SYSTEM =
+  "You are the Physique Scanner inside CORE, a fitness app. You look at a single full-body photo and give an encouraging, coach-style aesthetic/fitness read — like a strength coach sizing up training priorities. " +
+  "You are NOT a doctor. NEVER give medical or body-composition diagnosis, never estimate body-fat percentage or weight, never comment on health conditions, and never use shaming or demoralizing language. Frame everything as training guidance. " +
+  "If the image is NOT a clear, single, full human body (e.g. it's an object, a pet, an empty room, a face-only/cropped shot, or too dark to tell), set isBody=false and do not invent a rating. " +
+  "Assess these six muscle groups only: " + MUSCLE_LIST + ". For each give a development level 0-100 and a status of weak, ok, or strong. " +
+  "Pick the tier name from: Beginner, Developing, Athletic, Lean, Shredded, Elite. " +
+  "Respond with STRICT JSON ONLY — no prose, no markdown fences — exactly this shape: " +
+  '{"isBody":boolean,"rank":{"tier":string,"score":number 0-100},' +
+  '"muscles":{"chest":{"level":number,"status":"weak|ok|strong"},"back":{...},"shoulders":{...},"arms":{...},"legs":{...},"core":{...}},' +
+  '"weakPoints":[muscle keys to prioritize],"summary":"one or two short constructive sentences, no medical claims"}';
+
+/**
+ * Single source of truth for the vision call — used by index.ts AND the
+ * integration test, so they can never drift. Does the Anthropic request, pulls
+ * the JSON, and normalizes to the strict contract. `fetchImpl` is injectable for
+ * tests. Never logs the image.
+ */
+export async function analyzePhysique(args: {
+  apiKey: string;
+  base64: string;
+  mediaType: string;
+  model: string;
+  fetchImpl?: typeof fetch;
+}): Promise<
+  | { ok: true; result: ScanResult }
+  | { ok: false; error: string; status?: number }
+> {
+  const f = args.fetchImpl ?? fetch;
+  const res = await f("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-api-key": args.apiKey,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({
+      model: args.model,
+      max_tokens: 700,
+      temperature: 0.4,
+      system: [{ type: "text", text: SYSTEM, cache_control: { type: "ephemeral" } }],
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "image", source: { type: "base64", media_type: args.mediaType, data: args.base64 } },
+            { type: "text", text: "Analyze this full-body photo and return the strict JSON. If it isn't a clear full body, set isBody=false." },
+          ],
+        },
+      ],
+    }),
+  });
+
+  if (!res.ok) return { ok: false, error: "model_error", status: res.status };
+  const data = await res.json();
+  const text: string = (data?.content ?? [])
+    .filter((b: { type: string }) => b.type === "text")
+    .map((b: { text: string }) => b.text)
+    .join("")
+    .trim();
+  const parsed = extractJSON(text);
+  if (!parsed) return { ok: false, error: "empty_reply" };
+  return { ok: true, result: normalizeResult(parsed) };
+}
+
 /** Pull the first balanced JSON object out of a model response (handles ```json fences). */
 export function extractJSON(text: string): unknown {
   if (!text) return null;
