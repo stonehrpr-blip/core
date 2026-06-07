@@ -20,6 +20,10 @@ import Svg, { Path } from "react-native-svg";
 
 import { ScanCard, type ScanMode } from "@/components/scanner/ScanCard";
 import { ComingSoonSheet } from "@/components/scanner/ComingSoonSheet";
+import { BodyMap } from "@/components/scanner/BodyMap";
+import { useGameStateStore } from "@/stores/game-state-store";
+import { useScanHistoryStore } from "@/stores/scan-history-store";
+import { useWorkoutStore } from "@/stores/workout-store";
 import { useCoreScreenView } from "@/lib/analytics";
 
 const ACCENT = "#4A8FFF";
@@ -34,6 +38,13 @@ export default function ScanScreen() {
   useCoreScreenView("scan");
   const [permission, requestPermission] = useCameraPermissions();
   const [activeMode, setActiveMode] = useState<ScanMode | null>(null);
+
+  // Physique state — written by the scanner, read here so the muscle map +
+  // routine persist and are visible between scans.
+  const muscles = useGameStateStore((st) => st.muscles);
+  const lastScan = useScanHistoryStore((st) => st.records[0] ?? null);
+  const routine = useWorkoutStore((st) => st.routine);
+  const hasScan = !!lastScan;
 
   const granted = permission?.granted ?? false;
   const canAsk = permission?.canAskAgain ?? true;
@@ -103,6 +114,46 @@ export default function ScanScreen() {
               </Pressable>
             )}
           </View>
+
+          {/* Your physique — muscle map + latest score (updated by scans) */}
+          {hasScan && (
+            <>
+              <Text style={s.sectionEyebrow}>YOUR PHYSIQUE</Text>
+              <Pressable style={s.physCard} onPress={() => router.push("/scan/physique")} accessibilityRole="button">
+                <BodyMap muscles={muscles} size={120} />
+                <View style={{ flex: 1, minWidth: 0 }}>
+                  <Text style={s.physTier}>{lastScan!.tier.toUpperCase()}</Text>
+                  <Text style={s.physScore}>{lastScan!.score}</Text>
+                  <Text style={s.physScoreLabel}>PHYSIQUE SCORE</Text>
+                  <View style={s.physLegend}>
+                    {(["weak", "ok", "strong"] as const).map((k) => (
+                      <View key={k} style={s.legendItem}>
+                        <View style={[s.legendDot, { backgroundColor: k === "weak" ? "#FF7A45" : k === "ok" ? ACCENT : "#34D399" }]} />
+                        <Text style={s.legendText}>{k === "weak" ? "Weak" : k === "ok" ? "Solid" : "Strong"}</Text>
+                      </View>
+                    ))}
+                  </View>
+                  <Text style={s.physCta}>Tap to rescan →</Text>
+                </View>
+              </Pressable>
+            </>
+          )}
+
+          {/* Your plan — the routine saved by the last scan */}
+          {routine && (
+            <>
+              <Text style={s.sectionEyebrow}>YOUR PLAN · {routine.days} DAYS/WK</Text>
+              <View style={s.planCard}>
+                <Text style={s.planTitle}>{routine.title}</Text>
+                {routine.exercises.map((ex, i) => (
+                  <View key={i} style={s.exRow}>
+                    <Text style={s.exName}>{ex.name}</Text>
+                    <Text style={s.exSets}>{ex.sets}</Text>
+                  </View>
+                ))}
+              </View>
+            </>
+          )}
 
           {/* Mode cards */}
           <Text style={s.sectionEyebrow}>SCAN MODES</Text>
@@ -176,6 +227,24 @@ const s = StyleSheet.create({
   permBtnText: { color: "#6BA9FF", fontSize: 12, fontWeight: "700", letterSpacing: 1.6 },
 
   sectionEyebrow: { color: "#9AA1B7", fontSize: 11, fontWeight: "600", letterSpacing: 2.4, textTransform: "uppercase", marginTop: 24, marginBottom: 10, paddingHorizontal: 4 },
+
+  // your physique
+  physCard: { flexDirection: "row", alignItems: "center", gap: 8, padding: 14, borderRadius: 20, backgroundColor: "rgba(74,143,255,0.05)", borderWidth: 1, borderColor: "rgba(74,143,255,0.20)" },
+  physTier: { color: ACCENT, fontSize: 11, fontWeight: "900", letterSpacing: 2 },
+  physScore: { color: "#FFFFFF", fontSize: 40, fontWeight: "900", letterSpacing: -1.5, lineHeight: 44 },
+  physScoreLabel: { color: "#4F5570", fontSize: 9, fontWeight: "800", letterSpacing: 1.8 },
+  physLegend: { flexDirection: "row", gap: 12, marginTop: 10 },
+  legendItem: { flexDirection: "row", alignItems: "center", gap: 5 },
+  legendDot: { width: 8, height: 8, borderRadius: 4 },
+  legendText: { color: "#9AA1B7", fontSize: 10.5, fontWeight: "600" },
+  physCta: { color: "#6BA9FF", fontSize: 12, fontWeight: "700", marginTop: 10 },
+
+  // your plan
+  planCard: { padding: 16, borderRadius: 18, backgroundColor: "rgba(255,255,255,0.03)", borderWidth: 1, borderColor: "rgba(255,255,255,0.07)" },
+  planTitle: { color: "#F8FAFE", fontSize: 14, fontWeight: "800", marginBottom: 10 },
+  exRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 9, borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.05)" },
+  exName: { color: "#D7DCEA", fontSize: 13.5, flex: 1 },
+  exSets: { color: "#6BA9FF", fontSize: 12, fontWeight: "700" },
 
   footer: { marginTop: 14, paddingHorizontal: 4 },
   footerText: { color: "#4F5570", fontSize: 11, lineHeight: 16, letterSpacing: 0.2 },

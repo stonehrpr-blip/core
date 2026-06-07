@@ -31,6 +31,7 @@ import { savePhoto } from "@/lib/scanner/storage";
 import { buildRoutine, whyWeak, muscleLabel } from "@/lib/scanner/routine";
 import { useGameStateStore, MUSCLE_KEYS, type MuscleKey } from "@/stores/game-state-store";
 import { useScanHistoryStore } from "@/stores/scan-history-store";
+import { useWorkoutStore } from "@/stores/workout-store";
 import { useCoreScreenView } from "@/lib/analytics";
 
 const ACCENT = "#4A8FFF";
@@ -117,6 +118,9 @@ export default function PhysiqueScannerScreen() {
     const delta = prev ? res.rank.score - prev.score : 0;
     setScoreDelta(prev ? delta : null);
     if (delta > 0) game.addStat("body", Math.min(8, Math.round(delta * 0.5)), "quest_scan_physique");
+
+    // Save the weak-point routine so it persists in the Scan tab's "Your Plan".
+    useWorkoutStore.getState().setRoutine(buildRoutine(res.weakPoints), "physique_scan");
 
     history.addScan({
       id,
