@@ -181,10 +181,13 @@
             '</div>' +
             '</div><div class="w-ls-grid">';
 
+          // Task 2: iterate all 6 defs — no slice/limit here.
+          // Task 3: routing: strength→gym.html focus→focus.html wealth→wealth.html
+          //         health/social/purpose → stat.html?s=<key> (d.page missing → fallback)
           defs.forEach(function (d) {
             var href = d.page || ('stat.html?s=' + d.key);
             html +=
-              '<a href="' + href + '" class="w-ls-card" aria-label="' + d.name + '">' +
+              '<a href="' + href + '" class="w-ls-card" style="--sc:' + (d.color || 'var(--blue)') + '" aria-label="' + d.name + '">' +
               '<div class="w-ls-card-head">' +
                 '<div class="w-ls-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + (d.icon || STAT_IC[d.key] || '') + '</svg></div>' +
                 '<span class="w-ls-name">' + d.name + '</span>' +
