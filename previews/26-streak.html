@@ -133,6 +133,16 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   background:radial-gradient(58% 50% at 50% 38%,color-mix(in srgb,var(--tglow) 28%,transparent),transparent 72%);
   animation:breathe 4.4s ease-in-out infinite;transition:background .8s;}
 @keyframes breathe{0%,100%{transform:scale(.95);opacity:.65;}50%{transform:scale(1.06);opacity:1;}}
+/* living energy backdrop — a slow conic swirl + drifting glow, tinted by tier */
+.hero .heroEnergy{position:absolute;inset:-32%;z-index:0;pointer-events:none;border-radius:50%;
+  background:conic-gradient(from 0deg,transparent 0deg,color-mix(in srgb,var(--tglow) 26%,transparent) 55deg,transparent 135deg,color-mix(in srgb,var(--tc) 20%,transparent) 220deg,transparent 320deg);
+  filter:blur(26px);opacity:.5;animation:heroSpin 20s linear infinite;will-change:transform;}
+@keyframes heroSpin{to{transform:rotate(360deg);}}
+.hero .heroFlow{position:absolute;inset:0;z-index:0;pointer-events:none;mix-blend-mode:screen;opacity:.85;
+  background:radial-gradient(38% 46% at 28% 30%,color-mix(in srgb,var(--tc) 26%,transparent),transparent 62%),
+             radial-gradient(42% 50% at 74% 68%,color-mix(in srgb,var(--tglow) 22%,transparent),transparent 60%);
+  animation:heroFlow 13s ease-in-out infinite;will-change:transform;}
+@keyframes heroFlow{0%,100%{transform:translate(0,0) scale(1);}33%{transform:translate(10px,-8px) scale(1.1);}66%{transform:translate(-8px,6px) scale(.95);}}
 /* rings from t30 up — escalate at each mark */
 .hero .rings{position:absolute;inset:0;z-index:0;pointer-events:none;display:none;}
 .hero.t30 .rings,.hero.t50 .rings,.hero.t100 .rings,.hero.t200 .rings,.hero.t300 .rings{display:block;}
@@ -171,7 +181,8 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .hero.t300 .rainbow{padding:3px;animation-duration:2.4s;
   background:linear-gradient(120deg,#DCEEFF,#5BB1FF,#0A84FF,#9AD0FF,#fff,#DCEEFF);background-size:300% 300%;}
 @keyframes rainbowShift{to{background-position:300% 0;}}
-.hero .heroInner{position:relative;z-index:3;display:flex;flex-direction:column;align-items:center;padding:22px 18px 18px;}
+.hero .heroInner{position:relative;z-index:3;width:100%;display:flex;flex-direction:column;align-items:center;text-align:center;padding:22px 18px 18px;}
+.hero .bignum{align-self:center;}
 .hero .flame{width:40px;height:40px;color:color-mix(in srgb,var(--tglow) 82%,#fff);
   filter:drop-shadow(0 0 12px color-mix(in srgb,var(--tglow) 65%,transparent));
   animation:flameFlick 3s ease-in-out infinite;}
@@ -598,7 +609,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .pay-state .ps-sub{margin-top:5px;font-size:12px;color:var(--muted);text-align:center;}
 
 @media(prefers-reduced-motion:reduce){
-  .hero .auraLayer,.hero .hp,.hero .rings i,.hero .rainbow,.hero .halo,.hero .flame,
+  .hero .auraLayer,.hero .hp,.hero .rings i,.hero .rainbow,.hero .halo,.hero .flame,.hero .heroEnergy,.hero .heroFlow,
   .hero .bignum,.shieldrow .shi svg,.wd.today .wc,.spark,
   .celebrate .cflash,.celebrate .cglow,.celebrate .crewic,
   .rm-node.current .rm-dot,.rm-node.claimable .rm-dot,.rm-claim-btn,
@@ -640,6 +651,8 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     <div class="scroll">
       <!-- HERO -->
       <div class="hero t0" id="hero">
+        <div class="heroEnergy"></div>
+        <div class="heroFlow"></div>
         <div class="auraLayer"></div>
         <div class="halo"></div>
         <div class="rings"><i></i><i></i><i></i></div>
@@ -1377,8 +1390,9 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
         qs('#rmClaim').onclick=function(){ claim(claimable); };
       } else { cr.style.display='none'; cr.innerHTML=''; }
     }
+    var readyCount=MILES.filter(function(m){ return reachedDay(m)&&claimed.indexOf(m.d)<0; }).length;
     var meta=qs('#roadmapMeta');
-    if(meta) meta.textContent=claimable?'Ready to claim!':nextM?'Next · Day '+nextM.d:'All claimed!';
+    if(meta) meta.textContent=readyCount?(readyCount+' reward'+(readyCount>1?'s':'')+' ready'):nextM?'Next · Day '+nextM.d:'All claimed!';
   }
 
   // ── squad (real friends) + friend-count XP booster ───────────────────────────
@@ -1576,7 +1590,15 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     qs('#lcReveal').innerHTML=buildReveal(newDays);
     cer.classList.add('show'); SFX(auto?'streak_grow':'streak_milestone_big');
     if(!REDUCED){ var pr=qs('.phone').getBoundingClientRect(); setTimeout(function(){ burstAt(pr.left+pr.width/2,pr.top+pr.height*0.5,e.glow,28); },340); }
-    var btn=qs('#lcBtn'); if(btn) btn.onclick=function(){ cer.classList.remove('show'); lightBusy=false; SFX('reward_collect'); lastDays=null; render(); };
+    // If lighting just CROSSED a milestone day, let "Continue" collect that gift
+    // right away (chains the flame ceremony into the reward celebration).
+    var crossed=MILES.filter(function(m){ return m.d===newDays && jget('coreStreakRewardsClaimed',[]).indexOf(m.d)<0; })[0];
+    var btn=qs('#lcBtn');
+    if(btn){
+      btn.textContent=crossed?('Collect Day '+newDays+' reward'):'Continue';
+      btn.onclick=function(){ cer.classList.remove('show'); lightBusy=false; SFX('reward_collect'); lastDays=null;
+        render(); if(crossed) setTimeout(function(){ claim(crossed); },280); };
+    }
     return true;
   }
 
