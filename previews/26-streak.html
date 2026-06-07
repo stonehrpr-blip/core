@@ -707,6 +707,24 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     if(bestStored>lr+Math.max(30,grace)){ S.update(function(st){ st.bestStreak=lr; return st; }); lset('coreBestStreak',String(lr)); changed=true; }
     if(changed){ try{ S.syncProgress(); }catch(e){} }
   }
+  // First-ever open = Day 1. A brand-new user starts ON day 1 (the act of
+  // starting their quit journey counts), so the streak is never 0/grey for
+  // someone who has begun — grey/Dormant is reserved for a genuinely lost
+  // streak. Runs once; never re-fires after a loss (lostAt set) or any real
+  // history, so it can't be used to skip the real day-by-day engine.
+  function ensureStartDay(){
+    if(lget('coreStreakInit','')==='1') return;
+    var s=S.read(), st=(s.streak||{});
+    var fresh=((st.days||0)===0) && !st.lostAt && !st.previousDays &&
+              cleanHistory().length===0 &&
+              (lget('coreLastActiveDate',null)===null||lget('coreLastActiveDate','')==='');
+    if(fresh){
+      S.update(function(x){ x.streak.days=1; if(!x.streak.startedAt) x.streak.startedAt=Date.now(); if((x.bestStreak||0)<1) x.bestStreak=1; return x; });
+      lset('coreStreak','1'); if(ig('coreBestStreak',0)<1) lset('coreBestStreak','1');
+      try{ S.syncProgress(); }catch(e){}
+    }
+    lset('coreStreakInit','1');
+  }
   function migrate(){
     if(lget('coreStreakSchemaV','')==='2'){ cleanHistory(); repairStreak(); return; }
     cleanHistory();
@@ -1244,6 +1262,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 
   // ── wiring ────────────────────────────────────────────────────────────────────
   migrate();
+  ensureStartDay();
   var renderT; function scheduleRender(){ clearTimeout(renderT); renderT=setTimeout(render,60); }
   var SK=/^core(Streak|LastActiveDate|TodayActive|BestStreak|StreakShields|StreakRewardsClaimed|OwnedChests|Coins|Xp|Rank|PerfectDays|ShieldLog|Friends|FriendRewardsClaimed)/i;
   window.addEventListener('coreStateChange',scheduleRender);
