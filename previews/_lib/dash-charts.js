@@ -7,7 +7,7 @@
 
   function S() { return window.coreState; }
 
-  var HISTORY_KEY = 'coreLifeHistory.v1';
+  var HISTORY_KEY = 'coreLifeHistory.v2';
 
   // ── date helpers (local-day keys, no Date.now coupling beyond "today") ──
   function dayKey(d) {
@@ -54,8 +54,12 @@
     return x - Math.floor(x); // 0..1
   }
 
-  // Build a synthetic-but-plausible back-trail ending at the current value, so
-  // a freshly-added graph has something to show on day one. Persisted once.
+  function clamp(v) { return v < 0 ? 0 : v > 100 ? 100 : v; }
+
+  // Build a gentle back-trail that ENDS at the current value and drifts only a
+  // little day-to-day — so a 7d/30d delta reads as a small, realistic number
+  // (e.g. ▲ 1.20), never a fake ±27 swing. Values stay fractional so the change
+  // badge can show 2 decimals; the displayed value is rounded.
   function ensureBackfill(days) {
     var cs = S(); if (!cs) return;
     var h = readHistory();
@@ -65,24 +69,31 @@
     var curScore = cs.lifeScore();
     var curStats = {};
     (cs.STAT_DEFS || []).forEach(function (d) { curStats[d.key] = cs.statValue(d.key); });
+    var keys = Object.keys(curStats);
+
+    var n = Math.max(days, 30);
+    function walk(end, seed) {
+      var arr = new Array(n);
+      arr[n - 1] = end;
+      var v = end;
+      for (var i = n - 2; i >= 0; i--) {
+        v = clamp(v - (noise(i + seed * 31 + 1) - 0.46) * 0.42); // ~±0.18/day drift
+        arr[i] = Math.round(v * 100) / 100;
+      }
+      return arr;
+    }
+
+    var scoreW = walk(curScore, 0);
+    var statW = {};
+    keys.forEach(function (k, ki) { statW[k] = walk(curStats[k], ki + 1); });
 
     var pts = [];
-    var n = Math.max(days, 30);
-    for (var i = n - 1; i >= 0; i--) {
-      var d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
-      // gentle upward ramp toward the current value + small deterministic wobble
-      var ramp = 1 - (i / n);                     // 0 → 1
-      var wob = (noise(i + 1) - 0.5) * 6;         // ±3
+    for (var i = 0; i < n; i++) {
+      var d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - (n - 1 - i));
       var stats = {};
-      Object.keys(curStats).forEach(function (k, ki) {
-        var base = Math.max(0, Math.round(curStats[k] * (0.55 + 0.45 * ramp) + (noise(i + ki * 7 + 1) - 0.5) * 5));
-        stats[k] = Math.min(100, base);
-      });
-      var score = Math.max(0, Math.round(curScore * (0.55 + 0.45 * ramp) + wob));
-      pts.push({ date: dayKey(d), score: Math.min(100, score), stats: stats });
+      keys.forEach(function (k) { stats[k] = statW[k][i]; });
+      pts.push({ date: dayKey(d), score: scoreW[i], stats: stats });
     }
-    // force the final point to the true current values
-    pts[pts.length - 1] = { date: dayKey(today), score: curScore, stats: curStats };
     writeHistory({ points: pts });
   }
 
@@ -153,9 +164,9 @@
     host.innerHTML =
       '<div class="dc-wrap">' +
         '<div class="dc-cap">' +
-          '<span class="dc-cap-val" style="color:' + color + '">' + last + (opts.suffix || '') + '</span>' +
+          '<span class="dc-cap-val" style="color:' + color + '">' + Math.round(last) + (opts.suffix || '') + '</span>' +
           '<span class="dc-cap-delta ' + (delta >= 0 ? 'up' : 'dn') + '">' +
-            (delta >= 0 ? '▲ ' : '▼ ') + Math.abs(delta) + (opts.suffix || '') +
+            (delta >= 0 ? '▲ ' : '▼ ') + Math.abs(delta).toFixed(2) + (opts.suffix || '') +
           '</span>' +
         '</div>' +
         '<div class="dc-plot" style="height:' + H + 'px">' + svg +
