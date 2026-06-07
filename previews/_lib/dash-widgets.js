@@ -519,10 +519,14 @@
           var pts = DC.getHistory(30);
           var html = '<div class="dc-mini-grid">';
           defs.forEach(function (d) {
-            html += '<div class="dc-mini"><div class="dc-mini-head">' +
+            // route to the stat's page (gym/focus/wealth …) or stat.html?s=<key>
+            var href = d.page || ('stat.html?s=' + d.key);
+            html += '<a href="' + href + '" class="dc-mini" aria-label="' + d.name + '"><div class="dc-mini-head">' +
               '<span class="dc-mini-dot" style="background:' + (d.color || 'var(--blue)') + '"></span>' +
-              '<span class="dc-mini-name">' + d.name + '</span></div>' +
-              '<div class="dc-mini-host" data-k="' + d.key + '"></div></div>';
+              '<span class="dc-mini-name">' + d.name + '</span>' +
+              '<svg class="dc-mini-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>' +
+              '</div>' +
+              '<div class="dc-mini-host" data-k="' + d.key + '"></div></a>';
           });
           host.innerHTML = html + '</div>';
           defs.forEach(function (d) {
