@@ -14,7 +14,7 @@
 
   // ── Inject styles once ────────────────────────────────────────────────────
   var STYLE = [
-    '.ch-overlay{position:fixed;inset:0;z-index:9000;display:flex;align-items:flex-end;',
+    '.ch-overlay{position:absolute;inset:0;z-index:9000;display:flex;align-items:flex-end;',
       'background:rgba(0,0,0,0);transition:background .28s;pointer-events:none;}',
     '.ch-overlay.ch-open{background:rgba(0,0,0,0.52);pointer-events:auto;}',
     '.ch-sheet{',
@@ -72,7 +72,9 @@
         '<button class="ch-close" aria-label="Close help">Got it</button>' +
       '</div>';
 
-    document.body.appendChild(overlay);
+    // Mount inside the phone frame (positioned ancestor) so the sheet stays
+    // within the device mock; falls back to body for non-framed pages.
+    (document.querySelector('.phone') || document.body).appendChild(overlay);
     _overlay = overlay;
 
     // Animate in
