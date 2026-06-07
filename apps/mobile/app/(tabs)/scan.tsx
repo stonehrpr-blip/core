@@ -73,7 +73,7 @@ export default function ScanScreen() {
           <View style={s.header}>
             <Text style={s.eyebrow}>SCAN · AI VISION</Text>
             <Text style={s.h1}>Scan</Text>
-            <Text style={s.sub}>Point, capture, log. AI scanning is rolling out soon.</Text>
+            <Text style={s.sub}>Body scan is live — Food & Outfit are rolling out next.</Text>
           </View>
 
           {/* Camera permission / privacy card */}
@@ -163,6 +163,7 @@ export default function ScanScreen() {
               mode={m.mode}
               title={m.title}
               blurb={m.blurb}
+              live={m.mode === "body"}
               // Body scan is live — it opens the real Physique Scanner instantly.
               onPress={() => (m.mode === "body" ? router.push("/scan/physique") : setActiveMode(m.mode))}
             />
@@ -171,7 +172,7 @@ export default function ScanScreen() {
           {/* Honest footer */}
           <View style={s.footer}>
             <Text style={s.footerText}>
-              Scanning is in development. We'd rather ship nothing than fake a result — every estimate will show its confidence when it lands.
+              Body scanning is live. Food & Outfit are still in development — we'd rather ship nothing than fake a result.
             </Text>
           </View>
 
