@@ -62,14 +62,23 @@
   // badge can show 2 decimals; the displayed value is rounded.
   function ensureBackfill(days) {
     var cs = S(); if (!cs) return;
-    var h = readHistory();
-    if (h.points.length >= 2) return; // already have real history
 
     var today = new Date();
     var curScore = cs.lifeScore();
     var curStats = {};
     (cs.STAT_DEFS || []).forEach(function (d) { curStats[d.key] = cs.statValue(d.key); });
     var keys = Object.keys(curStats);
+
+    var h = readHistory();
+    var last = h.points[h.points.length - 1];
+    // Reuse the stored trail only when its end still matches the live values.
+    // If state changed after the trail was built (e.g. the demo seed runs after
+    // the widget's first paint, or the user earns XP), the old end is stale and
+    // would produce a fake huge delta + end-spike — so rebuild ending at current.
+    var fresh = last
+      && Math.abs((last.score || 0) - curScore) < 0.75
+      && keys.every(function (k) { return Math.abs(((last.stats && last.stats[k]) || 0) - curStats[k]) < 0.75; });
+    if (h.points.length >= 2 && fresh) return;
 
     var n = Math.max(days, 30);
     function walk(end, seed) {

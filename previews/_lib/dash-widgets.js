@@ -510,7 +510,7 @@
 
   // ── Layout ───────────────────────────────────────────────────────────────────
   var LAYOUT_KEY = 'coreDashboard.v1';
-  var DEFAULT_LAYOUT = ['quote', 'lifescore', 'tasks'];
+  var DEFAULT_LAYOUT = ['quote', 'lifescore', 'stattrend', 'tasks'];
 
   function readLayout() {
     try {
