@@ -36,6 +36,24 @@ button, .tab, .opt, .pill-chip, .row, .nav-btn, .tb-btn, .stab, .icon-btn,
 img, svg { max-width: 100%; }
 .grain { display: none !important; }
 
+/* ── Fit hardening (applies on every device) ───────────────────────────
+   The screens are flex columns: .phone > .frame (flex column) > .scroll
+   (flex:1; overflow-y:auto) + tab bar. A flex item's default min-height is
+   `auto`, so the scroll area refuses to shrink below its content — on short
+   phones it overflows and shoves the tab bar off-screen instead of scrolling.
+   Forcing min-height:0 lets overflow-y:auto actually engage, so content fits
+   and scrolls on every height. Harmless when content already fits. */
+.frame, .screen, .app, .sheet, .scroll, .sheet-scroll,
+.content, .body-scroll, main {
+  min-height: 0;
+}
+/* No screen should ever scroll sideways on a phone */
+html, body { overflow-x: hidden; }
+.phone { max-width: 100vw; }
+img, video, canvas { max-width: 100%; height: auto; }
+/* Long unbroken strings (names, handles, URLs) wrap instead of overflowing */
+.copy, .title, .desc, .name, .label, p, h1, h2, h3 { overflow-wrap: break-word; }
+
 /* ── Phone-class viewport — drop the frame, fill edge to edge ──────── */
 
 @media (max-width: 460px), (max-height: 900px) and (max-width: 768px) {
