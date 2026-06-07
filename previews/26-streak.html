@@ -1269,7 +1269,19 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     return html;
   }
 
-  var curHistTab='week';
+  var curHistTab='week', yearAnimate=false;
+  // Slide the year heatmap from the start of the year across to TODAY (the far
+  // right). Animated on tab-click; instant on background re-renders.
+  function placeYearScroll(wrap, animate){
+    if(!wrap) return;
+    var target=wrap.scrollWidth-wrap.clientWidth; if(target<=0) return;
+    if(!animate||REDUCED){ wrap.scrollLeft=target; return; }
+    wrap.scrollLeft=0;
+    var start=null, dur=950;
+    function step(ts){ if(start===null) start=ts; var p=Math.min(1,(ts-start)/dur); var e=1-Math.pow(1-p,3);
+      wrap.scrollLeft=Math.round(target*e); if(p<1) requestAnimationFrame(step); }
+    requestAnimationFrame(step);
+  }
   function renderHist(hist, active){
     var el=qs('#histContent'), meta=qs('#histMeta'); if(!el) return;
     if(curHistTab==='week'){
@@ -1283,12 +1295,15 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     } else {
       el.innerHTML=yearView(hist);
       if(meta) meta.textContent='Year';
+      var doAnim=yearAnimate; yearAnimate=false;
+      requestAnimationFrame(function(){ placeYearScroll(el.querySelector('.ycal-wrap'), doAnim); });
     }
   }
   document.querySelectorAll('.hist-tab').forEach(function(tab){
     tab.addEventListener('click',function(){
       document.querySelectorAll('.hist-tab').forEach(function(t){ t.classList.remove('active'); });
       tab.classList.add('active'); curHistTab=tab.dataset.tab;
+      if(curHistTab==='year') yearAnimate=true;   // slide to "now" on click
       var hist=cleanHistory(); renderHist(hist, lget('coreLastActiveDate',null)===todayKey());
     });
   });
