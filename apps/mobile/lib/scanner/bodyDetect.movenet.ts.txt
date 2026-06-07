@@ -1,0 +1,61 @@
+// REFERENCE IMPLEMENTATION — on-device MoveNet full-body gate.
+// Drop this into bodyDetect.ts AFTER installing the optional deps on a dev client:
+//   pnpm --filter mobile add @tensorflow/tfjs @tensorflow/tfjs-react-native \
+//     @tensorflow-models/pose-detection expo-gl
+// Kept as .txt so Metro doesn't try to bundle the uninstalled imports.
+
+import * as tf from "@tensorflow/tfjs";
+import { decodeJpeg } from "@tensorflow/tfjs-react-native";
+import * as poseDetection from "@tensorflow-models/pose-detection";
+
+export type BodyCheck =
+  | { available: false }
+  | { available: true; isFullBody: boolean; confidence: number };
+
+let _detector: poseDetection.PoseDetector | null = null;
+let _ready = false;
+
+async function ensureDetector(): Promise<boolean> {
+  if (_ready) return true;
+  try {
+    await tf.ready();
+    _detector = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet, {
+      modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING,
+    });
+    _ready = true;
+  } catch {
+    _ready = false;
+  }
+  return _ready;
+}
+
+export function isPoseDetectionAvailable(): boolean {
+  return _ready;
+}
+
+const UPPER = ["left_shoulder", "right_shoulder"];
+const LOWER = ["left_hip", "right_hip", "left_knee", "right_knee", "left_ankle", "right_ankle"];
+const MIN_SCORE = 0.3;
+
+export async function detectFullBody(base64Jpeg: string): Promise<BodyCheck> {
+  if (!(await ensureDetector()) || !_detector) return { available: false };
+  let imageTensor: tf.Tensor3D | null = null;
+  try {
+    const raw = globalThis.atob(base64Jpeg);
+    const bytes = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+    imageTensor = decodeJpeg(bytes);
+    const poses = await _detector.estimatePoses(imageTensor);
+    if (!poses?.length) return { available: true, isFullBody: false, confidence: 0 };
+    const kp = poses[0].keypoints ?? [];
+    const named = new Map(kp.map((k) => [k.name, k.score ?? 0]));
+    const upperOk = UPPER.some((n) => (named.get(n) ?? 0) > MIN_SCORE);
+    const lowerHits = LOWER.filter((n) => (named.get(n) ?? 0) > MIN_SCORE).length;
+    const confidence = kp.reduce((a, k) => a + (k.score ?? 0), 0) / Math.max(1, kp.length);
+    return { available: true, isFullBody: upperOk && lowerHits >= 2, confidence: Math.round(confidence * 100) / 100 };
+  } catch {
+    return { available: false };
+  } finally {
+    imageTensor?.dispose();
+  }
+}
