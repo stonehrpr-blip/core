@@ -71,7 +71,7 @@
       font-family: 'Chakra Petch', -apple-system, sans-serif;
       width: fit-content;
     `;
-    badge.textContent = '🎁 ' + d.pct + '% off applied · ref: ' + (d.ref || '').slice(0, 8).toUpperCase();
+    badge.textContent = d.pct + '% off applied · ref: ' + (d.ref || '').slice(0, 8).toUpperCase();
     anchor.parentNode.insertBefore(badge, anchor);
 
     if (window.coreTrack) coreTrack('invite_discount_shown', { pct: d.pct, ref: d.ref });

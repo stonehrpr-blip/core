@@ -6,67 +6,103 @@
 <title>CORE — Ranks</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <style>
-  :root { --bg-base:#02020A; --bg-card:rgba(255,255,255,0.035); --border:rgba(255,255,255,0.08); --text:#F8FAFE; --muted:#9AA1B7; --dim:#4F5570; --accent:#4A8FFF; --good:#34D399; }
+  :root { --bg-base:#02020A; --bg-card:rgba(255,255,255,0.022); --border:rgba(255,255,255,0.07); --text:#F8FAFE; --muted:#9AA1B7; --dim:#4F5570; --accent:#0A84FF; --good:#0A84FF; }
   * { box-sizing:border-box; } html,body{ margin:0; padding:0; height:100%; }
   body { min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text); -webkit-font-smoothing:antialiased; padding:24px; overflow:hidden; }
   .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
   .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:60; }
   .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:60; }
 
-  /* per-rank animated background */
-  .bg { position:absolute; inset:0; z-index:0; background:
-    radial-gradient(70% 40% at 50% 6%, color-mix(in srgb,var(--rk,#4A8FFF) 20%,transparent) 0%, transparent 60%),
-    radial-gradient(60% 40% at 50% 100%, color-mix(in srgb,var(--rk,#4A8FFF) 10%,transparent) 0%, transparent 60%),
-    linear-gradient(180deg, #070a18 0%, #02020A 60%); transition:background .8s; }
-  .bgfx{ position:absolute; inset:0; z-index:1; pointer-events:none; overflow:hidden; }
-  .bgfx span{ position:absolute; border-radius:50%; background:var(--rk,#4A8FFF); opacity:0; }
-  .bgfx span{ animation:bgrise var(--d,9s) linear var(--del,0s) infinite; }
-  @keyframes bgrise{ 0%{opacity:0;transform:translateY(20px) scale(.6);} 15%{opacity:.5;} 85%{opacity:.3;} 100%{opacity:0;transform:translateY(-120px) scale(1);} }
-  .bgglow{ position:absolute; left:50%; top:-12%; width:320px; height:320px; transform:translateX(-50%); z-index:1; border-radius:50%; pointer-events:none;
-    background:radial-gradient(circle, color-mix(in srgb,var(--rk,#4A8FFF) 30%,transparent), transparent 60%); filter:blur(20px); animation:bgpulse 5s ease-in-out infinite; }
-  @keyframes bgpulse{ 0%,100%{ opacity:.5; transform:translateX(-50%) scale(.92);} 50%{ opacity:.9; transform:translateX(-50%) scale(1.08);} }
-  @media (prefers-reduced-motion: reduce){ .bgfx span,.bgglow{ animation:none!important; } }
+  /* ── ambient (dashboard chrome) + per-rank glow ── */
+  #ambBg{ position:absolute; inset:0; z-index:0; background:linear-gradient(180deg,#070a18 0%, #03030c 58%, #02020A 100%); }
+  #ambStars{ position:absolute; inset:-2%; pointer-events:none; z-index:1; }
+  #ambCelestial{ position:absolute; inset:0; pointer-events:none; z-index:2; }
+  #ambOverlay{ position:absolute; inset:0; pointer-events:none; z-index:3; }
+  .bgglow{ position:absolute; left:50%; top:-10%; width:340px; height:340px; transform:translateX(-50%); z-index:2; border-radius:50%; pointer-events:none;
+    background:radial-gradient(circle, color-mix(in srgb,var(--rk,#0A84FF) 30%,transparent), transparent 62%); filter:blur(26px); animation:bgpulse 5.5s ease-in-out infinite; }
+  @keyframes bgpulse{ 0%,100%{ opacity:.45; transform:translateX(-50%) scale(.92);} 50%{ opacity:.85; transform:translateX(-50%) scale(1.08);} }
+  @media (prefers-reduced-motion: reduce){ .bgglow{ animation:none!important; } }
 
   .frame { position:absolute; inset:0; z-index:10; display:flex; flex-direction:column; padding:54px 0 0; }
   .hdr { display:flex; align-items:center; gap:12px; padding:2px 18px 8px; }
-  .back { width:38px; height:38px; border-radius:50%; border:none; background:rgba(255,255,255,0.06); color:var(--text); display:flex; align-items:center; justify-content:center; text-decoration:none; flex:none; } .back svg{ width:19px; height:19px; }
+  .back { width:38px; height:38px; border-radius:50%; border:none; background:rgba(255,255,255,0.06); color:var(--text); display:flex; align-items:center; justify-content:center; text-decoration:none; flex:none; cursor:pointer; } .back svg{ width:19px; height:19px; }
   .hdr .ttl { font-size:19px; font-weight:900; } .hdr .sub{ font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); }
+  .hdr .sp{ flex:1; }
+  .help { width:34px; height:34px; border-radius:50%; border:1px solid var(--border); background:rgba(255,255,255,0.05); color:var(--muted); font-size:15px; font-weight:900; cursor:pointer; flex:none; }
   .scroll { flex:1; overflow-y:auto; padding:6px 16px 110px; } .scroll::-webkit-scrollbar{ display:none; }
-  .season{ display:flex; align-items:center; gap:9px; padding:11px 13px; border-radius:13px; background:rgba(255,255,255,0.04); border:1px solid var(--border); margin-bottom:14px; font-size:11.5px; font-weight:700; color:var(--muted); }
-  .season svg{ width:15px; height:15px; color:var(--accent); flex:none; }
 
-  .grid{ display:grid; grid-template-columns:1fr 1fr; gap:9px; align-content:start; }
-  .rk{ position:relative; border-radius:16px; padding:9px 8px 11px; background:var(--bg-card); border:1px solid var(--border); text-align:center; overflow:hidden; transition:.25s; min-height:108px; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; }
-  .rk.cur{ border-color:color-mix(in srgb,var(--c) 60%,transparent); box-shadow:0 0 22px color-mix(in srgb,var(--c) 22%,transparent); background:linear-gradient(170deg, color-mix(in srgb,var(--c) 14%,transparent), rgba(255,255,255,0.015)); }
-  .rk.locked{ opacity:.5; }
-  .rk .num{ position:absolute; top:8px; left:10px; font-size:11px; font-weight:900; color:color-mix(in srgb,var(--c) 70%,#fff); opacity:.6; }
-  .rk .st{ position:absolute; top:8px; right:9px; }
-  .rk .st .now{ font-size:7.5px; font-weight:900; letter-spacing:.04em; padding:3px 6px; border-radius:999px; color:#04040c; background:var(--c); }
-  .rk .st svg{ width:13px; height:13px; } .rk .st .have{ color:var(--good); } .rk .st .lock{ color:var(--dim); }
-  .rk .gem{ width:52px; height:52px; margin:9px auto 1px; color:var(--c); position:relative; display:flex; align-items:center; justify-content:center; }
-  .rk .gem svg, .rk .gem img{ width:100%; height:100%; object-fit:contain; object-position:center; display:block; filter:drop-shadow(0 2px 5px rgba(0,0,0,0.45)); }
-  .rk.cur .gem{ animation:var(--anim,float 4s ease-in-out infinite); }
+  /* ── HERO progress-to-next ── */
+  .heroProg{ margin:12px 2px 4px; }
+  .heroProg .pl{ display:flex; justify-content:space-between; align-items:baseline; font-size:11px; font-weight:800; letter-spacing:.02em; }
+  .heroProg .pl .cur{ color:var(--c,#0A84FF); } .heroProg .pl .to{ color:var(--muted); }
+  .heroProg .bar{ height:8px; border-radius:999px; background:rgba(255,255,255,0.06); overflow:hidden; margin-top:7px; box-shadow:inset 0 1px 2px rgba(0,0,0,.4); }
+  .heroProg .fill{ height:100%; border-radius:999px; background:linear-gradient(90deg, color-mix(in srgb,var(--c,#0A84FF) 70%,#fff), var(--c,#0A84FF)); box-shadow:0 0 10px color-mix(in srgb,var(--c,#0A84FF) 60%,transparent); transition:width .6s cubic-bezier(.2,.8,.2,1); }
+  .heroProg .sub{ font-size:10px; font-weight:700; color:var(--dim); margin-top:6px; text-align:center; }
+
+  /* ── section headers ── */
+  .sec{ display:flex; align-items:center; justify-content:space-between; margin:22px 2px 11px; }
+  .sec h2{ font-size:13px; font-weight:900; letter-spacing:.02em; margin:0; } .sec .meta{ font-size:10.5px; font-weight:800; color:var(--dim); }
+
+  /* ── SEASON panel ── */
+  .season{ border-radius:18px; padding:14px 15px; background:linear-gradient(165deg, rgba(10,132,255,.10), rgba(255,255,255,0.018)); border:1px solid color-mix(in srgb,var(--accent) 26%,var(--border)); position:relative; overflow:hidden; }
+  .season .srow{ display:flex; align-items:center; gap:10px; }
+  .season .sicon{ width:34px; height:34px; border-radius:11px; background:rgba(10,132,255,.16); border:1px solid rgba(10,132,255,.4); display:flex; align-items:center; justify-content:center; color:var(--accent); flex:none; } .season .sicon svg{ width:18px; height:18px; }
+  .season .sname{ font-size:14px; font-weight:900; } .season .sdesc{ font-size:10.5px; font-weight:700; color:var(--muted); margin-top:2px; }
+  .season .cd{ display:flex; gap:7px; margin-top:13px; }
+  .season .cd .u{ flex:1; text-align:center; padding:8px 4px; border-radius:11px; background:rgba(0,0,0,0.3); border:1px solid var(--border); }
+  .season .cd .u b{ display:block; font-size:18px; font-weight:900; font-variant-numeric:tabular-nums; line-height:1; color:var(--text); }
+  .season .cd .u span{ display:block; font-size:8px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); margin-top:5px; }
+  .season .reset{ font-size:9.5px; font-weight:700; color:var(--accent); margin-top:11px; display:flex; align-items:center; gap:6px; } .season .reset svg{ width:12px; height:12px; flex:none; }
+  .season .best{ display:flex; align-items:center; gap:10px; margin-top:12px; padding-top:12px; border-top:1px solid var(--border); }
+  .season .best .bg2{ width:32px; height:32px; flex:none; color:var(--c,#0A84FF); } .season .best .bg2 svg{ width:100%; height:100%; }
+  .season .best .bl{ font-size:9px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); } .season .best .bv{ font-size:13px; font-weight:900; color:var(--c,#0A84FF); margin-top:1px; }
+  .season .hist{ margin-top:10px; display:flex; flex-direction:column; gap:5px; }
+  .season .hist .h{ display:flex; justify-content:space-between; font-size:10.5px; font-weight:700; color:var(--muted); padding:6px 9px; border-radius:9px; background:rgba(0,0,0,0.22); }
+  .season .hist .h b{ color:var(--text); font-weight:800; }
+
+  /* ── how to rank up ── */
+  .guide{ display:flex; flex-direction:column; gap:8px; }
+  .gstep{ display:flex; align-items:flex-start; gap:11px; padding:11px 13px; border-radius:14px; background:var(--bg-card); border:1px solid var(--border); }
+  .gstep .gn{ width:24px; height:24px; flex:none; border-radius:8px; background:rgba(10,132,255,.14); border:1px solid rgba(10,132,255,.4); color:var(--accent); font-size:12px; font-weight:900; display:flex; align-items:center; justify-content:center; }
+  .gstep .gt{ font-size:12.5px; font-weight:800; } .gstep .gd{ font-size:10.5px; font-weight:600; color:var(--muted); margin-top:2px; line-height:1.35; }
+
   @keyframes float{ 0%,100%{transform:translateY(-3px);} 50%{transform:translateY(4px);} }
-  /* CORE = centered full-width apex card */
-  .rk.core{ grid-column:1 / -1; padding:12px 8px 13px; min-height:0; }
-  .rk.core .gem{ width:56px; height:56px; }
-  @keyframes pulse{ 0%,100%{transform:scale(1);filter:brightness(1);} 50%{transform:scale(1.06);filter:brightness(1.3);} }
-  @keyframes spin3d{ 0%,100%{transform:rotateY(0);} 50%{transform:rotateY(22deg);} }
-  @keyframes flick{ 0%,100%{filter:brightness(1);} 35%{filter:brightness(1.4);} 60%{filter:brightness(.92);} }
+  @keyframes pulse{ 0%,100%{transform:scale(1);filter:brightness(1);} 50%{transform:scale(1.06);filter:brightness(1.25);} }
+  @keyframes spin3d{ 0%,100%{transform:rotateY(0);} 50%{transform:rotateY(24deg);} }
+  @keyframes flick{ 0%,100%{filter:brightness(1);} 35%{filter:brightness(1.35);} 60%{filter:brightness(.92);} }
   @keyframes twk{ 0%,100%{transform:rotate(0) scale(1);} 50%{transform:rotate(18deg) scale(1.07);} }
-  .rk .nm{ font-size:12.5px; font-weight:900; letter-spacing:.04em; color:var(--c); margin-top:3px; }
-  .rk .tg{ font-size:9px; font-weight:600; color:var(--muted); line-height:1.25; margin-top:3px; }
-  .rk.core .tg{ margin-top:1px; }
-  .rk .pips{ display:flex; gap:4px; justify-content:center; margin-top:9px; } .rk .pips i{ width:14px; height:4px; border-radius:999px; background:rgba(255,255,255,0.12); } .rk .pips i.on{ background:var(--c); box-shadow:0 0 6px color-mix(in srgb,var(--c) 70%,transparent); }
-  .rk .xp{ font-size:9px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:var(--dim); margin-top:7px; }
-  .rk .prog{ height:5px; border-radius:999px; background:rgba(0,0,0,.4); overflow:hidden; margin-top:7px; } .rk .pf{ height:100%; border-radius:999px; background:var(--c); box-shadow:0 0 6px color-mix(in srgb,var(--c) 60%,transparent); }
+
+  /* ── ladder — poster-style rows (number · medallion · name · tier badges I/II/III) ── */
+  .grid{ display:flex; flex-direction:column; gap:8px; }
+  .tiersHdr{ display:flex; align-items:center; padding:0 10px 5px; }
+  .tiersHdr .sp{ flex:1; }
+  .tiersHdr .th{ width:46px; text-align:center; font-size:10px; font-weight:900; letter-spacing:.16em; color:var(--muted); }
+  .row{ position:relative; display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:14px; overflow:hidden; cursor:pointer; transition:.2s;
+    background:linear-gradient(100deg, color-mix(in srgb,var(--c) 15%,transparent) 0%, rgba(255,255,255,0.018) 52%, rgba(255,255,255,0.01) 100%);
+    border:1px solid color-mix(in srgb,var(--c) 16%,var(--border)); }
+  .row:active{ transform:scale(.992); }
+  .row.cur{ border-color:color-mix(in srgb,var(--c) 58%,transparent); box-shadow:0 0 20px color-mix(in srgb,var(--c) 22%,transparent); background:linear-gradient(100deg, color-mix(in srgb,var(--c) 26%,transparent) 0%, rgba(255,255,255,0.02) 56%); }
+  .row.locked{ opacity:.94; }
+  .row .rnum{ width:22px; flex:none; text-align:center; font-size:15px; font-weight:900; font-variant-numeric:tabular-nums; color:color-mix(in srgb,var(--c) 72%,#fff); opacity:.9; }
+  .row .rmed{ width:46px; height:46px; flex:none; color:var(--c); display:flex; align-items:center; justify-content:center; }
+  .row .rmed img, .row .rmed svg{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 2px 5px rgba(0,0,0,.55)) drop-shadow(0 0 7px color-mix(in srgb,var(--c) 30%,transparent)); }
+  .row .rmed{ animation:none; }
+  .row .rinfo{ flex:1; min-width:0; }
+  .row .rname{ font-size:13px; font-weight:900; letter-spacing:.07em; color:var(--c); line-height:1; }
+  .row .rtag{ font-size:8.5px; font-weight:600; color:var(--muted); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .row .rtiers{ display:flex; gap:1px; flex:none; }
+  .row .rt{ width:46px; height:38px; display:flex; align-items:center; justify-content:center; }
+  .row .rt img{ max-width:100%; max-height:100%; object-fit:contain; display:block; filter:drop-shadow(0 1px 3px rgba(0,0,0,.5)); }
+  .row .rt.lk{ opacity:.4; filter:grayscale(.55); }
+  .row .lockmark{ position:absolute; top:7px; right:9px; }
+  .row .lockmark svg{ width:12px; height:12px; color:var(--dim); }
+  .row .nowtag{ position:absolute; top:6px; right:8px; font-size:7px; font-weight:900; letter-spacing:.08em; padding:2px 6px; border-radius:999px; color:#05060e; background:var(--c); }
 
   .nav { position:absolute; left:0; right:0; bottom:0; z-index:50; padding:10px 12px 26px; display:flex; justify-content:space-around; align-items:flex-end; background:linear-gradient(180deg, rgba(5,6,14,0) 0%, rgba(5,6,14,0.88) 34%, #04040c 100%); backdrop-filter:blur(14px); }
   .nav a{ display:flex; flex-direction:column; align-items:center; gap:4px; padding:6px 8px; min-width:48px; min-height:44px; text-decoration:none; color:var(--dim); } .nav svg{ width:23px; height:23px; } .nav .nl{ font-size:10px; font-weight:800; }
-  .nav .item.active{ color:var(--text); } .nav .item.active svg{ color:var(--accent); filter:drop-shadow(0 0 8px rgba(74,143,255,.75)); }
-  .rk{ cursor:pointer; } .rk:active{ transform:scale(.985); }
+  .nav .item.active{ color:var(--text); } .nav .item.active svg{ color:var(--accent); }
 
-  /* ── rank detail overlay + preview card ── */
+  /* ── rank detail overlay ── */
   .dt{ position:absolute; inset:0; z-index:80; display:none; } .dt.open{ display:block; }
   .dt .scrim{ position:absolute; inset:0; background:rgba(2,2,8,0.74); backdrop-filter:blur(8px); }
   .dt .sheet{ position:absolute; left:0; right:0; bottom:0; max-height:94%; overflow-y:auto; border-radius:30px 30px 0 0; background:linear-gradient(180deg,#0c0e1a,#05060e); border-top:1px solid var(--border); padding:14px 18px 30px; animation:rise .3s cubic-bezier(.2,.8,.2,1); }
@@ -74,6 +110,18 @@
   .dt .grab{ width:42px; height:5px; border-radius:999px; background:rgba(255,255,255,0.18); margin:2px auto 12px; }
   .dt .close{ position:absolute; top:16px; right:16px; width:34px; height:34px; border-radius:50%; border:none; background:rgba(255,255,255,0.08); color:var(--text); cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:2; } .dt .close svg{ width:18px; height:18px; }
   .dhead{ text-align:center; margin-bottom:13px; } .dhead .dnum{ font-size:12px; font-weight:900; color:var(--c); opacity:.7; letter-spacing:.1em; } .dhead .dname{ font-size:22px; font-weight:900; letter-spacing:.04em; color:var(--c); margin-top:2px; } .dhead .dtag{ font-size:12px; color:var(--muted); margin-top:4px; }
+  /* tier breakdown */
+  .tiers{ margin-top:16px; } .tiers .th{ font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); margin-bottom:9px; }
+  .tier-row{ display:flex; align-items:center; gap:10px; padding:11px 12px; border-radius:13px; background:var(--bg-card); border:1px solid var(--border); margin-bottom:7px; }
+  .tier-row .tbadge{ width:50px; height:30px; flex:none; display:flex; align-items:center; justify-content:center; } .tier-row .tbadge img{ max-width:100%; max-height:100%; object-fit:contain; }
+  .tier-row .rom{ width:24px; flex:none; font-size:13px; font-weight:900; color:var(--c); text-align:center; }
+  .tier-row .tn{ flex:1; font-size:12px; font-weight:700; color:var(--text); } .tier-row .txp{ font-size:11px; font-weight:800; color:var(--muted); font-variant-numeric:tabular-nums; }
+  .tier-row.done{ opacity:.7; } .tier-row.here{ border-color:color-mix(in srgb,var(--c) 55%,transparent); box-shadow:0 0 14px color-mix(in srgb,var(--c) 18%,transparent); } .tier-row .chk{ width:16px;height:16px;flex:none;color:var(--c);} .tier-row .chk svg{width:100%;height:100%;}
+
+  .dt .perks{ margin-top:16px; } .dt .perks .ph{ font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); margin-bottom:9px; } .dt .perk{ display:flex; align-items:center; gap:9px; font-size:13.5px; font-weight:600; color:var(--text); padding:12px; border-radius:13px; background:var(--bg-card); border:1px solid var(--border); margin-bottom:8px; } .dt .perk svg{ width:15px; height:15px; flex:none; color:var(--c); }
+  .dt .status{ margin-top:14px; display:flex; align-items:center; justify-content:center; gap:8px; padding:14px; border-radius:14px; font-size:13px; font-weight:800; } .dt .status svg{ width:16px; height:16px; } .dt .status.lock{ color:var(--c); background:color-mix(in srgb,var(--c) 10%,transparent); border:1px solid color-mix(in srgb,var(--c) 30%,transparent); } .dt .status.have{ color:var(--c); background:color-mix(in srgb,var(--c) 12%,transparent); border:1px solid color-mix(in srgb,var(--c) 32%,transparent); }
+  .dt .note{ text-align:center; font-size:11.5px; color:var(--dim); margin-top:10px; font-weight:600; line-height:1.5; }
+
   /* ════ LARGE COLLECTIBLE PLAYER CARD · Rank=theme · Tier=intensity · Level=badge ════ */
   @property --ang{ syntax:'<angle>'; initial-value:0deg; inherits:false; }
   .pcard{ position:relative; border-radius:26px; padding:18px 15px 16px; overflow:hidden; isolation:isolate;
@@ -86,7 +134,6 @@
     transform:perspective(1100px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)); transform-style:preserve-3d; transition:transform .25s cubic-bezier(.2,.7,.3,1); }
   .pcard.t2{ box-shadow:0 30px 66px rgba(0,0,0,.62), inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -34px 64px rgba(0,0,0,.42), 0 0 34px color-mix(in srgb,var(--c) 14%,transparent); }
   .pcard.t3{ box-shadow:0 32px 70px rgba(0,0,0,.64), inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -34px 64px rgba(0,0,0,.42), 0 0 50px color-mix(in srgb,var(--c) 22%,transparent); }
-  /* ── BORDER SYSTEM — thin silver (t1) → glowing (t2) → animated metallic (t3) ── */
   .pcard::before{ content:''; position:absolute; inset:0; border-radius:26px; padding:1.2px; z-index:7; pointer-events:none; opacity:.7;
     background:linear-gradient(160deg, #cfd4dd, color-mix(in srgb,var(--c) 42%,#6b7079) 45%, #2f333d 76%, #aeb4c0);
     -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; }
@@ -94,7 +141,6 @@
   .pcard.t3::before{ padding:1.9px; opacity:1; animation:angspin 8s linear infinite;
     background:conic-gradient(from var(--ang), #e9edf4, color-mix(in srgb,var(--c) 65%,#fff), #5b616d, #23262f, color-mix(in srgb,var(--c) 82%,#fff), #aeb4c0, #2f333d, #cfd4dd, #e9edf4); }
   @keyframes angspin{ to{ --ang:360deg; } }
-  /* corner frames — hidden (t1), subtle pulse (t2), strong (t3) */
   .pcard .corners i{ position:absolute; width:14px; height:14px; z-index:8; pointer-events:none; border:1.5px solid color-mix(in srgb,var(--c) 62%,#fff); opacity:0; box-shadow:0 0 8px color-mix(in srgb,var(--c) 45%,transparent); }
   .pcard .corners .tl{ top:10px; left:10px; border-right:0; border-bottom:0; border-radius:7px 0 0 0; }
   .pcard .corners .tr{ top:10px; right:10px; border-left:0; border-bottom:0; border-radius:0 7px 0 0; }
@@ -103,7 +149,6 @@
   .pcard.t2 .corners i{ opacity:.5; animation:cornpulse 4s ease-in-out infinite; }
   .pcard.t3 .corners i{ opacity:.85; width:19px; height:19px; border-width:1.6px; box-shadow:0 0 13px color-mix(in srgb,var(--c) 60%,transparent); animation:cornpulse 2.6s ease-in-out infinite; }
   @keyframes cornpulse{ 0%,100%{ opacity:.38; } 50%{ opacity:.9; } }
-  /* ── BACKGROUND SYSTEM — fog (all) + cracks (t2/t3) ── */
   .pcard .patmos{ position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden; border-radius:26px; }
   .pcard .patmos i{ position:absolute; border-radius:50%; filter:blur(28px); opacity:.4; mix-blend-mode:screen; }
   .pcard .patmos .f1{ width:200px; height:200px; left:-44px; top:-34px; background:radial-gradient(circle, color-mix(in srgb,var(--c) 55%,transparent), transparent 70%); animation:fog1 17s ease-in-out infinite; }
@@ -120,7 +165,6 @@
   .pcard.t2 .cracks{ opacity:.22; }
   .pcard.t3 .cracks{ opacity:.5; filter:brightness(1.7) saturate(.55); animation:crackglow 5s ease-in-out infinite; }
   @keyframes crackglow{ 0%,100%{ opacity:.36; } 50%{ opacity:.62; } }
-  /* ── particle field (parametric per rank; density set in JS by tier) ── */
   .pcard .pfx{ position:absolute; inset:0; z-index:1; pointer-events:none; overflow:hidden; border-radius:26px; transform:translate3d(calc(var(--px,0)*-9px),calc(var(--py,0)*-9px),0); }
   .pcard .pfx span{ position:absolute; opacity:0; background:var(--c); box-shadow:0 0 6px color-mix(in srgb,var(--c) 80%,transparent); }
   .pcard .pfx .dust{ border-radius:50%; animation:p_rise var(--d,6s) linear var(--del,0s) infinite; }
@@ -133,27 +177,23 @@
   @keyframes p_riseR{ 0%{opacity:0;transform:translateY(18px) rotate(0) scale(.5);} 20%{opacity:.8;} 100%{opacity:0;transform:translateY(-170px) rotate(240deg) scale(1);} }
   @keyframes p_riseS{ 0%{opacity:0;transform:translateY(22px) scaleY(.6);} 20%{opacity:.55;} 100%{opacity:0;transform:translateY(-190px) scaleY(1.3);} }
   @keyframes p_orbit{ 0%{opacity:0;transform:rotate(0) translateX(72px) scale(.5);} 14%{opacity:.85;} 84%{opacity:.55;} 100%{opacity:0;transform:rotate(360deg) translateX(72px) scale(1);} }
-  /* ── shimmer sweep (t3 only) + scanlines ── */
   .pcard .sweep{ position:absolute; inset:0; z-index:6; pointer-events:none; border-radius:26px; overflow:hidden; }
   .pcard .sweep::after{ content:''; position:absolute; top:-50%; left:0; width:46%; height:200%; transform:translateX(-130px) rotate(18deg); opacity:0;
     background:linear-gradient(90deg, transparent, color-mix(in srgb,var(--c) 22%,rgba(255,255,255,0.2)), transparent); }
   .pcard.t3 .sweep::after{ animation:sweep 5.5s ease-in-out infinite; }
   @keyframes sweep{ 0%,68%{ transform:translateX(-130px) rotate(18deg); opacity:0; } 76%{ opacity:1; } 100%{ transform:translateX(440px) rotate(18deg); opacity:0; } }
   .pcard .scan{ position:absolute; inset:0; z-index:6; pointer-events:none; border-radius:26px; opacity:.4; mix-blend-mode:overlay; background:repeating-linear-gradient(0deg, transparent 0 2px, rgba(255,255,255,.03) 2px 3px); }
-  /* ── UNLOCKED certification stamp ── */
   .pcard .ownrow{ display:flex; justify-content:center; position:relative; z-index:5; margin-bottom:10px; }
   .lockpill{ display:inline-flex; align-items:center; gap:5px; font-size:8px; font-weight:900; letter-spacing:.18em; text-transform:uppercase; padding:4px 11px; border-radius:999px; }
   .lockpill svg{ width:10px; height:10px; }
-  .lockpill.have{ color:color-mix(in srgb,var(--good) 92%,#fff); background:rgba(52,211,153,.1); border:1px solid rgba(52,211,153,.42); box-shadow:0 0 12px rgba(52,211,153,.28); }
+  .lockpill.have{ color:color-mix(in srgb,var(--c) 92%,#fff); background:color-mix(in srgb,var(--c) 12%,transparent); border:1px solid color-mix(in srgb,var(--c) 42%,transparent); }
   .lockpill.lk{ color:color-mix(in srgb,var(--c) 72%,#fff); background:color-mix(in srgb,var(--c) 8%,transparent); border:1px solid color-mix(in srgb,var(--c) 32%,transparent); }
-  /* ── ZONE 1 · identity ── */
   .pcard .crow{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; position:relative; z-index:5; }
   .pcard .who .nm{ font-size:19px; font-weight:900; letter-spacing:.01em; line-height:1; text-shadow:0 2px 8px rgba(0,0,0,.55); }
   .pcard .who .sub{ display:flex; align-items:center; gap:7px; margin-top:6px; }
   .pcard .who .cls{ font-size:9.5px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; color:color-mix(in srgb,var(--c) 72%,#fff); }
   .pcard .who .dot{ width:3px; height:3px; border-radius:50%; background:var(--dim); }
   .pcard .who .pid{ font-size:9.5px; font-weight:700; letter-spacing:.04em; color:var(--muted); font-variant-numeric:tabular-nums; }
-  /* ── LEVEL BADGE — prestige evolves lp1→lp5 ── */
   .pcard .lvlbadge{ position:relative; flex:none; width:50px; height:56px; display:flex; align-items:center; justify-content:center; transform:translate3d(calc(var(--px,0)*7px),calc(var(--py,0)*7px),0); }
   .pcard .lvlbadge .hex{ position:absolute; inset:0; z-index:1; clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
     background:linear-gradient(160deg, color-mix(in srgb,var(--c) 50%,#fff), color-mix(in srgb,var(--c) 30%,#1a1d27) 55%, #0c0e16);
@@ -172,7 +212,6 @@
   .pcard .lvlbadge.lp5 .aura{ opacity:1; animation:angspin 3.2s linear infinite; background:conic-gradient(from var(--ang), transparent, #fff, color-mix(in srgb,var(--c) 82%,#fff), transparent 46%); }
   .pcard .lvlbadge.lp5 .spk{ animation:spark 1.8s ease-in-out infinite; } .pcard .lvlbadge.lp5 .lv{ font-size:21px; text-shadow:0 0 12px color-mix(in srgb,var(--c) 82%,transparent); }
   @keyframes spark{ 0%,100%{ opacity:0; transform:translateY(0) scale(.6); } 40%{ opacity:1; transform:translateY(-8px) scale(1); } }
-  /* ── ZONE 2 · artifact showcase (lighting/fragments scale by tier) ── */
   .pcard .stg{ position:relative; height:152px; display:flex; align-items:center; justify-content:center; z-index:3; margin-top:2px; transform-style:preserve-3d; }
   .pcard .rays{ position:absolute; inset:0; margin:auto; width:230px; height:230px; z-index:1; pointer-events:none; mix-blend-mode:screen; opacity:0;
     background:conic-gradient(from 0deg, transparent 0deg, color-mix(in srgb,var(--c) 26%,transparent) 7deg, transparent 15deg, transparent 42deg, color-mix(in srgb,var(--c) 18%,transparent) 49deg, transparent 57deg, transparent 92deg, color-mix(in srgb,var(--c) 24%,transparent) 99deg, transparent 107deg, transparent 150deg, color-mix(in srgb,var(--c) 18%,transparent) 157deg, transparent 165deg, transparent 210deg, color-mix(in srgb,var(--c) 24%,transparent) 217deg, transparent 225deg, transparent 270deg, color-mix(in srgb,var(--c) 18%,transparent) 277deg, transparent 285deg, transparent 320deg, color-mix(in srgb,var(--c) 24%,transparent) 327deg, transparent 335deg);
@@ -189,16 +228,15 @@
   .pcard .pshadow{ position:absolute; bottom:12px; left:50%; width:118px; height:20px; z-index:2; border-radius:50%; background:radial-gradient(ellipse, rgba(0,0,0,.6), transparent 70%); filter:blur(4px); animation:pshad 5s ease-in-out infinite; }
   .pcard.t3 .pshadow{ width:128px; height:23px; }
   @keyframes pshad{ 0%,100%{ transform:translateX(-50%) scale(1); opacity:.6; } 50%{ transform:translateX(-50%) scale(.82); opacity:.4; } }
-  .pcard .gem{ width:124px; height:124px; position:relative; z-index:4; display:flex; align-items:center; justify-content:center; transform:translate3d(calc(var(--px,0)*14px),calc(var(--py,0)*14px),0); }
+  .pcard .gem{ width:124px; height:124px; position:relative; z-index:4; display:flex; align-items:center; justify-content:center; color:var(--c); transform:translate3d(calc(var(--px,0)*14px),calc(var(--py,0)*14px),0); }
   .pcard .gemfloat{ width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
-  .pcard.t2 .gemfloat{ animation:lift 4.5s ease-in-out infinite; } .pcard.t3 .gemfloat{ animation:liftHi 4s ease-in-out infinite; }
+  .pcard .gemfloat, .pcard.t2 .gemfloat, .pcard.t3 .gemfloat{ animation:none !important; }
   @keyframes lift{ 0%,100%{ transform:translateY(2px); } 50%{ transform:translateY(-6px); } }
   @keyframes liftHi{ 0%,100%{ transform:translateY(4px) rotate(-1.2deg); } 50%{ transform:translateY(-12px) rotate(1.2deg); } }
   .pcard .gemspin{ width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
-  .pcard .gem img{ width:100%; height:100%; object-fit:contain; object-position:center; display:block; -webkit-mask:radial-gradient(circle at 50% 47%, #000 64%, transparent 93%); mask:radial-gradient(circle at 50% 47%, #000 64%, transparent 93%); filter:drop-shadow(0 6px 16px rgba(0,0,0,.42)) drop-shadow(0 0 18px color-mix(in srgb,var(--c) 42%,transparent)); }
-  .pcard.t2 .gem img{ filter:drop-shadow(0 7px 18px rgba(0,0,0,.42)) drop-shadow(0 0 22px color-mix(in srgb,var(--c) 54%,transparent)); }
-  .pcard.t3 .gem img{ filter:drop-shadow(0 9px 22px rgba(0,0,0,.46)) drop-shadow(0 0 30px color-mix(in srgb,var(--c) 68%,transparent)) brightness(1.08); }
-  /* ── ZONE 3 · rank title + tier badge ── */
+  .pcard .gem svg, .pcard .gem img{ width:100%; height:100%; object-fit:contain; object-position:center; display:block; filter:drop-shadow(0 6px 16px rgba(0,0,0,.42)) drop-shadow(0 0 18px color-mix(in srgb,var(--c) 42%,transparent)); }
+  .pcard.t2 .gem svg, .pcard.t2 .gem img{ filter:drop-shadow(0 7px 18px rgba(0,0,0,.42)) drop-shadow(0 0 22px color-mix(in srgb,var(--c) 54%,transparent)); }
+  .pcard.t3 .gem svg, .pcard.t3 .gem img{ filter:drop-shadow(0 9px 22px rgba(0,0,0,.46)) drop-shadow(0 0 30px color-mix(in srgb,var(--c) 68%,transparent)) brightness(1.08); }
   .pcard .rl{ text-align:center; position:relative; z-index:5; margin-top:4px; }
   .pcard .r1{ font-size:30px; font-weight:900; letter-spacing:.06em; line-height:1; color:var(--c); text-shadow:0 0 12px color-mix(in srgb,var(--c) 30%,transparent), 0 2px 4px rgba(0,0,0,.5); }
   .pcard.t2 .r1, .pcard.t3 .r1{ animation:titleglow 4s ease-in-out infinite; }
@@ -214,64 +252,125 @@
   .pcard.t3 .tier::after{ content:''; position:absolute; inset:0; background:linear-gradient(90deg, transparent, rgba(255,255,255,.75), transparent); transform:translateX(-120%); animation:tiershine 3.6s ease-in-out infinite; }
   @keyframes tiershine{ 0%,55%{ transform:translateX(-120%); } 100%{ transform:translateX(120%); } }
   .pcard .r2{ font-size:9.5px; font-weight:600; color:var(--muted); margin-top:8px; line-height:1.3; }
-  /* ── ZONE 4 · stat attributes (premium glass) ── */
   .pcard .sbar{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:16px; position:relative; z-index:5; }
   .pcard .stat{ display:flex; flex-direction:column; align-items:center; gap:5px; padding:11px 5px 10px; border-radius:14px; background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.015)); border:1px solid rgba(255,255,255,.09); box-shadow:inset 0 1px 0 rgba(255,255,255,.1), 0 6px 14px rgba(0,0,0,.25); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); transition:.2s; }
   .pcard.t2 .stat, .pcard.t3 .stat{ border-color:color-mix(in srgb,var(--c) 22%,rgba(255,255,255,.09)); }
   .pcard.t3 .stat{ box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 6px 16px rgba(0,0,0,.3), 0 0 12px color-mix(in srgb,var(--c) 13%,transparent); }
-  .pcard .stat:hover{ border-color:color-mix(in srgb,var(--c) 50%,transparent); box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 0 16px color-mix(in srgb,var(--c) 24%,transparent); transform:translateY(-2px); }
   .pcard .stat .ic{ width:14px; height:14px; color:color-mix(in srgb,var(--c) 72%,#fff); opacity:.92; }
   .pcard .stat .v{ font-size:14px; font-weight:900; line-height:1; font-variant-numeric:tabular-nums; }
   .pcard .stat .k{ font-size:7.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--dim); }
   .pcard .stat.pw .v{ color:var(--c); text-shadow:0 0 10px color-mix(in srgb,var(--c) 50%,transparent); }
   @media (prefers-reduced-motion: reduce){ .pcard, .pcard *, .pcard::before{ animation:none!important; } .pcard{ transform:none!important; } }
-  .dt .perks{ margin-top:16px; } .dt .perks .ph{ font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); margin-bottom:9px; } .dt .perk{ display:flex; align-items:center; gap:9px; font-size:13.5px; font-weight:600; color:var(--text); padding:12px; border-radius:13px; background:var(--bg-card); border:1px solid var(--border); margin-bottom:8px; } .dt .perk svg{ width:15px; height:15px; flex:none; color:var(--c); }
-  .dt .status{ margin-top:14px; display:flex; align-items:center; justify-content:center; gap:8px; padding:14px; border-radius:14px; font-size:13px; font-weight:800; } .dt .status svg{ width:16px; height:16px; } .dt .status.lock{ color:var(--c); background:color-mix(in srgb,var(--c) 10%,transparent); border:1px solid color-mix(in srgb,var(--c) 30%,transparent); } .dt .status.have{ color:var(--good); background:rgba(52,211,153,.1); border:1px solid rgba(52,211,153,.35); }
-  .dt .note{ text-align:center; font-size:11.5px; color:var(--dim); margin-top:10px; font-weight:600; line-height:1.5; }
+
+  /* ── rank-up celebration ── */
+  .ru{ position:absolute; inset:0; z-index:90; display:none; align-items:center; justify-content:center; padding:24px; }
+  .ru.open{ display:flex; }
+  .ru .ruscrim{ position:absolute; inset:0; background:radial-gradient(circle at 50% 42%, color-mix(in srgb,var(--c,#0A84FF) 26%,rgba(2,2,8,.92)), rgba(2,2,8,.95)); backdrop-filter:blur(10px); }
+  .ru .rubox{ position:relative; text-align:center; animation:rupop .5s cubic-bezier(.2,1.1,.4,1); }
+  @keyframes rupop{ from{ transform:scale(.7); opacity:0; } to{ transform:scale(1); opacity:1; } }
+  .ru .rkicker{ font-size:11px; font-weight:900; letter-spacing:.3em; text-transform:uppercase; color:var(--c,#0A84FF); }
+  .ru .rgem{ width:140px; height:140px; margin:14px auto 6px; color:var(--c,#0A84FF); filter:drop-shadow(0 0 30px color-mix(in srgb,var(--c,#0A84FF) 60%,transparent)); } .ru .rgem svg, .ru .rgem img{ width:100%; height:100%; object-fit:contain; }
+  @keyframes rufloat{ 0%,100%{ transform:translateY(-6px); } 50%{ transform:translateY(8px); } }
+  .ru .rname{ font-size:34px; font-weight:900; letter-spacing:.04em; color:var(--c,#0A84FF); text-shadow:0 0 24px color-mix(in srgb,var(--c,#0A84FF) 55%,transparent); }
+  .ru .rsub{ font-size:12px; font-weight:700; color:var(--muted); margin-top:6px; }
+  .ru .rperks{ margin:18px auto 0; max-width:240px; display:flex; flex-direction:column; gap:7px; }
+  .ru .rp{ display:flex; align-items:center; gap:8px; justify-content:center; font-size:12.5px; font-weight:700; color:var(--text); padding:9px 12px; border-radius:11px; background:color-mix(in srgb,var(--c,#0A84FF) 10%,transparent); border:1px solid color-mix(in srgb,var(--c,#0A84FF) 30%,transparent); } .ru .rp svg{ width:14px; height:14px; color:var(--c,#0A84FF); flex:none; }
+  .ru .rbtn{ margin-top:22px; padding:14px 40px; border-radius:14px; border:none; font-size:14px; font-weight:900; color:#04040c; background:linear-gradient(180deg, color-mix(in srgb,var(--c,#0A84FF) 86%,#fff), var(--c,#0A84FF)); cursor:pointer; box-shadow:0 0 24px color-mix(in srgb,var(--c,#0A84FF) 45%,transparent); }
+  .ru .rcfx{ position:absolute; inset:0; pointer-events:none; overflow:hidden; } .ru .rcfx i{ position:absolute; top:46%; left:50%; width:6px; height:6px; border-radius:1px; background:var(--c,#0A84FF); box-shadow:0 0 8px var(--c,#0A84FF); opacity:0; animation:ruburst 1.1s ease-out forwards; }
+  @keyframes ruburst{ 0%{ opacity:1; transform:translate(0,0) scale(1); } 100%{ opacity:0; transform:translate(var(--tx,0),var(--ty,0)) scale(.3); } }
+  @media (prefers-reduced-motion: reduce){ .ru .rgem,.ru .rcfx i{ animation:none!important; } }
 </style>
 </head>
 <body>
   <div class="phone">
-    <div class="bg" id="bgEl"></div><div class="bgglow" id="bgGlow"></div><div class="bgfx" id="bgfx"></div><div class="notch"></div>
+    <div id="ambBg"></div><div id="ambStars"></div><div id="ambCelestial"></div><div id="ambOverlay"></div>
+    <div class="bgglow" id="bgGlow"></div>
+    <div class="notch"></div>
     <div class="frame">
-      <div class="hdr"><a class="back" href="23-profile.html" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"/></svg></a><div><div class="ttl">Ranks</div><div class="sub" id="curSub">Stone I</div></div></div>
+      <div class="hdr">
+        <a class="back" href="23-profile.html" data-fallback="20-dashboard.html" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"/></svg></a>
+        <div><div class="ttl">Ranks</div><div class="sub" id="curSub">Sand I</div></div>
+        <div class="sp"></div>
+        <button class="help" id="helpBtn" aria-label="How ranks work">?</button>
+      </div>
       <div class="scroll">
-        <div class="season"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 3v18M3 12h18M6 6l12 12M18 6L6 18"/></svg>11 ranks · each has 3 tiers (I·II·III). CORE is the apex — it resets every season.</div>
+        <!-- HERO — current rank card + progress to next -->
+        <div id="hero"></div>
+        <div class="heroProg" id="heroProg"></div>
+
+        <!-- SEASON -->
+        <div class="sec"><h2>Season</h2><span class="meta" id="seasonMeta"></span></div>
+        <div class="season" id="seasonPanel"></div>
+
+        <!-- HOW TO RANK UP -->
+        <div class="sec"><h2>How to rank up</h2></div>
+        <div class="guide">
+          <div class="gstep"><div class="gn">1</div><div><div class="gt">Earn XP every day</div><div class="gd">Complete daily quests, hold your streak and finish boss quests — every action feeds your XP.</div></div></div>
+          <div class="gstep"><div class="gn">2</div><div><div class="gt">Climb the tiers</div><div class="gd">Each rank has three tiers — I, II, III. Fill the bar to advance a tier, then break into the next rank.</div></div></div>
+          <div class="gstep"><div class="gn">3</div><div><div class="gt">Unlock perks &amp; cosmetics</div><div class="gd">Higher ranks unlock chest luck, frames, auras and exclusive card effects. Tap any rank to preview yours.</div></div></div>
+        </div>
+
+        <!-- LADDER -->
+        <div class="sec"><h2>Ranking system</h2><span class="meta">11 ranks · 3 tiers each</span></div>
+        <div class="tiersHdr"><span class="sp"></span><span class="th">I</span><span class="th">II</span><span class="th">III</span></div>
         <div class="grid" id="grid"></div>
       </div>
       <nav class="nav" aria-label="Primary">
-        <a class="item" href="20-dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 11l9-7 9 7M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/></svg><span class="nl">Home</span></a>
-        <a class="item" href="21-quests.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg><span class="nl">Quests</span></a>
-        <a class="item" href="27-shop.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M6 2L3 6v13a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"/></svg><span class="nl">Shop</span></a>
-        <a class="item active" href="23-profile.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="nl">Profile</span></a>
-        <a class="item active" href="24-more.html" aria-current="page"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg><span class="nl">More</span></a>
+        <a class="item" href="20-dashboard.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 11l9-7 9 7M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/></svg>
+          <span class="nl">Home</span>
+        </a>
+        <a class="item" href="21-quests.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M9 5h11M9 12h11M9 19h11M4 5l1 1 2-2M4 12l1 1 2-2M4 19l1 1 2-2"/></svg>
+          <span class="nl">Quests</span>
+        </a>
+        <a class="item" href="coach.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+          <span class="nl">Coach</span>
+        </a>
+        <a class="item" href="community.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M7 8h10M7 11h7M7 14h5" stroke-linecap="round"/></svg>
+          <span class="nl">Community</span>
+        </a>
+        <a class="item active" href="24-more.html" aria-current="page">
+          <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2.5"/><circle cx="12" cy="12" r="2.5"/><circle cx="19" cy="12" r="2.5"/></svg>
+          <span class="nl">More</span>
+        </a>
       </nav>
       <div class="home-indicator"></div>
     </div>
+
+    <!-- rank detail -->
     <div class="dt" id="dt" role="dialog" aria-modal="true">
       <div class="scrim" id="dtScrim"></div>
       <div class="sheet"><div class="grab"></div><button class="close" id="dtClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 6l12 12M18 6L6 18"/></svg></button><div id="dtBody"></div></div>
     </div>
+
+    <!-- rank-up celebration -->
+    <div class="ru" id="ru" role="dialog" aria-modal="true"><div class="ruscrim"></div><div class="rcfx" id="ruCfx"></div><div class="rubox" id="ruBox"></div></div>
   </div>
+
   <script src="_lib/core-sfx.js"></script>
-  <script src="_lib/core-state.js"></script>
+  <script src="_lib/dash-ambient.js"></script>
+  <script src="_lib/core-state.js?v=20260607c"></script>
+  <script src="_lib/core-gems.js?v=20260607l"></script>
+  <script src="_lib/core-help.js"></script>
   <script>
   (function(){
     var S=window.coreState, qs=function(s){return document.querySelector(s);};
     try{ if(/[?&]demo=1/.test(location.search)) S.seedDemo(); }catch(e){}
-    var ICON=S.RANK_ICONS;
-    var ANIM={Stone:'pulse 4s ease-in-out infinite',Earth:'float 5s ease-in-out infinite',Leaf:'float 4s ease-in-out infinite',Water:'float 3.4s ease-in-out infinite',Crystal:'pulse 2.8s ease-in-out infinite',Gold:'spin3d 6s ease-in-out infinite',Ember:'flick 1.6s ease-in-out infinite',Wind:'float 3.6s ease-in-out infinite',Aurora:'twk 4.4s ease-in-out infinite',Ascend:'float 4s ease-in-out infinite',CORE:'pulse 2.4s ease-in-out infinite'};
+    // dev/screenshot helper: ?xp=N forces an XP value so any rank/tier can be previewed
+    try{ var xm=location.search.match(/[?&]xp=(\d+)/); if(xm){ var st=S.read(); st.xp=+xm[1]; S.write(st); } }catch(e){}
+
     var CHECK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12l4 4 10-11"/></svg>';
     var LOCK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+    var STAR='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l2.5 5.6 6.1.6-4.6 4.1 1.4 6L12 16.8 6.6 19.3 8 13.3 3.4 9.2l6.1-.6z"/></svg>';
 
-    function pad(n){ return (n<10?'0':'')+n; }
-    function playerName(){ var n=''; try{ var t=JSON.parse(localStorage.getItem('coreOnboardTrial')||'{}'); n=t.name||t.firstName||''; }catch(e){} return n||'Player'; }
-    function playerId(){ try{ return localStorage.getItem('corePlayerId')||'CORE-XXXX-XXXX'; }catch(e){ return 'CORE-XXXX-XXXX'; } }
-
-    // Per-rank rarity particle system (single design, evolves by rank).
-    var FX={ Stone:{c:'dust',n:16,a:1,b:2.4,s0:6,s1:10}, Earth:{c:'shard',n:13,a:1.6,b:3.2,s0:6,s1:9}, Leaf:{c:'dust',n:15,a:1.4,b:3,s0:5,s1:9}, Water:{c:'streak',n:14,a:1.3,b:2,s0:4,s1:7}, Crystal:{c:'shard',n:15,a:1.6,b:3.4,s0:5,s1:8}, Gold:{c:'ember',n:16,a:1.2,b:2.6,s0:4,s1:7}, Ember:{c:'ember',n:20,a:1.4,b:3,s0:3,s1:5.5}, Wind:{c:'streak',n:16,a:1.2,b:2,s0:3.5,s1:6}, Aurora:{c:'streak',n:16,a:1.6,b:2.6,s0:5,s1:9}, Ascend:{c:'shard',n:17,a:1.6,b:3.4,s0:4,s1:7}, CORE:{c:'orbit',n:22,a:1.4,b:3,s0:6,s1:11} };
+    // Per-rank gem animation + particle field — keyed to the NEW ladder.
+    var ANIM={Sand:'float 5s ease-in-out infinite',Clay:'float 4.6s ease-in-out infinite',Stone:'pulse 4s ease-in-out infinite',Copper:'spin3d 6s ease-in-out infinite',Silver:'spin3d 5s ease-in-out infinite',Gold:'spin3d 5.5s ease-in-out infinite',Emerald:'pulse 3s ease-in-out infinite',Sapphire:'float 3.4s ease-in-out infinite',Obsidian:'flick 2.2s ease-in-out infinite',Solar:'pulse 2.4s ease-in-out infinite',Celestial:'twk 4s ease-in-out infinite'};
+    var FX={ Sand:{c:'dust',n:14,a:1,b:2.4,s0:6,s1:10}, Clay:{c:'dust',n:13,a:1.4,b:3,s0:6,s1:9}, Stone:{c:'shard',n:13,a:1.6,b:3.2,s0:6,s1:9}, Copper:{c:'ember',n:14,a:1.2,b:2.6,s0:4.5,s1:7.5}, Silver:{c:'shard',n:15,a:1.4,b:3,s0:5,s1:8}, Gold:{c:'ember',n:16,a:1.2,b:2.6,s0:4,s1:7}, Emerald:{c:'shard',n:15,a:1.6,b:3.2,s0:5,s1:8}, Sapphire:{c:'streak',n:15,a:1.3,b:2,s0:4,s1:7}, Obsidian:{c:'shard',n:17,a:1.6,b:3.4,s0:4,s1:7}, Solar:{c:'ember',n:20,a:1.4,b:3,s0:3,s1:5.5}, Celestial:{c:'orbit',n:22,a:1.4,b:3,s0:6,s1:11} };
     function particles(name,tier){
-      var f=FX[name]||FX.Stone, mul=tier===1?0.7:tier===2?1:1.4, n=Math.round(f.n*mul), html='';
+      var f=FX[name]||FX.Sand, mul=tier===1?0.7:tier===2?1:1.4, n=Math.round(f.n*mul), html='';
       for(var i=0;i<n;i++){
         var t=i/n, sz=(f.a+t*(f.b-f.a)).toFixed(1), sp=(f.s0+((i*37)%100)/100*(f.s1-f.s0)).toFixed(1), del=((i%9)*0.6).toFixed(1);
         var left=(i*53)%100, top=(f.c==='orbit')?46:(56+((i*29)%44)), w=sz, h=(f.c==='streak')?(sz*7).toFixed(1):sz;
@@ -279,9 +378,17 @@
       }
       return html;
     }
-    // Previewed tier for rank `idx`: current rank → real tier · owned → III (mastered) · locked → I (starter) · apex → III.
+    function gem(name,tier){ var G=window.coreGems; if(!G) return ''; var f=G.img||G.svg; return f?f.call(G,name,{tier:tier}):''; }
+
+    function pad(n){ return (n<10?'0':'')+n; }
+    function playerName(){ var n=''; try{ var t=JSON.parse(localStorage.getItem('coreOnboardTrial')||'{}'); n=t.name||t.firstName||''; }catch(e){} return n||'Player'; }
+    function playerId(){ try{ return localStorage.getItem('corePlayerId')||'CORE-XXXX-XXXX'; }catch(e){ return 'CORE-XXXX-XXXX'; } }
+    var TITLES=['First Step','Quest Starter','Focused','Disciplined','Unbreakable','Relentless','Ascendant'];
+    function title(level){ var i=Math.min(TITLES.length-1, Math.floor((level-1)/8)); return TITLES[i]; }
+
+    // Previewed tier for rank `idx`: current rank -> real tier · owned -> III (mastered) · locked -> I (starter).
     function tierFor(idx){
-      var cur=S.rankTier(S.read().xp||0); if(!S.RANKS[idx+1]) return 2;
+      var cur=S.rankTier(S.read().xp||0);
       if(idx===cur.idx) return Math.max(0,Math.min(2,cur.sub||0));
       return idx<cur.idx?2:0;
     }
@@ -294,24 +401,20 @@
     };
 
     // Build the player card AS IT WOULD LOOK at rank `idx`, with the player's real stats.
-    // Rank = element/theme · Tier = evolution/intensity · Level = badge prestige.
     function buildPreview(idx){
-      var s=S.read(), r=S.RANKS[idx], isCore=!S.RANKS[idx+1];
+      var s=S.read(), r=S.RANKS[idx];
       var level=S.levelFor(s.xp||0), xp=s.xp||0, power=S.corePower(), streak=(s.streak&&s.streak.days)||0;
       var cur=S.rankTier(s.xp||0).idx, owned=idx<=cur, here=idx===cur;
       var tIdx=tierFor(idx), tier=tIdx+1, ROM=['I','II','III'], roman=ROM[tIdx];
       var lp=level>=50?5:level>=21?4:level>=11?3:level>=6?2:1;
-      var rname=isCore?'CORE':r.name.toUpperCase();
-      var cls=(s.class||'Warrior').replace(/^\w/,function(c){return c.toUpperCase();});
+      var rname=r.name.toUpperCase();
+      var cls=(s.class||title(level)).replace(/^\w/,function(c){return c.toUpperCase();});
       var pill = here ? '<span class="lockpill have">'+CHECK+'Your rank</span>' : owned ? '<span class="lockpill have">'+CHECK+'Unlocked</span>' : '<span class="lockpill lk">'+LOCK+'Locked preview</span>';
       var sv='--c:'+r.color+';--c1:'+(r.c1||r.color)+';--c2:'+(r.c2||'#0a0b14');
-      // tier badge: emblem (t3) + pips(×tier) + label
       var pips=''; for(var p=0;p<tier;p++){ pips+='<i class="tp"></i>'; }
-      var tierBadge='<span class="tier">'+(tier===3?TIEREMBLEM:'')+pips+'<span>'+(isCore?'APEX':'TIER '+roman)+'</span></span>';
-      // level prestige badge
+      var tierBadge='<span class="tier">'+(tier===3?TIEREMBLEM:'')+pips+'<span>TIER '+roman+'</span></span>';
       var sparks=''; if(lp>=4){ var SP=[[16,22],[80,28],[50,6]], ns=lp>=5?3:2; for(var k=0;k<ns;k++){ sparks+='<span class="spk" style="left:'+SP[k][0]+'%;top:'+SP[k][1]+'%;animation-delay:'+(k*0.6)+'s"></span>'; } }
       var lvlBadge='<div class="lvlbadge col lp'+lp+'"><div class="aura"></div><div class="hex"></div>'+sparks+'<span class="lk">LVL</span><span class="lv">'+level+'</span></div>';
-      // orbiting artifact fragments (t2/t3)
       var fr=''; if(tier>=2){ var fn=tier===3?6:3; for(var g=0;g<fn;g++){ var rad=58+(g%3)*9, fd=6+(g%4), delay=-(fd*(g/fn)); fr+='<i style="--fr:'+rad+'px;--fd:'+fd+'s;animation-delay:'+delay.toFixed(2)+'s"></i>'; } }
       return '<div class="pcard t'+tier+'" style="'+sv+'">'+
         '<div class="patmos"><i class="f1"></i><i class="f2"></i></div>'+
@@ -322,7 +425,7 @@
         '<div class="ownrow">'+pill+'</div>'+
         '<div class="crow"><div class="who"><div class="nm">'+playerName()+'</div><div class="sub"><span class="cls">'+cls+'</span><span class="dot"></span><span class="pid">'+playerId()+'</span></div></div>'+lvlBadge+'</div>'+
         '<div class="stg"><div class="rays"></div><div class="halo"></div><div class="frags">'+fr+'</div><div class="pshadow"></div>'+
-          '<div class="gem"><div class="gemfloat"><div class="gemspin" style="animation:'+(ANIM[r.name]||ANIM.Stone)+'"><img src="assets/ranks/'+r.name.toLowerCase()+'.png" alt="'+r.name+'"></div></div></div></div>'+
+          '<div class="gem"><div class="gemfloat"><div class="gemspin">'+gem(r.name,tier)+'</div></div></div></div>'+
         '<div class="rl"><div class="r1">'+rname+'</div>'+tierBadge+'<div class="r2">'+(r.tagline||'')+'</div></div>'+
         '<div class="sbar">'+
           '<div class="stat">'+SI.lvl+'<span class="v">'+level+'</span><span class="k">Level</span></div>'+
@@ -332,45 +435,150 @@
         '</div>'+
       '</div>';
     }
+
+    // ── rank detail sheet ──
     function openDetail(idx){
-      var s=S.read(), r=S.RANKS[idx], isCore=!S.RANKS[idx+1], cur=S.rankTier(s.xp||0).idx, owned=idx<=cur, here=idx===cur;
+      var s=S.read(), xp=s.xp||0, r=S.RANKS[idx], cur=S.rankTier(xp).idx, owned=idx<=cur, here=idx===cur;
+      var lo=r.min, hi=isFinite(r.max)?(r.max+1):(S.RANKS[idx+1]?S.RANKS[idx+1].min:r.min+1), third=Math.max(1,(hi-lo)/3);
       var status, note='';
       if(here){ status='<div class="status have">'+CHECK+'This is your current rank</div>'; }
       else if(owned){ status='<div class="status have">'+CHECK+'Unlocked</div>'; }
-      else { var need=Math.max(0,r.min-(s.xp||0)); status='<div class="status lock">'+LOCK+need.toLocaleString()+' XP to reach '+r.name+'</div>'; note='<div class="note">This is a preview of your card at '+r.name+' using your current stats.<br>You’ll own this look once you hit '+r.min.toLocaleString()+' XP.</div>'; }
+      else { var need=Math.max(0,r.min-xp); status='<div class="status lock">'+LOCK+need.toLocaleString()+' XP to reach '+r.name+'</div>'; note='<div class="note">A preview of your card at '+r.name+' using your current stats.<br>You’ll own this look once you hit '+r.min.toLocaleString()+' XP.</div>'; }
+      // tier breakdown I/II/III
+      var ROM=['I','II','III'], tRows='';
+      for(var ti=0;ti<3;ti++){
+        var tMin=Math.round(lo+ti*third), reached=xp>=tMin, hereTier=here&&S.rankTier(xp).sub===ti;
+        tRows+='<div class="tier-row'+(reached?' done':'')+(hereTier?' here':'')+'"><div class="tbadge">'+badge(r.name,ti+1)+'</div><div class="rom">'+ROM[ti]+'</div><div class="tn">'+r.name+' '+ROM[ti]+'</div>'+(reached?'<div class="chk">'+CHECK+'</div>':'<div class="txp">'+tMin.toLocaleString()+' XP</div>')+'</div>';
+      }
+      var tiers='<div class="tiers"><div class="th">Tiers</div>'+tRows+'</div>';
       var perks='<div class="perks"><div class="ph">Unlocks at '+r.name+'</div>'+(r.unlocks||[]).map(function(u){return '<div class="perk">'+(owned?CHECK:LOCK)+u+'</div>';}).join('')+'</div>';
-      qs('#dtBody').innerHTML='<div class="dhead" style="--c:'+r.color+'"><div class="dnum">'+pad(idx+1)+(isCore?' · APEX':'')+'</div><div class="dname">'+r.name.toUpperCase()+'</div><div class="dtag">'+(r.tagline||'')+'</div></div>'+buildPreview(idx)+status+perks+note;
+      qs('#dtBody').innerHTML='<div class="dhead" style="--c:'+r.color+'"><div class="dnum">'+pad(idx+1)+'</div><div class="dname">'+r.name.toUpperCase()+'</div><div class="dtag">'+(r.tagline||'')+'</div></div>'+buildPreview(idx)+status+tiers+perks+note;
       qs('#dt').classList.add('open');
+      try{ if(window.coreSfx) coreSfx('click'); }catch(e){}
     }
     function closeDetail(){ qs('#dt').classList.remove('open'); }
     qs('#dtScrim').addEventListener('click', closeDetail); qs('#dtClose').addEventListener('click', closeDetail);
 
-    function buildBgFx(color){
-      var host=qs('#bgfx'); host.innerHTML=''; var f=document.createDocumentFragment();
-      for(var i=0;i<16;i++){ var s=document.createElement('span'); var sz=1.5+(i%4); s.style.width=sz+'px'; s.style.height=sz+'px'; s.style.left=((i*61)%100)+'%'; s.style.top=(60+(i%40))+'%'; s.style.setProperty('--d',(7+(i%6))+'s'); s.style.setProperty('--del',((i%9)*0.7)+'s'); f.appendChild(s); }
-      host.appendChild(f);
+    // ── SEASON (coreSeason.v1): live countdown + seasonal rewards + permanent best ──
+    var SEASON_KEY='coreSeason.v1';
+    var SEASON_EPOCH=Date.UTC(2026,0,1);      // Season 1 begins 2026-01-01
+    var SEASON_MS=30*86400000;                // 30-day seasons
+    var SEASON_REWARDS=['Exclusive season card frame','Season badge for your profile','Bonus Legendary chest at season end'];
+    function seasonNow(){ var now=Date.now(); var n=Math.max(1,Math.floor((now-SEASON_EPOCH)/SEASON_MS)+1); var start=SEASON_EPOCH+(n-1)*SEASON_MS; return {n:n,start:start,end:start+SEASON_MS}; }
+    function loadSeason(){ try{ return JSON.parse(localStorage.getItem(SEASON_KEY))||{}; }catch(e){ return {}; } }
+    function saveSeason(o){ try{ localStorage.setItem(SEASON_KEY, JSON.stringify(o)); }catch(e){} }
+    function rankVal(t){ return (t.idx||0)*3+(t.sub||0); }
+    function syncSeason(){
+      var o=loadSeason(), cur=seasonNow(), t=S.rankTier(S.read().xp||0), v=rankVal(t);
+      if(!o.current || o.current.n!==cur.n){
+        if(o.current && o.seasonBest){ o.history=o.history||[]; o.history.unshift({n:o.current.n, full:o.seasonBest.full, endedAt:o.current.end}); if(o.history.length>12) o.history.length=12; }
+        o.current={n:cur.n, startedAt:cur.start, endsAt:cur.end};
+        o.seasonBest=null; // ranks reset each season
+      }
+      // permanent best (never reset) + this-season best
+      if(!o.best || v>rankVal(o.best)) o.best={idx:t.idx, sub:t.sub||0, full:t.full};
+      if(!o.seasonBest || v>rankVal(o.seasonBest)) o.seasonBest={idx:t.idx, sub:t.sub||0, full:t.full};
+      saveSeason(o); return o;
+    }
+    var cdTimer=null;
+    function renderSeason(){
+      var o=syncSeason(), cur=o.current, best=o.best, color=S.rankFor(S.read().xp||0).color;
+      qs('#seasonMeta').textContent='Season '+cur.n;
+      var bestIcon = best ? '<div class="bg2" style="color:'+(S.RANKS[best.idx]?S.RANKS[best.idx].color:color)+'">'+gem(S.RANKS[best.idx]?S.RANKS[best.idx].name:'Sand',3)+'</div>' : '';
+      var hist=(o.history||[]).slice(0,3).map(function(h){ return '<div class="h"><span>Season '+h.n+'</span><b>'+(h.full||'—')+'</b></div>'; }).join('');
+      qs('#seasonPanel').style.setProperty('--c', best&&S.RANKS[best.idx]?S.RANKS[best.idx].color:color);
+      qs('#seasonPanel').innerHTML=
+        '<div class="srow"><div class="sicon">'+STAR+'</div><div><div class="sname">Season '+cur.n+'</div><div class="sdesc">'+SEASON_REWARDS[0]+' · '+SEASON_REWARDS.length+' rewards</div></div></div>'+
+        '<div class="cd" id="cd"><div class="u"><b id="cdD">0</b><span>Days</span></div><div class="u"><b id="cdH">0</b><span>Hrs</span></div><div class="u"><b id="cdM">0</b><span>Min</span></div><div class="u"><b id="cdS">0</b><span>Sec</span></div></div>'+
+        '<div class="reset">'+STAR+'Ranks reset each season — your permanent best is kept forever.</div>'+
+        (best?'<div class="best">'+bestIcon+'<div><div class="bl">Best rank reached</div><div class="bv">'+best.full+'</div></div></div>':'')+
+        (hist?'<div class="hist">'+hist+'</div>':'');
+      tickCountdown();
+      if(cdTimer) clearInterval(cdTimer); cdTimer=setInterval(tickCountdown,1000);
+    }
+    function tickCountdown(){
+      var o=loadSeason(); if(!o.current) return; var ms=Math.max(0, o.current.endsAt-Date.now());
+      var d=Math.floor(ms/86400000), h=Math.floor(ms%86400000/3600000), m=Math.floor(ms%3600000/60000), s=Math.floor(ms%60000/1000);
+      var set=function(id,v){ var el=qs(id); if(el) el.textContent=v; };
+      set('#cdD',d); set('#cdH',pad(h)); set('#cdM',pad(m)); set('#cdS',pad(s));
+      if(ms<=0 && !tickCountdown._rolled){ tickCountdown._rolled=true; renderSeason(); render(); }
     }
 
-    var builtBg=null;
-    function render(){
-      var s=S.read(), xp=s.xp||0, t=S.rankTier(xp), curIdx=t.idx, ranks=S.RANKS;
-      qs('#bgEl').style.setProperty('--rk',t.color); qs('#bgGlow').style.setProperty('--rk',t.color); qs('#bgfx').style.setProperty('--rk',t.color);
-      qs('#curSub').textContent='Currently '+t.full;
-      if(builtBg!==t.color){ buildBgFx(t.color); builtBg=t.color; }
-      var html='';
+    // ── rank-up celebration ──
+    function showRankUp(data){
+      var ni=data.newIndex; if(ni==null) return; var r=S.RANKS[ni]; if(!r) return;
+      var perks=(data.perks||r.unlocks||[]).map(function(p){ return '<div class="rp">'+CHECK+p+'</div>'; }).join('');
+      qs('#ru').style.setProperty('--c', r.color);
+      qs('#ruBox').innerHTML='<div class="rkicker">Rank Up</div><div class="rgem">'+gem(r.name,3)+'</div><div class="rname">'+r.name.toUpperCase()+'</div><div class="rsub">'+(r.tagline||'')+'</div><div class="rperks">'+perks+'</div><button class="rbtn" id="ruBtn">Claim</button>';
+      // confetti burst
+      var cfx=qs('#ruCfx'); cfx.innerHTML=''; var reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+      if(!reduced){ for(var i=0;i<26;i++){ var ang=(i/26)*Math.PI*2, dist=120+(i%5)*26; var sp=document.createElement('i'); sp.style.setProperty('--tx',(Math.cos(ang)*dist).toFixed(0)+'px'); sp.style.setProperty('--ty',(Math.sin(ang)*dist).toFixed(0)+'px'); sp.style.animationDelay=((i%6)*0.04)+'s'; cfx.appendChild(sp); } }
+      qs('#ru').classList.add('open');
+      try{ if(window.coreSfx) coreSfx('reward'); }catch(e){}
+      qs('#ruBtn').addEventListener('click', function(){ qs('#ru').classList.remove('open'); try{ S.clearPendingRankUp&&S.clearPendingRankUp(); }catch(e){} });
+    }
+
+    // ── HERO + LADDER ──
+    function renderHero(){
+      var s=S.read(), xp=s.xp||0, t=S.rankTier(xp), color=t.color;
+      qs('#bgGlow').style.setProperty('--rk',color);
+      qs('#curSub').textContent=t.full;
+      qs('#hero').innerHTML=buildPreview(t.idx);
+      // progress to next
+      var toGo = t.isMax ? 0 : (t.toNext||0);
+      var nextLabel = t.isMax ? 'Max rank reached' : (toGo.toLocaleString()+' XP to '+t.next);
+      qs('#heroProg').style.setProperty('--c',color);
+      qs('#heroProg').innerHTML='<div class="pl"><span class="cur">'+t.full+'</span><span class="to">'+(t.isMax?'MAX':t.next)+'</span></div>'+
+        '<div class="bar"><div class="fill" style="width:'+(t.isMax?100:Math.max(4,t.bandPct))+'%"></div></div>'+
+        '<div class="sub">'+nextLabel+'</div>';
+    }
+    function badge(name,tier){ return (window.coreGems&&coreGems.badge)?coreGems.badge(name,tier):''; }
+    function renderLadder(){
+      var s=S.read(), xp=s.xp||0, t=S.rankTier(xp), curIdx=t.idx, curTier=(t.sub||0)+1, ranks=S.RANKS, html='';
       ranks.forEach(function(r,i){
-        var state=i<curIdx?'have':i===curIdx?'cur':'locked', isCore=!ranks[i+1];
-        var st = i===curIdx?'<span class="now">Current</span>': i<curIdx?'<span class="have">'+CHECK+'</span>':'<span class="lock">'+LOCK+'</span>';
-        html+='<div class="rk'+(state==='cur'?' cur':state==='locked'?' locked':'')+(isCore?' core':'')+'" style="--c:'+r.color+';--anim:'+(ANIM[r.name]||ANIM.Stone)+'">'+
-          '<div class="num">'+pad(i+1)+'</div><div class="st">'+st+'</div>'+
-          '<div class="gem"><img src="assets/ranks/'+r.name.toLowerCase()+'.png" alt="'+r.name+'"></div>'+
-          '<div class="nm">'+r.name.toUpperCase()+'</div><div class="tg">'+(r.tagline||'')+'</div></div>';
+        var state=i<curIdx?'have':i===curIdx?'cur':'locked';
+        var tiers='';
+        for(var tt=1;tt<=3;tt++){
+          var lit = i<curIdx || (i===curIdx && tt<=curTier);
+          tiers+='<div class="rt'+(lit?'':' lk')+'">'+badge(r.name,tt)+'</div>';
+        }
+        var corner = i===curIdx ? '<span class="nowtag">NOW</span>'
+                   : i>curIdx ? '<span class="lockmark">'+LOCK+'</span>' : '';
+        html+='<div class="row'+(state==='cur'?' cur':state==='locked'?' locked':'')+'" style="--c:'+r.color+'" data-i="'+i+'">'+
+          '<div class="rnum">'+pad(i+1)+'</div>'+
+          '<div class="rmed">'+gem(r.name, i===curIdx?curTier:3)+'</div>'+
+          '<div class="rinfo"><div class="rname">'+r.name.toUpperCase()+'</div><div class="rtag">'+(r.tagline||'')+'</div></div>'+
+          '<div class="rtiers">'+tiers+'</div>'+corner+'</div>';
       });
       qs('#grid').innerHTML=html;
-      qs('#grid').querySelectorAll('.rk').forEach(function(el,i){ el.setAttribute('role','button'); el.setAttribute('tabindex','0'); el.addEventListener('click',function(){ openDetail(i); }); el.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openDetail(i); } }); });
+      qs('#grid').querySelectorAll('.row').forEach(function(el){ var i=+el.getAttribute('data-i'); el.setAttribute('role','button'); el.setAttribute('tabindex','0'); el.addEventListener('click',function(){ openDetail(i); }); el.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openDetail(i); } }); });
     }
-    S.syncProgress(); window.addEventListener('coreStateChange',render); window.addEventListener('core:progress-updated',render); render();
+    function render(){ renderHero(); renderLadder(); renderSeason();
+      try{ var sm=location.search.match(/scrollY=(\d+)/); if(sm){ var sc=document.querySelector('.scroll'); if(sc) sc.scrollTop=+sm[1]; } }catch(e){} }
+
+    // help
+    try{ if(window.coreHelp){ window.coreHelp.attach('helpBtn',{ title:'How ranks work', bullets:[
+      'CORE has 11 ranks — Sand up to Celestial — and each splits into three tiers (I, II, III): 33 steps in all.',
+      'Earn XP from quests, streaks and habits to fill the bar and climb tiers.',
+      'Every rank unlocks new perks — chest luck, frames, auras and exclusive card effects.',
+      'Tap any rank to preview your card at that rank and see what it unlocks.',
+      'Ranks reset each season, but your best rank ever is kept forever.'
+    ]}); } }catch(e){}
+
+    // boot
+    try{ if(window.dashAmbient) dashAmbient.init(); }catch(e){}
+    S.syncProgress();
+    window.addEventListener('coreStateChange',render);
+    window.addEventListener('core:progress-updated',render);
+    render();
+    // rank-up: pending payload, or ?rankup=N for preview
+    try{
+      var rum=location.search.match(/[?&]rankup=(\d+)/);
+      if(rum){ var ni=+rum[1]; setTimeout(function(){ showRankUp({oldIndex:Math.max(0,ni-1), newIndex:ni, perks:(S.RANKS[ni]||{}).unlocks}); },400); }
+      else { var p=S.pendingRankUp&&S.pendingRankUp(); if(p) setTimeout(function(){ showRankUp(p); },400); }
+    }catch(e){}
   })();
   </script>
+  <script src="_lib/core-back.js"></script>
 </body>
 </html>

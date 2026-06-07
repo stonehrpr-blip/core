@@ -223,7 +223,7 @@
       const path = (location.pathname.split('/').pop() || '').toLowerCase();
       if (CELEBRATION_SKIP.has(path)) return;
       // Defer the redirect so the user sees the action that caused the rank-up
-      // (e.g. log slip → +XP toast → 700ms later, celebration fires)
+      // (e.g. log slip -> +XP toast -> 700ms later, celebration fires)
       setTimeout(() => {
         location.href = '47-rank-up.html?tier=' + encodeURIComponent(pending);
       }, 700);

@@ -17,6 +17,19 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export type StatKey = "lungs" | "brain" | "wallet" | "willpower" | "body";
 export type Stats = Record<StatKey, number>;
 
+// ── Muscle development (shared) ──────────────────────────────────────────────
+// The Physique Scanner (Coach tab) WRITES these; the Strength/gym muscle map
+// READS them for its weak→strong colour coding. Single source of truth — lives
+// on this store (persisted in core.gameState.v1), never forked into its own key.
+export type MuscleKey = "chest" | "back" | "shoulders" | "arms" | "legs" | "core";
+export type MuscleStatus = "weak" | "ok" | "strong";
+export type MuscleLevel = { level: number; status: MuscleStatus; lastScannedAt: number | null };
+export type MuscleMap = Record<MuscleKey, MuscleLevel>;
+export const MUSCLE_KEYS: MuscleKey[] = ["chest", "back", "shoulders", "arms", "legs", "core"];
+function muscleStatusFor(level: number): MuscleStatus {
+  return level < 45 ? "weak" : level < 72 ? "ok" : "strong";
+}
+
 export type Slip = {
   habit: string;
   ts: number;
@@ -109,8 +122,10 @@ type GameState = {
   xpLedger: XpLedgerEntry[];
   statLedger: StatLedgerEntry[];
   rankHistory: RankHistoryEntry[];
+  muscles: MuscleMap;
 
   // selectors
+  getMuscleAvg: () => number;
   lifeScore: () => number;
   rankFor: (xp?: number) => Rank & { idx: number; tier: number; label: string; toNext: number };
   streakLost: () => boolean;
@@ -131,6 +146,8 @@ type GameState = {
   // ledger entries (these events already happened on the device that earned them).
   restoreFromServer: (snap: { xp: number; streakDays: number; stats?: Partial<Stats> }) => void;
   addStat: (stat: StatKey, amount: number, reason?: string) => void;
+  // Physique Scanner writes per-muscle levels here (status auto-derived if omitted).
+  setMuscleLevels: (m: Partial<Record<MuscleKey, { level: number; status?: MuscleStatus }>>) => void;
   applyStatTick: () => void;
   restoreStreak: () => void;
   useFreeze: () => boolean;
@@ -139,8 +156,17 @@ type GameState = {
   resetAll: () => void;
 };
 
-const DEFAULTS: Pick<GameState, "stats" | "streak" | "xp" | "level" | "slips" | "lastSeenAt" | "lastStatTickAt" | "xpLedger" | "statLedger" | "rankHistory"> = {
+const DEFAULTS: Pick<GameState, "stats" | "streak" | "xp" | "level" | "slips" | "lastSeenAt" | "lastStatTickAt" | "xpLedger" | "statLedger" | "rankHistory" | "muscles"> = {
   stats: { lungs: 64, brain: 78, wallet: 58, willpower: 81, body: 67 },
+  // Neutral starting map until the first physique scan personalizes it.
+  muscles: {
+    chest: { level: 50, status: "ok", lastScannedAt: null },
+    back: { level: 50, status: "ok", lastScannedAt: null },
+    shoulders: { level: 50, status: "ok", lastScannedAt: null },
+    arms: { level: 50, status: "ok", lastScannedAt: null },
+    legs: { level: 50, status: "ok", lastScannedAt: null },
+    core: { level: 50, status: "ok", lastScannedAt: null },
+  },
   streak: {
     days: 14,
     startedAt: Date.now() - 14 * 86400000,
@@ -176,6 +202,12 @@ export const useGameStateStore = create<GameState>()(
   persist(
     (set, get) => ({
       ...DEFAULTS,
+
+      getMuscleAvg: () => {
+        const m = get().muscles;
+        const vals = MUSCLE_KEYS.map((k) => m[k]?.level ?? 0);
+        return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
+      },
 
       lifeScore: () => {
         const v = get().stats;
@@ -301,6 +333,23 @@ export const useGameStateStore = create<GameState>()(
         });
       },
 
+      // Physique Scanner result → muscle map. Derives status from level when the
+      // caller doesn't supply one; stamps lastScannedAt. Read by the Strength map.
+      setMuscleLevels: (m) => {
+        if (!m || typeof m !== "object") return;
+        set((s) => {
+          const now = Date.now();
+          const next: MuscleMap = { ...s.muscles };
+          (Object.keys(m) as MuscleKey[]).forEach((k) => {
+            const incoming = m[k];
+            if (!incoming || !MUSCLE_KEYS.includes(k)) return;
+            const level = clamp(Math.round(incoming.level), STAT_MIN, STAT_MAX);
+            next[k] = { level, status: incoming.status ?? muscleStatusFor(level), lastScannedAt: now };
+          });
+          return { muscles: next };
+        });
+      },
+
       // Passive daily stat drift — stats in STAT_DECAY drop per idle calendar day
       // (capped at 7), with a 24h grace if raised recently. Paused during onboarding
       // (xp < 600). Idempotent within a day — safe to call on every mount. Mirrors
@@ -416,6 +465,14 @@ export const useGameStateStore = create<GameState>()(
         const fz = state.streak?.freezes;
         if (fz && fz.weekResetAt < Date.now()) {
           state.streak.freezes = { availableThisWeek: FREEZE_PER_WEEK, weekResetAt: Date.now() + 7 * 86400000 };
+        }
+        // Backfill the muscle map for state persisted before the Physique Scanner.
+        if (!state.muscles || typeof state.muscles !== "object") {
+          state.muscles = { ...DEFAULTS.muscles };
+        } else {
+          for (const k of MUSCLE_KEYS) {
+            if (!state.muscles[k]) state.muscles[k] = { level: 50, status: "ok", lastScannedAt: null };
+          }
         }
       },
     },

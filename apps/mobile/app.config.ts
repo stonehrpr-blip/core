@@ -22,6 +22,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     infoPlist: {
       NSCameraUsageDescription:
         "Life-OS uses the camera to scan your food, body, and outfits.",
+      NSPhotoLibraryUsageDescription:
+        "Life-OS lets you upload a photo from your library for a physique scan. Photos stay on your device.",
       NSMicrophoneUsageDescription:
         "Life-OS uses the microphone for voice journaling and coach conversations.",
       ITSAppUsesNonExemptEncryption: false,
@@ -39,6 +41,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     "expo-router",
     "expo-secure-store",
     "expo-camera",
+    [
+      "expo-image-picker",
+      {
+        photosPermission: "Life-OS lets you upload a photo from your library for a physique scan. Photos stay on your device.",
+        cameraPermission: "Life-OS uses the camera to take a physique scan photo. Photos stay on your device.",
+      },
+    ],
     "expo-notifications",
     [
       "expo-splash-screen",

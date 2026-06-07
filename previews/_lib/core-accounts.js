@@ -17,16 +17,16 @@
  *
  * Public API on `window.coreAccounts`:
  *
- *   isReal()                → true when Supabase is wired
- *   current()               → Promise<account|null> (or sync account|null in local mode)
- *   list()                  → array (LOCAL only — for the picker UI)
- *   findOrCreate(opts)      → Promise<{account, isNew}>  /  {account, isNew}
- *   signIn(accountId)       → Promise<account>            /  account
- *   signInWithOAuth(provider) → Promise<void>   (Supabase only — redirects away)
- *   signInWithEmailOtp(email) → Promise<void>   (Supabase only — sends OTP)
- *   verifyEmailOtp(email, token) → Promise<{account, isNew}>  (Supabase only)
- *   updateCurrent(patcher)  → Promise<account>            /  account
- *   signOut()               → Promise<void>               /  void
+ *   isReal()                -> true when Supabase is wired
+ *   current()               -> Promise<account|null> (or sync account|null in local mode)
+ *   list()                  -> array (LOCAL only — for the picker UI)
+ *   findOrCreate(opts)      -> Promise<{account, isNew}>  /  {account, isNew}
+ *   signIn(accountId)       -> Promise<account>            /  account
+ *   signInWithOAuth(provider) -> Promise<void>   (Supabase only — redirects away)
+ *   signInWithEmailOtp(email) -> Promise<void>   (Supabase only — sends OTP)
+ *   verifyEmailOtp(email, token) -> Promise<{account, isNew}>  (Supabase only)
+ *   updateCurrent(patcher)  -> Promise<account>            /  account
+ *   signOut()               -> Promise<void>               /  void
  *
  * The legacy localStorage flags (coreOnboardComplete, coreOnboardTrial)
  * are mirrored from the active account so existing gated pages keep
@@ -327,7 +327,7 @@
         if (error) {
           // Don't lose the write: stash the DB-ready patch so the next successful
           // load (flushPending) replays it. Prevents the "marked onboarded locally
-          // but onboarded=false in DB → re-onboarding on next device" data loss.
+          // but onboarded=false in DB -> re-onboarding on next device" data loss.
           writePending({ id: account.id, patch: patch });
           console.error('[core-accounts] profile UPDATE failed — queued for retry on next load', error);
           return null;

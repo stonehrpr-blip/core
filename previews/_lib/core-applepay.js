@@ -20,6 +20,7 @@
   var HOLD_MS = 900;
   var injected = false;
   var cbAuth = null, cbDecline = null;
+  var customRows = null;   // optional per-open line-items (e.g. coin packs), set via open({rows})
   var holdTimer = null, holdRaf = null, holdStart = 0;
 
   var CSS = '' +
@@ -69,6 +70,7 @@
   var APPLE_SVG = '<svg viewBox="0 0 24 24" fill="#fff" style="width:18px;height:18px;"><path d="M17.6 12.4c0-2.3 1.9-3.4 2-3.4-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.8-3.5.8-.7 0-1.9-.8-3.1-.8-1.6 0-3.1.9-3.9 2.4-1.7 2.9-.4 7.2 1.2 9.6.8 1.2 1.7 2.5 3 2.4 1.2 0 1.7-.8 3.1-.8 1.4 0 1.9.8 3.1.8 1.3 0 2.1-1.2 2.9-2.4.9-1.4 1.3-2.7 1.3-2.8 0-.1-2.6-1-2.7-4z"/><path d="M15.3 5.8c.6-.8 1.1-1.9 1-3-.9 0-2 .6-2.7 1.4-.6.7-1.2 1.8-1 2.9 1.1.1 2.1-.5 2.7-1.3z"/></svg>';
 
   function planRows() {
+    if (customRows) return customRows;   // caller-supplied line-items (coin packs, gifts…)
     var plan = 'monthly';
     try { var t = JSON.parse(localStorage.getItem('coreOnboardTrial') || '{}'); if (t.plan) plan = t.plan; } catch (e) {}
     var future = plan === 'annual' ? '$44.99/yr · cancel any time' : '$7.99/mo · cancel any time';
@@ -100,17 +102,17 @@
     sheet.setAttribute('role', 'dialog'); sheet.setAttribute('aria-modal', 'true');
     sheet.innerHTML =
       '<div class="cap-grab"></div>' +
-      '<div class="cap-head"><div class="cap-logo">' + APPLE_SVG + ' Pay</div><div class="cap-close" id="capClose">✕</div></div>' +
+      '<div class="cap-head"><div class="cap-logo">' + APPLE_SVG + ' Pay</div><div class="cap-close" id="capClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:14px;height:14px;display:block;"><path d="M6 6l12 12M18 6L6 18"/></svg></div></div>' +
       '<div class="cap-merchant"><div class="cap-mlogo">C</div><div class="cap-mname">Core</div></div>' +
       '<div class="cap-rows" id="capRows">' + planRows() + '</div>' +
-      '<div class="cap-card" id="capCard"><span class="cap-card-mark" id="capCardMark">VISA</span><span id="capCardLine">···· 4242</span><span class="cap-default">DEFAULT</span><span class="cap-card-chev">›</span></div>' +
+      '<div class="cap-card" id="capCard"><span class="cap-card-mark" id="capCardMark">VISA</span><span id="capCardLine">···· 4242</span><span class="cap-default">DEFAULT</span><span class="cap-card-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;display:block;"><path d="M9 6l6 6-6 6"/></svg></span></div>' +
       '<button class="cap-pay" id="capPay">' +
         '<span class="cap-pay-default"><span class="cap-faceid">' + FACE_SVG + '</span> Hold to confirm with Face&nbsp;ID</span>' +
         '<span class="cap-pay-doing"><span class="cap-faceid-anim">' + FACE_SVG + '</span> Authenticating…</span>' +
         '<span class="cap-pay-done"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;"><path d="M5 13l4 4L19 7"/></svg> Done</span>' +
         '<span class="cap-hold-ring" id="capHoldRing"></span>' +
       '</button>' +
-      '<div class="cap-fineprint">Cancel any time at Settings → Apple ID → Subscriptions. First charge on day 7.</div>' +
+      '<div class="cap-fineprint">Cancel any time at Settings - Apple ID - Subscriptions. First charge on day 7.</div>' +
       '<div class="cap-decline" id="capDecline">Not now · continue free</div>';
 
     host.appendChild(back);
@@ -213,6 +215,7 @@
     opts = opts || {};
     cbAuth = opts.onAuthorized || null;
     cbDecline = opts.onDeclined || null;
+    customRows = opts.rows || null;
     build();
     // reset visual state in case of re-open
     var sheet = document.getElementById('capSheet');

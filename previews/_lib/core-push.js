@@ -10,8 +10,8 @@
  * `backend/lib/notifications/*`. This file is only the client half.
  *
  * Public API on window.corePush:
- *   enable()  → Promise<{ok:boolean, reason?:string}>  request perm + register
- *   flush()   → replay a stored token to the backend (e.g. after sign-in)
+ *   enable()  -> Promise<{ok:boolean, reason?:string}>  request perm + register
+ *   flush()   -> replay a stored token to the backend (e.g. after sign-in)
  *   isNative()/platform()
  */
 (function () {
@@ -92,7 +92,7 @@
     var perm = await PN.checkPermissions();
     if (perm.receive !== 'granted') perm = await PN.requestPermissions();
     if (perm.receive !== 'granted') return { ok: false, reason: 'denied' };
-    await PN.register(); // → fires 'registration' → persist()
+    await PN.register(); // -> fires 'registration' -> persist()
     return { ok: true };
   }
 

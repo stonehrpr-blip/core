@@ -170,7 +170,7 @@
     // 15 — quality / length / charset / whitespace / excessive symbols
     if (original !== trimmed) return deny('whitespace');           // leading/trailing space
     if (trimmed.length < 3 || trimmed.length > 24) return deny('length');
-    if (!/^[A-Za-z0-9_.]+$/.test(trimmed)) return deny('charset'); // letters/numbers/_/. only → blocks spaces, emoji, symbols
+    if (!/^[A-Za-z0-9_.]+$/.test(trimmed)) return deny('charset'); // letters/numbers/_/. only -> blocks spaces, emoji, symbols
     if (/[_.]{3,}/.test(trimmed) || (trimmed.match(/[_.]/g) || []).length > 4) return deny('symbols');
 
     // 12 — spam: repeated chars / keyboard smash
@@ -186,7 +186,7 @@
     if (!norm) return deny('charset');
     // "bare" form: letters+digits, NO leet-decode, leading/trailing digits stripped.
     // Catches number-suffixed impersonation ("admin1", "elonmusk7") that leet-decoding
-    // would otherwise corrupt (1→i, 7→t). We check both forms.
+    // would otherwise corrupt (1->i, 7->t). We check both forms.
     const bare = String(trimmed).toLowerCase().replace(/[^a-z0-9]/g, '').replace(/^\d+/, '').replace(/\d+$/, '');
 
     // 18 — reserved (after stripping trailing digits, e.g. "admin1")
@@ -207,7 +207,7 @@
     // 8/9/10 — impersonation (fan names allowed when clearly unofficial)
     if ((matchesImpersonation(norm) || matchesImpersonation(bare)) && !FAN_OK.test(low)) return deny('impersonation');
 
-    // 17 — AI review: subtle / evasive → flag (blocked here in preview)
+    // 17 — AI review: subtle / evasive -> flag (blocked here in preview)
     if (suspicious(norm)) return { ok: false, flagged: true, code: 'review', message: UNAVAILABLE_MSG };
 
     return { ok: true };

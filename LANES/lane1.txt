@@ -1,0 +1,19 @@
+/rename Lane1-AgeGate-Disclaimer
+
+You are working in ~/Desktop/lifeos (the CORE app — a gamified quit-vaping life-OS, Expo/React Native at apps/mobile). Your lane is COMPLIANCE LOGIC. This is a ship-blocker.
+
+GOAL: Stop under-age signup and force a "not medical advice" disclaimer + consent before payment.
+
+YOU OWN (only edit these): apps/mobile/app/(auth)/onboarding/quiz.tsx, apps/mobile/app/(auth)/trial.tsx (gate/consent logic ONLY, not visuals/copy), new apps/mobile/components/MedicalDisclaimer.tsx, new apps/mobile/app/(auth)/under-age.tsx
+DO NOT TOUCH: copy strings (another session owns legal copy), visual styling, other tabs.
+
+STEPS:
+1. Canonical minimum age = 18. In quiz.tsx (~line 159) the age slider is currently min={13} max={65} default 16 — change to min={18} default 18.
+2. After the age step, if answers.age < 18 -> router.replace to a new under-age dead-end screen: "CORE is built for adults 18+. Come back when you're ready." No way to proceed past it.
+3. Build <MedicalDisclaimer> showing: "CORE is a self-help wellness tool, not medical or addiction advice. In crisis, contact emergency services." Import the exact text from apps/mobile/constants/legal-strings.ts (another session is creating that file — if it doesn't exist yet, stub the strings locally with a TODO and import later).
+4. In trial.tsx, render the disclaimer + a required consent checkbox ("I've read & agree to the Terms & Privacy Policy") BEFORE the payment CTA. Block the CTA until checked. Link Terms/Privacy.
+
+DONE WHEN: a user entering age 16 is blocked from (tabs); the payment CTA is gated behind the consent checkbox; disclaimer shows before purchase.
+VERIFY: cd apps/mobile && npx expo start — run onboarding with age 16 (blocked) and age 25 (disclaimer + consent works).
+
+Confirm the approach back to me before making changes if anything conflicts with what you find. Ask me before any destructive change.

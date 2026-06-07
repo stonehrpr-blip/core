@@ -58,7 +58,7 @@
             '<div style="font-size:13px; font-weight:700; color:#fff; letter-spacing:-0.1px;">You lost your ' + prev + '-day streak <span style="color:#9AA1B7; font-weight:500;">· ' + ago + '</span></div>' +
             '<div style="font-size:11px; color:#FF7A45; letter-spacing:0.04em; margin-top:2px;">Restore for $0.99 · 48h window</div>' +
           '</div>' +
-          '<div style="color:#FF7A45; font-size:18px; font-weight:600;">›</div>' +
+          '<div style="color:#FF7A45; font-size:18px; font-weight:600;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-2px"><path d="M9 6l6 6-6 6"/></svg></div>' +
         '</div>' +
         '<div style="margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,79,107,0.20); display:flex; align-items:flex-start; gap:10px;">' +
           '<div style="flex-shrink:0; width:22px; height:22px; border-radius:50%; background: radial-gradient(circle at 35% 28%, #DCEBFF, #2F8FFF 55%, #1856B8); box-shadow: 0 0 12px rgba(47,143,255,0.4);"></div>' +

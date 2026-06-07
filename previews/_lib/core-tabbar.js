@@ -176,7 +176,7 @@
     const countEl = sheet.querySelector('#coreTabCount');
     let pick = [...readPick()];
     function paint() {
-      countEl.textContent = pick.length + ' / 5 selected' + (pick.length === 5 ? ' ✓' : '');
+      countEl.innerHTML = pick.length + ' / 5 selected' + (pick.length === 5 ? ' <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;vertical-align:-1px;display:inline-block;"><path d="M5 12l4 4 10-11"/></svg>' : '');
       grid.innerHTML = ALL_TABS.map(t => {
         const isOn = pick.includes(t.key);
         const idx = pick.indexOf(t.key);

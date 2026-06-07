@@ -8,17 +8,17 @@
 <style>
   :root {
     --bg-base:#02020A;
-    --bg-card:rgba(255,255,255,0.03);
-    --border:rgba(255,255,255,0.08);
+    --bg-card:rgba(255,255,255,0.022);
+    --border:rgba(255,255,255,0.07);
     --text:#F8FAFE;
     --muted:#9AA1B7;
     --dim:#4F5570;
-    --accent:#4A8FFF;
-    --good:#34D399;
-    --gold:#FFD98A;
+    --accent:#0A84FF;
+    --good:#0A84FF;
+    --gold:#0A84FF;
     /* rarity of THIS chest — overwritten by JS once the pull is rolled */
-    --rar:#9AA1B7;
-    --rarA:rgba(154,161,183,0.5);
+    --rar:#0A84FF;
+    --rarA:rgba(10,132,255,0.5);
   }
   * { box-sizing:border-box; }
   html, body { margin:0; padding:0; height:100%; }
@@ -116,6 +116,36 @@
   .chest-inner { opacity:0; }
   body.phase-opening .chest-inner{ animation:innerGlow 1s 1.5s ease-out forwards; }
   @keyframes innerGlow { 0%{opacity:0;} 40%{opacity:1;} 100%{opacity:.6;} }
+
+  /* ── photographic chest art (assets/chests/<rar>.png) on a lit vault pedestal ──
+     The renders sit on a white background; a near-white pedestal + multiply blend
+     keys that white out while keeping the chest, and the pedestal reads as a lit
+     display case glowing in the chest's rarity colour. */
+  .chest-photo{ position:relative; z-index:3; width:212px; height:212px; display:flex; align-items:center; justify-content:center; }
+  .chest-photo::before{ content:""; position:absolute; inset:-6px; border-radius:50%; z-index:0;
+    background:radial-gradient(circle at 50% 48%, color-mix(in srgb, var(--rar) 42%, transparent) 0%, color-mix(in srgb, var(--rar) 14%, transparent) 42%, transparent 70%); }
+  .chest-photo img{ position:relative; z-index:1; width:196px; height:auto; object-fit:contain;
+    filter:drop-shadow(0 16px 26px rgba(0,0,0,0.6)) drop-shadow(0 0 22px color-mix(in srgb, var(--rar) 50%, transparent)); }
+  body.phase-ready .chest-photo{ animation:chestIdle 3.4s ease-in-out infinite; }
+  /* charge-up: an escalating rumble that builds tension before the burst */
+  body.phase-opening .chest-photo{ animation:photoCharge 1.5s cubic-bezier(.4,0,.7,1) forwards; }
+  @keyframes photoCharge {
+    0%{transform:translate(0,0) scale(1) rotate(0);}
+    20%{transform:translate(-2px,1px) scale(1.02) rotate(-1deg);}
+    40%{transform:translate(2px,-1px) scale(1.03) rotate(1deg);}
+    60%{transform:translate(-3px,1px) scale(1.05) rotate(-1.5deg);}
+    78%{transform:translate(3px,-2px) scale(1.07) rotate(1.5deg);}
+    90%{transform:translate(-2px,1px) scale(1.06) rotate(-1deg);}
+    100%{transform:translate(0,-4px) scale(1.1) rotate(0);}
+  }
+  /* burst: the chest snaps bigger then blows apart into light */
+  body.phase-opening .chest-photo img{ animation:photoBurst .72s 1.5s cubic-bezier(.2,.8,.3,1) forwards; }
+  @keyframes photoBurst { 0%{transform:scale(1);opacity:1;} 22%{transform:scale(1.26) translateY(-6px);opacity:1;} 100%{transform:scale(1.7) translateY(-14px);opacity:0;} }
+  /* the rarity glow swells then flares out with the burst */
+  body.phase-opening .chest-photo::before{ animation:glowCharge 1.55s ease-in forwards, glowFlare .8s 1.5s ease-out forwards; }
+  @keyframes glowCharge { 0%{opacity:.55;transform:scale(.96);} 100%{opacity:1;transform:scale(1.2);} }
+  @keyframes glowFlare { 0%{opacity:1;transform:scale(1.2);} 30%{opacity:1;transform:scale(1.7);} 100%{opacity:0;transform:scale(2.4);} }
+  @media (prefers-reduced-motion: reduce){ .chest-photo,.chest-photo img,.chest-photo::before{ animation:none!important; } }
   /* light beam that shoots up out of the open lid */
   .beam { position:absolute; left:50%; top:18%; width:54px; height:0; transform:translateX(-50%);
           background:linear-gradient(180deg, transparent, color-mix(in srgb, var(--rar) 80%, white) 30%, var(--rar)); z-index:2;
@@ -171,25 +201,25 @@
   .rv.hi .rvi{ width:50px; height:50px; }
   .rv.hi .rvi svg{ width:27px; height:27px; }
   .rv.hi .rvname{ font-size:17px; }
-  .rv.hi .rvname::after{ content:" ★"; color:var(--rc); }
+  .rv.hi .rvname::after{ content:""; }
   .rv.hi .added{ display:inline-flex; align-items:center; gap:4px; font-size:9px; font-weight:900; letter-spacing:0.1em; text-transform:uppercase; color:var(--good); margin-top:5px; }
   .rv.hi .added svg{ width:11px; height:11px; }
 
   /* primary buttons — same family as the rest of the app */
   .cta-wrap { width:100%; }
   .btn { display:flex; align-items:center; justify-content:center; gap:9px; width:100%; padding:18px 24px; border:none;
-         border-radius:999px; font-family:inherit; font-size:17px; font-weight:800; letter-spacing:-0.32px; color:#1a1206; cursor:pointer;
-         text-decoration:none; background:linear-gradient(135deg, var(--gold), #FF9F45); background-size:160% 160%;
-         box-shadow:0 14px 36px rgba(255,150,60,0.4), 0 1px 0 rgba(255,255,255,0.3) inset;
+         border-radius:999px; font-family:inherit; font-size:17px; font-weight:800; letter-spacing:-0.32px; color:#fff; cursor:pointer;
+         text-decoration:none; background:var(--accent); background-size:160% 160%;
+         box-shadow:0 14px 36px rgba(10,132,255,0.35), 0 1px 0 rgba(255,255,255,0.18) inset;
          transition:transform .12s cubic-bezier(0.4,0,0.2,1), filter .2s; -webkit-tap-highlight-color:transparent; }
   .btn:hover{ filter:brightness(1.08); }
   .btn:active{ transform:scale(0.985); }
   .btn:focus-visible{ outline:2px solid #fff; outline-offset:3px; }
   .btn svg{ width:18px; height:18px; }
   /* the open button glows in the chest's rarity colour */
-  .btn.open { color:#fff; background:linear-gradient(135deg, color-mix(in srgb, var(--rar) 75%, #1F4FA8), color-mix(in srgb, var(--rar) 60%, #4B2E94));
+  .btn.open { color:#fff; background:var(--accent);
               box-shadow:0 14px 36px color-mix(in srgb, var(--rar) 40%, transparent), 0 1px 0 rgba(255,255,255,0.18) inset; text-shadow:0 1px 2px rgba(0,0,0,0.4); }
-  .btn.equipped-done{ color:var(--good); background:rgba(52,211,153,0.14); border:1px solid rgba(52,211,153,0.4); box-shadow:none; text-shadow:none; cursor:default; }
+  .btn.equipped-done{ color:var(--good); background:rgba(10,132,255,0.14); border:1px solid rgba(10,132,255,0.4); box-shadow:none; text-shadow:none; cursor:default; }
   body.phase-opening .open-cta{ opacity:0; pointer-events:none; transition:opacity .3s; }
   body.phase-reveal .open-cta{ display:none; }
   .open-cta{ opacity:0; transform:translateY(10px); animation:rise .6s .45s cubic-bezier(.2,.8,.2,1) forwards; }
@@ -197,7 +227,7 @@
   .reveal-cta { width:100%; margin-top:20px; display:none; }
   body.phase-reveal .reveal-cta{ display:block; opacity:0; transform:translateY(10px); animation:rise .6s cubic-bezier(.2,.8,.2,1) forwards; }
   .nextsub { display:block; text-align:center; margin-top:11px; font-size:12px; font-weight:600; color:var(--muted); }
-  .nextsub b{ color:var(--good); font-weight:700; }
+  .nextsub b{ color:var(--accent); font-weight:700; }
 </style>
 </head>
 <body class="phase-ready">
@@ -247,6 +277,7 @@
               <circle cx="80" cy="79" r="3.4" fill="var(--rar)"/>
             </g>
           </svg>
+          <div class="chest-photo" id="chestPhoto" hidden><img id="chestImg" alt="" /></div>
         </div>
 
         <div class="tap" id="tapPrompt">
@@ -316,11 +347,11 @@
     var PARTS=[];
     (function particles(){
       var host=document.getElementById('particles'); if(!host) return; var frag=document.createDocumentFragment();
-      for(var i=0;i<26;i++){ var p=document.createElement('span'); p.className='pt';
-        var ang=(Math.PI*2)*(i/26)+(Math.random()*0.4), dist=70+Math.random()*86;
+      for(var i=0;i<40;i++){ var p=document.createElement('span'); p.className='pt';
+        var ang=(Math.PI*2)*(i/40)+(Math.random()*0.4), dist=70+Math.random()*120;
         p.style.setProperty('--tx', Math.cos(ang)*dist+'px');
         p.style.setProperty('--ty', (Math.sin(ang)*dist-30)+'px');
-        var sz=4+Math.random()*6; p.style.width=sz+'px'; p.style.height=sz+'px';
+        var sz=3+Math.random()*8; p.style.width=sz+'px'; p.style.height=sz+'px';
         frag.appendChild(p); PARTS.push(p); }
       host.appendChild(frag);
     })();
@@ -354,9 +385,11 @@
       ? 'Added to your <b>Inventory</b>. Back to the Shop.'
       : 'Added to your <b>Inventory</b>.';
 
-    // paint the chest in its floor rarity straight away (the closed chest shows its tier)
+    // Each chest tier wears its own rarity colour (shared ladder with the rest of
+    // the app) so a Legendary chest reads gold, a Mythic one rose, etc.
+    var RARCOL = { common:'#9AA1B7', rare:'#0A84FF', epic:'#9F8FFF', legendary:'#FFC857', mythic:'#FF6B7E' };
     function paintRarity(rar){
-      var c = S && S.chestRarColor ? S.chestRarColor(rar) : '#9AA1B7';
+      var c = RARCOL[String(rar||'').toLowerCase()] || '#0A84FF';
       body.style.setProperty('--rar', c);
       body.style.setProperty('--rarA', hexA(c, 0.5));
       return c;
@@ -364,17 +397,50 @@
     paintRarity(floorRar);
     qs('#chestTagName').textContent = chestName;
 
+    // Use the photographic chest art when we have it for this tier (mythic falls
+    // back to the inline SVG chest, tinted rose). Keeps the lid SVG as a safety net.
+    (function setChestArt(){
+      var ART = { common:1, rare:1, epic:1, legendary:1, mythic:1 };   // assets/chests/*-cut.png we ship
+      var key = String(floorRar||'common').toLowerCase();
+      var photo = qs('#chestPhoto'), img = qs('#chestImg'), svg = qs('.chest-svg');
+      if (ART[key]) {
+        img.onload = function(){ photo.hidden = false; if (svg) svg.style.display = 'none'; };
+        img.onerror = function(){ photo.hidden = true; if (svg) svg.style.display = ''; };
+        img.src = 'assets/chests/' + key + '-cut.png';
+      }
+    })();
+
     // ── reveal one reward card at a time — the dopamine beat ───────────────────
+    // Mythic-pull celebration — same flash+confetti language as a boss win.
+    function mythicFlash(){
+      var phone=document.querySelector('.phone'); if(!phone) return;
+      var fl=document.createElement('div');
+      fl.style.cssText='position:absolute;inset:0;z-index:95;pointer-events:none;background:radial-gradient(60% 45% at 50% 42%,rgba(10,132,255,0.45),rgba(10,132,255,0.18) 45%,transparent 72%)';
+      phone.appendChild(fl);
+      if(REDUCED){ setTimeout(function(){ fl.remove(); },500); return; }
+      fl.animate([{opacity:0},{opacity:1,offset:.15},{opacity:0}],{duration:950,easing:'ease-out'}).onfinish=function(){ fl.remove(); };
+      var cols=['#FF6B7E','#FFC857','#F8FAFE','#9F8FFF','#FF6B7E'];
+      for(var i=0;i<30;i++){ (function(){ var c=document.createElement('span'),col=cols[i%cols.length];
+        c.style.cssText='position:absolute;left:50%;top:40%;width:8px;height:8px;border-radius:2px;z-index:96;pointer-events:none;background:'+col+';box-shadow:0 0 8px '+col;
+        phone.appendChild(c);
+        var a=(Math.PI*2)*(i/30)+Math.random()*0.4, d=100+Math.random()*150, dx=Math.cos(a)*d, dy=Math.sin(a)*d-30, rot=Math.random()*720-360;
+        c.animate([{transform:'translate(0,0) rotate(0) scale(1)',opacity:1},{transform:'translate('+dx+'px,'+dy+'px) rotate('+rot+'deg) scale(.4)',opacity:0}],{duration:1000+Math.random()*500,easing:'cubic-bezier(.15,.7,.3,1)'}).onfinish=function(){ c.remove(); };
+      })(); }
+    }
     function showReveals(roll){
+      if(roll && roll.rar==='mythic') mythicFlash();
       var host = qs('#reveals'); host.innerHTML='';
       var nodes = roll.reveals.map(function(r){
-        var rc = S.chestRarColor(r.r);
+        var rc = RARCOL[String(r.r||'').toLowerCase()] || (r.hi ? '#0A84FF' : '#9AA1B7');
         var el = document.createElement('div');
         el.className = 'rv'+(r.hi?' hi':'');
         el.style.setProperty('--rc', rc);
+        // Currency drops read as a reward type, not a rarity word ("Reward" not "Common").
+        var CURLBL = { xp:'Experience', coins:'Coins', shards:'Shards', tickets:'Tickets' };
+        var sub = CURLBL[r.kind] || (r.r.charAt(0).toUpperCase()+r.r.slice(1));
         el.innerHTML =
           '<div class="rvi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">'+r.ic+'</svg></div>'+
-          '<div class="rvb"><div class="rvname">'+r.n+'</div><div class="rvr">'+r.r.charAt(0).toUpperCase()+r.r.slice(1)+
+          '<div class="rvb"><div class="rvname">'+r.n+'</div><div class="rvr">'+sub+
           (r.hi ? '</div><div class="added"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l4 4 10-11"/></svg>Added to Inventory</div>'
                 : '</div>')+
           '</div>';
@@ -435,7 +501,7 @@
     function open(){
       if(opening) return; opening = true;
       var roll = (S && S.rollChest) ? S.rollChest(floorRar, noUp) : null;
-      if(!roll){ // safety: no engine → just go back
+      if(!roll){ // safety: no engine -> just go back
         bankRewards(roll); location.href = backHref; return;
       }
       var rarePull = roll.tier >= 3;                       // legendary / mythic

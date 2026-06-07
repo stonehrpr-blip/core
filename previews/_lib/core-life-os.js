@@ -3,10 +3,10 @@
  *
  * Subscribes to events and auto-creates linked items so nothing exists
  * in isolation. Example:
- *   • Meal plan generated → tasks auto-created for prep + cook + log
- *   • Workout created → gym session added to dashboard routine
- *   • Morning routine updated → check-in tasks scheduled
- *   • Habit picked → daily task seeded
+ *   • Meal plan generated -> tasks auto-created for prep + cook + log
+ *   • Workout created -> gym session added to dashboard routine
+ *   • Morning routine updated -> check-in tasks scheduled
+ *   • Habit picked -> daily task seeded
  *
  * Anyone can fire these events:
  *   window.dispatchEvent(new CustomEvent('coreLifeMealCreated',     { detail: {...} }));
@@ -25,7 +25,7 @@
     setTimeout(() => whenReady(check, cb, retries - 1), 80);
   }
 
-  // ── Meal plan → tasks ────────────────────────────────────────────────
+  // ── Meal plan -> tasks ────────────────────────────────────────────────
   window.addEventListener('coreLifeMealCreated', (e) => {
     whenReady(() => window.coreTasks, () => {
       const m = e.detail || {};
@@ -42,7 +42,7 @@
     });
   });
 
-  // ── Workout created → gym session in routine ────────────────────────
+  // ── Workout created -> gym session in routine ────────────────────────
   window.addEventListener('coreLifeWorkoutCreated', (e) => {
     whenReady(() => window.coreTasks, () => {
       const w = e.detail || {};
@@ -56,7 +56,7 @@
     });
   });
 
-  // ── Routine updated → schedule daily check-in ───────────────────────
+  // ── Routine updated -> schedule daily check-in ───────────────────────
   window.addEventListener('coreLifeRoutineUpdated', (e) => {
     whenReady(() => window.coreTasks, () => {
       const r = e.detail || {};
@@ -74,7 +74,7 @@
     });
   });
 
-  // ── Habit picked → recurring daily task ─────────────────────────────
+  // ── Habit picked -> recurring daily task ─────────────────────────────
   window.addEventListener('coreLifeHabitPicked', (e) => {
     whenReady(() => window.coreTasks, () => {
       const h = e.detail || {};
@@ -88,7 +88,7 @@
     });
   });
 
-  // ── Plan accepted (from deep-onboarding) → seed today + remind ──────
+  // ── Plan accepted (from deep-onboarding) -> seed today + remind ──────
   window.addEventListener('coreLifePlanSeeded', (e) => {
     whenReady(() => window.coreTasks, () => {
       const plan = e.detail?.plan || {};

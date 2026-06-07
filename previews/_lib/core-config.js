@@ -3,8 +3,8 @@
  *
  * This is the ONLY file you have to edit to point the preview at your real
  * Supabase project. Replace the empty strings below with your project's
- * URL and ANON KEY (find them in your Supabase dashboard → Project Settings
- * → API).
+ * URL and ANON KEY (find them in your Supabase dashboard -> Project Settings
+ * -> API).
  *
  * Leave them empty to keep using the localStorage-only "fake backend"
  * (good for design previews and offline demos).

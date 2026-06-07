@@ -28,7 +28,7 @@
     if (sameRef && history.length > 1) {
       try { history.back(); return; } catch (e) {}
     }
-    // No real history → use the page's declared parent / fallback
+    // No real history -> use the page's declared parent / fallback
     location.href = fallback || '01-index.html';
   }
   // Expose for inline onclick=coreBack('NN-prev.html')

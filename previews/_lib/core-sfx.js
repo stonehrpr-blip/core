@@ -109,6 +109,9 @@
     // progression
     rankup: function () { arp([523, 659, 784, 1046, 1318], 0.08, "triangle", 0.6); },
     levelup: function () { arp([659, 988, 1318], 0.07, "sine", 0.55); },
+    // quest claims — distinct from generic reward/confirm
+    quest_complete: function () { arp([659, 988, 1318, 1760], 0.07, "triangle", 0.6); },
+    boss_win: function () { noise({ dur: 0.5, filter: "lowpass", cut: 1400, cutTo: 200, gain: 0.5 }); tone({ from: 220, to: 110, type: "sawtooth", dur: 0.5, gain: 0.4 }); arp([392, 523, 784, 1046, 1568], 0.09, "triangle", 0.55); },
 
     // streak (26-streak.html)
     streak_grow: function () { arp([659, 988], 0.09, "triangle", 0.55); },
@@ -153,6 +156,7 @@
         play.mute(willMute);
         if (!willMute) play("tick"); // confirm tone when turning sound back on
         paint();
+        sfxToast(willMute ? "Sound off" : "Sound on");
       });
     });
   }

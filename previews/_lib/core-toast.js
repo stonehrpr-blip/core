@@ -75,7 +75,7 @@
   function iconFor(kind, message) {
     if (kind === 'coin') return 'C';
     if (kind === 'warn') return '!';
-    if (kind === 'success') return '✓';
+    if (kind === 'success') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;display:block;"><path d="M5 12l4 4 10-11"/></svg>';
     return 'i';
   }
   function toast(message, opts) {
@@ -84,7 +84,7 @@
     opts = opts || {};
     let kind = opts.kind;
     if (!kind) {
-      // Heuristic: starts with "+" or contains "coin" → coin toast
+      // Heuristic: starts with "+" or contains "coin" -> coin toast
       if (/^\s*[+]\d+/.test(message) || /coin/i.test(message)) kind = 'coin';
       else kind = 'info';
     }

@@ -8,20 +8,26 @@
 <style>
   :root {
     --bg-base:#02020A;
-    --bg-card:rgba(255,255,255,0.03);
+    --bg-card:rgba(255,255,255,0.022);
     --bg-card-2:rgba(255,255,255,0.05);
-    --border:rgba(255,255,255,0.08);
+    --border:rgba(255,255,255,0.07);
     --text:#F8FAFE;
     --muted:#9AA1B7;
     --dim:#4F5570;
-    --accent:#4A8FFF;
-    --grad-a:#4A8FFF;
-    --grad-b:#6F70FF;
-    --grad-c:#B388FF;
-    --good:#34D399;
-    --rar:#9AA1B7;                 /* common rarity grey — matches dashboard RAR.common */
-    --rank-c:#b8c0cf;             /* overwritten by JS from the 08 rank ladder (default Stone) */
-    --rank-glow:rgba(184,192,207,0.6);
+    --accent:#0A84FF;
+    --grad-a:#0A84FF;
+    --grad-b:#0A84FF;
+    --grad-c:#0A84FF;
+    --good:#9AA1B7;
+    --rar:#9AA1B7;                 /* common rarity grey */
+    --rank-c:#0A84FF;
+    --rank-glow:rgba(255,255,255,0.0);
+  }
+  /* Neutralise per-rank tier colours injected by JS onto <body> (inline
+     custom props are overridden by these !important stylesheet declarations) */
+  body {
+    --rank-c: #0A84FF !important;
+    --rank-glow: rgba(255,255,255,0.0) !important;
   }
   * { box-sizing:border-box; }
   html, body { margin:0; padding:0; height:100%; }
@@ -43,8 +49,8 @@
   .bg {
     position:absolute; inset:0; z-index:0;
     background:
-      radial-gradient(60% 35% at 50% 14%, rgba(91,177,255,0.18) 0%, transparent 65%),
-      radial-gradient(60% 35% at 50% 92%, rgba(159,143,255,0.10) 0%, transparent 65%),
+      radial-gradient(60% 35% at 50% 14%, rgba(10,132,255,0.16) 0%, transparent 65%),
+      radial-gradient(60% 35% at 50% 92%, rgba(255,255,255,0.05) 0%, transparent 65%),
       linear-gradient(180deg, #050518 0%, #02020A 55%, #050510 100%);
   }
   .aurora { position:absolute; inset:0; z-index:1; pointer-events:none; opacity:0.45; mix-blend-mode:screen; transition:opacity .6s ease; }
@@ -52,8 +58,8 @@
     content:""; position:absolute; border-radius:50%; filter:blur(70px);
     animation:auroraDrift 22s ease-in-out infinite; will-change:transform;
   }
-  .aurora::before { width:70%; height:40%; left:-10%; top:6%; background:radial-gradient(circle, rgba(91,177,255,0.30), transparent 65%); }
-  .aurora::after { width:60%; height:35%; right:-8%; bottom:14%; background:radial-gradient(circle, rgba(159,143,255,0.26), transparent 65%); animation-delay:-11s; }
+  .aurora::before { width:70%; height:40%; left:-10%; top:6%; background:radial-gradient(circle, rgba(10,132,255,0.26), transparent 65%); }
+  .aurora::after { width:60%; height:35%; right:-8%; bottom:14%; background:radial-gradient(circle, rgba(255,255,255,0.12), transparent 65%); animation-delay:-11s; }
   @keyframes auroraDrift { 0%,100%{transform:translate(0,0) scale(1);opacity:0.5;} 50%{transform:translate(18px,-14px) scale(1.06);opacity:0.75;} }
   body.phase-reveal .aurora{ opacity:0.65; }
   .stars { position:absolute; inset:-2%; pointer-events:none; z-index:2; }
@@ -67,7 +73,7 @@
   /* top identity */
   .topbar { display:flex; align-items:center; justify-content:space-between; padding:6px 2px 0; }
   .brand { display:flex; align-items:center; gap:8px; }
-  .brand .dot { width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 10px var(--accent); }
+  .brand .dot { width:7px; height:7px; border-radius:50%; background:var(--accent); }
   .brand .wm { font-size:12px; font-weight:800; letter-spacing:0.34em; }
   .who { display:flex; align-items:center; gap:8px; }
   .pill { display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 12px; border-radius:999px;
@@ -110,11 +116,11 @@
                 opacity:0; transform:translateY(14px) scale(.96); animation:rise .8s .45s cubic-bezier(.2,.8,.2,1) forwards; }
   body.phase-reveal .chest-area{ display:none; }
   .halo { position:absolute; width:212px; height:212px; border-radius:50%;
-          background:radial-gradient(circle, color-mix(in srgb, var(--accent) 28%, transparent), rgba(159,143,255,0.12) 46%, transparent 70%);
+          background:radial-gradient(circle, color-mix(in srgb, var(--accent) 26%, transparent), rgba(255,255,255,0.08) 46%, transparent 70%);
           filter:blur(6px); animation:haloPulse 3.4s ease-in-out infinite; }
   @keyframes haloPulse { 0%,100%{opacity:.55;transform:scale(.94);} 50%{opacity:.95;transform:scale(1.04);} }
   body.phase-opening .halo{ animation:haloBuild 1.5s ease-in forwards; }
-  @keyframes haloBuild { 0%{opacity:.6;transform:scale(.94);} 55%{opacity:1;transform:scale(1.14);} 100%{opacity:1;transform:scale(1.4); background:radial-gradient(circle, rgba(140,180,255,0.6), rgba(179,136,255,0.28) 46%, transparent 72%);} }
+  @keyframes haloBuild { 0%{opacity:.6;transform:scale(.94);} 55%{opacity:1;transform:scale(1.14);} 100%{opacity:1;transform:scale(1.4); background:radial-gradient(circle, rgba(10,132,255,0.5), rgba(255,255,255,0.10) 46%, transparent 72%);} }
 
   .chest-svg { position:relative; z-index:2; width:160px; height:auto; filter:drop-shadow(0 18px 30px rgba(0,0,0,0.5)); }
   body.phase-locked .chest-svg{ animation:chestIdle 3.6s ease-in-out infinite; }
@@ -130,11 +136,11 @@
 
   /* particle burst + flash */
   .particles { position:absolute; left:50%; top:46%; width:0; height:0; z-index:3; pointer-events:none; }
-  .pt { position:absolute; left:0; top:0; width:6px; height:6px; border-radius:50%; opacity:0; background:radial-gradient(circle, #cfe0ff, #6f70ff); }
+  .pt { position:absolute; left:0; top:0; width:6px; height:6px; border-radius:50%; opacity:0; background:radial-gradient(circle, #ffffff, #0A84FF); }
   body.phase-opening .pt{ animation:burst 1s .5s cubic-bezier(.15,.7,.3,1) forwards; }
   @keyframes burst { 0%{opacity:0; transform:translate(0,0) scale(.4);} 14%{opacity:1;} 100%{opacity:0; transform:translate(var(--tx),var(--ty)) scale(1);} }
   .flash { position:absolute; inset:0; z-index:40; pointer-events:none; opacity:0;
-           background:radial-gradient(circle at 50% 46%, rgba(200,220,255,0.9), rgba(150,190,255,0.22) 40%, transparent 70%); }
+           background:radial-gradient(circle at 50% 46%, rgba(255,255,255,0.9), rgba(255,255,255,0.22) 40%, transparent 70%); }
   body.phase-opening .flash{ animation:flash .8s .48s ease-out; }
   @keyframes flash { 0%{opacity:0;} 22%{opacity:.8;} 100%{opacity:0;} }
 
@@ -142,13 +148,12 @@
   .cta-wrap { width:100%; }
   .btn { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:18px 24px; border:none;
          border-radius:999px; font-family:inherit; font-size:17px; font-weight:700; letter-spacing:-0.32px; color:#fff; cursor:pointer;
-         text-decoration:none; text-shadow:0 1px 2px rgba(0,0,0,0.40);
-         background:linear-gradient(135deg, #1F4FA8 0%, #4B2E94 50%, #8A1F4E 100%); background-size:200% 200%;
-         animation:gradShift 6s ease infinite;
-         box-shadow:0 16px 40px rgba(31,79,168,0.40), 0 0 60px rgba(75,46,148,0.28), 0 1px 0 rgba(255,255,255,0.16) inset, 0 -1px 0 rgba(0,0,0,0.30) inset;
+         text-decoration:none; text-shadow:0 1px 2px rgba(0,0,0,0.30);
+         background:#0A84FF;
+         box-shadow:none;
          transition:transform .12s cubic-bezier(0.4,0,0.2,1), filter .2s; -webkit-tap-highlight-color:transparent; }
-  .btn:hover{ filter:brightness(1.20) saturate(1.10); }
-  .btn:active{ transform:scale(0.985); filter:brightness(0.85); }
+  .btn:hover{ filter:brightness(1.08); }
+  .btn:active{ transform:scale(0.985); filter:brightness(0.92); }
   .btn:focus-visible{ outline:2px solid #fff; outline-offset:3px; }
   .btn[disabled]{ opacity:.45; cursor:default; pointer-events:none; box-shadow:none; filter:none; animation:none; }
   .btn svg{ width:18px; height:18px; }
@@ -167,35 +172,31 @@
 
   /* SECTION 4 — item card */
   .item-card { position:relative; width:100%; max-width:300px; border-radius:22px; padding:18px 18px 18px; text-align:center;
-               background:linear-gradient(168deg, color-mix(in srgb, var(--accent) 10%, transparent), rgba(159,143,255,0.05) 60%, rgba(255,255,255,0.02));
-               border:1px solid rgba(140,170,230,0.26);
-               box-shadow:0 18px 48px rgba(20,40,90,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
+               background:rgba(255,255,255,0.022);
+               border:1px solid rgba(255,255,255,0.07);
+               box-shadow:0 18px 48px rgba(0,0,0,0.4);
                opacity:0; transform:translateY(20px) scale(.95); animation:cardIn .7s .25s cubic-bezier(.2,.9,.25,1) forwards; }
   @keyframes cardIn { to { opacity:1; transform:translateY(0) scale(1); } }
-  .item-card::after { content:""; position:absolute; inset:-1px; border-radius:22px; padding:1px; pointer-events:none;
-                      background:linear-gradient(130deg, rgba(74,143,255,0), color-mix(in srgb, var(--accent) 60%, transparent), rgba(179,136,255,0.6), rgba(74,143,255,0));
-                      -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude;
-                      opacity:0; animation:ringIn .8s .9s ease forwards, ringGlow 3.4s 1.7s ease-in-out infinite; }
+  .item-card::after { content:none; }
   @keyframes ringIn { to { opacity:1; } }
-  @keyframes ringGlow { 0%,100%{ filter:drop-shadow(0 0 4px rgba(110,150,255,.4)); } 50%{ filter:drop-shadow(0 0 11px rgba(150,190,255,.8)); } }
+  @keyframes ringGlow { 0%,100%{ filter:none; } 50%{ filter:none; } }
 
   .added { display:inline-flex; align-items:center; gap:6px; height:26px; padding:0 12px; border-radius:999px; margin-bottom:14px;
-           background:rgba(52,211,153,0.12); border:1px solid rgba(52,211,153,0.35); color:var(--good);
+           background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.07); color:var(--text);
            font-size:10.5px; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; }
   .added svg{ width:13px; height:13px; }
 
   .item-emblem { width:84px; height:84px; margin:0 auto 13px; border-radius:22px; position:relative;
                  display:flex; align-items:center; justify-content:center;
-                 background:linear-gradient(150deg, #232a3b, #11151f); border:1px solid rgba(154,161,183,0.3);
-                 box-shadow:0 0 28px rgba(154,161,183,0.26), inset 0 2px 0 rgba(255,255,255,0.12); }
+                 background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.07); }
   .item-emblem svg{ width:42px; height:42px; color:#CFD8E6; filter:drop-shadow(0 2px 4px rgba(0,0,0,.4)); }
   .item-emblem .spark { position:absolute; inset:-6px; border-radius:26px; pointer-events:none;
-                        background:radial-gradient(circle, rgba(180,190,210,0.32), transparent 66%); animation:haloPulse 3s ease-in-out infinite; }
+                        background:radial-gradient(circle, rgba(255,255,255,0.10), transparent 66%); animation:haloPulse 3s ease-in-out infinite; }
 
   .rarity { display:inline-flex; align-items:center; gap:6px; height:22px; padding:0 10px; border-radius:999px; margin-bottom:9px;
             background:rgba(154,161,183,0.14); border:1px solid rgba(154,161,183,0.4); color:var(--rar);
             font-size:10px; font-weight:800; letter-spacing:0.14em; text-transform:uppercase; }
-  .rarity .rdot{ width:6px; height:6px; border-radius:50%; background:var(--rar); box-shadow:0 0 8px var(--rar); }
+  .rarity .rdot{ width:6px; height:6px; border-radius:50%; background:var(--rar); }
   .item-name { font-size:20px; font-weight:800; letter-spacing:-0.01em; }
   .item-type { margin-top:4px; font-size:11.5px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:var(--muted); }
   .bonus { display:inline-flex; align-items:center; gap:7px; margin-top:12px; padding:8px 13px; border-radius:12px;
@@ -212,8 +213,8 @@
   .loop { display:flex; align-items:flex-start; justify-content:space-between; gap:2px; }
   .loop .step { display:flex; flex-direction:column; align-items:center; gap:6px; flex:1; min-width:0; }
   .loop .si { width:34px; height:34px; border-radius:11px; display:flex; align-items:center; justify-content:center;
-              background:linear-gradient(150deg, color-mix(in srgb, var(--accent) 16%, transparent), rgba(255,255,255,0.02)); border:1px solid rgba(120,160,255,0.22); }
-  .loop .si svg{ width:18px; height:18px; color:var(--accent); }
+              background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.07); }
+  .loop .si svg{ width:18px; height:18px; color:var(--muted); }
   .loop .sl { font-size:9px; font-weight:700; letter-spacing:0.01em; color:var(--muted); text-align:center; line-height:1.2; }
   .loop .arr { flex:none; display:flex; align-items:center; padding-top:9px; color:var(--dim); }
   .loop .arr svg{ width:13px; height:13px; }
@@ -281,7 +282,7 @@
             <defs>
               <linearGradient id="cBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#252c3e"/><stop offset="1" stop-color="#0d111b"/></linearGradient>
               <linearGradient id="cLid"  x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2e3650"/><stop offset="1" stop-color="#161b2a"/></linearGradient>
-              <linearGradient id="cSeam" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4A8FFF"/><stop offset="1" stop-color="#B388FF"/></linearGradient>
+              <linearGradient id="cSeam" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#0A84FF"/><stop offset="1" stop-color="#0A84FF"/></linearGradient>
             </defs>
             <!-- interior glow (revealed as lid lifts) -->
             <rect class="chest-inner" x="34" y="60" width="92" height="20" rx="6" fill="url(#cSeam)"/>
@@ -295,7 +296,7 @@
               <rect x="34" y="74" width="92" height="6" rx="3" fill="url(#cSeam)" opacity="0.9"/>
               <!-- latch -->
               <rect x="70" y="68" width="20" height="22" rx="6" fill="#11151f" stroke="rgba(150,180,240,0.4)" stroke-width="1.5"/>
-              <circle cx="80" cy="79" r="3.4" fill="#7FB0FF"/>
+              <circle cx="80" cy="79" r="3.4" fill="#0A84FF"/>
             </g>
           </svg>
         </div>
@@ -441,7 +442,7 @@
     // ── persist the opened chest — shared format (coreState) + spec flat keys ──
     function persistOpen(){
       var item = { name:"Starter Badge", rarity:"Common", type:"Badge", bonus:"+5 CORE Power", source:"Starter Chest" };
-      // 1) authoritative coreState blob → dashboard + profile read this (item shows, "Starter Chest" badge unlocks, power rises)
+      // 1) authoritative coreState blob -> dashboard + profile read this (item shows, "Starter Chest" badge unlocks, power rises)
       try{
         if(window.coreState){
           coreState.openStarterChest({ id:'starter_badge', name:item.name, type:'badge', rarity:'common',
@@ -476,7 +477,7 @@
     try{ opened = val('coreFirstChestOpened')==='1' || (window.coreState && coreState.read().chests && coreState.read().chests.starterOpened); }catch(e){}
     if(opened){ goReveal(); }
 
-    // ── OPEN CHEST → ~1.5s sequence → persist → reveal ─────────────────────
+    // ── OPEN CHEST -> ~1.5s sequence -> persist -> reveal ─────────────────────
     var btn = document.getElementById('openBtn');
     var reduce = false; try{ reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
     btn.addEventListener('click', function(){

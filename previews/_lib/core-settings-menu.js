@@ -131,7 +131,7 @@
       <svg viewBox="0 0 24 24">${icon}</svg>
       <span class="lbl">${label}</span>
       ${badge}
-      ${opts.danger ? '' : '<span class="chev">›</span>'}
+      ${opts.danger ? '' : '<span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-2px"><path d="M9 6l6 6-6 6"/></svg></span>'}
     </div>`;
   }
 

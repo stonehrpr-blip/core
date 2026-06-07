@@ -28,8 +28,9 @@ export function RankGemCard(props: {
   streakDays: number;
   power: number;
   frame: string;
+  plus?: boolean;
 }) {
-  const { rank, name, title, klass, playerId, level, xp, streakDays, power, frame } = props;
+  const { rank, name, title, klass, playerId, level, xp, streakDays, power, frame, plus } = props;
   const nextR = GAME_RANKS[rank.idx + 1] || null;
   const span = nextR ? nextR.min - rank.min : 1;
   const into = Math.max(0, xp - rank.min);
@@ -77,9 +78,16 @@ export function RankGemCard(props: {
         </View>
         <View style={{ alignItems: "flex-end", gap: 6 }}>
           <Text style={s.pid}>{playerId ?? "CORE-····-····"}</Text>
-          <View style={s.lvlChip}>
-            <View style={[s.lvlDot, { backgroundColor: rank.glow }]} />
-            <Text style={s.lvlTxt}>LVL {level}</Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+            {plus && (
+              <View style={s.plusPill}>
+                <Text style={s.plusTxt}>PLUS</Text>
+              </View>
+            )}
+            <View style={s.lvlChip}>
+              <View style={[s.lvlDot, { backgroundColor: rank.glow }]} />
+              <Text style={s.lvlTxt}>LVL {level}</Text>
+            </View>
           </View>
         </View>
       </View>
@@ -151,6 +159,8 @@ const s = StyleSheet.create({
   title: { fontSize: 10, fontWeight: "800", letterSpacing: 1.4, textTransform: "uppercase", marginTop: 6 },
   klass: { color: "#4F5570", fontSize: 10, fontWeight: "800", letterSpacing: 1.2, textTransform: "uppercase", marginTop: 3 },
   pid: { color: "#9AA1B7", fontSize: 10, fontWeight: "700", letterSpacing: 0.4, fontVariant: ["tabular-nums"] },
+  plusPill: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999, backgroundColor: "#8FB4FF" },
+  plusTxt: { color: "#06122b", fontSize: 9, fontWeight: "900", letterSpacing: 0.6 },
   lvlChip: { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 9, paddingVertical: 4, borderRadius: 999, backgroundColor: "rgba(0,0,0,0.35)", borderWidth: 1, borderColor: "rgba(255,255,255,0.08)" },
   lvlDot: { width: 6, height: 6, borderRadius: 3, opacity: 0.8 },
   lvlTxt: { color: "#F8FAFE", fontSize: 11, fontWeight: "900" },

@@ -5,7 +5,7 @@
  * Everything is local-first (localStorage) so the page is fully functional
  * with NO API key. If an OpenAI key is set (coreAI.hasKey()), open-ended
  * coach chat is upgraded to real GPT-4o; the deterministic memory parsing
- * (book → page → daily target → auto-generated quest) always runs locally.
+ * (book -> page -> daily target -> auto-generated quest) always runs locally.
  *
  * Public surface: window.coreQuest
  */
@@ -217,7 +217,7 @@
   }
 
   // ════════════════════════════════════════════════════════════════════
-  // ONBOARDING → memory + first quests
+  // ONBOARDING -> memory + first quests
   // ════════════════════════════════════════════════════════════════════
   function onboardComplete(ans) {
     var m = getMemory();
@@ -239,7 +239,7 @@
       ],
       reward: { xp: 2500, coins: 500, chest: 'legendary' }
     };
-    // Habit → domain memory
+    // Habit -> domain memory
     if (ans.habit) {
       var h = ans.habit.toLowerCase();
       if (/read/.test(h)) m.domains.reading = m.domains.reading || { book: '', page: 0, target: 0, daily: 10, why: '' };
@@ -255,7 +255,7 @@
   }
 
   // ════════════════════════════════════════════════════════════════════
-  // THE COACH BRAIN  — coachReply(text) → { text, did:[] }
+  // THE COACH BRAIN  — coachReply(text) -> { text, did:[] }
   // Deterministic intent parsing (works with no API key).
   // ════════════════════════════════════════════════════════════════════
   function num(s) { var m = String(s).match(/(\d[\d,]*)/); return m ? parseInt(m[1].replace(/,/g, ''), 10) : null; }
@@ -351,12 +351,12 @@
     if (/(harder|tougher|more (xp|reward)|raise|push me)/i.test(low)) {
       var active = allQuests().filter(function (q) { return q.status === 'active' && q.cat !== 'main'; });
       var q = active[active.length - 1];
-      if (q) { var i = Math.min(RANK.length - 1, RANK.indexOf(q.rarity) + 1); q.rarity = RANK[i]; var rew = rewardFor(q.rarity); q.xp = rew.xp; q.coins = rew.coins; q.proof = proofFor(q.rarity, q.domain); upsertQuest(q.id, q); return { text: 'Raised <b>' + q.title + '</b> to <b>' + RARITY[q.rarity].l + '</b> — now +' + q.xp + ' XP and stronger proof. No backing out.', did: ['↑ ' + q.title] }; }
+      if (q) { var i = Math.min(RANK.length - 1, RANK.indexOf(q.rarity) + 1); q.rarity = RANK[i]; var rew = rewardFor(q.rarity); q.xp = rew.xp; q.coins = rew.coins; q.proof = proofFor(q.rarity, q.domain); upsertQuest(q.id, q); return { text: 'Raised <b>' + q.title + '</b> to <b>' + RARITY[q.rarity].l + '</b> — now +' + q.xp + ' XP and stronger proof. No backing out.', did: ['Raised ' + q.title] }; }
     }
     if (/(easier|simpler|too hard|lower|smaller)/i.test(low)) {
       var active2 = allQuests().filter(function (q) { return q.status === 'active' && q.cat !== 'main'; });
       var q2 = active2[active2.length - 1];
-      if (q2) { var j = Math.max(0, RANK.indexOf(q2.rarity) - 1); q2.rarity = RANK[j]; var rew2 = rewardFor(q2.rarity); q2.xp = rew2.xp; q2.coins = rew2.coins; q2.proof = proofFor(q2.rarity, q2.domain); upsertQuest(q2.id, q2); return { text: 'Scaled <b>' + q2.title + '</b> down to ' + RARITY[q2.rarity].l + '. Smaller is fine — momentum matters more than size.', did: ['↓ ' + q2.title] }; }
+      if (q2) { var j = Math.max(0, RANK.indexOf(q2.rarity) - 1); q2.rarity = RANK[j]; var rew2 = rewardFor(q2.rarity); q2.xp = rew2.xp; q2.coins = rew2.coins; q2.proof = proofFor(q2.rarity, q2.domain); upsertQuest(q2.id, q2); return { text: 'Scaled <b>' + q2.title + '</b> down to ' + RARITY[q2.rarity].l + '. Smaller is fine — momentum matters more than size.', did: ['Lowered ' + q2.title] }; }
     }
 
     // 6) WHAT FIRST / where to start
@@ -368,7 +368,7 @@
       return { text: 'You\'re clear for now. Tell me a goal and I\'ll build the next quest.', did: [] };
     }
 
-    // 7) generic → real AI if key, else scripted coach
+    // 7) generic -> real AI if key, else scripted coach
     if (window.coreAI && coreAI.hasKey()) { return { text: '__ASYNC__', raw: t }; }
     var stub = [
       'Keep it simple: pick the smallest quest on your board and finish it in the next 10 minutes. Momentum first.',
@@ -396,7 +396,7 @@
   }
 
   // ── completion + reward bundle ──
-  // Quest domain → CORE life-score stat (display key) + rarity-scaled gain.
+  // Quest domain -> CORE life-score stat (display key) + rarity-scaled gain.
   // Single source for both the reward overlay (rewardBundle) and the grant (claimQuest).
   var DOMAIN_STAT = { gym: 'strength', reading: 'focus', school: 'focus', mind: 'health', health: 'health', discipline: 'purpose', money: 'wealth', business: 'wealth', social: 'social' };
   var RARITY_STAT_GAIN = { common: 1, uncommon: 1, rare: 2, epic: 2, legendary: 3, mythic: 3 };

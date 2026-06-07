@@ -18,8 +18,8 @@
 
   // ── Tour content keyed by page filename ──────────────────────────────
   const TOURS = {
-    'dashboard.html':    { key: 'home',    title: 'Welcome to CORE',              body: 'Tap a row to mark it done · big button locks your daily streak · long-press the tab bar to customize it · Settings → Layout → Edit page reorders widgets · Theme toggles light/dark.' },
-    'feed.html':         { key: 'feed',    title: 'Your friends\' wins',          body: 'See what people you follow finished today. Tap ⚡ to cheer them on.' },
+    'dashboard.html':    { key: 'home',    title: 'Welcome to CORE',              body: 'Tap a row to mark it done · big button locks your daily streak · long-press the tab bar to customize it · Settings -> Layout -> Edit page reorders widgets · Theme toggles light/dark.' },
+    'feed.html':         { key: 'feed',    title: 'Your friends\' wins',          body: 'See what people you follow finished today. Tap the cheer button to cheer them on.' },
     'coach.html':        { key: 'coach',   title: 'Your AI coach',                body: 'Ask anything — habits, routine tweaks, motivation. Your coach knows your data.' },
     'ranks.html':        { key: 'ranks',   title: 'Climb the ranks',              body: 'Each rank unlocks new perks. Tap any rank to see exactly what you get when you hit it.' },
     'profile.html':      { key: 'you',     title: 'Your profile',                 body: 'Stats, streak, achievements, friends — all in one place. Long-press the tab bar to customize it.' },

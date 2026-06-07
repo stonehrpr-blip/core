@@ -2,7 +2,7 @@
  * CoreAvatar — shared profile-picture registry + DOM helpers.
  *
  *   coreAvatar.set('flow')        // save selection
- *   coreAvatar.current()          // → { key, name, c1, c2, glow, svg }
+ *   coreAvatar.current()          // -> { key, name, c1, c2, glow, svg }
  *   coreAvatar.applyTo(el)        // sets background gradient + glow + injects SVG
  *   coreAvatar.gradient(key)      // string CSS gradient for inline style
  *

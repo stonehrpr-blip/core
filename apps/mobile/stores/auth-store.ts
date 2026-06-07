@@ -33,6 +33,9 @@ type AuthState = {
   permissions: Permissions;
   trial: TrialState;
   subscriptionActive: boolean;
+  // CORE Plus is the cosmetic/perk membership (2× rewards, PLUS badge), kept
+  // independent of billing's `subscriptionActive` so the two can diverge.
+  corePlus: boolean;
   onboardedAt: string | null;
   lastSeenAt: string | null;
 
@@ -50,6 +53,7 @@ type AuthState = {
   setTrial: (t: Partial<TrialState>) => void;
   startTrial: () => void;
   setSubscriptionActive: (active: boolean) => void;
+  setCorePlus: (active: boolean) => void;
   touchLastSeen: () => void;
   completeOnboarding: () => void;
 };
@@ -86,6 +90,7 @@ export const useAuthStore = create<AuthState>()(
       permissions: EMPTY_PERMISSIONS,
       trial: EMPTY_TRIAL,
       subscriptionActive: false,
+      corePlus: false,
       onboardedAt: null,
       lastSeenAt: null,
 
@@ -123,6 +128,7 @@ export const useAuthStore = create<AuthState>()(
           permissions: EMPTY_PERMISSIONS,
           trial: EMPTY_TRIAL,
           subscriptionActive: false,
+          corePlus: false,
           onboardedAt: null,
           lastSeenAt: null,
         }),
@@ -143,6 +149,8 @@ export const useAuthStore = create<AuthState>()(
 
       setSubscriptionActive: (active) =>
         set({ subscriptionActive: active }),
+
+      setCorePlus: (active) => set({ corePlus: active }),
 
       touchLastSeen: () =>
         set({ lastSeenAt: new Date().toISOString() }),

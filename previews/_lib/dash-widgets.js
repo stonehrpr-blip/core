@@ -113,6 +113,19 @@
     purpose:  '<circle cx="12" cy="12" r="8.5"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z"/>',
   };
 
+  // ── Shared 7d/30d range toggle (used by lifetrend + stattrend) ──
+  function segHeadHTML(range) {
+    return '<div class="dc-head"><div class="dc-seg" role="tablist">' +
+      '<button class="dc-seg-btn' + (range === 7 ? ' on' : '') + '" data-r="7">7d</button>' +
+      '<button class="dc-seg-btn' + (range === 30 ? ' on' : '') + '" data-r="30">30d</button>' +
+      '</div></div>';
+  }
+  function wireSeg(host, onPick) {
+    Array.prototype.forEach.call(host.querySelectorAll('.dc-seg-btn'), function (b) {
+      b.addEventListener('click', function (e) { e.preventDefault(); onPick(+this.dataset.r); });
+    });
+  }
+
   // ── REGISTRY ─────────────────────────────────────────────────────────────────
   var REGISTRY = {
 
@@ -120,108 +133,64 @@
       id: 'quote', title: 'Daily Quote',
       icon: '<path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1zm12 0c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>',
       render: function (host) {
-        var cs = S(), s = cs ? cs.read() : {}, xp = (s && s.xp) || 0;
-        var rank = cs && cs.rankFor ? cs.rankFor(xp) : { name: 'Stone', color: '#AEB4BD' };
-        var lvl  = cs && cs.levelFor ? cs.levelFor(xp) : 1;
+        // Task 1a: rank chip removed — rank lives in the Life Score hero only.
         host.innerHTML =
           '<div class="w-quote">' +
           '<div class="w-quote-top">' +
           '<svg class="w-quote-mark" viewBox="0 0 24 24" fill="currentColor"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1zm12 0c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/></svg>' +
-          '<a href="24-ranks.html" class="w-quote-rank" style="color:var(--muted)">' +
-          '<svg viewBox="0 0 24 24" fill="currentColor" width="9" height="9"><path d="M12 2L2 8l10 14L22 8z"/></svg>' +
-          'Lv ' + lvl + ' \xb7 ' + (rank.name || 'Stone') +
-          '</a>' +
           '</div>' +
           '<p class="w-quote-text">' + dailyQuote() + '</p>' +
           '</div>';
       }
     },
 
+    // ── Life Score (DEFAULT) — slim hero: big number + progress bar only ──
     lifescore: {
       id: 'lifescore', title: 'Life Score',
       icon: '<path d="M12 20.5s-7.2-4.6-7.2-9.8A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 7.2 3.7c0 5.2-7.2 9.8-7.2 9.8Z"/>',
       render: function (host) {
         var cs = S();
         if (!cs) { host.innerHTML = '<div class="w-empty">Loading…</div>'; return; }
-        var defs = cs.STAT_DEFS || [];
 
         function xpForLevel(lvl) { return lvl * 300; }
 
         function buildHTML() {
-          var s    = cs.read();
-          var xp   = s.xp || 0;
-          var lvl  = cs.levelFor ? cs.levelFor(xp) : (Math.floor(xp / 300) + 1);
-          var rank = cs.rankFor  ? cs.rankFor(xp)  : { name: 'Stone', color: '#AEB4BD' };
-          var xpPrev = xpForLevel(lvl - 1);
-          var xpNext = xpForLevel(lvl);
-          var pct  = xpNext > xpPrev ? Math.min(100, Math.round((xp - xpPrev) / (xpNext - xpPrev) * 100)) : 100;
-
-          var DAY_LABELS = ['S','M','T','W','T','F','S'];
-          var todayIdx = new Date().getDay();
-          var daysHtml = '<div class="w-ls-days">';
-          DAY_LABELS.forEach(function(dn, i) {
-            daysHtml += '<span class="w-ls-day' + (i === todayIdx ? ' today' : '') + '">' + dn + '</span>';
-          });
-          daysHtml += '</div>';
-
-          var html = daysHtml +
-            '<div class="w-ls-hero">' +
-            '<div class="w-ls-score-num" id="wLsNum">0</div>' +
-            '<div class="w-ls-score-label">Life Score</div>' +
-            '<a href="24-ranks.html" class="w-ls-rank-badge" style="color:var(--text)">' +
-              '<svg viewBox="0 0 24 24" fill="currentColor" width="11" height="11"><path d="M12 2L2 8l10 14L22 8z"/></svg>' +
-              rank.name +
-            '</a>' +
-            '<div class="w-ls-xp">' +
-              '<div class="w-ls-xp-head">' +
-                '<span class="w-ls-xp-rank">Lv ' + lvl + '</span>' +
-                '<span class="w-ls-xp-num">' + xp + ' XP</span>' +
+          var s   = cs.read();
+          var xp  = s.xp || 0;
+          var lvl = cs.levelFor ? cs.levelFor(xp) : (Math.floor(xp / 300) + 1);
+          // Task 1b: hero is just the score + the XP progress bar. No stacked
+          // rank/level badges, no stat grid, no day-dots — the page reads clean.
+          return '' +
+            '<a href="24-ranks.html" class="w-ls-hero" style="text-decoration:none;color:inherit" aria-label="Life Score — view rank">' +
+              '<span class="w-ls-cta" aria-hidden="true">Rank<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>' +
+              '<div class="w-ls-score-num" id="wLsNum">0</div>' +
+              '<div class="w-ls-score-label">Life Score</div>' +
+              '<div class="w-ls-xp">' +
+                '<div class="w-ls-xp-head">' +
+                  '<span class="w-ls-xp-rank" id="wLsLvl">Lv ' + lvl + '</span>' +
+                  '<span class="w-ls-xp-num" id="wLsXpNum">' + xp + ' XP</span>' +
+                '</div>' +
+                '<div class="w-ls-xp-bar"><div class="w-ls-xp-fill" id="wLsXpFill" style="width:0%"></div></div>' +
               '</div>' +
-              '<div class="w-ls-xp-bar"><div class="w-ls-xp-fill" id="wLsXpFill" style="width:0%"></div></div>' +
-            '</div>' +
-            '</div><div class="w-ls-grid">';
-
-          // Task 2: iterate all 6 defs — no slice/limit here.
-          // Task 3: routing: strength→gym.html focus→focus.html wealth→wealth.html
-          //         health/social/purpose → stat.html?s=<key> (d.page missing → fallback)
-          defs.forEach(function (d) {
-            var href = d.page || ('stat.html?s=' + d.key);
-            html +=
-              '<a href="' + href + '" class="w-ls-card" style="--sc:' + (d.color || 'var(--blue)') + '" aria-label="' + d.name + '">' +
-              '<div class="w-ls-card-head">' +
-                '<div class="w-ls-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + (d.icon || STAT_IC[d.key] || '') + '</svg></div>' +
-                '<span class="w-ls-name">' + d.name + '</span>' +
-              '</div>' +
-              '<span class="w-ls-val" data-sk="' + d.key + '">0</span>' +
-              '<div class="w-ls-bar" style="margin-top:8px"><div class="w-ls-fill" data-skf="' + d.key + '" style="width:0%"></div></div>' +
-              '<div class="w-ls-lvl" data-skl="' + d.key + '">Lv 1</div>' +
-              '</a>';
-          });
-          return html + '</div>';
+            '</a>';
         }
 
         host.innerHTML = buildHTML();
 
         function animateIn() {
-          var s    = cs.read();
-          var xp   = s.xp || 0;
-          var lvl  = cs.levelFor ? cs.levelFor(xp) : (Math.floor(xp / 300) + 1);
+          var s   = cs.read();
+          var xp  = s.xp || 0;
+          var lvl = cs.levelFor ? cs.levelFor(xp) : (Math.floor(xp / 300) + 1);
           var xpPrev = lvl > 1 ? (lvl - 1) * 300 : 0;
           var xpNext = lvl * 300;
-          var pct  = xpNext > xpPrev ? Math.min(100, Math.round((xp - xpPrev) / (xpNext - xpPrev) * 100)) : 100;
+          var pct = xpNext > xpPrev ? Math.min(100, Math.round((xp - xpPrev) / (xpNext - xpPrev) * 100)) : 100;
           var fill = host.querySelector('#wLsXpFill');
           if (fill) requestAnimationFrame(function () { fill.style.width = pct + '%'; });
-
+          var lvlEl = host.querySelector('#wLsLvl');
+          if (lvlEl) lvlEl.textContent = 'Lv ' + lvl;
+          var xpEl = host.querySelector('#wLsXpNum');
+          if (xpEl) xpEl.textContent = xp + ' XP';
           animCount(host.querySelector('#wLsNum'), cs.lifeScore());
-          defs.forEach(function (d) {
-            var v   = cs.statValue(d.key);
-            var lvl = statLevel(v);
-            animCount(host.querySelector('[data-sk="' + d.key + '"]'), v);
-            var fe  = host.querySelector('[data-skf="' + d.key + '"]');
-            var le  = host.querySelector('[data-skl="' + d.key + '"]');
-            if (fe) requestAnimationFrame(function () { fe.style.width = v + '%'; });
-            if (le) le.textContent = 'Lv ' + lvl;
-          });
         }
         setTimeout(animateIn, 80);
 
@@ -230,6 +199,10 @@
         host._cleanup = function () { window.removeEventListener('coreStateChange', onUpdate); };
       }
     },
+
+    // Stat Breakdown removed — its per-stat page links now live on the
+    // Stat Trends widget (strength→gym, focus→focus, wealth→wealth,
+    // health/social/purpose→stat.html?s=<key>).
 
     tasks: {
       id: 'tasks', title: "Today's Tasks",
@@ -257,6 +230,7 @@
           return m < 60 ? m + 'm left' : Math.ceil(m / 60) + 'h left';
         }
 
+        var wasAllDone = false;
         function renderTasks() {
           host.innerHTML = '';
           var tasks = getTasks();
@@ -278,8 +252,21 @@
           if (!tasks.length) {
             var e = document.createElement('div');
             e.className = 'w-empty'; e.textContent = 'No quests today.';
-            host.appendChild(e); return;
+            host.appendChild(e); wasAllDone = false; return;
           }
+
+          // all-tasks-done celebratory moment
+          var allDone = done === tasks.length;
+          if (allDone) {
+            var cel = document.createElement('div');
+            cel.className = 'w-tasks-done';
+            cel.innerHTML =
+              '<div class="w-tasks-done-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-11"/></svg></div>' +
+              '<div class="w-tasks-done-txt"><b>All quests complete</b><span>Nice work — come back tomorrow for more XP.</span></div>';
+            host.appendChild(cel);
+            if (!wasAllDone) { try { window.coreSfx && window.coreSfx('levelup'); } catch (er) {} }
+          }
+          wasAllDone = allDone;
 
           tasks.forEach(function (task) {
             var isDone = task.done;
@@ -399,21 +386,18 @@
           fog:    SVG_HEAD + '<path d="M3 10h18M5 14h14M4 18h16"/></svg>'
         };
         var LABELS = { clear: 'Clear skies', cloudy: 'Overcast', rain: 'Raining', snow: 'Snowing', fog: 'Foggy' };
-        var TIMES  = { sunrise: 'Sunrise', day: 'Daytime', afternoon: 'Afternoon', sunset: 'Sunset', night: 'Night' };
         var amb = window.dashAmbient;
         var w = amb ? amb.getWeather() : 'clear';
-        var ti = amb ? amb.getTime() : 'day';
+        // Condition only — the header glyph already shows time of day.
         host.innerHTML =
           '<div class="w-weather">' +
           '<span class="w-weather-icon" id="wWIcon">' + (ICONS[w] || ICONS.clear) + '</span>' +
           '<span class="w-weather-label" id="wWLabel">' + (LABELS[w] || 'Clear') + '</span>' +
-          '<span class="w-weather-time" id="wWTime">' + (TIMES[ti] || ti) + '</span>' +
           '</div>';
         function onAmb(e) {
-          var ic = host.querySelector('#wWIcon'), lb = host.querySelector('#wWLabel'), tm = host.querySelector('#wWTime');
+          var ic = host.querySelector('#wWIcon'), lb = host.querySelector('#wWLabel');
           if (ic) ic.innerHTML = ICONS[e.detail.weather] || ICONS.clear;
           if (lb) lb.textContent = LABELS[e.detail.weather] || 'Clear';
-          if (tm) tm.textContent = TIMES[e.detail.time] || e.detail.time;
         }
         window.addEventListener('dashAmbientChange', onAmb);
         host._cleanup = function () { window.removeEventListener('dashAmbientChange', onAmb); };
@@ -468,16 +452,98 @@
       }
     },
 
+    // ── Life Score trend (OPTIONAL chart) ──
+    lifetrend: {
+      id: 'lifetrend', title: 'Life Score Trend',
+      icon: '<path d="M3 17l5-6 4 4 5-7M3 21h18"/>',
+      render: function (host) {
+        var DC = window.dashCharts;
+        if (!DC) { host.innerHTML = '<div class="w-empty">Chart engine not loaded.</div>'; return; }
+        var reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches);
+        var range = 7, painted = false;
+
+        function draw() {
+          var pts = DC.getHistory(range);
+          host.innerHTML = segHeadHTML(range) + '<div class="dc-host"></div>';
+          DC.lineChart(host.querySelector('.dc-host'), {
+            values: DC.series(pts, 'score'),
+            labels: DC.rangeLabels(pts),
+            color: '#0A84FF',
+            height: 60,
+            reducedMotion: reduced,
+            animate: !painted           // animate on first paint + range switch only
+          });
+          painted = true;
+          wireSeg(host, function (r) { if (r !== range) { range = r; painted = false; } draw(); });
+        }
+        draw();
+        function onUpdate() { draw(); }  // painted stays true → no re-animation on state change
+        window.addEventListener('coreStateChange', onUpdate);
+        host._cleanup = function () { window.removeEventListener('coreStateChange', onUpdate); };
+      }
+    },
+
+    // ── Per-stat trend mini-graphs (OPTIONAL chart) ──
+    stattrend: {
+      id: 'stattrend', title: 'Stat Trends',
+      icon: '<path d="M3 12l4-4 4 4 4-6 6 8M3 20h18"/>',
+      render: function (host) {
+        var cs = S(), DC = window.dashCharts;
+        if (!cs || !DC) { host.innerHTML = '<div class="w-empty">Loading…</div>'; return; }
+        var reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches);
+        var defs = cs.STAT_DEFS || [];
+        var range = 30, painted = false;
+
+        function draw() {
+          var pts = DC.getHistory(range);
+          var html = segHeadHTML(range) + '<div class="dc-mini-grid">';
+          defs.forEach(function (d) {
+            // route to the stat's page (gym/focus/wealth …) or stat.html?s=<key>
+            var href = d.page || ('stat.html?s=' + d.key);
+            html += '<a href="' + href + '" class="dc-mini" aria-label="' + d.name + '"><div class="dc-mini-head">' +
+              '<span class="dc-mini-dot" style="background:' + (d.color || 'var(--blue)') + '"></span>' +
+              '<span class="dc-mini-name">' + d.name + '</span>' +
+              '<svg class="dc-mini-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>' +
+              '</div>' +
+              '<div class="dc-mini-host" data-k="' + d.key + '"></div></a>';
+          });
+          host.innerHTML = html + '</div>';
+          defs.forEach(function (d) {
+            DC.lineChart(host.querySelector('[data-k="' + d.key + '"]'), {
+              values: DC.series(pts, d.key),
+              labels: [],
+              color: d.color || '#0A84FF',
+              height: 38,
+              reducedMotion: reduced,
+              animate: !painted
+            });
+          });
+          painted = true;
+          wireSeg(host, function (r) { if (r !== range) { range = r; painted = false; } draw(); });
+        }
+        draw();
+        function onUpdate() { draw(); }
+        window.addEventListener('coreStateChange', onUpdate);
+        host._cleanup = function () { window.removeEventListener('coreStateChange', onUpdate); };
+      }
+    },
+
   };
 
   // ── Layout ───────────────────────────────────────────────────────────────────
   var LAYOUT_KEY = 'coreDashboard.v1';
-  var DEFAULT_LAYOUT = ['quote', 'lifescore', 'tasks'];
+  var DEFAULT_LAYOUT = ['quote', 'lifescore', 'stattrend', 'tasks'];
 
   function readLayout() {
     try {
-      var s = JSON.parse(localStorage.getItem(LAYOUT_KEY) || 'null');
-      if (Array.isArray(s) && s.length) return s;
+      var raw = localStorage.getItem(LAYOUT_KEY);
+      if (raw != null) {
+        var s = JSON.parse(raw);
+        // Honor an explicitly-saved array, INCLUDING empty — removing the last
+        // widget should leave an empty dashboard (empty-state), not silently
+        // restore defaults. Defaults are only for first run + Reset.
+        if (Array.isArray(s)) return s;
+      }
     } catch (e) {}
     return DEFAULT_LAYOUT.slice();
   }

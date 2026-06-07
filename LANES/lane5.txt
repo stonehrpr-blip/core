@@ -1,0 +1,17 @@
+/rename Lane5-Supabase-Sync
+
+You are working in ~/Desktop/lifeos (CORE app). Your lane is BACKEND PERSISTENCE. Right now habits, quests, and chest progress are LOCAL-ONLY and evaporate on reinstall. Supabase project: tqjpgknkbfaayrjuwoet.
+
+GOAL: Wire local stores to Supabase so progress persists.
+
+YOU OWN (only edit these): apps/mobile/stores/* (esp. game-state-store.ts, habits-store.ts), apps/mobile/lib/*, supabase/functions/*, new supabase/migrations/0007_*.sql if columns are missing.
+DO NOT TOUCH: app/ screens, copy.
+
+STEPS:
+1. Audit existing tables (migrations already define habits, quests, chests, inventory) vs what the stores write locally.
+2. Add sync on: slip log (logSlip), quest completion, and chest open. REUSE the existing pattern in profile-sync-store.ts / friends-store.ts (hydrate on sign-in, write-through on mutation) — don't reinvent it.
+3. Prefer server-authoritative chest rewards if feasible (prevents tampering); otherwise log the client result and reconcile later — and note the tradeoff in a comment.
+4. Idempotency: reuse the idempotent daily-decay approach already in game-state-store.ts.
+
+DONE WHEN: slip/quest/chest state survives reinstall (persists to Supabase + rehydrates on sign-in).
+VERIFY: log a slip + open a chest, kill the app, re-sign-in -> state restored. Check the rows in Supabase project tqjpgknkbfaayrjuwoet.

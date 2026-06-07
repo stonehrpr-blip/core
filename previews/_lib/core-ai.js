@@ -195,7 +195,7 @@
       "Honest answer: the slip pattern usually traces back to one trigger. Which one was it this time?"
     ];
     const pick = stub[Math.abs((txt.length || 1)) % stub.length];
-    return { ok: false, fallback: true, text: pick + (reason ? `\n\n_AI is in demo mode${reason ? ' ('+reason+')':''}. Add an OpenAI key in Settings → AI Setup for real responses._` : ''), reason };
+    return { ok: false, fallback: true, text: pick + (reason ? `\n\n_AI is in demo mode${reason ? ' ('+reason+')':''}. Add an OpenAI key in Settings - AI Setup for real responses._` : ''), reason };
   }
 
   // ── Activity logger (so AI has recent context) ───────────────────────

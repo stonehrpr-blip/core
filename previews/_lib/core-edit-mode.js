@@ -161,7 +161,7 @@
       if (w.querySelector(':scope > .core-edit-handle')) return;
       const h = document.createElement('div');
       h.className = 'core-edit-handle';
-      h.innerHTML = '<button data-dir="up" aria-label="Move up">↑</button><button data-dir="down" aria-label="Move down">↓</button>';
+      h.innerHTML = '<button data-dir="up" aria-label="Move up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;display:block;"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button><button data-dir="down" aria-label="Move down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;display:block;"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>';
       w.appendChild(h);
       h.querySelectorAll('button').forEach(b => {
         b.addEventListener('click', (e) => {

@@ -48,6 +48,7 @@ export default function Profile() {
   const userId = useAuthStore((s) => s.userId);
   const trialName = useAuthStore((s) => s.trial.name);
   const displayName = useAuthStore((s) => s.displayName);
+  const corePlus = useAuthStore((s) => s.corePlus);
   const name = trialName || displayName || "Player";
   const xp = useGameStateStore((s) => s.xp);
   const statsObj = useGameStateStore((s) => s.stats);
@@ -126,6 +127,7 @@ export default function Profile() {
             streakDays={streak.days}
             power={power}
             frame={frame}
+            plus={corePlus}
           />
 
           <Pressable onPress={onShare} style={({ pressed }) => [s.shareBtn, pressed && { opacity: 0.9 }]} accessibilityRole="button" accessibilityLabel="Share my card">
