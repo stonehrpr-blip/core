@@ -205,34 +205,68 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .hist-summary .hs-v{font-size:17px;font-weight:900;letter-spacing:-.02em;line-height:1;color:var(--text);}
 .hist-summary .hs-l{font-size:8px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--dim);margin-top:4px;}
 .heat-cell{transition:transform .1s;}
+/* shared heat fills (month + year) */
+.heat1{background:color-mix(in srgb,var(--blue) 30%,transparent)!important;}
+.heat2{background:color-mix(in srgb,var(--blue) 50%,transparent)!important;}
+.heat3{background:color-mix(in srgb,var(--blue) 72%,transparent)!important;}
+.heat4{background:color-mix(in srgb,var(--blue) 92%,transparent)!important;}
+/* month calendar */
+.mcal-head{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px;}
+.mcal-head span{font-size:8.5px;font-weight:800;letter-spacing:.03em;color:var(--dim);text-align:center;}
+.mcal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.mcal-cell{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:800;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.055);color:var(--dim);}
+.mcal-cell.empty{background:none!important;border:none!important;}
+.mcal-cell.on{color:#eaf3ff;border-color:transparent;}
+.mcal-cell.h3,.mcal-cell.h4{box-shadow:0 0 9px color-mix(in srgb,var(--blue) 26%,transparent);}
+.mcal-cell.future{opacity:.3;}
+.mcal-cell.today{border:2px solid var(--blue);color:#fff;box-shadow:0 0 11px rgba(10,132,255,.42);}
+/* year contribution graph */
+.ycal-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:3px;}
+.ycal-wrap::-webkit-scrollbar{display:none;}
+.ycal-months{position:relative;height:12px;margin-bottom:4px;}
+.ycal-months span{position:absolute;font-size:7.5px;font-weight:800;color:var(--dim);white-space:nowrap;}
+.ycal-body{display:flex;gap:3px;}
+.ycal-col{display:flex;flex-direction:column;gap:3px;}
+.ycal-cell{width:9px;height:9px;border-radius:2px;background:rgba(255,255,255,.05);}
+.ycal-cell.future{background:rgba(255,255,255,.02);}
+.ycal-cell.today{box-shadow:0 0 0 1.5px var(--blue);}
 
 /* ── Milestone roadmap ── */
 .roadmap-wrap{border-radius:22px;background:rgba(255,255,255,0.028);border:1px solid var(--border);
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:14px 0 10px;overflow:hidden;}
 .roadmap-scroll{overflow-x:auto;padding:0 14px;-webkit-overflow-scrolling:touch;}
 .roadmap-scroll::-webkit-scrollbar{display:none;}
-.roadmap-track{display:flex;align-items:flex-start;gap:0;position:relative;padding:2px 0 10px;}
-.roadmap-line{position:absolute;top:17px;left:18px;right:18px;height:2px;border-radius:999px;
-  background:linear-gradient(90deg,var(--blue) var(--rp,0%),rgba(255,255,255,.07) var(--rp,0%));z-index:0;}
-.rm-node{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:5px;flex:none;min-width:52px;padding:0 2px;cursor:default;}
-.rm-node.claimable,.rm-node.reached{cursor:pointer;}
-.rm-dot{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  border:2px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);transition:.3s;}
-.rm-dot svg{width:14px;height:14px;color:var(--dim);}
-.rm-node.reached .rm-dot{background:color-mix(in srgb,var(--rc,var(--blue)) 18%,transparent);
-  border-color:color-mix(in srgb,var(--rc,var(--blue)) 50%,transparent);}
-.rm-node.reached .rm-dot svg{color:var(--rc,var(--blue));}
-.rm-node.current .rm-dot{border-color:color-mix(in srgb,var(--rc,var(--blue)) 80%,transparent);
-  box-shadow:0 0 14px color-mix(in srgb,var(--rc,var(--blue)) 45%,transparent);
-  animation:rmPulse 2s ease-in-out infinite;}
-@keyframes rmPulse{0%,100%{box-shadow:0 0 10px color-mix(in srgb,var(--rc,var(--blue)) 35%,transparent);}50%{box-shadow:0 0 20px color-mix(in srgb,var(--rc,var(--blue)) 65%,transparent);}}
-.rm-node.claimable .rm-dot{border-color:var(--blue);animation:rmPulse2 1.7s ease-in-out infinite;}
-.rm-node.claimable .rm-dot svg{color:var(--blue);}
-@keyframes rmPulse2{0%,100%{box-shadow:0 0 8px rgba(10,132,255,.38);}50%{box-shadow:0 0 18px rgba(10,132,255,.68);}}
-.rm-node.locked .rm-dot{opacity:.38;}
-.rm-label{font-size:8.5px;font-weight:800;color:var(--dim);text-align:center;letter-spacing:.02em;}
-.rm-node.reached .rm-label,.rm-node.current .rm-label{color:var(--muted);}
-.rm-node.claimable .rm-label{color:var(--blue-3);}
+/* responsive track: real connector segments BETWEEN dots → never clip at any length */
+.roadmap-track{display:flex;align-items:flex-start;width:max-content;min-width:100%;padding:6px 16px 8px;}
+.rm-node{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:7px;flex:none;width:48px;cursor:default;}
+.rm-node.claimable{cursor:pointer;}
+.rm-conn{position:relative;flex:1 1 auto;min-width:12px;height:3px;margin-top:20.5px;border-radius:999px;
+  background:rgba(255,255,255,.08);overflow:hidden;}
+.rm-conn i{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:999px;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--blue) 90%,transparent),var(--blue-3));
+  box-shadow:0 0 8px rgba(10,132,255,.35);transition:width .5s;}
+.rm-dot{position:relative;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  border:2px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);transition:.3s;}
+.rm-dot svg{width:18px;height:18px;color:var(--dim);}
+.rm-node.reached .rm-dot,.rm-node.claimed .rm-dot{background:color-mix(in srgb,var(--rc,var(--blue)) 20%,transparent);
+  border-color:color-mix(in srgb,var(--rc,var(--blue)) 55%,transparent);}
+.rm-node.reached .rm-dot svg,.rm-node.claimed .rm-dot svg{color:var(--rc,var(--blue));}
+.rm-node.claimed .rm-dot{background:color-mix(in srgb,var(--rc,var(--blue)) 30%,transparent);}
+.rm-chk{position:absolute;right:-3px;bottom:-3px;width:17px;height:17px;border-radius:50%;background:var(--blue);
+  display:flex;align-items:center;justify-content:center;border:2px solid #0a0c16;}
+.rm-chk svg{width:9px;height:9px;color:#fff;}
+.rm-node.current .rm-dot{border-color:color-mix(in srgb,var(--rc,var(--blue)) 85%,transparent);animation:rmPulse 2s ease-in-out infinite;}
+@keyframes rmPulse{0%,100%{box-shadow:0 0 9px color-mix(in srgb,var(--rc,var(--blue)) 35%,transparent);}50%{box-shadow:0 0 20px color-mix(in srgb,var(--rc,var(--blue)) 65%,transparent);}}
+.rm-node.claimable .rm-dot{border-color:var(--blue);animation:rmPulse2 1.6s ease-in-out infinite;}
+.rm-node.claimable .rm-dot svg{color:var(--blue-3);}
+@keyframes rmPulse2{0%,100%{box-shadow:0 0 9px rgba(10,132,255,.42);}50%{box-shadow:0 0 22px rgba(10,132,255,.78);}}
+.rm-node.locked .rm-dot{opacity:.42;}
+.rm-day{font-size:10px;font-weight:900;color:var(--text);letter-spacing:-.01em;}
+.rm-node.locked .rm-day{color:var(--dim);}
+.rm-sub{font-size:7.5px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--dim);text-align:center;line-height:1.15;max-width:52px;}
+.rm-node.reached .rm-sub,.rm-node.claimed .rm-sub{color:var(--muted);}
+.rm-node.claimable .rm-sub{color:var(--blue-3);}
 .rm-claim-row{padding:2px 14px 0;display:none;}
 .rm-claim-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:10px;border-radius:13px;
   border:none;cursor:pointer;font:inherit;font-size:12.5px;font-weight:800;color:#fff;
@@ -297,6 +331,27 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .squad-claim-btn svg{width:14px;height:14px;}
 @media(prefers-reduced-motion:reduce){.squad-claim-btn{animation:none!important;}}
 
+/* ── Squad perks (mock cross-user; visibly help the streak) ── */
+.perks-card{border-radius:22px;background:rgba(255,255,255,0.028);border:1px solid var(--border);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);overflow:hidden;}
+.perk{display:flex;align-items:center;gap:12px;padding:12px 15px;}
+.perk+.perk{border-top:1px solid var(--border);}
+.perk .pk-ic{width:36px;height:36px;flex:none;border-radius:11px;display:flex;align-items:center;justify-content:center;
+  background:rgba(10,132,255,.1);border:1px solid rgba(10,132,255,.22);}
+.perk .pk-ic svg{width:18px;height:18px;color:var(--blue-3);}
+.perk.off .pk-ic{background:rgba(255,255,255,.04);border-color:var(--border);}
+.perk.off .pk-ic svg{color:var(--dim);}
+.perk .pk-b{flex:1;min-width:0;}
+.perk .pk-t{font-size:12.5px;font-weight:900;display:flex;align-items:center;gap:7px;}
+.perk .pk-t .pk-v{font-size:11.5px;font-weight:900;color:var(--blue-3);}
+.perk .pk-d{font-size:10px;color:var(--muted);margin-top:2px;line-height:1.4;}
+.perk .pk-act{flex:none;border:none;cursor:pointer;font:inherit;font-size:11px;font-weight:800;color:#fff;
+  padding:8px 13px;border-radius:10px;background:var(--blue);box-shadow:0 4px 12px rgba(10,132,255,.3);}
+.perk .pk-act:active{transform:scale(.97);}
+.perk .pk-act.ghost{background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--muted);box-shadow:none;}
+.perks-empty{padding:16px 16px 17px;text-align:center;font-size:11.5px;color:var(--muted);line-height:1.5;}
+.perks-foot{padding:9px 15px 11px;font-size:9px;color:var(--dim);text-align:center;border-top:1px solid var(--border);}
+
 /* ── Stats slim row ── */
 .stats-row{display:flex;gap:11px;}
 .stat{flex:1;border-radius:18px;padding:14px 13px 12px;background:rgba(255,255,255,0.028);border:1px solid var(--border);backdrop-filter:blur(12px);}
@@ -352,6 +407,55 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   font:inherit;font-size:15px;font-weight:900;color:#fff;
   background:linear-gradient(135deg,var(--grad-a),var(--grad-b));box-shadow:0 10px 26px rgba(10,132,255,.42);opacity:0;}
 .celebrate.show .cbtn{animation:cFade .5s ease 1.1s forwards;}.celebrate .cbtn:active{transform:scale(.98);}
+
+/* ── Light-your-streak ceremony (full-page flame, scales with streak) ── */
+.lightcer{position:absolute;inset:0;z-index:90;display:none;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(72% 62% at 50% 56%,color-mix(in srgb,var(--fc,#5BB1FF) 26%,transparent),rgba(2,2,10,.97) 72%);
+  -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);overflow:hidden;}
+.lightcer.show{display:flex;}
+.lc-flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;}
+.lightcer.show .lc-flash{animation:lcFlash .7s ease;}
+@keyframes lcFlash{0%{opacity:0;}12%{opacity:.92;}100%{opacity:0;}}
+.lc-fireglow{position:absolute;left:50%;top:50%;width:360px;height:360px;border-radius:50%;pointer-events:none;
+  transform:translate(-50%,-50%) scale(var(--fs,1));
+  background:radial-gradient(circle,color-mix(in srgb,var(--fc,#5BB1FF) 52%,transparent),transparent 64%);
+  filter:blur(20px);opacity:0;animation:lcGlow 2.4s ease forwards;}
+@keyframes lcGlow{0%{opacity:0;transform:translate(-50%,-50%) scale(.4);}32%{opacity:.95;}100%{opacity:.7;transform:translate(-50%,-50%) scale(var(--fs,1));}}
+.lc-flame{position:relative;z-index:2;width:150px;height:182px;display:flex;align-items:flex-end;justify-content:center;
+  transform:scale(var(--fs,1));transform-origin:bottom center;opacity:0;animation:lcRiseIn .6s cubic-bezier(.2,.9,.3,1.4) .12s forwards;}
+@keyframes lcRiseIn{from{opacity:0;transform:scale(calc(var(--fs,1)*.3)) translateY(46px);}to{opacity:1;transform:scale(var(--fs,1)) translateY(0);}}
+.lc-flame svg{width:150px;height:178px;color:#fff;transform-origin:bottom center;
+  filter:drop-shadow(0 0 26px color-mix(in srgb,var(--fc,#5BB1FF) 92%,#fff)) drop-shadow(0 0 64px color-mix(in srgb,var(--fc,#5BB1FF) 70%,transparent));
+  animation:lcFlick 1.7s ease-in-out infinite;}
+@keyframes lcFlick{0%,100%{transform:scaleY(1) scaleX(1);}25%{transform:scaleY(1.05) scaleX(.97) translateY(-3px);}50%{transform:scaleY(.97) scaleX(1.03);}75%{transform:scaleY(1.04) scaleX(.98) translateY(-2px);}}
+.lc-ember{position:absolute;left:50%;bottom:34%;width:6px;height:6px;border-radius:50%;z-index:3;pointer-events:none;
+  background:radial-gradient(circle,#fff,color-mix(in srgb,var(--fc,#5BB1FF) 80%,transparent));
+  box-shadow:0 0 9px color-mix(in srgb,var(--fc,#5BB1FF) 85%,transparent);
+  opacity:0;animation:lcEmber var(--ed,2.4s) ease-in var(--edl,0s) infinite;}
+@keyframes lcEmber{0%{opacity:0;transform:translate(0,0) scale(1);}16%{opacity:1;}100%{opacity:0;transform:translate(var(--ex,0),-280px) scale(.2);}}
+.lc-content{position:relative;z-index:4;display:flex;flex-direction:column;align-items:center;margin-top:8px;padding:0 24px;}
+.lc-plus{font-size:13px;font-weight:900;letter-spacing:.18em;text-transform:uppercase;color:color-mix(in srgb,var(--fc,#5BB1FF) 82%,#fff);opacity:0;animation:lcFade .5s ease .5s forwards;}
+.lc-day{font-size:68px;font-weight:900;line-height:1;letter-spacing:-.03em;margin-top:3px;opacity:0;
+  background:linear-gradient(180deg,#fff,color-mix(in srgb,var(--fc,#5BB1FF) 60%,#fff));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 18px color-mix(in srgb,var(--fc,#5BB1FF) 55%,transparent));animation:lcPop .6s cubic-bezier(.2,.9,.3,1.5) .55s forwards;}
+@keyframes lcPop{0%{opacity:0;transform:scale(.5);}100%{opacity:1;transform:scale(1);}}
+.lc-tier{font-size:11px;font-weight:900;letter-spacing:.22em;text-transform:uppercase;color:color-mix(in srgb,var(--fc,#5BB1FF) 80%,#fff);margin-top:5px;opacity:0;animation:lcFade .5s ease .7s forwards;}
+.lc-reveal{margin-top:16px;width:252px;border-radius:18px;padding:11px 14px 12px;background:rgba(255,255,255,.045);
+  border:1px solid color-mix(in srgb,var(--fc,#5BB1FF) 30%,var(--border));opacity:0;animation:lcFade .5s ease .85s forwards;}
+.lc-reveal .lr-h{font-size:9px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.lc-uitem{display:flex;align-items:center;gap:9px;padding:7px 0;}
+.lc-uitem+.lc-uitem{border-top:1px solid rgba(255,255,255,.06);}
+.lc-uitem .lu-ic{width:27px;height:27px;flex:none;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  background:color-mix(in srgb,var(--fc,#5BB1FF) 16%,transparent);border:1px solid color-mix(in srgb,var(--fc,#5BB1FF) 30%,transparent);}
+.lc-uitem .lu-ic svg{width:15px;height:15px;color:color-mix(in srgb,var(--fc,#5BB1FF) 88%,#fff);}
+.lc-uitem .lu-t{flex:1;min-width:0;font-size:12px;font-weight:700;color:#eaf1ff;}
+.lc-uitem .lu-t b{font-weight:900;}
+.lc-uitem .lu-v{font-size:11.5px;font-weight:900;color:color-mix(in srgb,var(--fc,#5BB1FF) 84%,#fff);white-space:nowrap;}
+.lc-uitem .lu-v.new{color:#04040c;background:color-mix(in srgb,var(--fc,#5BB1FF) 88%,#fff);padding:2px 7px;border-radius:999px;font-size:8.5px;letter-spacing:.08em;}
+.lc-btn{margin-top:18px;width:222px;padding:14px;border-radius:14px;border:none;cursor:pointer;font:inherit;font-size:15px;font-weight:900;color:#fff;
+  background:linear-gradient(135deg,var(--grad-a),var(--grad-b));box-shadow:0 10px 26px rgba(10,132,255,.42);opacity:0;animation:lcFade .5s ease 1.05s forwards;}
+.lc-btn:active{transform:scale(.98);}
+@keyframes lcFade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
 
 .spark{position:absolute;width:7px;height:7px;border-radius:50%;pointer-events:none;z-index:78;}
 
@@ -431,7 +535,9 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   .hero .bignum,.shieldrow .shi svg,.wd.today .wc,.spark,
   .celebrate .cflash,.celebrate .cglow,.celebrate .crewic,
   .rm-node.current .rm-dot,.rm-node.claimable .rm-dot,.rm-claim-btn,
-  .pay-sheet .pay-spin{animation:none!important;}
+  .pay-sheet .pay-spin,
+  .lightcer .lc-flash,.lc-fireglow,.lc-flame,.lc-flame svg,.lc-ember,
+  .lc-plus,.lc-day,.lc-tier,.lc-reveal,.lc-btn{animation:none!important;opacity:1!important;}
 }
 </style>
 </head>
@@ -517,6 +623,10 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
         <div class="squad-claim-row" id="squadClaimRow"></div>
       </div>
 
+      <!-- SQUAD PERKS (these visibly help the streak) -->
+      <div class="sec"><h2>Squad Perks</h2><span class="smeta" id="squadPerksMeta"></span></div>
+      <div class="perks-card" id="perksCard"></div>
+
       <!-- STATS (2 cards) -->
       <div class="sec"><h2>Lifetime</h2></div>
       <div class="stats-row" id="statsRow"></div>
@@ -561,6 +671,21 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     <button class="cbtn" id="celBtn" type="button">Collect</button>
   </div>
 
+  <!-- Light-your-streak ceremony (full-page flame; scales with streak) -->
+  <div class="lightcer" id="lightCer">
+    <div class="lc-flash"></div>
+    <div class="lc-fireglow"></div>
+    <div class="lc-flame"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1.3 3.6-1 5-1 7.6 0 1.6 1 2.6 1 2.6s2-1 2-3.6c2 2 3 4.4 3 7.4a5 5 0 0 1-10 0c0-3.4 2.2-5.4 3-9 .9 2 2 2 2 2s0-2.6 0-7Z"/></svg></div>
+    <div id="lcEmbers"></div>
+    <div class="lc-content">
+      <div class="lc-plus" id="lcPlus">+1 DAY</div>
+      <div class="lc-day" id="lcDay">0</div>
+      <div class="lc-tier" id="lcTier">Ember Streak</div>
+      <div class="lc-reveal" id="lcReveal"></div>
+      <button class="lc-btn" id="lcBtn" type="button">Continue</button>
+    </div>
+  </div>
+
   <!-- Paid-restore purchase sheet (confirmation-gated; charge is mocked in preview) -->
   <div class="pay-scrim" id="payScrim" role="dialog" aria-modal="true" aria-label="Restore streak">
     <div class="pay-sheet">
@@ -572,7 +697,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
         </div>
         <div class="pay-title">Restore your streak</div>
         <div class="pay-sub" id="paySub">Bring back your streak instantly. One restore per loss.</div>
-        <div class="pay-line"><span class="pl-l">Streak Restore</span><span class="pl-r">$0.99</span></div>
+        <div class="pay-line"><span class="pl-l">Streak Restore</span><span class="pl-r" id="payPrice">$0.99</span></div>
         <div class="pay-method">
           <span class="pm-ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 12.7c0-1.9 1.5-2.8 1.6-2.9-.9-1.3-2.2-1.5-2.7-1.5-1.1-.1-2.2.7-2.8.7-.6 0-1.5-.6-2.4-.6-1.2 0-2.4.7-3 1.8-1.3 2.2-.3 5.5.9 7.3.6.9 1.3 1.9 2.2 1.8.9 0 1.2-.6 2.3-.6s1.4.6 2.3.5c1 0 1.6-.9 2.2-1.8.7-1 1-2 1-2-.1 0-1.9-.7-1.9-2.9zM15.9 6.6c.5-.6.8-1.4.7-2.2-.7 0-1.6.5-2.1 1.1-.5.5-.9 1.4-.8 2.2.8.1 1.6-.4 2.2-1.1z"/></svg></span>
           <div class="pm-b"><div class="pm-t" id="payMethodT">Apple Pay</div><div class="pm-d" id="payMethodD">Saved payment method</div></div>
@@ -580,7 +705,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
         </div>
         <button class="pay-btn" id="payBtn" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18"/></svg>
-          Pay $0.99
+          <span id="payBtnLabel">Pay $0.99</span>
         </button>
         <button class="pay-cancel" id="payCancel" type="button">Not now</button>
         <div class="pay-fine">You approve every charge. Mocked in preview — real App Store / saved-method billing drops in here.</div>
@@ -623,7 +748,8 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     if(qm && /[?&]demo=1/.test(location.search)){
       var qn=Math.max(0,Math.min(parseInt(qm[1],10)||0, 4000));
       var qlost=/[?&]lost=1/.test(location.search);
-      var anchor=new Date(); if(qlost) anchor.setDate(anchor.getDate()-1); // history ends yesterday when lost
+      var qready=/[?&]ready=1/.test(location.search);   // quest done today, not yet secured → Light flow
+      var anchor=new Date(); if(qlost||qready) anchor.setDate(anchor.getDate()-1); // history ends yesterday
       var qhist=[]; for(var qi=qn-1;qi>=0;qi--){ var qd=new Date(anchor.getTime()); qd.setDate(qd.getDate()-qi); qhist.push(dkey(qd)); }
       jset('coreStreakHistory',qhist);
       lset('corePerfectDaysCount',String(qn));
@@ -633,11 +759,24 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
         lset('coreLastActiveDate', dkey(anchor)); lset('coreTodayActive','0');
         lset('coreStreak','0'); lset('coreBestStreak',String(qn));
         S.update(function(st){ st.streak.days=0; st.streak.previousDays=qn; st.streak.lostAt=Date.now()-3600000; if(qn>(st.bestStreak||0)) st.bestStreak=qn; return st; });
+      } else if(qready){
+        // yesterday secured at qn; today's quest is DONE but the day isn't locked in yet
+        lset('coreLastActiveDate', dkey(anchor)); lset('coreTodayActive','1');
+        lset('coreStreak',String(qn)); lset('coreBestStreak',String(qn));
+        S.update(function(st){ st.streak.days=qn; st.streak.lostAt=null; st.streak.previousDays=null; if(qn>(st.bestStreak||0)) st.bestStreak=qn; return st; });
       } else {
         lset('coreLastActiveDate', todayKey()); lset('coreTodayActive','1');
         lset('coreStreak',String(qn)); lset('coreBestStreak',String(qn));
         S.update(function(st){ st.streak.days=qn; st.streak.lostAt=null; st.streak.previousDays=null; if(qn>(st.bestStreak||0)) st.bestStreak=qn; return st; });
       }
+    }
+    // ?plus=1 — turn on CORE Plus for testing auto-claim
+    if(/[?&]plus=1/.test(location.search) && /[?&]demo=1/.test(location.search)){
+      lset('corePlusActive','1'); lset('corePlusUntil',String(Date.now()+30*86400000));
+    }
+    // ?vouch=1 — simulate a squad vouch (discounts the paid restore)
+    if(/[?&]vouch=1/.test(location.search) && /[?&]demo=1/.test(location.search)){
+      lset('coreStreakVouch','1');
     }
     // ?friends=N — seed N synthetic squad members (demo only) to preview the squad UI
     var fm=location.search.match(/[?&]friends=(\d+)/);
@@ -753,8 +892,14 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
       if(p<1) el._raf=requestAnimationFrame(step); else el._raf=null; }
     el._raf=requestAnimationFrame(step); }
 
-  // ── streak engine (preserved — local-date maintenance) ───────────────────────
+  // ── streak engine ────────────────────────────────────────────────────────────
   function logShield(r){ try{ var l=jget('coreShieldLog',[]); l.unshift({ts:Date.now(),reason:r}); if(l.length>30) l=l.slice(0,30); jset('coreShieldLog',l); }catch(e){} }
+  // CORE Plus flag — read-only (engine owns the source of truth in core-state).
+  function corePlus(){ try{ if(lget('corePlusActive','')!=='1') return false; var until=ig('corePlusUntil',0); if(until&&Date.now()>until) return false; return true; }catch(e){ return false; } }
+
+  // maintain() now ONLY handles the DOWN direction (losses + shield protection)
+  // automatically. The +1 — securing today — is an explicit act: see
+  // secureToday(), driven by the "Light your streak" tap or CORE+ auto-claim.
   function maintain(){
     var s=S.read(), todayK=todayKey(), yK=dkey(addDays(new Date(),-1));
     var last=lget('coreLastActiveDate',null); if(last==='') last=null;
@@ -762,15 +907,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     var changed=false, usedShield=false, justLost=false, okClock=clockOk();
     if(active){
       lset('coreTodayActive','1');
-      if(last!==todayK&&okClock){
-        if(last===yK){ days++; }
-        else if(last===null){ days=Math.max(days,1); }
-        else { var sh=ig('coreStreakShields',0); if(sh>0){ sh--; lset('coreStreakShields',String(sh)); days++; usedShield=true; logShield('gap-protected'); } else days=1; }
-        S.update(function(st){ st.streak.days=days; if(days>(st.bestStreak||0)) st.bestStreak=days; st.streak.lastCleanAt=Date.now(); st.streak.lostAt=null; return st; });
-        lset('coreLastActiveDate',todayK);
-        var hist=cleanHistory(); if(hist.indexOf(todayK)<0){ hist.push(todayK); hist.sort(); if(hist.length>800) hist=hist.slice(-800); jset('coreStreakHistory',hist); bumpPerfect(); }
-        changed=true;
-      }
+      // securing handled by secureToday() — never auto-incremented here.
     } else {
       lset('coreTodayActive','0');
       if(last&&last!==todayK&&last!==yK&&okClock){
@@ -785,7 +922,32 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     if(changed){ S.syncProgress(); dispatch(); }
     var st2=S.read().streak||{}, recoverable=false;
     try{ recoverable=typeof S.isStreakRecoverable==='function'?S.isStreakRecoverable(S.read()):!!(st2.lostAt&&(st2.previousDays||0)>0&&(Date.now()-st2.lostAt)/3600000<=48); }catch(e){}
-    return { days:days, active:active, lost:justLost, recoverable:recoverable, prevDays:(st2.previousDays||0) };
+    var securedToday=(last===todayK);
+    var canSecure=active&&!securedToday&&okClock;        // work done, not yet locked in
+    return { days:days, active:active, lost:justLost, recoverable:recoverable, prevDays:(st2.previousDays||0),
+             securedToday:securedToday, canSecure:canSecure, nextDays:(last===yK?days+1:(last===null?Math.max(days,1):days+1)) };
+  }
+
+  // Lock in today — the REAL +1. Gated on questDoneToday so it can never be a
+  // free increment, and on clockOk so a rolled-back clock can't farm days.
+  // Idempotent per day (lastActiveDate===today short-circuits) → once per day.
+  function secureToday(){
+    var s=S.read(); if(!questDoneToday(s)) return null;     // no work → no day
+    if(!clockOk()) return null;                              // clock tamper → refuse
+    var todayK=todayKey(), yK=dkey(addDays(new Date(),-1));
+    var last=lget('coreLastActiveDate',null); if(last==='') last=null;
+    if(last===todayK) return null;                          // already secured today
+    var days=(s.streak&&s.streak.days)||0, usedShield=false;
+    if(last===yK){ days++; }
+    else if(last===null){ days=Math.max(days,1); }
+    else { var sh=ig('coreStreakShields',0); if(sh>0){ sh--; lset('coreStreakShields',String(sh)); days++; usedShield=true; logShield('gap-protected'); } else days=1; }
+    S.update(function(st){ st.streak.days=days; if(days>(st.bestStreak||0)) st.bestStreak=days; st.streak.lastCleanAt=Date.now(); st.streak.lostAt=null; return st; });
+    lset('coreLastActiveDate',todayK); lset('coreTodayActive','1'); lset('coreStreak',String(days));
+    var hist=cleanHistory(); if(hist.indexOf(todayK)<0){ hist.push(todayK); hist.sort(); if(hist.length>800) hist=hist.slice(-800); jset('coreStreakHistory',hist); bumpPerfect(); }
+    var best=Math.max(ig('coreBestStreak',0),(S.read().bestStreak||0),days); lset('coreBestStreak',String(best));
+    if(usedShield) toast('Shield used — streak protected');
+    try{ S.syncProgress(); }catch(e){} dispatch();
+    return days;
   }
 
   // ── tier + multiplier ─────────────────────────────────────────────────────────
@@ -845,9 +1007,10 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     var eligible=st&&st.recoverable&&typeof S.restoreStreak==='function'&&!alreadyPaidThisLoss(srec);
     if(eligible){
       el.hidden=false;
+      var price=restorePrice();
       el.innerHTML='<div class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v3.5H6.5"/></svg></div>'+
-        '<div class="rb"><div class="rt">Streak lost — restore it</div><div class="rd">Bring back your '+st.prevDays+'-day streak. Within the 48h window — one restore.</div></div>'+
-        '<button class="rbtn" id="recoverBtn">Restore · $0.99</button>';
+        '<div class="rb"><div class="rt">Streak lost — restore it</div><div class="rd">'+(price.free?'A squad vouch makes this restore FREE. ':'Bring back your '+st.prevDays+'-day streak. ')+'Within the 48h window — one restore.</div></div>'+
+        '<button class="rbtn" id="recoverBtn">Restore · '+price.label+'</button>';
       qs('#recoverBtn').onclick=function(){ openPay(st.prevDays); };
     } else { el.hidden=true; el.innerHTML=''; } }
 
@@ -856,9 +1019,13 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   function showPayState(id){ ['payConfirm','payProcessing','paySuccess'].forEach(function(p){ var el=qs('#'+p); if(el) el.classList.toggle('show',p===id); }); }
   function openPay(prevDays){
     if(payState==='processing') return;
-    var method=lget('corePaymentMethod','Apple Pay');
-    var mt=qs('#payMethodT'); if(mt) mt.textContent=method;
-    var sub=qs('#paySub'); if(sub) sub.textContent=prevDays?('Bring back your '+prevDays+'-day streak instantly. One restore per loss.'):'Bring back your streak instantly. One restore per loss.';
+    var price=restorePrice();
+    var pp=qs('#payPrice'); if(pp) pp.textContent=price.free?'Free':'$0.99';
+    var bl=qs('#payBtnLabel'); if(bl) bl.textContent=price.free?'Confirm restore · Free':'Pay $0.99';
+    var mt=qs('#payMethodT'), md=qs('#payMethodD');
+    if(price.free){ if(mt) mt.textContent='Squad vouch'; if(md) md.textContent='Covered by your squad — no charge'; }
+    else { var method=lget('corePaymentMethod','Apple Pay'); if(mt) mt.textContent=method; if(md) md.textContent='Saved payment method'; }
+    var sub=qs('#paySub'); if(sub) sub.textContent=(price.free?'A squad vouch covers this restore — no charge. ':'')+(prevDays?('Bring back your '+prevDays+'-day streak instantly. One restore per loss.'):'Bring back your streak instantly. One restore per loss.');
     var ssub=qs('#paySuccessSub'); if(ssub) ssub.textContent=prevDays?("You're back to "+prevDays+' days. Keep it alive!'):"You're back on track.";
     showPayState('payConfirm'); payState='confirm';
     qs('#payScrim').classList.add('show'); SFX('sheet_open');
@@ -869,11 +1036,12 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     payState='processing'; showPayState('payProcessing'); SFX('pay_processing');
     // MOCK: this is where real App Store IAP / saved-method billing executes.
     // Only the explicit "Pay $0.99" tap reaches here — never an auto-charge.
-    var delay=REDUCED?500:1300;
+    var delay=REDUCED?500:1300, wasFree=restorePrice().free;
     setTimeout(function(){
       var srec=S.read().streak||{}, lostAt=srec.lostAt;
       var ok=false; try{ if(typeof S.restoreStreak==='function'){ S.restoreStreak(); ok=true; } }catch(e){}
-      if(!ok){ payState='idle'; showPayState('payConfirm'); toast('Payment failed — not charged'); return; }
+      if(!ok){ payState='idle'; showPayState('payConfirm'); toast(wasFree?'Restore failed':'Payment failed — not charged'); return; }
+      if(wasFree) lset('coreStreakVouch','0');   // consume the squad vouch
       markPaid(lostAt); lossToasted=false;
       payState='success'; showPayState('paySuccess'); SFX('streak_restore');
       if(!REDUCED){ var pr=qs('.phone').getBoundingClientRect(); burstAt(pr.left+pr.width/2,pr.top+pr.height*0.32,'#5BB1FF',24); }
@@ -931,18 +1099,16 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     var sk=dkey(fd), ek=dkey(ld), total=countInRange(hist,sk,ek), bestRun=longestRunInRange(set,fd,ld);
     var monthName=fd.toLocaleString('default',{month:'long'});
     var html='<div class="hist-summary">'+chip(total,'Active days')+chip(bestRun,'Best run')+chip(Math.round(total/ld.getDate()*100)+'%','Of month')+'</div>';
-    html+='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;">';
-    DOW.forEach(function(d){ html+='<div style="font-size:8px;font-weight:800;color:var(--dim);text-align:center;padding-bottom:2px;">'+d+'</div>'; });
+    html+='<div class="mcal-head">'; DOW.forEach(function(d){ html+='<span>'+d+'</span>'; }); html+='</div>';
+    html+='<div class="mcal-grid">';
     var totalCells=startDow+ld.getDate(), rows=Math.ceil(totalCells/7);
     for(var i=0;i<rows*7;i++){
       var dayN=i-startDow+1;
-      if(dayN<1||dayN>ld.getDate()){ html+='<div></div>'; continue; }
+      if(dayN<1||dayN>ld.getDate()){ html+='<div class="mcal-cell empty"></div>'; continue; }
       var dk=y+'-'+('0'+(m+1)).slice(-2)+'-'+('0'+dayN).slice(-2);
-      var isFuture=dk>tk, isToday=dk===tk, lvl=heatLvl(depth[dk]);
-      var bg=lvl>=0?HEAT[lvl]:isFuture?'rgba(255,255,255,.02)':'rgba(255,255,255,.05)';
-      var bdr=isToday?'border:2px solid var(--blue);':'border:1px solid rgba(255,255,255,.06);';
-      var glow=lvl>=2?'box-shadow:0 0 8px color-mix(in srgb,var(--blue) 28%,transparent);':'';
-      html+='<div class="heat-cell" style="aspect-ratio:1;border-radius:5px;'+bdr+'background:'+bg+';'+glow+'opacity:'+(isFuture?.32:1)+';display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:'+(lvl>=0?'#eaf3ff':'var(--dim)')+'">'+dayN+'</div>';
+      var lvl=heatLvl(depth[dk]), isFuture=dk>tk, isToday=dk===tk;
+      var cls='mcal-cell'+(lvl>=0?' on h'+(lvl+1)+' heat'+(lvl+1):'')+(isFuture?' future':'')+(isToday?' today':'');
+      html+='<div class="'+cls+'">'+dayN+'</div>';
     }
     html+='</div>'+heatLegend();
     html+='<div class="histmeta">'+total+' day'+(total===1?'':'s')+' active in '+monthName+'</div>';
@@ -957,24 +1123,23 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     var cols=[], mlabels=[], lastM=-1;
     for(var c=0;c<53;c++){
       var cs=addDays(startMon,c*7), cells=[];
-      for(var r=0;r<7;r++){ var d=addDays(cs,r); var dk=dkey(d); cells.push({dk:dk,lvl:heatLvl(depth[dk]),future:dk>tk,today:dk===tk,m:d.getMonth()}); }
+      for(var r=0;r<7;r++){ var d=addDays(cs,r); var dk=dkey(d); cells.push({lvl:heatLvl(depth[dk]),future:dk>tk,today:dk===tk,m:d.getMonth()}); }
       if(cells[0].m!==lastM){ mlabels.push({col:c,name:MNAMES[cells[0].m]}); lastM=cells[0].m; }
       cols.push(cells);
     }
-    var cw=7,gap=2,total=53*(cw+gap);
+    var step=12; // 9px cell + 3px gap
     var sk=dkey(startMon), actCount=countInRange(hist,sk,tk), bestRun=longestRunInRange(set,startMon,now);
     var weeks=0; for(var w=0;w<cols.length;w++){ if(cols[w].some(function(c){return c.lvl>=0;})) weeks++; }
     var html='<div class="hist-summary">'+chip(actCount,'Active days')+chip(bestRun,'Best run')+chip(weeks,'Active weeks')+'</div>';
-    html+='<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;"><div style="width:'+total+'px;">';
-    html+='<div style="position:relative;height:11px;margin-bottom:3px;">';
-    mlabels.forEach(function(l){ html+='<span style="position:absolute;left:'+(l.col*(cw+gap))+'px;font-size:7px;font-weight:800;color:var(--dim);white-space:nowrap;">'+l.name+'</span>'; });
-    html+='</div><div style="display:flex;gap:'+gap+'px;">';
+    html+='<div class="ycal-wrap"><div style="min-width:'+(53*step)+'px;">';
+    html+='<div class="ycal-months">';
+    mlabels.forEach(function(l){ html+='<span style="left:'+(l.col*step)+'px;">'+l.name+'</span>'; });
+    html+='</div><div class="ycal-body">';
     cols.forEach(function(col){
-      html+='<div style="display:flex;flex-direction:column;gap:'+gap+'px;">';
+      html+='<div class="ycal-col">';
       col.forEach(function(cell){
-        var bg=cell.lvl>=0?HEAT[cell.lvl]:cell.future?'rgba(255,255,255,.02)':'rgba(255,255,255,.05)';
-        var bd=cell.today?'box-shadow:0 0 0 1px var(--blue);':'';
-        html+='<div style="width:'+cw+'px;height:'+cw+'px;border-radius:2px;background:'+bg+';'+bd+'"></div>';
+        var cls='ycal-cell'+(cell.lvl>=0?' heat'+(cell.lvl+1):'')+(cell.future?' future':'')+(cell.today?' today':'');
+        html+='<div class="'+cls+'"></div>';
       });
       html+='</div>';
     });
@@ -1060,24 +1225,41 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     qs('#celBtn').onclick=function(){ cel.classList.remove('show'); SFX('reward_collect'); toast('Claimed · '+m.reward); render(); };
   }
 
-  // ── milestone roadmap ─────────────────────────────────────────────────────────
+  // ── milestone roadmap (responsive connectors; no clipping at any length) ──────
+  function shortReward(m){
+    if(m.type==='chest') return m.chest.charAt(0).toUpperCase()+m.chest.slice(1);
+    if(m.type==='trophy') return 'Trophy';
+    if(m.type==='xp') return m.reward;
+    if(m.sub==='frame') return 'Border';
+    if(m.sub==='effect') return 'Effect';
+    if(m.sub==='legendary') return 'Legend';
+    return m.reward;
+  }
+  var CHESTIC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l2-4h14l2 4M3 9v9a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V9M3 9h18" fill="currentColor" fill-opacity="0.12"/></svg>';
   function renderRoadmap(days, claimed){
     var track=qs('#roadmapTrack'); if(!track) return;
-    var reached=MILES.filter(reachedDay);
-    var pct=Math.round(reached.length/MILES.length*100);
-    track.innerHTML='<div class="roadmap-line" style="--rp:'+pct+'%"></div>';
-    var claimable=MILES.filter(function(m){ return reachedDay(m)&&claimed.indexOf(m.d)<0; }).sort(function(a,b){return a.d-b.d;})[0];
     var nextM=MILES.filter(function(m){ return !reachedDay(m); }).sort(function(a,b){return a.d-b.d;})[0];
-    MILES.forEach(function(m){
-      var isReached=reachedDay(m), isClaim=isReached&&claimed.indexOf(m.d)<0, isCur=!isReached&&nextM&&m.d===nextM.d;
-      var cls='rm-node '+(isClaim?'claimable':isReached?'reached':isCur?'current':'locked');
-      var ico=m.type==='chest'
-        ?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l2-4h14l2 4M3 9v9a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V9M3 9h18" fill="currentColor" fill-opacity="0.12"/></svg>'
-        :'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">'+(m.ic||IC.bolt)+'</svg>';
-      var nd=document.createElement('div'); nd.className=cls; nd.style.setProperty('--rc',m.rc||'#0A84FF');
-      nd.innerHTML='<div class="rm-dot">'+ico+'</div><div class="rm-label">'+m.d+'d</div>';
-      if(isClaim){ nd.addEventListener('click',function(){ claim(m); }); }
-      track.appendChild(nd);
+    var claimable=MILES.filter(function(m){ return reachedDay(m)&&claimed.indexOf(m.d)<0; }).sort(function(a,b){return a.d-b.d;})[0];
+    var html='';
+    MILES.forEach(function(m,i){
+      // connector INTO this node — fills with progress between the two marks
+      if(i>0){
+        var prev=MILES[i-1];
+        var fill=reachedDay(prev)?(reachedDay(m)?100:Math.max(0,Math.min(100,Math.round((days-prev.d)/(m.d-prev.d)*100)))):0;
+        html+='<div class="rm-conn"><i style="width:'+fill+'%"></i></div>';
+      }
+      var isReached=reachedDay(m), isClaimed=claimed.indexOf(m.d)>=0;
+      var isClaim=isReached&&!isClaimed, isCur=!isReached&&nextM&&m.d===nextM.d;
+      var cls='rm-node '+(isClaim?'claimable':isClaimed?'claimed':isReached?'reached':isCur?'current':'locked');
+      var ico=m.type==='chest'?CHESTIC:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">'+(m.ic||IC.bolt)+'</svg>';
+      var chk=isClaimed?'<span class="rm-chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4"><path d="M5 12l4 4 10-11"/></svg></span>':'';
+      var sub=isClaim?'Claim':isClaimed?'Claimed':shortReward(m);
+      html+='<div class="'+cls+'" data-d="'+m.d+'" style="--rc:'+(m.rc||'#0A84FF')+'">'+
+        '<div class="rm-dot">'+ico+chk+'</div><div class="rm-day">'+m.d+'d</div><div class="rm-sub">'+sub+'</div></div>';
+    });
+    track.innerHTML=html;
+    Array.prototype.forEach.call(track.querySelectorAll('.rm-node.claimable'),function(nd){
+      nd.addEventListener('click',function(){ var d=+nd.getAttribute('data-d'); var m=MILES.filter(function(x){return x.d===d;})[0]; if(m) claim(m); });
     });
     var cr=qs('#rmClaimRow');
     if(cr){
@@ -1085,10 +1267,10 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
         cr.style.display='block'; cr.style.paddingTop='10px';
         cr.innerHTML='<button class="rm-claim-btn" id="rmClaim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12l4 4 10-11"/></svg>Claim '+claimable.title+' — '+claimable.reward+'</button>';
         qs('#rmClaim').onclick=function(){ claim(claimable); };
-      } else cr.style.display='none';
+      } else { cr.style.display='none'; cr.innerHTML=''; }
     }
     var meta=qs('#roadmapMeta');
-    if(meta) meta.textContent=claimable?'Ready to claim!':nextM?'Next: Day '+nextM.d:'All claimed!';
+    if(meta) meta.textContent=claimable?'Ready to claim!':nextM?'Next · Day '+nextM.d:'All claimed!';
   }
 
   // ── squad (real friends) + friend-count XP booster ───────────────────────────
@@ -1175,6 +1357,60 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     }
   }
 
+  // ── squad → streak perks (mock cross-user data; real sync = backend phase) ────
+  function friendStreakOf(id){ return 1+((hashN(id)*7+id.length*13)%120); }
+  function squadActiveIds(){ var tk=todayKey(); return friendIds().filter(function(id){ return (hashN(id+tk)%10)<6; }); } // ~60% active today
+  function squadActiveBoostPct(){ return Math.min(0.15, squadActiveIds().length*0.02); }   // +2%/active, cap +15%
+  function sharedSquadStreak(yourDays){
+    var act=squadActiveIds(); if(!act.length) return yourDays;
+    var sum=yourDays; act.forEach(function(id){ sum+=friendStreakOf(id); });
+    return Math.round(sum/(act.length+1));
+  }
+  function vouched(){ return lget('coreStreakVouch','')==='1'; }
+  // vouch makes the paid restore free; otherwise flat $0.99.
+  function restorePrice(){ return vouched()?{amount:0,label:'Free',free:true}:{amount:0.99,label:'$0.99',free:false}; }
+
+  var PK_BOLT='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8Z"/></svg>';
+  var PK_FLAME='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1.3 3.6-1 5-1 7.6 0 1.6 1 2.6 1 2.6s2-1 2-3.6c2 2 3 4.4 3 7.4a5 5 0 0 1-10 0c0-3.4 2.2-5.4 3-9 .9 2 2 2 2 2s0-2.6 0-7Z"/></svg>';
+  var PK_SHIELD='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3l7 3v5c0 4-3 7-7 9-4-2-7-5-7-9V6l7-3Z"/></svg>';
+  var PK_PEOPLE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 7a3 3 0 0 1 0 6M22 20a6 6 0 0 0-3-5"/></svg>';
+
+  function renderPerks(yourDays){
+    var card=qs('#perksCard'); if(!card) return;
+    var ids=friendIds(), cnt=ids.length, tk=todayKey(), meta=qs('#squadPerksMeta');
+    if(!cnt){
+      card.innerHTML='<div class="perks-empty">Add squad members to unlock streak perks — active-day XP boosts, giftable shields, a shared squad streak and free restores.</div>';
+      if(meta) meta.textContent=''; return;
+    }
+    var act=squadActiveIds(), activeN=act.length, boost=squadActiveBoostPct(), shared=sharedSquadStreak(yourDays);
+    if(meta) meta.textContent=activeN+' active today';
+    var giftDone=lget('coreSquadGiftDate','')===tk, canClaimGift=cnt>=2&&!giftDone;
+    var v=vouched();
+    var html='';
+    // 1) active-squad XP boost
+    html+='<div class="perk'+(activeN?'':' off')+'"><div class="pk-ic">'+PK_BOLT+'</div><div class="pk-b">'+
+      '<div class="pk-t">Squad active boost <span class="pk-v">+'+Math.round(boost*100)+'% XP</span></div>'+
+      '<div class="pk-d">'+activeN+' of '+cnt+' squadmates on a streak today — the more active, the bigger your XP boost.</div></div></div>';
+    // 2) shared squad streak
+    html+='<div class="perk"><div class="pk-ic">'+PK_FLAME+'</div><div class="pk-b">'+
+      '<div class="pk-t">Shared squad streak <span class="pk-v">'+shared+'d</span></div>'+
+      '<div class="pk-d">Grows while your active squad keeps showing up together.</div></div></div>';
+    // 3) gift / receive shields (claiming adds a REAL shield → protects the streak)
+    html+='<div class="perk"><div class="pk-ic">'+PK_SHIELD+'</div><div class="pk-b">'+
+      '<div class="pk-t">Squad shields</div><div class="pk-d">'+(canClaimGift?'A squadmate gifted you a shield — claim it to protect a missed day.':'Shield gifted to your squad. More tomorrow.')+'</div></div>'+
+      (canClaimGift?'<button class="pk-act" id="claimGift" type="button">Claim +1</button>':'<button class="pk-act ghost" id="giftShield" type="button">Gift</button>')+'</div>';
+    // 4) friend-vouched restore (free restore — visibly helps recovery)
+    html+='<div class="perk'+(v?'':' off')+'"><div class="pk-ic">'+PK_PEOPLE+'</div><div class="pk-b">'+
+      '<div class="pk-t">Friend vouch '+(v?'<span class="pk-v">Ready</span>':'')+'</div>'+
+      '<div class="pk-d">'+(v?'Your next streak restore is FREE — backed by your squad.':'Ask your squad to vouch and your next $0.99 restore is free.')+'</div></div>'+
+      (v?'':'<button class="pk-act" id="reqVouch" type="button">Request</button>')+'</div>';
+    html+='<div class="perks-foot">Squad activity is simulated in preview — live cross-user sync arrives with the backend phase.</div>';
+    card.innerHTML=html;
+    var cg=qs('#claimGift'); if(cg) cg.onclick=function(){ var n=ig('coreStreakShields',0)+1; lset('coreStreakShields',String(n)); lset('coreSquadGiftDate',tk); toast('Gifted shield claimed · +1'); SFX('reward_collect'); render(); };
+    var gs=qs('#giftShield'); if(gs) gs.onclick=function(){ lset('coreSquadGiftDate',tk); toast('Shield gifted to your squad'); SFX('tap'); render(); };
+    var rv=qs('#reqVouch'); if(rv) rv.onclick=function(){ lset('coreStreakVouch','1'); toast('Vouch requested — your squad has your back'); SFX('confirm'); render(); };
+  }
+
   // ── shields ───────────────────────────────────────────────────────────────────
   function renderShields(rankIdx){
     var unlocked=rankIdx>=waterIdx();
@@ -1188,6 +1424,53 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
       '<div class="shd">'+(unlocked?'Earn more at higher ranks':'Unlocks at Water rank')+'</div>'+
       '<div class="shdots">'+dots+'</div></div>';
     var meta=qs('#shieldMeta'); if(meta) meta.textContent=unlocked?total+' ready':'Locked';
+  }
+
+  // ── Light-your-streak ceremony (full-page flame, scales with streak) ──────────
+  var lightBusy=false;
+  function flameScale(days){ var d=Math.min(Math.max(days,1),300); return +(0.85+(d/300)*1.05).toFixed(2); } // 0.85 → 1.90
+  function buildEmbers(n){ var host=qs('#lcEmbers'); if(!host) return; host.innerHTML=''; if(REDUCED||!n) return;
+    var f=document.createDocumentFragment();
+    for(var i=0;i<n;i++){ var sp=document.createElement('span'); sp.className='lc-ember';
+      sp.style.setProperty('--ex',(((i*37)%21)-10)*7+'px'); sp.style.setProperty('--ed',(2.0+(i%6)*0.4)+'s'); sp.style.setProperty('--edl',((i%9)*0.28)+'s');
+      sp.style.marginLeft=(((i*53)%120)-60)+'px'; var sz=(i%5===0)?7:(i%2===0)?5:4; sp.style.width=sz+'px'; sp.style.height=sz+'px'; f.appendChild(sp); }
+    host.appendChild(f); }
+  var GIFTIC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 9l2-4h14l2 4M3 9v9a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V9M3 9h18"/></svg>';
+  function buildReveal(days){
+    var e=evo(days), mult=multFor(days);
+    var marks=[3,10,30,50,100,200,300], isNewTier=marks.indexOf(days)>=0;
+    var claimedArr=jget('coreStreakRewardsClaimed',[]);
+    var nextMile=MILES.filter(function(m){return m.d>days;}).sort(function(a,b){return a.d-b.d;})[0];
+    var claimableNow=MILES.filter(function(m){return days>=m.d&&claimedArr.indexOf(m.d)<0;}).sort(function(a,b){return a.d-b.d;})[0];
+    var rows='<div class="lr-h">'+(isNewTier?'New tier unlocked':'Streak secured')+'</div>';
+    rows+='<div class="lc-uitem"><div class="lu-ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1.3 3.6-1 5-1 7.6 0 1.6 1 2.6 1 2.6s2-1 2-3.6c2 2 3 4.4 3 7.4a5 5 0 0 1-10 0c0-3.4 2.2-5.4 3-9 .9 2 2 2 2 2s0-2.6 0-7Z"/></svg></div>'+
+      '<div class="lu-t">'+e.name+' flame</div><div class="lu-v'+(isNewTier?' new':'')+'">'+(isNewTier?'NEW TIER':'Active')+'</div></div>';
+    rows+='<div class="lc-uitem"><div class="lu-ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8Z"/></svg></div>'+
+      '<div class="lu-t">Streak XP multiplier</div><div class="lu-v">'+mult.toFixed(2)+'×</div></div>';
+    if(claimableNow) rows+='<div class="lc-uitem"><div class="lu-ic">'+GIFTIC+'</div><div class="lu-t">Reward ready: <b>'+claimableNow.reward+'</b></div><div class="lu-v new">CLAIM</div></div>';
+    else if(nextMile) rows+='<div class="lc-uitem"><div class="lu-ic">'+GIFTIC+'</div><div class="lu-t">Next: <b>'+nextMile.reward+'</b></div><div class="lu-v">Day '+nextMile.d+'</div></div>';
+    else rows+='<div class="lc-uitem"><div class="lu-ic">'+GIFTIC+'</div><div class="lu-t">All milestones reached</div><div class="lu-v">MAX</div></div>';
+    return rows;
+  }
+  // doLight: gated on real quest completion + clockOk; secures via the engine,
+  // then plays the flame (scaled to the streak) and reveals the tier's perks.
+  function doLight(auto){
+    if(lightBusy) return false;
+    if(!questDoneToday(S.read())){ if(!auto) toast('Complete today’s quest first'); return false; }
+    if(lget('coreLastActiveDate',null)===todayKey()) return false; // already secured today
+    var newDays=secureToday();
+    if(newDays===null) return false;
+    lightBusy=true;
+    var e=evo(newDays), cer=qs('#lightCer');
+    cer.style.setProperty('--fc',e.glow); cer.style.setProperty('--fs',flameScale(newDays));
+    qs('#lcDay').textContent=newDays; qs('#lcTier').textContent=e.name+' Streak';
+    qs('#lcPlus').textContent=auto?'CORE+ AUTO-SECURED':'+1 DAY';
+    buildEmbers(Math.round(6+Math.min(newDays,300)/300*16));
+    qs('#lcReveal').innerHTML=buildReveal(newDays);
+    cer.classList.add('show'); SFX(auto?'streak_grow':'streak_milestone_big');
+    if(!REDUCED){ var pr=qs('.phone').getBoundingClientRect(); setTimeout(function(){ burstAt(pr.left+pr.width/2,pr.top+pr.height*0.5,e.glow,28); },340); }
+    var btn=qs('#lcBtn'); if(btn) btn.onclick=function(){ cer.classList.remove('show'); lightBusy=false; SFX('reward_collect'); lastDays=null; render(); };
+    return true;
   }
 
   // ── main render ───────────────────────────────────────────────────────────────
@@ -1231,21 +1514,33 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     qs('#multTxt').textContent=mult.toFixed(2)+'x XP';
     var nxt=qs('#multNext'); if(nxt) nxt.textContent=nm?'· next at '+nm.at+'d':'';
 
-    // CTA
+    // CORE+ auto-claim: the moment the daily requirement is met, secure with no
+    // tap (still requires the work — secureToday() is gated on questDoneToday).
+    if(st.canSecure && corePlus() && !lightBusy && lget('coreLastActiveDate',null)!==todayKey()){
+      if(doLight(true)) return;    // ceremony covers the screen; Continue re-renders fully
+    }
+
+    // CTA — Light is GATED: only securable once today's quest is done; otherwise
+    // it routes to Quests (never a free +1).
     var cta=qs('#cta');
-    if(active){
-      cta.className='cta secured'; cta.removeAttribute('href');
+    if(st.securedToday){
+      cta.className='cta secured'; cta.removeAttribute('href'); cta.onclick=null;
       cta.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12l4 4 10-11"/></svg>Locked in for today';
+    } else if(st.canSecure){
+      cta.className='cta'; cta.removeAttribute('href');
+      cta.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1.3 3.6-1 5-1 7.6 0 1.6 1 2.6 1 2.6s2-1 2-3.6c2 2 3 4.4 3 7.4a5 5 0 0 1-10 0c0-3.4 2.2-5.4 3-9 .9 2 2 2 2 2s0-2.6 0-7Z"/></svg>Light your streak · Day '+st.nextDays;
+      cta.onclick=function(ev){ if(ev&&ev.preventDefault) ev.preventDefault(); doLight(false); };
     } else {
-      cta.className='cta'; cta.setAttribute('href','21-quests.html');
-      cta.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8Z"/></svg>'+(days>0?'Keep your streak alive':'Light your streak')+'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>';
+      cta.className='cta'; cta.setAttribute('href','21-quests.html'); cta.onclick=null;
+      cta.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Complete a quest to light<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>';
     }
 
     startMotivate(days);
-    startPillClock(active);
+    startPillClock(st.securedToday);
     renderHist(hist, active);
     renderRoadmap(days, claimed);
     renderFriends();
+    renderPerks(days);
 
     // stats row — 2 cards
     var sr=qs('#statsRow');
@@ -1264,7 +1559,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   migrate();
   ensureStartDay();
   var renderT; function scheduleRender(){ clearTimeout(renderT); renderT=setTimeout(render,60); }
-  var SK=/^core(Streak|LastActiveDate|TodayActive|BestStreak|StreakShields|StreakRewardsClaimed|OwnedChests|Coins|Xp|Rank|PerfectDays|ShieldLog|Friends|FriendRewardsClaimed)/i;
+  var SK=/^core(Streak|LastActiveDate|TodayActive|BestStreak|StreakShields|StreakRewardsClaimed|OwnedChests|Coins|Xp|Rank|PerfectDays|ShieldLog|Friends|FriendRewardsClaimed|StreakVouch|SquadGift|PlusActive)/i;
   window.addEventListener('coreStateChange',scheduleRender);
   window.addEventListener('core:progress-updated',scheduleRender);
   window.addEventListener('storage',function(ev){ if(!ev.key||SK.test(ev.key)) scheduleRender(); });
@@ -1278,11 +1573,12 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
       window.coreHelp.attach('helpBtn',{
         title:'Streak Help',
         bullets:[
-          'Your streak counts every consecutive day you complete a quest — it\'s built from your real history, so it can\'t be faked.',
+          'Finish today\'s quest, then tap "Light your streak" to lock in the day with a flame that grows bigger the longer your streak. You can only light it once the work is done.',
+          'CORE+ members auto-secure the streak the moment the daily quest is done — no tap needed.',
           'The flame evolves at 3, 10, 30, 50, 100, 200 and 300 days. Day 300 is the top look — your number keeps climbing past it.',
-          'Miss a day and your streak resets, but you have 48 hours to restore it once for $0.99 (you approve the charge).',
-          'Shields (unlocked at Water rank) auto-protect a single missed day so your streak survives.',
-          'Build your Squad — every friend milestone (1, 3, 5, 10) you claim grants XP, chests and permanent XP boosts that apply everywhere.',
+          'Your streak is built from your real day-by-day history, so editing storage or the clock can\'t fake it.',
+          'Miss a day and your streak resets, but you have 48 hours to restore it once for $0.99 — or free if your squad vouches for you.',
+          'Squad perks help your streak: an XP boost when squadmates are active, giftable shields, a shared squad streak, and free restores.',
           'Hit milestone days to claim chests, borders and effects — tap a glowing node on the roadmap to collect.'
         ]
       });
