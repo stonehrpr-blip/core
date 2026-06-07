@@ -186,49 +186,9 @@
       }
     },
 
-    // ── Stat Breakdown (OPTIONAL) — the 6 routing cards ──
-    statbreakdown: {
-      id: 'statbreakdown', title: 'Stat Breakdown',
-      icon: '<path d="M4 19V5M4 19h16M8 19v-7M12 19V8M16 19v-4"/>',
-      render: function (host) {
-        var cs = S();
-        if (!cs) { host.innerHTML = '<div class="w-empty">Loading…</div>'; return; }
-        var defs = cs.STAT_DEFS || [];
-
-        var html = '<div class="w-ls-grid">';
-        // Task 6: each card routes via d.page || ('stat.html?s='+d.key)
-        defs.forEach(function (d) {
-          var href = d.page || ('stat.html?s=' + d.key);
-          html +=
-            '<a href="' + href + '" class="w-ls-card" style="--sc:' + (d.color || 'var(--blue)') + '" aria-label="' + d.name + '">' +
-            '<div class="w-ls-card-head">' +
-              '<div class="w-ls-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + (d.icon || STAT_IC[d.key] || '') + '</svg></div>' +
-              '<span class="w-ls-name">' + d.name + '</span>' +
-            '</div>' +
-            '<span class="w-ls-val" data-sk="' + d.key + '">0</span>' +
-            '<div class="w-ls-bar" style="margin-top:8px"><div class="w-ls-fill" data-skf="' + d.key + '" style="width:0%"></div></div>' +
-            '<div class="w-ls-lvl" data-skl="' + d.key + '">Lv 1</div>' +
-            '</a>';
-        });
-        host.innerHTML = html + '</div>';
-
-        function animateIn() {
-          defs.forEach(function (d) {
-            var v = cs.statValue(d.key);
-            animCount(host.querySelector('[data-sk="' + d.key + '"]'), v);
-            var fe = host.querySelector('[data-skf="' + d.key + '"]');
-            var le = host.querySelector('[data-skl="' + d.key + '"]');
-            if (fe) requestAnimationFrame(function () { fe.style.width = v + '%'; });
-            if (le) le.textContent = 'Lv ' + statLevel(v);
-          });
-        }
-        setTimeout(animateIn, 80);
-
-        function onUpdate() { animateIn(); }
-        window.addEventListener('coreStateChange', onUpdate);
-        host._cleanup = function () { window.removeEventListener('coreStateChange', onUpdate); };
-      }
-    },
+    // Stat Breakdown removed — its per-stat page links now live on the
+    // Stat Trends widget (strength→gym, focus→focus, wealth→wealth,
+    // health/social/purpose→stat.html?s=<key>).
 
     tasks: {
       id: 'tasks', title: "Today's Tasks",
