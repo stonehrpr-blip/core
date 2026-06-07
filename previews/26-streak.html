@@ -260,6 +260,43 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .fr-name{font-size:8.5px;font-weight:800;letter-spacing:.02em;color:var(--dim);max-width:48px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .fr-empty{padding:4px 14px;font-size:12px;color:var(--dim);font-weight:700;}
 
+/* ── Squad card (friends + XP-boost) ── */
+.squad-card{border-radius:22px;background:rgba(255,255,255,0.028);border:1px solid var(--border);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);overflow:hidden;}
+.squad-boost{display:flex;align-items:center;gap:12px;padding:13px 15px 12px;border-bottom:1px solid var(--border);}
+.squad-boost .sb-ic{width:38px;height:38px;flex:none;border-radius:11px;display:flex;align-items:center;justify-content:center;
+  background:rgba(10,132,255,.12);border:1px solid rgba(10,132,255,.26);}
+.squad-boost .sb-ic svg{width:19px;height:19px;color:var(--blue);filter:drop-shadow(0 0 6px rgba(10,132,255,.5));}
+.squad-boost.zero .sb-ic{background:rgba(255,255,255,.04);border-color:var(--border);}
+.squad-boost.zero .sb-ic svg{color:var(--dim);filter:none;}
+.squad-boost .sb-b{flex:1;min-width:0;}
+.squad-boost .sb-t{font-size:13px;font-weight:900;display:flex;align-items:center;gap:7px;}
+.squad-boost .sb-pct{font-size:12px;font-weight:900;color:var(--blue-3);}
+.squad-boost.zero .sb-pct{color:var(--dim);}
+.squad-boost .sb-d{font-size:10px;color:var(--muted);margin-top:2px;}
+.squad-boost .sb-bar{margin-top:7px;height:5px;border-radius:999px;background:rgba(0,0,0,.28);border:1px solid var(--border);overflow:hidden;}
+.squad-boost .sb-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--blue),var(--grad-b));box-shadow:0 0 9px rgba(10,132,255,.42);transition:width .5s;}
+.squad-card .friends-scroll{display:flex;gap:10px;overflow-x:auto;padding:12px 14px;-webkit-overflow-scrolling:touch;}
+.squad-card .friends-scroll::-webkit-scrollbar{display:none;}
+.squad-empty{padding:16px 16px 18px;text-align:center;}
+.squad-empty .se-ic{width:46px;height:46px;border-radius:14px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;
+  background:rgba(10,132,255,.1);border:1px solid rgba(10,132,255,.22);}
+.squad-empty .se-ic svg{width:24px;height:24px;color:var(--blue-3);}
+.squad-empty .se-t{font-size:13.5px;font-weight:900;}
+.squad-empty .se-d{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5;padding:0 6px;}
+.squad-empty .se-btn{display:inline-flex;align-items:center;gap:7px;margin-top:13px;padding:10px 18px;border-radius:13px;
+  border:none;cursor:pointer;font:inherit;font-size:12.5px;font-weight:800;color:#fff;text-decoration:none;
+  background:linear-gradient(135deg,var(--grad-a),var(--grad-b));box-shadow:0 6px 16px rgba(10,132,255,.34);}
+.squad-empty .se-btn svg{width:14px;height:14px;}
+.squad-claim-row{padding:0 14px;}
+.squad-claim-row:not(:empty){padding-bottom:13px;}
+.squad-claim-btn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:11px;border-radius:13px;
+  border:none;cursor:pointer;font:inherit;font-size:12.5px;font-weight:800;color:#fff;background:var(--blue);
+  box-shadow:0 5px 14px rgba(10,132,255,.32);animation:claimPulse 1.7s ease-in-out infinite;}
+.squad-claim-btn:active{transform:scale(.97);}
+.squad-claim-btn svg{width:14px;height:14px;}
+@media(prefers-reduced-motion:reduce){.squad-claim-btn{animation:none!important;}}
+
 /* ── Stats slim row ── */
 .stats-row{display:flex;gap:11px;}
 .stat{flex:1;border-radius:18px;padding:14px 13px 12px;background:rgba(255,255,255,0.028);border:1px solid var(--border);backdrop-filter:blur(12px);}
@@ -472,9 +509,13 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
         <div class="rm-claim-row" id="rmClaimRow"></div>
       </div>
 
-      <!-- FRIENDS -->
-      <div class="sec"><h2>Friends</h2><a class="smeta" href="23-profile.html">Profile <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><path d="M9 6l6 6-6 6"/></svg></a></div>
-      <div class="friends-strip" id="friendsStrip"></div>
+      <!-- SQUAD (friends) -->
+      <div class="sec"><h2>Squad</h2><a class="smeta" href="26-friends.html">Manage <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><path d="M9 6l6 6-6 6"/></svg></a></div>
+      <div class="squad-card">
+        <div class="squad-boost" id="squadBoost"></div>
+        <div id="friendsStrip"></div>
+        <div class="squad-claim-row" id="squadClaimRow"></div>
+      </div>
 
       <!-- STATS (2 cards) -->
       <div class="sec"><h2>Lifetime</h2></div>
@@ -597,6 +638,14 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
         lset('coreStreak',String(qn)); lset('coreBestStreak',String(qn));
         S.update(function(st){ st.streak.days=qn; st.streak.lostAt=null; st.streak.previousDays=null; if(qn>(st.bestStreak||0)) st.bestStreak=qn; return st; });
       }
+    }
+    // ?friends=N — seed N synthetic squad members (demo only) to preview the squad UI
+    var fm=location.search.match(/[?&]friends=(\d+)/);
+    if(fm && /[?&]demo=1/.test(location.search)){
+      var fn=Math.max(0,Math.min(parseInt(fm[1],10)||0,40)), fids=[];
+      var blocks='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      for(var fj=0;fj<fn;fj++){ var s=''; for(var fk=0;fk<8;fk++){ s+=blocks[(fj*7+fk*13+5)%blocks.length]; } fids.push('CORE-'+s.slice(0,4)+'-'+s.slice(4,8)); }
+      jset('coreFriends',fids);
     }
   }catch(e){}
   var REDUCED=false; try{ REDUCED=window.matchMedia('(prefers-reduced-motion:reduce)').matches; }catch(e){}
@@ -983,10 +1032,10 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     var cel=qs('#celebrate'), color=m.rc||'#0A84FF';
     cel.style.setProperty('--cpc',color);
     qs('#celIc').innerHTML=m.type==='chest'?chestSVG(m.chest):'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">'+(m.ic||IC.bolt)+'</svg>';
-    var big=[30,100,200,300].indexOf(m.d)>=0;
-    qs('#celEyebrow').textContent=m.d>=200?'Prestige milestone':big?'Milestone reached':'Reward unlocked';
+    var big=m.big||[30,100,200,300].indexOf(m.d)>=0;
+    qs('#celEyebrow').textContent=m.eyebrow||(m.d>=200?'Prestige milestone':big?'Milestone reached':'Reward unlocked');
     qs('#celTitle').textContent=m.title+' · '+m.reward;
-    qs('#celReward').textContent=m.type==='chest'?'Added to chests — open in Shop.':m.type==='trophy'?'Permanent profile decoration.':m.type==='xp'?'Added straight to your balance.':'Unlocked on your profile.';
+    qs('#celReward').textContent=m.type==='boost'?'XP boost locked in — applies everywhere.':m.type==='chest'?'Added to chests — open in Shop.':m.type==='trophy'?'Permanent profile decoration.':m.type==='xp'?'Added straight to your balance.':'Unlocked on your profile.';
     qs('#celXp').textContent=xpGain?'+'+xpGain+' XP':'';
     cel.classList.add('show'); SFX(big?'streak_milestone_big':'streak_reward');
     if(!REDUCED){ var pr=qs('.phone').getBoundingClientRect(); setTimeout(function(){ burstAt(pr.left+pr.width/2,pr.top+pr.height*0.4,color,big?30:16); },300); }
@@ -1024,25 +1073,88 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     if(meta) meta.textContent=claimable?'Ready to claim!':nextM?'Next: Day '+nextM.d:'All claimed!';
   }
 
-  // ── friends strip ─────────────────────────────────────────────────────────────
-  var FCOLS=[['#3A4055','#2A2F40'],['#3A4055','#2A2F40'],['#3A4055','#2A2F40'],['#3A4055','#2A2F40'],['#3A4055','#2A2F40'],['#3A4055','#2A2F40']];
+  // ── squad (real friends) + friend-count XP booster ───────────────────────────
+  // Real friends come from coreFriends (the friends page / profile write them);
+  // no mocks — an empty squad shows an add-friends CTA. Friend stats are
+  // deterministically derived from the ID (the app's "illustrative until live
+  // sync" model). Milestone claims grant real, persisted rewards; the XP-boost
+  // tiers write the engine's own upgrade flags so the boost applies everywhere.
+  var FCOLS=[['#2A3550','#1E2740'],['#2F3A58','#202A44'],['#34304F','#221F38'],['#2A4458','#1C2E40'],['#3A3050','#262038'],['#2E3A4A','#1F2733']];
   function hashN(s){ var h=2166136261>>>0; for(var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619)>>>0; } return h>>>0; }
-  var MOCK_FRIENDS=[{id:'ALEX',streak:42,c:FCOLS[0]},{id:'SAM',streak:14,c:FCOLS[1]},{id:'MIA',streak:7,c:FCOLS[2]},{id:'JAY',streak:31,c:FCOLS[3]}];
+  function friendIds(){ return jget('coreFriends',[]).filter(function(x){ return typeof x==='string'&&x; }); }
+  function friendCount(){ return friendIds().length; }
+
+  var FRIEND_MILES=[
+    {n:1,  title:'First Friend', reward:'+100 XP',               type:'xp',    xp:100, rc:'#7BC4FF', eyebrow:'Squad reward',   ic:IC.bolt},
+    {n:3,  title:'Trio',         reward:'Bronze Chest · +5% XP',  type:'boost', boost:0.05, upgrade:'xpboost1', chest:'bronze', xp:50,  rc:'#5BB1FF', eyebrow:'Squad XP Boost', ic:IC.bolt},
+    {n:5,  title:'Crew',         reward:'+400 XP',               type:'xp',    xp:400, rc:'#2F8FFF', eyebrow:'Squad reward',   ic:IC.bolt},
+    {n:10, title:'Full Squad',   reward:'Silver Chest · +10% XP', type:'boost', boost:0.10, upgrade:'xpboost2', chest:'silver', xp:150, rc:'#9AD0FF', eyebrow:'Squad XP Boost', big:true, ic:IC.bolt}
+  ];
+  function friendClaimed(){ return jget('coreFriendRewardsClaimed',[]).map(function(x){return +x;}).filter(function(x){return !isNaN(x);}); }
+  function friendBoostPct(){ var c=friendClaimed(), p=0; FRIEND_MILES.forEach(function(m){ if(m.boost&&c.indexOf(m.n)>=0) p+=m.boost; }); return p; }
+
+  function claimFriend(m){
+    var cnt=friendCount(), claimed=friendClaimed();
+    if(claimed.indexOf(m.n)>=0||cnt<m.n) return;
+    if(m.chest){ pushUniq('coreOwnedChests',CHEST_SHOP[m.chest]); S.addItem({id:'fr_'+m.chest+'_'+m.n,name:(m.chest[0].toUpperCase()+m.chest.slice(1))+' Chest',type:'chest',rarity:m.chest==='silver'?'rare':'common',source:'Squad'}); }
+    // Real, app-wide XP boost: write the engine's own upgrade flag.
+    if(m.boost&&m.upgrade){ S.update(function(st){ st.upgrades=st.upgrades||[]; if(st.upgrades.indexOf(m.upgrade)<0) st.upgrades.push(m.upgrade); return st; }); }
+    if(m.xp) S.addXp(m.xp,'friend_m'+m.n);
+    claimed.push(m.n); jset('coreFriendRewardsClaimed',claimed);
+    try{ S.syncProgress(); }catch(e){} dispatch(); celebrate(m);
+  }
+
   function renderFriends(){
     var strip=qs('#friendsStrip'); if(!strip) return;
-    var stored=jget('coreFriends',[]);
-    var friends=stored.length?stored.map(function(id,i){
-      return {id:id.replace('CORE-','').slice(0,4), streak:1+((hashN(id)*7+id.length*13)%89), c:FCOLS[i%FCOLS.length]};
-    }):MOCK_FRIENDS;
-    var html='<div class="friends-scroll">';
-    friends.forEach(function(f){
-      html+='<a class="fr-item" href="23-profile.html" style="--c1:'+f.c[0]+';--c2:'+f.c[1]+'">' +
-        '<div class="fr-av">'+f.id[0]+'</div>'+
-        '<div class="fr-streak"><svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor"><path d="M12 2c1 3-1 4-1 6 0 1 1 2 1 2s2-1 2-3c2 2 3 4 3 7a5 5 0 0 1-10 0c0-3 2-5 3-7 1 2 2 2 2 2s0-3 0-7z"/></svg>'+f.streak+'</div>'+
-        '<div class="fr-name">'+f.id+'</div></a>';
-    });
-    html+='</div>';
-    strip.innerHTML=html;
+    var ids=friendIds(), cnt=ids.length, claimed=friendClaimed();
+
+    // ── XP-boost banner ──
+    var sb=qs('#squadBoost');
+    if(sb){
+      var pct=friendBoostPct();
+      var nextBoost=FRIEND_MILES.filter(function(m){ return m.boost&&claimed.indexOf(m.n)<0; }).sort(function(a,b){return a.n-b.n;})[0];
+      var line, fill;
+      if(nextBoost){
+        if(cnt>=nextBoost.n){ line='Ready: claim +'+Math.round(nextBoost.boost*100)+'% XP below'; fill=100; }
+        else { var need=nextBoost.n-cnt; line=need+' more friend'+(need===1?'':'s')+' → +'+Math.round(nextBoost.boost*100)+'% XP'; fill=Math.min(100,Math.round(cnt/nextBoost.n*100)); }
+      } else { line='Max XP boost unlocked'; fill=100; }
+      sb.className='squad-boost'+(pct>0?'':' zero');
+      sb.innerHTML='<div class="sb-ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8Z"/></svg></div>'+
+        '<div class="sb-b"><div class="sb-t">Squad XP Boost <span class="sb-pct">'+(pct>0?'+'+Math.round(pct*100)+'%':'+0%')+'</span></div>'+
+        '<div class="sb-d">'+(cnt?cnt+' friend'+(cnt===1?'':'s')+' · '+line:'Add friends to unlock permanent XP boosts')+'</div>'+
+        '<div class="sb-bar"><div class="sb-fill" style="width:'+fill+'%"></div></div></div>';
+    }
+
+    // ── avatars or empty state ──
+    if(!cnt){
+      strip.innerHTML='<div class="squad-empty"><div class="se-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 7a3 3 0 0 1 0 6M18.7 20a5.5 5.5 0 0 0-3.2-5"/></svg></div>'+
+        '<div class="se-t">Build your squad</div>'+
+        '<div class="se-d">Friends keep you accountable — and every milestone locks in a permanent XP boost.</div>'+
+        '<a class="se-btn" href="26-friends.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add Friends</a></div>';
+    } else {
+      var html='<div class="friends-scroll">';
+      ids.forEach(function(id){
+        var short=(id.replace(/^CORE-/,'').slice(0,4)||String(id).slice(0,4)||'?');
+        var fstreak=1+((hashN(id)*7+id.length*13)%120);
+        var c=FCOLS[hashN(id)%FCOLS.length];
+        html+='<a class="fr-item" href="26-friends.html" style="--c1:'+c[0]+';--c2:'+c[1]+'" aria-label="Squad member '+short+'">'+
+          '<div class="fr-av">'+(short[0]||'?').toUpperCase()+'</div>'+
+          '<div class="fr-streak"><svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor"><path d="M12 2c1 3-1 4-1 6 0 1 1 2 1 2s2-1 2-3c2 2 3 4 3 7a5 5 0 0 1-10 0c0-3 2-5 3-7 1 2 2 2 2 2s0-3 0-7z"/></svg>'+fstreak+'</div>'+
+          '<div class="fr-name">'+short+'</div></a>';
+      });
+      html+='</div>';
+      strip.innerHTML=html;
+    }
+
+    // ── claim row (one claimable at a time, lowest threshold first) ──
+    var cr=qs('#squadClaimRow');
+    if(cr){
+      var claimable=FRIEND_MILES.filter(function(m){ return cnt>=m.n&&claimed.indexOf(m.n)<0; }).sort(function(a,b){return a.n-b.n;})[0];
+      if(claimable){
+        cr.innerHTML='<button class="squad-claim-btn" id="squadClaim" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12l4 4 10-11"/></svg>Claim '+claimable.title+' — '+claimable.reward+'</button>';
+        qs('#squadClaim').onclick=function(){ claimFriend(claimable); };
+      } else cr.innerHTML='';
+    }
   }
 
   // ── shields ───────────────────────────────────────────────────────────────────
@@ -1133,7 +1245,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   // ── wiring ────────────────────────────────────────────────────────────────────
   migrate();
   var renderT; function scheduleRender(){ clearTimeout(renderT); renderT=setTimeout(render,60); }
-  var SK=/^core(Streak|LastActiveDate|TodayActive|BestStreak|StreakShields|StreakRewardsClaimed|OwnedChests|Coins|Xp|Rank|PerfectDays|ShieldLog)/i;
+  var SK=/^core(Streak|LastActiveDate|TodayActive|BestStreak|StreakShields|StreakRewardsClaimed|OwnedChests|Coins|Xp|Rank|PerfectDays|ShieldLog|Friends|FriendRewardsClaimed)/i;
   window.addEventListener('coreStateChange',scheduleRender);
   window.addEventListener('core:progress-updated',scheduleRender);
   window.addEventListener('storage',function(ev){ if(!ev.key||SK.test(ev.key)) scheduleRender(); });
@@ -1151,6 +1263,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
           'The flame evolves at 3, 10, 30, 50, 100, 200 and 300 days. Day 300 is the top look — your number keeps climbing past it.',
           'Miss a day and your streak resets, but you have 48 hours to restore it once for $0.99 (you approve the charge).',
           'Shields (unlocked at Water rank) auto-protect a single missed day so your streak survives.',
+          'Build your Squad — every friend milestone (1, 3, 5, 10) you claim grants XP, chests and permanent XP boosts that apply everywhere.',
           'Hit milestone days to claim chests, borders and effects — tap a glowing node on the roadmap to collect.'
         ]
       });
