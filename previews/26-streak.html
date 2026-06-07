@@ -848,23 +848,23 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 <script>
 (function(){
   var S=window.coreState, qs=function(s){return document.querySelector(s);};
-  try{ if(/[?&]demo=1/.test(location.search) && S.seedDemo) S.seedDemo(); }catch(e){}
-
-  // ── preview-only QA seeding (?streak=N[&lost=1]) — demo pages ONLY ────────────
-  // Builds REAL consecutive history so the genuine engine derives the number;
-  // this is a screenshot aid, not a live-app bypass (gated behind ?demo=1).
+  // ── preview seeding (demo only) ───────────────────────────────────────────────
+  // A plain ?demo=1 seeds ONCE, then leaves your state alone — so lighting your
+  // streak, claiming rewards, gifting shields, vouches etc. all PERSIST across
+  // reloads (true save). Explicit state params (streak/lost/ready/secured)
+  // always re-seed so screenshots can jump to any state. Gated behind ?demo=1;
+  // never a live-app bypass — the real engine still derives from real history.
   try{
     var isDemo=/[?&]demo=1/.test(location.search);
     var qm=location.search.match(/[?&]streak=(\d+)/);
-    // Seed for ANY demo load (default streak 14 when no ?streak given), so the
-    // preview lands in a demonstrable state. DEFAULT = lightable (today's quest
-    // done, not yet secured) so "Light your streak" is interactive on tap.
-    // ?secured=1 = already locked in today · ?lost=1 = recovery state.
-    if(isDemo){
+    var hasStateParam=!!qm||/[?&](lost|ready|secured)=1/.test(location.search);
+    var demoSeeded=lget('coreStreakDemoSeeded','')==='1';
+    if(isDemo && (hasStateParam || !demoSeeded)){
+      if(S.seedDemo) S.seedDemo();                       // base demo state (once)
       var qn=qm?Math.max(0,Math.min(parseInt(qm[1],10)||0, 4000)):14;
       var qlost=/[?&]lost=1/.test(location.search);
       var qsecured=/[?&]secured=1/.test(location.search);
-      var qready=!qlost&&!qsecured;                     // lightable by default
+      var qready=!qlost&&!qsecured;                      // lightable by default
       var anchor=new Date(); if(qlost||qready) anchor.setDate(anchor.getDate()-1); // history ends yesterday
       var qhist=[]; for(var qi=qn-1;qi>=0;qi--){ var qd=new Date(anchor.getTime()); qd.setDate(qd.getDate()-qi); qhist.push(dkey(qd)); }
       jset('coreStreakHistory',qhist);
@@ -876,7 +876,6 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
         lset('coreStreak','0'); lset('coreBestStreak',String(qn));
         S.update(function(st){ st.streak.days=0; st.streak.previousDays=qn; st.streak.lostAt=Date.now()-3600000; if(qn>(st.bestStreak||0)) st.bestStreak=qn; return st; });
       } else if(qready){
-        // yesterday secured at qn; today's quest is DONE but the day isn't locked in yet
         lset('coreLastActiveDate', dkey(anchor)); lset('coreTodayActive','1');
         lset('coreStreak',String(qn)); lset('coreBestStreak',String(qn));
         S.update(function(st){ st.streak.days=qn; st.streak.lostAt=null; st.streak.previousDays=null; if(qn>(st.bestStreak||0)) st.bestStreak=qn; return st; });
@@ -885,18 +884,13 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
         lset('coreStreak',String(qn)); lset('coreBestStreak',String(qn));
         S.update(function(st){ st.streak.days=qn; st.streak.lostAt=null; st.streak.previousDays=null; if(qn>(st.bestStreak||0)) st.bestStreak=qn; return st; });
       }
+      lset('coreStreakDemoSeeded','1');
     }
-    // ?plus=1 — turn on CORE Plus for testing auto-claim
-    if(/[?&]plus=1/.test(location.search) && /[?&]demo=1/.test(location.search)){
-      lset('corePlusActive','1'); lset('corePlusUntil',String(Date.now()+30*86400000));
-    }
-    // ?vouch=1 — simulate a squad vouch (discounts the paid restore)
-    if(/[?&]vouch=1/.test(location.search) && /[?&]demo=1/.test(location.search)){
-      lset('coreStreakVouch','1');
-    }
-    // ?friends=N — seed N synthetic squad members (demo only) to preview the squad UI
+    // explicit toggles — applied whenever their param is present
+    if(isDemo && /[?&]plus=1/.test(location.search)){ lset('corePlusActive','1'); lset('corePlusUntil',String(Date.now()+30*86400000)); }
+    if(isDemo && /[?&]vouch=1/.test(location.search)){ lset('coreStreakVouch','1'); }
     var fm=location.search.match(/[?&]friends=(\d+)/);
-    if(fm && /[?&]demo=1/.test(location.search)){
+    if(fm && isDemo){
       var fn=Math.max(0,Math.min(parseInt(fm[1],10)||0,40)), fids=[];
       var blocks='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
       for(var fj=0;fj<fn;fj++){ var s=''; for(var fk=0;fk<8;fk++){ s+=blocks[(fj*7+fk*13+5)%blocks.length]; } fids.push('CORE-'+s.slice(0,4)+'-'+s.slice(4,8)); }
