@@ -120,69 +120,111 @@
       id: 'quote', title: 'Daily Quote',
       icon: '<path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1zm12 0c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>',
       render: function (host) {
+        // Task 1a: rank chip removed — rank lives in the Life Score hero only.
         host.innerHTML =
           '<div class="w-quote">' +
+          '<div class="w-quote-top">' +
           '<svg class="w-quote-mark" viewBox="0 0 24 24" fill="currentColor"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1zm12 0c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/></svg>' +
+          '</div>' +
           '<p class="w-quote-text">' + dailyQuote() + '</p>' +
           '</div>';
       }
     },
 
+    // ── Life Score (DEFAULT) — slim hero: big number + progress bar only ──
     lifescore: {
       id: 'lifescore', title: 'Life Score',
       icon: '<path d="M12 20.5s-7.2-4.6-7.2-9.8A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 7.2 3.7c0 5.2-7.2 9.8-7.2 9.8Z"/>',
       render: function (host) {
         var cs = S();
         if (!cs) { host.innerHTML = '<div class="w-empty">Loading…</div>'; return; }
+
+        function xpForLevel(lvl) { return lvl * 300; }
+
+        function buildHTML() {
+          var s   = cs.read();
+          var xp  = s.xp || 0;
+          var lvl = cs.levelFor ? cs.levelFor(xp) : (Math.floor(xp / 300) + 1);
+          // Task 1b: hero is just the score + the XP progress bar. No stacked
+          // rank/level badges, no stat grid, no day-dots — the page reads clean.
+          return '' +
+            '<a href="24-ranks.html" class="w-ls-hero" style="text-decoration:none;color:inherit">' +
+              '<div class="w-ls-score-num" id="wLsNum">0</div>' +
+              '<div class="w-ls-score-label">Life Score</div>' +
+              '<div class="w-ls-xp">' +
+                '<div class="w-ls-xp-head">' +
+                  '<span class="w-ls-xp-rank" id="wLsLvl">Lv ' + lvl + '</span>' +
+                  '<span class="w-ls-xp-num" id="wLsXpNum">' + xp + ' XP</span>' +
+                '</div>' +
+                '<div class="w-ls-xp-bar"><div class="w-ls-xp-fill" id="wLsXpFill" style="width:0%"></div></div>' +
+              '</div>' +
+            '</a>';
+        }
+
+        host.innerHTML = buildHTML();
+
+        function animateIn() {
+          var s   = cs.read();
+          var xp  = s.xp || 0;
+          var lvl = cs.levelFor ? cs.levelFor(xp) : (Math.floor(xp / 300) + 1);
+          var xpPrev = lvl > 1 ? (lvl - 1) * 300 : 0;
+          var xpNext = lvl * 300;
+          var pct = xpNext > xpPrev ? Math.min(100, Math.round((xp - xpPrev) / (xpNext - xpPrev) * 100)) : 100;
+          var fill = host.querySelector('#wLsXpFill');
+          if (fill) requestAnimationFrame(function () { fill.style.width = pct + '%'; });
+          var lvlEl = host.querySelector('#wLsLvl');
+          if (lvlEl) lvlEl.textContent = 'Lv ' + lvl;
+          var xpEl = host.querySelector('#wLsXpNum');
+          if (xpEl) xpEl.textContent = xp + ' XP';
+          animCount(host.querySelector('#wLsNum'), cs.lifeScore());
+        }
+        setTimeout(animateIn, 80);
+
+        function onUpdate() { animateIn(); }
+        window.addEventListener('coreStateChange', onUpdate);
+        host._cleanup = function () { window.removeEventListener('coreStateChange', onUpdate); };
+      }
+    },
+
+    // ── Stat Breakdown (OPTIONAL) — the 6 routing cards ──
+    statbreakdown: {
+      id: 'statbreakdown', title: 'Stat Breakdown',
+      icon: '<path d="M4 19V5M4 19h16M8 19v-7M12 19V8M16 19v-4"/>',
+      render: function (host) {
+        var cs = S();
+        if (!cs) { host.innerHTML = '<div class="w-empty">Loading…</div>'; return; }
         var defs = cs.STAT_DEFS || [];
 
-        // Build HTML with values starting at 0 (animates in)
-        var html = '<div class="w-ls-hero">' +
-          '<div class="w-ls-score-num" id="wLsNum">0</div>' +
-          '<div class="w-ls-score-label">Life Score</div>' +
-          '</div><div class="w-ls-grid">';
-
+        var html = '<div class="w-ls-grid">';
+        // Task 6: each card routes via d.page || ('stat.html?s='+d.key)
         defs.forEach(function (d) {
           var href = d.page || ('stat.html?s=' + d.key);
           html +=
-            '<a href="' + href + '" class="w-ls-card" style="--sc:' + d.color + '" aria-label="' + d.name + ' score">' +
+            '<a href="' + href + '" class="w-ls-card" style="--sc:' + (d.color || 'var(--blue)') + '" aria-label="' + d.name + '">' +
             '<div class="w-ls-card-head">' +
               '<div class="w-ls-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + (d.icon || STAT_IC[d.key] || '') + '</svg></div>' +
               '<span class="w-ls-name">' + d.name + '</span>' +
-              '<span class="w-ls-val" data-sk="' + d.key + '">0</span>' +
             '</div>' +
-            '<div class="w-ls-bar"><div class="w-ls-fill" data-skf="' + d.key + '" style="width:0%"></div></div>' +
+            '<span class="w-ls-val" data-sk="' + d.key + '">0</span>' +
+            '<div class="w-ls-bar" style="margin-top:8px"><div class="w-ls-fill" data-skf="' + d.key + '" style="width:0%"></div></div>' +
             '<div class="w-ls-lvl" data-skl="' + d.key + '">Lv 1</div>' +
             '</a>';
         });
-        html += '</div>';
-        host.innerHTML = html;
+        host.innerHTML = html + '</div>';
 
-        // Animate all values in after first paint
-        setTimeout(function () {
-          var ls = cs.lifeScore();
-          animCount(host.querySelector('#wLsNum'), ls);
+        function animateIn() {
           defs.forEach(function (d) {
             var v = cs.statValue(d.key);
-            var lvl = statLevel(v);
             animCount(host.querySelector('[data-sk="' + d.key + '"]'), v);
             var fe = host.querySelector('[data-skf="' + d.key + '"]');
             var le = host.querySelector('[data-skl="' + d.key + '"]');
             if (fe) requestAnimationFrame(function () { fe.style.width = v + '%'; });
-            if (le) le.textContent = 'Lv ' + lvl;
-          });
-        }, 80);
-
-        function onUpdate() {
-          var ls = cs.lifeScore();
-          animCount(host.querySelector('#wLsNum'), ls);
-          defs.forEach(function (d) {
-            var v = cs.statValue(d.key);
-            animCount(host.querySelector('[data-sk="' + d.key + '"]'), v);
-            var fe = host.querySelector('[data-skf="' + d.key + '"]');
-            if (fe) fe.style.width = v + '%';
+            if (le) le.textContent = 'Lv ' + statLevel(v);
           });
         }
+        setTimeout(animateIn, 80);
+
+        function onUpdate() { animateIn(); }
         window.addEventListener('coreStateChange', onUpdate);
         host._cleanup = function () { window.removeEventListener('coreStateChange', onUpdate); };
       }
@@ -229,7 +271,7 @@
           header.innerHTML =
             '<span class="w-tasks-progress"><b>' + done + '</b> / ' + tasks.length + ' done</span>' +
             '<span class="w-tasks-budget">' + (totalMin > 0 ? budgetStr + ' left' : 'All done!') + '</span>' +
-            '<a href="21-quests.html" class="w-tasks-viewall">All →</a>';
+            '<a href="21-quests.html" class="w-tasks-viewall">All<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;vertical-align:-1px;margin-left:3px"><path d="M9 6l6 6-6 6"/></svg></a>';
           host.appendChild(header);
 
           if (!tasks.length) {
@@ -253,17 +295,16 @@
             row.innerHTML =
               '<button class="w-task-check' + (isDone ? ' checked' : '') + '" aria-label="' + (isDone ? 'Done' : 'Complete') + '">' +
                 (isDone
-                  ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l4 4 10-11"/></svg>'
-                  : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>') +
+                  ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l4 4 10-11"/></svg>'
+                  : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/></svg>') +
               '</button>' +
               '<div class="w-task-body">' +
                 '<span class="w-task-title">' + task.title + '</span>' +
-                '<span class="w-task-meta">' +
+                '<div class="w-task-meta">' +
                   '<span class="w-task-chip">' + timeDisplay + '</span>' +
-                  '<span class="w-task-xp">+' + task.xp + ' XP</span>' +
-                  '<span class="w-task-dest">' + page.replace('stat.html?s=', '').replace('.html', '') + ' →</span>' +
-                '</span>' +
-              '</div>';
+                '</div>' +
+              '</div>' +
+              '<span class="w-task-xp-badge">+' + task.xp + ' XP</span>';
 
             if (!isDone) {
               var btn = row.querySelector('.w-task-check');
@@ -348,7 +389,14 @@
       id: 'weather', title: 'Weather',
       icon: '<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>',
       render: function (host) {
-        var ICONS  = { clear: '☀️', cloudy: '☁️', rain: '🌧️', snow: '❄️', fog: '🌫️' };
+        var SVG_HEAD = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">';
+        var ICONS  = {
+          clear:  SVG_HEAD + '<circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2 12h2M20 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>',
+          cloudy: SVG_HEAD + '<path d="M7 18h10a4 4 0 0 0 .5-7.97A5.5 5.5 0 0 0 6.8 9.3 3.6 3.6 0 0 0 7 18z"/></svg>',
+          rain:   SVG_HEAD + '<path d="M7 18h10a4 4 0 0 0 .5-7.97A5.5 5.5 0 0 0 6.8 9.3 3.6 3.6 0 0 0 7 18z"/><path d="M8 20l-1 2M12 20l-1 2M16 20l-1 2"/></svg>',
+          snow:   SVG_HEAD + '<path d="M7 18h10a4 4 0 0 0 .5-7.97A5.5 5.5 0 0 0 6.8 9.3 3.6 3.6 0 0 0 7 18z"/><path d="M8 20h.01M12 21h.01M16 20h.01"/></svg>',
+          fog:    SVG_HEAD + '<path d="M3 10h18M5 14h14M4 18h16"/></svg>'
+        };
         var LABELS = { clear: 'Clear skies', cloudy: 'Overcast', rain: 'Raining', snow: 'Snowing', fog: 'Foggy' };
         var TIMES  = { sunrise: 'Sunrise', day: 'Daytime', afternoon: 'Afternoon', sunset: 'Sunset', night: 'Night' };
         var amb = window.dashAmbient;
@@ -356,13 +404,13 @@
         var ti = amb ? amb.getTime() : 'day';
         host.innerHTML =
           '<div class="w-weather">' +
-          '<span class="w-weather-icon" id="wWIcon">' + (ICONS[w] || '☀️') + '</span>' +
+          '<span class="w-weather-icon" id="wWIcon">' + (ICONS[w] || ICONS.clear) + '</span>' +
           '<span class="w-weather-label" id="wWLabel">' + (LABELS[w] || 'Clear') + '</span>' +
           '<span class="w-weather-time" id="wWTime">' + (TIMES[ti] || ti) + '</span>' +
           '</div>';
         function onAmb(e) {
           var ic = host.querySelector('#wWIcon'), lb = host.querySelector('#wWLabel'), tm = host.querySelector('#wWTime');
-          if (ic) ic.textContent = ICONS[e.detail.weather] || '☀️';
+          if (ic) ic.innerHTML = ICONS[e.detail.weather] || ICONS.clear;
           if (lb) lb.textContent = LABELS[e.detail.weather] || 'Clear';
           if (tm) tm.textContent = TIMES[e.detail.time] || e.detail.time;
         }
@@ -378,15 +426,18 @@
         var social = window.coreSocial;
         var friends = (social && social.friends && social.friends()) || [];
         if (!friends.length) {
-          host.innerHTML = '<div class="w-empty">Add friends to see their progress.<br><a href="23-profile.html" style="color:var(--blue);font-weight:700;text-decoration:none">Find friends →</a></div>';
+          host.innerHTML = '<div class="w-empty">No friends yet.<br><a href="23-profile.html" style="color:var(--blue);font-weight:700;text-decoration:none">Go to Profile<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;vertical-align:-1px;margin-left:3px"><path d="M9 6l6 6-6 6"/></svg></a></div>';
           return;
         }
-        var html = '<div class="w-friends-list">';
+        var html = '<a href="23-profile.html" class="w-friends-header">' +
+          '<span class="w-friends-count">' + friends.length + ' ' + (friends.length === 1 ? 'friend' : 'friends') + '</span>' +
+          '<span class="w-friends-seeall">Profile<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;vertical-align:-1px;margin-left:3px"><path d="M9 6l6 6-6 6"/></svg></span>' +
+          '</a><div class="w-friends-list">';
         friends.slice(0, 4).forEach(function (f) {
-          html += '<div class="w-friend-item">' +
+          html += '<a href="23-profile.html" class="w-friend-item" style="text-decoration:none;color:inherit">' +
             '<div class="w-friend-avatar">' + ((f.name || '?').charAt(0).toUpperCase()) + '</div>' +
             '<div class="w-friend-info"><span class="w-friend-name">' + (f.name || 'Unknown') + '</span><span class="w-friend-rank">' + (f.rank || 'Stone') + '</span></div>' +
-            '<span class="w-friend-power">' + (f.power || 0) + '</span></div>';
+            '<span class="w-friend-power">' + (f.power || 0) + '</span></a>';
         });
         host.innerHTML = html + '</div>';
       }
@@ -413,6 +464,81 @@
             '<span class="w-activity-time">' + agoStr + '</span></div>';
         });
         host.innerHTML = html + '</div>';
+      }
+    },
+
+    // ── Life Score trend (OPTIONAL chart) ──
+    lifetrend: {
+      id: 'lifetrend', title: 'Life Score Trend',
+      icon: '<path d="M3 17l5-6 4 4 5-7M3 21h18"/>',
+      render: function (host) {
+        var DC = window.dashCharts;
+        if (!DC) { host.innerHTML = '<div class="w-empty">Chart engine not loaded.</div>'; return; }
+        var reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches);
+        var range = 7;
+
+        function draw() {
+          var pts = DC.getHistory(range);
+          host.innerHTML =
+            '<div class="dc-head">' +
+              '<div class="dc-seg" role="tablist">' +
+                '<button class="dc-seg-btn' + (range === 7 ? ' on' : '') + '" data-r="7">7d</button>' +
+                '<button class="dc-seg-btn' + (range === 30 ? ' on' : '') + '" data-r="30">30d</button>' +
+              '</div>' +
+            '</div>' +
+            '<div class="dc-host"></div>';
+          DC.lineChart(host.querySelector('.dc-host'), {
+            values: DC.series(pts, 'score'),
+            labels: DC.rangeLabels(pts),
+            color: '#0A84FF',
+            height: 60,
+            reducedMotion: reduced
+          });
+          Array.prototype.forEach.call(host.querySelectorAll('.dc-seg-btn'), function (b) {
+            b.addEventListener('click', function () { range = +this.dataset.r; draw(); });
+          });
+        }
+        draw();
+        function onUpdate() { draw(); }
+        window.addEventListener('coreStateChange', onUpdate);
+        host._cleanup = function () { window.removeEventListener('coreStateChange', onUpdate); };
+      }
+    },
+
+    // ── Per-stat trend mini-graphs (OPTIONAL chart) ──
+    stattrend: {
+      id: 'stattrend', title: 'Stat Trends',
+      icon: '<path d="M3 12l4-4 4 4 4-6 6 8M3 20h18"/>',
+      render: function (host) {
+        var cs = S(), DC = window.dashCharts;
+        if (!cs || !DC) { host.innerHTML = '<div class="w-empty">Loading…</div>'; return; }
+        var reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches);
+        var defs = cs.STAT_DEFS || [];
+
+        function draw() {
+          var pts = DC.getHistory(30);
+          var html = '<div class="dc-mini-grid">';
+          defs.forEach(function (d) {
+            html += '<div class="dc-mini"><div class="dc-mini-head">' +
+              '<span class="dc-mini-dot" style="background:' + (d.color || 'var(--blue)') + '"></span>' +
+              '<span class="dc-mini-name">' + d.name + '</span></div>' +
+              '<div class="dc-mini-host" data-k="' + d.key + '"></div></div>';
+          });
+          host.innerHTML = html + '</div>';
+          defs.forEach(function (d) {
+            DC.lineChart(host.querySelector('[data-k="' + d.key + '"]'), {
+              values: DC.series(pts, d.key),
+              labels: [],
+              color: d.color || '#0A84FF',
+              height: 38,
+              reducedMotion: reduced
+            });
+          });
+        }
+        draw();
+        function onUpdate() { draw(); }
+        window.addEventListener('coreStateChange', onUpdate);
+        host._cleanup = function () { window.removeEventListener('coreStateChange', onUpdate); };
       }
     },
 
