@@ -4,15 +4,20 @@ Everything is coded, type-checked, and the app bundles. These steps flip it from
 "compiles" to "actually works." Run from the repo root unless noted.
 
 ## 0. (Optional) Prove the AI works first — no deploy needed
-Needs your Anthropic key + any full-body photo (and optionally a non-body image):
+Needs a key + any full-body photo (and optionally a non-body image like a mug).
+OpenAI does the photo understanding ("is this a physique or something else?"):
 ```bash
-ANTHROPIC_API_KEY=sk-ant-... \
+# OpenAI (default when OPENAI_API_KEY is set):
+OPENAI_API_KEY=sk-... \
   deno run --allow-env --allow-read --allow-net \
   supabase/functions/physique-scan/integration_test.ts ~/Desktop/body.jpg ~/Desktop/mug.jpg
+
+# or Anthropic:
+# ANTHROPIC_API_KEY=sk-ant-... deno run -A .../integration_test.ts body.jpg mug.jpg
 ```
-Expect the body photo to return `isBody:true` + a rank/muscles/weakPoints JSON, and
-the non-body to return `isBody:false`. This is the single biggest unknown — it
-confirms the prompt actually rates a body correctly. (Or paste me a key and I'll run it.)
+Expect the body photo → `isBody:true` + a rank/muscles/weakPoints JSON, and the
+non-body → `isBody:false`. This is the biggest unknown — it confirms the model
+actually classifies + rates a photo correctly. (Or paste me a key and I'll run it.)
 
 ## 1. Deploy the function
 ```bash
@@ -22,9 +27,9 @@ brew install supabase/tap/supabase            # macOS
 supabase login                                # opens browser
 supabase link --project-ref tqjpgknkbfaayrjuwoet   # CORE project (from memory)
 
-supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
-# optional model override (defaults to claude-sonnet-4-6):
-# supabase secrets set PHYSIQUE_MODEL=claude-sonnet-4-6
+supabase secrets set OPENAI_API_KEY=sk-...        # OpenAI does the photo understanding
+# or Anthropic instead:
+# supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
 
 supabase functions deploy physique-scan
 ```

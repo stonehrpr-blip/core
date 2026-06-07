@@ -38,11 +38,19 @@ Errors: `400 bad_json|no_image|bad_media_type|not_base64`, `413 image_too_large`
 - Decoded-image cap: ~5 MB; media allow-list: jpeg / png / webp.
 - No medical/body-composition claims, no shaming (enforced in the system prompt).
 
+## Vision provider
+The model FIRST decides "is this a physique or something else?" (`isBody`) and
+only then rates it. Provider is chosen by which key is set (force with
+`VISION_PROVIDER=openai|anthropic`):
+- **OpenAI** (default when `OPENAI_API_KEY` is set) — `gpt-4o-mini`, override with `PHYSIQUE_OPENAI_MODEL`.
+- **Anthropic** — `claude-sonnet-4-6`, override with `PHYSIQUE_MODEL`.
+
 ## Deploy (manual — Stone)
 ```bash
-supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
-# optional model override (defaults to claude-sonnet-4-6):
-supabase secrets set PHYSIQUE_MODEL=claude-sonnet-4-6
+# OpenAI (recommended for photo understanding):
+supabase secrets set OPENAI_API_KEY=sk-...
+# or Anthropic:
+# supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
 supabase functions deploy physique-scan
 ```
 

@@ -19,6 +19,7 @@
 
 import {
   type MuscleKey,
+  type VisionProvider,
   callerKey,
   createRateLimiter,
   validateImage,
@@ -38,7 +39,15 @@ function json(obj: unknown, status = 200): Response {
   });
 }
 
-const MODEL = Deno.env.get("PHYSIQUE_MODEL") || "claude-sonnet-4-6";
+// Vision provider: prefer OpenAI when its key is present (it does the "is this a
+// physique or something else?" understanding + the rating), else Anthropic.
+// Force one with VISION_PROVIDER=openai|anthropic.
+const OPENAI_KEY = Deno.env.get("OPENAI_API_KEY") || "";
+const ANTHROPIC_KEY = Deno.env.get("ANTHROPIC_API_KEY") || "";
+const PROVIDER: VisionProvider =
+  (Deno.env.get("VISION_PROVIDER") as VisionProvider) || (OPENAI_KEY ? "openai" : "anthropic");
+const OPENAI_MODEL = Deno.env.get("PHYSIQUE_OPENAI_MODEL") || "gpt-4o-mini";
+const ANTHROPIC_MODEL = Deno.env.get("PHYSIQUE_MODEL") || "claude-sonnet-4-6";
 
 // Abuse guard: per-user sliding window + hard image-size cap.
 const RATE_WINDOW_MS = 60_000;
@@ -67,11 +76,12 @@ Deno.serve(async (req) => {
     return json({ error: img.error }, status);
   }
 
-  const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
+  const apiKey = PROVIDER === "openai" ? OPENAI_KEY : ANTHROPIC_KEY;
   if (!apiKey) return json({ error: "model_unavailable" }, 503);
+  const model = PROVIDER === "openai" ? OPENAI_MODEL : ANTHROPIC_MODEL;
 
   try {
-    const out = await analyzePhysique({ apiKey, base64: img.data, mediaType: img.mediaType, model: MODEL });
+    const out = await analyzePhysique({ provider: PROVIDER, apiKey, base64: img.data, mediaType: img.mediaType, model });
     if (!out.ok) {
       // Log status ONLY — never the image or any body that could echo it.
       console.error("anthropic_error", out.status ?? "");

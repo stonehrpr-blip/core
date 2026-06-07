@@ -136,13 +136,70 @@ export const SYSTEM =
   '"muscles":{"chest":{"level":number,"status":"weak|ok|strong"},"back":{...},"shoulders":{...},"arms":{...},"legs":{...},"core":{...}},' +
   '"weakPoints":[muscle keys to prioritize],"summary":"one or two short constructive sentences, no medical claims"}';
 
+export type VisionProvider = "openai" | "anthropic";
+const USER_INSTRUCTION =
+  "Look at this photo. FIRST decide if it actually shows a real human body/physique to assess — if it's anything else (an object, a pet, food, a screenshot, a face-only/cropped shot, or an empty/too-dark frame) set isBody=false and don't invent a rating. If it IS a clear body, analyze it and return the strict JSON.";
+
+/** OpenAI vision (gpt-4o family). Returns raw JSON text. */
+async function callOpenAI(f: typeof fetch, apiKey: string, model: string, base64: string, mediaType: string) {
+  const res = await f("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: { "content-type": "application/json", authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify({
+      model,
+      max_tokens: 700,
+      temperature: 0.4,
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: SYSTEM },
+        {
+          role: "user",
+          content: [
+            { type: "text", text: USER_INSTRUCTION },
+            { type: "image_url", image_url: { url: `data:${mediaType};base64,${base64}` } },
+          ],
+        },
+      ],
+    }),
+  });
+  if (!res.ok) return { ok: false as const, status: res.status };
+  const data = await res.json();
+  return { ok: true as const, text: String(data?.choices?.[0]?.message?.content ?? "").trim() };
+}
+
+/** Anthropic Claude vision. Returns raw JSON text. */
+async function callAnthropic(f: typeof fetch, apiKey: string, model: string, base64: string, mediaType: string) {
+  const res = await f("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "content-type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
+    body: JSON.stringify({
+      model, max_tokens: 700, temperature: 0.4,
+      system: [{ type: "text", text: SYSTEM, cache_control: { type: "ephemeral" } }],
+      messages: [{
+        role: "user",
+        content: [
+          { type: "image", source: { type: "base64", media_type: mediaType, data: base64 } },
+          { type: "text", text: USER_INSTRUCTION },
+        ],
+      }],
+    }),
+  });
+  if (!res.ok) return { ok: false as const, status: res.status };
+  const data = await res.json();
+  const text: string = (data?.content ?? [])
+    .filter((b: { type: string }) => b.type === "text").map((b: { text: string }) => b.text).join("").trim();
+  return { ok: true as const, text };
+}
+
 /**
  * Single source of truth for the vision call — used by index.ts AND the
- * integration test, so they can never drift. Does the Anthropic request, pulls
- * the JSON, and normalizes to the strict contract. `fetchImpl` is injectable for
- * tests. Never logs the image.
+ * integration test, so they can never drift. The model FIRST decides whether the
+ * photo is a real physique (isBody) and only then rates it; a non-body comes back
+ * isBody=false. `provider` picks OpenAI vs Anthropic. `fetchImpl` is injectable
+ * for tests. Never logs the image.
  */
 export async function analyzePhysique(args: {
+  provider: VisionProvider;
   apiKey: string;
   base64: string;
   mediaType: string;
@@ -153,38 +210,12 @@ export async function analyzePhysique(args: {
   | { ok: false; error: string; status?: number }
 > {
   const f = args.fetchImpl ?? fetch;
-  const res = await f("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-api-key": args.apiKey,
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({
-      model: args.model,
-      max_tokens: 700,
-      temperature: 0.4,
-      system: [{ type: "text", text: SYSTEM, cache_control: { type: "ephemeral" } }],
-      messages: [
-        {
-          role: "user",
-          content: [
-            { type: "image", source: { type: "base64", media_type: args.mediaType, data: args.base64 } },
-            { type: "text", text: "Analyze this full-body photo and return the strict JSON. If it isn't a clear full body, set isBody=false." },
-          ],
-        },
-      ],
-    }),
-  });
+  const call = args.provider === "openai"
+    ? await callOpenAI(f, args.apiKey, args.model, args.base64, args.mediaType)
+    : await callAnthropic(f, args.apiKey, args.model, args.base64, args.mediaType);
 
-  if (!res.ok) return { ok: false, error: "model_error", status: res.status };
-  const data = await res.json();
-  const text: string = (data?.content ?? [])
-    .filter((b: { type: string }) => b.type === "text")
-    .map((b: { text: string }) => b.text)
-    .join("")
-    .trim();
-  const parsed = extractJSON(text);
+  if (!call.ok) return { ok: false, error: "model_error", status: call.status };
+  const parsed = extractJSON(call.text);
   if (!parsed) return { ok: false, error: "empty_reply" };
   return { ok: true, result: normalizeResult(parsed) };
 }

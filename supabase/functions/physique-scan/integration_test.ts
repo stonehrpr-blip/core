@@ -11,9 +11,15 @@
 // (a mug, a pet, an empty room) to confirm the isBody=false gate fires for real.
 
 import { encodeBase64 } from "https://deno.land/std@0.224.0/encoding/base64.ts";
-import { analyzePhysique } from "./helpers.ts";
+import { analyzePhysique, type VisionProvider } from "./helpers.ts";
 
-const MODEL = Deno.env.get("PHYSIQUE_MODEL") || "claude-sonnet-4-6";
+// Uses OpenAI if OPENAI_API_KEY is set, else Anthropic. Override with VISION_PROVIDER.
+const OPENAI_KEY = Deno.env.get("OPENAI_API_KEY") || "";
+const PROVIDER: VisionProvider =
+  (Deno.env.get("VISION_PROVIDER") as VisionProvider) || (OPENAI_KEY ? "openai" : "anthropic");
+const MODEL = PROVIDER === "openai"
+  ? (Deno.env.get("PHYSIQUE_OPENAI_MODEL") || "gpt-4o-mini")
+  : (Deno.env.get("PHYSIQUE_MODEL") || "claude-sonnet-4-6");
 
 function mediaTypeFor(path: string): string {
   const p = path.toLowerCase();
@@ -23,13 +29,13 @@ function mediaTypeFor(path: string): string {
 }
 
 async function run(path: string, label: string) {
-  const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
-  if (!apiKey) { console.error("✗ Set ANTHROPIC_API_KEY in the environment."); Deno.exit(2); }
+  const apiKey = PROVIDER === "openai" ? OPENAI_KEY : (Deno.env.get("ANTHROPIC_API_KEY") || "");
+  if (!apiKey) { console.error(`✗ Set ${PROVIDER === "openai" ? "OPENAI_API_KEY" : "ANTHROPIC_API_KEY"} in the environment.`); Deno.exit(2); }
   const bytes = await Deno.readFile(path);
   const base64 = encodeBase64(bytes);
-  console.log(`\n── ${label}: ${path} (${(bytes.length / 1024).toFixed(0)} KB) ──`);
+  console.log(`\n── ${label} [${PROVIDER}/${MODEL}]: ${path} (${(bytes.length / 1024).toFixed(0)} KB) ──`);
   const t0 = Date.now();
-  const out = await analyzePhysique({ apiKey, base64, mediaType: mediaTypeFor(path), model: MODEL });
+  const out = await analyzePhysique({ provider: PROVIDER, apiKey, base64, mediaType: mediaTypeFor(path), model: MODEL });
   console.log(`took ${Date.now() - t0} ms`);
   if (!out.ok) { console.error("✗ error:", out.error, out.status ?? ""); return; }
   console.log(JSON.stringify(out.result, null, 2));
