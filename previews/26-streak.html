@@ -157,6 +157,12 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .cta:active{transform:scale(.985);}
 .cta svg{width:16px;height:16px;}
 .cta.secured{color:var(--blue-3);background:rgba(10,132,255,.1);border:1px solid rgba(10,132,255,.32);box-shadow:none;cursor:default;}
+.loghint{margin-top:9px;display:flex;align-items:center;justify-content:center;gap:7px;
+  font-size:10.5px;font-weight:700;color:var(--muted);text-align:center;line-height:1.4;padding:0 6px;}
+.loghint[hidden]{display:none;}
+.loghint svg{width:13px;height:13px;flex:none;color:var(--blue-3);}
+.loghint.free svg{color:var(--dim);}
+.loghint a{color:var(--blue-3);text-decoration:none;font-weight:900;white-space:nowrap;}
 
 /* ── Recovery ── */
 .recover{display:flex;align-items:center;gap:12px;margin-top:11px;border-radius:18px;padding:13px 14px;
@@ -593,6 +599,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 
       <!-- CTA -->
       <a class="cta" id="cta" href="21-quests.html">Light your streak</a>
+      <div class="loghint" id="logHint" hidden></div>
 
       <!-- Recovery -->
       <div class="recover" id="recover" hidden></div>
@@ -840,7 +847,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   // but cap the grace so a hand-edited shield log can't be used to inflate.
   function shieldGrace(){ try{ return Math.min(jget('coreShieldLog',[]).length,8); }catch(e){ return 0; } }
   function repairStreak(){
-    var hist=cleanHistory(); var s=S.read(), active=questDoneToday(s);
+    var hist=cleanHistory(); var s=S.read(), active=(lget('coreLastActiveDate',null)===todayKey());
     var real=consecutiveFrom(hist,active), grace=shieldGrace();
     var ceil=real+Math.max(2,grace), justified=real+grace;
     var lr=Math.max(real,longestRun(hist)), changed=false;
@@ -907,20 +914,17 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   // automatically. The +1 — securing today — is an explicit act: see
   // secureToday(), driven by the "Light your streak" tap or CORE+ auto-claim.
   function maintain(){
-    var s=S.read(), todayK=todayKey(), yK=dkey(addDays(new Date(),-1));
+    var todayK=todayKey(), yK=dkey(addDays(new Date(),-1));
     var last=lget('coreLastActiveDate',null); if(last==='') last=null;
-    var active=questDoneToday(s), days=(s.streak&&s.streak.days)||0;
+    var days=(S.read().streak&&S.read().streak.days)||0;
     var changed=false, usedShield=false, justLost=false, okClock=clockOk();
-    if(active){
-      lset('coreTodayActive','1');
-      // securing handled by secureToday() — never auto-incremented here.
-    } else {
-      lset('coreTodayActive','0');
-      if(last&&last!==todayK&&last!==yK&&okClock){
-        var sh2=ig('coreStreakShields',0);
-        if(sh2>0&&days>0){ sh2--; lset('coreStreakShields',String(sh2)); logShield('miss-protected'); S.update(function(st){ st.streak.lastCleanAt=Date.now(); return st; }); lset('coreLastActiveDate',yK); usedShield=true; changed=true; }
-        else if(days>0){ S.update(function(st){ st.streak.previousDays=days; st.streak.days=0; st.streak.lostAt=Date.now(); return st; }); days=0; changed=true; justLost=true; }
-      }
+    // The streak is a DAILY LOG (no quest required). The only automatic move is
+    // the DOWN direction: if you didn't log yesterday the streak broke — a shield
+    // protects a single missed day. Securing (+1) is explicit: secureToday().
+    if(last&&last!==todayK&&last!==yK&&okClock){
+      var sh2=ig('coreStreakShields',0);
+      if(sh2>0&&days>0){ sh2--; lset('coreStreakShields',String(sh2)); logShield('miss-protected'); S.update(function(st){ st.streak.lastCleanAt=Date.now(); return st; }); lset('coreLastActiveDate',yK); usedShield=true; changed=true; }
+      else if(days>0){ S.update(function(st){ st.streak.previousDays=days; st.streak.days=0; st.streak.lostAt=Date.now(); return st; }); days=0; changed=true; justLost=true; }
     }
     var best=Math.max(ig('coreBestStreak',0),(S.read().bestStreak||0),days);
     lset('coreStreak',String(days)); lset('coreBestStreak',String(best));
@@ -929,21 +933,21 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     var st2=S.read().streak||{}, recoverable=false;
     try{ recoverable=typeof S.isStreakRecoverable==='function'?S.isStreakRecoverable(S.read()):!!(st2.lostAt&&(st2.previousDays||0)>0&&(Date.now()-st2.lostAt)/3600000<=48); }catch(e){}
     var securedToday=(last===todayK);
-    var canSecure=active&&!securedToday&&okClock;        // work done, not yet locked in
-    return { days:days, active:active, lost:justLost, recoverable:recoverable, prevDays:(st2.previousDays||0),
+    var canSecure=!securedToday&&okClock;                // daily log — anyone can log, no quest gate
+    return { days:days, lost:justLost, recoverable:recoverable, prevDays:(st2.previousDays||0),
              securedToday:securedToday, canSecure:canSecure, nextDays:(last===yK?days+1:(last===null?Math.max(days,1):days+1)) };
   }
 
-  // Lock in today — the REAL +1. Gated on questDoneToday so it can never be a
-  // free increment, and on clockOk so a rolled-back clock can't farm days.
-  // Idempotent per day (lastActiveDate===today short-circuits) → once per day.
+  // Log today — the REAL +1. It's a daily check-in (no quest needed), but still
+  // anti-cheat-safe: clockOk refuses a rolled-back clock, cleanHistory drops
+  // future-dated logs, and the lastActiveDate===today guard makes it strictly
+  // once per real day. repairStreak reconciles against real history.
   function secureToday(){
-    var s=S.read(); if(!questDoneToday(s)) return null;     // no work → no day
-    if(!clockOk()) return null;                              // clock tamper → refuse
+    if(!clockOk()) return null;                             // clock tamper → refuse
     var todayK=todayKey(), yK=dkey(addDays(new Date(),-1));
     var last=lget('coreLastActiveDate',null); if(last==='') last=null;
-    if(last===todayK) return null;                          // already secured today
-    var days=(s.streak&&s.streak.days)||0, usedShield=false;
+    if(last===todayK) return null;                          // already logged today (once per day)
+    var s=S.read(), days=(s.streak&&s.streak.days)||0, usedShield=false;
     if(last===yK){ days++; }
     else if(last===null){ days=Math.max(days,1); }
     else { var sh=ig('coreStreakShields',0); if(sh>0){ sh--; lset('coreStreakShields',String(sh)); days++; usedShield=true; logShield('gap-protected'); } else days=1; }
@@ -1089,6 +1093,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
       var cls='wd'; var inner=String(d.getDate());
       if(isT) cls+=' today';
       if(isDone){ cls+=' done'; inner=CK; done++; }
+      else if(isT){ /* today, not yet logged — pending (the day isn't over), neutral */ }
       else if(t>nowT) cls+=' future';
       else if(t>=firstAct){ cls+=' missed'; inner=CX; }
       html+='<div class="'+cls+'"><span class="wl">'+DOW[i]+'</span><span class="wc">'+inner+'</span></div>';
@@ -1174,7 +1179,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     tab.addEventListener('click',function(){
       document.querySelectorAll('.hist-tab').forEach(function(t){ t.classList.remove('active'); });
       tab.classList.add('active'); curHistTab=tab.dataset.tab;
-      var hist=cleanHistory(); renderHist(hist, questDoneToday(S.read()));
+      var hist=cleanHistory(); renderHist(hist, lget('coreLastActiveDate',null)===todayKey());
     });
   });
 
@@ -1462,8 +1467,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   // then plays the flame (scaled to the streak) and reveals the tier's perks.
   function doLight(auto){
     if(lightBusy) return false;
-    if(!questDoneToday(S.read())){ if(!auto) toast('Complete today’s quest first'); return false; }
-    if(lget('coreLastActiveDate',null)===todayKey()) return false; // already secured today
+    if(lget('coreLastActiveDate',null)===todayKey()) return false; // already logged today
     var newDays=secureToday();
     if(newDays===null) return false;
     lightBusy=true;
@@ -1479,12 +1483,27 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     return true;
   }
 
+  // Free vs CORE+ daily-log distinction: Free = manual, no reminders;
+  // CORE+ = auto-logged + reminders (reminders are a notification-layer feature).
+  function renderLogHint(st,isPro){
+    var el=qs('#logHint'); if(!el) return;
+    var BELL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>';
+    var CHK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+    if(isPro){
+      el.className='loghint'; el.hidden=false;
+      el.innerHTML=CHK+(st.securedToday?'<span>Auto-logged by CORE+ — your streak is handled.</span>':'<span>CORE+ logs today automatically — no tap needed.</span>');
+    } else if(!st.securedToday){
+      el.className='loghint free'; el.hidden=false;
+      el.innerHTML=BELL+'<span>Log it yourself each day — Free gets no reminders. <a href="29-core-plus.html">CORE+</a> auto-logs &amp; reminds you.</span>';
+    } else { el.hidden=true; el.innerHTML=''; }
+  }
+
   // ── main render ───────────────────────────────────────────────────────────────
   var lastDays=null, initialDone=false;
   function render(){
     repairStreak();              // anti-cheat: reconcile against real history every render
     var st=maintain(); var s=S.read();
-    var days=st.days, active=st.active;
+    var days=st.days, active=st.securedToday;   // "active" = logged today (drives the week-view marker)
     var best=Math.max(s.bestStreak||0,ig('coreBestStreak',0),days);
     var rankIdx=S.rankFor(s.xp||0).idx;
     var claimed=jget('coreStreakRewardsClaimed',[]);
@@ -1520,26 +1539,24 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     qs('#multTxt').textContent=mult.toFixed(2)+'x XP';
     var nxt=qs('#multNext'); if(nxt) nxt.textContent=nm?'· next at '+nm.at+'d':'';
 
-    // CORE+ auto-claim: the moment the daily requirement is met, secure with no
-    // tap (still requires the work — secureToday() is gated on questDoneToday).
+    // CORE+ auto-claim: auto-log the day with no tap. Free users must tap "Light
+    // your streak" themselves (and get no reminder); CORE+ handles it for them.
     if(st.canSecure && corePlus() && !lightBusy && lget('coreLastActiveDate',null)!==todayKey()){
       if(doLight(true)) return;    // ceremony covers the screen; Continue re-renders fully
     }
 
-    // CTA — Light is GATED: only securable once today's quest is done; otherwise
-    // it routes to Quests (never a free +1).
+    // CTA — the streak is a DAILY LOG: tap once a day to log it (no quest gate).
+    // Free users do this manually; CORE+ auto-logs above before we reach here.
     var cta=qs('#cta');
     if(st.securedToday){
       cta.className='cta secured'; cta.removeAttribute('href'); cta.onclick=null;
-      cta.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12l4 4 10-11"/></svg>Locked in for today';
-    } else if(st.canSecure){
-      cta.className='cta'; cta.removeAttribute('href');
-      cta.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1.3 3.6-1 5-1 7.6 0 1.6 1 2.6 1 2.6s2-1 2-3.6c2 2 3 4.4 3 7.4a5 5 0 0 1-10 0c0-3.4 2.2-5.4 3-9 .9 2 2 2 2 2s0-2.6 0-7Z"/></svg>Light your streak · Day '+st.nextDays;
-      cta.onclick=function(ev){ if(ev&&ev.preventDefault) ev.preventDefault(); doLight(false); };
+      cta.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12l4 4 10-11"/></svg>Logged in for today';
     } else {
-      cta.className='cta'; cta.setAttribute('href','21-quests.html'); cta.onclick=null;
-      cta.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Complete a quest to light<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>';
+      cta.className='cta'; cta.removeAttribute('href');
+      cta.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1.3 3.6-1 5-1 7.6 0 1.6 1 2.6 1 2.6s2-1 2-3.6c2 2 3 4.4 3 7.4a5 5 0 0 1-10 0c0-3.4 2.2-5.4 3-9 .9 2 2 2 2 2s0-2.6 0-7Z"/></svg>'+(days>0?'Light your streak · Day '+st.nextDays:'Start your streak');
+      cta.onclick=function(ev){ if(ev&&ev.preventDefault) ev.preventDefault(); doLight(false); };
     }
+    renderLogHint(st, corePlus());
 
     startMotivate(days);
     startPillClock(st.securedToday);
@@ -1579,10 +1596,10 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
       window.coreHelp.attach('helpBtn',{
         title:'Streak Help',
         bullets:[
-          'Finish today\'s quest, then tap "Light your streak" to lock in the day with a flame that grows bigger the longer your streak. You can only light it once the work is done.',
-          'CORE+ members auto-secure the streak the moment the daily quest is done — no tap needed.',
+          'Your streak is a daily log — tap "Light your streak" once a day to lock in the day with a flame that grows bigger the longer your streak. No quest required.',
+          'On Free you log it yourself each day and there are no reminders, so don\'t forget. CORE+ logs it for you automatically and reminds you, so you never lose it.',
           'The flame evolves at 3, 10, 30, 50, 100, 200 and 300 days. Day 300 is the top look — your number keeps climbing past it.',
-          'Your streak is built from your real day-by-day history, so editing storage or the clock can\'t fake it.',
+          'Your streak is built from your real day-by-day history (one log per day, no clock tricks), so editing storage or the clock can\'t fake it.',
           'Miss a day and your streak resets, but you have 48 hours to restore it once for $0.99 — or free if your squad vouches for you.',
           'Squad perks help your streak: an XP boost when squadmates are active, giftable shields, a shared squad streak, and free restores.',
           'Hit milestone days to claim chests, borders and effects — tap a glowing node on the roadmap to collect.'
