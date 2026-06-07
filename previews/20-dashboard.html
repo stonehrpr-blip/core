@@ -119,8 +119,12 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .w-ls-day.today{background:var(--blue);color:#fff;box-shadow:0 0 10px rgba(10,132,255,0.5);}
 
 /* ── Life Score ── */
-.w-ls-hero{display:flex;flex-direction:column;align-items:center;padding:22px 20px 16px;
-  border-bottom:1px solid rgba(255,255,255,0.06);}
+.w-ls-hero{position:relative;display:flex;flex-direction:column;align-items:center;padding:22px 20px 18px;
+  transition:background .14s;}
+.w-ls-hero:active{background:rgba(255,255,255,0.02);}
+.w-ls-cta{position:absolute;top:13px;right:13px;display:inline-flex;align-items:center;gap:2px;
+  font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);}
+.w-ls-cta svg{width:12px;height:12px;}
 .w-ls-score-num{font-size:54px;font-weight:800;letter-spacing:-0.04em;line-height:1;color:#fff;}
 .w-ls-score-label{font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--dim);margin-top:4px;}
 /* XP progress bar */
@@ -178,6 +182,16 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .w-task-xp-badge{font-size:10px;font-weight:800;color:var(--blue);
   background:rgba(10,132,255,0.10);border:1px solid rgba(10,132,255,0.22);
   padding:2px 7px;border-radius:999px;margin-left:auto;flex-shrink:0;white-space:nowrap;}
+/* all-tasks-done celebratory state */
+.w-tasks-done{display:flex;align-items:center;gap:12px;padding:14px 16px;
+  background:linear-gradient(180deg,rgba(52,211,153,0.10),rgba(52,211,153,0.02));
+  border-bottom:1px solid rgba(255,255,255,0.04);}
+.w-tasks-done-ic{width:38px;height:38px;flex:none;border-radius:11px;display:flex;align-items:center;justify-content:center;
+  background:rgba(52,211,153,0.16);border:1px solid rgba(52,211,153,0.34);color:var(--green);}
+.w-tasks-done-ic svg{width:19px;height:19px;}
+.w-tasks-done-txt{display:flex;flex-direction:column;gap:2px;}
+.w-tasks-done-txt b{font-size:13.5px;font-weight:800;}
+.w-tasks-done-txt span{font-size:11.5px;color:var(--muted);}
 
 /* ── Streak ── */
 .w-streak{padding:15px 16px;}
@@ -253,8 +267,11 @@ body.edit-active .w-edit-ctrls{display:flex;pointer-events:auto;}
 .w-edit-grip svg{width:15px;height:15px;pointer-events:none;}
 .w-edit-rm{width:30px;height:30px;border-radius:9px;border:1px solid rgba(255,107,126,.4);
   background:rgba(20,22,34,.92);color:var(--pink);display:flex;align-items:center;justify-content:center;
-  cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.4);padding:0;}
+  cursor:pointer;touch-action:none;box-shadow:0 4px 12px rgba(0,0,0,.4);padding:0;}
 .w-edit-rm svg{width:14px;height:14px;pointer-events:none;}
+/* keyboard focus ring on edit controls */
+.w-edit-grip:focus-visible,.w-edit-rm:focus-visible{outline:2px solid var(--blue);outline-offset:2px;}
+.widget-wrap:has(.w-edit-grip:focus-visible) .widget-body{box-shadow:0 0 0 2px rgba(10,132,255,.6);}
 
 /* In edit mode: ring the cards, freeze internal navigation */
 body.edit-active .widget-body{box-shadow:0 0 0 1.5px rgba(10,132,255,.30);}
@@ -267,6 +284,28 @@ body.edit-active .widget-label{opacity:.6;}
 /* Drop placeholder gap */
 .dash-placeholder{margin:0 18px 18px;border-radius:18px;border:1.5px dashed rgba(10,132,255,.45);
   background:rgba(10,132,255,.05);}
+
+/* Edit-mode hint banner */
+.edit-hint{display:none;align-items:center;gap:8px;margin:0 18px 12px;padding:9px 13px;
+  border-radius:13px;border:1px dashed rgba(255,255,255,.12);background:rgba(255,255,255,.03);
+  font-size:11.5px;font-weight:600;color:var(--muted);letter-spacing:.01em;}
+.edit-hint svg{width:15px;height:15px;flex:none;color:var(--blue);}
+body.edit-active .edit-hint{display:flex;}
+
+/* Empty-state card */
+.dash-empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:30px 22px;}
+.dash-empty-ic{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+  background:rgba(10,132,255,.10);border:1px solid rgba(10,132,255,.22);margin-bottom:14px;}
+.dash-empty-ic svg{width:24px;height:24px;color:var(--blue);}
+.dash-empty-title{font-size:15px;font-weight:800;margin-bottom:4px;}
+.dash-empty-sub{font-size:12.5px;color:var(--muted);line-height:1.5;margin-bottom:16px;}
+.dash-empty-btn{padding:11px 20px;border-radius:13px;border:none;font:inherit;font-size:14px;font-weight:800;
+  cursor:pointer;color:#fff;background:linear-gradient(135deg,var(--blue),var(--grad-b));
+  box-shadow:0 8px 20px rgba(10,132,255,.34);}
+.dash-empty-btn:active{transform:scale(.97);}
+
+/* visually-hidden (screen-reader announcements) */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
 
 /* ── Edit toolbar (replaces nav in edit mode) ── */
 .edit-bar{position:absolute;left:0;right:0;bottom:0;z-index:52;display:none;gap:10px;
@@ -309,7 +348,7 @@ body.edit-active .nav{display:none;}
 .sheet-empty{padding:24px 8px;text-align:center;color:var(--muted);font-size:13px;line-height:1.5;}
 
 /* ── Confirm dialog (reset) ── */
-.confirm-scrim{position:absolute;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;
+.confirm-scrim{position:absolute;inset:0;z-index:95;display:flex;align-items:center;justify-content:center;
   padding:30px;background:rgba(2,2,10,.66);opacity:0;pointer-events:none;transition:opacity .22s;}
 .confirm-scrim.show{opacity:1;pointer-events:auto;}
 .confirm-card{width:100%;max-width:300px;background:linear-gradient(180deg,#12131f,#0a0b12);
@@ -363,6 +402,9 @@ body.edit-active .nav{display:none;}
 @media(prefers-reduced-motion:reduce){
   .widget-wrap{animation:none;}
   .dc-area{opacity:1!important;}
+  .toast,.edit-bar,.sheet,.sheet-scrim,.confirm-scrim,.confirm-card,.dash-empty-btn,
+  .edit-bar-btn,.edit-done,.w-ls-card,.dc-mini,.st-cell{transition:none!important;}
+  .widget-wrap.dragging,.widget-wrap.dragging .widget-body{transform:none!important;}
 }
 
 /* ── Nav — seamless glass float, background shows through ── */
@@ -442,6 +484,12 @@ body.edit-active .nav{display:none;}
       </div>
     </div>
 
+    <!-- Edit-mode hint (shown only while customizing) -->
+    <div class="edit-hint" id="editHint" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 7h.01M8 12h.01M8 17h.01M16 7h.01M16 12h.01M16 17h.01"/></svg>
+      Drag the handle to reorder · use ↑ ↓ keys when focused
+    </div>
+
     <!-- Widgets -->
     <div class="scroll" id="widgetScroll"></div>
 
@@ -502,6 +550,7 @@ body.edit-active .nav{display:none;}
   </div>
 
   <div class="toast" id="toast"></div>
+  <div id="dashLive" aria-live="polite" class="sr-only"></div>
 </div><!-- .phone -->
 
 <script src="_lib/core-sfx.js"></script>
@@ -630,15 +679,46 @@ body.edit-active .nav{display:none;}
       e.preventDefault(); e.stopPropagation();
       removeWidget(id);
     });
-    ctrls.querySelector('.w-edit-grip').addEventListener('pointerdown',function(e){ startDrag(e,wrap); });
+    var grip=ctrls.querySelector('.w-edit-grip');
+    grip.addEventListener('pointerdown',function(e){ startDrag(e,wrap); });
+    // keyboard reorder: focus a grip, Arrow Up/Down moves the widget
+    grip.addEventListener('keydown',function(e){
+      if(e.key==='ArrowUp'){ e.preventDefault(); moveWidget(id,-1); }
+      else if(e.key==='ArrowDown'){ e.preventDefault(); moveWidget(id,1); }
+    });
 
+    return wrap;
+  }
+
+  // aria-live announcer for keyboard reordering
+  function announce(msg){ var l=qs('#dashLive'); if(l) l.textContent=msg; }
+
+  function buildEmptyState(){
+    var wrap=document.createElement('div');
+    wrap.className='widget-wrap';
+    var body=document.createElement('div');
+    body.className='widget-body';
+    body.innerHTML=
+      '<div class="dash-empty">'+
+        '<div class="dash-empty-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M17.5 14.5v6M14.5 17.5h6"/></svg></div>'+
+        '<div class="dash-empty-title">Your dashboard is empty</div>'+
+        '<div class="dash-empty-sub">Add widgets to make this screen yours.</div>'+
+        '<button class="dash-empty-btn" id="emptyAddBtn">Add a widget</button>'+
+      '</div>';
+    wrap.appendChild(body);
+    body.querySelector('#emptyAddBtn').addEventListener('click',function(){
+      if(!document.body.classList.contains('edit-active')) openEdit();
+      openAddSheet();
+    });
     return wrap;
   }
 
   function renderAll(){
     Array.from(scroll.querySelectorAll('.widget-body')).forEach(cleanupHost);
     scroll.innerHTML='';
-    WS.readLayout().forEach(function(id){
+    var layout=WS.readLayout();
+    if(!layout.length){ scroll.appendChild(buildEmptyState()); return; }
+    layout.forEach(function(id){
       var w=buildWidget(id);
       if(w) scroll.appendChild(w);
     });
@@ -646,7 +726,7 @@ body.edit-active .nav{display:none;}
   renderAll();
 
   function persistOrder(){
-    var ids=Array.from(scroll.querySelectorAll('.widget-wrap')).map(function(w){ return w.dataset.wid; });
+    var ids=Array.from(scroll.querySelectorAll('.widget-wrap[data-wid]')).map(function(w){ return w.dataset.wid; });
     WS.saveLayout(ids);
   }
 
@@ -654,6 +734,19 @@ body.edit-active .nav{display:none;}
     cleanupHost(scroll.querySelector('.widget-wrap[data-wid="'+id+'"] .widget-body'));
     WS.saveLayout(WS.readLayout().filter(function(x){ return x!==id; }));
     renderAll();
+    try{ window.coreSfx && window.coreSfx('tap'); }catch(e){}
+  }
+
+  // keyboard move: shift widget one slot, persist, re-render, keep focus, announce
+  function moveWidget(id,dir){
+    var l=WS.readLayout(), i=l.indexOf(id); if(i<0) return;
+    var j=i+dir; if(j<0||j>=l.length) return;
+    var t=l[i]; l[i]=l[j]; l[j]=t; WS.saveLayout(l);
+    renderAll();
+    var def=WS.getWidget(id);
+    var g=scroll.querySelector('.widget-wrap[data-wid="'+id+'"] .w-edit-grip');
+    if(g) g.focus();
+    announce(((def&&def.title)||'Widget')+' moved to position '+(j+1)+' of '+l.length);
     try{ window.coreSfx && window.coreSfx('tap'); }catch(e){}
   }
 
@@ -757,6 +850,7 @@ body.edit-active .nav{display:none;}
     scroll.scrollTop=0;
   }
   function closeEdit(){
+    if(drag) endDrag();                 // commit + tear down any in-flight drag
     document.body.classList.remove('edit-active');
     closeAddSheet();
   }
@@ -764,6 +858,14 @@ body.edit-active .nav{display:none;}
     document.body.classList.contains('edit-active') ? closeEdit() : openEdit();
   });
   qs('#doneBtn').addEventListener('click',closeEdit);
+
+  // Esc closes the active surface (sheet → confirm → edit mode)
+  document.addEventListener('keydown',function(e){
+    if(e.key!=='Escape') return;
+    if(qs('#confirmScrim').classList.contains('show')){ qs('#confirmScrim').classList.remove('show'); scroll.style.overflow=''; }
+    else if(addSheet.classList.contains('show')){ closeAddSheet(); }
+    else if(document.body.classList.contains('edit-active')){ closeEdit(); }
+  });
 
   // ── add-widget library sheet ──
   var sheetScrim=qs('#sheetScrim'), addSheet=qs('#addSheet'), addScroll=qs('#addScroll');
@@ -793,20 +895,23 @@ body.edit-active .nav{display:none;}
     }
     sheetScrim.classList.add('show');
     addSheet.classList.add('show');
+    scroll.style.overflow='hidden';     // lock background scroll behind the sheet
   }
-  function closeAddSheet(){ sheetScrim.classList.remove('show'); addSheet.classList.remove('show'); }
+  function closeAddSheet(){ sheetScrim.classList.remove('show'); addSheet.classList.remove('show'); scroll.style.overflow=''; }
   qs('#addBtn').addEventListener('click',openAddSheet);
   sheetScrim.addEventListener('click',closeAddSheet);
 
   // ── reset to default ──
   var confirmScrim=qs('#confirmScrim');
-  qs('#resetBtn').addEventListener('click',function(){ confirmScrim.classList.add('show'); });
-  qs('#confirmCancel').addEventListener('click',function(){ confirmScrim.classList.remove('show'); });
-  confirmScrim.addEventListener('click',function(e){ if(e.target===confirmScrim) confirmScrim.classList.remove('show'); });
+  function openConfirm(){ confirmScrim.classList.add('show'); scroll.style.overflow='hidden'; }
+  function closeConfirm(){ confirmScrim.classList.remove('show'); scroll.style.overflow=''; }
+  qs('#resetBtn').addEventListener('click',openConfirm);
+  qs('#confirmCancel').addEventListener('click',closeConfirm);
+  confirmScrim.addEventListener('click',function(e){ if(e.target===confirmScrim) closeConfirm(); });
   qs('#confirmReset').addEventListener('click',function(){
     WS.saveLayout(WS.DEFAULT_LAYOUT.slice());
     renderAll();
-    confirmScrim.classList.remove('show');
+    closeConfirm();
     toast('Dashboard reset to default');
     try{ window.coreSfx && window.coreSfx('tap'); }catch(e){}
   });
@@ -819,8 +924,8 @@ body.edit-active .nav{display:none;}
         bullets:[
           'Your Life Score is the average of all 6 stats — build habits to raise it. Tap it to view your rank.',
           'Check off Today\'s Tasks to earn XP and move your stats.',
-          'Tap the gear to edit your dashboard, then drag the grip handle to reorder widgets.',
-          'In edit mode, use Add Widget to bring in trends, your streak, stat breakdown and more.',
+          'Tap the gear to edit your dashboard, then drag the grip handle (or use the ↑ ↓ keys) to reorder widgets.',
+          'In edit mode, use Add Widget to bring in trends, your streak and more.',
           'Hit Reset any time to return to the default layout — Quote, Life Score, Stat Trends and Tasks.'
         ]
       });

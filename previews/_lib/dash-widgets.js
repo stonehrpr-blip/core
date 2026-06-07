@@ -113,6 +113,19 @@
     purpose:  '<circle cx="12" cy="12" r="8.5"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z"/>',
   };
 
+  // ── Shared 7d/30d range toggle (used by lifetrend + stattrend) ──
+  function segHeadHTML(range) {
+    return '<div class="dc-head"><div class="dc-seg" role="tablist">' +
+      '<button class="dc-seg-btn' + (range === 7 ? ' on' : '') + '" data-r="7">7d</button>' +
+      '<button class="dc-seg-btn' + (range === 30 ? ' on' : '') + '" data-r="30">30d</button>' +
+      '</div></div>';
+  }
+  function wireSeg(host, onPick) {
+    Array.prototype.forEach.call(host.querySelectorAll('.dc-seg-btn'), function (b) {
+      b.addEventListener('click', function (e) { e.preventDefault(); onPick(+this.dataset.r); });
+    });
+  }
+
   // ── REGISTRY ─────────────────────────────────────────────────────────────────
   var REGISTRY = {
 
@@ -148,7 +161,8 @@
           // Task 1b: hero is just the score + the XP progress bar. No stacked
           // rank/level badges, no stat grid, no day-dots — the page reads clean.
           return '' +
-            '<a href="24-ranks.html" class="w-ls-hero" style="text-decoration:none;color:inherit">' +
+            '<a href="24-ranks.html" class="w-ls-hero" style="text-decoration:none;color:inherit" aria-label="Life Score — view rank">' +
+              '<span class="w-ls-cta" aria-hidden="true">Rank<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>' +
               '<div class="w-ls-score-num" id="wLsNum">0</div>' +
               '<div class="w-ls-score-label">Life Score</div>' +
               '<div class="w-ls-xp">' +
@@ -216,6 +230,7 @@
           return m < 60 ? m + 'm left' : Math.ceil(m / 60) + 'h left';
         }
 
+        var wasAllDone = false;
         function renderTasks() {
           host.innerHTML = '';
           var tasks = getTasks();
@@ -237,8 +252,21 @@
           if (!tasks.length) {
             var e = document.createElement('div');
             e.className = 'w-empty'; e.textContent = 'No quests today.';
-            host.appendChild(e); return;
+            host.appendChild(e); wasAllDone = false; return;
           }
+
+          // all-tasks-done celebratory moment
+          var allDone = done === tasks.length;
+          if (allDone) {
+            var cel = document.createElement('div');
+            cel.className = 'w-tasks-done';
+            cel.innerHTML =
+              '<div class="w-tasks-done-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-11"/></svg></div>' +
+              '<div class="w-tasks-done-txt"><b>All quests complete</b><span>Nice work — come back tomorrow for more XP.</span></div>';
+            host.appendChild(cel);
+            if (!wasAllDone) { try { window.coreSfx && window.coreSfx('levelup'); } catch (er) {} }
+          }
+          wasAllDone = allDone;
 
           tasks.forEach(function (task) {
             var isDone = task.done;
@@ -358,21 +386,18 @@
           fog:    SVG_HEAD + '<path d="M3 10h18M5 14h14M4 18h16"/></svg>'
         };
         var LABELS = { clear: 'Clear skies', cloudy: 'Overcast', rain: 'Raining', snow: 'Snowing', fog: 'Foggy' };
-        var TIMES  = { sunrise: 'Sunrise', day: 'Daytime', afternoon: 'Afternoon', sunset: 'Sunset', night: 'Night' };
         var amb = window.dashAmbient;
         var w = amb ? amb.getWeather() : 'clear';
-        var ti = amb ? amb.getTime() : 'day';
+        // Condition only — the header glyph already shows time of day.
         host.innerHTML =
           '<div class="w-weather">' +
           '<span class="w-weather-icon" id="wWIcon">' + (ICONS[w] || ICONS.clear) + '</span>' +
           '<span class="w-weather-label" id="wWLabel">' + (LABELS[w] || 'Clear') + '</span>' +
-          '<span class="w-weather-time" id="wWTime">' + (TIMES[ti] || ti) + '</span>' +
           '</div>';
         function onAmb(e) {
-          var ic = host.querySelector('#wWIcon'), lb = host.querySelector('#wWLabel'), tm = host.querySelector('#wWTime');
+          var ic = host.querySelector('#wWIcon'), lb = host.querySelector('#wWLabel');
           if (ic) ic.innerHTML = ICONS[e.detail.weather] || ICONS.clear;
           if (lb) lb.textContent = LABELS[e.detail.weather] || 'Clear';
-          if (tm) tm.textContent = TIMES[e.detail.time] || e.detail.time;
         }
         window.addEventListener('dashAmbientChange', onAmb);
         host._cleanup = function () { window.removeEventListener('dashAmbientChange', onAmb); };
@@ -435,31 +460,24 @@
         var DC = window.dashCharts;
         if (!DC) { host.innerHTML = '<div class="w-empty">Chart engine not loaded.</div>'; return; }
         var reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches);
-        var range = 7;
+        var range = 7, painted = false;
 
         function draw() {
           var pts = DC.getHistory(range);
-          host.innerHTML =
-            '<div class="dc-head">' +
-              '<div class="dc-seg" role="tablist">' +
-                '<button class="dc-seg-btn' + (range === 7 ? ' on' : '') + '" data-r="7">7d</button>' +
-                '<button class="dc-seg-btn' + (range === 30 ? ' on' : '') + '" data-r="30">30d</button>' +
-              '</div>' +
-            '</div>' +
-            '<div class="dc-host"></div>';
+          host.innerHTML = segHeadHTML(range) + '<div class="dc-host"></div>';
           DC.lineChart(host.querySelector('.dc-host'), {
             values: DC.series(pts, 'score'),
             labels: DC.rangeLabels(pts),
             color: '#0A84FF',
             height: 60,
-            reducedMotion: reduced
+            reducedMotion: reduced,
+            animate: !painted           // animate on first paint + range switch only
           });
-          Array.prototype.forEach.call(host.querySelectorAll('.dc-seg-btn'), function (b) {
-            b.addEventListener('click', function () { range = +this.dataset.r; draw(); });
-          });
+          painted = true;
+          wireSeg(host, function (r) { if (r !== range) { range = r; painted = false; } draw(); });
         }
         draw();
-        function onUpdate() { draw(); }
+        function onUpdate() { draw(); }  // painted stays true → no re-animation on state change
         window.addEventListener('coreStateChange', onUpdate);
         host._cleanup = function () { window.removeEventListener('coreStateChange', onUpdate); };
       }
@@ -474,10 +492,11 @@
         if (!cs || !DC) { host.innerHTML = '<div class="w-empty">Loading…</div>'; return; }
         var reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches);
         var defs = cs.STAT_DEFS || [];
+        var range = 30, painted = false;
 
         function draw() {
-          var pts = DC.getHistory(30);
-          var html = '<div class="dc-mini-grid">';
+          var pts = DC.getHistory(range);
+          var html = segHeadHTML(range) + '<div class="dc-mini-grid">';
           defs.forEach(function (d) {
             // route to the stat's page (gym/focus/wealth …) or stat.html?s=<key>
             var href = d.page || ('stat.html?s=' + d.key);
@@ -495,9 +514,12 @@
               labels: [],
               color: d.color || '#0A84FF',
               height: 38,
-              reducedMotion: reduced
+              reducedMotion: reduced,
+              animate: !painted
             });
           });
+          painted = true;
+          wireSeg(host, function (r) { if (r !== range) { range = r; painted = false; } draw(); });
         }
         draw();
         function onUpdate() { draw(); }
@@ -514,8 +536,14 @@
 
   function readLayout() {
     try {
-      var s = JSON.parse(localStorage.getItem(LAYOUT_KEY) || 'null');
-      if (Array.isArray(s) && s.length) return s;
+      var raw = localStorage.getItem(LAYOUT_KEY);
+      if (raw != null) {
+        var s = JSON.parse(raw);
+        // Honor an explicitly-saved array, INCLUDING empty — removing the last
+        // widget should leave an empty dashboard (empty-state), not silently
+        // restore defaults. Defaults are only for first run + Reset.
+        if (Array.isArray(s)) return s;
+      }
     } catch (e) {}
     return DEFAULT_LAYOUT.slice();
   }

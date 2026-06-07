@@ -121,7 +121,9 @@
   }
 
   // ── SVG line chart ──
-  // opts: { values:[], labels:[], color:'#hex', height, reducedMotion, suffix }
+  // opts: { values:[], labels:[], color:'#hex', height, reducedMotion, suffix, animate }
+  // animate defaults to true; pass animate:false to redraw without the draw-in
+  // (used on coreStateChange re-renders so the line doesn't replay every tick).
   function lineChart(host, opts) {
     opts = opts || {};
     var vals = opts.values || [];
@@ -129,8 +131,10 @@
     var W = 100, H = opts.height || 56;            // viewBox units (responsive width)
     var padX = 2, padY = 8;
     var reduced = opts.reducedMotion;
+    var animate = (opts.animate !== false) && !reduced;
 
     if (!vals.length) { host.innerHTML = '<div class="w-empty">No data yet.</div>'; return; }
+    if (vals.length === 1) { vals = [vals[0], vals[0]]; }  // single point → flat line (avoid /0)
 
     var max = Math.max.apply(null, vals);
     var min = Math.min.apply(null, vals);
@@ -164,7 +168,7 @@
             '<stop offset="100%" stop-color="' + color + '" stop-opacity="0"/>' +
           '</linearGradient>' +
         '</defs>' +
-        '<path class="dc-area" d="' + areaPath + '" fill="url(#' + gid + ')"' + (reduced ? '' : ' style="opacity:0"') + '/>' +
+        '<path class="dc-area" d="' + areaPath + '" fill="url(#' + gid + ')"' + (animate ? ' style="opacity:0"' : '') + '/>' +
         '<path class="dc-line" d="' + linePath + '" fill="none" stroke="' + color + '" stroke-width="1.6" ' +
           'stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>' +
       '</svg>';
@@ -185,7 +189,7 @@
       '</div>';
 
     // animated draw-in (stroke dash) + area fade — reduced-motion safe
-    if (!reduced) {
+    if (animate) {
       var lineEl = host.querySelector('.dc-line');
       var areaEl = host.querySelector('.dc-area');
       try {
