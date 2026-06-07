@@ -480,6 +480,38 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .gm-s svg{width:11px;height:11px;color:var(--blue-3);}
 .guild-foot{padding:10px 15px 12px;font-size:10.5px;color:var(--muted);text-align:center;border-top:1px solid var(--border);}
 .guild-foot b{color:#dce4f4;}
+/* create wizard: step label, privacy options, code box, share, invite list */
+.gf-step{font-size:8.5px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:7px;}
+.gp-opt{display:flex;align-items:flex-start;gap:11px;width:100%;text-align:left;padding:13px;border-radius:13px;margin-bottom:9px;
+  border:1px solid var(--border);background:rgba(255,255,255,.03);color:var(--text);font:inherit;cursor:pointer;transition:border-color .15s,background .15s;}
+.gp-opt:hover,.gp-opt:active{border-color:rgba(10,132,255,.4);background:rgba(10,132,255,.06);}
+.gp-opt .gp-ic{width:34px;height:34px;flex:none;border-radius:10px;display:flex;align-items:center;justify-content:center;background:rgba(10,132,255,.12);border:1px solid rgba(10,132,255,.24);}
+.gp-opt .gp-ic svg{width:18px;height:18px;color:var(--blue-3);}
+.gp-opt .gp-t{font-size:13px;font-weight:900;}
+.gp-opt .gp-d{font-size:10.5px;color:var(--muted);margin-top:2px;line-height:1.4;}
+.gcode-box{border-radius:13px;padding:13px 14px;background:rgba(10,132,255,.08);border:1px solid rgba(10,132,255,.24);text-align:center;}
+.gcb-l{font-size:8.5px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:var(--blue-3);}
+.gcode{font-size:23px;font-weight:900;letter-spacing:.1em;margin:5px 0 3px;font-variant-numeric:tabular-nums;color:#fff;}
+.glink{font-size:10.5px;font-weight:700;color:var(--muted);word-break:break-all;}
+.gshare{display:flex;gap:8px;margin-top:11px;}
+.gshare button{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:9px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:#cfe0ff;font:inherit;font-size:11px;font-weight:800;cursor:pointer;}
+.gshare button:active{background:rgba(10,132,255,.16);}
+.gshare button svg{width:13px;height:13px;}
+.ginv-label{font-size:9px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:15px 2px 7px;}
+.ginv-row{display:flex;align-items:center;gap:10px;padding:7px 0;}
+.ginv-av{width:30px;height:30px;flex:none;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff;background:linear-gradient(150deg,#3A4055,#2A2F40);}
+.ginv-n{flex:1;font-size:12.5px;font-weight:800;}
+.ginv-btn{flex:none;padding:7px 14px;border-radius:10px;border:none;cursor:pointer;font:inherit;font-size:11px;font-weight:800;color:#fff;background:var(--blue);}
+.ginv-btn.done{background:rgba(52,211,153,.14);color:#5fe0a8;cursor:default;}
+.ginv-btn:active{transform:scale(.97);}
+.ginv-empty{font-size:11px;color:var(--dim);padding:7px 2px;line-height:1.5;}
+.gf-full{width:100%;margin-top:15px;padding:13px;border-radius:13px;border:none;cursor:pointer;font:inherit;font-size:14px;font-weight:900;color:#fff;background:linear-gradient(135deg,var(--grad-a),var(--grad-b));box-shadow:0 8px 20px rgba(10,132,255,.34);}
+.gf-full:active{transform:scale(.98);}
+.gb-priv{font-size:8.5px;font-weight:900;letter-spacing:.04em;padding:2px 7px;border-radius:999px;color:var(--muted);background:rgba(255,255,255,.06);}
+.guild-share{display:flex;align-items:center;gap:7px;padding:11px 14px;border-top:1px solid var(--border);flex-wrap:wrap;}
+.guild-share .gs-code{font-size:12px;font-weight:900;letter-spacing:.06em;color:var(--blue-3);margin-right:auto;}
+.guild-share .gs-copy{padding:6px 11px;border-radius:9px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:#cfe0ff;font:inherit;font-size:10.5px;font-weight:800;cursor:pointer;}
+.guild-share .gs-copy:active{background:rgba(10,132,255,.16);}
 
 /* ── Stats slim row ── */
 .stats-row{display:flex;gap:11px;}
@@ -1614,27 +1646,58 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   function myStreak(){ return (S.read().streak&&S.read().streak.days)||0; }
   function rosterFromFriends(max){ return friendIds().slice(0,max).map(function(id){ return {name:friendShort(id),streak:friendStreakOf(id),leader:false,you:false}; }); }
   function synthMembers(seed,count){ var out=[]; for(var i=0;i<count;i++){ out.push({name:SYN_NAMES[hashN(seed+'_'+i)%SYN_NAMES.length],streak:6+(hashN(seed+'#'+i)%150),leader:false,you:false}); } return out; }
-  function createGuild(name){
-    name=(name||'').trim()||'My Guild';
-    var members=[{name:'You',streak:myStreak(),leader:true,you:true}].concat(rosterFromFriends(5));
-    if(members.length<3) members=members.concat(synthMembers(name,4-members.length));
-    setGuild({name:name,tag:tagOf(name),role:'leader',leaderName:'You',members:members,createdAt:Date.now()});
+  function genCode(name){ var a='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',s=''; for(var i=0;i<4;i++) s+=a.charAt(Math.floor(Math.random()*a.length)); return tagOf(name)+'-'+s; }
+  function guildLink(code){ return 'core.app/g/'+code; }                              // branded share link (display)
+  function guildRealLink(code){ try{ var b=(location.origin&&location.origin!=='null')?location.origin+location.pathname:'core.app/streak'; return b+'?guild='+encodeURIComponent(code); }catch(e){ return 'core.app/streak?guild='+code; } }
+  function copyText(t){ try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(function(){ toast('Copied · '+t); },function(){ toast(t); }); return; } }catch(e){} toast(t); }
+  function createGuild(name,privacy,code){
+    name=(name||'').trim()||'My Guild'; code=code||genCode(name);
+    setGuild({name:name,tag:tagOf(name),code:code,privacy:(privacy==='private'?'private':'public'),role:'leader',leaderName:'You',members:[{name:'You',streak:myStreak(),leader:true,you:true}],createdAt:Date.now()});
+    return code;
   }
   function joinGuild(name){
     name=(name||'').trim()||'Lung Legion';
     var ld=SYN_NAMES[hashN(name)%SYN_NAMES.length];
     var members=[{name:ld,streak:45+(hashN(name)%140),leader:true,you:false},{name:'You',streak:myStreak(),leader:false,you:true}]
       .concat(rosterFromFriends(4)).concat(synthMembers(name,2));
-    setGuild({name:name,tag:tagOf(name),role:'member',leaderName:ld,members:members,createdAt:Date.now()});
+    setGuild({name:name,tag:tagOf(name),code:(/-/.test(name)?name.toUpperCase():genCode(name)),privacy:'public',role:'member',leaderName:ld,members:members,createdAt:Date.now()});
   }
+  function inviteToGuild(nm,streak){ var g=getGuild(); if(!g) return; if(g.members.some(function(m){return m.name===nm;})) return; g.members.push({name:nm,streak:streak||0,leader:false,you:false}); setGuild(g); }
   var CROWN='<svg class="gm-crown" viewBox="0 0 24 24" fill="currentColor"><path d="M3 8l4.2 3.5L12 4l4.8 7.5L21 8l-1.6 10.2a1 1 0 0 1-1 .8H5.6a1 1 0 0 1-1-.8L3 8z"/></svg>';
   var FLAMEMINI='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3-1 4-1 6 0 1 1 2 1 2s2-1 2-3c2 2 3 4 3 7a5 5 0 0 1-10 0c0-3 2-5 3-7 1 2 2 2 2 2s0-3 0-7z"/></svg>';
+  var CPYIC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
   var GUILD_SUGGEST=[{name:'Iron Lungs',m:8},{name:'Clear Skies',m:12},{name:'Fresh Start Crew',m:5}];
-  var guildUI='';   // '' options · 'create' · 'join'
+  var guildUI='', guildDraft=null, pendingInvite=null;
+
+  function inviteListHtml(g){
+    var ids=friendIds();
+    if(!ids.length) return '<div class="ginv-empty">No friends yet — share the code or link above, or add friends from Manage.</div>';
+    return ids.map(function(id){ var nm=friendShort(id), joined=g.members.some(function(m){return m.name===nm;});
+      return '<div class="ginv-row"><div class="ginv-av">'+esc(nm.charAt(0).toUpperCase())+'</div><div class="ginv-n">'+esc(nm)+'</div>'+
+        (joined?'<button class="ginv-btn done" type="button" disabled>Invited ✓</button>':'<button class="ginv-btn" type="button" data-inv="'+esc(id)+'">Invite</button>')+'</div>';
+    }).join('');
+  }
 
   function renderGuild(){
     var card=qs('#guildCard'); if(!card) return;
     var meta=qs('#guildMeta'), g=getGuild();
+
+    // STEP 3 — invite/share (guild just created; show before the normal view)
+    if(g && guildUI==='invite'){
+      if(meta) meta.textContent='Step 3 of 3';
+      card.innerHTML='<div class="guild-form"><div class="gf-step">Invite your squad · Step 3 of 3</div>'+
+        '<div class="gcode-box"><div class="gcb-l">Guild code</div><div class="gcode">'+esc(g.code)+'</div><div class="glink">'+esc(guildLink(g.code))+'</div>'+
+          '<div class="gshare"><button id="copyCode" type="button">'+CPYIC+'Copy code</button><button id="copyLink" type="button">'+CPYIC+'Copy link</button></div></div>'+
+        '<div class="ginv-label">Invite friends</div>'+inviteListHtml(g)+
+        '<button class="gf-full" id="guildDone" type="button">Done</button></div>';
+      qs('#copyCode').onclick=function(){ copyText(g.code); };
+      qs('#copyLink').onclick=function(){ copyText(guildRealLink(g.code)); };
+      Array.prototype.forEach.call(card.querySelectorAll('.ginv-btn[data-inv]'),function(btn){ btn.onclick=function(){ var id=btn.getAttribute('data-inv'); inviteToGuild(friendShort(id),friendStreakOf(id)); toast('Invited '+friendShort(id)); SFX('tap'); renderGuild(); }; });
+      qs('#guildDone').onclick=function(){ guildUI=''; toast('Guild ready — you’re the leader'); SFX('confirm'); render(); };
+      return;
+    }
+
+    // GUILD VIEW
     if(g){
       if(meta) meta.textContent=g.members.length+' members';
       var ms=g.members.slice().sort(function(a,b){return (b.streak||0)-(a.streak||0);});
@@ -1646,41 +1709,78 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
           '<div class="gm-n">'+esc(m.name)+(m.leader?CROWN:'')+(m.you?'<span class="gm-you">YOU</span>':'')+'</div>'+
           '<div class="gm-s">'+FLAMEMINI+(m.streak||0)+'</div></div>';
       });
+      var priv=(g.privacy==='private')?'Private':'Public';
       card.innerHTML='<div class="guild-banner"><div class="gb-crest">'+esc(g.tag.charAt(0))+'</div>'+
-        '<div class="gb-b"><div class="gb-name">'+esc(g.name)+' <span class="gb-tag">'+esc(g.tag)+'</span></div>'+
+        '<div class="gb-b"><div class="gb-name">'+esc(g.name)+' <span class="gb-tag">'+esc(g.tag)+'</span> <span class="gb-priv">'+priv+'</span></div>'+
         '<div class="gb-sub">Leader: '+esc(g.leaderName)+' · '+(g.role==='leader'?'You’re the group leader':'You’re a member')+'</div></div>'+
         '<button class="gb-leave" id="guildLeave" type="button">Leave</button></div>'+
         '<div class="guild-members">'+rows+'</div>'+
+        '<div class="guild-share"><span class="gs-code">'+esc(g.code||'')+'</span>'+
+          '<button class="gs-copy" id="gvCopyCode" type="button">Copy code</button>'+
+          '<button class="gs-copy" id="gvCopyLink" type="button">Copy link</button>'+
+          '<button class="gs-copy" id="gvInvite" type="button">Invite</button></div>'+
         '<div class="guild-foot">Combined guild streak · <b>'+total+' days</b></div>';
-      var lv=qs('#guildLeave'); if(lv) lv.onclick=function(){ leaveGuild(); guildUI=''; toast('Left the guild'); SFX('tap'); render(); };
+      qs('#guildLeave').onclick=function(){ leaveGuild(); guildUI=''; toast('Left the guild'); SFX('tap'); render(); };
+      qs('#gvCopyCode').onclick=function(){ copyText(g.code||''); };
+      qs('#gvCopyLink').onclick=function(){ copyText(guildRealLink(g.code||'')); };
+      qs('#gvInvite').onclick=function(){ guildUI='invite'; render(); };
       return;
     }
+
+    // INVITED via link (?guild=CODE)
+    if(guildUI==='invited' && pendingInvite){
+      if(meta) meta.textContent='Invite';
+      card.innerHTML='<div class="guild-form"><div class="gf-step">You’ve been invited</div><div class="gf-t">Join this guild?</div>'+
+        '<div class="gcode-box"><div class="gcb-l">Invite code</div><div class="gcode">'+esc(pendingInvite)+'</div></div>'+
+        '<div class="gf-row"><button class="gf-btn ghost" id="guildCancel" type="button">Not now</button><button class="gf-btn" id="guildAccept" type="button">Join guild</button></div></div>';
+      qs('#guildCancel').onclick=function(){ guildUI=''; pendingInvite=null; render(); };
+      qs('#guildAccept').onclick=function(){ joinGuild(pendingInvite); pendingInvite=null; guildUI=''; toast('Joined via invite'); SFX('confirm'); render(); };
+      return;
+    }
+
+    // STEP 1 — name
     if(guildUI==='create'){
-      if(meta) meta.textContent='New guild';
-      card.innerHTML='<div class="guild-form"><div class="gf-t">Create your guild</div>'+
+      if(meta) meta.textContent='Step 1 of 3';
+      card.innerHTML='<div class="guild-form"><div class="gf-step">Name your guild · Step 1 of 3</div>'+
         '<input class="gf-in" id="guildName" maxlength="22" placeholder="Guild name" autocomplete="off" />'+
-        '<div class="gf-row"><button class="gf-btn ghost" id="guildCancel" type="button">Cancel</button><button class="gf-btn" id="guildCreate" type="button">Create</button></div>'+
-        '<div class="gf-note">You’ll be the group leader — friends join as members.</div></div>';
+        '<div class="gf-row"><button class="gf-btn ghost" id="guildCancel" type="button">Cancel</button><button class="gf-btn" id="guildNext" type="button">Next</button></div>'+
+        '<div class="gf-note">You’ll be the group leader.</div></div>';
       var inp=qs('#guildName'); if(inp) inp.focus();
+      function goNext(){ var v=(qs('#guildName').value||'').trim()||'My Guild'; guildDraft={name:v}; guildUI='privacy'; render(); }
       qs('#guildCancel').onclick=function(){ guildUI=''; render(); };
-      qs('#guildCreate').onclick=function(){ createGuild(qs('#guildName').value); guildUI=''; toast('Guild created — you’re the leader'); SFX('confirm'); render(); };
-      if(inp) inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){ createGuild(inp.value); guildUI=''; toast('Guild created — you’re the leader'); SFX('confirm'); render(); } });
+      qs('#guildNext').onclick=goNext;
+      if(inp) inp.addEventListener('keydown',function(e){ if(e.key==='Enter') goNext(); });
       return;
     }
+
+    // STEP 2 — public / private
+    if(guildUI==='privacy'){
+      if(meta) meta.textContent='Step 2 of 3';
+      card.innerHTML='<div class="guild-form"><div class="gf-step">Who can join? · Step 2 of 3</div>'+
+        '<button class="gp-opt" type="button" data-p="public"><div class="gp-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18"/></svg></div><div><div class="gp-t">Public</div><div class="gp-d">Anyone with the code or link can join.</div></div></button>'+
+        '<button class="gp-opt" type="button" data-p="private"><div class="gp-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><div><div class="gp-t">Private</div><div class="gp-d">Invite-only — only people you invite can join.</div></div></button>'+
+        '<div class="gf-row"><button class="gf-btn ghost" id="guildBack" type="button">Back</button></div></div>';
+      Array.prototype.forEach.call(card.querySelectorAll('.gp-opt'),function(btn){ btn.onclick=function(){ var p=btn.getAttribute('data-p'); createGuild((guildDraft&&guildDraft.name)||'My Guild',p); guildDraft=null; guildUI='invite'; SFX('confirm'); render(); }; });
+      qs('#guildBack').onclick=function(){ guildUI='create'; render(); };
+      return;
+    }
+
+    // JOIN (browse / code)
     if(guildUI==='join'){
       if(meta) meta.textContent='Find a guild';
       var sug=GUILD_SUGGEST.map(function(s){ return '<div class="gj-row"><div class="gj-crest">'+esc(s.name.charAt(0))+'</div>'+
         '<div class="gj-b"><div class="gj-n">'+esc(s.name)+'</div><div class="gj-m">'+s.m+' members · led by '+SYN_NAMES[hashN(s.name)%SYN_NAMES.length]+'</div></div>'+
         '<button class="gj-join" type="button" data-g="'+esc(s.name)+'">Join</button></div>'; }).join('');
       card.innerHTML='<div class="guild-form"><div class="gf-t">Join a guild</div>'+sug+
-        '<input class="gf-in" id="guildCode" maxlength="22" placeholder="…or enter a guild name / code" autocomplete="off" style="margin-top:11px" />'+
+        '<input class="gf-in" id="guildCode" maxlength="22" placeholder="…or enter a guild code" autocomplete="off" style="margin-top:11px" />'+
         '<div class="gf-row"><button class="gf-btn ghost" id="guildCancel" type="button">Cancel</button><button class="gf-btn" id="guildCodeJoin" type="button">Join</button></div></div>';
       Array.prototype.forEach.call(card.querySelectorAll('.gj-join'),function(btn){ btn.onclick=function(){ joinGuild(btn.getAttribute('data-g')); guildUI=''; toast('Joined '+btn.getAttribute('data-g')); SFX('confirm'); render(); }; });
       qs('#guildCancel').onclick=function(){ guildUI=''; render(); };
       qs('#guildCodeJoin').onclick=function(){ var v=qs('#guildCode').value; if(!(v||'').trim()){ qs('#guildCode').focus(); return; } joinGuild(v); guildUI=''; toast('Joined '+v.trim()); SFX('confirm'); render(); };
       return;
     }
-    // default — no guild
+
+    // DEFAULT — no guild
     if(meta) meta.textContent='';
     card.innerHTML='<div class="guild-empty"><div class="ge-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4-3 7-7 9-4-2-7-5-7-9V6l7-3Z"/><path d="M9.2 12l2 2 3.6-4"/></svg></div>'+
       '<div class="ge-t">Join forces in a guild</div>'+
@@ -1880,6 +1980,9 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     sheet.addEventListener('click',function(e){ if(e.target===sheet) closeHowto(); });
     document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&sheet.classList.contains('show')) closeHowto(); });
   })();
+
+  // Invite link: ?guild=CODE opens a join prompt for that guild (the share link works).
+  try{ var gmm=location.search.match(/[?&]guild=([A-Za-z0-9\-]+)/); if(gmm && !getGuild()){ pendingInvite=decodeURIComponent(gmm[1]).toUpperCase(); guildUI='invited'; } }catch(e){}
 
   render();
   if(window.dashAmbient) window.dashAmbient.init();
