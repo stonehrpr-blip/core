@@ -744,11 +744,17 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   // Builds REAL consecutive history so the genuine engine derives the number;
   // this is a screenshot aid, not a live-app bypass (gated behind ?demo=1).
   try{
+    var isDemo=/[?&]demo=1/.test(location.search);
     var qm=location.search.match(/[?&]streak=(\d+)/);
-    if(qm && /[?&]demo=1/.test(location.search)){
-      var qn=Math.max(0,Math.min(parseInt(qm[1],10)||0, 4000));
+    // Seed for ANY demo load (default streak 14 when no ?streak given), so the
+    // preview lands in a demonstrable state. DEFAULT = lightable (today's quest
+    // done, not yet secured) so "Light your streak" is interactive on tap.
+    // ?secured=1 = already locked in today · ?lost=1 = recovery state.
+    if(isDemo){
+      var qn=qm?Math.max(0,Math.min(parseInt(qm[1],10)||0, 4000)):14;
       var qlost=/[?&]lost=1/.test(location.search);
-      var qready=/[?&]ready=1/.test(location.search);   // quest done today, not yet secured → Light flow
+      var qsecured=/[?&]secured=1/.test(location.search);
+      var qready=!qlost&&!qsecured;                     // lightable by default
       var anchor=new Date(); if(qlost||qready) anchor.setDate(anchor.getDate()-1); // history ends yesterday
       var qhist=[]; for(var qi=qn-1;qi>=0;qi--){ var qd=new Date(anchor.getTime()); qd.setDate(qd.getDate()-qi); qhist.push(dkey(qd)); }
       jset('coreStreakHistory',qhist);
