@@ -90,19 +90,46 @@
 
   .counter{ position:relative; z-index:5; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; }
   .counter .clbl{ font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:2px; font-weight:700; }
-  .counter .cnum{ font-size:120px; font-weight:800; letter-spacing:-5px; line-height:0.9; font-variant-numeric:tabular-nums; text-shadow:0 0 40px rgba(10,132,255,0.35); }
-  .counter .cnum.bump{ animation:bump .25s ease; } @keyframes bump{ 0%{transform:scale(1);} 40%{transform:scale(1.18);} 100%{transform:scale(1);} }
-  .counter .cgain{ font-size:14px; color:var(--accent); font-weight:700; margin-top:4px; }
-  .counter .cfeed{ font-size:14px; color:var(--text); margin-top:14px; min-height:20px; font-weight:600; }
-  .counter .formfb{ font-size:12.5px; font-weight:700; margin-top:6px; min-height:16px; letter-spacing:-0.1px; }
-  .counter .formfb.ok{ color:#34D399; } .counter .formfb.warn{ color:#FF9F45; }
+
+  /* speed multiplier bar — fills the faster you rep */
+  .multi{ display:flex; align-items:center; gap:9px; width:188px; margin-bottom:14px; }
+  .multibar{ flex:1; height:7px; border-radius:999px; background:rgba(255,255,255,0.10); overflow:hidden; box-shadow:inset 0 0 0 1px rgba(255,255,255,0.06); }
+  .multibar i{ display:block; height:100%; width:0%; border-radius:999px;
+    background:linear-gradient(90deg,#0A84FF,#5BB1FF 60%,#FFCB3D); transition:width .18s ease; }
+  .multilbl{ font-size:13px; font-weight:900; font-variant-numeric:tabular-nums; color:#FFCB3D; min-width:34px; text-align:right; text-shadow:0 0 12px rgba(255,203,61,0.4); }
+  .multilbl.hot{ animation:multipulse .5s ease; } @keyframes multipulse{ 0%,100%{transform:scale(1);} 50%{transform:scale(1.22);} }
+
+  .cwrap{ position:relative; display:flex; flex-direction:column; align-items:center; }
+  .counter .cnum{ font-size:124px; font-weight:800; letter-spacing:-5px; line-height:0.9; font-variant-numeric:tabular-nums; text-shadow:0 0 44px rgba(10,132,255,0.45); }
+  .counter .cnum.bump{ animation:bump .28s cubic-bezier(.2,1.5,.4,1); } @keyframes bump{ 0%{transform:scale(1);} 40%{transform:scale(1.22);} 100%{transform:scale(1);} }
+  .counter .pts{ font-size:17px; font-weight:800; color:#fff; margin-top:2px; font-variant-numeric:tabular-nums; letter-spacing:-0.2px; }
+  .counter .pts b{ color:var(--accent); } .counter .pts .u{ color:var(--muted); font-size:12px; font-weight:700; }
+  .counter .cgain{ font-size:13px; color:var(--accent); font-weight:700; margin-top:5px; opacity:.9; }
+
+  /* particle + floating "+N" layer, centred on the number */
+  .poplayer{ position:absolute; left:50%; top:42%; width:0; height:0; pointer-events:none; z-index:9; }
+  .floatN{ position:absolute; left:0; top:0; transform:translate(-50%,-50%); font-size:34px; font-weight:900; letter-spacing:-1px;
+    color:#FFCB3D; text-shadow:0 2px 18px rgba(255,203,61,0.55); white-space:nowrap; animation:floatN 1s cubic-bezier(.2,.9,.3,1) forwards; }
+  @keyframes floatN{ 0%{ opacity:0; transform:translate(-50%,-30%) scale(.5);} 18%{ opacity:1; transform:translate(-50%,-90%) scale(1.1);} 100%{ opacity:0; transform:translate(-50%,-200%) scale(.95);} }
+  .pcl{ position:absolute; left:0; top:0; width:9px; height:9px; border-radius:50%; will-change:transform,opacity;
+    transform:translate(-50%,-50%); animation:pcl .72s ease-out forwards; }
+  @keyframes pcl{ 0%{ opacity:1; transform:translate(-50%,-50%) translate(0,0) scale(1);} 100%{ opacity:0; transform:translate(-50%,-50%) translate(var(--dx),var(--dy)) scale(.3);} }
+
+  /* clean popup cues */
+  .cuewrap{ position:absolute; left:0; right:0; top:46%; z-index:8; display:flex; flex-direction:column; align-items:center; gap:8px; pointer-events:none; }
+  .cue{ display:inline-flex; align-items:center; gap:8px; padding:10px 16px; border-radius:16px; font-size:14.5px; font-weight:800; letter-spacing:-0.2px;
+    background:rgba(10,12,22,0.74); border:1px solid rgba(255,255,255,0.12); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+    color:#fff; box-shadow:0 12px 34px rgba(0,0,0,0.45); animation:cueIn .9s cubic-bezier(.16,1,.3,1) forwards; }
+  .cue svg{ width:17px; height:17px; }
+  .cue.good{ border-color:rgba(52,211,153,0.5); color:#34D399; box-shadow:0 12px 34px rgba(52,211,153,0.18); }
+  .cue.warn{ border-color:rgba(255,159,69,0.55); color:#FF9F45; box-shadow:0 12px 34px rgba(255,159,69,0.18); }
+  .cue.bonus{ border-color:rgba(255,203,61,0.6); color:#FFCB3D; box-shadow:0 12px 36px rgba(255,203,61,0.25); }
+  @keyframes cueIn{ 0%{ opacity:0; transform:translateY(14px) scale(.86);} 14%{ opacity:1; transform:translateY(0) scale(1);} 80%{ opacity:1; transform:translateY(0) scale(1);} 100%{ opacity:0; transform:translateY(-10px) scale(.96);} }
 
   .livebtns{ position:relative; z-index:5; padding:0 20px 36px; display:flex; flex-direction:column; gap:11px; }
-  .repbtn{ width:100%; border:none; border-radius:22px; padding:24px; font-size:20px; font-weight:800; letter-spacing:-0.3px; color:#fff; cursor:pointer; background:var(--accent); box-shadow:0 14px 36px rgba(10,132,255,0.35); transition:transform .08s; user-select:none; }
-  .repbtn:active{ transform:scale(0.96); }
-  .row2{ display:flex; gap:11px; } .row2 .gb{ flex:1; border:1px solid var(--border); background:rgba(255,255,255,0.05); color:var(--text); border-radius:16px; padding:14px; font-size:14px; font-weight:700; cursor:pointer; transition:transform .12s; } .row2 .gb:active{ transform:scale(0.96); }
+  .row2{ display:flex; gap:11px; } .row2 .gb{ flex:1; border:1px solid var(--border); background:rgba(255,255,255,0.05); color:var(--text); border-radius:16px; padding:15px; font-size:14px; font-weight:700; cursor:pointer; transition:transform .12s; } .row2 .gb:active{ transform:scale(0.96); }
   .row2 .gb.fin{ background:var(--accent); border-color:transparent; color:#fff; }
-  .camhint{ text-align:center; font-size:10.5px; color:var(--dim); margin-top:-2px; }
+  @media (prefers-reduced-motion:reduce){ .floatN,.pcl,.cue,.cnum.bump,.multilbl.hot{ animation-duration:.01ms!important; } }
 
   /* summary */
   .scrim{ position:absolute; inset:0; z-index:80; background:rgba(2,2,10,0.7); backdrop-filter:blur(8px); opacity:0; pointer-events:none; transition:.3s; } .scrim.show{ opacity:1; pointer-events:auto; }
@@ -151,16 +178,18 @@
           <span class="pill" id="camState">Camera off</span>
         </div>
         <div class="counter">
+          <div class="multi"><div class="multibar"><i id="multiFill"></i></div><span class="multilbl" id="multiLbl">×1.0</span></div>
           <div class="clbl">Reps</div>
-          <div class="cnum" id="cnum">0</div>
+          <div class="cwrap">
+            <div class="cnum" id="cnum">0</div>
+            <div class="poplayer" id="popLayer"></div>
+          </div>
+          <div class="pts"><b id="pts">0</b> <span class="u">pts</span></div>
           <div class="cgain" id="cgain">+0.00 Strength</div>
-          <div class="cfeed" id="cfeed">Let's go</div>
-          <div class="formfb" id="formFb"></div>
         </div>
+        <div class="cuewrap" id="cueWrap"></div>
         <div class="livebtns">
-          <button class="repbtn" id="repBtn">+1 REP</button>
-          <div class="camhint" id="camHint">Tap to count each rep · turn on camera for auto-tracking</div>
-          <div class="row2"><button class="gb" id="camToggle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px"><path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg> Turn on camera</button><button class="gb" id="autoBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg> Auto</button><button class="gb fin" id="finBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px"><path d="M5 12l4 4 10-11"/></svg> Finish</button></div>
+          <div class="row2"><button class="gb" id="camToggle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px"><path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg> Camera</button><button class="gb fin" id="finBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px"><path d="M5 12l4 4 10-11"/></svg> Finish</button></div>
         </div>
       </div>
 
@@ -247,11 +276,16 @@
     var plus=S.isPlus(), rate=S.perRep();
     var cur=null, reps=0, stream=null;
 
-    // ── Pose tracking state ──────────────────────────────────────────────
+    // ── Pose tracking + scoring state ────────────────────────────────────
     // BlazePose 33-landmark indices: 11/12 shoulders, 13/14 elbows, 15/16
     // wrists, 23/24 hips, 25/26 knees, 27/28 ankles.
-    var auto=true, poseRunning=false, pk=null, ctx=null, draw=null;
+    var poseRunning=false, pk=null, ctx=null, draw=null;
     var phase='up', repMin=180, repMax=0, lastRepAt=0, lastTrack='';
+    var BASE_PTS=10;                                  // points per rep at ×1.0
+    var points=0, ptsShown=0;                         // target vs animated display
+    var mult=1, lastRepTime=0;                        // speed multiplier + cadence
+    var downAt=0, holdReady=false, holdScored=false;  // hold-for-bonus
+    var lastCueTxt='', lastCueAt=0, uiRunning=false;
 
     function angleAt(L,a,b,c,W,H){
       var ax=L[a].x*W, ay=L[a].y*H, bx=L[b].x*W, by=L[b].y*H, cx=L[c].x*W, cy=L[c].y*H;
@@ -294,7 +328,59 @@
     };
     function resetRange(){ repMin=180; repMax=0; }
     function setTrack(t){ if(t!==lastTrack){ lastTrack=t; $('#camState').innerHTML=t; } }
-    function showForm(t,ok){ var f=$('#formFb'); f.textContent=t; f.className='formfb '+(ok?'ok':'warn'); }
+
+    // Clean popup cue — throttled so an identical cue doesn't spam.
+    function cue(txt, kind, force){
+      var now=performance.now();
+      if(!force && txt===lastCueTxt && now-lastCueAt<1400) return;
+      lastCueTxt=txt; lastCueAt=now;
+      var wrap=$('#cueWrap'); if(!wrap) return;
+      var el=document.createElement('div');
+      el.className='cue'+(kind?' '+kind:''); el.innerHTML=txt;
+      wrap.appendChild(el);
+      setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 950);
+    }
+    // Particle burst + floating "+N" over the number.
+    function burst(label, gold){
+      var layer=$('#popLayer'); if(!layer) return;
+      var col=(cur&&cur.c)||'#5BB1FF';
+      var f=document.createElement('div'); f.className='floatN'; f.textContent=label;
+      if(!gold) f.style.color=col;
+      layer.appendChild(f); setTimeout(function(){ if(f.parentNode) f.parentNode.removeChild(f); }, 1000);
+      var n=gold?16:11;
+      for(var i=0;i<n;i++){
+        var p=document.createElement('i'); p.className='pcl';
+        var a=Math.random()*Math.PI*2, d=30+Math.random()*60;
+        p.style.setProperty('--dx',(Math.cos(a)*d).toFixed(0)+'px');
+        p.style.setProperty('--dy',(Math.sin(a)*d-20).toFixed(0)+'px');
+        p.style.background=gold?(Math.random()<0.5?'#FFCB3D':'#FFE08A'):col;
+        layer.appendChild(p);
+        (function(el){ setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 780); })(p);
+      }
+    }
+    // Speed multiplier from rep cadence: faster reps push it toward ×3.
+    function bumpMult(){
+      var now=performance.now();
+      if(lastRepTime){
+        var gap=now-lastRepTime;                          // ms between reps
+        var fast=Math.max(0,Math.min(1,(2600-gap)/2100)); // ≥2.6s apart → 0
+        mult=Math.min(3, mult*0.55 + (1+fast*2)*0.45);
+      }
+      lastRepTime=now;
+      var ml=$('#multiLbl'); ml.classList.remove('hot'); void ml.offsetWidth; ml.classList.add('hot');
+    }
+    // One rAF loop while live: eases the points number + decays the multiplier.
+    function startUI(){ if(uiRunning) return; uiRunning=true; requestAnimationFrame(uiLoop); }
+    function stopUI(){ uiRunning=false; }
+    function uiLoop(){
+      if(!uiRunning) return;
+      if(Math.abs(points-ptsShown)>0.5){ ptsShown += (points-ptsShown)*0.18; $('#pts').textContent=Math.round(ptsShown).toLocaleString(); }
+      else if(ptsShown!==points){ ptsShown=points; $('#pts').textContent=points.toLocaleString(); }
+      if(lastRepTime && performance.now()-lastRepTime>1100){ mult += (1-mult)*0.04; if(mult<1.02) mult=1; }
+      $('#multiFill').style.width=Math.max(0,Math.min(100,(mult-1)/2*100))+'%';
+      $('#multiLbl').textContent='×'+mult.toFixed(1);
+      requestAnimationFrame(uiLoop);
+    }
 
     function initSelect(){
       $('#plusBadge').textContent = plus ? '5× CORE+' : '1× RATE';
@@ -308,19 +394,29 @@
     }
 
     function startSession(id){
-      cur=EXOS.find(function(e){ return e.id===id; }); reps=0;
+      cur=EXOS.find(function(e){ return e.id===id; });
+      reps=0; points=0; ptsShown=0; mult=1; lastRepTime=0; lastRepAt=0; phase='up'; resetRange();
       sfx('confirm'); haptic();
       document.documentElement.style.setProperty('--str', cur.c);
       $('#liveEx').textContent=cur.name; $('#silho').innerHTML=cur.emoji;
-      $('#cnum').textContent='0'; $('#cgain').textContent='+0.00 Strength'; $('#cfeed').innerHTML="Let's go";
+      $('#cnum').textContent='0'; $('#pts').textContent='0'; $('#cgain').textContent='+0.00 Strength';
+      $('#multiFill').style.width='0%'; $('#multiLbl').textContent='×1.0';
+      $('#cueWrap').innerHTML=''; $('#popLayer').innerHTML='';
       $('#pick').style.display='none'; $('#live').classList.add('on');
+      startUI();
+      toggleCam(); // auto-start the camera — we're inside the tap gesture
     }
 
-    function addRep(){
-      reps++; sfx(reps%10===0?'coin':'tick'); haptic();
-      var n=$('#cnum'); n.textContent=reps; n.classList.remove('bump'); void n.offsetWidth; n.classList.add('bump');
+    // Count n reps (n=2 on a held bottom) and award points × current multiplier.
+    function countRep(n, held){
+      reps += n;
+      bumpMult();
+      var gain=Math.round(BASE_PTS*n*mult);
+      points += gain;
+      sfx(held?'coin':(reps%10===0?'coin':'tick')); haptic();
+      var num=$('#cnum'); num.textContent=reps; num.classList.remove('bump'); void num.offsetWidth; num.classList.add('bump');
       $('#cgain').textContent='+'+(reps*rate).toFixed(2)+' Strength';
-      $('#cfeed').innerHTML = reps%5===0 ? FEEDS[Math.floor((reps/5)%FEEDS.length)] : $('#cfeed').innerHTML;
+      burst('+'+gain, held);
     }
 
     async function toggleCam(){
@@ -328,32 +424,21 @@
       try{
         stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:'user' }, audio:false });
         $('#vid').srcObject=stream; $('#silho').style.display='none';
-        lastTrack=''; $('#camState').innerHTML=GI.dot+' Live'; $('#camToggle').innerHTML=GI.camera+' Camera on';
-        $('#camHint').textContent = auto ? 'Auto-counting your reps · +1 REP still works as backup' : 'Tap +1 REP for each rep · Auto is off';
-        if(auto) startPose();
+        lastTrack=''; setTrack(GI.dot+' Live'); $('#camToggle').innerHTML=GI.camera+' Camera on';
+        startPose();
       }catch(e){
-        $('#camState').textContent='Camera blocked'; $('#camHint').textContent='No camera access — tap counting still works';
-        sfx('warn');
+        setTrack('Camera blocked'); cue('Allow camera access to auto-track', 'warn', true); sfx('warn');
       }
     }
-    function stopCam(){ stopPose(); if(stream){ stream.getTracks().forEach(function(t){ t.stop(); }); stream=null; } $('#vid').srcObject=null; $('#silho').style.display='flex'; lastTrack=''; $('#camState').textContent='Camera off'; $('#camToggle').innerHTML=GI.camera+' Turn on camera'; }
-    function setAuto(on){
-      auto=on;
-      $('#autoBtn').style.background = on ? 'color-mix(in srgb,var(--accent) 22%,transparent)' : 'rgba(255,255,255,0.05)';
-      $('#autoBtn').style.borderColor = on ? 'color-mix(in srgb,var(--accent) 45%,transparent)' : 'var(--border)';
-      if(stream){ // camera already on — start/stop tracking immediately
-        if(on){ startPose(); $('#camHint').textContent='Auto-counting your reps · +1 REP still works as backup'; }
-        else { stopPose(); setTrack(GI.dot+' Live'); $('#camHint').textContent='Tap +1 REP for each rep · Auto is off'; }
-      }
-    }
+    function stopCam(){ stopPose(); if(stream){ stream.getTracks().forEach(function(t){ t.stop(); }); stream=null; } $('#vid').srcObject=null; $('#silho').style.display='flex'; lastTrack=''; setTrack('Camera off'); $('#camToggle').innerHTML=GI.camera+' Turn on camera'; }
 
     function finish(){
-      stopCam();
+      stopCam(); stopUI();
       var res=S.addReps(cur.muscle, reps, { diff:cur.diff });
       S.commitRepStrength(res.gain);
       var xpGain=Math.round(res.gain*20);
       sfx('reward');
-      $('#sumBody').innerHTML='<div class="sumhead"><div class="ring">'+cur.emoji+'</div><h2>'+reps+' reps done</h2><p>'+cur.name+' · logged to your Strength</p></div>'+
+      $('#sumBody').innerHTML='<div class="sumhead"><div class="ring">'+cur.emoji+'</div><h2>'+reps+' reps done</h2><p>'+cur.name+' · '+points.toLocaleString()+' pts</p></div>'+
         '<div class="big3"><div class="b"><div class="bn">'+reps+'</div><div class="bl">Total Reps</div></div>'+
           '<div class="b str"><div class="bn">+'+res.gain.toFixed(2)+'</div><div class="bl">Strength</div></div>'+
           '<div class="b xp"><div class="bn">+'+xpGain+'</div><div class="bl">XP</div></div></div>'+
@@ -361,7 +446,7 @@
         '<button class="againbtn" id="sumAgain">Go again</button>';
       $('#sumScrim').classList.add('show'); $('#sumSheet').classList.add('show');
       $('#sumDone').addEventListener('click', function(){ location.href='gym.html'; });
-      $('#sumAgain').addEventListener('click', function(){ $('#sumScrim').classList.remove('show'); $('#sumSheet').classList.remove('show'); $('#live').classList.remove('on'); $('#pick').style.display='block'; cur=null; reps=0; });
+      $('#sumAgain').addEventListener('click', function(){ $('#sumScrim').classList.remove('show'); $('#sumSheet').classList.remove('show'); $('#live').classList.remove('on'); $('#pick').style.display='block'; cur=null; reps=0; points=0; ptsShown=0; });
     }
 
     // ── Pose loop ────────────────────────────────────────────────────────
@@ -370,11 +455,11 @@
       if(poseRunning||poseStarting) return;
       if(!window.PoseKit){ $('#camHint').textContent='Auto-tracking not supported here — tap +1 REP'; return; }
       poseStarting=true;
-      setTrack(GI.dot+' Loading model…');
+      setTrack(GI.dot+' Loading…');
       try{ pk=await window.PoseKit.load(); }
-      catch(e){ pk=null; poseStarting=false; setTrack('● Live'); $('#camHint').textContent='Auto-tracking unavailable — tap +1 REP'; return; }
+      catch(e){ pk=null; poseStarting=false; setTrack('● Live'); cue('Auto-tracking unavailable here', 'warn', true); return; }
       poseStarting=false;
-      if(!stream||!auto){ return; } // user turned camera off / disabled auto while the model loaded
+      if(!stream){ return; } // user turned camera off while the model loaded
       var cv=$('#pose'); ctx=cv.getContext('2d'); draw=new pk.DrawingUtils(ctx);
       $('#cam').classList.add('tracking');
       poseRunning=true; phase='up'; resetRange();
@@ -382,7 +467,7 @@
     }
     function stopPose(){
       poseRunning=false; var cv=$('#pose'); if(cv&&ctx){ ctx.clearRect(0,0,cv.width,cv.height); }
-      $('#cam').classList.remove('tracking'); $('#formFb').textContent=''; lastTrack='';
+      $('#cam').classList.remove('tracking'); lastTrack='';
     }
     function poseLoop(){
       if(!poseRunning||!stream||!pk){ return; }
@@ -400,32 +485,39 @@
       var W=cv.width, H=cv.height;
       ctx.clearRect(0,0,W,H);
       var L=res&&res.landmarks&&res.landmarks[0];
-      if(!L){ setTrack('Step back — get your whole body in frame'); return; }
-      // Skeleton (canvas shares the video's object-fit + mirror via CSS, so
-      // normalized landmarks line up with the person on screen).
-      draw.drawConnectors(L, pk.PoseLandmarker.POSE_CONNECTIONS, { color:'rgba(255,255,255,0.85)', lineWidth:4 });
-      draw.drawLandmarks(L, { color:'#02030A', fillColor:(cur&&cur.c)||'#0A84FF', radius:5, lineWidth:2 });
+      if(!L){ setTrack('Step into frame'); return; }
+      // Thick skeleton — soft glow underlay + bright limb lines + joint dots.
+      // (Canvas shares the video's object-fit + mirror via CSS, so landmarks
+      // line up with the person on screen.)
+      var col=(cur&&cur.c)||'#0A84FF';
+      draw.drawConnectors(L, pk.PoseLandmarker.POSE_CONNECTIONS, { color:'rgba(10,132,255,0.35)', lineWidth:14 });
+      draw.drawConnectors(L, pk.PoseLandmarker.POSE_CONNECTIONS, { color:'#FFFFFF', lineWidth:6 });
+      draw.drawLandmarks(L, { color:'#02030A', fillColor:col, radius:7, lineWidth:2 });
 
       var cfg=POSE_CFG[cur&&cur.id]; if(!cfg) { setTrack('● Live'); return; }
       var ang=exAngle(L,cfg,W,H);
-      if(ang==null){ setTrack('Turn so your '+cfg.label+' are visible'); return; }
+      if(ang==null){ setTrack('Turn so your '+cfg.label+' show'); return; }
       setTrack('● Tracking');
       repMin=Math.min(repMin,ang); repMax=Math.max(repMax,ang);
-      // Live posture cue (formFb line). Cleared when posture is fine.
-      var lc=cfg.live(L,W,H); showForm(lc?lc.t:'', lc?lc.ok:true);
-      // Rep state machine with a debounce so a single rep can't double-count.
-      if(phase==='up' && ang<cfg.down){ phase='down'; }
-      else if(phase==='down' && ang>cfg.up){
-        var now=performance.now();
-        if(now-lastRepAt>450){ lastRepAt=now; onPoseRep(cfg); }
-        phase='up';
+      // Live posture cue → clean popup.
+      var lc=cfg.live(L,W,H); if(lc) cue(lc.t, 'warn');
+      // Rep state machine + hold-for-bonus.
+      if(phase==='up' && ang<cfg.down){
+        phase='down'; downAt=performance.now(); holdReady=true; holdScored=false;
+        cue('Hold for +2', 'bonus');
+      } else if(phase==='down'){
+        if(holdReady && !holdScored && performance.now()-downAt>700){ holdScored=true; cue('Hold it — nice!', 'good'); }
+        if(ang>cfg.up){
+          var now=performance.now();
+          if(now-lastRepAt>420){ lastRepAt=now; finishRep(cfg, holdScored); }
+          phase='up';
+        }
       }
     }
-    function onPoseRep(cfg){
-      addRep();
-      // Per-rep quality summary goes on the encouragement line (cfeed).
-      var s=cfg.summary(repMin,repMax);
-      if(s){ var c=$('#cfeed'); c.textContent=s.t; c.style.color=s.ok?'#34D399':'#FF9F45'; }
+    function finishRep(cfg, held){
+      countRep(held?2:1, held);
+      if(held){ cue('HOLD BONUS +2', 'bonus', true); }
+      else { var s=cfg.summary(repMin,repMax); if(s) cue(s.t, s.ok?'good':'warn'); }
       resetRange();
     }
 
@@ -437,22 +529,19 @@
           window.coreHelp.attach('helpBtn',{
             title:'Live Rep Counter',
             bullets:[
-              'Pick an exercise, then tap "Turn on camera". With Auto on, CORE tracks your joints and counts every rep for you.',
-              'A skeleton overlay shows what the tracker sees; form cues (e.g. "squat deeper", "chest up") appear as you move.',
-              'Tap "Auto" to switch tracking on/off. "+1 REP" always works as a manual backup.',
-              'Every rep earns Strength live; CORE+ members earn it 5× faster.',
-              'All tracking runs on your device — camera frames never leave your phone. No camera? Tap counting still works.'
+              'Pick an exercise — CORE turns on the camera and tracks your joints automatically. No buttons to tap.',
+              'A thick skeleton overlay shows what the tracker sees; every rep counts itself with a particle pop.',
+              'Rep faster to fill the speed multiplier (up to ×3) and bank more points. Hold the bottom of a rep for a +2 bonus.',
+              'Form cues pop up live (e.g. "squat deeper", "chest up") so you can fix your technique on the fly.',
+              'All tracking runs on your device — camera frames never leave your phone. Reps log to your Strength when you Finish.'
             ]
           });
         }
       }catch(e){}
-      $('#repBtn').addEventListener('click', addRep);
       $('#camToggle').addEventListener('click', toggleCam);
-      $('#autoBtn').addEventListener('click', function(){ setAuto(!auto); sfx('tick'); });
-      setAuto(true); // reflect default ON styling
-      $('#finBtn').addEventListener('click', function(){ if(reps===0){ if(!confirm('No reps yet — leave?')) return; stopCam(); location.href='gym.html'; return; } finish(); });
-      $('#backBtn').addEventListener('click', function(){ stopCam(); sfx('tick'); if($('#live').classList.contains('on') && reps>0){ if(!confirm('Leave without saving these reps?')) return; } location.href='gym.html'; });
-      window.addEventListener('pagehide', stopCam);
+      $('#finBtn').addEventListener('click', function(){ if(reps===0){ stopCam(); stopUI(); location.href='gym.html'; return; } finish(); });
+      $('#backBtn').addEventListener('click', function(){ stopCam(); stopUI(); sfx('tick'); if($('#live').classList.contains('on') && reps>0){ if(!confirm('Leave without saving these reps?')) return; } location.href='gym.html'; });
+      window.addEventListener('pagehide', function(){ stopCam(); stopUI(); });
     }
     if(document.readyState!=='loading') init(); else document.addEventListener('DOMContentLoaded', init);
   })();
