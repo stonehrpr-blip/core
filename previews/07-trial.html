@@ -1141,6 +1141,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="_lib/core-background.css">
   <script src="_lib/core-background.js"></script>
+  <meta name="theme-color" content="#000000">
 </head>
 <body data-font="apple" style='font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, "Segoe UI", Roboto, sans-serif !important;'>
   <div class="phone">
@@ -4462,7 +4463,10 @@
     try { state.connectedVia = provider; } catch (e) {}
     // Portal gate collects the card here, so payment is already connected —
     // mark it so the downstream rank-reveal doesn't re-prompt for Apple Pay.
-    if (provider === 'card') { try { state.applePayConnected = true; } catch (e) {} }
+    if (provider === 'card') {
+      try { state.applePayConnected = true; } catch (e) {}
+      try { localStorage.removeItem('corePayPending'); } catch (e) {}
+    }
     track('account_connected', { provider: provider });
     finishOnboarding(true);
   }
