@@ -985,16 +985,23 @@
   .demo-cursor::after { content:""; position:absolute; inset:-5px; border-radius:50%; border:2px solid rgba(255,255,255,0.75); opacity:0; }
   .demo-note { margin-top:11px; font-size:12px; line-height:1.4; color:var(--muted); text-align:center; }
   .demo-note b { color:#cdd9ff; font-weight:700; }
-  /* Preview screens go FULL-SCREEN (real-app look) — edge-to-edge, dashboard bg */
-  .step[data-step="18"], .step[data-step="19"], .step[data-step="20"]{ padding:0; gap:0; }
-  .step[data-step="18"] > .kicker, .step[data-step="18"] > .title, .step[data-step="18"] > .copy,
-  .step[data-step="19"] > .kicker, .step[data-step="19"] > .title, .step[data-step="19"] > .copy,
-  .step[data-step="20"] > .kicker, .step[data-step="20"] > .title, .step[data-step="20"] > .copy{ display:none; }
-  .step[data-step="18"] .demo, .step[data-step="19"] .demo, .step[data-step="20"] .demo{ margin:0; flex:1; min-height:0; display:flex; }
-  .step[data-step="18"] .demo-note, .step[data-step="19"] .demo-note, .step[data-step="20"] .demo-note{ display:none; }
-  .step[data-step="18"] .demo-screen, .step[data-step="19"] .demo-screen, .step[data-step="20"] .demo-screen{
-    width:100%; height:100%; border-radius:0; border:none; box-shadow:none; padding:60px 22px 110px;
-    background:linear-gradient(180deg,#070713 0%,#02020A 55%,#050510 100%); }
+  /* 30-day flip-card showcase (step 19) */
+  .flipgrid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px; perspective:1200px; }
+  .flipcard{ all:unset; position:relative; display:block; aspect-ratio:1/1; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  .flipcard-inner{ position:absolute; inset:0; transform-style:preserve-3d; transition:transform .6s cubic-bezier(.2,.85,.25,1); }
+  .flipcard.flipped .flipcard-inner{ transform:rotateY(180deg); }
+  .flipface{ position:absolute; inset:0; -webkit-backface-visibility:hidden; backface-visibility:hidden; border-radius:18px; border:1px solid var(--border); padding:15px; display:flex; flex-direction:column; justify-content:space-between; box-sizing:border-box; }
+  .flip-front{ background:rgba(255,255,255,0.035); }
+  .flip-back{ transform:rotateY(180deg); justify-content:flex-end; gap:4px;
+    background:linear-gradient(165deg, color-mix(in srgb,var(--fac,#0A84FF) 22%,transparent), rgba(255,255,255,0.02));
+    border-color:color-mix(in srgb,var(--fac,#0A84FF) 42%,transparent); }
+  .flip-ic{ width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center;
+    color:var(--fac,#0A84FF); background:color-mix(in srgb,var(--fac,#0A84FF) 16%,transparent); }
+  .flip-ic svg{ width:20px; height:20px; }
+  .flip-front .fname{ font-size:15.5px; font-weight:800; letter-spacing:-0.2px; }
+  .flip-front .fnow{ font-size:11.5px; color:var(--muted); margin-top:2px; }
+  .flip-back .fb-eyebrow{ font-size:10px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:color-mix(in srgb,var(--fac,#0A84FF) 70%, #ffffff); }
+  .flip-back .fb-to{ font-size:15.5px; font-weight:800; color:#fff; line-height:1.25; }
 
   /* ---- DEMO 1: Quests ---- */
   .qd-row { display:flex; align-items:center; gap:10px; padding:11px 12px; margin-bottom:8px; border-radius:13px; background:rgba(255,255,255,0.04); border:1px solid var(--border); }
@@ -3002,30 +3009,27 @@
 
         <!-- ============ DEMO 2: DASHBOARD (data-step 19) ============ -->
         <div class="step" data-step="19">
-          <div class="kicker">Quick demo</div>
-          <h1 class="title">Your<br/><span class="g">command center.</span></h1>
-          <p class="copy">Everything you build shows up here — streak, level, and your daily chest.</p>
-          <div class="demo" data-demo="dashboard" aria-label="Dashboard walkthrough animation">
-            <div class="demo-tag"><span class="dt-dot"></span>LIVE PREVIEW</div>
-            <div class="demo-screen">
-              <div class="demo-statusbar"><span class="dsb-dot"></span>CORE · Home</div>
-              <div class="dd-top">
-                <div class="dd-stat"><div class="dd-lab">Streak</div><div class="dd-val"><span id="ddStreak">7</span><svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;color:#4FA3FF;margin-left:4px;vertical-align:-2px;"><path d="M13 2C13 6 9 8 9 12a4 4 0 008 0c0-2-1-3-1-3 2 1 3 3 3 5a7 7 0 11-14 0C5 9 13 7 13 2z"/></svg></div></div>
-                <div class="dd-stat"><div class="dd-lab">Power</div><div class="dd-val">1,240</div></div>
-              </div>
-              <div class="dd-xpwrap">
-                <div class="dd-xphead"><span>Level 3 · <b>Stone</b></span><span>710 / 1000 XP</span></div>
-                <div class="dd-xpbar"><div class="dd-xpfill"></div></div>
-              </div>
-              <div class="dd-chest">
-                <div class="dd-ring"><svg viewBox="0 0 44 44"><circle class="dd-rtrack" cx="22" cy="22" r="18"/><circle class="dd-rprog" cx="22" cy="22" r="18"/></svg></div>
-                <div class="dd-cbody"><div class="dd-ct">Daily chest</div><div class="dd-cs">2 of 3 quests — almost there</div></div>
-                <div class="dd-pop">+50 XP</div>
-              </div>
-              <div class="demo-cursor"></div>
-            </div>
+          <div class="kicker">Your potential</div>
+          <h1 class="title">Where you'll be<br/><span class="g">in 30 days.</span></h1>
+          <p class="copy">Tap a card to flip it — this is what showing up on CORE builds.</p>
+          <div class="flipgrid" id="flipgrid">
+            <button type="button" class="flipcard" style="--fac:#FF6B6B"><div class="flipcard-inner">
+              <div class="flipface flip-front"><div class="flip-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg></div><div><div class="fname">Energy</div><div class="fnow">Day 1 · running low</div></div></div>
+              <div class="flipface flip-back"><div class="fb-eyebrow">Day 30</div><div class="fb-to">Cravings fade, energy back</div></div>
+            </div></button>
+            <button type="button" class="flipcard" style="--fac:#4A8FFF"><div class="flipcard-inner">
+              <div class="flipface flip-front"><div class="flip-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/></svg></div><div><div class="fname">Focus</div><div class="fnow">Scattered</div></div></div>
+              <div class="flipface flip-back"><div class="fb-eyebrow">Day 30</div><div class="fb-to">Sharper, fewer slips</div></div>
+            </div></button>
+            <button type="button" class="flipcard" style="--fac:#34D399"><div class="flipcard-inner">
+              <div class="flipface flip-front"><div class="flip-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1.6 3.6 4 4.6 4 8a4 4 0 0 1-8 0c0-1.3.5-2.1 1-2.7C9 11 12 8 12 3z"/></svg></div><div><div class="fname">Streak</div><div class="fnow">Day 0</div></div></div>
+              <div class="flipface flip-back"><div class="fb-eyebrow">Day 30</div><div class="fb-to">30 days locked in</div></div>
+            </div></button>
+            <button type="button" class="flipcard" style="--fac:#FFCB3D"><div class="flipcard-inner">
+              <div class="flipface flip-front"><div class="flip-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a5 5 0 1 0 0-10 5 5 0 0 0 0 10ZM8.5 13.5L7 22l5-3 5 3-1.5-8.5"/></svg></div><div><div class="fname">Rank</div><div class="fnow">Sand</div></div></div>
+              <div class="flipface flip-back"><div class="fb-eyebrow">Day 30</div><div class="fb-to">Climbing the tiers</div></div>
+            </div></button>
           </div>
-          <div class="demo-note">Finish today's quests <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;vertical-align:-1px;display:inline-block;"><path d="M9 6l6 6-6 6"/></svg> <b>open your chest</b> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;vertical-align:-1px;display:inline-block;"><path d="M9 6l6 6-6 6"/></svg> bank the reward.</div>
         </div>
 
         <!-- ============ DEMO 3: RANKS (data-step 20) ============ -->
@@ -5585,6 +5589,28 @@
     }, 6000);
   }
   setTimeout(maybeShowHint, 8000);
+</script>
+<script>
+(function(){
+  var grid=document.getElementById('flipgrid'); if(!grid) return;
+  // Tap to flip an individual card.
+  grid.addEventListener('click', function(e){
+    var c=e.target.closest('.flipcard'); if(!c) return;
+    c.classList.toggle('flipped');
+    try{ window.coreSfx && window.coreSfx('tick'); }catch(_){}
+  });
+  // Auto-reveal the cards in sequence the first time the step opens.
+  var step=grid.closest('.step'); if(!step) return;
+  var done=false;
+  function cascade(){
+    if(done) return; done=true;
+    var cards=grid.querySelectorAll('.flipcard');
+    cards.forEach(function(c,i){ setTimeout(function(){ c.classList.add('flipped'); }, 420+i*240); });
+  }
+  if(step.classList.contains('on')) cascade();
+  var obs=new MutationObserver(function(){ if(step.classList.contains('on')) cascade(); });
+  obs.observe(step,{attributes:true,attributeFilter:['class']});
+})();
 </script>
 </body>
 </html>
