@@ -985,36 +985,20 @@
   .demo-cursor::after { content:""; position:absolute; inset:-5px; border-radius:50%; border:2px solid rgba(255,255,255,0.75); opacity:0; }
   .demo-note { margin-top:11px; font-size:12px; line-height:1.4; color:var(--muted); text-align:center; }
   .demo-note b { color:#cdd9ff; font-weight:700; }
-  /* 30-day flip-card showcase (step 19) */
-  .step[data-step="19"]{ overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:120px; }
-  .flipgrid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px; perspective:1400px; }
-  .flipcard{ all:unset; position:relative; display:block; aspect-ratio:1/0.9; cursor:pointer; -webkit-tap-highlight-color:transparent; opacity:0; }
-  .step[data-step="19"].on .flipcard{ animation:flipIn .5s cubic-bezier(.2,1,.3,1) both; }
-  .step[data-step="19"].on .flipcard:nth-child(2){ animation-delay:.07s; }
-  .step[data-step="19"].on .flipcard:nth-child(3){ animation-delay:.14s; }
-  .step[data-step="19"].on .flipcard:nth-child(4){ animation-delay:.21s; }
-  @keyframes flipIn{ from{ opacity:0; transform:translateY(18px) scale(.95); } to{ opacity:1; transform:translateY(0) scale(1); } }
-  .flipcard-inner{ position:absolute; inset:0; transform-style:preserve-3d; transition:transform .68s cubic-bezier(.34,1.56,.44,1); }
-  .flipcard.flipped .flipcard-inner{ transform:rotateY(180deg); }
-  .flipface{ position:absolute; inset:0; -webkit-backface-visibility:hidden; backface-visibility:hidden; border-radius:18px; padding:15px;
-    display:flex; flex-direction:column; justify-content:space-between; box-sizing:border-box; overflow:hidden; }
-  .flip-front{ border:1px solid color-mix(in srgb,var(--fac,#0A84FF) 38%, var(--border));
-    background:linear-gradient(158deg, color-mix(in srgb,var(--fac,#0A84FF) 20%, #0b0b16), #0a0a14); }
-  .flip-front::before{ content:""; position:absolute; inset:0; pointer-events:none;
-    background:radial-gradient(120% 75% at 82% 0%, color-mix(in srgb,var(--fac,#0A84FF) 30%, transparent), transparent 62%); }
-  .flip-back{ transform:rotateY(180deg); justify-content:flex-end; gap:5px;
-    border:1px solid color-mix(in srgb,var(--fac,#0A84FF) 62%, transparent);
-    background:linear-gradient(152deg, color-mix(in srgb,var(--fac,#0A84FF) 44%, #0b0b16), color-mix(in srgb,var(--fac,#0A84FF) 9%, #0a0a14));
-    box-shadow:inset 0 0 34px color-mix(in srgb,var(--fac,#0A84FF) 24%, transparent); }
-  .flip-ic{ position:relative; width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#fff;
-    background:color-mix(in srgb,var(--fac,#0A84FF) 65%, transparent); box-shadow:0 5px 18px color-mix(in srgb,var(--fac,#0A84FF) 50%, transparent); }
-  .flipcard.flipped .flip-ic{ animation:icPop .5s ease .2s both; }
-  @keyframes icPop{ 0%{ transform:scale(1); } 45%{ transform:scale(1.18); } 100%{ transform:scale(1); } }
-  .flip-ic svg{ width:21px; height:21px; }
-  .flip-front .fname{ position:relative; font-size:16px; font-weight:800; letter-spacing:-0.2px; color:#fff; }
-  .flip-front .fnow{ position:relative; font-size:11.5px; color:var(--muted); margin-top:2px; }
-  .flip-back .fb-eyebrow{ font-size:10px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; color:#fff; opacity:.85; }
-  .flip-back .fb-to{ font-size:16px; font-weight:800; color:#fff; line-height:1.2; text-shadow:0 1px 8px rgba(0,0,0,.45); }
+  /* 30-day outcome cards (step 19) — static, no flip, no scroll */
+  .flipgrid{ display:grid; grid-template-columns:1fr 1fr; gap:11px; margin-top:14px; }
+  .flipcard{ position:relative; display:flex; flex-direction:column; box-sizing:border-box; border-radius:18px; padding:14px; overflow:hidden;
+    border:1px solid color-mix(in srgb,var(--fac,#0A84FF) 55%, transparent);
+    background:linear-gradient(152deg, color-mix(in srgb,var(--fac,#0A84FF) 40%, #0b0b16), color-mix(in srgb,var(--fac,#0A84FF) 8%, #0a0a14));
+    box-shadow:inset 0 0 32px color-mix(in srgb,var(--fac,#0A84FF) 22%, transparent); }
+  .flipcard::before{ content:""; position:absolute; inset:0; pointer-events:none;
+    background:radial-gradient(120% 70% at 82% 0%, color-mix(in srgb,var(--fac,#0A84FF) 28%, transparent), transparent 62%); }
+  .flip-ic{ position:relative; width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#fff;
+    background:color-mix(in srgb,var(--fac,#0A84FF) 70%, transparent); box-shadow:0 5px 18px color-mix(in srgb,var(--fac,#0A84FF) 50%, transparent); }
+  .flip-ic svg{ width:20px; height:20px; }
+  .flipcard .fname{ position:relative; font-size:15px; font-weight:800; letter-spacing:-0.2px; color:#fff; margin-top:9px; }
+  .flipcard .fb-eyebrow{ position:relative; font-size:9.5px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; color:#fff; opacity:.8; margin-top:7px; }
+  .flipcard .fb-to{ position:relative; font-size:14px; font-weight:800; color:#fff; line-height:1.22; margin-top:2px; text-shadow:0 1px 8px rgba(0,0,0,.45); }
 
   /* ---- DEMO 1: Quests ---- */
   .qd-row { display:flex; align-items:center; gap:10px; padding:11px 12px; margin-bottom:8px; border-radius:13px; background:rgba(255,255,255,0.04); border:1px solid var(--border); }
@@ -3025,24 +3009,32 @@
         <div class="step" data-step="19">
           <div class="kicker">Your potential</div>
           <h1 class="title">Where you'll be<br/><span class="g">in 30 days.</span></h1>
-          <p class="copy">Tap a card to flip it — this is what showing up on CORE builds.</p>
+          <p class="copy">This is what showing up on CORE builds.</p>
           <div class="flipgrid" id="flipgrid">
-            <button type="button" class="flipcard" style="--fac:#FF6B6B"><div class="flipcard-inner">
-              <div class="flipface flip-front"><div class="flip-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg></div><div><div class="fname">Energy</div><div class="fnow">Day 1 · running low</div></div></div>
-              <div class="flipface flip-back"><div class="fb-eyebrow">Day 30</div><div class="fb-to">Cravings fade, energy back</div></div>
-            </div></button>
-            <button type="button" class="flipcard" style="--fac:#4A8FFF"><div class="flipcard-inner">
-              <div class="flipface flip-front"><div class="flip-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/></svg></div><div><div class="fname">Focus</div><div class="fnow">Scattered</div></div></div>
-              <div class="flipface flip-back"><div class="fb-eyebrow">Day 30</div><div class="fb-to">Sharper, fewer slips</div></div>
-            </div></button>
-            <button type="button" class="flipcard" style="--fac:#34D399"><div class="flipcard-inner">
-              <div class="flipface flip-front"><div class="flip-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1.6 3.6 4 4.6 4 8a4 4 0 0 1-8 0c0-1.3.5-2.1 1-2.7C9 11 12 8 12 3z"/></svg></div><div><div class="fname">Streak</div><div class="fnow">Day 0</div></div></div>
-              <div class="flipface flip-back"><div class="fb-eyebrow">Day 30</div><div class="fb-to">30 days locked in</div></div>
-            </div></button>
-            <button type="button" class="flipcard" style="--fac:#FFCB3D"><div class="flipcard-inner">
-              <div class="flipface flip-front"><div class="flip-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a5 5 0 1 0 0-10 5 5 0 0 0 0 10ZM8.5 13.5L7 22l5-3 5 3-1.5-8.5"/></svg></div><div><div class="fname">Rank</div><div class="fnow">Sand</div></div></div>
-              <div class="flipface flip-back"><div class="fb-eyebrow">Day 30</div><div class="fb-to">Climbing the tiers</div></div>
-            </div></button>
+            <div class="flipcard" style="--fac:#FF6B6B">
+              <div class="flip-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg></div>
+              <div class="fname">Energy</div>
+              <div class="fb-eyebrow">Day 30</div>
+              <div class="fb-to">Cravings fade, energy back</div>
+            </div>
+            <div class="flipcard" style="--fac:#4A8FFF">
+              <div class="flip-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/></svg></div>
+              <div class="fname">Focus</div>
+              <div class="fb-eyebrow">Day 30</div>
+              <div class="fb-to">Sharper, fewer slips</div>
+            </div>
+            <div class="flipcard" style="--fac:#34D399">
+              <div class="flip-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1.6 3.6 4 4.6 4 8a4 4 0 0 1-8 0c0-1.3.5-2.1 1-2.7C9 11 12 8 12 3z"/></svg></div>
+              <div class="fname">Streak</div>
+              <div class="fb-eyebrow">Day 30</div>
+              <div class="fb-to">30 days locked in</div>
+            </div>
+            <div class="flipcard" style="--fac:#FFCB3D">
+              <div class="flip-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a5 5 0 1 0 0-10 5 5 0 0 0 0 10ZM8.5 13.5L7 22l5-3 5 3-1.5-8.5"/></svg></div>
+              <div class="fname">Rank</div>
+              <div class="fb-eyebrow">Day 30</div>
+              <div class="fb-to">Climbing the tiers</div>
+            </div>
           </div>
         </div>
 
@@ -5606,28 +5598,6 @@
     }, 6000);
   }
   setTimeout(maybeShowHint, 8000);
-</script>
-<script>
-(function(){
-  var grid=document.getElementById('flipgrid'); if(!grid) return;
-  // Tap to flip an individual card.
-  grid.addEventListener('click', function(e){
-    var c=e.target.closest('.flipcard'); if(!c) return;
-    c.classList.toggle('flipped');
-    try{ window.coreSfx && window.coreSfx('tick'); }catch(_){}
-  });
-  // Auto-reveal the cards in sequence the first time the step opens.
-  var step=grid.closest('.step'); if(!step) return;
-  var done=false;
-  function cascade(){
-    if(done) return; done=true;
-    var cards=grid.querySelectorAll('.flipcard');
-    cards.forEach(function(c,i){ setTimeout(function(){ c.classList.add('flipped'); }, 420+i*240); });
-  }
-  if(step.classList.contains('on')) cascade();
-  var obs=new MutationObserver(function(){ if(step.classList.contains('on')) cascade(); });
-  obs.observe(step,{attributes:true,attributeFilter:['class']});
-})();
 </script>
 </body>
 </html>
