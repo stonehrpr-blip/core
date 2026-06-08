@@ -3734,9 +3734,8 @@
       // Personalized payoff screen — passive, always advanceable
       setCTA('See your offer', false, 'No charge yet — this is your free-trial plan');
     } else if (s === 17) {
-      // The "Begin free trial" button opens the Apple Pay sheet (handled in next()).
-      setCTA(state.applePayConnected ? 'Continue' : 'Begin free trial', false,
-        state.applePayConnected ? 'Apple Pay connected · $0 today' : '$0 today · Apple Pay · cancel any time');
+      // Plan-select only — payment is collected once, at the final portal gate.
+      setCTA('Continue', false, '$0 today · you\'ll confirm payment on the last step');
     } else if (s === 19) {
       // 30-day flip-card preview — passive, always advanceable
       setCTA('Next', false, 'Tap each card to see where you\'re headed');
@@ -3864,9 +3863,8 @@
   }
   function next() {
     if (cta.disabled) return;
-    // Step 17: the "Begin free trial" button opens the Apple Pay sheet first.
-    // authorizeApplePay() advances to the connect step once payment confirms.
-    if (state.step === 17 && !state.applePayConnected) { openApplePaySheet(); return; }
+    // Payment is collected once, at the final portal gate (step 21) — the paywall
+    // (step 17) only selects a plan, so it simply advances here.
     // Step 0: tapping "Sign" plays the signature ink-draw, then advances.
     if (state.step === 0 && !_signed) {
       if (_signing) return;
