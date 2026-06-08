@@ -307,7 +307,6 @@
       { id:'chinups',  name:'Chin-ups',          emoji:GI.pullup, muscle:'back', c:'#6E8BFF', diff:'hard', pf:1.05, sub:'Biceps · back' },
       { id:'pullwide', name:'Wide-grip Pull-ups',emoji:GI.pullup, muscle:'back', c:'#8A6BFF', diff:'hard', pf:1.2,  sub:'Lats · upper back' }
     ];
-    var FEEDS=['Keep going '+GI.dumbbell,'Nice rep!','Stay tight','You\'ve got this '+GI.flame,'Strong! '+GI.spark,'Don\'t stop','Looking good','Push! '+GI.bolt];
 
     var plus=S.isPlus(), rate=S.perRep();
     var cur=null, reps=0, stream=null;
@@ -315,7 +314,7 @@
     // ── Pose tracking + scoring state ────────────────────────────────────
     // BlazePose 33-landmark indices: 11/12 shoulders, 13/14 elbows, 15/16
     // wrists, 23/24 hips, 25/26 knees, 27/28 ankles.
-    var poseRunning=false, pk=null, ctx=null, draw=null;
+    var poseRunning=false, pk=null, ctx=null;
     var phase='up', repMin=180, repMax=0, lastRepAt=0, lastTrack='';
     var BASE_PTS=10;                                  // points per rep at ×1.0
     var points=0, ptsShown=0;                         // target vs animated display
@@ -332,6 +331,7 @@
     var JOINTS=[11,12,13,14,15,16,23,24,25,26,27,28];
     var xpInto=0, xpNeed=150, xpLevel=1, xpShown=0;   // XP bar + level
     var MINROM=30;                                     // min range of motion (deg) to count a rep
+    var refLo=1, refHi=0, MINSHIFT=0.04;               // body must actually translate (anti-fake)
 
     function angleAt(L,a,b,c,W,H){
       var ax=L[a].x*W, ay=L[a].y*H, bx=L[b].x*W, by=L[b].y*H, cx=L[c].x*W, cy=L[c].y*H;
@@ -390,7 +390,14 @@
         summary:function(mn,mx){ return mx<145 ? {t:'Full hang at the bottom',ok:false} : (mn>95?{t:'Chest to the bar',ok:false}:{t:'Wide & strong',ok:true}); },
         live:function(){ return null; } }
     };
-    function resetRange(){ repMin=180; repMax=0; }
+    function resetRange(){ repMin=180; repMax=0; refLo=1; refHi=0; }
+    // Exercise family → expected body orientation, the body point that must
+    // move during a rep, and the "get in position" prompt. Used for anti-fake.
+    function famOf(id){
+      if(id.indexOf('push')===0)  return { orient:'h', ref:[11,12], pos:'GET INTO PUSH-UP POSITION' };
+      if(id.indexOf('squat')===0) return { orient:'v', ref:[23,24], pos:'STAND TALL TO START' };
+      return { orient:'v', ref:[11,12], pos:'GET ON THE BAR' };   // pull-ups / chin-ups
+    }
     function setTrack(t){ if(t!==lastTrack){ lastTrack=t; $('#camState').innerHTML=t; } }
 
     // Clean popup cue — a single reused slot that cross-fades. Throttled so an
@@ -590,12 +597,26 @@
       for(i=0;i<JOINTS.length;i++){ j=L[JOINTS[i]]; if(j.visibility>0.4){ ctx.beginPath(); ctx.arc(j.x*W,j.y*H,4,0,6.283); ctx.fill(); } }
 
       var cfg=POSE_CFG[cur&&cur.id]; if(!cfg){ setTrack('● Live'); return; }
+      var fam=famOf(cur.id);
+      // Anti-fake gate #1 — the WHOLE body must be visible in frame.
+      var vis=0; for(i=0;i<JOINTS.length;i++){ if(L[JOINTS[i]].visibility>0.5) vis++; }
+      if(vis<9){ setTrack('Show your whole body'); setGuide('SHOW YOUR WHOLE BODY', true); angEMA=null; phase='up'; resetRange(); return; }
+      // Anti-fake gate #2 — body must be in the right ORIENTATION for the move
+      // (you can't fake a push-up standing up, or a squat lying down).
+      var lean=torsoLean(L,W,H);
+      // Lenient margins — only reject CLEARLY wrong orientation, so real reps at
+      // odd camera angles still count.
+      var orientOK = lean==null ? true : (fam.orient==='h' ? lean>35 : lean<60);
+      if(!orientOK){ setTrack('● Tracking'); setGuide(fam.pos, true); phase='up'; resetRange(); return; }
+      // Gates passed — clear any stale "get in position" prompt.
+      if(lastGuide==='SHOW YOUR WHOLE BODY'||lastGuide===fam.pos||lastGuide==='STEP INTO FRAME'||lastGuide==='FACE THE CAMERA') setGuide(cfg.gUp);
       var raw=exAngle(L,cfg,W,H);
       if(raw==null){ setTrack('Turn so your '+cfg.label+' show'); setGuide('FACE THE CAMERA'); angEMA=null; return; }
       setTrack('● Tracking');
       angEMA = angEMA==null ? raw : angEMA*0.55 + raw*0.45;   // smooth jitter → reliable counting
       var ang=angEMA;
       repMin=Math.min(repMin,ang); repMax=Math.max(repMax,ang);
+      var refY=(L[fam.ref[0]].y+L[fam.ref[1]].y)/2; refLo=Math.min(refLo,refY); refHi=Math.max(refHi,refY);
       // Adaptive calibration: learn this person's real extended/contracted
       // angles and set thresholds from them, so it counts properly for anyone.
       if(seenHi==null){ seenHi=ang; seenLo=ang; }
@@ -612,9 +633,13 @@
         if(holdReady && !holdScored && performance.now()-downAt>650){ holdScored=true; setGuide('HOLD'); cue('Hold it!', 'good'); }
         if(ang>upTh){
           var now=performance.now();
-          // Count exactly on lockout — but only if it was a real rep: enough
-          // range of motion and not a stutter within the debounce window.
-          if(now-lastRepAt>400 && (repMax-repMin)>=MINROM){ lastRepAt=now; finishRep(cfg, holdScored); }
+          if(now-lastRepAt>400){
+            lastRepAt=now;
+            // Anti-fake gate #3 — a real rep needs full range of motion AND
+            // real body translation (not just a flicking joint).
+            if((repMax-repMin)>=MINROM && (refHi-refLo)>=MINSHIFT){ finishRep(cfg, holdScored); }
+            else { cue('Use your whole body — full rep', 'warn', true); resetRange(); }
+          }
           phase='up'; setGuide(cfg.gUp);                // locked out → lower for the next rep
         }
       }
