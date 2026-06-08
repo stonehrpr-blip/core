@@ -947,21 +947,26 @@
     .step.on .title, .step.on .copy, .step.on .tone-list { animation:none; }
   }
 
-  /* ════ Habit-pick (step 4): bigger, more appealing cards ════ */
-  .step[data-step="4"]{ overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:110px; }
-  .step[data-step="4"] .title { font-size:24px; line-height:1.06; }
-  .step[data-step="4"] .copy { font-size:12.5px; line-height:16px; margin-bottom:0; }
-  .step[data-step="4"] .habit-grid { gap:11px; margin-top:12px; }
-  .step[data-step="4"] .habit-card { min-height:120px; padding:15px 15px 14px; gap:9px; }
-  .step[data-step="4"] .habit-ico { width:46px; height:46px; border-radius:13px; }
-  .step[data-step="4"] .habit-ico svg { width:26px; height:26px; }
-  .step[data-step="4"] .habit-name { font-size:16px; }
-  .step[data-step="4"] .habit-desc { font-size:11.5px; line-height:13px; }
+  /* ════ Habit-pick (step 4): bigger, appealing cards — sized to fit, no scroll ════ */
+  .step[data-step="4"] .title { font-size:23px; line-height:1.05; }
+  .step[data-step="4"] .copy { font-size:12px; line-height:15px; margin-bottom:0; }
+  .step[data-step="4"] .habit-grid { gap:9px; margin-top:9px; }
+  .step[data-step="4"] .habit-card { min-height:104px; padding:13px 14px 12px; gap:7px; }
+  .step[data-step="4"] .habit-ico { width:42px; height:42px; border-radius:12px; }
+  .step[data-step="4"] .habit-ico svg { width:24px; height:24px; }
+  .step[data-step="4"] .habit-name { font-size:15px; }
+  .step[data-step="4"] .habit-desc { font-size:11px; line-height:13px; }
   .step[data-step="4"] .habit-badge { font-size:8.5px; padding:3px 7px; }
-  .step[data-step="4"] .habit-preview { margin-top:11px; padding:8px 13px; font-size:11.5px; }
-  /* Paywall genuinely has plan cards + benefits + Apple Pay + legal — allow it to scroll
-     (clipping the pay button would break checkout). Every other page stays no-scroll. */
-  .step[data-step="17"] { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .step[data-step="4"] .habit-preview { margin-top:9px; padding:7px 12px; font-size:11px; }
+  /* Paywall — trimmed to essentials so it fits on one screen, no scroll. */
+  .step[data-step="17"] { gap:10px; }
+  .step[data-step="17"] .title { font-size:24px; line-height:1.05; }
+  .step[data-step="17"] .copy { font-size:12.5px; line-height:16px; }
+  .step[data-step="17"] .ap-hero { margin-top:8px; padding:16px 18px; }
+  .step[data-step="17"] .ap-price-big { font-size:46px; }
+  .step[data-step="17"] .ap-list { margin-top:8px; }
+  .step[data-step="17"] .ap-list-row { min-height:50px; padding:10px 16px; }
+  .step[data-step="17"] .ap-state { margin-top:6px; }
 
   /* ============================================================
      DEMO STEPS — animated faux-UI "screen recordings" (steps 18/19/20)
@@ -2614,12 +2619,10 @@
             </button>
           </div>
           <style>
-            /* let the tone options scroll so none get cut off on short phones */
-            .step[data-step="12"]{ overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:120px; }
-            /* clean separated cards, one per tone */
+            /* clean separated cards, one per tone — sized to fit with no scroll */
             .tone-list {
-              display: flex; flex-direction: column; gap: 10px;
-              margin-top: 12px;
+              display: flex; flex-direction: column; gap: 9px;
+              margin-top: 10px;
             }
             .tone-row {
               all: unset;
@@ -2789,13 +2792,6 @@
             <div class="ap-list-row">
               <div class="ap-list-ico"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>
               <div class="ap-list-body">
-                <div class="ap-list-title">Tap-to-log slip</div>
-                <div class="ap-list-sub">Visceral lungs feedback when you fall</div>
-              </div>
-            </div>
-            <div class="ap-list-row">
-              <div class="ap-list-ico"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>
-              <div class="ap-list-body">
                 <div class="ap-list-title">5-stat life score</div>
                 <div class="ap-list-sub">Grows the days you don't</div>
               </div>
@@ -2808,29 +2804,17 @@
               </div>
             </div>
             <div class="ap-list-row">
-              <div class="ap-list-ico"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>
-              <div class="ap-list-body">
-                <div class="ap-list-title">Streak widget · leaderboard · quests</div>
-                <div class="ap-list-sub">All pro features unlocked</div>
-              </div>
-            </div>
-            <div class="ap-list-row">
               <div class="ap-list-ico" style="background:var(--accent);"><svg viewBox="0 0 24 24"><path d="M5 8l7 5 7-5M5 8v9h14V8M5 8l3-3h8l3 3"/></svg></div>
               <div class="ap-list-body">
                 <div class="ap-list-title">A letter from you · day 7</div>
-                <div class="ap-list-sub">Coach writes it to you when you make it through the first week</div>
+                <div class="ap-list-sub">Coach writes it when you make it through the first week</div>
               </div>
             </div>
           </div>
 
           <!-- Payment is collected at the very end (just before the app). Here we
                only confirm the plan — the bottom CTA starts the free trial. -->
-          <div id="applePayState" class="ap-state">$0 today · no card needed yet · you'll confirm at the very end</div>
-          <div class="ap-reassure">
-            <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
-            <span>Cancel any time in Settings <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;vertical-align:-1px;display:inline-block;"><path d="M9 6l6 6-6 6"/></svg> Apple ID <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;vertical-align:-1px;display:inline-block;"><path d="M9 6l6 6-6 6"/></svg> Subscriptions</span>
-          </div>
-          <div class="ap-cred">No ads. No selling your data. Built for people who've tried to quit before.</div>
+          <div id="applePayState" class="ap-state">$0 today · no card needed yet · cancel any time in Settings</div>
 
           <style>
             .ap-hero {
