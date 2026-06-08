@@ -23,10 +23,18 @@ _Last updated by an overnight polish pass. Tick items as they're verified on a r
 
 ## 🎨 Consistency & Polish
 - [x] Apple-touch-icon + favicons on every page (home-screen install)
+- [x] `theme-color` meta on every page (mobile browser chrome matches the dark app)
 - [x] Gallery (`97-gallery.html`) — unbuilt pages auto-marked "Soon" (no dead links)
 - [x] Every shipped page includes `core-responsive.css` (scales 390×844 to real phones)
+- [x] Player ID (`CORE-XXXX-XXXX`) confirmed generated at rank-reveal (not a stuck placeholder)
 - [ ] One palette everywhere (index blue + dashboard pillar colors)
 - [ ] No clipped buttons / cut-off content on any screen (device check)
+
+## 💳 Payment flow (single point)
+- [x] Payment collected once — at the final portal gate (paywall no longer opens a 2nd Apple Pay sheet)
+- [x] Stale `corePayPending` cleared when the card is captured (no downstream re-prompt)
+- [ ] ⚠️ Price mismatch: portal says **$4.99/mo**, paywall says **$7.99/mo / $44.99/yr** — pick one
+- [ ] Wire to real billing (currently a mockup)
 
 ## 🔌 Data & Accounts
 - [ ] Decide: stay localStorage-only or wire real cloud sync (Supabase)
