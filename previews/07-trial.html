@@ -2571,7 +2571,7 @@
           <h1 class="title">How should your<br/><span class="g">coach talk to you?</span></h1>
           <p class="copy">Pick the tone that'll keep you honest. You can change it any time.</p>
           <div class="tone-list" id="tones">
-            <button class="tone-row" data-tone="gentle">
+            <button class="tone-row" data-tone="gentle" style="--tc:#4A8FFF;">
               <div class="tone-ico"><svg viewBox="0 0 24 24"><path d="M20 12c0 5-4 8-8 8s-8-3-8-8a8 8 0 0 1 16 0Z"/><circle cx="9" cy="11" r="1"/><circle cx="15" cy="11" r="1"/><path d="M9 15c1 1 2 1.5 3 1.5s2-.5 3-1.5"/></svg></div>
               <div class="tone-body">
                 <div class="tone-name">Gentle</div>
@@ -2579,7 +2579,7 @@
               </div>
               <div class="tone-check"></div>
             </button>
-            <button class="tone-row" data-tone="balanced">
+            <button class="tone-row" data-tone="balanced" style="--tc:#34D399;">
               <div class="tone-ico"><svg viewBox="0 0 24 24"><path d="M12 3v18M4 8h16M4 16h16"/></svg></div>
               <div class="tone-body">
                 <div class="tone-name">Balanced</div>
@@ -2587,7 +2587,7 @@
               </div>
               <div class="tone-check"></div>
             </button>
-            <button class="tone-row" data-tone="direct">
+            <button class="tone-row" data-tone="direct" style="--tc:#FFCB3D;">
               <div class="tone-ico"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
               <div class="tone-body">
                 <div class="tone-name">Direct</div>
@@ -2595,7 +2595,7 @@
               </div>
               <div class="tone-check"></div>
             </button>
-            <button class="tone-row" data-tone="drill">
+            <button class="tone-row" data-tone="drill" style="--tc:#FF6B6B;">
               <div class="tone-ico"><svg viewBox="0 0 24 24"><path d="M12 2L4 7v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V7l-8-5Z"/></svg></div>
               <div class="tone-body">
                 <div class="tone-name">Drill</div>
@@ -2607,45 +2607,53 @@
           <style>
             /* let the tone options scroll so none get cut off on short phones */
             .step[data-step="12"]{ overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:120px; }
+            /* clean separated cards, one per tone */
             .tone-list {
-              display: flex; flex-direction: column;
-              background: rgba(255,255,255,0.04);
-              border-radius: 14px;
-              overflow: hidden;
-              margin-top: 8px;
+              display: flex; flex-direction: column; gap: 10px;
+              margin-top: 12px;
             }
             .tone-row {
               all: unset;
-              display: flex; align-items: center; gap: 14px;
-              padding: 14px 16px;
-              min-height: 44px;
+              display: flex; align-items: center; gap: 13px;
+              padding: 14px 15px;
+              border-radius: 16px;
+              background: rgba(255,255,255,0.035);
+              border: 1px solid rgba(255,255,255,0.09);
               cursor: pointer;
-              border-bottom: 0.5px solid rgba(255,255,255,0.08);
-              transition: background 0.12s var(--ease);
+              box-sizing: border-box;
+              transition: transform .18s var(--ease), border-color .18s, background .18s, box-shadow .18s;
               -webkit-tap-highlight-color: transparent;
             }
-            .tone-row:last-child { border-bottom: none; }
-            .tone-row:active { background: rgba(255,255,255,0.06); }
+            .tone-row:active { transform: scale(0.985); }
             .tone-ico {
-              width: 32px; height: 32px; border-radius: 8px;
-              background: color-mix(in srgb, var(--accent) 16%, transparent);
+              width: 42px; height: 42px; border-radius: 12px;
+              background: linear-gradient(140deg, color-mix(in srgb, var(--tc) 92%, white), var(--tc));
+              box-shadow: 0 5px 14px color-mix(in srgb, var(--tc) 45%, transparent),
+                          0 0 0 1px rgba(255,255,255,0.10) inset;
               display: flex; align-items: center; justify-content: center;
               flex-shrink: 0;
+              transition: transform .2s var(--ease);
             }
-            .tone-ico svg { width: 18px; height: 18px; stroke: #6BA9FF; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+            .tone-ico svg { width: 21px; height: 21px; stroke: #fff; fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
             .tone-body { flex: 1; min-width: 0; text-align: left; }
-            .tone-name { font-size: 17px; font-weight: 500; color: #fff; letter-spacing: -0.2px; }
-            .tone-desc { font-size: 13px; color: rgba(235,235,245,0.60); margin-top: 1px; }
+            .tone-name { font-size: 16px; font-weight: 700; color: #fff; letter-spacing: -0.2px; }
+            .tone-desc { font-size: 12.5px; color: rgba(235,235,245,0.58); margin-top: 2px; }
             .tone-check {
               width: 22px; height: 22px; border-radius: 50%;
-              border: 1.5px solid rgba(255,255,255,0.20);
+              border: 1.5px solid rgba(255,255,255,0.22);
               flex-shrink: 0;
               position: relative;
               transition: all 0.18s var(--ease);
             }
+            .tone-row.sel {
+              border-color: var(--tc);
+              background: color-mix(in srgb, var(--tc) 12%, rgba(255,255,255,0.035));
+              box-shadow: 0 0 0 1px var(--tc) inset, 0 8px 22px color-mix(in srgb, var(--tc) 28%, transparent);
+            }
+            .tone-row.sel .tone-ico { transform: scale(1.05); }
             .tone-row.sel .tone-check {
-              background: #0A84FF;
-              border-color: #0A84FF;
+              background: var(--tc);
+              border-color: var(--tc);
             }
             .tone-row.sel .tone-check::after {
               content: ""; position: absolute;
@@ -2655,19 +2663,6 @@
               border-bottom: 2px solid #fff;
               transform: rotate(-45deg);
             }
-            .tone-row.sel { background: rgba(10,132,255,0.10); }
-          </style>
-          <!-- tone-test entry removed: 08-coach-tone-test.html was retired (was a 404). -->
-
-          <style>
-            .tone-test-btn {
-              margin-top: 14px; width: 100%; padding: 14px;
-              background: none; border: none;
-              color: #6BA9FF; font-size: 14px; font-family: inherit; font-weight: 500;
-              cursor: pointer; letter-spacing: -0.1px;
-              text-align: center;
-            }
-            .tone-test-btn span { font-weight: 600; }
           </style>
         </div>
 
