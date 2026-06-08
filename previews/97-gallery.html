@@ -425,5 +425,28 @@
     } catch(e){}
   })();
 </script>
+<script>
+/* Mark cards that point to pages not yet built as "Soon" (dim + non-clickable),
+   so the owner index has no dead 404 links. Built list mirrors /previews/*.html. */
+(function(){
+  var BUILT = new Set(['01-index.html','03-welcome-back.html','04-sign-in.html','05-sign-in-email.html','06-sign-in-otp.html','07-trial.html','08-rank-reveal.html','09-first-chest.html','20-dashboard.html','21-quests.html','22-inventory.html','23-profile.html','24-more.html','24-ranks.html','25-settings.html','26-friends.html','26-streak.html','27-shop.html','28-chest.html','29-core-plus.html','82-legal.html','97-gallery.html','coach.html','community-guidelines.html','community.html','focus.html','gym.html','health.html','index.html','physique-scan.html','refund-policy.html','scan.html','social.html','stat.html','strength-camera.html','wallet.html','wealth.html','willpower.html']);
+  document.querySelectorAll('a.card[href]').forEach(function(a){
+    var base = (a.getAttribute('href')||'').split('#')[0].split('?')[0];
+    if (BUILT.has(base)) return;
+    a.classList.add('soon');
+    a.setAttribute('aria-disabled','true');
+    a.style.opacity = '0.4';
+    a.style.filter = 'grayscale(0.6)';
+    a.style.pointerEvents = 'none';
+    var pills = a.querySelector('.card-pills');
+    var tag = document.createElement('span');
+    tag.className = 'card-pill';
+    tag.textContent = 'Soon';
+    tag.style.background = 'rgba(255,255,255,0.08)';
+    tag.style.color = '#9AA1B7';
+    if (pills) pills.appendChild(tag); else a.appendChild(tag);
+  });
+})();
+</script>
 </body>
 </html>
