@@ -250,6 +250,32 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 @media(prefers-reduced-motion:reduce){.hot,.scan,.sug,.btn,.ex,.sheet,.scrim,.toast{transition:none!important;}}
 .fade{animation:fade .3s ease;}@keyframes fade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 @media(prefers-reduced-motion:reduce){.fade{animation:none;}}
+
+/* ── Greeting + featured + action grid (dashboard-matched) ── */
+.greet{margin:14px 2px 2px;}
+.greet-eyebrow{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:800;letter-spacing:.03em;color:var(--muted);margin-bottom:9px;}
+.greet-eyebrow .gd{width:7px;height:7px;border-radius:50%;background:var(--m-chest);box-shadow:0 0 8px var(--m-chest);}
+.greet h1{margin:0;font-size:30px;font-weight:800;letter-spacing:-0.8px;line-height:1.05;}
+.greet p{margin:5px 0 0;font-size:14px;color:var(--muted);}
+.feat{display:block;margin:16px 0 0;padding:16px 17px;border-radius:20px;text-decoration:none;color:inherit;cursor:pointer;
+  background:linear-gradient(180deg, color-mix(in srgb,var(--blue) 13%,transparent), rgba(255,255,255,0.02));
+  border:1px solid color-mix(in srgb,var(--blue) 28%,transparent);transition:transform .12s,border-color .2s;}
+.feat:active{transform:scale(.99);}
+.feat-flag{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:800;color:#5BB1FF;margin-bottom:7px;}
+.feat-flag svg{width:15px;height:15px;}
+.feat b{display:block;font-size:17px;font-weight:800;letter-spacing:-0.3px;}
+.feat span{display:block;font-size:13px;color:var(--muted);line-height:1.45;margin-top:4px;}
+.act-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:14px;}
+.act-card{display:flex;flex-direction:column;align-items:flex-start;padding:16px;border-radius:20px;text-align:left;cursor:pointer;
+  background:rgba(255,255,255,0.022);border:1px solid rgba(255,255,255,0.07);color:inherit;text-decoration:none;font:inherit;
+  transition:transform .12s,border-color .2s;}
+.act-card:active{transform:scale(.97);}
+.act-card:hover{border-color:color-mix(in srgb,var(--ac,#0A84FF) 45%,transparent);}
+.act-ic{width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;
+  color:var(--ac,#0A84FF);background:color-mix(in srgb,var(--ac,#0A84FF) 15%,transparent);border:1px solid color-mix(in srgb,var(--ac,#0A84FF) 30%,transparent);}
+.act-ic svg{width:22px;height:22px;}
+.act-card b{font-size:15.5px;font-weight:800;letter-spacing:-0.2px;}
+.act-card span{font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.35;}
 </style>
   <link rel="stylesheet" href="_lib/core-responsive.css">
   <link rel="stylesheet" href="_lib/core-responsive.css">
@@ -282,23 +308,39 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 
     <div class="scroll" id="scroll">
       <div class="pane" id="paneProgress">
-      <!-- 1. Physique scan -->
-      <a class="scan" href="physique-scan.html" aria-label="Scan your physique">
-        <div class="scan-ic">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3.2"/></svg>
-        </div>
-        <div class="scan-tx"><b>Scan Your Physique</b><span>Update your body and track progress</span></div>
-        <span class="scan-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+      <!-- Greeting -->
+      <div class="greet">
+        <div class="greet-eyebrow"><span class="gd"></span><span id="greetMeta">Strength · keep building</span></div>
+        <h1 id="greetHi">Good evening.</h1>
+        <p>What are we training today?</p>
+      </div>
+
+      <!-- Featured / Coach's pick -->
+      <a class="feat" id="featCard" href="#workout">
+        <div class="feat-flag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V4M4 4h12l-2 4 2 4H4"/></svg>Coach's Pick</div>
+        <b id="featTitle">Start your next session</b>
+        <span id="featSub">Your first session of the week sets the tone — light up the muscle map below.</span>
       </a>
 
-      <!-- 1b. Live rep counter -->
-      <a class="scan" href="strength-camera.html" aria-label="Live rep counter" style="margin-top:10px">
-        <div class="scan-ic" style="background:rgba(255,107,107,0.12);border-color:rgba(255,107,107,0.26)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:#FFB3B3"><path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
-        </div>
-        <div class="scan-tx"><b>Live Rep Counter</b><span>Count reps live · earn Strength as you go</span></div>
-        <span class="scan-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
-      </a>
+      <!-- Action grid -->
+      <div class="act-grid">
+        <a class="act-card" href="strength-camera.html" style="--ac:#FF6B6B" aria-label="Live rep counter">
+          <div class="act-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg></div>
+          <b>Live Rep Counter</b><span>Track reps on camera</span>
+        </a>
+        <a class="act-card" href="physique-scan.html" style="--ac:#0A84FF" aria-label="Physique scan">
+          <div class="act-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3.2"/></svg></div>
+          <b>Physique Scan</b><span>Rate &amp; track your body</span>
+        </a>
+        <button class="act-card" id="actQuick" type="button" style="--ac:#34D399">
+          <div class="act-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg></div>
+          <b>Quick Workout</b><span>Tap a muscle to log</span>
+        </button>
+        <button class="act-card" id="actProgram" type="button" style="--ac:#B388FF">
+          <div class="act-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></div>
+          <b>Build a Program</b><span>Your custom plan</span>
+        </button>
+      </div>
 
       <!-- 2. Muscle map — colour-coded by training; tiny inline body-type toggle -->
       <div class="sec"><h2>Muscle Map</h2><span class="meta" id="lastTrained"></span></div>
@@ -792,6 +834,31 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   renderChip(); renderDiagram(); renderWorkout();
   window.addEventListener('coreStateChange',renderChip);
   window.addEventListener('focus',function(){ renderDiagram(); });
+})();
+</script>
+<script>
+(function(){
+  var q=function(s){ return document.querySelector(s); };
+  // Time-based greeting + name
+  try{
+    var h=new Date().getHours();
+    var g=h<12?'Good morning':h<18?'Good afternoon':'Good evening';
+    var nm=''; try{ nm=(JSON.parse(localStorage.getItem('coreOnboardTrial')||'{}').name||'').trim(); }catch(e){}
+    var hi=q('#greetHi'); if(hi) hi.textContent=g+(nm?(', '+nm):'')+'.';
+  }catch(e){}
+  function sfx(n){ try{ window.coreSfx&&window.coreSfx(n); }catch(e){} }
+  function scrollTo(sel){ var el=q(sel); if(el) el.scrollIntoView({behavior:'smooth',block:'center'}); }
+  function toast(m){
+    var t=document.getElementById('gymToast');
+    if(!t){ t=document.createElement('div'); t.id='gymToast';
+      t.style.cssText='position:absolute;left:50%;bottom:96px;transform:translateX(-50%) translateY(10px);z-index:90;background:rgba(10,12,22,0.94);border:1px solid var(--border);color:var(--text);font-size:12.5px;font-weight:600;padding:10px 16px;border-radius:14px;opacity:0;transition:opacity .25s,transform .25s;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);pointer-events:none;white-space:nowrap;';
+      (q('.phone')||document.body).appendChild(t); }
+    t.textContent=m; requestAnimationFrame(function(){ t.style.opacity='1'; t.style.transform='translateX(-50%) translateY(0)'; });
+    clearTimeout(t._t); t._t=setTimeout(function(){ t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(10px)'; }, 1900);
+  }
+  var qw=q('#actQuick'); if(qw) qw.addEventListener('click', function(){ sfx('tick'); scrollTo('#figs'); });
+  var bp=q('#actProgram'); if(bp) bp.addEventListener('click', function(){ sfx('tick'); toast('Program builder is coming soon'); });
+  var fc=q('#featCard'); if(fc) fc.addEventListener('click', function(e){ e.preventDefault(); sfx('tick'); scrollTo('#workout'); });
 })();
 </script>
 </body>
