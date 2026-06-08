@@ -66,7 +66,13 @@
   .exo:active{ transform:scale(0.97); }
   .exo .ei{ width:54px; height:54px; flex:none; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px; color:var(--muted); background:rgba(255,255,255,0.04); box-shadow:inset 0 0 0 1px var(--border); }
   .exo .et{ flex:1; } .exo .et b{ font-size:16px; font-weight:800; letter-spacing:-0.3px; } .exo .et span{ display:block; font-size:11.5px; color:var(--muted); margin-top:2px; }
-  .exo .ego{ color:var(--dim); font-size:20px; }
+  .exo .ego{ color:var(--dim); font-size:20px; display:flex; align-items:center; }
+  /* variant-screen header */
+  .varhead{ display:flex; align-items:center; gap:12px; margin:2px 0 14px; }
+  .vback{ width:40px; height:40px; flex:none; border-radius:50%; border:1px solid var(--border); background:rgba(255,255,255,0.05); color:var(--text); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform .12s; }
+  .vback:active{ transform:scale(0.94); }
+  .vh-t{ flex:1; min-width:0; } .vh-t b{ display:block; font-size:19px; font-weight:800; letter-spacing:-0.4px; } .vh-t span{ font-size:12px; color:var(--muted); }
+  .vh-ic{ width:48px; height:48px; flex:none; border-radius:14px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.04); box-shadow:inset 0 0 0 1px var(--border); }
   .ratebar{ margin-top:18px; display:flex; align-items:center; gap:10px; padding:13px 15px; border-radius:16px; background:color-mix(in srgb,var(--accent) 9%,transparent); border:1px solid color-mix(in srgb,var(--accent) 30%,transparent); }
   .ratebar .rr{ font-size:12px; color:var(--text); } .ratebar .rr b{ color:var(--accent); }
 
@@ -345,17 +351,17 @@
     var mult=1, combo=0, lastRepTime=0;               // milestone multiplier + combo streak
     var MILESTONE=5, MAXMULT=5;                        // +0.1× every MILESTONE reps in the streak
     var downAt=0, holdReady=false, holdScored=false;  // hold-for-bonus
-    var lastCueTxt='', lastCueAt=0, uiRunning=false;
+    var lastCueTxt='', lastCueAt=0, uiRunning=false, _mw=-1, _ml='';
     var angEMA=null, cueTimer=null, lastDetect=0, lastGuide='';
     var seenHi=null, seenLo=null;                     // adaptive calibration (per-person range)
     var lastL=null, camW=0, camH=0;                   // for popping numbers out of the body
-    var DETECT_MS=66;  // cap pose inference to ~15fps — smooth, low-lag, plenty for reps
+    var DETECT_MS=85;  // cap pose inference to ~12fps — lower lag, plenty for reps
     // Minimal skeleton: body limbs only (no face mesh), hand-drawn (cheaper than DrawingUtils).
     var BODY=[[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],[23,25],[25,27],[24,26],[26,28]];
     var JOINTS=[11,12,13,14,15,16,23,24,25,26,27,28];
     var xpInto=0, xpNeed=150, xpLevel=1, xpShown=0;   // XP bar + level
     var MINROM=30;                                     // min range of motion (deg) to count a rep
-    var refLo=1, refHi=0, MINSHIFT=0.04;               // body must actually translate (anti-fake)
+    var refLo=1, refHi=0, MINSHIFT=0.03;               // body must actually translate (anti-fake)
 
     function angleAt(L,a,b,c,W,H){
       var ax=L[a].x*W, ay=L[a].y*H, bx=L[b].x*W, by=L[b].y*H, cx=L[c].x*W, cy=L[c].y*H;
@@ -476,14 +482,14 @@
     function stopUI(){ uiRunning=false; }
     function uiLoop(){
       if(!uiRunning) return;
+      // Only touch the DOM when a value actually changed (avoids per-frame thrash).
       if(Math.abs(points-ptsShown)>0.5){ ptsShown += (points-ptsShown)*0.18; $('#pts').textContent=Math.round(ptsShown).toLocaleString(); }
       else if(ptsShown!==points){ ptsShown=points; $('#pts').textContent=points.toLocaleString(); }
-      // Multiplier bar = progress toward the next milestone (+0.1×).
-      $('#multiFill').style.width=((combo%MILESTONE)/MILESTONE*100)+'%';
-      $('#multiLbl').textContent='×'+mult.toFixed(1);
-      // XP bar — smooth fill + boost state when the multiplier is hot.
+      var mw=Math.round((combo%MILESTONE)/MILESTONE*100);
+      if(mw!==_mw){ _mw=mw; $('#multiFill').style.width=mw+'%'; }
+      var ml='×'+mult.toFixed(1); if(ml!==_ml){ _ml=ml; $('#multiLbl').textContent=ml; }
       var xpT=Math.max(0,Math.min(100, xpInto/xpNeed*100));
-      xpShown += (xpT-xpShown)*0.2; $('#xpFill').style.width=xpShown.toFixed(1)+'%';
+      if(Math.abs(xpT-xpShown)>0.3){ xpShown += (xpT-xpShown)*0.2; $('#xpFill').style.width=xpShown.toFixed(1)+'%'; }
       $('#xpWrap').classList.toggle('boost', mult>=1.5);
       // "Can't stop for >10s" — warn in the last 3s, then break the streak.
       if(poseRunning && combo>0 && lastRepTime){
@@ -503,31 +509,35 @@
     }
     // Stage 1 — the three movements.
     function renderCats(){
-      pickStage='cat'; $('#pickLead').textContent='Pick a movement';
+      pickStage='cat';
+      $('#pickLead').style.display=''; $('#pickLead').textContent='Pick a movement';
       $('#exsel').innerHTML = CATS.map(function(c){
-        return '<div class="exo" data-cat="'+c.id+'" style="--c:'+c.c+'"><div class="ei" style="color:'+c.c+'">'+c.emoji+'</div><div class="et"><b>'+c.name+'</b><span>'+c.sub+'</span></div><div class="ego">'+GI.chevron+'</div></div>';
+        return '<div class="exo" data-cat="'+c.id+'"><div class="ei" style="color:'+c.c+'">'+c.emoji+'</div><div class="et"><b>'+c.name+'</b><span>'+c.sub+'</span></div><div class="ego">'+GI.chevron+'</div></div>';
       }).join('');
-      Array.prototype.forEach.call(document.querySelectorAll('.exo'), function(x){ x.addEventListener('click', function(){ openCat(x.getAttribute('data-cat')); }); });
+      Array.prototype.forEach.call(document.querySelectorAll('#exsel .exo'), function(x){ x.addEventListener('click', function(){ openCat(x.getAttribute('data-cat')); }); });
+      var pk=$('#pick'); if(pk) pk.scrollTop=0;
     }
-    // Stage 2 — variants of the chosen movement (+ a back row).
+    // Stage 2 — variants of the chosen movement, with a proper header.
     function openCat(id){
       var c=CATS.find(function(k){ return k.id===id; }); if(!c) return;
-      pickStage='var'; sfx('tick'); $('#pickLead').textContent=c.name+' — choose a variant';
-      var html='<div class="exo back" data-back="1"><div class="ei">'+GI.cleft+'</div><div class="et"><b>All movements</b><span>Push · Pull · Squat</span></div></div>';
+      pickStage='var'; sfx('tick'); $('#pickLead').style.display='none';
+      var html='<div class="varhead"><button type="button" class="vback" id="vBack" aria-label="Back to movements">'+GI.cleft+'</button>'+
+        '<div class="vh-t"><b>'+c.name+'</b><span>Choose a variant</span></div>'+
+        '<div class="vh-ic" style="color:'+c.c+'">'+c.emoji+'</div></div>';
       html+=c.modes.map(function(mid){
         var e=EXOS.find(function(x){ return x.id===mid; }); if(!e) return '';
         var nm=e.name.replace('Standard ','');
-        return '<div class="exo" data-id="'+e.id+'" style="--c:'+e.c+'"><div class="ei" style="color:'+e.c+'">'+e.emoji+'</div><div class="et"><b>'+nm+'</b><span>'+e.sub+'</span></div><div class="ego">'+GI.chevron+'</div></div>';
+        return '<div class="exo" data-id="'+e.id+'"><div class="ei" style="color:'+e.c+'">'+e.emoji+'</div><div class="et"><b>'+nm+'</b><span>'+e.sub+'</span></div><div class="ego">'+GI.chevron+'</div></div>';
       }).join('');
       $('#exsel').innerHTML=html;
-      Array.prototype.forEach.call(document.querySelectorAll('.exo'), function(x){
-        x.addEventListener('click', function(){ if(x.getAttribute('data-back')){ renderCats(); } else { startSession(x.getAttribute('data-id')); } });
-      });
+      $('#vBack').addEventListener('click', function(){ renderCats(); });
+      Array.prototype.forEach.call(document.querySelectorAll('#exsel .exo'), function(x){ x.addEventListener('click', function(){ startSession(x.getAttribute('data-id')); }); });
+      var pk=$('#pick'); if(pk) pk.scrollTop=0;
     }
 
     function startSession(id){
       cur=EXOS.find(function(e){ return e.id===id; });
-      reps=0; points=0; ptsShown=0; mult=1; combo=0; lastRepTime=0; lastRepAt=0; phase='up'; angEMA=null; seenHi=null; seenLo=null; lastGuide=''; lastL=null; resetRange();
+      reps=0; points=0; ptsShown=0; mult=1; combo=0; lastRepTime=0; lastRepAt=0; phase='up'; angEMA=null; seenHi=null; seenLo=null; lastGuide=''; lastL=null; _mw=-1; _ml=''; resetRange();
       xpInto=0; xpNeed=150; xpLevel=1; xpShown=0;
       sfx('confirm'); haptic();
       document.documentElement.style.setProperty('--str', cur.c);
@@ -568,7 +578,7 @@
     async function toggleCam(){
       if(stream){ stopCam(); return; }
       try{
-        stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:'user', width:{ ideal:480 }, height:{ ideal:640 }, frameRate:{ ideal:30 } }, audio:false });
+        stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:'user', width:{ ideal:360 }, height:{ ideal:480 }, frameRate:{ ideal:24 } }, audio:false });
         $('#vid').srcObject=stream; $('#silho').style.display='none';
         lastTrack=''; setTrack(GI.dot+' Live'); $('#camToggle').innerHTML=GI.camera+' Camera on';
         startPose();
@@ -659,18 +669,13 @@
 
       var cfg=POSE_CFG[cur&&cur.id]; if(!cfg){ setTrack('● Live'); return; }
       var fam=famOf(cur.id);
-      // Anti-fake gate #1 — the WHOLE body must be visible in frame.
-      var vis=0; for(i=0;i<JOINTS.length;i++){ if(L[JOINTS[i]].visibility>0.5) vis++; }
-      if(vis<9){ setTrack('Show your whole body'); setGuide('SHOW YOUR WHOLE BODY', true); angEMA=null; phase='up'; resetRange(); return; }
-      // Anti-fake gate #2 — body must be in the right ORIENTATION for the move
-      // (you can't fake a push-up standing up, or a squat lying down).
-      var lean=torsoLean(L,W,H);
-      // Lenient margins — only reject CLEARLY wrong orientation, so real reps at
-      // odd camera angles still count.
-      var orientOK = lean==null ? true : (fam.orient==='h' ? lean>35 : lean<60);
-      if(!orientOK){ setTrack('● Tracking'); setGuide(fam.pos, true); phase='up'; resetRange(); return; }
-      // Gates passed — clear any stale "get in position" prompt.
-      if(lastGuide==='SHOW YOUR WHOLE BODY'||lastGuide===fam.pos||lastGuide==='STEP INTO FRAME'||lastGuide==='FACE THE CAMERA') setGuide(cfg.gUp);
+      // Anti-fake gate #1 — your core body (both shoulders + both hips) must be
+      // in frame, so you can't game it with just an arm. No orientation gate:
+      // push-ups viewed from a floor phone read as "vertical" and were wrongly
+      // rejected. The real-movement + range gates below stop the actual fakes.
+      var coreVis = L[11].visibility>0.5 && L[12].visibility>0.5 && L[23].visibility>0.4 && L[24].visibility>0.4;
+      if(!coreVis){ setTrack('Show your whole body'); setGuide('SHOW YOUR WHOLE BODY', true); angEMA=null; phase='up'; resetRange(); return; }
+      if(lastGuide==='SHOW YOUR WHOLE BODY'||lastGuide==='STEP INTO FRAME'||lastGuide==='FACE THE CAMERA') setGuide(cfg.gUp);
       var raw=exAngle(L,cfg,W,H);
       if(raw==null){ setTrack('Turn so your '+cfg.label+' show'); setGuide('FACE THE CAMERA'); angEMA=null; return; }
       setTrack('● Tracking');
