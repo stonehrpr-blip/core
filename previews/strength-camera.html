@@ -75,7 +75,11 @@
   .live{ position:absolute; inset:0; z-index:70; display:none; flex-direction:column; }
   .live.on{ display:flex; }
   .cam{ position:absolute; inset:0; z-index:0; background:#06060d; overflow:hidden; }
-  .cam video{ width:100%; height:100%; object-fit:cover; transform:scaleX(-1); opacity:0.55; }
+  .cam video{ width:100%; height:100%; object-fit:cover; transform:scaleX(-1); opacity:0.55; transition:opacity .3s; }
+  /* Skeleton overlay — sized to the video's intrinsic resolution and given the
+     SAME object-fit/mirror as the video so landmarks line up exactly. */
+  #pose{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transform:scaleX(-1); z-index:1; pointer-events:none; }
+  .cam.tracking video{ opacity:0.95; }
   .cam .silho{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
   .cam .scan{ position:absolute; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--accent),transparent); box-shadow:0 0 14px color-mix(in srgb,var(--accent) 70%,transparent); animation:scan 3s ease-in-out infinite; }
   @keyframes scan{ 0%,100%{top:14%;} 50%{top:80%;} }
@@ -90,6 +94,8 @@
   .counter .cnum.bump{ animation:bump .25s ease; } @keyframes bump{ 0%{transform:scale(1);} 40%{transform:scale(1.18);} 100%{transform:scale(1);} }
   .counter .cgain{ font-size:14px; color:var(--accent); font-weight:700; margin-top:4px; }
   .counter .cfeed{ font-size:14px; color:var(--text); margin-top:14px; min-height:20px; font-weight:600; }
+  .counter .formfb{ font-size:12.5px; font-weight:700; margin-top:6px; min-height:16px; letter-spacing:-0.1px; }
+  .counter .formfb.ok{ color:#34D399; } .counter .formfb.warn{ color:#FF9F45; }
 
   .livebtns{ position:relative; z-index:5; padding:0 20px 36px; display:flex; flex-direction:column; gap:11px; }
   .repbtn{ width:100%; border:none; border-radius:22px; padding:24px; font-size:20px; font-weight:800; letter-spacing:-0.3px; color:#fff; cursor:pointer; background:var(--accent); box-shadow:0 14px 36px rgba(10,132,255,0.35); transition:transform .08s; user-select:none; }
@@ -135,6 +141,7 @@
       <div class="live" id="live">
         <div class="cam" id="cam">
           <video id="vid" autoplay playsinline muted></video>
+          <canvas id="pose"></canvas>
           <div class="silho" id="silho"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:64px;height:64px"><circle cx="12" cy="5" r="2.5"/><path d="M12 8v7M12 15l-3 6M12 15l3 6M7 11h10"/></svg></div>
           <div class="scan"></div>
         </div>
@@ -148,11 +155,12 @@
           <div class="cnum" id="cnum">0</div>
           <div class="cgain" id="cgain">+0.00 Strength</div>
           <div class="cfeed" id="cfeed">Let's go</div>
+          <div class="formfb" id="formFb"></div>
         </div>
         <div class="livebtns">
           <button class="repbtn" id="repBtn">+1 REP</button>
-          <div class="camhint" id="camHint">Tap to count each rep · auto-detect coming soon</div>
-          <div class="row2"><button class="gb" id="camToggle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px"><path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg> Turn on camera</button><button class="gb fin" id="finBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px"><path d="M5 12l4 4 10-11"/></svg> Finish</button></div>
+          <div class="camhint" id="camHint">Tap to count each rep · turn on camera for auto-tracking</div>
+          <div class="row2"><button class="gb" id="camToggle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px"><path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg> Turn on camera</button><button class="gb" id="autoBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg> Auto</button><button class="gb fin" id="finBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px"><path d="M5 12l4 4 10-11"/></svg> Finish</button></div>
         </div>
       </div>
 
@@ -176,6 +184,37 @@
   <script src="_lib/core-strength.js"></script>
   <script src="_lib/dash-ambient.js"></script>
   <script src="_lib/core-help.js"></script>
+  <!-- Pose model loader (ES module, lazy). Pulls MediaPipe Tasks-Vision +
+       the lightweight pose model from a CDN only when auto-tracking is first
+       enabled. All inference runs on-device; no frames ever leave the phone.
+       If the CDN/model can't load, the page falls back to manual rep tapping. -->
+  <script type="module">
+    let _p = null;
+    async function load(){
+      if (_p) return _p;
+      _p = (async () => {
+        const V = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
+        const m = await import(V);
+        const fileset = await m.FilesetResolver.forVisionTasks(V + "/wasm");
+        let landmarker;
+        try {
+          landmarker = await m.PoseLandmarker.createFromOptions(fileset, {
+            baseOptions: { modelAssetPath: "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task", delegate: "GPU" },
+            runningMode: "VIDEO", numPoses: 1,
+          });
+        } catch (e) {
+          // Some devices have no WebGL/GPU delegate — retry on CPU.
+          landmarker = await m.PoseLandmarker.createFromOptions(fileset, {
+            baseOptions: { modelAssetPath: "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task", delegate: "CPU" },
+            runningMode: "VIDEO", numPoses: 1,
+          });
+        }
+        return { landmarker, PoseLandmarker: m.PoseLandmarker, DrawingUtils: m.DrawingUtils };
+      })();
+      return _p;
+    }
+    window.PoseKit = { load };
+  </script>
   <script>
   (function(){
     "use strict";
@@ -207,6 +246,55 @@
 
     var plus=S.isPlus(), rate=S.perRep();
     var cur=null, reps=0, stream=null;
+
+    // ── Pose tracking state ──────────────────────────────────────────────
+    // BlazePose 33-landmark indices: 11/12 shoulders, 13/14 elbows, 15/16
+    // wrists, 23/24 hips, 25/26 knees, 27/28 ankles.
+    var auto=true, poseRunning=false, pk=null, ctx=null, draw=null;
+    var phase='up', repMin=180, repMax=0, lastRepAt=0, lastTrack='';
+
+    function angleAt(L,a,b,c,W,H){
+      var ax=L[a].x*W, ay=L[a].y*H, bx=L[b].x*W, by=L[b].y*H, cx=L[c].x*W, cy=L[c].y*H;
+      var v1x=ax-bx, v1y=ay-by, v2x=cx-bx, v2y=cy-by;
+      var m1=Math.hypot(v1x,v1y), m2=Math.hypot(v2x,v2y);
+      if(m1===0||m2===0) return null;
+      var cos=Math.max(-1,Math.min(1,(v1x*v2x+v1y*v2y)/(m1*m2)));
+      return Math.acos(cos)*180/Math.PI;
+    }
+    // Average the named joint angle over whichever side(s) are clearly visible.
+    function exAngle(L,cfg,W,H){
+      var vals=[];
+      cfg.joints.forEach(function(j){
+        var vis=Math.min(L[j[0]].visibility,L[j[1]].visibility,L[j[2]].visibility);
+        if(vis>0.5){ var a=angleAt(L,j[0],j[1],j[2],W,H); if(a!=null) vals.push(a); }
+      });
+      if(!vals.length) return null;
+      return vals.reduce(function(s,x){return s+x;},0)/vals.length;
+    }
+    // Torso lean from vertical (0° = upright). Used for squat "chest up" cue.
+    function torsoLean(L,W,H){
+      if(Math.min(L[11].visibility,L[12].visibility,L[23].visibility,L[24].visibility)<0.4) return null;
+      var sx=(L[11].x+L[12].x)/2*W, sy=(L[11].y+L[12].y)/2*H;
+      var hx=(L[23].x+L[24].x)/2*W, hy=(L[23].y+L[24].y)/2*H;
+      return Math.abs(Math.atan2(sx-hx, -(sy-hy)))*180/Math.PI;
+    }
+
+    // Per-exercise rep + form model. A rep = a full flex→extend cycle: the
+    // tracked joint angle drops below `down`, then rises back above `up`.
+    var POSE_CFG={
+      pushups:{ joints:[[12,14,16],[11,13,15]], down:95, up:155, label:'arms',
+        summary:function(mn){ return mn>108 ? {t:'Go lower — full range',ok:false} : {t:'Clean rep',ok:true}; },
+        live:function(L,W,H){ var a=angleAt(L,12,24,26,W,H); if(a!=null&&a<150) return {t:'Keep hips in line with your back',ok:false}; return null; } },
+      squats:{  joints:[[24,26,28],[23,25,27]], down:100, up:160, label:'legs',
+        summary:function(mn){ return mn>112 ? {t:'Squat deeper next rep',ok:false} : {t:'Good depth',ok:true}; },
+        live:function(L,W,H){ var t=torsoLean(L,W,H); if(t!=null&&t>48) return {t:'Chest up — sit back',ok:false}; return null; } },
+      pullups:{ joints:[[12,14,16],[11,13,15]], down:80, up:150, label:'arms',
+        summary:function(mn,mx){ return mx<145 ? {t:'Lower to a full hang',ok:false} : (mn>92?{t:'Pull a little higher',ok:false}:{t:'Strong pull',ok:true}); },
+        live:function(){ return null; } }
+    };
+    function resetRange(){ repMin=180; repMax=0; }
+    function setTrack(t){ if(t!==lastTrack){ lastTrack=t; $('#camState').innerHTML=t; } }
+    function showForm(t,ok){ var f=$('#formFb'); f.textContent=t; f.className='formfb '+(ok?'ok':'warn'); }
 
     function initSelect(){
       $('#plusBadge').textContent = plus ? '5× CORE+' : '1× RATE';
@@ -240,14 +328,24 @@
       try{
         stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:'user' }, audio:false });
         $('#vid').srcObject=stream; $('#silho').style.display='none';
-        $('#camState').innerHTML=GI.dot+' Live'; $('#camToggle').innerHTML=GI.camera+' Camera on';
-        $('#camHint').textContent='Tap +1 REP for each rep · pose-detection upgrade later';
+        lastTrack=''; $('#camState').innerHTML=GI.dot+' Live'; $('#camToggle').innerHTML=GI.camera+' Camera on';
+        $('#camHint').textContent = auto ? 'Auto-counting your reps · +1 REP still works as backup' : 'Tap +1 REP for each rep · Auto is off';
+        if(auto) startPose();
       }catch(e){
         $('#camState').textContent='Camera blocked'; $('#camHint').textContent='No camera access — tap counting still works';
         sfx('warn');
       }
     }
-    function stopCam(){ if(stream){ stream.getTracks().forEach(function(t){ t.stop(); }); stream=null; } $('#vid').srcObject=null; $('#silho').style.display='flex'; $('#camState').textContent='Camera off'; $('#camToggle').innerHTML=GI.camera+' Turn on camera'; }
+    function stopCam(){ stopPose(); if(stream){ stream.getTracks().forEach(function(t){ t.stop(); }); stream=null; } $('#vid').srcObject=null; $('#silho').style.display='flex'; lastTrack=''; $('#camState').textContent='Camera off'; $('#camToggle').innerHTML=GI.camera+' Turn on camera'; }
+    function setAuto(on){
+      auto=on;
+      $('#autoBtn').style.background = on ? 'color-mix(in srgb,var(--accent) 22%,transparent)' : 'rgba(255,255,255,0.05)';
+      $('#autoBtn').style.borderColor = on ? 'color-mix(in srgb,var(--accent) 45%,transparent)' : 'var(--border)';
+      if(stream){ // camera already on — start/stop tracking immediately
+        if(on){ startPose(); $('#camHint').textContent='Auto-counting your reps · +1 REP still works as backup'; }
+        else { stopPose(); setTrack(GI.dot+' Live'); $('#camHint').textContent='Tap +1 REP for each rep · Auto is off'; }
+      }
+    }
 
     function finish(){
       stopCam();
@@ -266,6 +364,71 @@
       $('#sumAgain').addEventListener('click', function(){ $('#sumScrim').classList.remove('show'); $('#sumSheet').classList.remove('show'); $('#live').classList.remove('on'); $('#pick').style.display='block'; cur=null; reps=0; });
     }
 
+    // ── Pose loop ────────────────────────────────────────────────────────
+    var poseStarting=false;
+    async function startPose(){
+      if(poseRunning||poseStarting) return;
+      if(!window.PoseKit){ $('#camHint').textContent='Auto-tracking not supported here — tap +1 REP'; return; }
+      poseStarting=true;
+      setTrack(GI.dot+' Loading model…');
+      try{ pk=await window.PoseKit.load(); }
+      catch(e){ pk=null; poseStarting=false; setTrack('● Live'); $('#camHint').textContent='Auto-tracking unavailable — tap +1 REP'; return; }
+      poseStarting=false;
+      if(!stream||!auto){ return; } // user turned camera off / disabled auto while the model loaded
+      var cv=$('#pose'); ctx=cv.getContext('2d'); draw=new pk.DrawingUtils(ctx);
+      $('#cam').classList.add('tracking');
+      poseRunning=true; phase='up'; resetRange();
+      requestAnimationFrame(poseLoop);
+    }
+    function stopPose(){
+      poseRunning=false; var cv=$('#pose'); if(cv&&ctx){ ctx.clearRect(0,0,cv.width,cv.height); }
+      $('#cam').classList.remove('tracking'); $('#formFb').textContent=''; lastTrack='';
+    }
+    function poseLoop(){
+      if(!poseRunning||!stream||!pk){ return; }
+      var v=$('#vid'), cv=$('#pose');
+      if(v.readyState>=2 && v.videoWidth){
+        if(cv.width!==v.videoWidth){ cv.width=v.videoWidth; cv.height=v.videoHeight; }
+        try{
+          var res=pk.landmarker.detectForVideo(v, performance.now());
+          handlePose(res, cv);
+        }catch(e){ /* skip this frame */ }
+      }
+      requestAnimationFrame(poseLoop);
+    }
+    function handlePose(res, cv){
+      var W=cv.width, H=cv.height;
+      ctx.clearRect(0,0,W,H);
+      var L=res&&res.landmarks&&res.landmarks[0];
+      if(!L){ setTrack('Step back — get your whole body in frame'); return; }
+      // Skeleton (canvas shares the video's object-fit + mirror via CSS, so
+      // normalized landmarks line up with the person on screen).
+      draw.drawConnectors(L, pk.PoseLandmarker.POSE_CONNECTIONS, { color:'rgba(255,255,255,0.85)', lineWidth:4 });
+      draw.drawLandmarks(L, { color:'#02030A', fillColor:(cur&&cur.c)||'#0A84FF', radius:5, lineWidth:2 });
+
+      var cfg=POSE_CFG[cur&&cur.id]; if(!cfg) { setTrack('● Live'); return; }
+      var ang=exAngle(L,cfg,W,H);
+      if(ang==null){ setTrack('Turn so your '+cfg.label+' are visible'); return; }
+      setTrack('● Tracking');
+      repMin=Math.min(repMin,ang); repMax=Math.max(repMax,ang);
+      // Live posture cue (formFb line). Cleared when posture is fine.
+      var lc=cfg.live(L,W,H); showForm(lc?lc.t:'', lc?lc.ok:true);
+      // Rep state machine with a debounce so a single rep can't double-count.
+      if(phase==='up' && ang<cfg.down){ phase='down'; }
+      else if(phase==='down' && ang>cfg.up){
+        var now=performance.now();
+        if(now-lastRepAt>450){ lastRepAt=now; onPoseRep(cfg); }
+        phase='up';
+      }
+    }
+    function onPoseRep(cfg){
+      addRep();
+      // Per-rep quality summary goes on the encouragement line (cfeed).
+      var s=cfg.summary(repMin,repMax);
+      if(s){ var c=$('#cfeed'); c.textContent=s.t; c.style.color=s.ok?'#34D399':'#FF9F45'; }
+      resetRange();
+    }
+
     function init(){
       initSelect();
       // "?" help sheet
@@ -274,17 +437,19 @@
           window.coreHelp.attach('helpBtn',{
             title:'Live Rep Counter',
             bullets:[
-              'Pick an exercise, then tap "Turn on camera" to train with the live view.',
-              'Tap "+1 REP" for each rep you complete — the counter tracks your set.',
+              'Pick an exercise, then tap "Turn on camera". With Auto on, CORE tracks your joints and counts every rep for you.',
+              'A skeleton overlay shows what the tracker sees; form cues (e.g. "squat deeper", "chest up") appear as you move.',
+              'Tap "Auto" to switch tracking on/off. "+1 REP" always works as a manual backup.',
               'Every rep earns Strength live; CORE+ members earn it 5× faster.',
-              'Tap "Finish" to log your reps to your Strength score and earn XP.',
-              'No camera access? Tap counting still works — your reps still count.'
+              'All tracking runs on your device — camera frames never leave your phone. No camera? Tap counting still works.'
             ]
           });
         }
       }catch(e){}
       $('#repBtn').addEventListener('click', addRep);
       $('#camToggle').addEventListener('click', toggleCam);
+      $('#autoBtn').addEventListener('click', function(){ setAuto(!auto); sfx('tick'); });
+      setAuto(true); // reflect default ON styling
       $('#finBtn').addEventListener('click', function(){ if(reps===0){ if(!confirm('No reps yet — leave?')) return; stopCam(); location.href='gym.html'; return; } finish(); });
       $('#backBtn').addEventListener('click', function(){ stopCam(); sfx('tick'); if($('#live').classList.contains('on') && reps>0){ if(!confirm('Leave without saving these reps?')) return; } location.href='gym.html'; });
       window.addEventListener('pagehide', stopCam);
