@@ -6,8 +6,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <style>
 :root{ --bg:#02020A; --card:rgba(255,255,255,0.035); --border:rgba(255,255,255,0.08);
-  --text:#F8FAFE; --muted:#9AA1B7; --dim:#4F5570; --blue:#0A84FF; --blue-3:#5BB1FF;
-  --green:#34D399; --orange:#FF7A45; --pink:#FF6B7E; --grad-b:#6F70FF; }
+  --text:#F8FAFE; --muted:#9AA1B7; --dim:#4F5570; --accent:#0A84FF; --blue:#0A84FF; --blue-3:#5BB1FF;
+  --green:#34D399; --orange:#FF7A45; --pink:#FF6B7E; }
 *{box-sizing:border-box;}
 html,body{margin:0;height:100%;}
 body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify-content:center;
@@ -15,10 +15,14 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   -webkit-font-smoothing:antialiased;padding:24px;overflow:hidden;}
 .phone{position:relative;width:390px;height:844px;background:var(--bg);border-radius:56px;overflow:hidden;
   box-shadow:0 40px 100px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.06),0 0 0 10px #0a0a12,0 0 0 11px #2b2b38;}
-.amb{position:absolute;inset:0;z-index:0;background:
-  radial-gradient(60% 35% at 50% 25%,rgba(47,143,255,.18),transparent 55%),
+
+/* ── Ambient (matches dashboard: gradient + star canvas) ── */
+#ambBg{position:absolute;inset:0;z-index:0;background:
+  radial-gradient(60% 35% at 50% 25%,rgba(10,132,255,.18),transparent 55%),
   radial-gradient(50% 30% at 50% 100%,rgba(159,143,255,.10),transparent 65%),
-  linear-gradient(180deg,#060B26,#02020A 50%,#050510);}
+  linear-gradient(180deg,#070713,#02020A 50%,#050510);}
+#ambCelestial{position:absolute;inset:0;pointer-events:none;z-index:1;}
+
 .frame{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;}
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:54px 18px 12px;}
 .tb-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:var(--card);
@@ -31,43 +35,68 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .eyebrow{font-size:10px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);}
 .h1{font-size:25px;font-weight:800;letter-spacing:-.4px;line-height:1.15;}
 .muted{color:var(--muted);font-size:13px;line-height:1.5;}
-.btn{width:100%;padding:15px;border-radius:15px;border:none;font:inherit;font-size:15px;font-weight:800;
-  cursor:pointer;color:#02030A;background:var(--blue);box-shadow:0 8px 22px rgba(10,132,255,.32);}
-.btn:active{transform:scale(.98);}
-.link{background:none;border:none;color:var(--muted);font:inherit;font-size:13px;font-weight:700;cursor:pointer;padding:14px;}
 
-/* consent */
-.crow{display:flex;gap:13px;padding:14px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid var(--border);margin-bottom:10px;text-align:left;}
-.crow .ic{width:34px;height:34px;flex:none;border-radius:10px;display:flex;align-items:center;justify-content:center;
-  background:rgba(10,132,255,.10);border:1px solid rgba(10,132,255,.22);}
-.crow b{display:block;font-size:14px;font-weight:800;margin-bottom:3px;}
+/* ── Buttons (matched to trial.html .cta) ── */
+.btn{width:100%;padding:18px 24px;border-radius:999px;border:none;color:#fff;font:inherit;font-size:17px;font-weight:700;
+  letter-spacing:-.32px;background:var(--accent);text-shadow:0 1px 2px rgba(0,0,0,.40);
+  box-shadow:0 12px 30px rgba(0,0,0,.35),0 1px 0 rgba(255,255,255,.12) inset;
+  display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:transform .12s,filter .2s;}
+.btn:hover{filter:brightness(1.10);}
+.btn:active{transform:scale(.985);filter:brightness(.85);}
+.btn svg{width:18px;height:18px;stroke:#fff;}
+.btn.ghost{background:rgba(255,255,255,.06);box-shadow:none;border:1px solid var(--border);color:var(--text);}
+.btn.ghost svg{stroke:var(--text);}
+.link{background:none;border:none;color:var(--muted);font:inherit;font-size:13px;font-weight:700;cursor:pointer;padding:14px;width:100%;}
+
+/* ── Consent (how your photo is handled) ── */
+.crow{display:flex;gap:13px;padding:15px;border-radius:18px;background:rgba(255,255,255,.035);border:1px solid var(--border);margin-bottom:11px;text-align:left;}
+.crow .ic{width:40px;height:40px;flex:none;border-radius:13px;display:flex;align-items:center;justify-content:center;}
+.crow .ic svg{width:20px;height:20px;}
+.crow b{display:block;font-size:14.5px;font-weight:800;margin-bottom:3px;}
 .crow span{color:var(--muted);font-size:12.5px;line-height:1.45;}
 
-/* camera */
-.cam{flex:1;margin:8px 18px 0;border-radius:24px;overflow:hidden;border:1px solid rgba(10,132,255,.25);position:relative;
+/* ── Capture (two buttons) ── */
+.guidebox{flex:none;height:286px;margin:10px 18px 0;border-radius:24px;overflow:hidden;border:1px solid rgba(10,132,255,.25);position:relative;
   background:radial-gradient(120% 80% at 50% 20%,#0e1430,#06070f);}
-.cam video{width:100%;height:100%;object-fit:cover;}
-.guide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;}
-.scanline{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--blue),transparent);
-  box-shadow:0 0 14px var(--blue);animation:scan 3s ease-in-out infinite;}
-@keyframes scan{0%,100%{top:14%;}50%{top:82%;}}
-.camfoot{display:flex;flex-direction:column;align-items:center;gap:14px;padding:18px 0 24px;}
-.tips{color:var(--muted);font-size:12px;}
-.shutter{width:74px;height:74px;border-radius:50%;border:3px solid var(--blue);background:rgba(10,132,255,.12);
-  display:flex;align-items:center;justify-content:center;cursor:pointer;}
-.shutter .in{width:56px;height:56px;border-radius:50%;background:#F8FAFE;}
-.spin{width:42px;height:42px;border-radius:50%;border:3px solid rgba(10,132,255,.25);border-top-color:var(--blue);animation:sp 1s linear infinite;}
-@keyframes sp{to{transform:rotate(360deg);}}
+.guidebox .guide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+.tips{color:var(--muted);font-size:12.5px;text-align:center;}
 
-/* results */
-.rank{display:flex;flex-direction:column;align-items:center;padding:24px;border-radius:22px;
-  background:rgba(10,132,255,.06);border:1px solid rgba(10,132,255,.22);}
+/* ── Scanning the photo ── */
+.scanwrap{flex:1;position:relative;margin:10px 18px 18px;border-radius:24px;overflow:hidden;border:1px solid rgba(10,132,255,.3);background:#06070f;min-height:0;}
+.scanwrap img{width:100%;height:100%;object-fit:cover;display:block;}
+.scanline{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--blue),transparent);
+  box-shadow:0 0 16px var(--blue);animation:scan 2.4s ease-in-out infinite;z-index:3;}
+@keyframes scan{0%,100%{top:10%;}50%{top:86%;}}
+.marker{position:absolute;transform:translate(-50%,-50%);opacity:0;z-index:4;animation:markIn .45s cubic-bezier(.2,1.4,.4,1) forwards;color:var(--blue);}
+@keyframes markIn{from{opacity:0;transform:translate(-50%,-50%) scale(.4);}to{opacity:1;transform:translate(-50%,-50%) scale(1);}}
+.marker .ring{display:block;width:15px;height:15px;border-radius:50%;border:2px solid currentColor;box-shadow:0 0 12px currentColor;position:relative;}
+.marker .ring::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:1.5px solid currentColor;animation:ringPulse 1.5s ease-out infinite;}
+@keyframes ringPulse{from{transform:scale(.6);opacity:.7;}to{transform:scale(1.7);opacity:0;}}
+.marker .mlabel{position:absolute;left:22px;top:50%;transform:translateY(-50%);white-space:nowrap;font-size:11px;font-weight:800;
+  color:#fff;background:rgba(0,0,0,.55);border:1px solid var(--border);padding:3px 9px;border-radius:8px;backdrop-filter:blur(6px);}
+.analyzing{position:absolute;left:0;right:0;bottom:0;padding:18px 16px 20px;background:linear-gradient(transparent,rgba(2,2,10,.94));z-index:5;}
+.azbar{height:6px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden;}
+.azbar i{display:block;height:100%;width:8%;border-radius:999px;background:linear-gradient(90deg,#0A84FF,#5BB1FF);transition:width .6s ease;}
+.aztxt{font-size:13.5px;font-weight:800;color:#fff;margin-top:11px;text-align:center;letter-spacing:-.2px;}
+
+/* ── Results ── */
+.rank{display:flex;flex-direction:column;align-items:center;padding:24px;border-radius:24px;margin-top:6px;
+  background:rgba(10,132,255,.07);border:1px solid rgba(10,132,255,.24);}
 .rank .tier{color:var(--blue);font-size:12px;font-weight:900;letter-spacing:3px;}
-.rank .score{font-size:62px;font-weight:900;letter-spacing:-2px;line-height:1;margin-top:4px;}
+.rank .score{font-size:64px;font-weight:900;letter-spacing:-2px;line-height:1;margin-top:4px;text-shadow:0 0 40px rgba(10,132,255,.4);}
 .rank .lbl{color:var(--dim);font-size:10px;font-weight:800;letter-spacing:2.4px;margin-top:2px;}
 .sec{font-size:10.5px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin:22px 0 10px;}
-.mapcard{display:flex;align-items:center;gap:8px;padding:14px;border-radius:20px;background:rgba(255,255,255,.025);border:1px solid var(--border);}
-.legend{display:flex;gap:14px;margin-top:10px;}
+.scores{display:flex;flex-direction:column;gap:11px;padding:2px 0;}
+.srow{display:flex;align-items:center;gap:11px;}
+.sname{width:92px;flex:none;font-size:12.5px;font-weight:700;color:#D7DCEA;}
+.sbar{flex:1;height:8px;border-radius:999px;background:rgba(255,255,255,.07);overflow:hidden;}
+.sbar i{display:block;height:100%;width:0;border-radius:999px;transition:width .7s cubic-bezier(.16,1,.3,1);}
+.sval{width:26px;text-align:right;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;}
+.figcard{padding:14px;border-radius:20px;background:rgba(255,255,255,.025);border:1px solid var(--border);}
+.figrow{display:flex;justify-content:center;align-items:flex-end;gap:8px;}
+.figrow svg{height:210px;width:auto;}
+.figrow svg .base{fill:#141726;stroke:rgba(255,255,255,.08);stroke-width:2;}
+.legend{display:flex;justify-content:center;gap:16px;margin-top:12px;}
 .legend i{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:5px;}
 .legend span{font-size:11px;color:var(--muted);font-weight:600;}
 .summary{padding:15px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid var(--border);font-size:13.5px;color:#D7DCEA;line-height:1.5;}
@@ -79,26 +108,18 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .ex{display:flex;justify-content:space-between;padding:9px 0;border-top:1px solid rgba(255,255,255,.05);font-size:13.5px;color:#D7DCEA;}
 .ex span{color:var(--blue-3);font-weight:700;font-size:12px;}
 .disc{color:var(--dim);font-size:11px;text-align:center;margin:16px 0;line-height:1.5;}
-.btn.ghost{background:rgba(255,255,255,.06);color:var(--text);box-shadow:none;border:1px solid var(--border);}
-.btn.row{display:flex;align-items:center;justify-content:center;gap:8px;}
-.btn svg{width:18px;height:18px;}
-.btn.ghost svg{stroke:var(--text);}
-/* dashboard-style score bars */
-.scores{display:flex;flex-direction:column;gap:11px;padding:2px 0;}
-.srow{display:flex;align-items:center;gap:11px;}
-.sname{width:92px;flex:none;font-size:12.5px;font-weight:700;color:#D7DCEA;}
-.sbar{flex:1;height:8px;border-radius:999px;background:rgba(255,255,255,.07);overflow:hidden;}
-.sbar i{display:block;height:100%;width:0;border-radius:999px;transition:width .7s cubic-bezier(.16,1,.3,1);}
-.sval{width:26px;text-align:right;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;}
+.spin{width:42px;height:42px;border-radius:50%;border:3px solid rgba(10,132,255,.25);border-top-color:var(--blue);animation:sp 1s linear infinite;}
+@keyframes sp{to{transform:rotate(360deg);}}
 .notice{position:absolute;left:18px;right:18px;bottom:20px;background:rgba(20,22,34,.96);border:1px solid var(--border);
   border-radius:12px;padding:9px 12px;font-size:11px;color:var(--muted);text-align:center;z-index:30;}
 .hide{display:none!important;}
-@media(prefers-reduced-motion:reduce){.scanline,.spin{animation:none!important;}}
+@media(prefers-reduced-motion:reduce){.scanline,.spin,.marker .ring::after{animation:none!important;}}
 </style>
 </head>
 <body>
 <div class="phone">
-  <div class="amb"></div>
+  <div id="ambBg"></div>
+  <div id="ambCelestial"></div>
   <div class="frame">
     <div class="topbar">
       <div class="tb-btn" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg></div>
@@ -111,18 +132,18 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 </div>
 
 <script>
-// Back that never dead-ends: use real history if present, else return to the
-// page that opens the scanner (gym) so a direct/deep load still has an exit.
 function goBack(){ if (history.length > 1) { history.back(); } else { location.href = 'gym.html'; } }
 </script>
 <script src="_lib/core-config.js"></script>
+<script src="_lib/core-bodymap.js"></script>
+<script src="_lib/dash-ambient.js"></script>
 <script>
 (function(){
-  // Real AI scan via the deployed physique-scan function (Anthropic vision).
-  // Resolves from CORE_CONFIG; until the function is deployed the flow falls
-  // back to a deterministic demo result so the UX stays fully usable.
+  try{ if(window.dashAmbient) window.dashAmbient.init(); }catch(e){}
+
   var CFG = window.CORE_CONFIG || {};
   var FUNCTION_URL = CFG.SUPABASE_URL ? (CFG.SUPABASE_URL + "/functions/v1/physique-scan") : "";
+
   var MUSCLES = ["chest","back","shoulders","arms","legs","core"];
   var LABEL = {chest:"Chest",back:"Back",shoulders:"Shoulders",arms:"Arms",legs:"Legs",core:"Core"};
   var WHY = {chest:"Build pressing strength and upper-body shape.",back:"Fixes posture and balances your frame.",
@@ -133,24 +154,23 @@ function goBack(){ if (history.length > 1) { history.back(); } else { location.h
     legs:["Squats","Lunges"],core:["Plank","Hanging knee raises"]};
   var app=document.getElementById("app");
   function notice(m){ var n=document.getElementById("notice"); if(!m){n.style.display="none";return;} n.textContent=m; n.style.display="block"; }
-
-  // muscle map (mirrors the RN BodyMap)
   function statusColor(s){ return s==="weak"?"#FF7A45":s==="strong"?"#34D399":"#0A84FF"; }
-  function op(level){ return (0.28+(level/100)*0.62).toFixed(2); }
-  function bodyMap(muscles,size){
-    function f(k){ var m=muscles[k]||{level:50,status:"ok"}; return 'fill="'+statusColor(m.status)+'" opacity="'+op(m.level)+'"'; }
-    return '<svg width="'+size+'" height="'+(size*1.6)+'" viewBox="0 0 100 160">'+
-      '<circle cx="50" cy="14" r="9" fill="#11131f" stroke="rgba(255,255,255,.1)"/>'+
-      '<path d="M30 30 Q50 24 70 30 L66 40 Q50 34 34 40 Z" '+f("shoulders")+'/>'+
-      '<path d="M35 40 Q50 36 65 40 L63 58 Q50 64 37 58 Z" '+f("chest")+'/>'+
-      '<ellipse cx="27" cy="52" rx="6.5" ry="18" '+f("arms")+'/><ellipse cx="73" cy="52" rx="6.5" ry="18" '+f("arms")+'/>'+
-      '<path d="M38 60 L62 60 L60 84 Q50 90 40 84 Z" '+f("core")+'/>'+
-      '<path d="M40 86 Q50 92 60 86 L58 140 L52 140 L50 100 L48 140 L42 140 Z" '+f("legs")+'/>'+
-      '<circle cx="50" cy="30" r="2.4" '+f("back")+'/>'+
-      '<path d="M30 30 Q50 24 70 30 L66 42 Q73 44 73 52 Q73 66 66 70 L62 84 L58 140 L52 140 L50 102 L48 140 L42 140 L38 84 L34 70 Q27 66 27 52 Q27 44 34 42 Z" fill="none" stroke="rgba(255,255,255,.16)" stroke-linejoin="round"/></svg>';
+
+  // ── strength-page body diagram (CoreBodyMap), coloured by scan levels ──
+  function gymGender(){ try{ var s=JSON.parse(localStorage.getItem("coreGym.v1")||"{}"); return s.gender==="female"?"female":"male"; }catch(e){ return "male"; } }
+  function bodyFigure(muscles){
+    var bm=window.CoreBodyMap&&window.CoreBodyMap[gymGender()]; if(!bm) return "";
+    function side(s){
+      if(!s) return "";
+      var h='<svg viewBox="'+s.vb+'" preserveAspectRatio="xMidYMid meet">';
+      if(s.parts.base) h+='<path class="base" d="'+s.parts.base+'"></path>';
+      MUSCLES.forEach(function(k){ var d=s.parts[k]; if(!d) return; var m=muscles[k]||{level:50,status:"ok"};
+        h+='<path d="'+d+'" fill="'+statusColor(m.status)+'" fill-opacity="'+(0.30+(m.level/100)*0.58).toFixed(2)+'"></path>'; });
+      return h+'</svg>';
+    }
+    return '<div class="figrow">'+side(bm.front)+side(bm.back)+'</div>';
   }
 
-  // deterministic demo result (used when no deployed function / no real photo)
   function demoResult(){
     var m={}; var seed=[72,38,64,81,28,55];
     MUSCLES.forEach(function(k,i){ var lv=seed[i]; m[k]={level:lv,status:lv<45?"weak":lv<72?"ok":"strong"}; });
@@ -158,62 +178,6 @@ function goBack(){ if (history.length > 1) { history.back(); } else { location.h
       summary:"Solid upper body — prioritize legs and back to balance your frame and unlock overall strength."};
   }
 
-  function saveMuscles(res){ try{
-    var store=JSON.parse(localStorage.getItem("corePhysique.v1")||"{}");
-    store.muscles=res.muscles; store.lastScore=res.rank.score; store.lastTier=res.rank.tier; store.ts=Date.now();
-    localStorage.setItem("corePhysique.v1",JSON.stringify(store));
-  }catch(e){} }
-
-  // ── screens ──
-  var ICON={
-    device:'M7 2.5h10a1.5 1.5 0 0 1 1.5 1.5v16a1.5 1.5 0 0 1-1.5 1.5H7A1.5 1.5 0 0 1 5.5 20V4A1.5 1.5 0 0 1 7 2.5ZM10.5 18.5h3',
-    lock:'M6.5 10.5V7a5.5 5.5 0 0 1 11 0v3.5M5.5 10.5h13v9h-13z',
-    fitness:'M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12',
-    shield:'M12 2.5 4.5 5.3v6c0 4.7 3.2 7.6 7.5 8.7 4.3-1.1 7.5-4 7.5-8.7v-6Z'
-  };
-  function svgIcon(name,color){ return '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="'+(color||'#0A84FF')+'" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="'+ICON[name]+'"/></svg>'; }
-  function consent(){
-    notice("");
-    var pts=[["device","Stays on your device","Your photo is saved only here. It's never uploaded or shared."],
-      ["lock","Private analysis","To rate it, the image is sent securely to our own AI, analyzed in memory, and discarded right after."],
-      ["fitness","Fitness, not medical","Training guidance to help you improve — not a medical or body-composition diagnosis."],
-      ["shield","18+ and optional","You're in control. Delete every scan any time."]];
-    app.innerHTML='<div class="scroll"><div class="eyebrow" style="margin-top:6px">BEFORE YOUR FIRST SCAN</div>'+
-      '<div class="h1" style="margin:6px 0 14px">How your photo is handled</div>'+
-      pts.map(function(p){return '<div class="crow"><div class="ic">'+svgIcon(p[0])+'</div><div><b>'+p[1]+'</b><span>'+p[2]+'</span></div></div>';}).join("")+
-      '<div style="height:10px"></div><button class="btn" id="go">I understand — continue</button>'+
-      '<div style="text-align:center"><button class="link" onclick="goBack()">Not now</button></div></div>';
-    document.getElementById("go").onclick=camera;
-  }
-
-  function camera(){
-    notice("");
-    // Two buttons: "Scan Physique" opens the camera (capture), "Upload Photo"
-    // opens the library — each fires the native OS popup. Both feed analyze().
-    app.innerHTML='<div class="cam" id="cam" style="flex:none;height:300px;margin:10px 18px 0">'+
-      '<div class="guide"><svg width="56%" height="82%" viewBox="0 0 100 160"><path d="M50 6 a8 8 0 1 1 -.1 0 M34 30 Q50 22 66 30 L62 84 L58 150 L52 150 L50 100 L48 150 L42 150 L38 84 Z" fill="none" stroke="rgba(74,143,255,.55)" stroke-width="1.4" stroke-dasharray="4 3" stroke-linejoin="round"/></svg></div></div>'+
-      '<div style="padding:16px 18px 0"><div class="tips" style="text-align:center;margin-bottom:14px">Full body in frame · good lighting · fitted clothing</div>'+
-      '<button class="btn row" id="scanBtn"><svg viewBox="0 0 24 24" fill="none" stroke="#02030A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg> Scan Physique</button>'+
-      '<button class="btn ghost row" id="uploadBtn" style="margin-top:11px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5M5 20h14"/></svg> Upload Photo</button>'+
-      '<div style="text-align:center"><button class="link" onclick="goBack()">Cancel</button></div></div>'+
-      '<input type="file" id="camInput" accept="image/*" capture="environment" style="display:none">'+
-      '<input type="file" id="upInput" accept="image/*" style="display:none">';
-    function wire(inputId){
-      var input=document.getElementById(inputId);
-      input.onchange=function(e){
-        var file=e.target.files&&e.target.files[0]; if(!file) return;
-        var reader=new FileReader();
-        reader.onload=function(){ var data=String(reader.result), b64=data.split(",")[1]||"", mt=(data.split(",")[0].match(/data:([^;]+)/)||[])[1]||"image/jpeg"; analyze(b64,mt); };
-        reader.readAsDataURL(file);
-      };
-      return input;
-    }
-    var camInput=wire("camInput"), upInput=wire("upInput");
-    document.getElementById("scanBtn").onclick=function(){ camInput.click(); };
-    document.getElementById("uploadBtn").onclick=function(){ upInput.click(); };
-  }
-
-  // Category sub-scores derived from the muscle read (works for demo + real AI).
   function clamp(v){ return Math.max(0,Math.min(100,Math.round(v))); }
   function computeScores(res){
     var m=res.muscles, lv=function(k){ return (m[k]&&m[k].level)||50; };
@@ -231,31 +195,95 @@ function goBack(){ if (history.length > 1) { history.back(); } else { location.h
   }
   function scoreColor(v){ return v<45?"#FF7A45":v<72?"#0A84FF":"#34D399"; }
 
-  // Push the scan's muscle read into the gym store so the Strength page's
-  // physique diagram lights up to match (maps 0-100 level → gym intensity).
+  function saveMuscles(res){ try{
+    var store=JSON.parse(localStorage.getItem("corePhysique.v1")||"{}");
+    store.muscles=res.muscles; store.lastScore=res.rank.score; store.lastTier=res.rank.tier; store.ts=Date.now();
+    localStorage.setItem("corePhysique.v1",JSON.stringify(store));
+  }catch(e){} }
   function saveToGym(res){ try{
     var KEY="coreGym.v1", s=JSON.parse(localStorage.getItem(KEY)||"{}"); if(!s||typeof s!=="object") s={};
     s.muscles=s.muscles||{}; var now=Date.now();
-    MUSCLES.forEach(function(k){
-      var lvl=(res.muscles[k]&&res.muscles[k].level)||50, m=s.muscles[k]||{score:0,lastTs:0,sessions:0};
-      m.score=Math.max(m.score||0,(lvl/100)*11); m.lastTs=now; s.muscles[k]=m;
-    });
+    MUSCLES.forEach(function(k){ var lvl=(res.muscles[k]&&res.muscles[k].level)||50, m=s.muscles[k]||{score:0,lastTs:0,sessions:0};
+      m.score=Math.max(m.score||0,(lvl/100)*11); m.lastTs=now; s.muscles[k]=m; });
     localStorage.setItem(KEY,JSON.stringify(s));
   }catch(e){} }
 
-  function analyze(base64,mediaType){
-    app.innerHTML='<div class="center"><div class="spin"></div><div style="font-size:16px;font-weight:700;margin-top:16px">Analyzing your physique…</div><div class="muted">Private · your photo never leaves this device after analysis.</div></div>';
-    var done=function(res,real){ saveMuscles(res); results(res,real); };
+  // ── consent ──
+  var ICON={
+    device:'M7 2.5h10a1.5 1.5 0 0 1 1.5 1.5v16a1.5 1.5 0 0 1-1.5 1.5H7A1.5 1.5 0 0 1 5.5 20V4A1.5 1.5 0 0 1 7 2.5ZM10.5 18.5h3',
+    lock:'M6.5 10.5V7a5.5 5.5 0 0 1 11 0v3.5M5.5 10.5h13v9h-13z',
+    fitness:'M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12',
+    shield:'M12 2.5 4.5 5.3v6c0 4.7 3.2 7.6 7.5 8.7 4.3-1.1 7.5-4 7.5-8.7v-6Z'
+  };
+  function svgIcon(name,color){ return '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="'+(color||'#5BB1FF')+'" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="'+ICON[name]+'"/></svg>'; }
+  function consent(){
+    notice("");
+    var pts=[["device","#5BB1FF","Stays on your device","Your photo is saved only here — never uploaded or shared."],
+      ["lock","#34D399","Private analysis","To rate it, the image is sent securely to our own AI, analyzed in memory, and discarded right after."],
+      ["fitness","#FFCB3D","Fitness, not medical","Training guidance to help you improve — not a medical or body-composition diagnosis."],
+      ["shield","#B388FF","18+ and optional","You're in control. Delete every scan any time."]];
+    app.innerHTML='<div class="scroll"><div class="eyebrow" style="margin-top:6px">Before your first scan</div>'+
+      '<div class="h1" style="margin:6px 0 16px">How your photo is handled</div>'+
+      pts.map(function(p){return '<div class="crow"><div class="ic" style="background:'+p[1]+'1f;border:1px solid '+p[1]+'44">'+svgIcon(p[0],p[1])+'</div><div><b>'+p[2]+'</b><span>'+p[3]+'</span></div></div>';}).join("")+
+      '<div style="height:8px"></div><button class="btn" id="go">I understand — continue</button>'+
+      '<button class="link" onclick="goBack()">Not now</button></div>';
+    document.getElementById("go").onclick=function(){ try{localStorage.setItem("corePhysiqueConsent","1");}catch(e){} camera(); };
+  }
+
+  // ── capture: two buttons ──
+  function camera(){
+    notice("");
+    app.innerHTML='<div class="guidebox"><div class="guide"><svg width="56%" height="84%" viewBox="0 0 100 160"><path d="M50 6 a8 8 0 1 1 -.1 0 M34 30 Q50 22 66 30 L62 84 L58 150 L52 150 L50 100 L48 150 L42 150 L38 84 Z" fill="none" stroke="rgba(74,143,255,.55)" stroke-width="1.4" stroke-dasharray="4 3" stroke-linejoin="round"/></svg></div></div>'+
+      '<div style="padding:16px 18px 0"><div class="tips" style="margin-bottom:14px">Full body in frame · good lighting · fitted clothing</div>'+
+      '<button class="btn" id="scanBtn"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg> Scan Physique</button>'+
+      '<button class="btn ghost" id="uploadBtn" style="margin-top:11px"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5M5 20h14"/></svg> Upload Photo</button>'+
+      '<button class="link" onclick="goBack()">Cancel</button></div>'+
+      '<input type="file" id="camInput" accept="image/*" capture="environment" style="display:none">'+
+      '<input type="file" id="upInput" accept="image/*" style="display:none">';
+    function wire(id){ var input=document.getElementById(id);
+      input.onchange=function(e){ var file=e.target.files&&e.target.files[0]; if(!file) return;
+        var reader=new FileReader();
+        reader.onload=function(){ var data=String(reader.result), b64=data.split(",")[1]||"", mt=(data.split(",")[0].match(/data:([^;]+)/)||[])[1]||"image/jpeg"; analyze(b64,mt,data); };
+        reader.readAsDataURL(file); };
+      return input; }
+    var camInput=wire("camInput"), upInput=wire("upInput");
+    document.getElementById("scanBtn").onclick=function(){ camInput.click(); };
+    document.getElementById("uploadBtn").onclick=function(){ upInput.click(); };
+  }
+
+  // fetch real AI (or demo) without blocking the scan animation
+  function getResult(base64,mediaType,cb){
     if(FUNCTION_URL && base64){
       var h={"content-type":"application/json"};
       if(CFG.SUPABASE_ANON_KEY){ h.authorization="Bearer "+CFG.SUPABASE_ANON_KEY; h.apikey=CFG.SUPABASE_ANON_KEY; }
       fetch(FUNCTION_URL,{method:"POST",headers:h,body:JSON.stringify({image:base64,mediaType:mediaType||"image/jpeg"})})
         .then(function(r){return r.json();})
-        .then(function(j){ if(j&&j.isBody===false){ notbody(); } else if(j&&j.rank){ done(j,true);} else { done(demoResult(),false);} })
-        .catch(function(){ done(demoResult(),false); });
-    } else {
-      setTimeout(function(){ done(demoResult(),false); }, 1100);
-    }
+        .then(function(j){ if(j&&j.isBody===false) cb({isBody:false}); else if(j&&j.rank) cb(j,true); else cb(demoResult()); })
+        .catch(function(){ cb(demoResult()); });
+    } else { cb(demoResult()); }
+  }
+
+  // ── scanning the photo: show it, point things out, analyze ──
+  function analyze(base64,mediaType,dataUrl){
+    notice("");
+    app.innerHTML='<div class="scanwrap"><img src="'+(dataUrl||("data:"+mediaType+";base64,"+base64))+'" alt="">'+
+      '<div class="scanline"></div><div id="marks"></div>'+
+      '<div class="analyzing"><div class="azbar"><i id="azFill"></i></div><div class="aztxt" id="azTxt">Scanning your physique…</div></div></div>';
+    var MARKS=[["Shoulders",24,42,"#5BB1FF"],["Chest",37,56,"#0A84FF"],["Arms",46,30,"#9F8FFF"],["Core",55,54,"#34D399"],["Legs",76,46,"#FF7A45"]];
+    MARKS.forEach(function(m,i){ setTimeout(function(){ var d=document.getElementById("marks"); if(!d)return;
+      var e=document.createElement("div"); e.className="marker"; e.style.top=m[1]+"%"; e.style.left=m[2]+"%"; e.style.color=m[3];
+      e.innerHTML='<span class="ring"></span><span class="mlabel">'+m[0]+'</span>'; d.appendChild(e); }, 450+i*430); });
+    function setAz(t,pct){ var f=document.getElementById("azFill"),x=document.getElementById("azTxt"); if(f)f.style.width=pct+"%"; if(x)x.textContent=t; }
+    setTimeout(function(){ setAz("Mapping muscle groups…",52); }, 1500);
+    setTimeout(function(){ setAz("Analyzing your score…",84); }, 2900);
+    var ready=null, real=false, start=Date.now();
+    getResult(base64,mediaType,function(res,isReal){ ready=res; real=!!isReal; });
+    (function wait(){
+      if(ready && Date.now()-start>3500){
+        setAz("Done",100);
+        setTimeout(function(){ if(ready.isBody===false){ notbody(); } else { saveMuscles(ready); results(ready,real); } }, 380);
+      } else setTimeout(wait,150);
+    })();
   }
 
   function notbody(){
@@ -267,33 +295,24 @@ function goBack(){ if (history.length > 1) { history.back(); } else { location.h
     notice(real?"":"Demo result — deploy physique-scan for a real AI rating.");
     var routine=(res.weakPoints.length?res.weakPoints:["legs","back","chest"]).slice(0,3);
     var exHtml=routine.map(function(k){return POOL[k].map(function(n){return '<div class="ex"><span style="color:#D7DCEA;font-weight:400">'+n+'</span><span>3 × 8-12</span></div>';}).join("");}).join("");
-    var scores=computeScores(res);
-    var scoreHtml=scores.map(function(s){
+    var scoreHtml=computeScores(res).map(function(s){
       return '<div class="srow"><div class="sname">'+s.label+'</div><div class="sbar"><i data-w="'+s.value+'" style="background:'+scoreColor(s.value)+'"></i></div><div class="sval" style="color:'+scoreColor(s.value)+'">'+s.value+'</div></div>';
     }).join("");
     app.innerHTML='<div class="scroll">'+
       '<div class="rank"><div class="tier">'+res.rank.tier.toUpperCase()+'</div><div class="score">'+res.rank.score+'</div><div class="lbl">PHYSIQUE SCORE</div></div>'+
       '<div class="sec">Your scores</div><div class="scores">'+scoreHtml+'</div>'+
-      '<div class="sec">Muscle Map</div>'+
-      '<div class="mapcard">'+bodyMap(res.muscles,150)+
-        '<div style="flex:1"><div class="legend" style="flex-direction:column;gap:8px">'+
-        '<div><i style="background:#FF7A45"></i><span>Needs work</span></div>'+
-        '<div><i style="background:#0A84FF"></i><span>Solid</span></div>'+
-        '<div><i style="background:#34D399"></i><span>Strong</span></div></div></div></div>'+
+      '<div class="sec">Physique map</div><div class="figcard">'+bodyFigure(res.muscles)+
+        '<div class="legend"><span><i style="background:#FF7A45"></i>Needs work</span><span><i style="background:#0A84FF"></i>Solid</span><span><i style="background:#34D399"></i>Strong</span></div></div>'+
       '<div class="sec">Summary</div><div class="summary">'+res.summary+'</div>'+
       '<div class="sec">What to work on</div>'+
       res.weakPoints.map(function(k){return '<div class="weak"><div class="dot"></div><div><b>'+LABEL[k]+'</b><span>'+WHY[k]+'</span></div></div>';}).join("")+
       '<div class="sec">Your routine</div><div class="plan"><h4>Weak-point focus: '+routine.map(function(k){return LABEL[k];}).join(" · ")+'</h4>'+exHtml+'</div>'+
       '<div class="disc">Visual fitness guidance only — not a medical or body-composition assessment.</div>'+
-      '<button class="btn row" id="saveBtn"><svg viewBox="0 0 24 24" fill="none" stroke="#02030A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-11"/></svg> Save to my Strength</button>'+
-      '<div style="text-align:center"><button class="link" id="rescan">Scan again</button></div></div>';
-    // animate the score bars in
-    requestAnimationFrame(function(){ Array.prototype.forEach.call(document.querySelectorAll(".sbar i"), function(el){ el.style.width=el.getAttribute("data-w")+"%"; }); });
+      '<button class="btn" id="saveBtn"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-11"/></svg> Save to my Strength</button>'+
+      '<button class="link" id="rescan">Scan again</button></div>';
+    requestAnimationFrame(function(){ Array.prototype.forEach.call(document.querySelectorAll(".sbar i"),function(el){ el.style.width=el.getAttribute("data-w")+"%"; }); });
     document.getElementById("rescan").onclick=camera;
-    document.getElementById("saveBtn").onclick=function(){
-      saveToGym(res); saveMuscles(res); notice("Saved — your physique diagram is updated.");
-      setTimeout(function(){ location.href="gym.html"; }, 550);
-    };
+    document.getElementById("saveBtn").onclick=function(){ saveToGym(res); saveMuscles(res); notice("Saved — your physique diagram is updated."); setTimeout(function(){ location.href="gym.html"; }, 600); };
   }
 
   document.getElementById("privacyBtn").onclick=function(){
@@ -302,13 +321,10 @@ function goBack(){ if (history.length > 1) { history.back(); } else { location.h
     }
   };
 
-  // start: skip consent if already given (?demo=1 always starts at consent for screenshots)
-  var seen=false; try{ seen=localStorage.getItem("corePhysiqueConsent")==="1"; }catch(e){}
+  // start
   if(/[?&]start=camera/.test(location.search)) camera();
   else if(/[?&]start=result/.test(location.search)) results(demoResult(),false);
-  else consent();
-  // mark consent on continue
-  var _c=consent; // ensure continue persists consent
+  else { var seen=false; try{ seen=localStorage.getItem("corePhysiqueConsent")==="1"; }catch(e){} seen?camera():consent(); }
 })();
 </script>
 </body>
