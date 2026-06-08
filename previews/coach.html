@@ -74,16 +74,28 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
 .chat-av-name{font-size:14px;font-weight:800;}
 .chat-av-sub{font-size:10px;color:var(--muted);}
 .chat-online{width:8px;height:8px;border-radius:50%;background:var(--blue);box-shadow:0 0 6px var(--blue);}
-.chat-msgs{padding:12px 14px;display:flex;flex-direction:column;gap:8px;}
+.chat-msgs{padding:12px 14px;display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;}
+.chat-msgs::-webkit-scrollbar{display:none;}
 .chat-bubble{padding:9px 12px;border-radius:14px;font-size:12.5px;line-height:1.45;max-width:82%;}
 .chat-bubble.ai{background:rgba(10,132,255,0.12);border:1px solid rgba(10,132,255,0.22);align-self:flex-start;}
 .chat-bubble.user{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.09);align-self:flex-end;text-align:right;}
+.chat-bubble.typing{color:var(--muted);letter-spacing:2px;}
 .chat-input-row{display:flex;align-items:center;gap:9px;padding:10px 14px 14px;border-top:1px solid rgba(255,255,255,0.05);}
 .chat-input{flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);
-  border-radius:22px;padding:9px 14px;font:inherit;font-size:12.5px;color:var(--dim);}
+  border-radius:22px;padding:9px 14px;font:inherit;font-size:12.5px;color:var(--text);outline:none;transition:border-color .15s;}
+.chat-input::placeholder{color:var(--dim);}
+.chat-input:focus{border-color:rgba(10,132,255,0.5);}
 .chat-send{width:34px;height:34px;flex:none;border:none;border-radius:50%;background:var(--blue);
-  display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:.5;}
+  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s,opacity .15s;}
+.chat-send:active{transform:scale(.9);}
 .chat-send svg{width:14px;height:14px;color:#fff;}
+
+/* Toast */
+.toast{position:absolute;left:50%;bottom:104px;transform:translateX(-50%) translateY(10px);z-index:80;
+  background:rgba(10,12,22,0.94);border:1px solid var(--border);color:var(--text);font-size:12.5px;font-weight:600;
+  padding:10px 16px;border-radius:14px;max-width:280px;text-align:center;opacity:0;pointer-events:none;
+  transition:opacity .25s,transform .25s;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
 /* Coming soon banner */
 .coming-banner{margin:0 18px 16px;border-radius:16px;padding:14px 16px;
@@ -143,8 +155,8 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
           <div class="chat-bubble ai">That's huge. A craving means your brain is testing you — and you won. What helped you get through it?</div>
         </div>
         <div class="chat-input-row">
-          <div class="chat-input">Talk to your coach…</div>
-          <button class="chat-send" disabled aria-label="Send">
+          <input class="chat-input" id="chatInput" type="text" placeholder="Talk to your coach…" autocomplete="off" enterkeyhint="send" />
+          <button class="chat-send" id="chatSend" type="button" aria-label="Send">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7Z"/></svg>
           </button>
         </div>
@@ -153,13 +165,13 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
       <!-- Scanners -->
       <div class="sec-head">Scanners</div>
       <div class="scan-grid">
-        <div class="scan-card">
-          <span class="scan-badge coming">Soon</span>
-          <div class="scan-icon" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#9AA1B7" stroke-width="1.9"><path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/></svg>
+        <div class="scan-card" data-go="physique-scan.html">
+          <span class="scan-badge live">Live</span>
+          <div class="scan-icon" style="background:rgba(10,132,255,0.12);border:1px solid rgba(10,132,255,0.3);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#5BB1FF" stroke-width="1.9"><path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/></svg>
           </div>
           <div class="scan-name">Physique</div>
-          <div class="scan-desc">Track body progress over time</div>
+          <div class="scan-desc">Live body scan + tracking</div>
         </div>
         <div class="scan-card">
           <span class="scan-badge coming">Soon</span>
@@ -206,7 +218,7 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
       <!-- Coming banner -->
       <div class="coming-banner">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
-        <div class="coming-text"><strong>Coach is coming.</strong> AI chat + all 6 scanners launch with the full app. Streak, quests, and community are live now.</div>
+        <div class="coming-text"><strong>Your Coach is live.</strong> Chat any time and tap Physique to scan now. Food, Outfit, Posture, Looks &amp; Voice roll out with the full app.</div>
       </div>
 
     </div>
@@ -235,10 +247,99 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
       </a>
     </nav>
   </div>
+  <div class="toast" id="toast"></div>
 </div>
 
+<script src="_lib/core-config.js"></script>
 <script src="_lib/core-state.js"></script>
 <script src="_lib/dash-ambient.js"></script>
 <script>if(window.dashAmbient)window.dashAmbient.init();</script>
+<script>
+(function(){
+  "use strict";
+  var $=function(s){ return document.querySelector(s); };
+  var input=$('#chatInput'), sendBtn=$('#chatSend'), msgs=$('.chat-msgs'), toastEl=$('#toast');
+
+  // ── Scanner cards: real link if it has one, else an honest "coming" toast ──
+  function toast(msg){ toastEl.textContent=msg; toastEl.classList.add('show'); clearTimeout(toastEl._t); toastEl._t=setTimeout(function(){ toastEl.classList.remove('show'); }, 1900); }
+  Array.prototype.forEach.call(document.querySelectorAll('.scan-card'), function(c){
+    c.addEventListener('click', function(){
+      var go=c.getAttribute('data-go');
+      if(go){ location.href=go; }
+      else { var n=c.querySelector('.scan-name'); toast((n?n.textContent:'That')+' scanner arrives with the full app'); }
+    });
+  });
+
+  // ── Chat ──────────────────────────────────────────────────────────────────
+  // Seed the conversation from the bubbles already on screen so replies have
+  // context, then talk to the real ai-coach function when it's deployed,
+  // falling back to a warm local responder until then.
+  var convo=[];
+  Array.prototype.forEach.call(msgs.querySelectorAll('.chat-bubble'), function(b){
+    convo.push({ role: b.classList.contains('user') ? 'user' : 'assistant', content: b.textContent.trim() });
+  });
+
+  function bubble(role, text){
+    var b=document.createElement('div');
+    b.className='chat-bubble '+(role==='user'?'user':'ai');
+    b.textContent=text;
+    msgs.appendChild(b); msgs.scrollTop=msgs.scrollHeight;
+    return b;
+  }
+
+  function localReply(t){
+    var s=(t||'').toLowerCase();
+    if(/\b(kill myself|suicid|end it all|want to die|self[- ]?harm|hurt myself|no reason to live)\b/.test(s))
+      return "I'm really glad you told me. Please reach out for real human support right now — a crisis line can be there with you: Lifeline 13 11 14 (Australia) or 988 (US), or your local emergency number. You're not alone in this.";
+    if(/\b(crav|urge|tempt|want to vape|trigger)\b/.test(s))
+      return "Cravings peak at about three minutes, then fade — you can ride this one out. Slow breath, change rooms, glass of water. What set it off?";
+    if(/\b(relaps|slipped|caved|failed|messed up|gave in|broke)\b/.test(s))
+      return "One slip isn't a verdict, it's data. Be as kind to yourself as you'd be to a friend. What was happening right before it?";
+    if(/\b(tired|exhausted|drained|burnt? ?out|no energy)\b/.test(s))
+      return "Sounds like you're running on empty — rest is part of the work, not a break from it. What's one small kind thing you can do tonight?";
+    if(/\b(stress|anxious|anxiety|overwhelm|panic|worried)\b/.test(s))
+      return "Let's slow it down. Box breath with me: in 4, hold 4, out 4, hold 4 — twice. What's the biggest thing on your mind?";
+    if(/\b(proud|did it|stayed|streak|won|smashed|crushed|good day|great|nailed)\b/.test(s))
+      return "That's a real win — own it. What helped today that you can repeat tomorrow?";
+    if(/\b(hi|hey|hello|yo|sup|good morning|gm|heya)\b/.test(s))
+      return "Hey — good to see you. How are you feeling right now, honestly?";
+    if(/\b(thank|thanks|appreciate|cheers)\b/.test(s))
+      return "Anytime — I'm in your corner. What's next for you today?";
+    return "I hear you. Tell me a bit more — what's been the hardest part, and what would a good outcome look like?";
+  }
+
+  async function getReply(){
+    try{
+      var c=window.CORE_CONFIG;
+      if(c && c.SUPABASE_URL && c.SUPABASE_ANON_KEY){
+        var r=await fetch(c.SUPABASE_URL+'/functions/v1/ai-coach', {
+          method:'POST',
+          headers:{ 'content-type':'application/json', 'authorization':'Bearer '+c.SUPABASE_ANON_KEY, 'apikey':c.SUPABASE_ANON_KEY },
+          body:JSON.stringify({ tone:'balanced', messages: convo.slice(-12) })
+        });
+        if(r.ok){ var d=await r.json(); if(d && d.reply) return d.reply; }
+      }
+    }catch(e){}
+    return localReply(convo.length ? convo[convo.length-1].content : '');
+  }
+
+  var busy=false;
+  async function send(){
+    var t=input.value.trim();
+    if(!t || busy) return;
+    busy=true; input.value='';
+    bubble('user', t); convo.push({ role:'user', content:t });
+    var typing=bubble('ai', '•••'); typing.classList.add('typing');
+    var reply;
+    try{ reply=await getReply(); }catch(e){ reply=localReply(t); }
+    typing.remove();
+    bubble('ai', reply); convo.push({ role:'assistant', content:reply });
+    busy=false; input.focus();
+  }
+
+  sendBtn.addEventListener('click', send);
+  input.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); send(); } });
+})();
+</script>
 </body>
 </html>
