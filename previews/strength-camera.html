@@ -297,7 +297,9 @@
     };
 
     var EXOS=[
-      { id:'pushups', name:'Push-ups', emoji:GI.pushup, muscle:'chest', c:'#FF6B6B', diff:'easy', sub:'Chest · triceps · core' },
+      { id:'pushups',     name:'Standard Push-ups', emoji:GI.pushup, muscle:'chest', c:'#FF6B6B', diff:'easy',   pf:1,   sub:'Chest · triceps · core' },
+      { id:'pushwide',    name:'Wide Push-ups',     emoji:GI.pushup, muscle:'chest', c:'#FF8A5B', diff:'medium', pf:1.1, sub:'Outer chest · shoulders' },
+      { id:'pushdiamond', name:'Diamond Push-ups',  emoji:GI.pushup, muscle:'chest', c:'#FF5BA8', diff:'hard',   pf:1.3, sub:'Triceps · inner chest' },
       { id:'squats',  name:'Squats',   emoji:GI.legs,   muscle:'legs',  c:'#34D399', diff:'medium', sub:'Quads · glutes' },
       { id:'pullups', name:'Pull-ups', emoji:GI.pullup, muscle:'back',  c:'#4A8FFF', diff:'hard', sub:'Back · biceps' }
     ];
@@ -358,6 +360,12 @@
     var POSE_CFG={
       pushups:{ joints:[[12,14,16],[11,13,15]], down:100, up:150, label:'arms', gUp:'LOWER', gDn:'PUSH UP',
         summary:function(mn){ return mn>112 ? {t:'Go lower — full range',ok:false} : {t:'Clean rep',ok:true}; },
+        live:function(L,W,H){ var a=angleAt(L,12,24,26,W,H); if(a!=null&&a<148) return {t:'Keep your hips in line',ok:false}; return null; } },
+      pushwide:{ joints:[[12,14,16],[11,13,15]], down:105, up:150, label:'arms', gUp:'LOWER', gDn:'PUSH UP',
+        summary:function(mn){ return mn>116 ? {t:'Lower — chest toward the floor',ok:false} : {t:'Wide & strong',ok:true}; },
+        live:function(L,W,H){ var a=angleAt(L,12,24,26,W,H); if(a!=null&&a<148) return {t:'Keep your hips in line',ok:false}; return null; } },
+      pushdiamond:{ joints:[[12,14,16],[11,13,15]], down:95, up:150, label:'arms', gUp:'LOWER', gDn:'PUSH UP',
+        summary:function(mn){ return mn>108 ? {t:'Lower — keep elbows tight',ok:false} : {t:'Triceps torched',ok:true}; },
         live:function(L,W,H){ var a=angleAt(L,12,24,26,W,H); if(a!=null&&a<148) return {t:'Keep your hips in line',ok:false}; return null; } },
       squats:{  joints:[[24,26,28],[23,25,27]], down:105, up:155, label:'legs', gUp:'SQUAT', gDn:'STAND UP',
         summary:function(mn){ return mn>116 ? {t:'Squat deeper next rep',ok:false} : {t:'Good depth',ok:true}; },
@@ -470,7 +478,7 @@
       reps += n; combo += n; lastRepTime=performance.now();
       var nm=Math.min(MAXMULT, +(1+Math.floor(combo/MILESTONE)*0.1).toFixed(1));
       if(nm>mult){ mult=nm; milestoneHit(); }
-      var gain=Math.round(BASE_PTS*n*mult);
+      var gain=Math.round(BASE_PTS*n*mult*((cur&&cur.pf)||1));   // harder modes score more
       points += gain;
       // Feed the XP bar; a hot multiplier "boosts" XP gain. Roll levels over.
       xpInto += Math.round(gain*(mult>=1.5?1.5:1));
