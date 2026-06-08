@@ -96,7 +96,13 @@
   .frame { position:absolute; inset:0; z-index:10; display:flex; flex-direction:column; padding: 60px 0 40px; }
 
   /* top bar */
-  .topbar { display:flex; align-items:center; justify-content:space-between; padding:0 22px 8px; }
+  .topbar { display:flex; align-items:center; justify-content:space-between; padding:6px 22px 8px; }
+  /* frosted, consistent nav buttons */
+  .topbar .back, .topbar .skip {
+    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    transition: background .2s, transform .15s, border-color .2s;
+  }
+  .topbar .back:active, .topbar .skip:active { transform: scale(0.92); }
   /* .back rule now lives in core-theme.css globally (38px perfect circle).
      Local rule below only covers .skip (the exit X). */
   .skip { width:38px; height:38px; min-width:38px; min-height:38px; aspect-ratio:1/1; border-radius:50%; display:flex; align-items:center; justify-content:center; background: rgba(255,255,255,0.04); border: 1px solid var(--border); cursor:pointer; transition: background .2s; flex:0 0 38px; box-sizing:border-box; padding:0; font-family:inherit; align-self:center; }
@@ -108,23 +114,24 @@
   .brand .wm { font-size:12px; font-weight:700; letter-spacing:0.36em; color:rgba(255,255,255,0.92); }
 
   /* progress dots — 5 chapter pills, current chapter glows brighter */
-  .progress { display:flex; justify-content:center; align-items:center; gap:8px; padding: 12px 0 6px; }
+  .progress { display:flex; justify-content:center; align-items:center; gap:7px; padding: 14px 22px 8px; }
   .progress i {
-    width: 32px; height: 5px;
+    width: 36px; height: 4px;
     border-radius: 999px;
-    background: rgba(255,255,255,0.10);
-    transition: background .35s ease, width .4s cubic-bezier(.22,1,.36,1), box-shadow .35s ease;
+    background: rgba(255,255,255,0.12);
+    transition: background .35s ease, box-shadow .35s ease, transform .35s ease;
     display: inline-block; flex-shrink: 0;
   }
   .progress i.on {
-    background: linear-gradient(90deg, var(--grad-a), var(--grad-c));
+    background: linear-gradient(90deg, var(--accent), var(--accent-hi));
   }
   .progress i.active {
-    width: 52px;
+    transform: scaleY(1.6);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 75%, transparent);
   }
   .progress .chap-label {
-    font-size: 9.5px; letter-spacing: 0.20em; text-transform: uppercase;
-    color: rgba(255,255,255,0.55); font-weight: 700; margin-left: 4px;
+    font-size: 9.5px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: rgba(255,255,255,0.62); font-weight: 800; margin-left: 8px;
     transition: opacity .3s ease, color .3s ease;
   }
 
