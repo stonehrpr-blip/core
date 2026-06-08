@@ -1150,7 +1150,7 @@
       <div class="stepwrap" id="stepwrap">
 
         <!-- STEP 0: Commitment (type PROMISE) -->
-        <div class="step on" data-step="0">
+        <div class="step" data-step="0">
           <div class="kicker">Before we start</div>
           <h1 class="title">This only<br/><span class="g">works if you mean it.</span></h1>
           <p class="copy">CORE isn't a tracker — it's a witness. Sign the contract with yourself by typing the word below.</p>
@@ -1192,7 +1192,7 @@
         </div>
 
         <!-- STEP 1: Name + live availability -->
-        <div class="step" data-step="1">
+        <div class="step on" data-step="1">
           <div class="kicker">Step 1 · Basics</div>
           <h1 class="title">What should we<br/><span class="g">call you?</span></h1>
           <p class="copy">First name only — this is how your coach greets you. Then set your age below.</p>
@@ -3339,7 +3339,7 @@
     } catch(e){}
   }
 
-  const state = { step:0, promised:false, name:'', profile:null,
+  const state = { step:1, promised:false, name:'', profile:null,
                   // Step 3 now picks habit (replaces legacy goal). goal derived: 'quit'|'build'.
                   habit:null, goal:null,
                   blocker:null, routine:null,
@@ -3372,16 +3372,16 @@
   //  Lean rebuild — 6 questions + 3 interleaved animated previews, then trial.
   //   pos: 0       1         2       3       4     5       6        7     8        9        10       11
   //   id : 0       1         2       19      4     6       8        12    13       16       17       21
-  //        promise name+age  gender  D:dash  habit amount  D:stats  tone  trigger  D:30day  paywall  connect
-  const ORDER = [0, 1, 2, 19, 4, 6, 8, 12, 13, 16, 17, 21];
+  //        name  gender  D:dash  habit  tone  D:30day  paywall  promise  connect
+  const ORDER = [1, 2, 19, 4, 12, 16, 17, 0, 21];
   function curPos() { const i = ORDER.indexOf(state.step); return i < 0 ? 0 : i; }
   // Chapter map — drives the 5-pill progress bar + label (by ORDER position)
   const CHAPTERS = [
-    { ch: 'you',    label: 'You',    maxPos: 2  },  // promise, name+age, gender
-    { ch: 'habit',  label: 'Habit',  maxPos: 5  },  // dashboard preview, habit, amount
-    { ch: 'coach',  label: 'Coach',  maxPos: 8  },  // stats preview, tone, trigger
-    { ch: 'plan',   label: 'Plan',   maxPos: 9  },  // 30-day preview
-    { ch: 'trial',  label: 'Trial',  maxPos: 11 },  // paywall, connect
+    { ch: 'you',    label: 'You',    maxPos: 1  },  // name, gender
+    { ch: 'habit',  label: 'Habit',  maxPos: 3  },  // dashboard preview, habit
+    { ch: 'coach',  label: 'Coach',  maxPos: 4  },  // coach tone
+    { ch: 'plan',   label: 'Plan',   maxPos: 5  },  // 30-day preview
+    { ch: 'trial',  label: 'Trial',  maxPos: 8  },  // paywall, promise, connect
   ];
   function chapterIndexFor() {                 // reads state.step via curPos(); any arg ignored
     const p = curPos();
@@ -3498,7 +3498,7 @@
     state.step = n;
     // Dynamic step label — position-based so reordered/inserted steps stay correct
     const kEl = tgt && tgt.querySelector('.kicker');
-    if (kEl) kEl.textContent = (n === 0) ? 'Before we start'
+    if (kEl) kEl.textContent = (n === 0) ? 'One last thing'
       : (isDemoStep(n) ? 'Quick demo'
       : ('Step ' + (curPos() + 1) + ' · ' + CHAPTERS[chapterIndexFor()].label));
     // Step-4 (duration) + step-5 (amount) get the premium CTA treatment
