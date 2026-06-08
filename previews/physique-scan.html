@@ -90,7 +90,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   <div class="amb"></div>
   <div class="frame">
     <div class="topbar">
-      <div class="tb-btn" onclick="history.back()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg></div>
+      <div class="tb-btn" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg></div>
       <div class="tb-title">Physique Scan</div>
       <div class="tb-btn" id="privacyBtn" title="Privacy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V5z"/></svg></div>
     </div>
@@ -99,6 +99,11 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   <div class="notice" id="notice"></div>
 </div>
 
+<script>
+// Back that never dead-ends: use real history if present, else return to the
+// page that opens the scanner (gym) so a direct/deep load still has an exit.
+function goBack(){ if (history.length > 1) { history.back(); } else { location.href = 'gym.html'; } }
+</script>
 <script>
 (function(){
   // Point this at your deployed function to do a REAL scan. Until then the flow
@@ -163,7 +168,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
       '<div class="h1" style="margin:6px 0 14px">How your photo is handled</div>'+
       pts.map(function(p){return '<div class="crow"><div class="ic">'+svgIcon(p[0])+'</div><div><b>'+p[1]+'</b><span>'+p[2]+'</span></div></div>';}).join("")+
       '<div style="height:10px"></div><button class="btn" id="go">I understand — continue</button>'+
-      '<div style="text-align:center"><button class="link" onclick="history.back()">Not now</button></div></div>';
+      '<div style="text-align:center"><button class="link" onclick="goBack()">Not now</button></div></div>';
     document.getElementById("go").onclick=camera;
   }
 
@@ -222,7 +227,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
       res.weakPoints.map(function(k){return '<div class="weak"><div class="dot"></div><div><b>'+LABEL[k]+'</b><span>'+WHY[k]+'</span></div></div>';}).join("")+
       '<div class="sec">Your routine</div><div class="plan"><h4>Weak-point focus: '+routine.map(function(k){return LABEL[k];}).join(" · ")+'</h4>'+exHtml+'</div>'+
       '<div class="disc">Visual fitness guidance only — not a medical or body-composition assessment.</div>'+
-      '<button class="btn" onclick="history.back()">Done</button>'+
+      '<button class="btn" onclick="goBack()">Done</button>'+
       '<div style="text-align:center"><button class="link" id="rescan">Scan again</button></div></div>';
     document.getElementById("rescan").onclick=camera;
   }
