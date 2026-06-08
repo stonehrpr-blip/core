@@ -126,6 +126,16 @@
   .cue.warn{ color:#FFB061; border-color:rgba(255,159,69,0.4); }
   .cue.bonus{ color:#FFD45E; border-color:rgba(255,203,61,0.45); }
 
+  /* XP bar (fills with reps; "boosts" when the speed multiplier is high) */
+  .xpwrap{ position:relative; z-index:5; display:flex; align-items:center; gap:10px; padding:12px 22px 0; }
+  .xplvl{ font-size:10px; font-weight:900; letter-spacing:0.6px; color:var(--muted); white-space:nowrap; } .xplvl b{ color:#fff; }
+  .xpbar{ flex:1; height:9px; border-radius:999px; background:rgba(255,255,255,0.08); overflow:hidden; box-shadow:inset 0 0 0 1px rgba(255,255,255,0.06); }
+  .xpbar i{ display:block; height:100%; width:0%; border-radius:999px; background:linear-gradient(90deg,#7C5CFF,#5BB1FF); transition:width .3s cubic-bezier(.16,1,.3,1); }
+  .xpwrap.boost .xpbar i{ background:linear-gradient(90deg,#FFCB3D,#FF8A3D); box-shadow:0 0 16px rgba(255,170,60,0.65); }
+  .xpwrap.levelup .xpbar{ animation:lvlflash .55s ease; } @keyframes lvlflash{ 0%{filter:brightness(2.2);} 100%{filter:none;} }
+  .xpboost{ font-size:9px; font-weight:900; letter-spacing:1px; color:#FFCB3D; opacity:0; transition:opacity .25s; white-space:nowrap; }
+  .xpwrap.boost .xpboost{ opacity:1; animation:xpb .85s ease infinite; } @keyframes xpb{ 0%,100%{opacity:1;} 50%{opacity:.45;} }
+
   .livebtns{ position:relative; z-index:5; padding:0 20px 36px; display:flex; flex-direction:column; gap:11px; }
   .row2{ display:flex; gap:11px; } .row2 .gb{ flex:1; border:1px solid var(--border); background:rgba(255,255,255,0.05); color:var(--text); border-radius:16px; padding:15px; font-size:14px; font-weight:700; cursor:pointer; transition:transform .12s; } .row2 .gb:active{ transform:scale(0.96); }
   .row2 .gb.fin{ background:var(--accent); border-color:transparent; color:#fff; }
@@ -176,6 +186,11 @@
         <div class="livetop">
           <span class="pill"><span class="d"></span><span id="liveEx">Push-ups</span></span>
           <span class="pill" id="camState">Camera off</span>
+        </div>
+        <div class="xpwrap" id="xpWrap">
+          <span class="xplvl">LV <b id="xpLvl">1</b></span>
+          <div class="xpbar"><i id="xpFill"></i></div>
+          <span class="xpboost" id="xpBoost">BOOST</span>
         </div>
         <div class="counter">
           <div class="multi"><div class="multibar"><i id="multiFill"></i></div><span class="multilbl" id="multiLbl">×1.0</span></div>
@@ -291,6 +306,8 @@
     // Minimal skeleton: body limbs only (no face mesh), hand-drawn (cheaper than DrawingUtils).
     var BODY=[[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],[23,25],[25,27],[24,26],[26,28]];
     var JOINTS=[11,12,13,14,15,16,23,24,25,26,27,28];
+    var xpInto=0, xpNeed=150, xpLevel=1, xpShown=0;   // XP bar + level
+    var MINROM=30;                                     // min range of motion (deg) to count a rep
 
     function angleAt(L,a,b,c,W,H){
       var ax=L[a].x*W, ay=L[a].y*H, bx=L[b].x*W, by=L[b].y*H, cx=L[c].x*W, cy=L[c].y*H;
@@ -383,6 +400,10 @@
       if(lastRepTime && performance.now()-lastRepTime>1100){ mult += (1-mult)*0.04; if(mult<1.02) mult=1; }
       $('#multiFill').style.width=Math.max(0,Math.min(100,(mult-1)/2*100))+'%';
       $('#multiLbl').textContent='×'+mult.toFixed(1);
+      // XP bar — smooth fill + boost state when the multiplier is hot.
+      var xpT=Math.max(0,Math.min(100, xpInto/xpNeed*100));
+      xpShown += (xpT-xpShown)*0.2; $('#xpFill').style.width=xpShown.toFixed(1)+'%';
+      $('#xpWrap').classList.toggle('boost', mult>=2);
       requestAnimationFrame(uiLoop);
     }
 
@@ -400,11 +421,13 @@
     function startSession(id){
       cur=EXOS.find(function(e){ return e.id===id; });
       reps=0; points=0; ptsShown=0; mult=1; lastRepTime=0; lastRepAt=0; phase='up'; angEMA=null; resetRange();
+      xpInto=0; xpNeed=150; xpLevel=1; xpShown=0;
       sfx('confirm'); haptic();
       document.documentElement.style.setProperty('--str', cur.c);
       $('#liveEx').textContent=cur.name; $('#silho').innerHTML=cur.emoji;
       $('#cnum').textContent='0'; $('#pts').textContent='0'; $('#cgain').textContent='+0.00 Strength';
       $('#multiFill').style.width='0%'; $('#multiLbl').textContent='×1.0';
+      $('#xpLvl').textContent='1'; $('#xpFill').style.width='0%'; $('#xpWrap').classList.remove('boost','levelup');
       $('#cueEl').className='cue'; $('#popLayer').innerHTML='';
       // Pause the ambient aurora while live — it's hidden behind the camera and
       // its blur animation just costs GPU during tracking.
@@ -420,10 +443,18 @@
       bumpMult();
       var gain=Math.round(BASE_PTS*n*mult);
       points += gain;
+      // Feed the XP bar; high multiplier "boosts" XP gain. Roll levels over.
+      xpInto += Math.round(gain*(mult>=2?1.5:1));
+      while(xpInto>=xpNeed){ xpInto-=xpNeed; xpLevel++; xpNeed=150+xpLevel*40; levelUp(); }
       sfx(held?'coin':(reps%10===0?'coin':'tick')); haptic();
       var num=$('#cnum'); num.textContent=reps; num.classList.remove('bump'); void num.offsetWidth; num.classList.add('bump');
       $('#cgain').textContent='+'+(reps*rate).toFixed(2)+' Strength';
       burst('+'+gain, held);
+    }
+    function levelUp(){
+      $('#xpLvl').textContent=xpLevel;
+      var w=$('#xpWrap'); w.classList.remove('levelup'); void w.offsetWidth; w.classList.add('levelup');
+      sfx('reward'); cue('LEVEL '+xpLevel+'!', 'bonus', true);
     }
 
     async function toggleCam(){
@@ -445,7 +476,7 @@
       S.commitRepStrength(res.gain);
       var xpGain=Math.round(res.gain*20);
       sfx('reward');
-      $('#sumBody').innerHTML='<div class="sumhead"><div class="ring">'+cur.emoji+'</div><h2>'+reps+' reps done</h2><p>'+cur.name+' · '+points.toLocaleString()+' pts</p></div>'+
+      $('#sumBody').innerHTML='<div class="sumhead"><div class="ring">'+cur.emoji+'</div><h2>'+reps+' reps done</h2><p>'+cur.name+' · '+points.toLocaleString()+' pts · LV '+xpLevel+'</p></div>'+
         '<div class="big3"><div class="b"><div class="bn">'+reps+'</div><div class="bl">Total Reps</div></div>'+
           '<div class="b str"><div class="bn">+'+res.gain.toFixed(2)+'</div><div class="bl">Strength</div></div>'+
           '<div class="b xp"><div class="bn">+'+xpGain+'</div><div class="bl">XP</div></div></div>'+
@@ -519,7 +550,9 @@
         if(holdReady && !holdScored && performance.now()-downAt>650){ holdScored=true; cue('Hold it!', 'good'); }
         if(ang>cfg.up){
           var now=performance.now();
-          if(now-lastRepAt>400){ lastRepAt=now; finishRep(cfg, holdScored); }
+          // Count exactly on lockout — but only if it was a real rep: enough
+          // range of motion and not a stutter within the debounce window.
+          if(now-lastRepAt>400 && (repMax-repMin)>=MINROM){ lastRepAt=now; finishRep(cfg, holdScored); }
           phase='up';
         }
       }
