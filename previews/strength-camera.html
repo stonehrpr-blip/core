@@ -75,11 +75,11 @@
   .live{ position:absolute; inset:0; z-index:70; display:none; flex-direction:column; }
   .live.on{ display:flex; }
   .cam{ position:absolute; inset:0; z-index:0; background:#06060d; overflow:hidden; }
-  .cam{ --zoom:1; }
-  .cam video{ width:100%; height:100%; object-fit:cover; transform:scaleX(-1) scale(var(--zoom)); transform-origin:center center; opacity:0.55; transition:opacity .3s, transform .25s ease; }
+  .cam{ --zoom:1; --fit:contain; }   /* default = fully zoomed OUT (whole body) */
+  .cam video{ width:100%; height:100%; object-fit:var(--fit); transform:scaleX(-1) scale(var(--zoom)); transform-origin:center center; opacity:0.55; transition:opacity .3s, transform .25s ease; }
   /* Skeleton overlay — sized to the video's intrinsic resolution and given the
      SAME object-fit/mirror/zoom as the video so landmarks line up exactly. */
-  #pose{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transform:scaleX(-1) scale(var(--zoom)); transform-origin:center center; z-index:1; pointer-events:none; transition:transform .25s ease; }
+  #pose{ position:absolute; inset:0; width:100%; height:100%; object-fit:var(--fit); transform:scaleX(-1) scale(var(--zoom)); transform-origin:center center; z-index:1; pointer-events:none; transition:transform .25s ease; }
   .cam.tracking video{ opacity:0.95; }
   /* zoom meter (iPhone-style 0.5× / 1×) */
   .zoom{ position:absolute; left:50%; transform:translateX(-50%); bottom:118px; z-index:6; display:flex; gap:5px; padding:5px; border-radius:999px;
@@ -198,7 +198,7 @@
         <div class="camgrad"></div>
         <div class="poplayer" id="popLayer"></div>
         <div class="guide" id="guideTxt"></div>
-        <div class="zoom" id="zoomMeter"><button type="button" data-z="1" class="on">0.5×</button><button type="button" data-z="1.6">1×</button></div>
+        <div class="zoom" id="zoomMeter"><button type="button" data-fit="contain" class="on">0.5×</button><button type="button" data-fit="cover">1×</button></div>
         <div class="livetop">
           <span class="pill"><span class="d"></span><span id="liveEx">Push-ups</span></span>
           <span class="pill" id="camState">Camera off</span>
@@ -418,10 +418,14 @@
       var layer=$('#popLayer'); if(!layer) return;
       var x=camW*0.5, y=camH*0.42;
       if(lastL && camW){
-        var z=parseFloat(($('#cam').style.getPropertyValue('--zoom'))||'1')||1;
+        // Map the body point through the SAME object-fit the video uses, so the
+        // number pops out of the body in both 0.5× (contain) and 1× (cover).
+        var v=$('#vid'), vw=v.videoWidth||3, vh=v.videoHeight||4;
+        var fit=((getComputedStyle($('#cam')).getPropertyValue('--fit'))||'contain').trim();
+        var sc=fit==='cover' ? Math.max(camW/vw,camH/vh) : Math.min(camW/vw,camH/vh);
+        var dw=vw*sc, dh=vh*sc, ox=(camW-dw)/2, oy=(camH-dh)/2;
         var sx=(lastL[11].x+lastL[12].x)/2, sy=(lastL[11].y+lastL[12].y)/2;
-        var mx=1-sx;                                     // video is mirrored
-        x=(0.5+(mx-0.5)*z)*camW; y=(0.5+(sy-0.5)*z)*camH;
+        x=ox+(1-sx)*dw; y=oy+sy*dh;                      // mirror + object-fit aware
       }
       var col=(cur&&cur.c)||'#5BB1FF';
       var f=document.createElement('div'); f.className='floatN'; f.textContent=label;
@@ -506,7 +510,7 @@
       // Feed the XP bar; a hot multiplier "boosts" XP gain. Roll levels over.
       xpInto += Math.round(gain*(mult>=1.5?1.5:1));
       while(xpInto>=xpNeed){ xpInto-=xpNeed; xpLevel++; xpNeed=150+xpLevel*40; levelUp(); }
-      sfx(held?'coin':(reps%10===0?'coin':'tick')); haptic();
+      sfx('coin'); haptic();                                     // ding on every completed rep
       var num=$('#cnum'); num.textContent=reps; num.classList.remove('bump'); void num.offsetWidth; num.classList.add('bump');
       $('#cgain').textContent='+'+(reps*rate).toFixed(2)+' Strength';
       burstAtBody('+'+gain, held);   // number pops out of the body
@@ -532,13 +536,18 @@
 
     function finish(){
       stopCam(); stopUI();
-      var res=S.addReps(cur.muscle, reps, { diff:cur.diff });
-      S.commitRepStrength(res.gain);
-      var xpGain=Math.round(res.gain*20);
+      var diffF = cur.diff==='hard'?1.3:cur.diff==='medium'?1.15:1;
+      S.addReps(cur.muscle, reps, { diff:cur.diff });           // muscle map + total reps
+      // Commit a visible, synced reward into the real profile (Strength stat +
+      // XP) so camera reps show up everywhere — not only after 100 reps.
+      var strGain=Math.max(1, Math.round(reps*diffF*0.1));      // ~1 Strength / 10 reps
+      var xpGain =Math.max(10, Math.round(reps*2*diffF));
+      try{ if(window.coreState){ window.coreState.addStat('strength', strGain, 'camera:reps'); window.coreState.addXp(xpGain, 'camera:reps'); } }
+      catch(e){ try{ S.commitRepStrength(reps*S.perRep()); }catch(_){} }
       sfx('reward');
       $('#sumBody').innerHTML='<div class="sumhead"><div class="ring">'+cur.emoji+'</div><h2>'+reps+' reps done</h2><p>'+cur.name+' · '+points.toLocaleString()+' pts · LV '+xpLevel+'</p></div>'+
         '<div class="big3"><div class="b"><div class="bn">'+reps+'</div><div class="bl">Total Reps</div></div>'+
-          '<div class="b str"><div class="bn">+'+res.gain.toFixed(2)+'</div><div class="bl">Strength</div></div>'+
+          '<div class="b str"><div class="bn">+'+strGain+'</div><div class="bl">Strength</div></div>'+
           '<div class="b xp"><div class="bn">+'+xpGain+'</div><div class="bl">XP</div></div></div>'+
         '<button class="bigbtn" id="sumDone">Done</button>'+
         '<button class="againbtn" id="sumAgain">Go again</button>';
@@ -671,7 +680,7 @@
       $('#camToggle').addEventListener('click', toggleCam);
       Array.prototype.forEach.call(document.querySelectorAll('#zoomMeter button'), function(b){
         b.addEventListener('click', function(){
-          $('#cam').style.setProperty('--zoom', b.getAttribute('data-z'));
+          $('#cam').style.setProperty('--fit', b.getAttribute('data-fit'));
           Array.prototype.forEach.call(document.querySelectorAll('#zoomMeter button'), function(x){ x.classList.toggle('on', x===b); });
           sfx('tick');
         });
