@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script>try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8"/>
+<title>CORE — Scanner</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<style>
+:root{
+  --bg-base:#02020A;--bg-card:rgba(255,255,255,0.035);--border:rgba(255,255,255,0.08);
+  --text:#F8FAFE;--muted:#9AA1B7;--dim:#4F5570;--blue:#0A84FF;--green:#34D399;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify-content:center;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif;
+  color:var(--text);-webkit-font-smoothing:antialiased;padding:24px;overflow:hidden;}
+.phone{position:relative;width:390px;height:844px;background:var(--bg-base);border-radius:56px;overflow:hidden;
+  box-shadow:0 40px 100px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.06),0 0 0 10px #0a0a12,0 0 0 11px #2b2b38;}
+.notch{position:absolute;top:14px;left:50%;transform:translateX(-50%);width:124px;height:32px;background:#000;border-radius:20px;z-index:60;}
+.home-indicator{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;background:rgba(245,247,251,0.55);border-radius:999px;z-index:60;}
+#ambBg{position:absolute;inset:0;z-index:0;
+  background:
+    radial-gradient(60% 35% at 50% 22%, color-mix(in srgb, var(--sc,#0A84FF) 20%, transparent) 0%, transparent 55%),
+    radial-gradient(50% 30% at 50% 100%, rgba(255,255,255,0.04) 0%, transparent 65%),
+    linear-gradient(180deg,#070713 0%,#02020A 50%,#050510 100%);transition:background .4s ease;}
+
+.frame{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;padding-top:54px;}
+.top{display:flex;align-items:center;gap:12px;padding:6px 18px 4px;flex-shrink:0;}
+.back{width:38px;height:38px;flex:none;border-radius:50%;border:1px solid var(--border);background:rgba(255,255,255,0.06);
+  color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s;text-decoration:none;}
+.back:active{transform:scale(.94);}.back svg{width:18px;height:18px;}
+.top h1{font-size:16px;font-weight:800;letter-spacing:-0.3px;}
+
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 20px 28px;}
+.scroll::-webkit-scrollbar{display:none;}
+
+.hero{display:flex;flex-direction:column;align-items:center;text-align:center;padding:18px 0 8px;}
+.hero .ic{width:96px;height:96px;border-radius:28px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;
+  color:var(--sc,#0A84FF);
+  background:color-mix(in srgb, var(--sc,#0A84FF) 16%, transparent);
+  border:1px solid color-mix(in srgb, var(--sc,#0A84FF) 38%, transparent);
+  box-shadow:0 0 36px color-mix(in srgb, var(--sc,#0A84FF) 26%, transparent);}
+.hero .ic svg{width:46px;height:46px;}
+.hero h2{font-size:26px;font-weight:800;letter-spacing:-0.6px;}
+.hero p{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.5;max-width:280px;}
+.badge{display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-size:10px;font-weight:800;letter-spacing:.08em;
+  text-transform:uppercase;padding:5px 11px;border-radius:999px;
+  background:color-mix(in srgb, var(--sc,#0A84FF) 12%, transparent);
+  border:1px solid color-mix(in srgb, var(--sc,#0A84FF) 32%, transparent);color:var(--sc,#0A84FF);}
+.badge.live{background:rgba(52,211,153,0.12);border-color:rgba(52,211,153,0.34);color:var(--green);}
+.badge .d{width:6px;height:6px;border-radius:50%;background:currentColor;}
+
+.sec{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:24px 2px 10px;}
+.card{border-radius:18px;background:rgba(4,4,18,0.40);border:1px solid var(--border);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:6px 4px;}
+.row{display:flex;align-items:flex-start;gap:12px;padding:13px 14px;border-bottom:1px solid rgba(255,255,255,0.05);}
+.row:last-child{border-bottom:none;}
+.row .ck{width:22px;height:22px;flex:none;border-radius:7px;display:flex;align-items:center;justify-content:center;margin-top:1px;
+  color:var(--sc,#0A84FF);background:color-mix(in srgb, var(--sc,#0A84FF) 14%, transparent);}
+.row .ck svg{width:13px;height:13px;}
+.row span{font-size:13.5px;line-height:1.45;color:#D7DCEA;}
+
+.cta{width:100%;margin-top:22px;border:none;border-radius:18px;padding:16px;font:inherit;font-size:15px;font-weight:800;
+  cursor:pointer;color:#02030A;background:var(--sc,#0A84FF);box-shadow:0 12px 30px color-mix(in srgb, var(--sc,#0A84FF) 34%, transparent);
+  display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .12s;text-decoration:none;}
+.cta:active{transform:scale(.98);}.cta svg{width:17px;height:17px;}
+.cta.soon{background:rgba(255,255,255,0.06);color:var(--text);box-shadow:none;border:1px solid var(--border);}
+.note{text-align:center;font-size:11.5px;color:var(--dim);margin-top:12px;line-height:1.5;}
+
+.toast{position:absolute;left:50%;bottom:40px;transform:translateX(-50%) translateY(10px);z-index:80;
+  background:rgba(10,12,22,0.94);border:1px solid var(--border);color:var(--text);font-size:12.5px;font-weight:600;
+  padding:10px 16px;border-radius:14px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;backdrop-filter:blur(10px);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div id="ambBg"></div>
+  <div class="notch"></div>
+  <div class="home-indicator"></div>
+
+  <div class="frame">
+    <div class="top">
+      <a class="back" href="coach.html" aria-label="Back to Coach"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></a>
+      <h1 id="title">Scanner</h1>
+    </div>
+
+    <div class="scroll">
+      <div class="hero">
+        <div class="ic" id="hero-ic"></div>
+        <h2 id="name">Scanner</h2>
+        <p id="tag"></p>
+        <span class="badge" id="badge"><span class="d"></span><span id="badge-t">Coming soon</span></span>
+      </div>
+
+      <div class="sec">What it checks</div>
+      <div class="card" id="checks"></div>
+
+      <a class="cta" id="cta">Start</a>
+      <div class="note" id="note"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var $=function(s){return document.querySelector(s);};
+  function svg(d){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>';}
+
+  var SCANS={
+    physique:{ name:'Physique', color:'#FF6B6B', tag:'Body composition, symmetry and progress over time.',
+      icon:'<path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/>',
+      checks:['Body-fat & muscle read from a photo','Symmetry and weak-point flags','Progress tracked scan-to-scan'],
+      live:true, go:'physique-scan.html', cta:'Start scan' },
+    food:{ name:'Food', color:'#34D399', tag:'Point your camera at a meal for an instant health read.',
+      icon:'<path d="M12 20.5s-7.2-4.6-7.2-9.8A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 7.2 3.7c0 5.2-7.2 9.8-7.2 9.8Z"/>',
+      checks:['Calories & macro estimate per plate','A health score for the meal','Smarter swaps and suggestions'] },
+    outfit:{ name:'Outfit', color:'#FFCB3D', tag:'A quick style and fit check before you head out.',
+      icon:'<path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/>',
+      checks:['Fit and proportion feedback','Colour and combo tips','Match the outfit to the occasion'] },
+    posture:{ name:'Posture', color:'#4A8FFF', tag:'Stand in frame for an alignment check and fixes.',
+      icon:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/><path d="M12 1.5v3M12 19.5v3M22.5 12h-3M4.5 12h-3"/>',
+      checks:['Head, shoulder and hip alignment','Imbalances flagged clearly','Daily correction drills'] },
+    looks:{ name:'Looks', color:'#B388FF', tag:'Skin, symmetry and grooming insights from a selfie.',
+      icon:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/><path d="M12 12v4M9 16h6"/>',
+      checks:['Skin condition read','Facial symmetry analysis','Hair and grooming tips'] },
+    voice:{ name:'Voice', color:'#5EEAD4', tag:'Record a clip for speaking and delivery feedback.',
+      icon:'<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/>',
+      checks:['Pace, clarity and filler words','Tone and confidence read','Drills to sharpen delivery'] }
+  };
+
+  var type=(new URLSearchParams(location.search).get('type')||'physique').toLowerCase();
+  var s=SCANS[type]||SCANS.physique;
+
+  document.documentElement.style.setProperty('--sc', s.color);
+  document.getElementById('ambBg').style.setProperty('--sc', s.color);
+  $('#title').textContent=s.name+' Scanner';
+  $('#name').textContent=s.name;
+  $('#tag').textContent=s.tag;
+  $('#hero-ic').innerHTML=svg(s.icon);
+
+  var badge=$('#badge'), badgeT=$('#badge-t');
+  if(s.live){ badge.classList.add('live'); badgeT.textContent='Live now'; }
+  else { badgeT.textContent='Coming with the full app'; }
+
+  $('#checks').innerHTML=s.checks.map(function(c){
+    return '<div class="row"><div class="ck">'+svg('<path d="M5 12l4 4 10-11"/>')+'</div><span>'+c+'</span></div>';
+  }).join('');
+
+  var cta=$('#cta'), note=$('#note');
+  if(s.live && s.go){
+    cta.setAttribute('href', s.go);
+    cta.innerHTML=svg('<path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/>')+'<span>'+s.cta+'</span>';
+    note.textContent='Runs on your device — your camera frames never leave the phone.';
+  } else {
+    cta.classList.add('soon'); cta.removeAttribute('href');
+    var notified=false;
+    try{ notified=localStorage.getItem('coreScanNotify.'+type)==='1'; }catch(e){}
+    function paint(){ cta.innerHTML = notified ? svg('<path d="M5 12l4 4 10-11"/>')+'<span>You’ll be notified</span>' : '<span>Notify me at launch</span>'; }
+    paint();
+    cta.addEventListener('click', function(){
+      notified=true; try{ localStorage.setItem('coreScanNotify.'+type,'1'); }catch(e){}
+      paint(); var t=$('#toast'); t.textContent='Great — we’ll let you know when '+s.name+' is ready'; t.classList.add('show');
+      clearTimeout(t._t); t._t=setTimeout(function(){ t.classList.remove('show'); },2000);
+    });
+    note.textContent='This scanner launches with the full app.';
+  }
+})();
+</script>
+</body>
+</html>
