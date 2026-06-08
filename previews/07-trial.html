@@ -3048,34 +3048,192 @@
 
         <!-- STEP 21: Connect account (Apple / Google / email) -> finish -> rank reveal -->
         <div class="step" data-step="21">
-          <div class="kicker">Last step</div>
-          <h1 class="title">Save your<br/><span class="g">progress.</span></h1>
-          <p class="copy">Connect an account so your streak, stats, and coach follow you everywhere. One tap.</p>
-          <div class="connect-grid">
-            <button type="button" class="connect-btn" onclick="connectAccount('apple')">
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="width:20px;height:20px;"><path d="M17.6 12.4c0-2.3 1.9-3.4 2-3.4-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.8-3.5.8-.7 0-1.9-.8-3.1-.8-1.6 0-3.1.9-3.9 2.4-1.7 2.9-.4 7.2 1.2 9.6.8 1.2 1.7 2.5 3 2.4 1.2 0 1.7-.8 3.1-.8 1.4 0 1.9.8 3.1.8 1.3 0 2.1-1.2 2.9-2.4.9-1.4 1.3-2.7 1.3-2.8 0-.1-2.6-1-2.7-4z"/><path d="M15.3 5.8c.6-.8 1.1-1.9 1-3-.9 0-2 .6-2.7 1.4-.6.7-1.2 1.8-1 2.9 1.1.1 2.1-.5 2.7-1.3z"/></svg>
-              <span>Continue with Apple</span>
+          <div class="portal-gate" id="portalGate">
+            <div class="pg-particles" id="pgParticles" aria-hidden="true"></div>
+
+            <div class="pg-logo">CORE</div>
+
+            <div class="portal" id="portalCore" aria-hidden="true">
+              <span class="p-rays"></span>
+              <span class="p-ring r1"></span>
+              <span class="p-ring r2"></span>
+              <span class="p-ring r3"></span>
+              <span class="p-glow"></span>
+              <span class="p-core"></span>
+            </div>
+
+            <h1 class="pg-headline">Your transformation<br/>starts here</h1>
+            <p class="pg-sub">7 days free. Then $4.99/month. Cancel anytime.</p>
+
+            <button type="button" class="pg-cta" id="portalCta" disabled>
+              <span>Enter CORE — Start Free Trial</span>
             </button>
-            <button type="button" class="connect-btn" onclick="connectAccount('google')">
-              <svg viewBox="0 0 24 24" aria-hidden="true" style="width:19px;height:19px;"><path fill="#4285F4" d="M21.6 12.2c0-.6-.1-1.2-.2-1.8H12v3.4h5.4a4.6 4.6 0 0 1-2 3v2.5h3.2c1.9-1.7 3-4.3 3-7.1z"/><path fill="#34A853" d="M12 22c2.7 0 5-.9 6.6-2.4l-3.2-2.5c-.9.6-2 .9-3.4.9-2.6 0-4.8-1.7-5.6-4.1H3.1v2.6A10 10 0 0 0 12 22z"/><path fill="#FBBC05" d="M6.4 13.9a6 6 0 0 1 0-3.8V7.5H3.1a10 10 0 0 0 0 9z"/><path fill="#EA4335" d="M12 6.1c1.5 0 2.8.5 3.8 1.5l2.8-2.8A10 10 0 0 0 3.1 7.5l3.3 2.6C7.2 7.8 9.4 6.1 12 6.1z"/></svg>
-              <span>Continue with Google</span>
-            </button>
-            <button type="button" class="connect-btn" onclick="connectAccount('email')">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:19px;height:19px;"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
-              <span>Continue with email</span>
-            </button>
+
+            <form class="pg-fields" id="portalForm" autocomplete="on" novalidate>
+              <input class="pg-input" id="pgName" type="text" inputmode="text" placeholder="Name on card" autocomplete="cc-name" />
+              <input class="pg-input" id="pgNumber" type="text" inputmode="numeric" placeholder="Card number" autocomplete="cc-number" maxlength="23" />
+              <div class="pg-row">
+                <input class="pg-input" id="pgExp" type="text" inputmode="numeric" placeholder="MM / YY" autocomplete="cc-exp" maxlength="7" />
+                <input class="pg-input" id="pgCvv" type="text" inputmode="numeric" placeholder="CVV" autocomplete="cc-csc" maxlength="4" />
+              </div>
+            </form>
           </div>
-          <div class="connect-fine">$0 today · 7-day free trial · cancel any time. By continuing you agree to our <a href="82-legal.html#terms">Terms</a>.</div>
+          <div class="pg-flash" id="pgFlash" aria-hidden="true"></div>
+
           <style>
-            .connect-grid { display:flex; flex-direction:column; gap:10px; margin-top:26px; }
-            .connect-btn { display:flex; align-items:center; justify-content:center; gap:10px;
-              width:100%; padding:15px 18px; border-radius:14px; cursor:pointer;
-              background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12);
-              color:#fff; font-family:inherit; font-size:15px; font-weight:600; letter-spacing:-0.2px;
-              transition:transform .12s ease, background .2s ease; }
-            .connect-btn:active { transform:scale(0.98); background:rgba(255,255,255,0.10); }
-            .connect-fine { margin-top:18px; font-size:11.5px; line-height:17px; color:var(--muted); text-align:center; }
-            .connect-fine a { color:#4FA3FF; text-decoration:none; }
+            /* ===== Cinematic portal subscription gate (step 21) ===== */
+            body.on-portal .topbar,
+            body.on-portal .progress,
+            body.on-portal .footer { display:none !important; }
+            body.on-portal .frame { padding:0; }
+            body.on-portal .stepwrap { overflow:visible; }
+            body.on-portal .bg, body.on-portal .aurora, body.on-portal .stars { opacity:0 !important; transition:opacity .5s; }
+
+            .step[data-step="21"] { padding:0; overflow:hidden; }
+            .portal-gate {
+              position:absolute; inset:0;
+              background:radial-gradient(120% 80% at 50% 38%, #11132a 0%, #0a0a0f 60%, #07070b 100%);
+              display:flex; flex-direction:column; align-items:center;
+              padding:64px 26px 26px; box-sizing:border-box;
+              text-align:center; overflow:hidden;
+            }
+            .pg-logo {
+              font-size:13px; font-weight:800; letter-spacing:0.5em; color:#cfe4ff;
+              text-indent:0.5em; opacity:0.9; margin-bottom:6px;
+            }
+            /* ---- portal centerpiece ---- */
+            .portal {
+              position:relative; width:158px; height:158px; margin:10px auto 4px;
+              display:flex; align-items:center; justify-content:center;
+            }
+            .portal span { position:absolute; border-radius:50%; }
+            .p-rays {
+              width:300px; height:300px;
+              background:conic-gradient(from 0deg,
+                transparent 0deg, rgba(120,160,255,0.16) 14deg, transparent 28deg,
+                transparent 60deg, rgba(179,136,255,0.14) 74deg, transparent 88deg,
+                transparent 130deg, rgba(120,160,255,0.16) 144deg, transparent 158deg,
+                transparent 210deg, rgba(179,136,255,0.13) 224deg, transparent 238deg,
+                transparent 300deg, rgba(120,160,255,0.15) 314deg, transparent 328deg);
+              animation:pgSpin 18s linear infinite;
+              -webkit-mask-image:radial-gradient(closest-side, transparent 30%, #000 46%, transparent 78%);
+              mask-image:radial-gradient(closest-side, transparent 30%, #000 46%, transparent 78%);
+            }
+            .p-ring { border:1.5px solid transparent; }
+            .p-ring.r1 { width:158px; height:158px;
+              border-top-color:#7aa6ff; border-right-color:rgba(122,166,255,0.35);
+              box-shadow:0 0 22px rgba(122,166,255,0.45), inset 0 0 18px rgba(122,166,255,0.25);
+              animation:pgSpin 7s linear infinite; }
+            .p-ring.r2 { width:120px; height:120px;
+              border-bottom-color:#b388ff; border-left-color:rgba(179,136,255,0.35);
+              box-shadow:0 0 18px rgba(179,136,255,0.4), inset 0 0 14px rgba(179,136,255,0.22);
+              animation:pgSpinRev 5s linear infinite; }
+            .p-ring.r3 { width:86px; height:86px;
+              border-top-color:#cfe4ff; border-left-color:rgba(207,228,255,0.4);
+              animation:pgSpin 3.4s linear infinite; }
+            .p-glow {
+              width:104px; height:104px;
+              background:radial-gradient(circle, rgba(150,180,255,0.55), rgba(120,90,220,0.25) 55%, transparent 72%);
+              filter:blur(4px); animation:pgPulse 2.8s ease-in-out infinite;
+            }
+            .p-core {
+              width:52px; height:52px;
+              background:radial-gradient(circle at 50% 42%, #ffffff, #cfe4ff 40%, #7aa6ff 78%);
+              box-shadow:0 0 30px rgba(207,228,255,0.9), 0 0 60px rgba(122,166,255,0.6);
+              animation:pgPulse 2.8s ease-in-out infinite;
+            }
+            @keyframes pgSpin { to { transform:rotate(360deg); } }
+            @keyframes pgSpinRev { to { transform:rotate(-360deg); } }
+            @keyframes pgPulse { 0%,100%{ transform:scale(1); opacity:0.92; } 50%{ transform:scale(1.12); opacity:1; } }
+
+            /* ---- drifting particles ---- */
+            .pg-particles { position:absolute; inset:0; pointer-events:none; z-index:0; }
+            .pg-dot {
+              position:absolute; width:3px; height:3px; border-radius:50%;
+              background:#cfe4ff; opacity:0; box-shadow:0 0 6px rgba(207,228,255,0.8);
+              animation:pgDrift linear infinite;
+            }
+            @keyframes pgDrift {
+              0% { opacity:0; transform:translate(0,0) scale(1); }
+              12% { opacity:0.7; }
+              100% { opacity:0; transform:translate(var(--dx), var(--dy)) scale(0.2); }
+            }
+
+            .pg-headline {
+              position:relative; z-index:2;
+              font-size:27px; font-weight:800; line-height:1.08; letter-spacing:-0.6px;
+              color:#fff; margin:8px 0 0;
+              text-shadow:0 2px 24px rgba(122,166,255,0.35);
+            }
+            .pg-sub {
+              position:relative; z-index:2;
+              font-size:13px; color:rgba(207,228,255,0.72); margin:9px 0 0; letter-spacing:-0.1px;
+            }
+            .pg-cta {
+              position:relative; z-index:2; margin-top:18px; width:100%;
+              padding:16px 18px; border-radius:15px; border:none; cursor:pointer;
+              font-family:inherit; font-size:16px; font-weight:700; letter-spacing:-0.2px;
+              color:#06203f;
+              background:linear-gradient(180deg, #eaf3ff, #cfe4ff);
+              box-shadow:0 0 0 1px rgba(207,228,255,0.5), 0 10px 30px rgba(122,166,255,0.45);
+              transition:opacity .25s, transform .12s, box-shadow .3s, filter .25s;
+            }
+            .pg-cta[disabled] { opacity:0.42; filter:grayscale(0.4); cursor:not-allowed; box-shadow:0 0 0 1px rgba(207,228,255,0.2); }
+            .pg-cta:not([disabled]) { animation:pgCtaPulse 2.2s ease-in-out infinite; }
+            .pg-cta:not([disabled]):active { transform:scale(0.98); }
+            @keyframes pgCtaPulse {
+              0%,100% { box-shadow:0 0 0 1px rgba(207,228,255,0.5), 0 10px 30px rgba(122,166,255,0.45); }
+              50% { box-shadow:0 0 0 1px rgba(207,228,255,0.8), 0 12px 42px rgba(122,166,255,0.75); }
+            }
+            .pg-fields { position:relative; z-index:2; margin-top:14px; width:100%; display:flex; flex-direction:column; gap:9px; }
+            .pg-row { display:flex; gap:9px; }
+            .pg-row .pg-input { flex:1; min-width:0; }
+            .pg-input {
+              width:100%; box-sizing:border-box;
+              padding:14px 15px; border-radius:13px;
+              background:rgba(255,255,255,0.05);
+              border:1px solid rgba(207,228,255,0.18);
+              color:#fff; font-family:inherit; font-size:15px; letter-spacing:0.2px;
+              outline:none; transition:border-color .2s, background .2s, box-shadow .2s;
+            }
+            .pg-input::placeholder { color:rgba(207,228,255,0.40); letter-spacing:-0.1px; }
+            .pg-input:focus { border-color:#cfe4ff; background:rgba(207,228,255,0.08); box-shadow:0 0 0 3px rgba(207,228,255,0.14); }
+
+            /* ---- submit cinematic ---- */
+            .pg-flash {
+              position:absolute; inset:0; z-index:40; pointer-events:none;
+              background:#fff; opacity:0;
+            }
+            body.portal-launch .portal {
+              animation:pgZoom 1.5s cubic-bezier(.6,0,.3,1) forwards;
+              z-index:39;
+            }
+            body.portal-launch .pg-logo,
+            body.portal-launch .pg-headline,
+            body.portal-launch .pg-sub,
+            body.portal-launch .pg-cta,
+            body.portal-launch .pg-fields { animation:pgFade .5s ease forwards; }
+            body.portal-launch .pg-flash { animation:pgFlash 1.6s ease-in forwards; }
+            body.on-portal.portal-launch .notch,
+            body.on-portal.portal-launch .home-indicator { opacity:0; transition:opacity .4s ease; }
+            @keyframes pgZoom {
+              0% { transform:scale(1); }
+              55% { transform:scale(4.5); }
+              100% { transform:scale(16); opacity:0.9; }
+            }
+            @keyframes pgFade { to { opacity:0; transform:translateY(-8px); } }
+            @keyframes pgFlash {
+              0% { opacity:0; } 62% { opacity:0; } 82% { opacity:1; } 100% { opacity:1; }
+            }
+            @media (prefers-reduced-motion: reduce) {
+              .portal span, .pg-cta:not([disabled]) { animation:none !important; }
+            }
+            @media (max-height:740px) {
+              .portal-gate { padding-top:48px; }
+              .portal { width:128px; height:128px; }
+              .p-ring.r1{ width:128px;height:128px; } .p-ring.r2{ width:98px;height:98px; } .p-ring.r3{ width:70px;height:70px; }
+              .pg-headline { font-size:23px; }
+            }
           </style>
         </div>
 
@@ -3499,6 +3657,8 @@
     document.body.setAttribute('data-habit', state.habit || '');
     document.body.classList.toggle('on-vape-duration', n === 5 && state.habit === 'vape');
     document.body.classList.toggle('on-vape-amount', n === 6);
+    // Step-21 — cinematic portal subscription gate hides all chrome
+    document.body.classList.toggle('on-portal', n === 21);
     // Demo playback (start the one visible demo, stop any others)
     if (isDemoStep(n)) startDemo(n); else stopAllDemos();
     // Step-enter hooks (keyed by body id — unchanged by the reorder)
@@ -4302,6 +4462,9 @@
   // rank-reveal chain. (Preview: no real OAuth; production wires these to the SDKs.)
   function connectAccount(provider) {
     try { state.connectedVia = provider; } catch (e) {}
+    // Portal gate collects the card here, so payment is already connected —
+    // mark it so the downstream rank-reveal doesn't re-prompt for Apple Pay.
+    if (provider === 'card') { try { state.applePayConnected = true; } catch (e) {} }
     track('account_connected', { provider: provider });
     finishOnboarding(true);
   }
@@ -5585,6 +5748,82 @@
     }, 6000);
   }
   setTimeout(maybeShowHint, 8000);
+</script>
+<script>
+/* ===== Cinematic portal subscription gate (step 21) ===== */
+(function(){
+  var gate = document.getElementById('portalGate'); if(!gate) return;
+  var cta   = document.getElementById('portalCta');
+  var fName = document.getElementById('pgName');
+  var fNum  = document.getElementById('pgNumber');
+  var fExp  = document.getElementById('pgExp');
+  var fCvv  = document.getElementById('pgCvv');
+  var form  = document.getElementById('portalForm');
+
+  // --- drifting particles toward the portal ---
+  (function spawnParticles(){
+    var host = document.getElementById('pgParticles'); if(!host) return;
+    for (var i=0; i<16; i++){
+      var d = document.createElement('span');
+      d.className = 'pg-dot';
+      var x = Math.random()*100, y = 60 + Math.random()*45;      // start low/around
+      // drift toward the portal (~50% / 34% of the gate)
+      var dx = (50 - x) * (1.6 + Math.random()*1.4);
+      var dy = (34 - y) * (1.6 + Math.random()*1.2);
+      d.style.left = x + '%';
+      d.style.top  = y + '%';
+      d.style.setProperty('--dx', dx + 'px');
+      d.style.setProperty('--dy', dy + 'px');
+      d.style.animationDuration = (5 + Math.random()*6) + 's';
+      d.style.animationDelay = (Math.random()*6) + 's';
+      host.appendChild(d);
+    }
+  })();
+
+  // --- input formatting ---
+  fNum && fNum.addEventListener('input', function(){
+    var v = this.value.replace(/\D/g,'').slice(0,19);
+    this.value = v.replace(/(.{4})/g,'$1 ').trim();
+    validate();
+  });
+  fExp && fExp.addEventListener('input', function(){
+    var v = this.value.replace(/\D/g,'').slice(0,4);
+    if (v.length >= 3) v = v.slice(0,2) + ' / ' + v.slice(2);
+    this.value = v;
+    validate();
+  });
+  fCvv && fCvv.addEventListener('input', function(){
+    this.value = this.value.replace(/\D/g,'').slice(0,4); validate();
+  });
+  fName && fName.addEventListener('input', validate);
+
+  function validate(){
+    var nameOk = (fName.value.trim().length >= 2);
+    var numOk  = (fNum.value.replace(/\D/g,'').length >= 13);
+    var expOk  = (fExp.value.replace(/\D/g,'').length === 4);
+    var cvvOk  = (fCvv.value.replace(/\D/g,'').length >= 3);
+    var ok = nameOk && numOk && expOk && cvvOk;
+    cta.disabled = !ok;
+    return ok;
+  }
+
+  var launched = false;
+  function launch(){
+    if (launched || cta.disabled) return;
+    launched = true;
+    try { window.haptic && window.haptic(30); } catch(_){}
+    try { window.coreSfx && window.coreSfx('whoosh'); } catch(_){}
+    document.body.classList.add('portal-launch');
+    // Pulled-through cinematic, then continue the real onboarding chain.
+    setTimeout(function(){
+      // connectAccount('card') marks payment connected, persists the trial,
+      // and navigates (→ 08-rank-reveal → … → dashboard).
+      if (typeof window.connectAccount === 'function') window.connectAccount('card');
+    }, 1750);
+  }
+  cta && cta.addEventListener('click', launch);
+  form && form.addEventListener('submit', function(e){ e.preventDefault(); launch(); });
+})();
 </script>
 </body>
 </html>
