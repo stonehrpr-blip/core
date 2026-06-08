@@ -986,22 +986,35 @@
   .demo-note { margin-top:11px; font-size:12px; line-height:1.4; color:var(--muted); text-align:center; }
   .demo-note b { color:#cdd9ff; font-weight:700; }
   /* 30-day flip-card showcase (step 19) */
-  .flipgrid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px; perspective:1200px; }
-  .flipcard{ all:unset; position:relative; display:block; aspect-ratio:1/1; cursor:pointer; -webkit-tap-highlight-color:transparent; }
-  .flipcard-inner{ position:absolute; inset:0; transform-style:preserve-3d; transition:transform .6s cubic-bezier(.2,.85,.25,1); }
+  .step[data-step="19"]{ overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:120px; }
+  .flipgrid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px; perspective:1400px; }
+  .flipcard{ all:unset; position:relative; display:block; aspect-ratio:1/0.9; cursor:pointer; -webkit-tap-highlight-color:transparent; opacity:0; }
+  .step[data-step="19"].on .flipcard{ animation:flipIn .5s cubic-bezier(.2,1,.3,1) both; }
+  .step[data-step="19"].on .flipcard:nth-child(2){ animation-delay:.07s; }
+  .step[data-step="19"].on .flipcard:nth-child(3){ animation-delay:.14s; }
+  .step[data-step="19"].on .flipcard:nth-child(4){ animation-delay:.21s; }
+  @keyframes flipIn{ from{ opacity:0; transform:translateY(18px) scale(.95); } to{ opacity:1; transform:translateY(0) scale(1); } }
+  .flipcard-inner{ position:absolute; inset:0; transform-style:preserve-3d; transition:transform .68s cubic-bezier(.34,1.56,.44,1); }
   .flipcard.flipped .flipcard-inner{ transform:rotateY(180deg); }
-  .flipface{ position:absolute; inset:0; -webkit-backface-visibility:hidden; backface-visibility:hidden; border-radius:18px; border:1px solid var(--border); padding:15px; display:flex; flex-direction:column; justify-content:space-between; box-sizing:border-box; }
-  .flip-front{ background:rgba(255,255,255,0.035); }
-  .flip-back{ transform:rotateY(180deg); justify-content:flex-end; gap:4px;
-    background:linear-gradient(165deg, color-mix(in srgb,var(--fac,#0A84FF) 22%,transparent), rgba(255,255,255,0.02));
-    border-color:color-mix(in srgb,var(--fac,#0A84FF) 42%,transparent); }
-  .flip-ic{ width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center;
-    color:var(--fac,#0A84FF); background:color-mix(in srgb,var(--fac,#0A84FF) 16%,transparent); }
-  .flip-ic svg{ width:20px; height:20px; }
-  .flip-front .fname{ font-size:15.5px; font-weight:800; letter-spacing:-0.2px; }
-  .flip-front .fnow{ font-size:11.5px; color:var(--muted); margin-top:2px; }
-  .flip-back .fb-eyebrow{ font-size:10px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:color-mix(in srgb,var(--fac,#0A84FF) 70%, #ffffff); }
-  .flip-back .fb-to{ font-size:15.5px; font-weight:800; color:#fff; line-height:1.25; }
+  .flipface{ position:absolute; inset:0; -webkit-backface-visibility:hidden; backface-visibility:hidden; border-radius:18px; padding:15px;
+    display:flex; flex-direction:column; justify-content:space-between; box-sizing:border-box; overflow:hidden; }
+  .flip-front{ border:1px solid color-mix(in srgb,var(--fac,#0A84FF) 38%, var(--border));
+    background:linear-gradient(158deg, color-mix(in srgb,var(--fac,#0A84FF) 20%, #0b0b16), #0a0a14); }
+  .flip-front::before{ content:""; position:absolute; inset:0; pointer-events:none;
+    background:radial-gradient(120% 75% at 82% 0%, color-mix(in srgb,var(--fac,#0A84FF) 30%, transparent), transparent 62%); }
+  .flip-back{ transform:rotateY(180deg); justify-content:flex-end; gap:5px;
+    border:1px solid color-mix(in srgb,var(--fac,#0A84FF) 62%, transparent);
+    background:linear-gradient(152deg, color-mix(in srgb,var(--fac,#0A84FF) 44%, #0b0b16), color-mix(in srgb,var(--fac,#0A84FF) 9%, #0a0a14));
+    box-shadow:inset 0 0 34px color-mix(in srgb,var(--fac,#0A84FF) 24%, transparent); }
+  .flip-ic{ position:relative; width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#fff;
+    background:color-mix(in srgb,var(--fac,#0A84FF) 65%, transparent); box-shadow:0 5px 18px color-mix(in srgb,var(--fac,#0A84FF) 50%, transparent); }
+  .flipcard.flipped .flip-ic{ animation:icPop .5s ease .2s both; }
+  @keyframes icPop{ 0%{ transform:scale(1); } 45%{ transform:scale(1.18); } 100%{ transform:scale(1); } }
+  .flip-ic svg{ width:21px; height:21px; }
+  .flip-front .fname{ position:relative; font-size:16px; font-weight:800; letter-spacing:-0.2px; color:#fff; }
+  .flip-front .fnow{ position:relative; font-size:11.5px; color:var(--muted); margin-top:2px; }
+  .flip-back .fb-eyebrow{ font-size:10px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; color:#fff; opacity:.85; }
+  .flip-back .fb-to{ font-size:16px; font-weight:800; color:#fff; line-height:1.2; text-shadow:0 1px 8px rgba(0,0,0,.45); }
 
   /* ---- DEMO 1: Quests ---- */
   .qd-row { display:flex; align-items:center; gap:10px; padding:11px 12px; margin-bottom:8px; border-radius:13px; background:rgba(255,255,255,0.04); border:1px solid var(--border); }
@@ -3375,14 +3388,14 @@
   //   pos: 0       1         2       3       4     5       6        7     8        9        10       11
   //   id : 0       1         2       19      4     6       8        12    13       16       17       21
   //        name  gender  D:dash  habit  tone  D:30day  paywall  promise  connect
-  const ORDER = [1, 2, 19, 4, 12, 8, 16, 17, 0, 21];
+  const ORDER = [1, 2, 4, 12, 8, 19, 16, 17, 0, 21];
   function curPos() { const i = ORDER.indexOf(state.step); return i < 0 ? 0 : i; }
   // Chapter map — drives the 5-pill progress bar + label (by ORDER position)
   const CHAPTERS = [
     { ch: 'you',    label: 'You',    maxPos: 1  },  // name, gender
-    { ch: 'habit',  label: 'Habit',  maxPos: 3  },  // flip-card preview, habit
-    { ch: 'coach',  label: 'Coach',  maxPos: 5  },  // coach tone, journey graph
-    { ch: 'plan',   label: 'Plan',   maxPos: 6  },  // 30-day plan
+    { ch: 'habit',  label: 'Habit',  maxPos: 2  },  // habit
+    { ch: 'coach',  label: 'Coach',  maxPos: 4  },  // coach tone, journey graph
+    { ch: 'plan',   label: 'Plan',   maxPos: 6  },  // 30-day flip cards, plan
     { ch: 'trial',  label: 'Trial',  maxPos: 9  },  // paywall, promise, connect
   ];
   function chapterIndexFor() {                 // reads state.step via curPos(); any arg ignored
@@ -3465,7 +3478,7 @@
     if (label) label.textContent = CHAPTERS[ch].label;
   }
   // ── Demo steps (animated faux-UI walkthroughs) ──────────────────────────
-  const DEMO_STEPS = { 18: 'quests', 19: 'dashboard', 20: 'ranks' };
+  const DEMO_STEPS = { 18: 'quests', 20: 'ranks' };
   function isDemoStep(n) { return Object.prototype.hasOwnProperty.call(DEMO_STEPS, n); }
   let _demoTimer = null;
   function stopAllDemos() {
@@ -3585,6 +3598,9 @@
       // The "Begin free trial" button opens the Apple Pay sheet (handled in next()).
       setCTA(state.applePayConnected ? 'Continue' : 'Begin free trial', false,
         state.applePayConnected ? 'Apple Pay connected · $0 today' : '$0 today · Apple Pay · cancel any time');
+    } else if (s === 19) {
+      // 30-day flip-card preview — passive, always advanceable
+      setCTA('Next', false, 'Tap each card to see where you\'re headed');
     } else if (s === 21) {
       // Connect step — the account buttons drive navigation; footer CTA is inert.
       setCTA('Connect to finish', true, 'Choose Apple, Google, or email above');
