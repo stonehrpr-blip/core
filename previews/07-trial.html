@@ -1431,8 +1431,8 @@
               background: linear-gradient(0deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05)), rgba(13,17,27,0.66);
               box-shadow:
                 0 14px 32px rgba(0,0,0,0.30),
-                0 0 0 1px var(--hc) inset,
-                0 0 22px var(--hc);
+                0 0 0 1px color-mix(in srgb, var(--hc) 70%, transparent) inset,
+                0 6px 22px color-mix(in srgb, var(--hc) 26%, transparent);
               animation: habitPop .42s cubic-bezier(.22,1.5,.36,1);
             }
             /* one-shot bounce the moment a card is selected */
@@ -1474,26 +1474,27 @@
             .habit-card.sel .habit-badge { opacity: 0; }
             /* Icon tile — colored tinted bg w/ glow that scales on interaction */
             .habit-ico {
-              width: 48px; height: 48px; border-radius: 12px;
-              background:
-                linear-gradient(140deg,
-                  color-mix(in srgb, var(--hc) 92%, white),
-                  var(--hc));
-              border: none;
+              width: 48px; height: 48px; border-radius: 13px;
+              /* Apple-style frosted tint — translucent color, not a solid neon block */
+              background: color-mix(in srgb, var(--hc) 20%, rgba(255,255,255,0.05));
+              -webkit-backdrop-filter: blur(8px);
+              backdrop-filter: blur(8px);
+              border: 1px solid color-mix(in srgb, var(--hc) 32%, rgba(255,255,255,0.10));
               box-shadow:
-                0 6px 16px color-mix(in srgb, var(--hc) 45%, transparent),
-                0 0 0 1px rgba(255,255,255,0.10) inset;
+                0 4px 12px rgba(0,0,0,0.20),
+                0 0 0 0.5px rgba(255,255,255,0.06) inset;
               display: flex; align-items: center; justify-content: center;
               transition: transform .25s cubic-bezier(.22,1.4,.36,1), box-shadow .25s;
             }
             .habit-ico svg { width: 30px; height: 30px; display: block; }
             .habit-card:hover .habit-ico { transform: scale(1.06) rotate(-1.5deg); }
             .habit-card.sel .habit-ico {
-              transform: scale(1.10) rotate(-3deg);
+              transform: scale(1.08) rotate(-2deg);
+              background: color-mix(in srgb, var(--hc) 32%, rgba(255,255,255,0.06));
+              border-color: color-mix(in srgb, var(--hc) 55%, transparent);
               box-shadow:
-                0 0 28px var(--hc),
-                0 0 0 1.5px rgba(255,255,255,0.30) inset,
-                0 8px 18px rgba(0,0,0,0.30);
+                0 6px 18px color-mix(in srgb, var(--hc) 30%, transparent),
+                0 0 0 0.5px rgba(255,255,255,0.16) inset;
             }
             .habit-name {
               font-size: 15px; font-weight: 700; color: #fff;
