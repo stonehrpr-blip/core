@@ -79,6 +79,17 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .ex{display:flex;justify-content:space-between;padding:9px 0;border-top:1px solid rgba(255,255,255,.05);font-size:13.5px;color:#D7DCEA;}
 .ex span{color:var(--blue-3);font-weight:700;font-size:12px;}
 .disc{color:var(--dim);font-size:11px;text-align:center;margin:16px 0;line-height:1.5;}
+.btn.ghost{background:rgba(255,255,255,.06);color:var(--text);box-shadow:none;border:1px solid var(--border);}
+.btn.row{display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn svg{width:18px;height:18px;}
+.btn.ghost svg{stroke:var(--text);}
+/* dashboard-style score bars */
+.scores{display:flex;flex-direction:column;gap:11px;padding:2px 0;}
+.srow{display:flex;align-items:center;gap:11px;}
+.sname{width:92px;flex:none;font-size:12.5px;font-weight:700;color:#D7DCEA;}
+.sbar{flex:1;height:8px;border-radius:999px;background:rgba(255,255,255,.07);overflow:hidden;}
+.sbar i{display:block;height:100%;width:0;border-radius:999px;transition:width .7s cubic-bezier(.16,1,.3,1);}
+.sval{width:26px;text-align:right;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;}
 .notice{position:absolute;left:18px;right:18px;bottom:20px;background:rgba(20,22,34,.96);border:1px solid var(--border);
   border-radius:12px;padding:9px 12px;font-size:11px;color:var(--muted);text-align:center;z-index:30;}
 .hide{display:none!important;}
@@ -104,11 +115,14 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 // page that opens the scanner (gym) so a direct/deep load still has an exit.
 function goBack(){ if (history.length > 1) { history.back(); } else { location.href = 'gym.html'; } }
 </script>
+<script src="_lib/core-config.js"></script>
 <script>
 (function(){
-  // Point this at your deployed function to do a REAL scan. Until then the flow
-  // gracefully falls back to a deterministic demo result so the UX is fully usable.
-  var FUNCTION_URL = ""; // e.g. "https://tqjpgknkbfaayrjuwoet.supabase.co/functions/v1/physique-scan"
+  // Real AI scan via the deployed physique-scan function (Anthropic vision).
+  // Resolves from CORE_CONFIG; until the function is deployed the flow falls
+  // back to a deterministic demo result so the UX stays fully usable.
+  var CFG = window.CORE_CONFIG || {};
+  var FUNCTION_URL = CFG.SUPABASE_URL ? (CFG.SUPABASE_URL + "/functions/v1/physique-scan") : "";
   var MUSCLES = ["chest","back","shoulders","arms","legs","core"];
   var LABEL = {chest:"Chest",back:"Back",shoulders:"Shoulders",arms:"Arms",legs:"Legs",core:"Core"};
   var WHY = {chest:"Build pressing strength and upper-body shape.",back:"Fixes posture and balances your frame.",
@@ -174,33 +188,72 @@ function goBack(){ if (history.length > 1) { history.back(); } else { location.h
 
   function camera(){
     notice("");
-    // Blank camera frame (no live feed) + a button that opens the OS popup to
-    // take a photo OR upload one. The native file picker handles the access prompt.
-    app.innerHTML='<div class="cam" id="cam">'+
-      '<div class="guide"><svg width="58%" height="82%" viewBox="0 0 100 160"><path d="M50 6 a8 8 0 1 1 -.1 0 M34 30 Q50 22 66 30 L62 84 L58 150 L52 150 L50 100 L48 150 L42 150 L38 84 Z" fill="none" stroke="rgba(74,143,255,.55)" stroke-width="1.4" stroke-dasharray="4 3" stroke-linejoin="round"/></svg></div></div>'+
-      '<div class="camfoot"><div class="tips">Full body in frame · good lighting · fitted clothing</div>'+
-      '<div style="width:100%;padding:0 18px"><button class="btn" id="takeBtn">Take or upload a photo</button></div></div>'+
-      '<input type="file" id="fileInput" accept="image/*" style="display:none">';
-    var input=document.getElementById("fileInput");
-    document.getElementById("takeBtn").onclick=function(){ input.click(); };
-    input.onchange=function(e){
-      var file=e.target.files&&e.target.files[0]; if(!file) return;
-      var reader=new FileReader();
-      reader.onload=function(){ var b64=String(reader.result).split(",")[1]||""; analyze(b64); };
-      reader.readAsDataURL(file);
-    };
+    // Two buttons: "Scan Physique" opens the camera (capture), "Upload Photo"
+    // opens the library — each fires the native OS popup. Both feed analyze().
+    app.innerHTML='<div class="cam" id="cam" style="flex:none;height:300px;margin:10px 18px 0">'+
+      '<div class="guide"><svg width="56%" height="82%" viewBox="0 0 100 160"><path d="M50 6 a8 8 0 1 1 -.1 0 M34 30 Q50 22 66 30 L62 84 L58 150 L52 150 L50 100 L48 150 L42 150 L38 84 Z" fill="none" stroke="rgba(74,143,255,.55)" stroke-width="1.4" stroke-dasharray="4 3" stroke-linejoin="round"/></svg></div></div>'+
+      '<div style="padding:16px 18px 0"><div class="tips" style="text-align:center;margin-bottom:14px">Full body in frame · good lighting · fitted clothing</div>'+
+      '<button class="btn row" id="scanBtn"><svg viewBox="0 0 24 24" fill="none" stroke="#02030A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg> Scan Physique</button>'+
+      '<button class="btn ghost row" id="uploadBtn" style="margin-top:11px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5M5 20h14"/></svg> Upload Photo</button>'+
+      '<div style="text-align:center"><button class="link" onclick="goBack()">Cancel</button></div></div>'+
+      '<input type="file" id="camInput" accept="image/*" capture="environment" style="display:none">'+
+      '<input type="file" id="upInput" accept="image/*" style="display:none">';
+    function wire(inputId){
+      var input=document.getElementById(inputId);
+      input.onchange=function(e){
+        var file=e.target.files&&e.target.files[0]; if(!file) return;
+        var reader=new FileReader();
+        reader.onload=function(){ var data=String(reader.result), b64=data.split(",")[1]||"", mt=(data.split(",")[0].match(/data:([^;]+)/)||[])[1]||"image/jpeg"; analyze(b64,mt); };
+        reader.readAsDataURL(file);
+      };
+      return input;
+    }
+    var camInput=wire("camInput"), upInput=wire("upInput");
+    document.getElementById("scanBtn").onclick=function(){ camInput.click(); };
+    document.getElementById("uploadBtn").onclick=function(){ upInput.click(); };
   }
 
-  function analyze(base64){
+  // Category sub-scores derived from the muscle read (works for demo + real AI).
+  function clamp(v){ return Math.max(0,Math.min(100,Math.round(v))); }
+  function computeScores(res){
+    var m=res.muscles, lv=function(k){ return (m[k]&&m[k].level)||50; };
+    var all=MUSCLES.map(lv), avg=function(a){ return a.reduce(function(x,y){return x+y;},0)/a.length; };
+    var upper=avg([lv("chest"),lv("back"),lv("shoulders"),lv("arms")]), lower=lv("legs"), core=lv("core");
+    var hi=Math.max.apply(null,all), lo=Math.min.apply(null,all);
+    return [
+      {label:"Upper Body",value:clamp(upper)},
+      {label:"Lower Body",value:clamp(lower)},
+      {label:"Core",value:clamp(core)},
+      {label:"Symmetry",value:clamp(100-(hi-lo)*1.1)},
+      {label:"Proportion",value:clamp(100-Math.abs(upper-lower)*1.3)},
+      {label:"Conditioning",value:clamp(res.rank.score*0.6+avg(all)*0.4)}
+    ];
+  }
+  function scoreColor(v){ return v<45?"#FF7A45":v<72?"#0A84FF":"#34D399"; }
+
+  // Push the scan's muscle read into the gym store so the Strength page's
+  // physique diagram lights up to match (maps 0-100 level → gym intensity).
+  function saveToGym(res){ try{
+    var KEY="coreGym.v1", s=JSON.parse(localStorage.getItem(KEY)||"{}"); if(!s||typeof s!=="object") s={};
+    s.muscles=s.muscles||{}; var now=Date.now();
+    MUSCLES.forEach(function(k){
+      var lvl=(res.muscles[k]&&res.muscles[k].level)||50, m=s.muscles[k]||{score:0,lastTs:0,sessions:0};
+      m.score=Math.max(m.score||0,(lvl/100)*11); m.lastTs=now; s.muscles[k]=m;
+    });
+    localStorage.setItem(KEY,JSON.stringify(s));
+  }catch(e){} }
+
+  function analyze(base64,mediaType){
     app.innerHTML='<div class="center"><div class="spin"></div><div style="font-size:16px;font-weight:700;margin-top:16px">Analyzing your physique…</div><div class="muted">Private · your photo never leaves this device after analysis.</div></div>';
     var done=function(res,real){ saveMuscles(res); results(res,real); };
     if(FUNCTION_URL && base64){
-      fetch(FUNCTION_URL,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({image:base64})})
+      var h={"content-type":"application/json"};
+      if(CFG.SUPABASE_ANON_KEY){ h.authorization="Bearer "+CFG.SUPABASE_ANON_KEY; h.apikey=CFG.SUPABASE_ANON_KEY; }
+      fetch(FUNCTION_URL,{method:"POST",headers:h,body:JSON.stringify({image:base64,mediaType:mediaType||"image/jpeg"})})
         .then(function(r){return r.json();})
         .then(function(j){ if(j&&j.isBody===false){ notbody(); } else if(j&&j.rank){ done(j,true);} else { done(demoResult(),false);} })
         .catch(function(){ done(demoResult(),false); });
     } else {
-      // no deployed function in this preview → demo result so the flow completes
       setTimeout(function(){ done(demoResult(),false); }, 1100);
     }
   }
@@ -211,11 +264,16 @@ function goBack(){ if (history.length > 1) { history.back(); } else { location.h
   }
 
   function results(res,real){
-    notice(real?"":"Demo result — deploy physique-scan + set FUNCTION_URL for a real AI rating.");
+    notice(real?"":"Demo result — deploy physique-scan for a real AI rating.");
     var routine=(res.weakPoints.length?res.weakPoints:["legs","back","chest"]).slice(0,3);
     var exHtml=routine.map(function(k){return POOL[k].map(function(n){return '<div class="ex"><span style="color:#D7DCEA;font-weight:400">'+n+'</span><span>3 × 8-12</span></div>';}).join("");}).join("");
+    var scores=computeScores(res);
+    var scoreHtml=scores.map(function(s){
+      return '<div class="srow"><div class="sname">'+s.label+'</div><div class="sbar"><i data-w="'+s.value+'" style="background:'+scoreColor(s.value)+'"></i></div><div class="sval" style="color:'+scoreColor(s.value)+'">'+s.value+'</div></div>';
+    }).join("");
     app.innerHTML='<div class="scroll">'+
       '<div class="rank"><div class="tier">'+res.rank.tier.toUpperCase()+'</div><div class="score">'+res.rank.score+'</div><div class="lbl">PHYSIQUE SCORE</div></div>'+
+      '<div class="sec">Your scores</div><div class="scores">'+scoreHtml+'</div>'+
       '<div class="sec">Muscle Map</div>'+
       '<div class="mapcard">'+bodyMap(res.muscles,150)+
         '<div style="flex:1"><div class="legend" style="flex-direction:column;gap:8px">'+
@@ -227,9 +285,15 @@ function goBack(){ if (history.length > 1) { history.back(); } else { location.h
       res.weakPoints.map(function(k){return '<div class="weak"><div class="dot"></div><div><b>'+LABEL[k]+'</b><span>'+WHY[k]+'</span></div></div>';}).join("")+
       '<div class="sec">Your routine</div><div class="plan"><h4>Weak-point focus: '+routine.map(function(k){return LABEL[k];}).join(" · ")+'</h4>'+exHtml+'</div>'+
       '<div class="disc">Visual fitness guidance only — not a medical or body-composition assessment.</div>'+
-      '<button class="btn" onclick="goBack()">Done</button>'+
+      '<button class="btn row" id="saveBtn"><svg viewBox="0 0 24 24" fill="none" stroke="#02030A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-11"/></svg> Save to my Strength</button>'+
       '<div style="text-align:center"><button class="link" id="rescan">Scan again</button></div></div>';
+    // animate the score bars in
+    requestAnimationFrame(function(){ Array.prototype.forEach.call(document.querySelectorAll(".sbar i"), function(el){ el.style.width=el.getAttribute("data-w")+"%"; }); });
     document.getElementById("rescan").onclick=camera;
+    document.getElementById("saveBtn").onclick=function(){
+      saveToGym(res); saveMuscles(res); notice("Saved — your physique diagram is updated.");
+      setTimeout(function(){ location.href="gym.html"; }, 550);
+    };
   }
 
   document.getElementById("privacyBtn").onclick=function(){
