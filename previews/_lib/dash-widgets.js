@@ -531,8 +531,11 @@
   };
 
   // ── Layout ───────────────────────────────────────────────────────────────────
-  var LAYOUT_KEY = 'coreDashboard.v1';
-  var DEFAULT_LAYOUT = ['quote', 'lifescore', 'stattrend', 'tasks'];
+  // v2 — reset everyone to the new clean minimal default (rank hero + tasks).
+  var LAYOUT_KEY = 'coreDashboard.v2';
+  // Clean, minimal default (Lock In style): rank/score hero first, then the
+  // to-do list. Everything else is opt-in via the customize (gear) sheet.
+  var DEFAULT_LAYOUT = ['lifescore', 'tasks'];
 
   function readLayout() {
     try {
