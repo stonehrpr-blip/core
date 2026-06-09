@@ -468,9 +468,26 @@ body.edit-active .nav{display:none;}
   <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
   <meta name="theme-color" content="#000000">
+<link rel="stylesheet" href="_lib/core-background.css">
 <style>
   /* ===== Routine dashboard ===== */
-  .dash-gear,.dash-help-btn,.edit-hint{display:none !important;}
+  .edit-hint{display:none !important;}
+  /* match index background exactly — hide the old (darker) ambient layers,
+     core-background.js injects the shared atmosphere into .phone */
+  #ambBg,#ambAurora,#ambStars,#ambCelestial,#ambOverlay{display:none !important;}
+  .phone{background:#02020A !important;}
+  /* evenly-spread (centered) bottom nav */
+  .nav{justify-content:space-evenly !important;}
+  .nav .item{flex:1 1 0;}
+  /* entrance animations */
+  #dashMain > *{animation:dashIn .5s cubic-bezier(.22,1,.36,1) both;}
+  #dashMain > .rankbar{animation-delay:.02s;}
+  #dashMain > .rt-head{animation-delay:.09s;}
+  #dashMain > .rt-list{animation-delay:.15s;}
+  #dashMain > .rt-build{animation-delay:.22s;}
+  @keyframes dashIn{from{opacity:0;transform:translateY(13px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes rtCardIn{from{opacity:0;transform:translateY(12px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+  @media (prefers-reduced-motion: reduce){ #dashMain > *,.rt-task{animation:none !important;} }
   #dashMain{flex:1;overflow-y:auto;overflow-x:hidden;padding:4px 18px 96px;scrollbar-width:none;}
   #dashMain::-webkit-scrollbar{display:none;}
 
@@ -1210,6 +1227,7 @@ body.edit-active .nav{display:none;}
   try{ var m=location.search.match(/scrollY=(\d+)/); if(m){ scroll.scrollTop=+m[1]; } }catch(e){}
 })();
 </script>
+<script src="_lib/core-background.js"></script>
 <script>
 /* ===== Routine dashboard: rank header + detailed to-do + AI/template builder ===== */
 (function(){
@@ -1281,17 +1299,18 @@ body.edit-active .nav{display:none;}
 
   // ---- render list ----
   var list=$('rtList');
-  function render(){
+  function render(animate){
     if(!tasks.length){
       list.innerHTML='<div class="rt-empty">No tasks yet.<br/>Build your routine below to get started. 👇</div>';
       $('rtCount').textContent='0/0'; return;
     }
     var done=tasks.filter(function(t){return t.done;}).length;
     $('rtCount').textContent=done+'/'+tasks.length;
-    list.innerHTML=tasks.map(function(t){
+    list.innerHTML=tasks.map(function(t,i){
       var quick = t.type==='count'
         ? '<button class="rt-quick" data-act="inc" data-id="'+t.id+'">+</button>' : '';
-      return '<div class="rt-task'+(t.done?' done':'')+'" data-id="'+t.id+'" style="--tkc:'+t.color+'">'
+      var anim = animate ? ';animation:rtCardIn .45s cubic-bezier(.22,1,.36,1) '+(0.14+i*0.07).toFixed(2)+'s both' : '';
+      return '<div class="rt-task'+(t.done?' done':'')+'" data-id="'+t.id+'" style="--tkc:'+t.color+anim+'">'
         + '<div class="rt-check" data-act="toggle" data-id="'+t.id+'">'+svg('check')+'</div>'
         + '<div class="rt-ico">'+svg(t.icon)+'</div>'
         + '<div class="rt-body"><div class="rt-name">'+esc(t.title)+'</div><div class="rt-detail">'+esc(detailText(t))+'</div></div>'
@@ -1299,7 +1318,10 @@ body.edit-active .nav{display:none;}
     }).join('');
   }
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-  function persist(){ save(tasks); render(); }
+  function persist(){ save(tasks); render(false); }
+
+  // Settings (gear) → settings page; runs before the legacy widget handler.
+  var gear=$('gearBtn'); if(gear) gear.addEventListener('click',function(e){ e.stopPropagation(); window.location.href='25-settings.html'; }, true);
 
   list.addEventListener('click',function(e){
     var b=e.target.closest('[data-act]'), card=e.target.closest('.rt-task');
@@ -1410,7 +1432,7 @@ body.edit-active .nav{display:none;}
     try{window.coreSfx&&window.coreSfx('tap');}catch(_){}
   });
 
-  render();
+  render(true);
 })();
 </script>
 </body>
