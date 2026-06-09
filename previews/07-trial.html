@@ -93,7 +93,11 @@
   }
   @media (prefers-reduced-motion: reduce) { .stars.far, .stars.near { animation:none; } }
 
-  .frame { position:absolute; inset:0; z-index:10; display:flex; flex-direction:column; padding: 60px 0 40px; }
+  .frame { position:absolute; inset:0; z-index:10; display:flex; flex-direction:column; padding: 54px 0 40px; }
+
+  /* top bar + progress removed for a clean, full-screen question flow.
+     Kept in the DOM (JS still references them) but hidden. */
+  .topbar, .progress { display:none !important; }
 
   /* top bar */
   .topbar { display:flex; align-items:center; justify-content:space-between; padding:6px 22px 8px; }
@@ -178,7 +182,7 @@
   .pick-card { padding:16px; border-radius:16px; border:1px solid var(--border); background: var(--bg-card); cursor:pointer; transition: border-color .2s, background .2s, transform .15s; position:relative; overflow:hidden; }
   .pick-card:hover { background: rgba(255,255,255,0.05); }
   .pick-card.sel { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent) inset, 0 8px 24px color-mix(in srgb, var(--accent) 15%, transparent); }
-  .pick-card.sel::after { content:""; position:absolute; top:10px; right:10px; width:18px; height:18px; border-radius:50%; background: var(--accent); box-shadow:0 0 12px var(--accent); }
+  .pick-card.sel::after { content:""; position:absolute; top:10px; right:10px; width:18px; height:18px; border-radius:50%; background: var(--accent); }
   .pick-card.sel::before { content:""; position:absolute; top:14px; right:14px; width:10px; height:5px; border-left:1.6px solid white; border-bottom:1.6px solid white; transform: rotate(-45deg); z-index:2; }
   .pick-ico { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; background: var(--c, var(--accent)); box-shadow: 0 0 14px var(--c, var(--accent)); margin-bottom:10px; }
   .pick-ico svg { width:18px; height:18px; stroke:white; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
@@ -343,9 +347,9 @@
   .pick-card[data-checkin] { background: rgba(255,255,255,0.025) !important; border-color: rgba(255,255,255,0.05) !important; }
   /* Selected tone card — single electric-blue glow regardless of tone */
   .pick-card.sel {
-    background: color-mix(in srgb, var(--accent) 8%, transparent) !important;
-    border-color: color-mix(in srgb, var(--accent) 45%, transparent) !important;
-    box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent) inset, 0 6px 20px color-mix(in srgb, var(--accent) 15%, transparent) !important;
+    background: color-mix(in srgb, var(--accent) 11%, transparent) !important;
+    border-color: color-mix(in srgb, var(--accent) 60%, transparent) !important;
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent) inset !important;
   }
   .pick-card.sel .pick-ico {
     background: color-mix(in srgb, var(--accent) 18%, transparent) !important;
@@ -2620,7 +2624,9 @@
             </button>
           </div>
           <style>
-            /* clean separated cards, one per tone — sized to fit with no scroll */
+            /* ===== Unified clean tap cards — used by every option question
+               (tone, duration, amount, reason, triggers, vision). Clean blue,
+               no neon glow. Works with or without an icon. ===== */
             .tone-list {
               display: flex; flex-direction: column; gap: 9px;
               margin-top: 10px;
@@ -2628,29 +2634,29 @@
             .tone-row {
               all: unset;
               display: flex; align-items: center; gap: 13px;
-              padding: 14px 15px;
-              border-radius: 16px;
-              background: rgba(255,255,255,0.035);
-              border: 1px solid rgba(255,255,255,0.09);
+              padding: 15px 15px;
+              border-radius: 15px;
+              background: rgba(255,255,255,0.04);
+              border: 1px solid rgba(255,255,255,0.08);
               cursor: pointer;
               box-sizing: border-box;
-              transition: transform .18s var(--ease), border-color .18s, background .18s, box-shadow .18s;
+              transition: transform .16s var(--ease), border-color .18s, background .18s, box-shadow .18s;
               -webkit-tap-highlight-color: transparent;
             }
             .tone-row:active { transform: scale(0.985); }
+            /* frosted icon tile (Apple-style, not a glowing block) */
             .tone-ico {
-              width: 42px; height: 42px; border-radius: 12px;
-              background: linear-gradient(140deg, color-mix(in srgb, var(--tc) 92%, white), var(--tc));
-              box-shadow: 0 5px 14px color-mix(in srgb, var(--tc) 45%, transparent),
-                          0 0 0 1px rgba(255,255,255,0.10) inset;
+              width: 40px; height: 40px; border-radius: 11px;
+              background: color-mix(in srgb, var(--tc, var(--accent)) 22%, rgba(255,255,255,0.05));
+              border: 1px solid color-mix(in srgb, var(--tc, var(--accent)) 34%, rgba(255,255,255,0.10));
               display: flex; align-items: center; justify-content: center;
               flex-shrink: 0;
-              transition: transform .2s var(--ease);
+              transition: transform .2s var(--ease), background .2s;
             }
-            .tone-ico svg { width: 21px; height: 21px; stroke: #fff; fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+            .tone-ico svg { width: 20px; height: 20px; stroke: #cfe0ff; fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
             .tone-body { flex: 1; min-width: 0; text-align: left; }
-            .tone-name { font-size: 16px; font-weight: 700; color: #fff; letter-spacing: -0.2px; }
-            .tone-desc { font-size: 12.5px; color: rgba(235,235,245,0.58); margin-top: 2px; }
+            .tone-name { font-size: 15.5px; font-weight: 700; color: #fff; letter-spacing: -0.2px; }
+            .tone-desc { font-size: 12.5px; color: rgba(235,235,245,0.56); margin-top: 2px; }
             .tone-check {
               width: 22px; height: 22px; border-radius: 50%;
               border: 1.5px solid rgba(255,255,255,0.22);
@@ -2658,15 +2664,20 @@
               position: relative;
               transition: all 0.18s var(--ease);
             }
+            /* selected — clean blue, subtle, NOT neon */
             .tone-row.sel {
-              border-color: var(--tc);
-              background: color-mix(in srgb, var(--tc) 12%, rgba(255,255,255,0.035));
-              box-shadow: 0 0 0 1px var(--tc) inset, 0 8px 22px color-mix(in srgb, var(--tc) 28%, transparent);
+              border-color: color-mix(in srgb, var(--tc, var(--accent)) 70%, transparent);
+              background: color-mix(in srgb, var(--tc, var(--accent)) 11%, rgba(255,255,255,0.04));
+              box-shadow: 0 0 0 1px color-mix(in srgb, var(--tc, var(--accent)) 55%, transparent) inset;
             }
-            .tone-row.sel .tone-ico { transform: scale(1.05); }
+            .tone-row.sel .tone-ico {
+              background: color-mix(in srgb, var(--tc, var(--accent)) 32%, rgba(255,255,255,0.06));
+              border-color: color-mix(in srgb, var(--tc, var(--accent)) 50%, transparent);
+            }
+            .tone-row.sel .tone-ico svg { stroke: #fff; }
             .tone-row.sel .tone-check {
-              background: var(--tc);
-              border-color: var(--tc);
+              background: var(--tc, var(--accent));
+              border-color: var(--tc, var(--accent));
             }
             .tone-row.sel .tone-check::after {
               content: ""; position: absolute;
