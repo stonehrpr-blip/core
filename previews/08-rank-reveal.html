@@ -31,13 +31,13 @@
       color:rgba(255,255,255,0.5);animation:tapPulse 1.8s ease-in-out infinite;}
     @keyframes tapPulse{0%,100%{opacity:0.4;}50%{opacity:0.95;}}
     /* tap -> text pulls back then rushes in toward you, then white, then bang */
-    body.charging #stage1{animation:introZoom .5s cubic-bezier(.5,0,.85,.25) forwards;transform-origin:center;}
-    @keyframes introZoom{0%{transform:scale(1);opacity:1;}16%{transform:scale(0.86);opacity:1;}100%{transform:scale(11);opacity:0;}}
+    body.charging #stage1{animation:introZoom .45s cubic-bezier(.5,0,.85,.25) forwards;transform-origin:center;}
+    @keyframes introZoom{0%{transform:scale(1);opacity:1;}18%{transform:scale(0.86);opacity:1;}100%{transform:scale(7);opacity:0;}}
 
-    /* white flash — fills as the zoom finishes, holds ~230ms, then reveal */
+    /* white flash — covers the text early (before it gets too big), holds ~230ms */
     .flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:20;}
-    body.charging .flash{animation:flashIn 0.78s ease-in forwards;}
-    @keyframes flashIn{0%{opacity:0;}50%{opacity:0;}70%{opacity:1;}100%{opacity:1;}}
+    body.charging .flash{animation:flashIn 0.58s ease-in forwards;}
+    @keyframes flashIn{0%{opacity:0;}26%{opacity:0;}58%{opacity:1;}100%{opacity:1;}}
     body.revealed .flash{animation:flashOut .28s ease forwards;}
     @keyframes flashOut{from{opacity:1;}to{opacity:0;}}
 
@@ -256,7 +256,7 @@
       document.body.classList.add('revealed');
       spawnBurst();
       try{ if(navigator.vibrate) navigator.vibrate([0,40,30,60]); }catch(e){}
-    }, 780);
+    }, 580);
   }
   var s1=document.getElementById('stage1');
   s1.addEventListener('click', go);
