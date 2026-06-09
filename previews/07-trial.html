@@ -1460,10 +1460,10 @@
               all: unset;
               position: relative;
               padding: 12px 13px 11px;
-              border-radius: 16px;
-              border: 1px solid rgba(255,255,255,0.08);
-              /* clean opaque dark backing — color comes from the icon tile */
-              background: rgba(13,17,27,0.72);
+              border-radius: 18px;
+              border: 1px solid rgba(255,255,255,0.07);
+              /* gender-page card recipe — opaque dark backing, colour via icon tile */
+              background: rgba(13,17,27,0.66);
               cursor: pointer;
               overflow: hidden;
               -webkit-tap-highlight-color: transparent;
@@ -1491,12 +1491,11 @@
             .habit-card:active { transform: translateY(0) scale(0.97); }
             .habit-card.sel {
               transform: translateY(-2px);
-              border-color: var(--hc);
-              background: linear-gradient(0deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05)), rgba(13,17,27,0.66);
+              border-color: color-mix(in srgb, var(--hc) 50%, transparent);
+              background: linear-gradient(0deg, color-mix(in srgb, var(--hc) 15%, transparent), color-mix(in srgb, var(--hc) 15%, transparent)), rgba(13,17,27,0.66);
               box-shadow:
-                0 14px 32px rgba(0,0,0,0.30),
-                0 0 0 1px color-mix(in srgb, var(--hc) 70%, transparent) inset,
-                0 6px 22px color-mix(in srgb, var(--hc) 26%, transparent);
+                0 0 0 1px color-mix(in srgb, var(--hc) 42%, transparent) inset,
+                0 6px 20px color-mix(in srgb, var(--hc) 16%, transparent);
               animation: habitPop .42s cubic-bezier(.22,1.5,.36,1);
             }
             /* one-shot bounce the moment a card is selected */
@@ -1512,7 +1511,7 @@
               position: absolute; top: 10px; right: 10px;
               width: 18px; height: 18px; border-radius: 50%;
               background: var(--hc);
-              box-shadow: 0 0 12px var(--hc), 0 0 0 1.5px rgba(255,255,255,0.32) inset;
+              box-shadow: 0 0 0 1.5px rgba(255,255,255,0.30) inset;
               animation: habitTick .42s cubic-bezier(.22,1.6,.36,1);
               z-index: 4;
             }
@@ -2678,9 +2677,10 @@
               all: unset;
               display: flex; align-items: center; gap: 13px;
               padding: 15px 15px;
-              border-radius: 15px;
-              background: rgba(255,255,255,0.04);
-              border: 1px solid rgba(255,255,255,0.08);
+              border-radius: 18px;
+              /* gender-page card recipe — opaque dark backing + hairline border */
+              background: rgba(13,17,27,0.66);
+              border: 1px solid rgba(255,255,255,0.07);
               cursor: pointer;
               box-sizing: border-box;
               transition: transform .16s var(--ease), border-color .18s, background .18s, box-shadow .18s;
@@ -2707,11 +2707,11 @@
               position: relative;
               transition: all 0.18s var(--ease);
             }
-            /* selected — clean blue, subtle, NOT neon */
+            /* selected — same recipe as the gender card (tint over dark + ring) */
             .tone-row.sel {
-              border-color: color-mix(in srgb, var(--tc, var(--accent)) 70%, transparent);
-              background: color-mix(in srgb, var(--tc, var(--accent)) 11%, rgba(255,255,255,0.04));
-              box-shadow: 0 0 0 1px color-mix(in srgb, var(--tc, var(--accent)) 55%, transparent) inset;
+              border-color: color-mix(in srgb, var(--tc, var(--accent)) 50%, transparent);
+              background: linear-gradient(0deg, color-mix(in srgb, var(--tc, var(--accent)) 15%, transparent), color-mix(in srgb, var(--tc, var(--accent)) 15%, transparent)), rgba(13,17,27,0.66);
+              box-shadow: 0 0 0 1px color-mix(in srgb, var(--tc, var(--accent)) 42%, transparent) inset, 0 6px 20px color-mix(in srgb, var(--tc, var(--accent)) 16%, transparent);
             }
             .tone-row.sel .tone-ico {
               background: color-mix(in srgb, var(--tc, var(--accent)) 32%, rgba(255,255,255,0.06));
@@ -2731,33 +2731,15 @@
               transform: rotate(-45deg);
             }
 
-            /* ===== Coach-tone page only — full colour redesign (Apple system
-               colours). Each card always shows its accent so the screen reads
-               vibrant; other question lists stay clean blue. ===== */
+            /* ===== Coach-tone page — same card family as the gender page, each
+               tone keeping its Apple accent in the icon tile + selected state. ===== */
             .step[data-step="12"] .tone-list { gap: 11px; margin-top: 14px; }
-            .step[data-step="12"] .tone-row {
-              position: relative;
-              padding: 14px 15px;
-              background: linear-gradient(110deg, color-mix(in srgb, var(--tc) 15%, rgba(255,255,255,0.025)), rgba(255,255,255,0.02));
-              border: 1px solid color-mix(in srgb, var(--tc) 30%, transparent);
-              overflow: hidden;
-            }
-            .step[data-step="12"] .tone-row::before {
-              content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--tc);
-            }
             .step[data-step="12"] .tone-ico {
               width: 44px; height: 44px; border-radius: 12px;
-              background: color-mix(in srgb, var(--tc) 26%, rgba(255,255,255,0.05));
-              border: 1px solid color-mix(in srgb, var(--tc) 44%, transparent);
             }
             .step[data-step="12"] .tone-ico svg { stroke: #fff; }
-            .step[data-step="12"] .tone-desc { color: rgba(235,235,245,0.66); }
-            /* selected — fill with the tone's colour, clean (no neon glow) */
-            .step[data-step="12"] .tone-row.sel {
-              background: color-mix(in srgb, var(--tc) 20%, rgba(255,255,255,0.02));
-              border-color: color-mix(in srgb, var(--tc) 80%, transparent);
-              box-shadow: 0 0 0 1px color-mix(in srgb, var(--tc) 70%, transparent) inset;
-            }
+            .step[data-step="12"] .tone-desc { color: rgba(235,235,245,0.62); }
+            /* selected icon fills solid with the tone's colour */
             .step[data-step="12"] .tone-row.sel .tone-ico {
               background: var(--tc);
               border-color: var(--tc);
