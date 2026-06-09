@@ -3261,25 +3261,11 @@
             </div>
 
             <h1 class="pg-headline">Your transformation<br/>starts here</h1>
-            <p class="pg-sub" id="pgSub">7 days free, then $44.99/yr. Cancel anytime.</p>
+            <p class="pg-sub" id="pgSub">Everything you need to begin. Let's go.</p>
 
-            <div class="pg-trust" aria-hidden="true">
-              <span class="pg-trust-pill">$0 today</span>
-              <span class="pg-trust-pill">No charge for 7 days</span>
-              <span class="pg-trust-pill">Cancel anytime</span>
-            </div>
-
-            <button type="button" class="pg-cta pg-cta-pay" id="portalCta">
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.6 12.4c0-2.3 1.9-3.4 2-3.4-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.8-3.5.8-.7 0-1.9-.8-3.1-.8-1.6 0-3.1.9-3.9 2.4-1.7 2.9-.4 7.2 1.2 9.6.8 1.2 1.7 2.5 3 2.4 1.2 0 1.7-.8 3.1-.8 1.4 0 1.9.8 3.1.8 1.3 0 2.1-1.2 2.9-2.4.9-1.4 1.3-2.7 1.3-2.8 0-.1-2.6-1-2.7-4z"/><path d="M15.3 5.8c.6-.8 1.1-1.9 1-3-.9 0-2 .6-2.7 1.4-.6.7-1.2 1.8-1 2.9 1.1.1 2.1-.5 2.7-1.3z"/></svg>
-              <span>Pay — Start 7 days free</span>
+            <button type="button" class="pg-cta" id="portalCta">
+              <span>Enter CORE</span>
             </button>
-
-            <div class="pg-secure">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
-              <span>Apple Pay · Face ID · you won't be charged today</span>
-            </div>
-
-            <button type="button" class="pg-free" id="portalFree">Not now — continue with the free version</button>
           </div>
           <div class="pg-flash" id="pgFlash" aria-hidden="true"></div>
 
@@ -6078,20 +6064,11 @@
     }, 1750);
   };
 
-  // CTA opens the trusted Apple Pay sheet (Face ID hold) instead of a raw card form.
+  // No payment in the trial — the CTA fires the cinematic and goes straight
+  // into the rank reveal. (Paywall will live behind premium features later.)
   cta && cta.addEventListener('click', function(){
     if (launched) return;
-    try { window.haptic && window.haptic(12); } catch(_){}
-    if (typeof window.openApplePaySheet === 'function') window.openApplePaySheet();
-  });
-
-  // Free-tier escape — don't lose people who aren't ready to pay; let them in
-  // on the limited free version (still a captured user we can convert later).
-  var freeBtn = document.getElementById('portalFree');
-  freeBtn && freeBtn.addEventListener('click', function(){
-    if (launched) return; launched = true;
-    try { window.haptic && window.haptic(12); } catch(_){}
-    if (typeof window.confirmFreeTier === 'function') window.confirmFreeTier();
+    if (typeof window.__portalLaunch === 'function') window.__portalLaunch();
   });
 })();
 </script>
