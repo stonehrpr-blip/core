@@ -106,6 +106,36 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   -webkit-backdrop-filter:blur(10px);
 }
 
+/* ── Skeleton loaders (shimmer placeholders shown on first load) ── */
+.skel-wrap{ padding:0 18px; margin-bottom:18px; }
+.skel{
+  background:linear-gradient(100deg,
+    rgba(255,255,255,0.04) 30%,
+    rgba(255,255,255,0.10) 50%,
+    rgba(255,255,255,0.04) 70%);
+  background-size:220% 100%;
+  animation:skelShimmer 1.3s ease-in-out infinite;
+  border-radius:8px;
+}
+.skel-label{ height:11px; width:40%; margin:0 2px 9px; }
+.skel-body{
+  border-radius:18px; border:1px solid rgba(255,255,255,0.07);
+  background:rgba(255,255,255,0.022); padding:18px;
+  display:flex; flex-direction:column; gap:11px;
+}
+.skel-row{ height:13px; }
+#widgetScroll.dash-revealing > .widget-wrap{ animation:dashReveal .5s cubic-bezier(.22,1,.36,1) both; }
+#widgetScroll.dash-revealing > .widget-wrap:nth-child(2){ animation-delay:.06s; }
+#widgetScroll.dash-revealing > .widget-wrap:nth-child(3){ animation-delay:.12s; }
+#widgetScroll.dash-revealing > .widget-wrap:nth-child(4){ animation-delay:.18s; }
+#widgetScroll.dash-revealing > .widget-wrap:nth-child(n+5){ animation-delay:.24s; }
+@keyframes skelShimmer{ 0%{ background-position:100% 0; } 100%{ background-position:-120% 0; } }
+@keyframes dashReveal{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:translateY(0); } }
+@media (prefers-reduced-motion: reduce){
+  .skel{ animation:none; }
+  #widgetScroll.dash-revealing > .widget-wrap{ animation:none; }
+}
+
 /* ── Quote ── */
 .w-quote{padding:13px 18px 11px;}
 .w-quote-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;}
@@ -729,6 +759,37 @@ body.edit-active .nav{display:none;}
     });
   }
   renderAll();
+
+  // First dashboard view of the session shows skeleton loaders, then reveals the
+  // real widgets — so the home screen "loads in" instead of popping. Subsequent
+  // visits (and edit/reorder re-renders) stay instant.
+  (function skeletonIntro(){
+    var reduce=false; try{ reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
+    var seen=false; try{ seen=sessionStorage.getItem('coreDashSkeleton')==='1'; }catch(e){}
+    var layout=WS.readLayout()||[];
+    if(reduce || seen || !layout.length) return;   // renderAll() above already drew real content
+    try{ sessionStorage.setItem('coreDashSkeleton','1'); }catch(e){}
+    var n=Math.max(2, Math.min(4, layout.length));
+    var html='';
+    for(var i=0;i<n;i++){
+      html+='<div class="skel-wrap">'
+        +'<div class="skel skel-label"></div>'
+        +'<div class="skel-body">'
+          +'<div class="skel skel-row" style="width:72%"></div>'
+          +'<div class="skel skel-row" style="width:92%"></div>'
+          +'<div class="skel skel-row" style="width:54%"></div>'
+        +'</div>'
+      +'</div>';
+    }
+    // tear down the widgets renderAll() just mounted before swapping in skeletons
+    Array.from(scroll.querySelectorAll('.widget-body')).forEach(cleanupHost);
+    scroll.innerHTML=html;
+    setTimeout(function(){
+      renderAll();
+      scroll.classList.add('dash-revealing');
+      setTimeout(function(){ scroll.classList.remove('dash-revealing'); }, 700);
+    }, 650);
+  })();
 
   function persistOrder(){
     var ids=Array.from(scroll.querySelectorAll('.widget-wrap[data-wid]')).map(function(w){ return w.dataset.wid; });
