@@ -95,9 +95,21 @@
 
   .frame { position:absolute; inset:0; z-index:10; display:flex; flex-direction:column; padding: 54px 0 40px; }
 
-  /* top bar + progress removed for a clean, full-screen question flow.
-     Kept in the DOM (JS still references them) but hidden. */
+  /* Chunky top bar + 5-dot progress removed for a clean flow. Replaced by a
+     minimal back affordance + a thin momentum line (kept for completion rate). */
   .topbar, .progress { display:none !important; }
+  .mini-top { display:flex; align-items:center; gap:12px; padding:10px 22px 4px; }
+  .mini-back { width:30px; height:30px; flex:none; display:flex; align-items:center; justify-content:center;
+    background:none; border:none; padding:0; cursor:pointer; font-family:inherit; -webkit-tap-highlight-color:transparent;
+    transition:transform .14s, opacity .2s; }
+  .mini-back svg { width:22px; height:22px; stroke:rgba(255,255,255,0.62); fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+  .mini-back:active { transform:scale(0.9); }
+  .mini-back.hidden { visibility:hidden; pointer-events:none; }
+  .mini-prog { flex:1; height:3px; border-radius:999px; background:rgba(255,255,255,0.10); overflow:hidden; }
+  .mini-prog-fill { height:100%; width:0%; border-radius:999px;
+    background:linear-gradient(90deg, var(--accent), var(--accent-hi));
+    transition:width .45s cubic-bezier(.22,1,.36,1); }
+  body.on-portal .mini-top { display:none; }
 
   /* top bar */
   .topbar { display:flex; align-items:center; justify-content:space-between; padding:6px 22px 8px; }
@@ -170,6 +182,16 @@
   .title { font-size:28px; font-weight:700; letter-spacing:-0.8px; line-height:1.1; margin:0; }
   .title .g { color:#fff; -webkit-text-fill-color:#fff; background:none; }
   .copy { color: var(--muted); font-size:14px; line-height:21px; margin:0; letter-spacing:-0.1px; }
+  /* privacy reassurance for sensitive questions */
+  .privacy-note { display:flex; align-items:center; gap:7px; margin-top:2px;
+    font-size:11.5px; line-height:15px; color:rgba(207,228,255,0.62); letter-spacing:-0.05px; }
+  .privacy-note svg { width:13px; height:13px; flex:none; color:rgba(207,228,255,0.7); }
+  /* social proof at the paywall decision point */
+  .social-proof { display:flex; align-items:center; gap:8px; margin-top:2px; }
+  .social-proof .sp-stars { display:inline-flex; gap:1px; }
+  .social-proof .sp-stars svg { width:13px; height:13px; color:#FFCB3D; }
+  .social-proof .sp-text { font-size:12px; color:var(--muted); letter-spacing:-0.05px; }
+  .social-proof .sp-text b { color:#fff; font-weight:800; }
 
   /* name input */
   .field-wrap { margin-top:6px; }
@@ -1179,6 +1201,14 @@
         <span class="chap-label" id="chapLabel">Basics</span>
       </div>
 
+      <!-- Minimal top: a small back affordance + a thin momentum line -->
+      <div class="mini-top" id="miniTop">
+        <button class="mini-back" id="miniBack" type="button" onclick="back()" aria-label="Back">
+          <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div class="mini-prog"><div class="mini-prog-fill" id="miniProgFill"></div></div>
+      </div>
+
       <div class="stepwrap" id="stepwrap">
 
         <!-- STEP 0: Commitment (type PROMISE) -->
@@ -1267,6 +1297,10 @@
           <div class="kicker">Step 3 · Basics</div>
           <h1 class="title">What are you<br/><span class="g">tackling first?</span></h1>
           <p class="copy">Pick one — the whole flow shifts to fit it. You can add more anytime.</p>
+          <div class="privacy-note">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+            <span>Private &amp; encrypted — only used to personalize your plan. Never shared.</span>
+          </div>
 
           <div class="habit-grid" id="habits">
             <!-- Vape — Most picked (subtle badge, same shape as the rest) -->
@@ -2762,6 +2796,18 @@
           <h1 class="title" id="payTitle">Start your<br/><span class="g">7 days free.</span></h1>
           <p class="copy">$0 today. Then your plan starts after 7 days. Cancel any time in Settings.</p>
 
+          <!-- Social proof — reassurance at the decision point -->
+          <div class="social-proof">
+            <div class="sp-stars" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 6 20.2l1.4-6.8L2.3 9l6.9-.7z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 6 20.2l1.4-6.8L2.3 9l6.9-.7z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 6 20.2l1.4-6.8L2.3 9l6.9-.7z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 6 20.2l1.4-6.8L2.3 9l6.9-.7z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 6 20.2l1.4-6.8L2.3 9l6.9-.7z"/></svg>
+            </div>
+            <span class="sp-text"><b>4.8</b> · trusted by people starting over</span>
+          </div>
+
           <!-- Plan choice — annual pre-selected (best value) -->
           <div class="plan-choice" id="planChoice">
             <button type="button" class="plan-opt selected" data-plan="annual" onclick="selectPlan('annual')">
@@ -3075,7 +3121,13 @@
             </div>
 
             <h1 class="pg-headline">Your transformation<br/>starts here</h1>
-            <p class="pg-sub">7 days free. Then $4.99/month. Cancel anytime.</p>
+            <p class="pg-sub" id="pgSub">7 days free, then $44.99/yr. Cancel anytime.</p>
+
+            <div class="pg-trust" aria-hidden="true">
+              <span class="pg-trust-pill">$0 today</span>
+              <span class="pg-trust-pill">No charge for 7 days</span>
+              <span class="pg-trust-pill">Cancel anytime</span>
+            </div>
 
             <button type="button" class="pg-cta" id="portalCta" disabled>
               <span>Enter CORE — Start Free Trial</span>
@@ -3089,6 +3141,13 @@
                 <input class="pg-input" id="pgCvv" type="text" inputmode="numeric" placeholder="CVV" autocomplete="cc-csc" maxlength="4" />
               </div>
             </form>
+
+            <div class="pg-secure">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+              <span>Encrypted &amp; secure · you won't be charged today</span>
+            </div>
+
+            <button type="button" class="pg-free" id="portalFree">Not now — continue with the free version</button>
           </div>
           <div class="pg-flash" id="pgFlash" aria-hidden="true"></div>
 
@@ -3181,8 +3240,15 @@
               position:relative; z-index:2;
               font-size:13px; color:rgba(207,228,255,0.72); margin:9px 0 0; letter-spacing:-0.1px;
             }
+            /* trust pills — reassure before asking for a card */
+            .pg-trust { position:relative; z-index:2; display:flex; flex-wrap:wrap; justify-content:center; gap:6px; margin-top:12px; }
+            .pg-trust-pill {
+              font-size:10.5px; font-weight:700; letter-spacing:0.01em;
+              color:#cfe4ff; padding:5px 10px; border-radius:999px;
+              background:rgba(207,228,255,0.08); border:1px solid rgba(207,228,255,0.18);
+            }
             .pg-cta {
-              position:relative; z-index:2; margin-top:18px; width:100%;
+              position:relative; z-index:2; margin-top:16px; width:100%;
               padding:16px 18px; border-radius:15px; border:none; cursor:pointer;
               font-family:inherit; font-size:16px; font-weight:700; letter-spacing:-0.2px;
               color:#06203f;
@@ -3210,6 +3276,16 @@
             }
             .pg-input::placeholder { color:rgba(207,228,255,0.40); letter-spacing:-0.1px; }
             .pg-input:focus { border-color:#cfe4ff; background:rgba(207,228,255,0.08); box-shadow:0 0 0 3px rgba(207,228,255,0.14); }
+            /* secured reassurance under the card fields */
+            .pg-secure { position:relative; z-index:2; display:flex; align-items:center; justify-content:center; gap:6px;
+              margin-top:11px; font-size:11.5px; color:rgba(207,228,255,0.58); letter-spacing:-0.05px; }
+            .pg-secure svg { width:13px; height:13px; flex:none; }
+            /* free-tier escape — capture people who aren't ready to pay */
+            .pg-free { position:relative; z-index:2; margin-top:13px; width:100%;
+              background:none; border:none; padding:6px; cursor:pointer; font-family:inherit;
+              font-size:13px; font-weight:600; color:rgba(207,228,255,0.66); text-decoration:underline; text-underline-offset:3px;
+              -webkit-tap-highlight-color:transparent; transition:color .2s; }
+            .pg-free:active { color:#cfe4ff; }
 
             /* ---- submit cinematic ---- */
             .pg-flash {
@@ -3625,6 +3701,12 @@
     });
     const label = document.getElementById('chapLabel');
     if (label) label.textContent = CHAPTERS[ch].label;
+    // Thin momentum line + back affordance (minimal top).
+    const pos = curPos();
+    const fill = document.getElementById('miniProgFill');
+    if (fill) fill.style.width = Math.round(((pos + 1) / ORDER.length) * 100) + '%';
+    const mb = document.getElementById('miniBack');
+    if (mb) mb.classList.toggle('hidden', pos <= 0);   // nothing to go back to on the first screen
   }
   // ── Demo steps (animated faux-UI walkthroughs) ──────────────────────────
   const DEMO_STEPS = { 18: 'quests', 20: 'ranks' };
@@ -3855,6 +3937,11 @@
     if (sub) sub.textContent = annual
       ? 'then $44.99/yr after 7 days · cancel any time'
       : 'then $7.99/mo after 7 days · cancel any time';
+    // Keep the portal gate's price line consistent with the chosen plan (no mismatch)
+    const pgSub = document.getElementById('pgSub');
+    if (pgSub) pgSub.textContent = annual
+      ? '7 days free, then $44.99/yr. Cancel anytime.'
+      : '7 days free, then $7.99/mo. Cancel anytime.';
     // Don't clobber the post-connect "Ready" confirmation
     if (stateLine && !state.applePayConnected) {
       stateLine.textContent = annual
@@ -5836,6 +5923,15 @@
   }
   cta && cta.addEventListener('click', launch);
   form && form.addEventListener('submit', function(e){ e.preventDefault(); launch(); });
+
+  // Free-tier escape — don't lose people who aren't ready to pay; let them in
+  // on the limited free version (still a captured user we can convert later).
+  var freeBtn = document.getElementById('portalFree');
+  freeBtn && freeBtn.addEventListener('click', function(){
+    if (launched) return; launched = true;
+    try { window.haptic && window.haptic(12); } catch(_){}
+    if (typeof window.confirmFreeTier === 'function') window.confirmFreeTier();
+  });
 })();
 </script>
 </body>
