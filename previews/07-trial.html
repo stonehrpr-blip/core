@@ -1024,20 +1024,32 @@
   .demo-cursor::after { content:""; position:absolute; inset:-5px; border-radius:50%; border:2px solid rgba(255,255,255,0.75); opacity:0; }
   .demo-note { margin-top:11px; font-size:12px; line-height:1.4; color:var(--muted); text-align:center; }
   .demo-note b { color:#cdd9ff; font-weight:700; }
-  /* 30-day outcome cards (step 19) — static, no flip, no scroll */
-  .flipgrid{ display:grid; grid-template-columns:1fr 1fr; gap:11px; margin-top:14px; }
-  .flipcard{ position:relative; display:flex; flex-direction:column; box-sizing:border-box; border-radius:18px; padding:14px; overflow:hidden;
-    border:1px solid color-mix(in srgb,var(--fac,#0A84FF) 55%, transparent);
-    background:linear-gradient(152deg, color-mix(in srgb,var(--fac,#0A84FF) 40%, #0b0b16), color-mix(in srgb,var(--fac,#0A84FF) 8%, #0a0a14));
-    box-shadow:inset 0 0 32px color-mix(in srgb,var(--fac,#0A84FF) 22%, transparent); }
-  .flipcard::before{ content:""; position:absolute; inset:0; pointer-events:none;
-    background:radial-gradient(120% 70% at 82% 0%, color-mix(in srgb,var(--fac,#0A84FF) 28%, transparent), transparent 62%); }
-  .flip-ic{ position:relative; width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#fff;
-    background:color-mix(in srgb,var(--fac,#0A84FF) 70%, transparent); box-shadow:0 5px 18px color-mix(in srgb,var(--fac,#0A84FF) 50%, transparent); }
-  .flip-ic svg{ width:20px; height:20px; }
-  .flipcard .fname{ position:relative; font-size:15px; font-weight:800; letter-spacing:-0.2px; color:#fff; margin-top:9px; }
-  .flipcard .fb-eyebrow{ position:relative; font-size:9.5px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; color:#fff; opacity:.8; margin-top:7px; }
-  .flipcard .fb-to{ position:relative; font-size:14px; font-weight:800; color:#fff; line-height:1.22; margin-top:2px; text-shadow:0 1px 8px rgba(0,0,0,.45); }
+  /* ── 30-day transformation list (step 19) — one accent colour per metric ── */
+  .trans-list{ display:flex; flex-direction:column; gap:11px; margin-top:18px; }
+  .trans-row{ position:relative; display:flex; align-items:center; gap:13px; padding:13px 14px; border-radius:16px; overflow:hidden;
+    background:linear-gradient(110deg, color-mix(in srgb,var(--fac) 15%, rgba(255,255,255,0.025)), rgba(255,255,255,0.018));
+    border:1px solid color-mix(in srgb,var(--fac) 28%, transparent); }
+  .trans-row::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--fac); }
+  .trans-ic{ flex:none; width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+    background:color-mix(in srgb,var(--fac) 24%, rgba(255,255,255,0.05));
+    border:1px solid color-mix(in srgb,var(--fac) 40%, transparent); }
+  .trans-ic svg{ width:21px; height:21px; stroke:#fff; }
+  .trans-body{ flex:1; min-width:0; }
+  .trans-name{ font-size:15px; font-weight:800; letter-spacing:-0.2px; color:#fff; }
+  .trans-flow{ display:flex; align-items:center; gap:7px; margin-top:3px; font-size:12.5px; min-width:0; }
+  .trans-now{ color:rgba(235,235,245,0.45); white-space:nowrap; }
+  .trans-arrow{ flex:none; width:13px; height:13px; stroke:var(--fac); fill:none; }
+  .trans-to{ font-weight:800; color:color-mix(in srgb,var(--fac) 72%, #ffffff); letter-spacing:-0.1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .trans-day{ flex:none; align-self:flex-start; font-size:8.5px; font-weight:900; letter-spacing:.1em; text-transform:uppercase;
+    color:color-mix(in srgb,var(--fac) 75%, #ffffff); padding:3px 7px; border-radius:999px;
+    background:color-mix(in srgb,var(--fac) 16%, transparent); border:1px solid color-mix(in srgb,var(--fac) 32%, transparent); }
+  /* gentle staggered entrance */
+  .step[data-step="19"].on .trans-row{ animation:transIn .5s cubic-bezier(.22,1,.36,1) both; }
+  .step[data-step="19"].on .trans-row:nth-child(2){ animation-delay:.07s; }
+  .step[data-step="19"].on .trans-row:nth-child(3){ animation-delay:.14s; }
+  .step[data-step="19"].on .trans-row:nth-child(4){ animation-delay:.21s; }
+  @keyframes transIn{ from{ opacity:0; transform:translateY(12px); } to{ opacity:1; transform:translateY(0); } }
+  @media (prefers-reduced-motion: reduce){ .step[data-step="19"].on .trans-row{ animation:none; } }
 
   /* ---- DEMO 1: Quests ---- */
   .qd-row { display:flex; align-items:center; gap:10px; padding:11px 12px; margin-bottom:8px; border-radius:13px; background:rgba(255,255,255,0.04); border:1px solid var(--border); }
@@ -3054,31 +3066,39 @@
         <div class="step" data-step="19">
           <div class="kicker">Your potential</div>
           <h1 class="title">Where you'll be<br/><span class="g">in 30 days.</span></h1>
-          <p class="copy">This is what showing up on CORE builds.</p>
-          <div class="flipgrid" id="flipgrid">
-            <div class="flipcard" style="--fac:#0A84FF">
-              <div class="flip-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg></div>
-              <div class="fname">Energy</div>
-              <div class="fb-eyebrow">Day 30</div>
-              <div class="fb-to">Cravings fade, energy back</div>
+          <p class="copy">Stay on CORE and here's the shift you'll feel.</p>
+          <div class="trans-list" id="flipgrid">
+            <div class="trans-row" style="--fac:#34D399">
+              <div class="trans-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg></div>
+              <div class="trans-body">
+                <div class="trans-name">Energy</div>
+                <div class="trans-flow"><span class="trans-now">Running low</span><svg class="trans-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg><span class="trans-to">Restored</span></div>
+              </div>
+              <div class="trans-day">Day 30</div>
             </div>
-            <div class="flipcard" style="--fac:#0A84FF">
-              <div class="flip-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/></svg></div>
-              <div class="fname">Focus</div>
-              <div class="fb-eyebrow">Day 30</div>
-              <div class="fb-to">Sharper, fewer slips</div>
+            <div class="trans-row" style="--fac:#4A8FFF">
+              <div class="trans-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/></svg></div>
+              <div class="trans-body">
+                <div class="trans-name">Focus</div>
+                <div class="trans-flow"><span class="trans-now">Scattered</span><svg class="trans-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg><span class="trans-to">Sharp &amp; clear</span></div>
+              </div>
+              <div class="trans-day">Day 30</div>
             </div>
-            <div class="flipcard" style="--fac:#0A84FF">
-              <div class="flip-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1.6 3.6 4 4.6 4 8a4 4 0 0 1-8 0c0-1.3.5-2.1 1-2.7C9 11 12 8 12 3z"/></svg></div>
-              <div class="fname">Streak</div>
-              <div class="fb-eyebrow">Day 30</div>
-              <div class="fb-to">30 days locked in</div>
+            <div class="trans-row" style="--fac:#FFCB3D">
+              <div class="trans-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1.6 3.6 4 4.6 4 8a4 4 0 0 1-8 0c0-1.3.5-2.1 1-2.7C9 11 12 8 12 3z"/></svg></div>
+              <div class="trans-body">
+                <div class="trans-name">Streak</div>
+                <div class="trans-flow"><span class="trans-now">Day 0</span><svg class="trans-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg><span class="trans-to">30 days strong</span></div>
+              </div>
+              <div class="trans-day">Day 30</div>
             </div>
-            <div class="flipcard" style="--fac:#0A84FF">
-              <div class="flip-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a5 5 0 1 0 0-10 5 5 0 0 0 0 10ZM8.5 13.5L7 22l5-3 5 3-1.5-8.5"/></svg></div>
-              <div class="fname">Rank</div>
-              <div class="fb-eyebrow">Day 30</div>
-              <div class="fb-to">Climbing the tiers</div>
+            <div class="trans-row" style="--fac:#B388FF">
+              <div class="trans-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a5 5 0 1 0 0-10 5 5 0 0 0 0 10ZM8.5 13.5L7 22l5-3 5 3-1.5-8.5"/></svg></div>
+              <div class="trans-body">
+                <div class="trans-name">Rank</div>
+                <div class="trans-flow"><span class="trans-now">Stone</span><svg class="trans-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg><span class="trans-to">Climbing tiers</span></div>
+              </div>
+              <div class="trans-day">Day 30</div>
             </div>
           </div>
         </div>
