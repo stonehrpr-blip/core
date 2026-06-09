@@ -571,6 +571,32 @@ body.edit-active .nav{display:none;}
   .rt-tpl-ic svg{width:18px;height:18px;stroke:color-mix(in srgb,var(--tkc) 78%,#fff);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;}
   .rt-tpl-name{font-size:13.5px;font-weight:700;color:#fff;}
 
+  /* life score card */
+  .ls-card{display:flex;align-items:center;gap:16px;padding:15px 17px;border-radius:18px;margin-bottom:22px;
+    background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);}
+  .ls-left{flex:none;text-align:center;}
+  .ls-num{font-size:34px;font-weight:900;letter-spacing:-1px;line-height:1;color:var(--lsc,#fff);}
+  .ls-lbl{font-size:10px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-top:5px;}
+  .ls-right{flex:1;min-width:0;}
+  .ls-bar{height:8px;border-radius:999px;background:rgba(255,255,255,0.08);overflow:hidden;}
+  .ls-fill{display:block;height:100%;width:0;border-radius:999px;background:var(--lsc,#0A84FF);
+    box-shadow:0 0 10px var(--lsc,#0A84FF);transition:width 1s cubic-bezier(.22,1,.36,1);}
+  .ls-sub{font-size:11.5px;color:var(--muted);margin-top:8px;}
+
+  /* AI Q&A */
+  .ai-prog{height:5px;border-radius:999px;background:rgba(255,255,255,0.1);overflow:hidden;margin:0 0 18px;}
+  .ai-prog-fill{display:block;height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,#5AA0FF,#0A84FF);transition:width .35s cubic-bezier(.22,1,.36,1);}
+  .ai-q{font-size:21px;font-weight:800;color:#fff;letter-spacing:-0.4px;text-align:center;margin-bottom:18px;}
+  .ai-opts{display:flex;flex-direction:column;gap:10px;}
+  .ai-opt{display:flex;align-items:center;gap:13px;padding:15px;border-radius:16px;cursor:pointer;font-family:inherit;text-align:left;
+    background:color-mix(in srgb,var(--oc,#0A84FF) 12%,rgba(255,255,255,0.03));border:1px solid color-mix(in srgb,var(--oc,#0A84FF) 30%,transparent);
+    -webkit-tap-highlight-color:transparent;transition:transform .12s,border-color .18s;}
+  .ai-opt:active{transform:scale(.985);}
+  .ai-opt-ic{width:40px;height:40px;flex:none;border-radius:12px;display:flex;align-items:center;justify-content:center;
+    background:color-mix(in srgb,var(--oc) 26%,rgba(255,255,255,0.05));border:1px solid color-mix(in srgb,var(--oc) 42%,transparent);}
+  .ai-opt-ic svg{width:21px;height:21px;stroke:color-mix(in srgb,var(--oc) 80%,#fff);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;}
+  .ai-opt b{flex:1;font-size:15.5px;font-weight:700;color:#fff;letter-spacing:-0.2px;}
+
   /* edit sheet */
   .rt-edit-top{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
   .rt-edit-ic{width:44px;height:44px;flex:none;border-radius:13px;display:flex;align-items:center;justify-content:center;
@@ -672,6 +698,18 @@ body.edit-active .nav{display:none;}
         <span class="rankbar-score"><b id="rankBarScore">0</b><span>XP</span></span>
       </a>
 
+      <!-- Life score -->
+      <div class="ls-card" id="lsCard">
+        <div class="ls-left">
+          <div class="ls-num" id="lsNum">0</div>
+          <div class="ls-lbl">Life Score</div>
+        </div>
+        <div class="ls-right">
+          <div class="ls-bar"><span class="ls-fill" id="lsFill"></span></div>
+          <div class="ls-sub" id="lsSub">Build your routine to grow it</div>
+        </div>
+      </div>
+
       <!-- Routine to-do -->
       <div class="rt-head">
         <span class="rt-title">Today's routine</span>
@@ -693,11 +731,20 @@ body.edit-active .nav{display:none;}
       <div class="rt-sheet-title">Build your routine</div>
       <button class="rt-ai" id="rtAi">
         <span class="rt-ai-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.6 4.6L18 9l-4.4 1.4L12 15l-1.6-4.6L6 9l4.4-1.4z"/></svg></span>
-        <span class="rt-ai-tx"><b>Build it for me</b><small>AI picks a routine for your goal</small></span>
+        <span class="rt-ai-tx"><b>Build it for me</b><small>Answer a few questions →</small></span>
         <svg class="rt-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
       </button>
       <div class="rt-or">or pick from templates</div>
       <div class="rt-templates" id="rtTemplates"></div>
+    </div>
+
+    <!-- AI Q&A sheet -->
+    <div class="rt-back" id="aiBack"></div>
+    <div class="rt-sheet" id="aiSheet" role="dialog" aria-modal="true">
+      <div class="rt-grab"></div>
+      <div class="ai-prog"><span class="ai-prog-fill" id="aiProgFill"></span></div>
+      <div class="ai-q" id="aiQ">Question</div>
+      <div class="ai-opts" id="aiOpts"></div>
     </div>
 
     <!-- Task detail / edit sheet -->
@@ -1318,7 +1365,7 @@ body.edit-active .nav{display:none;}
     }).join('');
   }
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-  function persist(){ save(tasks); render(false); }
+  function persist(){ save(tasks); render(false); paintLifeScore(); }
 
   // Settings (gear) → settings page; runs before the legacy widget handler.
   var gear=$('gearBtn'); if(gear) gear.addEventListener('click',function(e){ e.stopPropagation(); window.location.href='25-settings.html'; }, true);
@@ -1352,24 +1399,80 @@ body.edit-active .nav{display:none;}
     persist(); sheet('buildSheet',false);
     try{window.coreSfx&&window.coreSfx('confirm');}catch(_){}
   });
-  // AI build — tailors a starter routine to the user's goal
-  $('rtAi').addEventListener('click',function(){
+  // AI build — asks a few questions, then tailors the routine
+  var AIQ=[
+    {q:"What's your main focus?", opts:[
+      {k:'discipline',label:'Discipline',icon:'star',color:'#0A84FF'},
+      {k:'health',label:'Health & energy',icon:'water',color:'#30D158'},
+      {k:'focus',label:'Focus & study',icon:'study',color:'#FFD60A'},
+      {k:'calm',label:'Calm & sleep',icon:'moon',color:'#BF5AF2'}
+    ]},
+    {q:"When do you have time?", opts:[
+      {k:'morning',label:'Mornings',icon:'star',color:'#FF9F0A'},
+      {k:'evening',label:'Evenings',icon:'moon',color:'#0A84FF'},
+      {k:'all',label:'Across the day',icon:'walk',color:'#30D158'}
+    ]},
+    {q:"How packed should it be?", opts:[
+      {k:'light',label:'Light · 3 tasks',icon:'check',color:'#40D0E0'},
+      {k:'balanced',label:'Balanced · 5 tasks',icon:'dumbbell',color:'#0A84FF'},
+      {k:'intense',label:'Intense · 7 tasks',icon:'star',color:'#FF453A'}
+    ]}
+  ];
+  var aiAns={}, aiStep=0;
+  function renderAiStep(){
+    var st=AIQ[aiStep];
+    $('aiProgFill').style.width=Math.round(aiStep/AIQ.length*100)+'%';
+    $('aiQ').textContent=st.q;
+    $('aiOpts').innerHTML=st.opts.map(function(o,i){
+      return '<button class="ai-opt" data-i="'+i+'" style="--oc:'+o.color+'"><span class="ai-opt-ic">'+svg(o.icon)+'</span><b>'+o.label+'</b></button>';
+    }).join('');
+  }
+  $('rtAi').addEventListener('click',function(){ aiAns={}; aiStep=0; sheet('buildSheet',false); renderAiStep(); sheet('aiSheet',true); });
+  $('aiBack').addEventListener('click',function(){ sheet('aiSheet',false); });
+  $('aiOpts').addEventListener('click',function(e){
+    var b=e.target.closest('.ai-opt'); if(!b) return;
+    aiAns[aiStep]=AIQ[aiStep].opts[+b.getAttribute('data-i')].k;
+    try{window.coreSfx&&window.coreSfx('tick');}catch(_){}
+    aiStep++;
+    if(aiStep<AIQ.length){ renderAiStep(); }
+    else { $('aiProgFill').style.width='100%'; setTimeout(function(){ generateFromAi(); sheet('aiSheet',false); },180); }
+  });
+  function generateFromAi(){
+    var focus=aiAns[0], when=aiAns[1], size=aiAns[2];
+    var count = size==='light'?3 : size==='intense'?7 : 5;
+    var pick=function(title){ for(var i=0;i<TEMPLATES.length;i++) if(TEMPLATES[i].title===title) return fromTemplate(TEMPLATES[i]); return null; };
+    var pool = focus==='health' ? ['Drink water','Go for a walk','Workout','Meditate','Sleep early','Read a book','Journal']
+      : focus==='focus' ? ['Study','Read a book','Drink water','Meditate','Workout','Go for a walk','Sleep early']
+      : focus==='calm' ? ['Meditate','Sleep early','Go for a walk','Journal','Read a book','Drink water','Workout']
+      : ['Workout','Drink water','Read a book','Go for a walk','Journal','Study','Meditate'];
+    var routine=[];
+    for(var i=0;i<pool.length && routine.length<count;i++){ var t=pick(pool[i]); if(t) routine.push(t); }
     var trial={}; try{ trial=JSON.parse(localStorage.getItem('coreOnboardTrial')||'{}')||{}; }catch(_){}
     var habit=(trial.habit||'').toString();
-    var pick=function(title){ for(var i=0;i<TEMPLATES.length;i++) if(TEMPLATES[i].title===title) return fromTemplate(TEMPLATES[i]); return null; };
-    var routine=[];
-    var m=pick('Drink water'); routine.push(m);
-    routine.push(pick('Go for a walk'));
-    var bk=pick('Read a book'); bk.detail.total=150; routine.push(bk);
-    routine.push(pick('Meditate'));
-    // a goal-specific keystone task
-    var label = habit==='build' ? 'Hit my habit today'
-      : habit ? ('Stay '+(habit==='doomscroll'?'off the scroll':habit==='spend'?'on budget':habit+'-free')+' today')
-      : 'Win the day';
-    routine.push({id:uid(),type:'custom',title:label,icon:'star',color:'#0A84FF',done:false,detail:{},note:''});
-    tasks=routine.filter(Boolean); persist(); sheet('buildSheet',false);
+    if(routine.length<count){
+      var label= habit ? ('Stay '+(habit==='doomscroll'?'off the scroll':habit==='spend'?'on budget':habit+'-free')+' today') : 'Win the day';
+      routine.push({id:uid(),type:'custom',title:label,icon:'star',color:'#0A84FF',done:false,detail:{},note:''});
+    }
+    routine.forEach(function(t){ if(when==='morning') t.detail.time=t.detail.time||'08:00'; else if(when==='evening') t.detail.time=t.detail.time||'20:30'; });
+    tasks=routine; render(true); save(tasks); paintLifeScore();
     try{window.coreSfx&&window.coreSfx('confirm');}catch(_){}
-  });
+  }
+
+  // life score
+  function paintLifeScore(){
+    var score=0;
+    try{ if(window.coreState && coreState.lifeScore) score=Math.round(coreState.lifeScore())||0; }catch(e){}
+    if(!score){
+      var done=tasks.filter(function(t){return t.done;}).length;
+      var pct=tasks.length?done/tasks.length:0, xp=parseInt(ls('coreXP','0'),10)||0;
+      score=(tasks.length||xp) ? Math.min(99, Math.round(18 + pct*44 + Math.min(38, xp/200))) : 0;
+    }
+    var col = score>=70?'#30D158':score>=40?'#FFD60A':score>0?'#FF9F0A':'#5E6B8A';
+    var c=$('lsCard'); if(c) c.style.setProperty('--lsc',col);
+    if($('lsNum')) $('lsNum').textContent=score;
+    setTimeout(function(){ if($('lsFill')) $('lsFill').style.width=Math.max(3,score)+'%'; },160);
+    if($('lsSub')) $('lsSub').textContent = score>=70?'Strong — keep it up':score>=40?'Building momentum':score>0?'Off to a good start':'Build your routine to grow it';
+  }
 
   // ---- edit / detail sheet ----
   var editing=null;
@@ -1433,6 +1536,7 @@ body.edit-active .nav{display:none;}
   });
 
   render(true);
+  paintLifeScore();
 })();
 </script>
 </body>
