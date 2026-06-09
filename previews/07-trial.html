@@ -227,16 +227,16 @@
   .cm-bar[data-lvl="3"] > span { height:72%; }
   .cm-bar[data-lvl="4"] > span { height:86%; }
   .cm-bar[data-lvl="5"] > span { height:100%; }
-  /* selected bars: colour ramps from muted (low) to vibrant green (high) */
+  /* selected bars: rainbow ramp — colour changes by how high you go */
   .cm-bar.on > span {
     border-color:transparent;
     box-shadow:0 6px 18px rgba(0,0,0,0.28), 0 1px 0 rgba(255,255,255,0.18) inset;
     animation:cmPop .34s cubic-bezier(.22,1.6,.36,1); }
-  .cm-bar[data-lvl="1"].on > span { background:linear-gradient(180deg, #7B86A3, #616c89); }
-  .cm-bar[data-lvl="2"].on > span { background:linear-gradient(180deg, #5AA0FF, #0A84FF); }
-  .cm-bar[data-lvl="3"].on > span { background:linear-gradient(180deg, #64D2FF, #2BB8E0); }
+  .cm-bar[data-lvl="1"].on > span { background:linear-gradient(180deg, #FF6B61, #FF453A); }
+  .cm-bar[data-lvl="2"].on > span { background:linear-gradient(180deg, #FFB23D, #FF9F0A); }
+  .cm-bar[data-lvl="3"].on > span { background:linear-gradient(180deg, #FFE34D, #FFD60A); }
   .cm-bar[data-lvl="4"].on > span { background:linear-gradient(180deg, #4BE07A, #30D158); }
-  .cm-bar[data-lvl="5"].on > span { background:linear-gradient(180deg, #7BF7A4, #30D158); box-shadow:0 6px 20px color-mix(in srgb, #30D158 38%, transparent), 0 1px 0 rgba(255,255,255,0.22) inset; }
+  .cm-bar[data-lvl="5"].on > span { background:linear-gradient(180deg, #4AA3FF, #0A84FF); box-shadow:0 6px 20px color-mix(in srgb, #0A84FF 40%, transparent), 0 1px 0 rgba(255,255,255,0.22) inset; }
   @keyframes cmPop{ 0%{ transform:scaleY(0.82); } 60%{ transform:scaleY(1.06); } 100%{ transform:scaleY(1); } }
   .commit-label { text-align:center; margin-top:18px; font-size:18px; font-weight:800; letter-spacing:-0.3px; color:#fff; min-height:24px; transition:color .2s; }
   /* faded small hint before anything is picked */
@@ -5747,12 +5747,15 @@
       refreshCTA();
     }
     function levelFromX(x) {
-      let found = 0;
-      bars.forEach(b => { const r = b.getBoundingClientRect(); if (x >= r.left - 4 && x <= r.right + 4) found = +b.dataset.lvl; });
-      return found;
+      // Map the pointer's X across the meter and clamp to 1-5, so you can drag
+      // anywhere on the screen and it still tracks (not just over the bars).
+      const wrap = meter.querySelector('.commit-bars') || meter;
+      const r = wrap.getBoundingClientRect();
+      const frac = (x - r.left) / Math.max(1, r.width);
+      return Math.max(1, Math.min(5, Math.ceil(frac * 5)));
     }
     let dragging = false;
-    meter.addEventListener('pointerdown', (e) => { dragging = true; setLevel(levelFromX(e.clientX)); });
+    meter.addEventListener('pointerdown', (e) => { e.preventDefault(); dragging = true; setLevel(levelFromX(e.clientX)); });
     window.addEventListener('pointermove', (e) => { if (dragging) setLevel(levelFromX(e.clientX)); });
     window.addEventListener('pointerup', () => { dragging = false; });
     window.addEventListener('pointercancel', () => { dragging = false; });
