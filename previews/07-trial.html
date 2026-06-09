@@ -5747,15 +5747,17 @@
       refreshCTA();
     }
     function levelFromX(x) {
-      // Map the pointer's X across the meter and clamp to 1-5, so you can drag
-      // anywhere on the screen and it still tracks (not just over the bars).
-      const wrap = meter.querySelector('.commit-bars') || meter;
-      const r = wrap.getBoundingClientRect();
+      // Map the pointer's X across the WHOLE screen width (clamped 1-5), so the
+      // entire screen behaves like the slider — touch/slide anywhere.
+      const r = (meter.closest('.step') || meter).getBoundingClientRect();
       const frac = (x - r.left) / Math.max(1, r.width);
       return Math.max(1, Math.min(5, Math.ceil(frac * 5)));
     }
+    // Start the slide from ANYWHERE on this screen — the whole step is the
+    // touch surface (it only receives events while this step is the active one).
+    const surface = meter.closest('.step') || meter;
     let dragging = false;
-    meter.addEventListener('pointerdown', (e) => { e.preventDefault(); dragging = true; setLevel(levelFromX(e.clientX)); });
+    surface.addEventListener('pointerdown', (e) => { dragging = true; setLevel(levelFromX(e.clientX)); });
     window.addEventListener('pointermove', (e) => { if (dragging) setLevel(levelFromX(e.clientX)); });
     window.addEventListener('pointerup', () => { dragging = false; });
     window.addEventListener('pointercancel', () => { dragging = false; });
