@@ -52,8 +52,8 @@
       box-shadow:0 26px 60px rgba(0,0,0,0.5), 0 0 0 1px color-mix(in srgb, var(--rc) 20%, transparent) inset, 0 0 56px color-mix(in srgb, var(--rc) 22%, transparent);
       animation:cardPop .7s cubic-bezier(.2,1.45,.3,1) .06s both;}
     @keyframes cardPop{0%{transform:scale(0.4);opacity:0;}55%{opacity:1;}100%{transform:scale(1);opacity:1;}}
-    .rank-gem{width:120px;height:120px;margin:0 auto;
-      filter:drop-shadow(0 12px 28px color-mix(in srgb, var(--rc) 60%, transparent));
+    .rank-gem{width:124px;height:124px;margin:0 auto;
+      filter:drop-shadow(0 0 16px color-mix(in srgb, var(--rc) 60%, transparent)) drop-shadow(0 12px 26px color-mix(in srgb, var(--rc) 45%, transparent));
       animation:gemFloat 4s ease-in-out 1s infinite;}
     .rank-gem img{width:100%;height:100%;object-fit:contain;display:block;}
     @keyframes gemFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
@@ -73,9 +73,8 @@
     .unlocks-head{font-size:10.5px;font-weight:800;letter-spacing:0.2em;text-transform:uppercase;
       color:rgba(255,255,255,0.42);text-align:center;margin-bottom:2px;opacity:0;}
     .unlock{display:flex;align-items:center;justify-content:center;gap:11px;opacity:0;}
-    .unlock-ic{width:23px;height:23px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;
-      background:#30D158;box-shadow:0 3px 9px rgba(48,209,88,0.4);}
-    .unlock-ic svg{width:12px;height:12px;stroke:#fff;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;}
+    .unlock-ic{width:20px;height:20px;flex:none;display:flex;align-items:center;justify-content:center;}
+    .unlock-ic svg{width:20px;height:20px;stroke:#248A3D;fill:none;stroke-width:3.4;stroke-linecap:round;stroke-linejoin:round;}
     .unlock-label{font-size:15px;font-weight:600;color:#fff;letter-spacing:-0.1px;}
     body.revealed .unlocks-head{animation:unlockIn .5s ease .7s both;}
     body.revealed .unlock{animation:unlockIn .55s cubic-bezier(.22,1,.32,1) both;}
@@ -87,6 +86,18 @@
     body.revealed .reveal-cta{animation:ctaIn .5s ease 1.75s both;}
     @keyframes ctaIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
     .reveal-cta:active{transform:scale(0.98);}
+
+    /* ===== celebratory pop — shockwave + particle burst ===== */
+    .burst{position:absolute;left:50%;top:34%;width:0;height:0;z-index:3;pointer-events:none;}
+    .particle{position:absolute;left:0;top:0;border-radius:50%;will-change:transform,opacity;}
+    @keyframes burstFly{0%{transform:translate(0,0) scale(1);opacity:1;}
+      100%{transform:translate(var(--tx),var(--ty)) scale(0.25);opacity:0;}}
+    .shockwave{position:absolute;left:0;top:0;width:84px;height:84px;margin:-42px 0 0 -42px;border-radius:50%;
+      border:2px solid #fff;transform:scale(0.1);opacity:0.9;will-change:transform,opacity;}
+    @keyframes shock{to{transform:scale(5);opacity:0;}}
+    .spark{position:absolute;left:0;top:0;will-change:transform,opacity;}
+    @keyframes sparkFly{0%{transform:translate(0,0) rotate(0deg) scale(1);opacity:1;}
+      100%{transform:translate(var(--tx),var(--ty)) rotate(var(--rot)) scale(0.4);opacity:0;}}
     @media (prefers-reduced-motion: reduce){ *{animation-duration:.01ms !important;} }
   </style>
 </head>
@@ -122,6 +133,7 @@
       <button class="reveal-cta" id="enterBtn">Continue</button>
     </div>
 
+    <div class="burst" id="burst"></div>
     <div class="flash"></div>
   </div>
 
@@ -196,6 +208,41 @@
   }
   persist();
 
+  function spawnBurst(){
+    var burst=document.getElementById('burst'); if(!burst) return;
+    var colors=[rank.color, '#ffffff', '#FFD60A', rank.color];
+    // expanding shockwave ring
+    var wv=document.createElement('span'); wv.className='shockwave';
+    wv.style.borderColor=rank.color;
+    wv.style.animation='shock .75s ease-out forwards';
+    burst.appendChild(wv); setTimeout(function(){wv.remove();},900);
+    // round particles flying outward
+    for(var i=0;i<34;i++){
+      var p=document.createElement('span'); p.className='particle';
+      var ang=Math.random()*Math.PI*2, dist=70+Math.random()*170;
+      p.style.setProperty('--tx',(Math.cos(ang)*dist).toFixed(0)+'px');
+      p.style.setProperty('--ty',(Math.sin(ang)*dist).toFixed(0)+'px');
+      var sz=(4+Math.random()*7).toFixed(1), col=colors[i%colors.length];
+      p.style.width=sz+'px'; p.style.height=sz+'px';
+      p.style.background=col; p.style.boxShadow='0 0 9px '+col;
+      p.style.animation='burstFly '+(0.7+Math.random()*0.7).toFixed(2)+'s cubic-bezier(.12,.7,.3,1) forwards';
+      burst.appendChild(p);
+      (function(el){ setTimeout(function(){el.remove();},1600);})(p);
+    }
+    // a few star sparkles
+    for(var j=0;j<10;j++){
+      var s=document.createElement('span'); s.className='spark';
+      var a2=Math.random()*Math.PI*2, d2=50+Math.random()*150;
+      s.style.setProperty('--tx',(Math.cos(a2)*d2).toFixed(0)+'px');
+      s.style.setProperty('--ty',(Math.sin(a2)*d2).toFixed(0)+'px');
+      s.style.setProperty('--rot',(Math.random()*360).toFixed(0)+'deg');
+      s.innerHTML='<svg viewBox="0 0 24 24" width="14" height="14" fill="#fff" style="filter:drop-shadow(0 0 6px '+rank.color+')"><path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4z"/></svg>';
+      s.style.animation='sparkFly '+(0.8+Math.random()*0.6).toFixed(2)+'s ease-out forwards';
+      burst.appendChild(s);
+      (function(el){ setTimeout(function(){el.remove();},1600);})(s);
+    }
+  }
+
   var revealed=false;
   function go(){
     if(revealed) return; revealed=true;
@@ -204,7 +251,8 @@
     setTimeout(function(){
       document.body.classList.remove('charging');
       document.body.classList.add('revealed');
-      try{ if(navigator.vibrate) navigator.vibrate([0,30,40,30]); }catch(e){}
+      spawnBurst();
+      try{ if(navigator.vibrate) navigator.vibrate([0,40,30,60]); }catch(e){}
     }, 950);
   }
   var s1=document.getElementById('stage1');
