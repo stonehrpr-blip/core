@@ -7,22 +7,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#000000" />
   <link rel="stylesheet" href="_lib/core-responsive.css?v=apple" />
+  <link rel="stylesheet" href="_lib/core-background.css" />
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
     html,body{height:100%;}
-    body{min-height:100%;background:#05060c;color:#fff;display:flex;align-items:center;justify-content:center;
+    body{min-height:100%;background:#0A0A14;color:#fff;display:flex;align-items:center;justify-content:center;
       padding:24px;overflow:hidden;
       font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif;
       -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
-    .phone{position:relative;width:390px;height:844px;border-radius:56px;overflow:hidden;background:#05060c;
+    .phone{position:relative;width:390px;height:844px;border-radius:56px;overflow:hidden;background:#02020A;
       box-shadow:0 40px 100px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.06),0 0 0 10px #0a0a12,0 0 0 11px #2b2b38;}
-    .reveal-bg{position:absolute;inset:0;
-      background:radial-gradient(120% 80% at 50% 36%, #12142c 0%, #06070f 60%, #04040a 100%);}
 
-    .stage{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;text-align:center;}
+    .stage{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center;}
 
     /* ===== Stage 1 — blank screen, tap to reveal ===== */
     #stage1{justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;}
@@ -40,53 +39,51 @@
     body.revealed .flash{animation:flashOut .55s ease forwards;}
     @keyframes flashOut{from{opacity:1;}to{opacity:0;}}
 
-    /* ===== Stage 2 — rank + unlocks ===== */
-    #stage2{opacity:0;pointer-events:none;justify-content:flex-start;padding:52px 0 0;
+    /* ===== Stage 2 — rank + unlocks (all centered) ===== */
+    #stage2{opacity:0;pointer-events:none;justify-content:flex-start;padding:54px 0 0;
       overflow-y:auto;scrollbar-width:none;}
     #stage2::-webkit-scrollbar{display:none;}
     body.revealed #stage1{display:none;}
     body.revealed #stage2{opacity:1;pointer-events:auto;}
 
-    .rank-card{width:300px;padding:30px 24px 22px;border-radius:30px;position:relative;flex-shrink:0;
+    .rank-card{width:300px;padding:30px 24px 22px;border-radius:30px;position:relative;flex-shrink:0;text-align:center;
       background:linear-gradient(170deg, color-mix(in srgb, var(--rc) 24%, #0b0d15), color-mix(in srgb, var(--rc) 8%, #08090f));
       border:1px solid color-mix(in srgb, var(--rc) 42%, transparent);
-      box-shadow:0 26px 60px rgba(0,0,0,0.5), 0 0 0 1px color-mix(in srgb, var(--rc) 20%, transparent) inset, 0 0 56px color-mix(in srgb, var(--rc) 20%, transparent);
+      box-shadow:0 26px 60px rgba(0,0,0,0.5), 0 0 0 1px color-mix(in srgb, var(--rc) 20%, transparent) inset, 0 0 56px color-mix(in srgb, var(--rc) 22%, transparent);
       animation:cardPop .7s cubic-bezier(.2,1.45,.3,1) .06s both;}
     @keyframes cardPop{0%{transform:scale(0.4);opacity:0;}55%{opacity:1;}100%{transform:scale(1);opacity:1;}}
-    .rank-gem{width:118px;height:118px;margin:0 auto;
-      filter:drop-shadow(0 12px 28px color-mix(in srgb, var(--rc) 58%, transparent));
+    .rank-gem{width:120px;height:120px;margin:0 auto;
+      filter:drop-shadow(0 12px 28px color-mix(in srgb, var(--rc) 60%, transparent));
       animation:gemFloat 4s ease-in-out 1s infinite;}
     @keyframes gemFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
-    .rank-eyebrow{margin-top:20px;font-size:11px;font-weight:800;letter-spacing:0.26em;text-transform:uppercase;
+    .rank-eyebrow{margin-top:18px;font-size:11px;font-weight:800;letter-spacing:0.26em;text-transform:uppercase;
       color:color-mix(in srgb,var(--rc) 62%, #ffffff);}
     .rank-name{margin-top:6px;font-size:34px;font-weight:800;letter-spacing:-0.8px;color:#fff;}
     .rank-tier{margin-top:5px;font-size:12px;color:rgba(255,255,255,0.5);}
     .rank-divider{height:1px;background:rgba(255,255,255,0.1);margin-top:22px;}
     .rank-rows{display:flex;}
-    .rank-row{flex:1;padding:15px 0 0;}
+    .rank-row{flex:1;padding:15px 0 0;text-align:center;}
     .rank-row+.rank-row{border-left:1px solid rgba(255,255,255,0.08);}
     .rr-v{font-size:21px;font-weight:800;color:#fff;letter-spacing:-0.3px;}
     .rr-k{margin-top:4px;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.45);}
 
-    /* unlock list — slides in one at a time, below the rank */
-    .unlocks{width:300px;margin:20px auto 130px;display:flex;flex-direction:column;gap:9px;}
-    .unlocks-head{font-size:10.5px;font-weight:800;letter-spacing:0.18em;text-transform:uppercase;
-      color:rgba(255,255,255,0.4);text-align:left;padding-left:4px;margin-bottom:2px;opacity:0;}
-    .unlock{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:15px;text-align:left;
-      background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);opacity:0;}
-    .unlock-ic{width:30px;height:30px;border-radius:9px;flex:none;display:flex;align-items:center;justify-content:center;
-      background:color-mix(in srgb, var(--rc) 24%, rgba(255,255,255,0.05));
-      border:1px solid color-mix(in srgb, var(--rc) 40%, transparent);}
-    .unlock-ic svg{width:16px;height:16px;stroke:color-mix(in srgb,var(--rc) 70%, #ffffff);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;}
-    .unlock-label{font-size:14px;font-weight:600;color:#fff;letter-spacing:-0.1px;}
+    /* unlock list — centered, green Apple ticks, slides in one by one */
+    .unlocks{width:300px;margin:24px auto 130px;display:flex;flex-direction:column;align-items:center;gap:13px;}
+    .unlocks-head{font-size:10.5px;font-weight:800;letter-spacing:0.2em;text-transform:uppercase;
+      color:rgba(255,255,255,0.42);text-align:center;margin-bottom:2px;opacity:0;}
+    .unlock{display:flex;align-items:center;justify-content:center;gap:11px;opacity:0;}
+    .unlock-ic{width:23px;height:23px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;
+      background:#30D158;box-shadow:0 3px 9px rgba(48,209,88,0.4);}
+    .unlock-ic svg{width:12px;height:12px;stroke:#fff;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;}
+    .unlock-label{font-size:15px;font-weight:600;color:#fff;letter-spacing:-0.1px;}
     body.revealed .unlocks-head{animation:unlockIn .5s ease .7s both;}
-    body.revealed .unlock{animation:unlockIn .5s cubic-bezier(.22,1,.32,1) both;}
-    @keyframes unlockIn{from{opacity:0;transform:translateX(-20px);}to{opacity:1;transform:translateX(0);}}
+    body.revealed .unlock{animation:unlockIn .55s cubic-bezier(.22,1,.32,1) both;}
+    @keyframes unlockIn{from{opacity:0;transform:translateY(14px) scale(.96);}to{opacity:1;transform:translateY(0) scale(1);}}
 
     .reveal-cta{position:absolute;bottom:46px;left:32px;right:32px;padding:16px;border-radius:16px;border:none;
       background:#fff;color:#06203f;font-family:inherit;font-size:16px;font-weight:700;letter-spacing:-0.2px;cursor:pointer;
       opacity:0;z-index:5;transition:transform .12s;-webkit-tap-highlight-color:transparent;}
-    body.revealed .reveal-cta{animation:ctaIn .5s ease 1.7s both;}
+    body.revealed .reveal-cta{animation:ctaIn .5s ease 1.75s both;}
     @keyframes ctaIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
     .reveal-cta:active{transform:scale(0.98);}
     @media (prefers-reduced-motion: reduce){ *{animation-duration:.01ms !important;} }
@@ -94,7 +91,7 @@
 </head>
 <body data-font="apple">
   <div class="phone">
-    <div class="reveal-bg"></div>
+    <!-- core-background.js injects the shared atmosphere (same as index/trial) here -->
 
     <!-- Stage 1: blank tap screen -->
     <div class="stage" id="stage1" role="button" tabindex="0" aria-label="Tap to reveal your rank">
@@ -127,6 +124,7 @@
     <div class="flash"></div>
   </div>
 
+  <script src="_lib/core-background.js"></script>
 <script>
 (function(){
   // 10 gemstone ranks (common -> legendary): colour + XP gate + what it unlocks.
@@ -142,23 +140,23 @@
     { name:'Ruby',      color:'#FF375F', xp:50000, perks:['Prestige badge','Ruby aura','Double-XP weekends'] },
     { name:'Diamond',   color:'#EAF2FF', xp:80000, perks:['Legend status','Diamond aura','Everything unlocked'] }
   ];
-  // Detailed faceted gem — gradient body, crown + pavilion facets, table highlight.
+  // Detailed brilliant-cut gem — balanced octagon, gradient body, full facet pattern + sparkle.
   function gemSvg(color){
     return '<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">'
-      + '<defs><linearGradient id="gg" x1="0" y1="0" x2="0" y2="1">'
-      +   '<stop offset="0" stop-color="#ffffff" stop-opacity="0.6"/>'
-      +   '<stop offset="0.42" stop-color="'+color+'" stop-opacity="0.96"/>'
+      + '<defs><linearGradient id="gg" x1="0.15" y1="0" x2="0.5" y2="1">'
+      +   '<stop offset="0" stop-color="#ffffff" stop-opacity="0.55"/>'
+      +   '<stop offset="0.45" stop-color="'+color+'" stop-opacity="0.95"/>'
       +   '<stop offset="1" stop-color="'+color+'"/>'
       + '</linearGradient></defs>'
-      + '<path d="M22 8 L42 8 L56 26 L32 60 L8 26 Z" fill="url(#gg)"/>'
-      + '<path d="M22 8 L42 8 L46 26 L18 26 Z" fill="#ffffff" fill-opacity="0.14"/>'
-      + '<path d="M8 26 H56" stroke="#ffffff" stroke-opacity="0.55" stroke-width="1.2"/>'
-      + '<path d="M22 8 L18 26 M42 8 L46 26 M22 8 L32 18 L42 8 M18 26 L32 18 L46 26" stroke="#ffffff" stroke-opacity="0.42" stroke-width="1.1" stroke-linejoin="round"/>'
-      + '<path d="M8 26 L32 60 M56 26 L32 60 M18 26 L32 60 M46 26 L32 60 M32 18 L32 60" stroke="#ffffff" stroke-opacity="0.3" stroke-width="1" stroke-linejoin="round"/>'
-      + '<path d="M22 8 L42 8 L56 26 L32 60 L8 26 Z" stroke="'+color+'" stroke-width="1.7" stroke-linejoin="round"/>'
+      + '<path d="M42 9 L22 9 L9 22 L9 42 L22 55 L42 55 L55 42 L55 22 Z" fill="url(#gg)"/>'
+      + '<path d="M42 9 L37 24 M42 9 L43 30 M22 9 L27 24 M22 9 L21 30 M9 22 L21 30 M9 22 L21 34 M9 42 L21 34 M9 42 L27 40 M22 55 L27 40 M22 55 L37 40 M42 55 L37 40 M42 55 L43 34 M55 42 L43 34 M55 42 L43 30 M55 22 L43 30 M55 22 L37 24" stroke="#ffffff" stroke-opacity="0.3" stroke-width="0.9" stroke-linejoin="round"/>'
+      + '<path d="M22 9 L42 9 L37 24 L27 24 Z" fill="#ffffff" fill-opacity="0.13"/>'
+      + '<path d="M9 22 L22 9 L27 24 L21 30 Z" fill="#ffffff" fill-opacity="0.06"/>'
+      + '<path d="M37 24 L27 24 L21 30 L21 34 L27 40 L37 40 L43 34 L43 30 Z" fill="#ffffff" fill-opacity="0.16" stroke="#ffffff" stroke-opacity="0.5" stroke-width="1"/>'
+      + '<path d="M42 9 L22 9 L9 22 L9 42 L22 55 L42 55 L55 42 L55 22 Z" stroke="'+color+'" stroke-width="1.7" stroke-linejoin="round"/>'
       + '</svg>';
   }
-  function check(){ return '<svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>'; }
+  function tick(){ return '<svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>'; }
   function ls(k,d){ try{ var v=localStorage.getItem(k); return v==null?d:v; }catch(e){ return d; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
 
@@ -176,13 +174,12 @@
   document.getElementById('rPlayer').textContent = name;
   document.getElementById('rScore').textContent = xp.toLocaleString();
 
-  // build unlock rows + stagger their slide-in (after the card pops)
   var ul = document.getElementById('unlocks');
   rank.perks.forEach(function(p, i){
     var row = document.createElement('div');
     row.className = 'unlock';
     row.style.animationDelay = (0.95 + i*0.22) + 's';
-    row.innerHTML = '<div class="unlock-ic">'+check()+'</div><div class="unlock-label">'+p+'</div>';
+    row.innerHTML = '<div class="unlock-ic">'+tick()+'</div><div class="unlock-label">'+p+'</div>';
     ul.appendChild(row);
   });
 
