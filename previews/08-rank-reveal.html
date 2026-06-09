@@ -30,13 +30,15 @@
     .tap-hint{position:absolute;bottom:74px;left:0;right:0;text-align:center;font-size:14px;font-weight:600;
       color:rgba(255,255,255,0.5);animation:tapPulse 1.8s ease-in-out infinite;}
     @keyframes tapPulse{0%,100%{opacity:0.4;}50%{opacity:0.95;}}
-    body.charging .pre-eyebrow,body.charging .pre-title,body.charging .tap-hint{opacity:0;transition:opacity .25s;}
+    /* tap -> text pulls back then rushes in toward you, then white, then bang */
+    body.charging #stage1{animation:introZoom .5s cubic-bezier(.5,0,.85,.25) forwards;transform-origin:center;}
+    @keyframes introZoom{0%{transform:scale(1);opacity:1;}16%{transform:scale(0.86);opacity:1;}100%{transform:scale(11);opacity:0;}}
 
-    /* white flash on tap */
+    /* white flash — fills as the zoom finishes, holds ~230ms, then reveal */
     .flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:20;}
-    body.charging .flash{animation:flashIn 0.42s ease-in forwards;}
-    @keyframes flashIn{0%{opacity:0;}62%{opacity:1;}100%{opacity:1;}}
-    body.revealed .flash{animation:flashOut .3s ease forwards;}
+    body.charging .flash{animation:flashIn 0.78s ease-in forwards;}
+    @keyframes flashIn{0%{opacity:0;}50%{opacity:0;}70%{opacity:1;}100%{opacity:1;}}
+    body.revealed .flash{animation:flashOut .28s ease forwards;}
     @keyframes flashOut{from{opacity:1;}to{opacity:0;}}
 
     /* ===== Stage 2 — rank + unlocks (all centered) ===== */
@@ -47,9 +49,10 @@
     body.revealed #stage2{opacity:1;pointer-events:auto;}
 
     .rank-card{width:300px;padding:30px 24px 22px;border-radius:30px;position:relative;flex-shrink:0;text-align:center;
-      background:linear-gradient(170deg, color-mix(in srgb, var(--rc) 24%, #0b0d15), color-mix(in srgb, var(--rc) 8%, #08090f));
+      background:linear-gradient(170deg, color-mix(in srgb, var(--rc) 20%, rgba(10,12,20,0.34)), color-mix(in srgb, var(--rc) 7%, rgba(7,8,14,0.26)));
+      -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
       border:1px solid color-mix(in srgb, var(--rc) 42%, transparent);
-      box-shadow:0 26px 60px rgba(0,0,0,0.5), 0 0 0 1px color-mix(in srgb, var(--rc) 20%, transparent) inset, 0 0 56px color-mix(in srgb, var(--rc) 22%, transparent);
+      box-shadow:0 26px 60px rgba(0,0,0,0.45), 0 0 0 1px color-mix(in srgb, var(--rc) 18%, transparent) inset, 0 0 56px color-mix(in srgb, var(--rc) 22%, transparent);
       animation:cardPop .58s cubic-bezier(.16,1.7,.3,1) both;}
     @keyframes cardPop{0%{transform:scale(0.2);opacity:0;}35%{opacity:1;}65%{transform:scale(1.06);}100%{transform:scale(1);opacity:1;}}
     .rank-gem{width:124px;height:124px;margin:0 auto;
@@ -69,10 +72,10 @@
     .rr-k{margin-top:4px;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.45);}
 
     /* unlock list — centered, green Apple ticks, slides in one by one */
-    .unlocks{width:300px;margin:24px auto 130px;display:flex;flex-direction:column;align-items:center;gap:13px;}
+    .unlocks{width:232px;margin:24px auto 130px;display:flex;flex-direction:column;align-items:stretch;gap:13px;}
     .unlocks-head{font-size:10.5px;font-weight:800;letter-spacing:0.2em;text-transform:uppercase;
-      color:rgba(255,255,255,0.42);text-align:center;margin-bottom:2px;opacity:0;}
-    .unlock{display:flex;align-items:center;justify-content:center;gap:11px;opacity:0;}
+      color:rgba(255,255,255,0.42);text-align:left;padding-left:2px;margin-bottom:2px;opacity:0;}
+    .unlock{display:flex;align-items:center;justify-content:flex-start;gap:12px;opacity:0;text-align:left;}
     .unlock-ic{width:20px;height:20px;flex:none;display:flex;align-items:center;justify-content:center;}
     .unlock-ic svg{width:20px;height:20px;stroke:#248A3D;fill:none;stroke-width:3.4;stroke-linecap:round;stroke-linejoin:round;}
     .unlock-label{font-size:15px;font-weight:600;color:#fff;letter-spacing:-0.1px;}
@@ -253,7 +256,7 @@
       document.body.classList.add('revealed');
       spawnBurst();
       try{ if(navigator.vibrate) navigator.vibrate([0,40,30,60]); }catch(e){}
-    }, 430);
+    }, 780);
   }
   var s1=document.getElementById('stage1');
   s1.addEventListener('click', go);
