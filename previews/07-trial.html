@@ -219,7 +219,7 @@
   .commit-bars { display:flex; align-items:flex-end; gap:9px; height:150px; }
   .cm-bar { all:unset; flex:1; height:100%; display:flex; align-items:flex-end; cursor:pointer; -webkit-tap-highlight-color:transparent; }
   .cm-bar > span { display:block; width:100%; border-radius:12px;
-    background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08);
+    background:rgba(255,255,255,0.035); border:1px solid rgba(255,255,255,0.06);
     transition:background .2s var(--ease), border-color .2s var(--ease), box-shadow .2s var(--ease), transform .12s var(--ease); }
   .cm-bar:active > span { transform:scaleY(0.98); }
   .cm-bar[data-lvl="1"] > span { height:42%; }
@@ -227,11 +227,16 @@
   .cm-bar[data-lvl="3"] > span { height:72%; }
   .cm-bar[data-lvl="4"] > span { height:86%; }
   .cm-bar[data-lvl="5"] > span { height:100%; }
+  /* selected bars: colour ramps from muted (low) to vibrant green (high) */
   .cm-bar.on > span {
-    background:linear-gradient(180deg, var(--accent-hi), var(--accent));
     border-color:transparent;
-    box-shadow:0 6px 18px color-mix(in srgb, var(--accent) 30%, transparent), 0 1px 0 rgba(255,255,255,0.18) inset;
+    box-shadow:0 6px 18px rgba(0,0,0,0.28), 0 1px 0 rgba(255,255,255,0.18) inset;
     animation:cmPop .34s cubic-bezier(.22,1.6,.36,1); }
+  .cm-bar[data-lvl="1"].on > span { background:linear-gradient(180deg, #7B86A3, #616c89); }
+  .cm-bar[data-lvl="2"].on > span { background:linear-gradient(180deg, #5AA0FF, #0A84FF); }
+  .cm-bar[data-lvl="3"].on > span { background:linear-gradient(180deg, #64D2FF, #2BB8E0); }
+  .cm-bar[data-lvl="4"].on > span { background:linear-gradient(180deg, #4BE07A, #30D158); }
+  .cm-bar[data-lvl="5"].on > span { background:linear-gradient(180deg, #7BF7A4, #30D158); box-shadow:0 6px 20px color-mix(in srgb, #30D158 38%, transparent), 0 1px 0 rgba(255,255,255,0.22) inset; }
   @keyframes cmPop{ 0%{ transform:scaleY(0.82); } 60%{ transform:scaleY(1.06); } 100%{ transform:scaleY(1); } }
   .commit-label { text-align:center; margin-top:18px; font-size:18px; font-weight:800; letter-spacing:-0.3px; color:#fff; min-height:24px; transition:color .2s; }
   /* faded small hint before anything is picked */
@@ -1271,7 +1276,7 @@
         <div class="step" data-step="0">
           <div class="kicker">Before we start</div>
           <h1 class="title">This only<br/><span class="g">works if you mean it.</span></h1>
-          <p class="copy">CORE isn't a tracker — it's a witness. Sign the contract with yourself by typing the word below.</p>
+          <p class="copy">CORE isn't a tracker — it's a witness. Sign the contract: type the word below.</p>
           <div id="habitChip" style="display:none; align-items:center; gap:8px; padding: 6px 12px 6px 8px; border-radius: 999px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); align-self: flex-start; font-size: 11px; color: var(--muted); letter-spacing:-0.05px; margin-top: 2px;">
             <span id="habitChipDot" style="width:8px; height:8px; border-radius:50%; box-shadow: 0 0 6px currentColor;"></span>
             <span>Quitting <strong id="habitChipName" style="color:#fff; font-weight:700; text-transform:capitalize;">vape</strong></span>
@@ -1313,7 +1318,7 @@
         <div class="step on" data-step="1">
           <div class="kicker">Step 1 · Basics</div>
           <h1 class="title">What should we<br/><span class="g">call you?</span></h1>
-          <p class="copy">First name only — this is how your coach greets you. Then set your age below.</p>
+          <p class="copy">First name only — your coach uses it. Add your age below.</p>
           <div class="field-wrap">
             <input id="name" class="field" type="text" placeholder="Your first name" autocomplete="given-name" maxlength="24" autocapitalize="words" spellcheck="false" />
             <div id="nameStatus" class="name-status" style="font-size:11.5px; margin-top:8px; padding-left:4px; min-height:16px; color:var(--muted); letter-spacing:-0.05px;">We'll check availability as you type.</div>
@@ -1328,7 +1333,7 @@
         <div class="step" data-step="2">
           <div class="kicker">Step 2 · Basics</div>
           <h1 class="title">Which profile<br/><span class="g">fits you?</span></h1>
-          <p class="copy">We use this to personalize copy, defaults, and the avatar that represents you in the feed.</p>
+          <p class="copy">Sets your avatar and tailors your plan.</p>
           <div class="profile-grid" id="profileGrid">
             <div class="profile-card" data-profile="male" onclick="pickProfile(this)">
               <img src="assets/profile-male.png" alt="Male" />
@@ -1352,7 +1357,7 @@
         <div class="step" data-step="4">
           <div class="kicker">Step 3 · Basics</div>
           <h1 class="title">What are you<br/><span class="g">tackling first?</span></h1>
-          <p class="copy">Pick one — the whole flow shifts to fit it. You can add more anytime.</p>
+          <p class="copy">Pick one. You can add more later.</p>
           <div class="privacy-note">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
             <span>Private &amp; encrypted — only used to personalize your plan. Never shared.</span>
@@ -2675,7 +2680,7 @@
         <div class="step" data-step="12">
           <div class="kicker">Step 13 · Coach</div>
           <h1 class="title">How should your<br/><span class="g">coach talk?</span></h1>
-          <p class="copy">Pick the tone that'll keep you honest. You can change it any time.</p>
+          <p class="copy">Pick the tone that keeps you honest.</p>
           <div class="tone-list" id="tones">
             <button class="tone-row" data-tone="gentle" style="--tc:#64D2FF;">
               <div class="tone-ico"><svg viewBox="0 0 24 24"><path d="M20 12c0 5-4 8-8 8s-8-3-8-8a8 8 0 0 1 16 0Z"/><circle cx="9" cy="11" r="1"/><circle cx="15" cy="11" r="1"/><path d="M9 15c1 1 2 1.5 3 1.5s2-.5 3-1.5"/></svg></div>
@@ -2776,19 +2781,27 @@
               transform: rotate(-45deg);
             }
 
-            /* ===== Coach-tone page — same card family as the gender page, each
-               tone keeping its Apple accent. Compacted so all 4 cards fit. ===== */
-            .step[data-step="12"] .title { font-size: 23px; }
-            .step[data-step="12"] .tone-list { gap: 9px; margin-top: 10px; }
-            .step[data-step="12"] .tone-row { padding: 12px 14px; }
-            .step[data-step="12"] .tone-ico {
+            /* ===== Coach-tone + Identity pages — same card family as the gender
+               page, each option keeping its Apple accent. Compacted to fit. ===== */
+            .step[data-step="12"] .title,
+            .step[data-step="23"] .title { font-size: 23px; }
+            .step[data-step="12"] .tone-list,
+            .step[data-step="23"] .tone-list { gap: 9px; margin-top: 10px; }
+            .step[data-step="12"] .tone-row,
+            .step[data-step="23"] .tone-row { padding: 12px 14px; }
+            .step[data-step="12"] .tone-ico,
+            .step[data-step="23"] .tone-ico {
               width: 40px; height: 40px; border-radius: 11px;
             }
-            .step[data-step="12"] .tone-ico svg { stroke: #fff; width: 19px; height: 19px; }
-            .step[data-step="12"] .tone-name { font-size: 15px; }
-            .step[data-step="12"] .tone-desc { color: rgba(235,235,245,0.62); font-size: 12px; }
-            /* selected icon fills solid with the tone's colour */
-            .step[data-step="12"] .tone-row.sel .tone-ico {
+            .step[data-step="12"] .tone-ico svg,
+            .step[data-step="23"] .tone-ico svg { stroke: #fff; width: 19px; height: 19px; }
+            .step[data-step="12"] .tone-name,
+            .step[data-step="23"] .tone-name { font-size: 15px; }
+            .step[data-step="12"] .tone-desc,
+            .step[data-step="23"] .tone-desc { color: rgba(235,235,245,0.62); font-size: 12px; }
+            /* selected icon fills solid with the option's colour */
+            .step[data-step="12"] .tone-row.sel .tone-ico,
+            .step[data-step="23"] .tone-row.sel .tone-ico {
               background: var(--tc);
               border-color: var(--tc);
             }
@@ -3129,7 +3142,7 @@
           <h1 class="title">Where you'll be<br/><span class="g">in 30 days.</span></h1>
           <p class="copy">Stay on CORE and here's the shift you'll feel.</p>
           <div class="trans-list" id="flipgrid">
-            <div class="trans-row" style="--fac:#34D399">
+            <div class="trans-row" style="--fac:#64D2FF">
               <div class="trans-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg></div>
               <div class="trans-body">
                 <div class="trans-name">Energy</div>
@@ -3137,7 +3150,7 @@
               </div>
               <div class="trans-day">Day 30</div>
             </div>
-            <div class="trans-row" style="--fac:#4A8FFF">
+            <div class="trans-row" style="--fac:#30D158">
               <div class="trans-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/></svg></div>
               <div class="trans-body">
                 <div class="trans-name">Focus</div>
@@ -3145,7 +3158,7 @@
               </div>
               <div class="trans-day">Day 30</div>
             </div>
-            <div class="trans-row" style="--fac:#FFCB3D">
+            <div class="trans-row" style="--fac:#FF9F0A">
               <div class="trans-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1.6 3.6 4 4.6 4 8a4 4 0 0 1-8 0c0-1.3.5-2.1 1-2.7C9 11 12 8 12 3z"/></svg></div>
               <div class="trans-body">
                 <div class="trans-name">Streak</div>
@@ -3153,7 +3166,7 @@
               </div>
               <div class="trans-day">Day 30</div>
             </div>
-            <div class="trans-row" style="--fac:#B388FF">
+            <div class="trans-row" style="--fac:#FF453A">
               <div class="trans-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a5 5 0 1 0 0-10 5 5 0 0 0 0 10ZM8.5 13.5L7 22l5-3 5 3-1.5-8.5"/></svg></div>
               <div class="trans-body">
                 <div class="trans-name">Rank</div>
@@ -3169,22 +3182,26 @@
           <div class="kicker">Step · You</div>
           <h1 class="title">Who do you<br/><span class="g">want to become?</span></h1>
           <p class="copy">Your coach holds you to this.</p>
-          <div class="id-grid" id="identityGrid">
-            <button class="id-card" data-identity="disciplined" style="--ic:#0A84FF">
-              <div class="id-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z"/></svg></div>
-              <div class="id-name">Disciplined</div>
+          <div class="tone-list" id="identityGrid">
+            <button class="tone-row" data-identity="disciplined" style="--tc:#0A84FF;">
+              <div class="tone-ico"><svg viewBox="0 0 24 24"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z"/></svg></div>
+              <div class="tone-body"><div class="tone-name">Disciplined</div><div class="tone-desc">Shows up even when it's hard</div></div>
+              <div class="tone-check"></div>
             </button>
-            <button class="id-card" data-identity="calm" style="--ic:#30D158">
-              <div class="id-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13c4 0 4-3 8-3s4 3 8 3M4 17c4 0 4-3 8-3s4 3 8 3"/></svg></div>
-              <div class="id-name">Calm &amp;<br/>in control</div>
+            <button class="tone-row" data-identity="calm" style="--tc:#30D158;">
+              <div class="tone-ico"><svg viewBox="0 0 24 24"><path d="M4 13c4 0 4-3 8-3s4 3 8 3M4 17c4 0 4-3 8-3s4 3 8 3"/></svg></div>
+              <div class="tone-body"><div class="tone-name">Calm &amp; in control</div><div class="tone-desc">Steady, unbothered</div></div>
+              <div class="tone-check"></div>
             </button>
-            <button class="id-card" data-identity="sharp" style="--ic:#BF5AF2">
-              <div class="id-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/></svg></div>
-              <div class="id-name">Sharp &amp;<br/>focused</div>
+            <button class="tone-row" data-identity="sharp" style="--tc:#BF5AF2;">
+              <div class="tone-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/></svg></div>
+              <div class="tone-body"><div class="tone-name">Sharp &amp; focused</div><div class="tone-desc">Clear head, locked in</div></div>
+              <div class="tone-check"></div>
             </button>
-            <button class="id-card" data-identity="free" style="--ic:#FF9F0A">
-              <div class="id-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12a6 6 0 0 1 12 0M9 12v6m6-6v6M9 18h6"/></svg></div>
-              <div class="id-name">Free of it</div>
+            <button class="tone-row" data-identity="free" style="--tc:#FF9F0A;">
+              <div class="tone-ico"><svg viewBox="0 0 24 24"><path d="M6 12a6 6 0 0 1 12 0M9 12v6m6-6v6M9 18h6"/></svg></div>
+              <div class="tone-body"><div class="tone-name">Free of it</div><div class="tone-desc">No longer owned by it</div></div>
+              <div class="tone-check"></div>
             </button>
           </div>
         </div>
@@ -5711,7 +5728,7 @@
   wireSingleSelect('#pastAttempts',  'attempts', 'pastAttempts');
   wireSingleSelect('#whoKnows',      'knows',    'whoKnows');
   wireSingleSelect('#successVision', 'vision',   'successVision');
-  wireSingleSelect('#identityGrid',  'identity', 'identity', '.id-card');
+  wireSingleSelect('#identityGrid',  'identity', 'identity');
 
   // ── Commitment meter (step 22) — tap OR drag a bar to set 1-5 ──
   (function commitMeter() {
