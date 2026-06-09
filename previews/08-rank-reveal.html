@@ -22,77 +22,88 @@
     .reveal-bg{position:absolute;inset:0;
       background:radial-gradient(120% 80% at 50% 36%, #12142c 0%, #06070f 60%, #04040a 100%);}
 
-    .stage{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
+    .stage{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;text-align:center;}
 
-    /* ===== Stage 1 — tap to reveal ===== */
-    #stage1{cursor:pointer;-webkit-tap-highlight-color:transparent;}
-    .pre-orb{width:118px;height:118px;border-radius:50%;
-      background:radial-gradient(circle at 50% 42%, #ffffff, rgba(150,180,255,0.55) 46%, transparent 72%);
-      box-shadow:0 0 64px rgba(122,166,255,0.55);animation:prelude 2.6s ease-in-out infinite;}
-    @keyframes prelude{0%,100%{transform:scale(1);opacity:0.86;}50%{transform:scale(1.12);opacity:1;}}
-    .pre-eyebrow{margin-top:36px;font-size:11px;font-weight:800;letter-spacing:0.3em;text-transform:uppercase;color:rgba(207,228,255,0.6);}
-    .pre-title{margin-top:9px;font-size:25px;font-weight:800;letter-spacing:-0.5px;color:#fff;}
-    .tap-hint{position:absolute;bottom:70px;left:0;right:0;text-align:center;font-size:14px;font-weight:600;
+    /* ===== Stage 1 — blank screen, tap to reveal ===== */
+    #stage1{justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+    .pre-eyebrow{font-size:11px;font-weight:800;letter-spacing:0.32em;text-transform:uppercase;color:rgba(207,228,255,0.55);}
+    .pre-title{margin-top:12px;font-size:30px;font-weight:800;letter-spacing:-0.6px;color:#fff;line-height:1.1;}
+    .tap-hint{position:absolute;bottom:74px;left:0;right:0;text-align:center;font-size:14px;font-weight:600;
       color:rgba(255,255,255,0.5);animation:tapPulse 1.8s ease-in-out infinite;}
-    @keyframes tapPulse{0%,100%{opacity:0.4;}50%{opacity:0.92;}}
+    @keyframes tapPulse{0%,100%{opacity:0.4;}50%{opacity:0.95;}}
+    body.charging .pre-eyebrow,body.charging .pre-title,body.charging .tap-hint{opacity:0;transition:opacity .25s;}
 
-    /* charge + white flash on tap */
-    body.charging .pre-orb{animation:charge 1.05s cubic-bezier(.5,0,.4,1) forwards;}
-    @keyframes charge{0%{transform:scale(1);}52%{transform:scale(0.66);}100%{transform:scale(10);opacity:0.95;}}
-    body.charging .pre-eyebrow,body.charging .pre-title,body.charging .tap-hint{opacity:0;transition:opacity .3s;}
+    /* white flash on tap */
     .flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:20;}
-    body.charging .flash{animation:flashIn 1.5s ease-in forwards;}
-    @keyframes flashIn{0%,58%{opacity:0;}82%{opacity:1;}100%{opacity:1;}}
-
-    /* ===== Stage 2 — rank card ===== */
-    #stage2{opacity:0;pointer-events:none;}
-    body.revealed #stage1{display:none;}
-    body.revealed #stage2{opacity:1;pointer-events:auto;}
+    body.charging .flash{animation:flashIn 0.95s ease-in forwards;}
+    @keyframes flashIn{0%{opacity:0;}70%{opacity:1;}100%{opacity:1;}}
     body.revealed .flash{animation:flashOut .55s ease forwards;}
     @keyframes flashOut{from{opacity:1;}to{opacity:0;}}
 
-    .rank-card{width:300px;padding:36px 26px 26px;border-radius:32px;position:relative;
+    /* ===== Stage 2 — rank + unlocks ===== */
+    #stage2{opacity:0;pointer-events:none;justify-content:flex-start;padding:52px 0 0;
+      overflow-y:auto;scrollbar-width:none;}
+    #stage2::-webkit-scrollbar{display:none;}
+    body.revealed #stage1{display:none;}
+    body.revealed #stage2{opacity:1;pointer-events:auto;}
+
+    .rank-card{width:300px;padding:30px 24px 22px;border-radius:30px;position:relative;flex-shrink:0;
       background:linear-gradient(170deg, color-mix(in srgb, var(--rc) 24%, #0b0d15), color-mix(in srgb, var(--rc) 8%, #08090f));
       border:1px solid color-mix(in srgb, var(--rc) 42%, transparent);
-      box-shadow:0 30px 70px rgba(0,0,0,0.5), 0 0 0 1px color-mix(in srgb, var(--rc) 20%, transparent) inset, 0 0 56px color-mix(in srgb, var(--rc) 20%, transparent);
-      animation:cardPop .72s cubic-bezier(.2,1.45,.3,1) .08s both;}
-    @keyframes cardPop{0%{transform:scale(0.35);opacity:0;}55%{opacity:1;}100%{transform:scale(1);opacity:1;}}
-    .rank-gem{width:112px;height:112px;margin:0 auto;
-      filter:drop-shadow(0 10px 26px color-mix(in srgb, var(--rc) 55%, transparent));
+      box-shadow:0 26px 60px rgba(0,0,0,0.5), 0 0 0 1px color-mix(in srgb, var(--rc) 20%, transparent) inset, 0 0 56px color-mix(in srgb, var(--rc) 20%, transparent);
+      animation:cardPop .7s cubic-bezier(.2,1.45,.3,1) .06s both;}
+    @keyframes cardPop{0%{transform:scale(0.4);opacity:0;}55%{opacity:1;}100%{transform:scale(1);opacity:1;}}
+    .rank-gem{width:118px;height:118px;margin:0 auto;
+      filter:drop-shadow(0 12px 28px color-mix(in srgb, var(--rc) 58%, transparent));
       animation:gemFloat 4s ease-in-out 1s infinite;}
     @keyframes gemFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
-    .rank-eyebrow{margin-top:22px;font-size:11px;font-weight:800;letter-spacing:0.26em;text-transform:uppercase;
-      color:color-mix(in srgb,var(--rc) 62%, #ffffff);text-align:center;}
-    .rank-name{margin-top:6px;font-size:34px;font-weight:800;letter-spacing:-0.8px;color:#fff;text-align:center;}
-    .rank-tier{margin-top:5px;font-size:12px;color:rgba(255,255,255,0.5);text-align:center;}
-    .rank-divider{height:1px;background:rgba(255,255,255,0.1);margin-top:24px;}
+    .rank-eyebrow{margin-top:20px;font-size:11px;font-weight:800;letter-spacing:0.26em;text-transform:uppercase;
+      color:color-mix(in srgb,var(--rc) 62%, #ffffff);}
+    .rank-name{margin-top:6px;font-size:34px;font-weight:800;letter-spacing:-0.8px;color:#fff;}
+    .rank-tier{margin-top:5px;font-size:12px;color:rgba(255,255,255,0.5);}
+    .rank-divider{height:1px;background:rgba(255,255,255,0.1);margin-top:22px;}
     .rank-rows{display:flex;}
-    .rank-row{flex:1;padding:16px 0 0;text-align:center;}
+    .rank-row{flex:1;padding:15px 0 0;}
     .rank-row+.rank-row{border-left:1px solid rgba(255,255,255,0.08);}
     .rr-v{font-size:21px;font-weight:800;color:#fff;letter-spacing:-0.3px;}
     .rr-k{margin-top:4px;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.45);}
 
-    .reveal-cta{position:absolute;bottom:52px;left:32px;right:32px;padding:16px;border-radius:16px;border:none;
+    /* unlock list — slides in one at a time, below the rank */
+    .unlocks{width:300px;margin:20px auto 130px;display:flex;flex-direction:column;gap:9px;}
+    .unlocks-head{font-size:10.5px;font-weight:800;letter-spacing:0.18em;text-transform:uppercase;
+      color:rgba(255,255,255,0.4);text-align:left;padding-left:4px;margin-bottom:2px;opacity:0;}
+    .unlock{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:15px;text-align:left;
+      background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);opacity:0;}
+    .unlock-ic{width:30px;height:30px;border-radius:9px;flex:none;display:flex;align-items:center;justify-content:center;
+      background:color-mix(in srgb, var(--rc) 24%, rgba(255,255,255,0.05));
+      border:1px solid color-mix(in srgb, var(--rc) 40%, transparent);}
+    .unlock-ic svg{width:16px;height:16px;stroke:color-mix(in srgb,var(--rc) 70%, #ffffff);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;}
+    .unlock-label{font-size:14px;font-weight:600;color:#fff;letter-spacing:-0.1px;}
+    body.revealed .unlocks-head{animation:unlockIn .5s ease .7s both;}
+    body.revealed .unlock{animation:unlockIn .5s cubic-bezier(.22,1,.32,1) both;}
+    @keyframes unlockIn{from{opacity:0;transform:translateX(-20px);}to{opacity:1;transform:translateX(0);}}
+
+    .reveal-cta{position:absolute;bottom:46px;left:32px;right:32px;padding:16px;border-radius:16px;border:none;
       background:#fff;color:#06203f;font-family:inherit;font-size:16px;font-weight:700;letter-spacing:-0.2px;cursor:pointer;
-      opacity:0;transition:opacity .4s .55s, transform .12s;-webkit-tap-highlight-color:transparent;}
-    body.revealed .reveal-cta{opacity:1;}
+      opacity:0;z-index:5;transition:transform .12s;-webkit-tap-highlight-color:transparent;}
+    body.revealed .reveal-cta{animation:ctaIn .5s ease 1.7s both;}
+    @keyframes ctaIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
     .reveal-cta:active{transform:scale(0.98);}
-    @media (prefers-reduced-motion: reduce){ *{animation:none !important;} }
+    @media (prefers-reduced-motion: reduce){ *{animation-duration:.01ms !important;} }
   </style>
 </head>
 <body data-font="apple">
   <div class="phone">
     <div class="reveal-bg"></div>
 
-    <!-- Stage 1: tap -->
-    <div class="stage" id="stage1" role="button" tabindex="0" aria-label="Tap anywhere to reveal your rank">
-      <div class="pre-orb"></div>
-      <div class="pre-eyebrow">Your starting rank</div>
-      <div class="pre-title">Ready?</div>
-      <div class="tap-hint">Tap anywhere to reveal</div>
+    <!-- Stage 1: blank tap screen -->
+    <div class="stage" id="stage1" role="button" tabindex="0" aria-label="Tap to reveal your rank">
+      <div class="pre-eyebrow">Your journey begins</div>
+      <div class="pre-title">Reveal your rank</div>
+      <div class="tap-hint">Tap anywhere</div>
     </div>
 
-    <!-- Stage 2: rank card -->
+    <!-- Stage 2: rank card + unlocks -->
     <div class="stage" id="stage2">
       <div class="rank-card" id="rankCard">
         <div class="rank-gem" id="rankGem"></div>
@@ -105,6 +116,11 @@
           <div class="rank-row"><div class="rr-v" id="rScore">0</div><div class="rr-k">Score</div></div>
         </div>
       </div>
+
+      <div class="unlocks" id="unlocks">
+        <div class="unlocks-head">Unlocked with this rank</div>
+      </div>
+
       <button class="reveal-cta" id="enterBtn">Continue</button>
     </div>
 
@@ -113,26 +129,36 @@
 
 <script>
 (function(){
-  // 10 gemstone ranks (common -> legendary). Colours fixed; XP thresholds gate them.
+  // 10 gemstone ranks (common -> legendary): colour + XP gate + what it unlocks.
   var RANKS = [
-    { name:'Moonstone', color:'#C7D0E8', xp:0 },
-    { name:'Amber',     color:'#FF9F0A', xp:500 },
-    { name:'Topaz',     color:'#FFD60A', xp:1500 },
-    { name:'Carnelian', color:'#E0533A', xp:3500 },
-    { name:'Jade',      color:'#30D158', xp:7000 },
-    { name:'Turquoise', color:'#40D0E0', xp:12000 },
-    { name:'Amethyst',  color:'#BF5AF2', xp:20000 },
-    { name:'Sapphire',  color:'#0A84FF', xp:32000 },
-    { name:'Ruby',      color:'#FF375F', xp:50000 },
-    { name:'Diamond',   color:'#EAF2FF', xp:80000 }
+    { name:'Moonstone', color:'#C7D0E8', xp:0,     perks:['Daily life score','Streak tracking','AI Coach unlocked','Your first chest'] },
+    { name:'Amber',     color:'#FF9F0A', xp:500,   perks:['Custom quests','Amber profile frame','Weekly review'] },
+    { name:'Topaz',     color:'#FFD60A', xp:1500,  perks:['Habit insights','Topaz frame','Streak freeze ×1'] },
+    { name:'Carnelian', color:'#E0533A', xp:3500,  perks:['Advanced stats','Carnelian frame','Coach personalities'] },
+    { name:'Jade',      color:'#30D158', xp:7000,  perks:['Focus tools','Jade frame','Milestone rewards'] },
+    { name:'Turquoise', color:'#40D0E0', xp:12000, perks:['Leaderboards','Turquoise frame','Bonus XP events'] },
+    { name:'Amethyst',  color:'#BF5AF2', xp:20000, perks:['Premium quests','Amethyst aura','Streak freeze ×3'] },
+    { name:'Sapphire',  color:'#0A84FF', xp:32000, perks:['Elite coach','Sapphire aura','Exclusive chests'] },
+    { name:'Ruby',      color:'#FF375F', xp:50000, perks:['Prestige badge','Ruby aura','Double-XP weekends'] },
+    { name:'Diamond',   color:'#EAF2FF', xp:80000, perks:['Legend status','Diamond aura','Everything unlocked'] }
   ];
+  // Detailed faceted gem — gradient body, crown + pavilion facets, table highlight.
   function gemSvg(color){
     return '<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">'
-      + '<path d="M22 7 L42 7 L58 25 L32 60 L6 25 Z" fill="'+color+'" fill-opacity="0.92"/>'
-      + '<path d="M6 25 H58 M22 7 L18 25 L32 60 M42 7 L46 25 L32 60 M22 7 L32 25 L42 7" stroke="#ffffff" stroke-opacity="0.5" stroke-width="1.3" stroke-linejoin="round"/>'
-      + '<path d="M22 7 L42 7 L58 25 L32 60 L6 25 Z" stroke="'+color+'" stroke-width="1.6" stroke-linejoin="round"/>'
+      + '<defs><linearGradient id="gg" x1="0" y1="0" x2="0" y2="1">'
+      +   '<stop offset="0" stop-color="#ffffff" stop-opacity="0.6"/>'
+      +   '<stop offset="0.42" stop-color="'+color+'" stop-opacity="0.96"/>'
+      +   '<stop offset="1" stop-color="'+color+'"/>'
+      + '</linearGradient></defs>'
+      + '<path d="M22 8 L42 8 L56 26 L32 60 L8 26 Z" fill="url(#gg)"/>'
+      + '<path d="M22 8 L42 8 L46 26 L18 26 Z" fill="#ffffff" fill-opacity="0.14"/>'
+      + '<path d="M8 26 H56" stroke="#ffffff" stroke-opacity="0.55" stroke-width="1.2"/>'
+      + '<path d="M22 8 L18 26 M42 8 L46 26 M22 8 L32 18 L42 8 M18 26 L32 18 L46 26" stroke="#ffffff" stroke-opacity="0.42" stroke-width="1.1" stroke-linejoin="round"/>'
+      + '<path d="M8 26 L32 60 M56 26 L32 60 M18 26 L32 60 M46 26 L32 60 M32 18 L32 60" stroke="#ffffff" stroke-opacity="0.3" stroke-width="1" stroke-linejoin="round"/>'
+      + '<path d="M22 8 L42 8 L56 26 L32 60 L8 26 Z" stroke="'+color+'" stroke-width="1.7" stroke-linejoin="round"/>'
       + '</svg>';
   }
+  function check(){ return '<svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>'; }
   function ls(k,d){ try{ var v=localStorage.getItem(k); return v==null?d:v; }catch(e){ return d; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
 
@@ -149,6 +175,16 @@
   document.getElementById('rankTier').textContent = 'Rank '+(idx+1)+' of '+RANKS.length;
   document.getElementById('rPlayer').textContent = name;
   document.getElementById('rScore').textContent = xp.toLocaleString();
+
+  // build unlock rows + stagger their slide-in (after the card pops)
+  var ul = document.getElementById('unlocks');
+  rank.perks.forEach(function(p, i){
+    var row = document.createElement('div');
+    row.className = 'unlock';
+    row.style.animationDelay = (0.95 + i*0.22) + 's';
+    row.innerHTML = '<div class="unlock-ic">'+check()+'</div><div class="unlock-label">'+p+'</div>';
+    ul.appendChild(row);
+  });
 
   function persist(){
     lsSet('coreRank', rank.name); lsSet('coreXP', String(xp)); lsSet('coreLevel','1'); lsSet('coreName', name);
@@ -169,7 +205,7 @@
       document.body.classList.remove('charging');
       document.body.classList.add('revealed');
       try{ if(navigator.vibrate) navigator.vibrate([0,30,40,30]); }catch(e){}
-    }, 1500);
+    }, 950);
   }
   var s1=document.getElementById('stage1');
   s1.addEventListener('click', go);
