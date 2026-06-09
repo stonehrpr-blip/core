@@ -193,6 +193,27 @@
   .social-proof .sp-text { font-size:12px; color:var(--muted); letter-spacing:-0.05px; }
   .social-proof .sp-text b { color:#fff; font-weight:800; }
 
+  /* Identity (step 23) — 2x2 square cards, background blended with each colour */
+  .id-grid { display:grid; grid-template-columns:1fr 1fr; gap:11px; margin-top:14px; }
+  .id-card { all:unset; position:relative; aspect-ratio:1; box-sizing:border-box; cursor:pointer; -webkit-tap-highlight-color:transparent;
+    border-radius:20px; padding:15px; overflow:hidden;
+    display:flex; flex-direction:column; justify-content:space-between;
+    background:linear-gradient(155deg, color-mix(in srgb, var(--ic) 26%, #0b0b16), color-mix(in srgb, var(--ic) 7%, #0a0a14));
+    border:1px solid color-mix(in srgb, var(--ic) 34%, transparent);
+    transition:transform .14s var(--ease), border-color .2s, box-shadow .2s; }
+  .id-card::before { content:""; position:absolute; inset:0; pointer-events:none;
+    background:radial-gradient(115% 70% at 80% 0%, color-mix(in srgb, var(--ic) 28%, transparent), transparent 60%); }
+  .id-card:active { transform:scale(0.97); }
+  .id-ico { position:relative; width:46px; height:46px; border-radius:14px; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(140deg, color-mix(in srgb, var(--ic) 92%, white), var(--ic));
+    box-shadow:0 6px 16px color-mix(in srgb, var(--ic) 45%, transparent), 0 0 0 1px rgba(255,255,255,0.12) inset; }
+  .id-ico svg { width:24px; height:24px; stroke:#fff; }
+  .id-name { position:relative; font-size:16px; font-weight:800; color:#fff; letter-spacing:-0.2px; line-height:1.12; }
+  .id-card.sel { border-color:var(--ic);
+    box-shadow:0 0 0 1px var(--ic) inset, 0 8px 26px color-mix(in srgb, var(--ic) 30%, transparent); }
+  .id-card.sel::after { content:""; position:absolute; top:12px; right:12px; width:20px; height:20px; border-radius:50%;
+    background:var(--ic); box-shadow:0 0 0 1.5px rgba(255,255,255,0.35) inset; }
+
   /* Commitment meter (step 22) — tap a bar to fill the gauge */
   .commit { margin-top:22px; }
   .commit-bars { display:flex; align-items:flex-end; gap:9px; height:150px; }
@@ -209,8 +230,12 @@
   .cm-bar.on > span {
     background:linear-gradient(180deg, var(--accent-hi), var(--accent));
     border-color:transparent;
-    box-shadow:0 6px 18px color-mix(in srgb, var(--accent) 26%, transparent), 0 1px 0 rgba(255,255,255,0.18) inset; }
-  .commit-label { text-align:center; margin-top:18px; font-size:17px; font-weight:800; letter-spacing:-0.3px; color:#fff; min-height:22px; }
+    box-shadow:0 6px 18px color-mix(in srgb, var(--accent) 30%, transparent), 0 1px 0 rgba(255,255,255,0.18) inset;
+    animation:cmPop .34s cubic-bezier(.22,1.6,.36,1); }
+  @keyframes cmPop{ 0%{ transform:scaleY(0.82); } 60%{ transform:scaleY(1.06); } 100%{ transform:scaleY(1); } }
+  .commit-label { text-align:center; margin-top:18px; font-size:18px; font-weight:800; letter-spacing:-0.3px; color:#fff; min-height:24px; transition:color .2s; }
+  /* faded small hint before anything is picked */
+  .commit-label.hint { font-size:13px; font-weight:500; color:rgba(255,255,255,0.34); }
 
   /* name input */
   .field-wrap { margin-top:6px; }
@@ -904,13 +929,13 @@
     color:rgba(255,255,255,0.75); letter-spacing:0.02em; margin-bottom:10px; }
   .lg { display:inline-block; width:14px; height:3px; border-radius:2px; vertical-align:middle; }
   .lg-bad { background:#FF453A; }
-  .lg-good { background:#34D399; }
+  .lg-good { background:#30D158; }
   .rgraph { width:100%; height:170px; display:block; overflow:visible; }
   .rgraph .grid { stroke:rgba(255,255,255,0.06); stroke-width:1; }
   .rgraph .line { fill:none; stroke-width:3.2; stroke-linecap:round; stroke-linejoin:round; }
   .rgraph .line-bad { stroke:#FF453A; filter:drop-shadow(0 0 6px rgba(255,69,58,0.4)); }
   .rgraph .line-bad.faded { stroke:rgba(255,69,58,0.55); stroke-width:2.4; }
-  .rgraph .line-good { stroke:#34D399; filter:drop-shadow(0 0 6px rgba(52,211,153,0.45)); }
+  .rgraph .line-good { stroke:#30D158; stroke-width:3.6; filter:drop-shadow(0 0 8px rgba(48,209,88,0.7)); }
   .rgraph .area { stroke:none; }
   .rgraph .area-bad  { fill:url(#badFill); }
   .rgraph .area-good { fill:url(#goodFill); }
@@ -1061,12 +1086,13 @@
   .trans-day{ flex:none; align-self:flex-start; font-size:8.5px; font-weight:900; letter-spacing:.1em; text-transform:uppercase;
     color:color-mix(in srgb,var(--fac) 75%, #ffffff); padding:3px 7px; border-radius:999px;
     background:color-mix(in srgb,var(--fac) 16%, transparent); border:1px solid color-mix(in srgb,var(--fac) 32%, transparent); }
-  /* gentle staggered entrance */
-  .step[data-step="19"].on .trans-row{ animation:transIn .5s cubic-bezier(.22,1,.36,1) both; }
-  .step[data-step="19"].on .trans-row:nth-child(2){ animation-delay:.07s; }
-  .step[data-step="19"].on .trans-row:nth-child(3){ animation-delay:.14s; }
-  .step[data-step="19"].on .trans-row:nth-child(4){ animation-delay:.21s; }
-  @keyframes transIn{ from{ opacity:0; transform:translateY(12px); } to{ opacity:1; transform:translateY(0); } }
+  /* slow staggered slide-in — one row at a time */
+  .step[data-step="19"].on .trans-row{ animation:transIn .6s cubic-bezier(.22,1,.32,1) both; }
+  .step[data-step="19"].on .trans-row:nth-child(1){ animation-delay:.10s; }
+  .step[data-step="19"].on .trans-row:nth-child(2){ animation-delay:.32s; }
+  .step[data-step="19"].on .trans-row:nth-child(3){ animation-delay:.54s; }
+  .step[data-step="19"].on .trans-row:nth-child(4){ animation-delay:.76s; }
+  @keyframes transIn{ from{ opacity:0; transform:translateX(-28px); } to{ opacity:1; transform:translateX(0); } }
   @media (prefers-reduced-motion: reduce){ .step[data-step="19"].on .trans-row{ animation:none; } }
 
   /* ---- DEMO 1: Quests ---- */
@@ -1702,21 +1728,22 @@
             <svg class="rgraph" viewBox="0 0 320 170" preserveAspectRatio="none" aria-hidden="true">
               <defs>
                 <linearGradient id="goodFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0" stop-color="#34D399" stop-opacity="0.30"/><stop offset="1" stop-color="#34D399" stop-opacity="0"/>
+                  <stop offset="0" stop-color="#30D158" stop-opacity="0.36"/><stop offset="1" stop-color="#30D158" stop-opacity="0"/>
                 </linearGradient>
                 <linearGradient id="badFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0" stop-color="#FF453A" stop-opacity="0.22"/><stop offset="1" stop-color="#FF453A" stop-opacity="0"/>
+                  <stop offset="0" stop-color="#FF453A" stop-opacity="0.20"/><stop offset="1" stop-color="#FF453A" stop-opacity="0"/>
                 </linearGradient>
               </defs>
               <line class="grid" x1="0" y1="42" x2="320" y2="42"/><line class="grid" x1="0" y1="85" x2="320" y2="85"/><line class="grid" x1="0" y1="128" x2="320" y2="128"/>
-              <path class="area area-bad" d="M0,52 C16,44 30,62 48,57 C70,51 84,74 108,71 C132,68 148,92 176,91 C206,90 222,112 252,114 C282,116 300,130 320,138 L320,170 L0,170 Z"/>
-              <path class="line line-bad" pathLength="1" d="M0,52 C16,44 30,62 48,57 C70,51 84,74 108,71 C132,68 148,92 176,91 C206,90 222,112 252,114 C282,116 300,130 320,138"/>
-              <path class="area area-good" d="M0,58 C18,65 32,45 54,50 C78,55 92,31 118,36 C144,41 160,19 188,24 C214,28 232,11 260,16 C288,21 302,7 320,11 L320,170 L0,170 Z"/>
-              <path class="line line-good" pathLength="1" d="M0,58 C18,65 32,45 54,50 C78,55 92,31 118,36 C144,41 160,19 188,24 C214,28 232,11 260,16 C288,21 302,7 320,11"/>
+              <!-- both start low (bottom-left); green climbs, red stays down -->
+              <path class="area area-bad" d="M0,150 C70,151 140,152 210,153 C260,154 290,156 320,158 L320,170 L0,170 Z"/>
+              <path class="line line-bad" pathLength="1" d="M0,150 C70,151 140,152 210,153 C260,154 290,156 320,158"/>
+              <path class="area area-good" d="M0,148 C56,140 96,126 140,104 C188,80 240,50 320,24 L320,170 L0,170 Z"/>
+              <path class="line line-good" pathLength="1" d="M0,148 C56,140 96,126 140,104 C188,80 240,50 320,24"/>
             </svg>
             <div class="graph-x"><span>Day 1</span><span>Day 15</span><span>Day 30</span></div>
           </div>
-          <div class="copy" style="margin-top:14px; font-size:13.5px;">The people who keep it for good are almost always the ones who make it past <b style="color:#34D399">day 30</b> — CORE's whole job is getting you there.</div>
+          <div class="copy" style="margin-top:14px; font-size:13.5px;">The people who keep it for good are almost always the ones who make it past <b style="color:#30D158">day 30</b> — CORE's whole job is getting you there.</div>
         </div>
 
         <!-- STEP 6: Why now -->
@@ -2750,13 +2777,16 @@
             }
 
             /* ===== Coach-tone page — same card family as the gender page, each
-               tone keeping its Apple accent in the icon tile + selected state. ===== */
-            .step[data-step="12"] .tone-list { gap: 11px; margin-top: 14px; }
+               tone keeping its Apple accent. Compacted so all 4 cards fit. ===== */
+            .step[data-step="12"] .title { font-size: 23px; }
+            .step[data-step="12"] .tone-list { gap: 9px; margin-top: 10px; }
+            .step[data-step="12"] .tone-row { padding: 12px 14px; }
             .step[data-step="12"] .tone-ico {
-              width: 44px; height: 44px; border-radius: 12px;
+              width: 40px; height: 40px; border-radius: 11px;
             }
-            .step[data-step="12"] .tone-ico svg { stroke: #fff; }
-            .step[data-step="12"] .tone-desc { color: rgba(235,235,245,0.62); }
+            .step[data-step="12"] .tone-ico svg { stroke: #fff; width: 19px; height: 19px; }
+            .step[data-step="12"] .tone-name { font-size: 15px; }
+            .step[data-step="12"] .tone-desc { color: rgba(235,235,245,0.62); font-size: 12px; }
             /* selected icon fills solid with the tone's colour */
             .step[data-step="12"] .tone-row.sel .tone-ico {
               background: var(--tc);
@@ -2817,7 +2847,7 @@
           <!-- 30-day recovery trajectory -->
           <div class="plan-card" id="planCurveCard">
             <div class="plan-curve-head">
-              <span>Where you're trending by day 30</span>
+              <span>Your day-30 outlook</span><span style="color:var(--accent-hi)">target</span>
             </div>
             <div class="plan-bars" id="planBars"><!-- filled by renderPlanScreen --></div>
           </div>
@@ -3044,14 +3074,16 @@
             .plan-save-unit { font-size:13px; color:rgba(255,255,255,0.85); font-weight:600; }
             .plan-save-sub { font-size:12px; color:var(--muted); margin-top:2px; }
             .plan-save-note { margin-top:10px; font-size:11px; line-height:15px; color:var(--muted); }
-            .plan-curve-head { font-size:10px; letter-spacing:0.14em; text-transform:uppercase; font-weight:700; color:var(--muted); margin-bottom:12px; }
-            .plan-bars { display:flex; flex-direction:column; gap:11px; }
-            .plan-bar-row { display:flex; align-items:center; gap:11px; }
-            .plan-bar-name { width:64px; flex-shrink:0; font-size:12px; font-weight:600; color:rgba(255,255,255,0.88); }
-            .plan-bar-track { flex:1; height:7px; border-radius:999px; background:rgba(255,255,255,0.08); overflow:hidden; position:relative; }
-            .plan-bar-fill { height:100%; border-radius:999px; background:linear-gradient(90deg, color-mix(in srgb, var(--accent) 55%, transparent), var(--accent));
-              width:0; transition:width .9s cubic-bezier(.22,1,.36,1); }
-            .plan-bar-arrow { font-size:11px; font-weight:700; color:var(--accent-hi); width:26px; text-align:right; }
+            .plan-curve-head { font-size:10px; letter-spacing:0.14em; text-transform:uppercase; font-weight:800; color:var(--muted); margin-bottom:14px; display:flex; justify-content:space-between; }
+            .plan-bars { display:flex; flex-direction:column; gap:14px; }
+            .plan-bar-row { display:flex; align-items:center; gap:12px; }
+            .plan-bar-name { width:58px; flex-shrink:0; font-size:13px; font-weight:700; color:#fff; }
+            .plan-bar-track { flex:1; height:9px; border-radius:999px; background:rgba(255,255,255,0.07); overflow:hidden; position:relative; }
+            .plan-bar-fill { height:100%; border-radius:999px;
+              background:linear-gradient(90deg, color-mix(in srgb, var(--accent) 50%, transparent), var(--accent-hi));
+              box-shadow:0 0 10px color-mix(in srgb, var(--accent) 45%, transparent);
+              width:0; transition:width 1s cubic-bezier(.22,1,.36,1); }
+            .plan-bar-val { font-size:13px; font-weight:800; color:var(--accent-hi); width:38px; text-align:right; font-variant-numeric:tabular-nums; }
             .plan-why { background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.08); }
             .plan-why-label { font-size:10px; letter-spacing:0.12em; text-transform:uppercase; font-weight:700; color:var(--muted); }
             .plan-why-quote { margin-top:8px; font-size:15px; line-height:21px; color:#fff; font-style:italic; letter-spacing:-0.1px; }
@@ -3137,12 +3169,23 @@
           <div class="kicker">Step · You</div>
           <h1 class="title">Who do you<br/><span class="g">want to become?</span></h1>
           <p class="copy">Your coach holds you to this.</p>
-          <div class="tone-list" id="identityGrid">
-            <button class="tone-row" data-identity="disciplined"><div class="tone-ico"><svg viewBox="0 0 24 24"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z"/></svg></div><div class="tone-body"><div class="tone-name">Disciplined</div><div class="tone-desc">Shows up even when it's hard</div></div><div class="tone-check"></div></button>
-            <button class="tone-row" data-identity="calm"><div class="tone-ico"><svg viewBox="0 0 24 24"><path d="M4 13c4 0 4-3 8-3s4 3 8 3M4 17c4 0 4-3 8-3s4 3 8 3"/></svg></div><div class="tone-body"><div class="tone-name">Calm &amp; in control</div><div class="tone-desc">Steady, unbothered</div></div><div class="tone-check"></div></button>
-            <button class="tone-row" data-identity="sharp"><div class="tone-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/></svg></div><div class="tone-body"><div class="tone-name">Sharp &amp; focused</div><div class="tone-desc">Clear head, locked in</div></div><div class="tone-check"></div></button>
-            <button class="tone-row" data-identity="free"><div class="tone-ico"><svg viewBox="0 0 24 24"><path d="M6 12a6 6 0 0 1 12 0M9 12v6m6-6v6M9 18h6"/></svg></div><div class="tone-body"><div class="tone-name">Free of it</div><div class="tone-desc">No longer owned by it</div></div><div class="tone-check"></div></button>
-            <button class="tone-row" data-identity="better"><div class="tone-ico"><svg viewBox="0 0 24 24"><path d="M5 19l5-5 4 4 5-9"/><path d="M19 5v5h-5"/></svg></div><div class="tone-body"><div class="tone-name">Better than yesterday</div><div class="tone-desc">A little, every day</div></div><div class="tone-check"></div></button>
+          <div class="id-grid" id="identityGrid">
+            <button class="id-card" data-identity="disciplined" style="--ic:#0A84FF">
+              <div class="id-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z"/></svg></div>
+              <div class="id-name">Disciplined</div>
+            </button>
+            <button class="id-card" data-identity="calm" style="--ic:#30D158">
+              <div class="id-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13c4 0 4-3 8-3s4 3 8 3M4 17c4 0 4-3 8-3s4 3 8 3"/></svg></div>
+              <div class="id-name">Calm &amp;<br/>in control</div>
+            </button>
+            <button class="id-card" data-identity="sharp" style="--ic:#BF5AF2">
+              <div class="id-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/></svg></div>
+              <div class="id-name">Sharp &amp;<br/>focused</div>
+            </button>
+            <button class="id-card" data-identity="free" style="--ic:#FF9F0A">
+              <div class="id-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12a6 6 0 0 1 12 0M9 12v6m6-6v6M9 18h6"/></svg></div>
+              <div class="id-name">Free of it</div>
+            </button>
           </div>
         </div>
 
@@ -3159,7 +3202,7 @@
               <button type="button" class="cm-bar" data-lvl="4" aria-label="Level 4"><span></span></button>
               <button type="button" class="cm-bar" data-lvl="5" aria-label="Level 5"><span></span></button>
             </div>
-            <div class="commit-label" id="commitLabel">Tap to set your level</div>
+            <div class="commit-label hint" id="commitLabel">tap or drag to set</div>
           </div>
         </div>
 
@@ -3955,17 +3998,17 @@
         saveCard.style.display = 'none';
       }
     }
-    // Recovery trajectory — illustrative day-30 targets
+    // Recovery trajectory — illustrative day-1 -> day-30 targets
     const bars = [
-      { name: 'Energy', to: 78 }, { name: 'Focus', to: 70 },
-      { name: 'Mood',   to: 66 }, { name: 'Sleep', to: 72 },
+      { name: 'Energy', from: 32, to: 78 }, { name: 'Focus', from: 28, to: 70 },
+      { name: 'Mood',   from: 35, to: 66 }, { name: 'Sleep', from: 40, to: 72 },
     ];
     const wrap = document.getElementById('planBars');
     if (wrap) {
       wrap.innerHTML = bars.map(function (b) {
         return '<div class="plan-bar-row"><div class="plan-bar-name">' + b.name + '</div>' +
           '<div class="plan-bar-track"><div class="plan-bar-fill" data-to="' + b.to + '"></div></div>' +
-          '<div class="plan-bar-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;display:inline-block;vertical-align:middle;"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div></div>';
+          '<div class="plan-bar-val">' + b.to + '%</div></div>';
       }).join('');
       // setTimeout (not rAF) so the fill lands reliably even if the step
       // isn't painted/visible yet; the CSS transition still animates it in.
@@ -5364,10 +5407,11 @@
 
   // ── New single-select pickers (steps 4-10, 15, 18-19) ─────────────────
   // Helper: factor out the standard "exclusive pick" pattern used above
-  function wireSingleSelect(rootSel, dataAttr, stateKey) {
-    document.querySelectorAll(rootSel + ' .tone-row').forEach(row => {
+  function wireSingleSelect(rootSel, dataAttr, stateKey, itemSel) {
+    var sel = itemSel || '.tone-row';
+    document.querySelectorAll(rootSel + ' ' + sel).forEach(row => {
       row.addEventListener('click', () => {
-        document.querySelectorAll(rootSel + ' .tone-row').forEach(r => r.classList.remove('sel'));
+        document.querySelectorAll(rootSel + ' ' + sel).forEach(r => r.classList.remove('sel'));
         row.classList.add('sel');
         state[stateKey] = row.dataset[dataAttr];
         refreshCTA();
@@ -5667,24 +5711,34 @@
   wireSingleSelect('#pastAttempts',  'attempts', 'pastAttempts');
   wireSingleSelect('#whoKnows',      'knows',    'whoKnows');
   wireSingleSelect('#successVision', 'vision',   'successVision');
-  wireSingleSelect('#identityGrid',  'identity', 'identity');
+  wireSingleSelect('#identityGrid',  'identity', 'identity', '.id-card');
 
-  // ── Commitment meter (step 22) — tap a bar to set 1-5, fills like a gauge ──
+  // ── Commitment meter (step 22) — tap OR drag a bar to set 1-5 ──
   (function commitMeter() {
     const meter = document.getElementById('commitMeter');
     if (!meter) return;
-    const bars  = meter.querySelectorAll('.cm-bar');
+    const bars  = Array.prototype.slice.call(meter.querySelectorAll('.cm-bar'));
     const label = document.getElementById('commitLabel');
     const WORDS = { 1: 'Just curious', 2: 'Testing the water', 3: 'Pretty serious', 4: 'Committed', 5: 'All in' };
-    meter.addEventListener('click', (e) => {
-      const b = e.target.closest('.cm-bar'); if (!b) return;
-      const lvl = +b.dataset.lvl;
+    function setLevel(lvl) {
+      if (!lvl || lvl === state.commitment) return;
       state.commitment = lvl;
       bars.forEach(x => x.classList.toggle('on', +x.dataset.lvl <= lvl));
-      if (label) label.textContent = WORDS[lvl];
+      if (label) { label.textContent = WORDS[lvl]; label.classList.remove('hint'); }
+      try { window.haptic && window.haptic(12); } catch (_) {}
       try { window.coreSfx && window.coreSfx('tick'); } catch (_) {}
       refreshCTA();
-    });
+    }
+    function levelFromX(x) {
+      let found = 0;
+      bars.forEach(b => { const r = b.getBoundingClientRect(); if (x >= r.left - 4 && x <= r.right + 4) found = +b.dataset.lvl; });
+      return found;
+    }
+    let dragging = false;
+    meter.addEventListener('pointerdown', (e) => { dragging = true; setLevel(levelFromX(e.clientX)); });
+    window.addEventListener('pointermove', (e) => { if (dragging) setLevel(levelFromX(e.clientX)); });
+    window.addEventListener('pointerup', () => { dragging = false; });
+    window.addEventListener('pointercancel', () => { dragging = false; });
   })();
 
   // ── Multi-select for triggers (step 16) ───────────────────────────────
