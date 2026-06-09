@@ -531,11 +531,12 @@
   };
 
   // ── Layout ───────────────────────────────────────────────────────────────────
-  // v2 — reset everyone to the new clean minimal default (rank hero + tasks).
-  var LAYOUT_KEY = 'coreDashboard.v2';
+  // v3 — Life Score + routine are dedicated on the dashboard now, so the
+  // customizable widget grid defaults to complementary widgets (no duplicates).
+  var LAYOUT_KEY = 'coreDashboard.v3';
   // Clean, minimal default (Lock In style): rank/score hero first, then the
   // to-do list. Everything else is opt-in via the customize (gear) sheet.
-  var DEFAULT_LAYOUT = ['lifescore', 'tasks'];
+  var DEFAULT_LAYOUT = ['streak', 'stattrend'];
 
   function readLayout() {
     try {

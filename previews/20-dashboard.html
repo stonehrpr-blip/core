@@ -471,7 +471,10 @@ body.edit-active .nav{display:none;}
 <link rel="stylesheet" href="_lib/core-background.css">
 <style>
   /* ===== Routine dashboard ===== */
-  .edit-hint{display:none !important;}
+  .wg-head{margin-top:28px;}
+  #widgetScroll{display:block;}
+  /* widgets live inside #dashMain's padding now — drop their own side padding */
+  #dashMain #widgetScroll .widget-wrap{padding-left:0;padding-right:0;}
   /* match index background exactly — hide the old (darker) ambient layers,
      core-background.js injects the shared atmosphere into .phone */
   #ambBg,#ambAurora,#ambStars,#ambCelestial,#ambOverlay{display:none !important;}
@@ -730,8 +733,11 @@ body.edit-active .nav{display:none;}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.6 4.6L18 9l-4.4 1.4L12 15l-1.6-4.6L6 9l4.4-1.4z"/><path d="M5 17l.8 2.2L8 20l-2.2.8L5 23l-.8-2.2L2 20l2.2-.8z"/></svg>
         Build your routine
       </button>
+
+      <!-- Customizable widgets -->
+      <div class="rt-head wg-head"><div><span class="rt-title">Widgets</span><span class="rt-sub">Tap the gear up top to add or reorder</span></div></div>
+      <div id="widgetScroll"></div>
     </div>
-    <div id="widgetScroll" style="display:none"></div>
 
     <!-- Build sheet: AI or templates -->
     <div class="rt-back" id="buildBack"></div>
@@ -1382,9 +1388,6 @@ body.edit-active .nav{display:none;}
   }
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   function persist(){ save(tasks); render(false); paintLifeScore(); }
-
-  // Settings (gear) → settings page; runs before the legacy widget handler.
-  var gear=$('gearBtn'); if(gear) gear.addEventListener('click',function(e){ e.stopPropagation(); window.location.href='25-settings.html'; }, true);
 
   list.addEventListener('click',function(e){
     var b=e.target.closest('[data-act]'), card=e.target.closest('.rt-task');
