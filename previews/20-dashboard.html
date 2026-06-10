@@ -519,8 +519,8 @@ body.edit-active .nav{display:none;}
   .stat6-ic svg{width:17px;height:17px;stroke:color-mix(in srgb,var(--sc) 80%,#fff);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;}
   .stat6-val{font-size:21px;font-weight:900;color:#fff;letter-spacing:-0.5px;font-variant-numeric:tabular-nums;}
   .stat6-name{font-size:12.5px;font-weight:700;color:rgba(255,255,255,0.82);margin-top:9px;}
-  .stat6-bar{height:5px;border-radius:999px;background:rgba(255,255,255,0.08);overflow:hidden;margin-top:7px;}
-  .stat6-bar span{display:block;height:100%;border-radius:999px;background:var(--sc);width:0;box-shadow:0 0 7px color-mix(in srgb,var(--sc) 55%,transparent);transition:width .8s cubic-bezier(.22,1,.36,1);}
+  .stat6-graph{margin-top:7px;height:34px;}
+  .stat6-graph svg{width:100%;height:100%;display:block;overflow:visible;}
 
   /* routine heading + guidance */
   .rt-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;padding:0 2px;}
@@ -1347,25 +1347,34 @@ body.edit-active .nav{display:none;}
 
   // ---- the 6 life scores ----
   var STATS=[
-    {name:'Strength',model:'body',color:'#FF6B6B',page:'gym.html',icon:'<path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/>'},
-    {name:'Focus',model:'brain',color:'#4A8FFF',page:'focus.html',icon:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/><path d="M12 1.5v3M12 19.5v3M22.5 12h-3M4.5 12h-3"/>'},
-    {name:'Wealth',model:'wallet',color:'#FFCB3D',page:'wealth.html',icon:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v9M9.6 10h4a1.6 1.6 0 0 1 0 3.2h-3.2a1.6 1.6 0 0 0 0 3.2h4.2"/>'},
-    {name:'Health',model:'lungs',color:'#34D399',page:'health.html',icon:'<path d="M12 20.5s-7.2-4.6-7.2-9.8A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 7.2 3.7c0 5.2-7.2 9.8-7.2 9.8Z"/>'},
-    {name:'Social',model:'social',color:'#B388FF',page:'social.html',icon:'<circle cx="9" cy="8" r="3.2"/><path d="M3.4 20a5.6 5.6 0 0 1 11.2 0M16 5.2a3.2 3.2 0 0 1 0 6M18.7 20a5.6 5.6 0 0 0-3.1-5"/>'},
-    {name:'Purpose',model:'willpower',color:'#5EEAD4',page:'willpower.html',icon:'<circle cx="12" cy="12" r="8.5"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z"/>'}
+    {key:'strength',name:'Strength',model:'body',color:'#FF6B6B',page:'gym.html',icon:'<path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/>'},
+    {key:'focus',name:'Focus',model:'brain',color:'#4A8FFF',page:'focus.html',icon:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/><path d="M12 1.5v3M12 19.5v3M22.5 12h-3M4.5 12h-3"/>'},
+    {key:'wealth',name:'Wealth',model:'wallet',color:'#FFCB3D',page:'wealth.html',icon:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v9M9.6 10h4a1.6 1.6 0 0 1 0 3.2h-3.2a1.6 1.6 0 0 0 0 3.2h4.2"/>'},
+    {key:'health',name:'Health',model:'lungs',color:'#34D399',page:'health.html',icon:'<path d="M12 20.5s-7.2-4.6-7.2-9.8A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 7.2 3.7c0 5.2-7.2 9.8-7.2 9.8Z"/>'},
+    {key:'social',name:'Social',model:'social',color:'#B388FF',page:'social.html',icon:'<circle cx="9" cy="8" r="3.2"/><path d="M3.4 20a5.6 5.6 0 0 1 11.2 0M16 5.2a3.2 3.2 0 0 1 0 6M18.7 20a5.6 5.6 0 0 0-3.1-5"/>'},
+    {key:'purpose',name:'Purpose',model:'willpower',color:'#5EEAD4',page:'willpower.html',icon:'<circle cx="12" cy="12" r="8.5"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z"/>'}
   ];
   function paintStats(){
-    var st={}; try{ st=(window.coreState && coreState.read && coreState.read().stats)||{}; }catch(e){}
     var box=$('stats6'); if(!box) return;
+    var st={}; try{ st=(window.coreState && coreState.read && coreState.read().stats)||{}; }catch(e){}
     box.innerHTML=STATS.map(function(s){
       var v=Math.max(0,Math.min(100,Math.round(st[s.model]||0)));
       return '<a class="stat6" href="'+s.page+'" style="--sc:'+s.color+'">'
         +'<div class="stat6-top"><span class="stat6-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'+s.icon+'</svg></span><span class="stat6-val" data-v="'+v+'">0</span></div>'
         +'<div class="stat6-name">'+s.name+'</div>'
-        +'<div class="stat6-bar"><span data-w="'+v+'"></span></div></a>';
+        +'<div class="stat6-graph" data-k="'+s.key+'"></div></a>';
     }).join('');
+    // line graphs (same engine as the original Stat Trends)
+    var DC=window.dashCharts;
+    if(DC){
+      var pts=DC.getHistory(30);
+      var reduced=!!(window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches);
+      STATS.forEach(function(s){
+        var g=box.querySelector('.stat6-graph[data-k="'+s.key+'"]');
+        if(g) DC.lineChart(g,{values:DC.series(pts,s.key),labels:[],color:s.color,height:34,reducedMotion:reduced,animate:true});
+      });
+    }
     setTimeout(function(){
-      box.querySelectorAll('.stat6-bar span').forEach(function(b){ b.style.width=(b.getAttribute('data-w')||0)+'%'; });
       box.querySelectorAll('.stat6-val').forEach(function(el){ animCount(el, +el.getAttribute('data-v')); });
     },160);
   }

@@ -531,12 +531,12 @@
   };
 
   // ── Layout ───────────────────────────────────────────────────────────────────
-  // v3 — Life Score + routine are dedicated on the dashboard now, so the
-  // customizable widget grid defaults to complementary widgets (no duplicates).
-  var LAYOUT_KEY = 'coreDashboard.v3';
+  // v4 — the 6 life scores + routine are dedicated sections now; the widget grid
+  // defaults to Streak only (Stat Trends moved into the Life Scores section).
+  var LAYOUT_KEY = 'coreDashboard.v4';
   // Clean, minimal default (Lock In style): rank/score hero first, then the
   // to-do list. Everything else is opt-in via the customize (gear) sheet.
-  var DEFAULT_LAYOUT = ['streak', 'stattrend'];
+  var DEFAULT_LAYOUT = ['streak'];
 
   function readLayout() {
     try {
