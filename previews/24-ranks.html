@@ -76,10 +76,16 @@
       border-radius:18px;border:none;
       background:linear-gradient(105deg, color-mix(in srgb,var(--rc) 28%,#0c0d17) 0%, color-mix(in srgb,var(--rc) 10%,#0a0a12) 56%, #0a0a12 100%);
       box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--rc) 42%,transparent), 0 8px 20px -10px color-mix(in srgb,var(--rc) 55%,transparent);
-      transition:transform .14s ease;-webkit-tap-highlight-color:transparent;}
+      transition:transform .14s ease;-webkit-tap-highlight-color:transparent;
+      animation:rowIn .5s cubic-bezier(.22,1,.36,1) backwards;}
+    @keyframes rowIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
     .lr:active{transform:scale(.985);}
     .lr.current{background:linear-gradient(105deg, color-mix(in srgb,var(--rc) 46%,#0c0d17) 0%, color-mix(in srgb,var(--rc) 16%,#0a0a12) 58%, #0a0a12 100%);
       box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--rc) 88%,transparent), 0 12px 30px -8px color-mix(in srgb,var(--rc) 68%,transparent);}
+    /* the current rank quietly breathes so the eye lands on it */
+    .lr.current::after{content:"";position:absolute;inset:0;border-radius:18px;pointer-events:none;
+      box-shadow:inset 0 0 18px color-mix(in srgb,var(--rc) 38%,transparent);animation:curGlow 2.8s ease-in-out infinite;}
+    @keyframes curGlow{0%,100%{opacity:.4;}50%{opacity:1;}}
     .lr.locked .lr-name{opacity:.74;}
     .lr.locked .lr-xp{opacity:.6;}
     /* gem socket */
@@ -116,7 +122,9 @@
       box-shadow:0 -1px 0 color-mix(in srgb,var(--rc) 45%,transparent), 0 -24px 60px rgba(0,0,0,.55);
       transform:translateY(110%);transition:transform .42s cubic-bezier(.22,1,.36,1);text-align:center;}
     .dt.on{pointer-events:auto;}.dt.on .scrim{opacity:1;}.dt.on .sheet{transform:translateY(0);}
-    .dt .grab{width:40px;height:5px;border-radius:999px;background:rgba(255,255,255,0.22);margin:2px auto 16px;}
+    .dt .grab{width:40px;height:5px;border-radius:999px;background:rgba(255,255,255,0.22);margin:2px auto 16px;cursor:pointer;
+      box-sizing:content-box;padding:8px 60px;background-clip:content-box;-webkit-tap-highlight-color:transparent;}
+    .dt .grab:active{background:rgba(255,255,255,0.4);background-clip:content-box;}
     .dt-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 13px;border-radius:999px;font-size:10px;font-weight:900;
       letter-spacing:.14em;text-transform:uppercase;margin-bottom:14px;}
     .dt-badge.cur{color:#06120f;background:var(--rc);box-shadow:0 0 16px color-mix(in srgb,var(--rc) 55%,transparent);}
@@ -147,6 +155,15 @@
       background:color-mix(in srgb,var(--rc) 26%,transparent);}
     .dt-perk .ic svg{width:15px;height:15px;stroke:#fff;fill:none;stroke-width:3.4;stroke-linecap:round;stroke-linejoin:round;}
     .dt-perk span{font-size:14.5px;font-weight:600;color:#fff;}
+    /* popup content rises in, one element after another */
+    .dt.on #dtBody > *{animation:sheetItem .5s cubic-bezier(.22,1,.36,1) backwards;}
+    .dt.on #dtBody > *:nth-child(1){animation-delay:.10s;}
+    .dt.on #dtBody > *:nth-child(2){animation-delay:.15s;}
+    .dt.on #dtBody > *:nth-child(3){animation-delay:.20s;}
+    .dt.on #dtBody > *:nth-child(4){animation-delay:.25s;}
+    .dt.on #dtBody > *:nth-child(5){animation-delay:.30s;}
+    .dt.on #dtBody > *:nth-child(6){animation-delay:.35s;}
+    @keyframes sheetItem{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
 
     /* respect users who reduce motion */
     @media (prefers-reduced-motion: reduce){ *{animation-duration:.01ms !important;animation-iteration-count:1 !important;} }
@@ -187,7 +204,7 @@
 
     <div class="dt" id="dt" role="dialog" aria-modal="true">
       <div class="scrim" id="dtScrim"></div>
-      <div class="sheet"><div class="grab"></div><div id="dtBody"></div></div>
+      <div class="sheet"><div class="grab" id="dtGrab" role="button" tabindex="0" aria-label="Close"></div><div id="dtBody"></div></div>
     </div>
   </div>
 
@@ -241,7 +258,7 @@
       : '<span class="lr-pill lock">'+fmt(r.xp)+' XP</span>';
     var aria=r.name+', rank '+(i+1)+' of '+RANKS.length+', '
       +(state==='current'?'your current rank':state==='unlocked'?'unlocked':'locked — unlocks at '+fmt(r.xp)+' XP');
-    return '<button class="lr '+state+'" data-i="'+i+'" style="--rc:'+r.color+'" aria-label="'+aria+'">'
+    return '<button class="lr '+state+'" data-i="'+i+'" style="--rc:'+r.color+';animation-delay:'+(0.04*i).toFixed(2)+'s" aria-label="'+aria+'">'
       +'<span class="lr-gem">'+gemImg(r)+'</span>'
       +'<span class="lr-body"><span class="lr-name">'+r.name+'</span><span class="lr-xp">Rank '+pad(i+1)+' · '+(i===0?'Start':fmt(r.xp)+' XP')+'</span></span>'
       +'<span class="lr-right">'+pill+'<svg class="lr-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>'
@@ -254,7 +271,7 @@
     setTimeout(function(){
       var curRow=$('ladder').querySelector('.lr.current');
       if(curRow&&curRow.scrollIntoView){ try{ curRow.scrollIntoView({block:'center',behavior:'smooth'}); }catch(_){ curRow.scrollIntoView(); } }
-    },520);
+    },720);
   }
 
   // detail sheet
@@ -280,6 +297,7 @@
       +'<div class="dt-perks">'+r.perks.map(function(p){return '<div class="dt-perk"><span class="ic">'+tick()+'</span><span>'+p+'</span></div>';}).join('')+'</div>';
     dt.classList.add('on');
     try{window.coreSfx&&window.coreSfx('click');}catch(_){}
+    try{ if(navigator.vibrate) navigator.vibrate(12); }catch(_){}
   }
   $('ladder').addEventListener('click',function(e){ var b=e.target.closest('.lr'); if(b) openDetail(+b.getAttribute('data-i')); });
   // hero gem opens its own rewards (parity with the rows)
@@ -290,6 +308,11 @@
   }
   function closeDetail(){ $('dt').classList.remove('on'); }
   $('dtScrim').addEventListener('click',closeDetail);
+  var grab=$('dtGrab');
+  if(grab){
+    grab.addEventListener('click',closeDetail);
+    grab.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); closeDetail(); } });
+  }
   // Esc closes the sheet (keyboard parity)
   document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeDetail(); });
 })();
