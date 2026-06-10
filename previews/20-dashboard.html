@@ -494,24 +494,33 @@ body.edit-active .nav{display:none;}
   #dashMain{flex:1;overflow-y:auto;overflow-x:hidden;padding:4px 18px 96px;scrollbar-width:none;}
   #dashMain::-webkit-scrollbar{display:none;}
 
-  /* combined rank + life-score hero */
-  .hero{display:block;padding:16px 17px;border-radius:20px;margin-bottom:14px;text-decoration:none;
-    background:linear-gradient(120deg, color-mix(in srgb,var(--rkc,#0A84FF) 20%, rgba(255,255,255,0.022)), rgba(255,255,255,0.02));
-    border:1px solid color-mix(in srgb,var(--rkc,#0A84FF) 30%, rgba(255,255,255,0.08));}
-  .hero:active{transform:scale(.99);}
-  .hero-top{display:flex;align-items:center;gap:13px;}
-  .hero-gem{width:46px;height:46px;flex:none;display:flex;align-items:center;justify-content:center;}
-  .hero-gem img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 3px 12px var(--rkc,rgba(122,166,255,.6)));}
-  .hero-rank{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
-  .hero-name{font-size:17px;font-weight:800;color:#fff;letter-spacing:-0.3px;}
-  .hero-meta{font-size:11.5px;color:var(--muted);font-weight:600;}
-  .hero-meta b{color:#fff;font-weight:800;}
-  .hero-ls{flex:none;text-align:right;display:flex;flex-direction:column;align-items:flex-end;}
-  .hero-ls-num{font-size:30px;font-weight:900;letter-spacing:-1px;line-height:1;color:var(--lsc,#fff);}
-  .hero-ls-lbl{font-size:9px;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-top:4px;}
-  .hero-bar{height:6px;border-radius:999px;background:rgba(255,255,255,0.10);overflow:hidden;margin-top:14px;}
-  .hero-fill{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--rkc,#0A84FF),#fff);width:0;box-shadow:0 0 8px color-mix(in srgb,var(--rkc,#0A84FF) 60%,transparent);transition:width .9s cubic-bezier(.22,1,.36,1);}
-  .hero-sub{font-size:11.5px;color:var(--muted);margin-top:9px;}
+  /* Life Score — centered, no box */
+  .ls-hero{text-align:center;padding:14px 0 24px;}
+  .ls-hero-num{font-size:66px;font-weight:900;letter-spacing:-3px;line-height:1;color:var(--lsc,#fff);text-shadow:0 4px 30px color-mix(in srgb,var(--lsc,#0A84FF) 35%,transparent);}
+  .ls-hero-lbl{font-size:11px;font-weight:800;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-top:9px;}
+  .ls-hero-rank{display:inline-flex;align-items:center;gap:8px;margin-top:15px;padding:7px 14px 7px 9px;border-radius:999px;text-decoration:none;
+    background:linear-gradient(120deg, color-mix(in srgb,var(--rkc,#0A84FF) 24%, rgba(255,255,255,0.03)), rgba(255,255,255,0.03));
+    border:1px solid color-mix(in srgb,var(--rkc,#0A84FF) 34%, transparent);transition:transform .12s;}
+  .ls-hero-rank:active{transform:scale(.97);}
+  .ls-hero-gem{width:24px;height:24px;flex:none;display:flex;align-items:center;justify-content:center;}
+  .ls-hero-gem img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 2px 7px var(--rkc,rgba(122,166,255,.6)));}
+  .ls-hero-rank b{font-size:14px;font-weight:800;color:#fff;}
+  .ls-hero-xp{color:var(--muted);font-weight:600;font-size:13px;}
+
+  /* the 6 life scores */
+  .stats6{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+  .stat6{display:block;padding:13px 14px;border-radius:16px;text-decoration:none;
+    background:linear-gradient(135deg, color-mix(in srgb,var(--sc,#0A84FF) 14%, rgba(255,255,255,0.03)), rgba(255,255,255,0.02));
+    border:1px solid color-mix(in srgb,var(--sc,#0A84FF) 24%, rgba(255,255,255,0.07));transition:transform .12s;}
+  .stat6:active{transform:scale(.985);}
+  .stat6-top{display:flex;align-items:center;justify-content:space-between;}
+  .stat6-ic{width:30px;height:30px;border-radius:9px;flex:none;display:flex;align-items:center;justify-content:center;
+    background:color-mix(in srgb,var(--sc) 22%,rgba(255,255,255,0.05));border:1px solid color-mix(in srgb,var(--sc) 36%,transparent);}
+  .stat6-ic svg{width:17px;height:17px;stroke:color-mix(in srgb,var(--sc) 80%,#fff);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;}
+  .stat6-val{font-size:21px;font-weight:900;color:#fff;letter-spacing:-0.5px;font-variant-numeric:tabular-nums;}
+  .stat6-name{font-size:12.5px;font-weight:700;color:rgba(255,255,255,0.82);margin-top:9px;}
+  .stat6-bar{height:5px;border-radius:999px;background:rgba(255,255,255,0.08);overflow:hidden;margin-top:7px;}
+  .stat6-bar span{display:block;height:100%;border-radius:999px;background:var(--sc);width:0;box-shadow:0 0 7px color-mix(in srgb,var(--sc) 55%,transparent);transition:width .8s cubic-bezier(.22,1,.36,1);}
 
   /* routine heading + guidance */
   .rt-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;padding:0 2px;}
@@ -714,21 +723,19 @@ body.edit-active .nav{display:none;}
     <!-- ===== Routine dashboard (rank + to-do + AI builder) ===== -->
     <div class="scroll" id="dashMain">
       <!-- Combined rank + Life Score hero -->
-      <a class="hero" id="rankBar" href="24-ranks.html">
-        <div class="hero-top">
-          <span class="hero-gem" id="rankBarGem"></span>
-          <span class="hero-rank">
-            <span class="hero-name" id="rankBarName">Moonstone</span>
-            <span class="hero-meta"><b id="rankBarScore">0</b> XP · <span id="rankTier">Rank 1 of 10</span></span>
-          </span>
-          <span class="hero-ls">
-            <span class="hero-ls-num" id="lsNum">0</span>
-            <span class="hero-ls-lbl">Life Score</span>
-          </span>
-        </div>
-        <div class="hero-bar"><span class="hero-fill" id="rankBarFill"></span></div>
-        <div class="hero-sub" id="lsSub">Build your routine to grow it</div>
-      </a>
+      <!-- Life Score — big, centered, no box — with rank + XP below -->
+      <div class="ls-hero" id="lsHero">
+        <div class="ls-hero-num" id="lsNum">0</div>
+        <div class="ls-hero-lbl">Life Score</div>
+        <a class="ls-hero-rank" id="rankBar" href="24-ranks.html">
+          <span class="ls-hero-gem" id="rankBarGem"></span>
+          <span><b id="rankBarName">Moonstone</b><span class="ls-hero-xp"> · <span id="rankBarScore">0</span> XP</span></span>
+        </a>
+      </div>
+
+      <!-- The 6 life scores -->
+      <div class="rt-head"><div><span class="rt-title">Life Scores</span><span class="rt-sub">Tap a stat to dive in</span></div></div>
+      <div class="stats6" id="stats6"></div>
 
       <!-- Routine to-do -->
       <div class="rt-head">
@@ -1338,6 +1345,31 @@ body.edit-active .nav{display:none;}
     setTimeout(function(){ if($('rankBarFill')) $('rankBarFill').style.width=pct+'%'; },140);
   })();
 
+  // ---- the 6 life scores ----
+  var STATS=[
+    {name:'Strength',model:'body',color:'#FF6B6B',page:'gym.html',icon:'<path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/>'},
+    {name:'Focus',model:'brain',color:'#4A8FFF',page:'focus.html',icon:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/><path d="M12 1.5v3M12 19.5v3M22.5 12h-3M4.5 12h-3"/>'},
+    {name:'Wealth',model:'wallet',color:'#FFCB3D',page:'wealth.html',icon:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v9M9.6 10h4a1.6 1.6 0 0 1 0 3.2h-3.2a1.6 1.6 0 0 0 0 3.2h4.2"/>'},
+    {name:'Health',model:'lungs',color:'#34D399',page:'health.html',icon:'<path d="M12 20.5s-7.2-4.6-7.2-9.8A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 7.2 3.7c0 5.2-7.2 9.8-7.2 9.8Z"/>'},
+    {name:'Social',model:'social',color:'#B388FF',page:'social.html',icon:'<circle cx="9" cy="8" r="3.2"/><path d="M3.4 20a5.6 5.6 0 0 1 11.2 0M16 5.2a3.2 3.2 0 0 1 0 6M18.7 20a5.6 5.6 0 0 0-3.1-5"/>'},
+    {name:'Purpose',model:'willpower',color:'#5EEAD4',page:'willpower.html',icon:'<circle cx="12" cy="12" r="8.5"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z"/>'}
+  ];
+  function paintStats(){
+    var st={}; try{ st=(window.coreState && coreState.read && coreState.read().stats)||{}; }catch(e){}
+    var box=$('stats6'); if(!box) return;
+    box.innerHTML=STATS.map(function(s){
+      var v=Math.max(0,Math.min(100,Math.round(st[s.model]||0)));
+      return '<a class="stat6" href="'+s.page+'" style="--sc:'+s.color+'">'
+        +'<div class="stat6-top"><span class="stat6-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'+s.icon+'</svg></span><span class="stat6-val" data-v="'+v+'">0</span></div>'
+        +'<div class="stat6-name">'+s.name+'</div>'
+        +'<div class="stat6-bar"><span data-w="'+v+'"></span></div></a>';
+    }).join('');
+    setTimeout(function(){
+      box.querySelectorAll('.stat6-bar span').forEach(function(b){ b.style.width=(b.getAttribute('data-w')||0)+'%'; });
+      box.querySelectorAll('.stat6-val').forEach(function(el){ animCount(el, +el.getAttribute('data-v')); });
+    },160);
+  }
+
   // ---- icons + templates ----
   var IC={
     water:'<path d="M12 3c4 5 6 7.5 6 11a6 6 0 0 1-12 0c0-3.5 2-6 6-11z"/>',
@@ -1547,7 +1579,7 @@ body.edit-active .nav{display:none;}
       score=(tasks.length||xp) ? Math.min(99, Math.round(18 + pct*44 + Math.min(38, xp/200))) : 0;
     }
     var col = score>=70?'#30D158':score>=40?'#FFD60A':score>0?'#FF9F0A':'#5E6B8A';
-    var c=$('rankBar'); if(c) c.style.setProperty('--lsc',col);
+    var hero=$('lsHero'); if(hero) hero.style.setProperty('--lsc',col);
     animCount($('lsNum'), score, function(n){ return Math.round(n); });
     if($('lsSub')) $('lsSub').textContent = score>=70?'Strong — keep it up':score>=40?'Building momentum':score>0?'Off to a good start':'Build your routine to grow it';
   }
@@ -1631,6 +1663,7 @@ body.edit-active .nav{display:none;}
 
   render(true);
   paintLifeScore();
+  paintStats();
 })();
 </script>
 </body>
