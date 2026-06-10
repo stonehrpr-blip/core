@@ -643,6 +643,12 @@ body.edit-active .nav{display:none;}
   .rt-save{width:100%;padding:15px;border-radius:14px;border:none;background:var(--blue,#0A84FF);color:#fff;font-family:inherit;
     font-size:16px;font-weight:700;cursor:pointer;margin-bottom:9px;}
   .rt-save:active{transform:scale(.99);}
+  .rt-move{display:flex;gap:9px;margin-bottom:12px;}
+  .rt-move-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:11px;border-radius:12px;
+    background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.10);color:#fff;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+  .rt-move-btn svg{width:16px;height:16px;}
+  .rt-move-btn:active{background:rgba(255,255,255,0.12);}
+  .rt-move-btn:disabled{opacity:.35;cursor:default;}
   .rt-del{width:100%;padding:13px;border-radius:14px;border:none;background:none;color:#FF453A;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;}
 </style>
 </head>
@@ -775,6 +781,10 @@ body.edit-active .nav{display:none;}
         <input class="rt-edit-time" id="teTime" type="time" />
       </div>
       <textarea class="rt-edit-note" id="teNote" placeholder="Notes (optional)"></textarea>
+      <div class="rt-move">
+        <button class="rt-move-btn" id="teUp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>Move up</button>
+        <button class="rt-move-btn" id="teDown"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>Move down</button>
+      </div>
       <button class="rt-save" id="teSave">Save</button>
       <button class="rt-del" id="teDelete">Delete task</button>
     </div>
@@ -1549,8 +1559,24 @@ body.edit-active .nav{display:none;}
     $('teNote').value=t.note||'';
     $('teFields').innerHTML=fieldsFor(t);
     bindFields(t);
+    var i=tasks.indexOf(t);
+    if($('teUp')) $('teUp').disabled = i<=0;
+    if($('teDown')) $('teDown').disabled = i>=tasks.length-1;
     sheet('taskSheet',true);
   }
+  function moveTask(dir){
+    if(!editing) return;
+    var i=tasks.indexOf(editing), j=i+dir;
+    if(i<0||j<0||j>=tasks.length) return;
+    var tmp=tasks[i]; tasks[i]=tasks[j]; tasks[j]=tmp;
+    save(tasks); render(false); updateProgress();
+    var ni=tasks.indexOf(editing);
+    if($('teUp')) $('teUp').disabled = ni<=0;
+    if($('teDown')) $('teDown').disabled = ni>=tasks.length-1;
+    try{window.coreSfx&&window.coreSfx('tick');}catch(_){}
+  }
+  $('teUp').addEventListener('click',function(){ moveTask(-1); });
+  $('teDown').addEventListener('click',function(){ moveTask(1); });
   function fieldsFor(t){
     var d=t.detail||{};
     if(t.type==='count') return stepper('Goal','goal',d.goal||1,1,99)+stepper('Done','count',d.count||0,0,99);
