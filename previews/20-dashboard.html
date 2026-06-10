@@ -494,19 +494,24 @@ body.edit-active .nav{display:none;}
   #dashMain{flex:1;overflow-y:auto;overflow-x:hidden;padding:4px 18px 96px;scrollbar-width:none;}
   #dashMain::-webkit-scrollbar{display:none;}
 
-  /* rank + score bar */
-  .rankbar{display:flex;align-items:center;gap:13px;padding:14px 16px;border-radius:18px;margin-bottom:14px;text-decoration:none;
-    background:linear-gradient(115deg, color-mix(in srgb,var(--rkc,#0A84FF) 18%, rgba(255,255,255,0.022)), rgba(255,255,255,0.02));
-    border:1px solid color-mix(in srgb,var(--rkc,#0A84FF) 28%, rgba(255,255,255,0.08));}
-  .rankbar:active{transform:scale(.99);}
-  .rankbar-gem{width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;}
-  .rankbar-gem img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 3px 12px var(--rkc,rgba(122,166,255,.6)));}
-  .rankbar-mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px;}
-  .rankbar-name{font-size:16px;font-weight:800;color:#fff;letter-spacing:-0.2px;}
-  .rankbar-track{height:6px;border-radius:999px;background:rgba(255,255,255,0.10);overflow:hidden;}
-  .rankbar-fill{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--rkc,#0A84FF),#fff);width:0;box-shadow:0 0 8px color-mix(in srgb,var(--rkc,#0A84FF) 60%,transparent);transition:width .8s cubic-bezier(.22,1,.36,1);}
-  .rankbar-score{flex:none;text-align:right;color:var(--muted);font-size:11px;font-weight:700;}
-  .rankbar-score b{display:block;font-size:19px;color:#fff;letter-spacing:-0.3px;}
+  /* combined rank + life-score hero */
+  .hero{display:block;padding:16px 17px;border-radius:20px;margin-bottom:14px;text-decoration:none;
+    background:linear-gradient(120deg, color-mix(in srgb,var(--rkc,#0A84FF) 20%, rgba(255,255,255,0.022)), rgba(255,255,255,0.02));
+    border:1px solid color-mix(in srgb,var(--rkc,#0A84FF) 30%, rgba(255,255,255,0.08));}
+  .hero:active{transform:scale(.99);}
+  .hero-top{display:flex;align-items:center;gap:13px;}
+  .hero-gem{width:46px;height:46px;flex:none;display:flex;align-items:center;justify-content:center;}
+  .hero-gem img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 3px 12px var(--rkc,rgba(122,166,255,.6)));}
+  .hero-rank{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
+  .hero-name{font-size:17px;font-weight:800;color:#fff;letter-spacing:-0.3px;}
+  .hero-meta{font-size:11.5px;color:var(--muted);font-weight:600;}
+  .hero-meta b{color:#fff;font-weight:800;}
+  .hero-ls{flex:none;text-align:right;display:flex;flex-direction:column;align-items:flex-end;}
+  .hero-ls-num{font-size:30px;font-weight:900;letter-spacing:-1px;line-height:1;color:var(--lsc,#fff);}
+  .hero-ls-lbl{font-size:9px;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-top:4px;}
+  .hero-bar{height:6px;border-radius:999px;background:rgba(255,255,255,0.10);overflow:hidden;margin-top:14px;}
+  .hero-fill{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--rkc,#0A84FF),#fff);width:0;box-shadow:0 0 8px color-mix(in srgb,var(--rkc,#0A84FF) 60%,transparent);transition:width .9s cubic-bezier(.22,1,.36,1);}
+  .hero-sub{font-size:11.5px;color:var(--muted);margin-top:9px;}
 
   /* routine heading + guidance */
   .rt-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;padding:0 2px;}
@@ -524,9 +529,11 @@ body.edit-active .nav{display:none;}
   .rt-empty-ic svg{width:27px;height:27px;stroke:#fff;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;}
   .rt-empty-h{font-size:16px;font-weight:800;color:#fff;letter-spacing:-0.2px;}
   .rt-empty-p{font-size:13px;color:var(--muted);line-height:1.5;margin-top:6px;max-width:230px;}
-  .rt-task{display:flex;align-items:center;gap:13px;padding:13px 14px;border-radius:16px;
+  .rt-task{position:relative;display:flex;align-items:center;gap:13px;padding:13px 14px;border-radius:16px;
     background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);cursor:pointer;-webkit-tap-highlight-color:transparent;
     transition:transform .12s,background .2s,opacity .2s;}
+  .confetti{position:absolute;z-index:80;width:8px;height:13px;border-radius:2px;pointer-events:none;}
+  @keyframes confettiFall{0%{opacity:1;transform:translate(0,0) rotate(0);}100%{opacity:0;transform:translate(var(--x),780px) rotate(var(--rot));}}
   .rt-task:active{transform:scale(.99);}
   .rt-check{width:26px;height:26px;flex:none;border-radius:50%;border:2px solid rgba(255,255,255,0.24);position:relative;transition:all .18s;}
   .rt-check svg{position:absolute;inset:0;width:100%;height:100%;stroke:#06120f;stroke-width:3.4;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:0;transform:scale(.6);transition:all .18s;}
@@ -583,17 +590,14 @@ body.edit-active .nav{display:none;}
   .rt-tpl-ic svg{width:18px;height:18px;stroke:color-mix(in srgb,var(--tkc) 78%,#fff);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;}
   .rt-tpl-name{font-size:13.5px;font-weight:700;color:#fff;}
 
-  /* life score card */
-  .ls-card{display:flex;align-items:center;gap:16px;padding:15px 17px;border-radius:18px;margin-bottom:22px;
-    background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);}
-  .ls-left{flex:none;text-align:center;}
-  .ls-num{font-size:34px;font-weight:900;letter-spacing:-1px;line-height:1;color:var(--lsc,#fff);}
-  .ls-lbl{font-size:10px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-top:5px;}
-  .ls-right{flex:1;min-width:0;}
-  .ls-bar{height:8px;border-radius:999px;background:rgba(255,255,255,0.08);overflow:hidden;}
-  .ls-fill{display:block;height:100%;width:0;border-radius:999px;background:var(--lsc,#0A84FF);
-    box-shadow:0 0 10px var(--lsc,#0A84FF);transition:width 1s cubic-bezier(.22,1,.36,1);}
-  .ls-sub{font-size:11.5px;color:var(--muted);margin-top:8px;}
+  /* match the customizable widgets to the routine card style */
+  #dashMain #widgetScroll .widget-body{background:rgba(255,255,255,0.04) !important;border:1px solid rgba(255,255,255,0.07) !important;}
+  /* check-off pop + floating XP */
+  .rt-task.pop .rt-check{animation:rtPop .4s cubic-bezier(.22,1.7,.4,1);}
+  @keyframes rtPop{0%{transform:scale(1);}45%{transform:scale(1.3);}100%{transform:scale(1);}}
+  .xp-float{position:absolute;z-index:60;font-size:14px;font-weight:900;color:#34C759;pointer-events:none;
+    text-shadow:0 2px 8px rgba(0,0,0,.5);animation:xpFloat 1s ease-out forwards;}
+  @keyframes xpFloat{0%{opacity:0;transform:translateY(0) scale(.8);}20%{opacity:1;}100%{opacity:0;transform:translateY(-34px) scale(1.1);}}
 
   /* AI Q&A */
   .ai-prog{height:5px;border-radius:999px;background:rgba(255,255,255,0.1);overflow:hidden;margin:0 0 18px;}
@@ -700,27 +704,22 @@ body.edit-active .nav{display:none;}
 
     <!-- ===== Routine dashboard (rank + to-do + AI builder) ===== -->
     <div class="scroll" id="dashMain">
-      <!-- Rank + score header -->
-      <a class="rankbar" id="rankBar" href="24-ranks.html">
-        <span class="rankbar-gem" id="rankBarGem"></span>
-        <span class="rankbar-mid">
-          <span class="rankbar-name" id="rankBarName">Moonstone</span>
-          <span class="rankbar-track"><span class="rankbar-fill" id="rankBarFill"></span></span>
-        </span>
-        <span class="rankbar-score"><b id="rankBarScore">0</b><span>XP</span></span>
+      <!-- Combined rank + Life Score hero -->
+      <a class="hero" id="rankBar" href="24-ranks.html">
+        <div class="hero-top">
+          <span class="hero-gem" id="rankBarGem"></span>
+          <span class="hero-rank">
+            <span class="hero-name" id="rankBarName">Moonstone</span>
+            <span class="hero-meta"><b id="rankBarScore">0</b> XP · <span id="rankTier">Rank 1 of 10</span></span>
+          </span>
+          <span class="hero-ls">
+            <span class="hero-ls-num" id="lsNum">0</span>
+            <span class="hero-ls-lbl">Life Score</span>
+          </span>
+        </div>
+        <div class="hero-bar"><span class="hero-fill" id="rankBarFill"></span></div>
+        <div class="hero-sub" id="lsSub">Build your routine to grow it</div>
       </a>
-
-      <!-- Life score -->
-      <div class="ls-card" id="lsCard">
-        <div class="ls-left">
-          <div class="ls-num" id="lsNum">0</div>
-          <div class="ls-lbl">Life Score</div>
-        </div>
-        <div class="ls-right">
-          <div class="ls-bar"><span class="ls-fill" id="lsFill"></span></div>
-          <div class="ls-sub" id="lsSub">Build your routine to grow it</div>
-        </div>
-      </div>
 
       <!-- Routine to-do -->
       <div class="rt-head">
@@ -1305,6 +1304,14 @@ body.edit-active .nav{display:none;}
     {name:'Amethyst',color:'#BF5AF2',xp:20000},{name:'Sapphire',color:'#0A84FF',xp:32000},
     {name:'Ruby',color:'#FF375F',xp:50000},{name:'Diamond',color:'#EAF2FF',xp:80000}
   ];
+  // count-up animation for numbers
+  function animCount(el,to,fmt){
+    if(!el) return; to=to||0; var from=0, t0=null, dur=900;
+    fmt=fmt||function(n){return Math.round(n).toLocaleString();};
+    function step(ts){ if(!t0)t0=ts; var p=Math.min(1,(ts-t0)/dur); var e=1-Math.pow(1-p,3);
+      el.textContent=fmt(from+(to-from)*e); if(p<1) requestAnimationFrame(step); }
+    requestAnimationFrame(step);
+  }
   (function paintRank(){
     var xp=parseInt(ls('coreXP','0'),10)||0, idx=0;
     for(var i=0;i<RANKS.length;i++){ if(xp>=RANKS[i].xp) idx=i; }
@@ -1312,9 +1319,10 @@ body.edit-active .nav{display:none;}
     var bar=$('rankBar'); if(bar) bar.style.setProperty('--rkc',r.color);
     var g=$('rankBarGem'); if(g) g.innerHTML='<img src="assets/ranks/'+r.name.toLowerCase()+'.png" alt="'+r.name+'">';
     if($('rankBarName')) $('rankBarName').textContent=r.name;
-    if($('rankBarScore')) $('rankBarScore').textContent=xp.toLocaleString();
+    if($('rankTier')) $('rankTier').textContent='Rank '+(idx+1)+' of '+RANKS.length;
+    animCount($('rankBarScore'), xp);
     var pct = idx>=RANKS.length-1 ? 100 : Math.max(4,Math.min(100,Math.round((xp-r.xp)/(nx.xp-r.xp)*100)));
-    setTimeout(function(){ if($('rankBarFill')) $('rankBarFill').style.width=pct+'%'; },120);
+    setTimeout(function(){ if($('rankBarFill')) $('rankBarFill').style.width=pct+'%'; },140);
   })();
 
   // ---- icons + templates ----
@@ -1389,18 +1397,57 @@ body.edit-active .nav{display:none;}
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   function persist(){ save(tasks); render(false); paintLifeScore(); }
 
+  // in-place updates so animations (pop, XP float) actually play
   list.addEventListener('click',function(e){
     var b=e.target.closest('[data-act]'), card=e.target.closest('.rt-task');
     if(b){
-      var t=byId(b.getAttribute('data-id')); if(!t) return;
+      var id=b.getAttribute('data-id'), t=byId(id); if(!t) return;
       e.stopPropagation();
-      if(b.getAttribute('data-act')==='toggle'){ t.done=!t.done; try{window.coreSfx&&window.coreSfx(t.done?'confirm':'tap');}catch(_){}}
-      else if(b.getAttribute('data-act')==='inc'){ t.detail.count=(t.detail.count||0)+1; if(t.detail.count>=t.detail.goal) t.done=true; try{window.coreSfx&&window.coreSfx('tick');}catch(_){}}
-      persist(); return;
+      var act=b.getAttribute('data-act');
+      var cardEl=list.querySelector('.rt-task[data-id="'+id+'"]');
+      if(act==='toggle'){
+        t.done=!t.done;
+        if(cardEl){ cardEl.classList.toggle('done',t.done); if(t.done){ cardEl.classList.remove('pop'); void cardEl.offsetWidth; cardEl.classList.add('pop'); spawnXp(cardEl); } }
+        try{window.coreSfx&&window.coreSfx(t.done?'confirm':'tap');}catch(_){}
+      } else if(act==='inc'){
+        t.detail.count=(t.detail.count||0)+1; if(t.detail.count>=t.detail.goal) t.done=true;
+        if(cardEl){ var dl=cardEl.querySelector('.rt-detail'); if(dl) dl.textContent=detailText(t); cardEl.classList.toggle('done',t.done); }
+        try{window.coreSfx&&window.coreSfx('tick');}catch(_){}
+      }
+      save(tasks); updateProgress(); return;
     }
     if(card) openEdit(byId(card.getAttribute('data-id')));
   });
   function byId(id){ for(var i=0;i<tasks.length;i++) if(tasks[i].id===id) return tasks[i]; return null; }
+  function spawnXp(cardEl){
+    var fl=document.createElement('div'); fl.className='xp-float'; fl.textContent='+5 XP';
+    fl.style.left='14px'; fl.style.top='-2px';
+    cardEl.appendChild(fl); setTimeout(function(){ fl.remove(); },1000);
+  }
+  var celebrated=false;
+  function updateProgress(){
+    var done=tasks.filter(function(t){return t.done;}).length;
+    if($('rtCount')) $('rtCount').textContent=done+' / '+tasks.length;
+    if($('rtSub')) $('rtSub').textContent = !tasks.length?'Start with the button below 👇'
+      : done===tasks.length?'All done — nice work today 🎉'
+      : done?('Keep going — '+(tasks.length-done)+' to go'):'Tap a task to edit · check it off as you go';
+    paintLifeScore();
+    if(tasks.length && done===tasks.length){ if(!celebrated){ celebrated=true; celebrate(); } } else { celebrated=false; }
+  }
+  function celebrate(){
+    var host=document.querySelector('.phone'); if(!host) return;
+    var cols=['#34C759','#0A84FF','#FFD60A','#FF375F','#BF5AF2','#40D0E0'];
+    for(var i=0;i<36;i++){
+      var c=document.createElement('span'); c.className='confetti';
+      c.style.left=(8+Math.random()*84)+'%'; c.style.top='-12px';
+      c.style.background=cols[i%cols.length];
+      c.style.setProperty('--x',((Math.random()*2-1)*130).toFixed(0)+'px');
+      c.style.setProperty('--rot',(Math.random()*720-360).toFixed(0)+'deg');
+      c.style.animation='confettiFall '+(1.5+Math.random()*0.9).toFixed(2)+'s cubic-bezier(.3,.6,.4,1) '+(Math.random()*0.3).toFixed(2)+'s forwards';
+      host.appendChild(c); (function(el){ setTimeout(function(){ el.remove(); },3000); })(c);
+    }
+    try{window.coreSfx&&window.coreSfx('levelup');}catch(_){}
+  }
 
   // ---- build sheet ----
   function sheet(id,on){ var s=$(id), back=$(id==='buildSheet'?'buildBack':'taskBack');
@@ -1487,9 +1534,8 @@ body.edit-active .nav{display:none;}
       score=(tasks.length||xp) ? Math.min(99, Math.round(18 + pct*44 + Math.min(38, xp/200))) : 0;
     }
     var col = score>=70?'#30D158':score>=40?'#FFD60A':score>0?'#FF9F0A':'#5E6B8A';
-    var c=$('lsCard'); if(c) c.style.setProperty('--lsc',col);
-    if($('lsNum')) $('lsNum').textContent=score;
-    setTimeout(function(){ if($('lsFill')) $('lsFill').style.width=Math.max(3,score)+'%'; },160);
+    var c=$('rankBar'); if(c) c.style.setProperty('--lsc',col);
+    animCount($('lsNum'), score, function(n){ return Math.round(n); });
     if($('lsSub')) $('lsSub').textContent = score>=70?'Strong — keep it up':score>=40?'Building momentum':score>0?'Off to a good start':'Build your routine to grow it';
   }
 
