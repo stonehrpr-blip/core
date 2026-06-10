@@ -45,10 +45,8 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
 .hero p{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.5;max-width:280px;}
 .badge{display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-size:10px;font-weight:800;letter-spacing:.08em;
   text-transform:uppercase;padding:5px 11px;border-radius:999px;
-  background:color-mix(in srgb, var(--sc,#0A84FF) 12%, transparent);
-  border:1px solid color-mix(in srgb, var(--sc,#0A84FF) 32%, transparent);color:var(--sc,#0A84FF);}
-.badge.live{background:rgba(52,211,153,0.12);border-color:rgba(52,211,153,0.34);color:var(--green);}
-.badge .d{width:6px;height:6px;border-radius:50%;background:currentColor;}
+  background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.34);color:var(--green);}
+.badge .d{width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 6px currentColor;}
 
 .sec{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:24px 2px 10px;}
 .card{border-radius:18px;background:rgba(4,4,18,0.40);border:1px solid var(--border);
@@ -62,17 +60,123 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
 
 .cta{width:100%;margin-top:22px;border:none;border-radius:18px;padding:16px;font:inherit;font-size:15px;font-weight:800;
   cursor:pointer;color:#02030A;background:var(--sc,#0A84FF);box-shadow:0 12px 30px color-mix(in srgb, var(--sc,#0A84FF) 34%, transparent);
-  display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .12s;text-decoration:none;}
+  display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .12s;}
 .cta:active{transform:scale(.98);}.cta svg{width:17px;height:17px;}
-.cta.soon{background:rgba(255,255,255,0.06);color:var(--text);box-shadow:none;border:1px solid var(--border);}
 .note{text-align:center;font-size:11.5px;color:var(--dim);margin-top:12px;line-height:1.5;}
 
-.toast{position:absolute;left:50%;bottom:40px;transform:translateX(-50%) translateY(10px);z-index:80;
+.last{margin-top:18px;border-radius:18px;border:1px solid var(--border);background:rgba(4,4,18,0.4);padding:14px 16px;
+  display:none;align-items:center;gap:14px;}
+.last.show{display:flex;}
+.last .ls-ring{width:46px;height:46px;flex:none;}
+.last .ls-meta{flex:1;}
+.last .ls-k{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.last .ls-v{font-size:14px;font-weight:700;margin-top:2px;}
+
+/* ── Camera scanner overlay ─────────────────────────────────────────── */
+.cam{position:absolute;inset:0;z-index:90;background:#000;display:none;flex-direction:column;}
+.cam.on{display:flex;}
+.cam video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000;}
+.cam.front video{transform:scaleX(-1);}
+.cam canvas{display:none;}
+.cam-shade{position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 42%,transparent 40%,rgba(0,0,0,0.55) 100%);pointer-events:none;}
+.cam-top{position:absolute;top:0;left:0;right:0;z-index:3;display:flex;align-items:center;justify-content:space-between;
+  padding:58px 18px 0;}
+.cam-x{width:38px;height:38px;border-radius:50%;border:none;background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);
+  color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.cam-x svg{width:18px;height:18px;}
+.cam-tt{font-size:13px;font-weight:800;letter-spacing:.02em;background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);
+  padding:7px 13px;border-radius:999px;}
+.cam-flip{width:38px;height:38px;border-radius:50%;border:none;background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);
+  color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.cam-flip svg{width:18px;height:18px;}
+/* framing guide */
+.reticle{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);z-index:2;pointer-events:none;
+  width:230px;height:300px;border-radius:26px;
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--sc,#0A84FF) 75%,transparent);}
+.reticle.oval{width:220px;height:280px;border-radius:50%;}
+.reticle.wide{width:280px;height:200px;border-radius:22px;}
+.reticle::before,.reticle::after{content:"";position:absolute;width:26px;height:26px;border:3px solid #fff;}
+.reticle::before{left:-2px;top:-2px;border-right:none;border-bottom:none;border-radius:8px 0 0 0;}
+.reticle::after{right:-2px;bottom:-2px;border-left:none;border-top:none;border-radius:0 0 8px 0;}
+.scanline{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);z-index:2;pointer-events:none;
+  width:230px;height:300px;overflow:hidden;border-radius:26px;display:none;}
+.scanning .scanline{display:block;}
+.scanline i{position:absolute;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,transparent,var(--sc,#0A84FF),transparent);
+  box-shadow:0 0 16px 3px color-mix(in srgb,var(--sc,#0A84FF) 70%,transparent);
+  animation:sweep 1.5s ease-in-out infinite;}
+@keyframes sweep{0%{top:4%;}50%{top:94%;}100%{top:4%;}}
+.cam-hint{position:absolute;left:0;right:0;bottom:152px;z-index:3;text-align:center;font-size:13.5px;font-weight:600;
+  color:#fff;padding:0 30px;text-shadow:0 1px 10px rgba(0,0,0,0.6);}
+/* shutter */
+.cam-bottom{position:absolute;left:0;right:0;bottom:46px;z-index:3;display:flex;align-items:center;justify-content:center;}
+.shutter{width:74px;height:74px;border-radius:50%;border:4px solid rgba(255,255,255,0.85);background:transparent;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .12s;}
+.shutter:active{transform:scale(.92);}
+.shutter i{width:56px;height:56px;border-radius:50%;background:#fff;transition:.15s;}
+.scanning .shutter{opacity:.4;pointer-events:none;}
+/* voice mode */
+.cam.voice video,.cam.voice .reticle,.cam.voice .scanline,.cam.voice .cam-shade,.cam.voice .cam-flip{display:none;}
+.cam.voice{background:radial-gradient(70% 50% at 50% 38%,color-mix(in srgb,var(--sc,#0A84FF) 22%,#05050d),#04040a);}
+.wave{position:absolute;left:0;right:0;top:40%;transform:translateY(-50%);z-index:2;display:none;align-items:flex-end;justify-content:center;gap:5px;height:120px;}
+.cam.voice .wave{display:flex;}
+.wave b{width:6px;border-radius:3px;background:var(--sc,#0A84FF);height:10px;box-shadow:0 0 10px color-mix(in srgb,var(--sc,#0A84FF) 60%,transparent);}
+
+/* analyzing overlay */
+.analyze{position:absolute;inset:0;z-index:95;background:rgba(3,4,12,0.86);backdrop-filter:blur(14px);
+  display:none;flex-direction:column;align-items:center;justify-content:center;gap:22px;}
+.analyze.on{display:flex;}
+.analyze .ring{width:128px;height:128px;}
+.analyze .ring circle{fill:none;stroke-width:8;stroke-linecap:round;}
+.analyze .ring .bg{stroke:rgba(255,255,255,0.08);}
+.analyze .ring .fg{stroke:var(--sc,#0A84FF);transform:rotate(-90deg);transform-origin:50% 50%;
+  transition:stroke-dashoffset .2s linear;filter:drop-shadow(0 0 8px color-mix(in srgb,var(--sc,#0A84FF) 60%,transparent));}
+.analyze .pct{font-size:26px;font-weight:800;}
+.analyze .lbl{font-size:13px;color:var(--muted);font-weight:600;}
+
+/* result sheet */
+.result{position:absolute;inset:0;z-index:96;background:linear-gradient(180deg,#0c0d16,#06070e);
+  display:none;flex-direction:column;padding:64px 22px calc(28px + env(safe-area-inset-bottom));overflow-y:auto;}
+.result.on{display:flex;animation:resIn .4s ease both;}
+@keyframes resIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+.result::-webkit-scrollbar{display:none;}
+.res-close{position:absolute;top:58px;right:18px;width:38px;height:38px;border-radius:50%;border:1px solid var(--border);
+  background:rgba(255,255,255,0.06);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;}
+.res-close:active{transform:scale(.94);}.res-close svg{width:18px;height:18px;}
+.res-snap{width:120px;height:120px;border-radius:24px;object-fit:cover;align-self:center;margin-bottom:4px;
+  border:1px solid var(--border);background:#05050c;}
+.res-score{display:flex;flex-direction:column;align-items:center;margin:6px 0 6px;}
+.res-ring{width:172px;height:172px;}
+.res-ring circle{fill:none;stroke-width:11;stroke-linecap:round;}
+.res-ring .bg{stroke:rgba(255,255,255,0.08);}
+.res-ring .fg{stroke:var(--sc,#0A84FF);transform:rotate(-90deg);transform-origin:50% 50%;
+  transition:stroke-dashoffset 1s cubic-bezier(.22,1,.36,1);filter:drop-shadow(0 0 10px color-mix(in srgb,var(--sc,#0A84FF) 55%,transparent));}
+.res-num{font-size:46px;font-weight:900;letter-spacing:-2px;}
+.res-num small{font-size:16px;font-weight:700;color:var(--muted);}
+.res-grade{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--sc,#0A84FF);margin-top:-6px;}
+.res-title{text-align:center;font-size:22px;font-weight:800;letter-spacing:-0.5px;margin-top:8px;}
+.res-sub{text-align:center;font-size:13px;color:var(--muted);margin-top:5px;line-height:1.5;}
+.res-sec{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:20px 2px 10px;}
+.tip{display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,0.04);border:1px solid var(--border);
+  border-radius:14px;padding:13px 14px;margin-bottom:9px;}
+.tip .ti{width:26px;height:26px;flex:none;border-radius:9px;display:flex;align-items:center;justify-content:center;
+  color:var(--sc,#0A84FF);background:color-mix(in srgb,var(--sc,#0A84FF) 16%,transparent);}
+.tip .ti svg{width:15px;height:15px;}
+.tip span{font-size:13.5px;line-height:1.5;color:#E4E8F2;}
+.res-actions{display:flex;gap:10px;margin-top:18px;}
+.btn{flex:1;border:none;border-radius:16px;padding:15px;font:inherit;font-size:14.5px;font-weight:800;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:7px;transition:transform .12s;}
+.btn:active{transform:scale(.98);}.btn svg{width:16px;height:16px;}
+.btn.save{color:#02030A;background:var(--sc,#0A84FF);box-shadow:0 10px 26px color-mix(in srgb,var(--sc,#0A84FF) 30%,transparent);}
+.btn.save.done{background:var(--green);box-shadow:none;}
+.btn.again{color:var(--text);background:rgba(255,255,255,0.06);border:1px solid var(--border);}
+
+.toast{position:absolute;left:50%;bottom:40px;transform:translateX(-50%) translateY(10px);z-index:120;
   background:rgba(10,12,22,0.94);border:1px solid var(--border);color:var(--text);font-size:12.5px;font-weight:600;
-  padding:10px 16px;border-radius:14px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;backdrop-filter:blur(10px);}
+  padding:10px 16px;border-radius:14px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;backdrop-filter:blur(10px);max-width:300px;text-align:center;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+@media(prefers-reduced-motion:reduce){.scanline i,.analyze .ring .fg{animation:none!important;}}
 </style>
-  <link rel="stylesheet" href="_lib/core-responsive.css">
   <link rel="stylesheet" href="_lib/core-responsive.css">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
@@ -96,16 +200,54 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
         <div class="ic" id="hero-ic"></div>
         <h2 id="name">Scanner</h2>
         <p id="tag"></p>
-        <span class="badge" id="badge"><span class="d"></span><span id="badge-t">Coming soon</span></span>
+        <span class="badge"><span class="d"></span>Live now</span>
+      </div>
+
+      <!-- last saved result for this scanner -->
+      <div class="last" id="last">
+        <svg class="ls-ring" id="lsRing" viewBox="0 0 46 46"></svg>
+        <div class="ls-meta"><div class="ls-k">Last scan</div><div class="ls-v" id="lsV">—</div></div>
       </div>
 
       <div class="sec">What it checks</div>
       <div class="card" id="checks"></div>
 
-      <a class="cta" id="cta">Start</a>
-      <div class="note" id="note"></div>
+      <button class="cta" id="cta" type="button">Start scan</button>
+      <div class="note" id="note">Runs on your device — your camera frames never leave the phone.</div>
     </div>
   </div>
+
+  <!-- Camera scanner -->
+  <div class="cam" id="cam">
+    <video id="video" playsinline autoplay muted></video>
+    <canvas id="canvas"></canvas>
+    <div class="cam-shade"></div>
+    <div class="reticle" id="reticle"></div>
+    <div class="scanline"><i></i></div>
+    <div class="wave" id="wave"></div>
+    <div class="cam-top">
+      <button class="cam-x" id="camX" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      <span class="cam-tt" id="camTT">Scan</span>
+      <button class="cam-flip" id="camFlip" aria-label="Flip camera"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4h5v5"/><path d="M4 9V4h5"/><path d="M20 4l-7 7"/><path d="M9 20H4v-5"/><path d="M20 15v5h-5"/><path d="M4 20l7-7"/></svg></button>
+    </div>
+    <div class="cam-hint" id="camHint">Position yourself in the frame</div>
+    <div class="cam-bottom">
+      <button class="shutter" id="shutter" aria-label="Capture"><i></i></button>
+    </div>
+  </div>
+
+  <!-- Analyzing -->
+  <div class="analyze" id="analyze">
+    <svg class="ring" viewBox="0 0 128 128">
+      <circle class="bg" cx="64" cy="64" r="58"></circle>
+      <circle class="fg" id="anFg" cx="64" cy="64" r="58"></circle>
+    </svg>
+    <div class="pct" id="anPct">0%</div>
+    <div class="lbl" id="anLbl">Analyzing…</div>
+  </div>
+
+  <!-- Result -->
+  <div class="result" id="result"></div>
 
   <div class="toast" id="toast"></div>
 </div>
@@ -115,65 +257,236 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
   "use strict";
   var $=function(s){return document.querySelector(s);};
   function svg(d){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>';}
+  function ls(k,d){try{var v=localStorage.getItem(k);return v==null?d:v;}catch(e){return d;}}
+  function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
 
   var SCANS={
-    physique:{ name:'Physique', color:'#FF6B6B', tag:'Body composition, symmetry and progress over time.',
+    physique:{ name:'Physique', color:'#FF6B6B', facing:'environment', frame:'',
+      tag:'Body composition, symmetry and progress over time.',
       icon:'<path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/>',
+      hint:'Stand back so your whole body is in frame',
       checks:['Body-fat & muscle read from a photo','Symmetry and weak-point flags','Progress tracked scan-to-scan'],
-      live:true, go:'physique-scan.html', cta:'Start scan' },
-    food:{ name:'Food', color:'#34D399', tag:'Point your camera at a meal for an instant health read.',
+      label:'Physique score',
+      tips:['Your shoulders read slightly ahead of your hips — brace your core in photos to gauge true posture.','Add one extra pull session this week to balance push/pull development.','Lighting from the front flattens definition — side light shows real progress.','Lock a weekly same-time scan so the trend is honest.'] },
+    food:{ name:'Food', color:'#34D399', facing:'environment', frame:'wide',
+      tag:'Point your camera at a meal for an instant health read.',
       icon:'<path d="M12 20.5s-7.2-4.6-7.2-9.8A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 7.2 3.7c0 5.2-7.2 9.8-7.2 9.8Z"/>',
-      checks:['Calories & macro estimate per plate','A health score for the meal','Smarter swaps and suggestions'] },
-    outfit:{ name:'Outfit', color:'#FFCB3D', tag:'A quick style and fit check before you head out.',
+      hint:'Frame the whole plate from above',
+      checks:['Calories & macro estimate per plate','A health score for the meal','Smarter swaps and suggestions'],
+      label:'Health score',
+      tips:['Solid protein on this plate — aim to keep it the largest portion.','Add a fist of greens to lift fibre and slow the sugar curve.','Looks lightly fried — grilled or baked would cut ~120 hidden calories.','Swap the side carb for something whole-grain next time.'] },
+    outfit:{ name:'Outfit', color:'#FFCB3D', facing:'environment', frame:'',
+      tag:'A quick style and fit check before you head out.',
       icon:'<path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/>',
-      checks:['Fit and proportion feedback','Colour and combo tips','Match the outfit to the occasion'] },
-    posture:{ name:'Posture', color:'#4A8FFF', tag:'Stand in frame for an alignment check and fixes.',
+      hint:'Stand back for a full head-to-toe shot',
+      checks:['Fit and proportion feedback','Colour and combo tips','Match the outfit to the occasion'],
+      label:'Style score',
+      tips:['Strong colour balance — the neutrals let one accent pop.','Try tucking or cropping the top to define your waistline.','Footwear is a touch casual for this combo — clean it up to level the fit.','Roll the sleeves once to sharpen the proportions.'] },
+    posture:{ name:'Posture', color:'#4A8FFF', facing:'environment', frame:'oval',
+      tag:'Stand in frame for an alignment check and fixes.',
       icon:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/><path d="M12 1.5v3M12 19.5v3M22.5 12h-3M4.5 12h-3"/>',
-      checks:['Head, shoulder and hip alignment','Imbalances flagged clearly','Daily correction drills'] },
-    looks:{ name:'Looks', color:'#B388FF', tag:'Skin, symmetry and grooming insights from a selfie.',
+      hint:'Stand side-on, full body in the oval',
+      checks:['Head, shoulder and hip alignment','Imbalances flagged clearly','Daily correction drills'],
+      label:'Posture score',
+      tips:['Slight forward head tilt — tuck your chin and lengthen the back of your neck.','Right shoulder sits a little high; loosen the upper trap with daily rolls.','Set a 45-min reminder to reset your sitting posture.','Add wall-angels: 2 sets of 10 each morning.'] },
+    looks:{ name:'Looks', color:'#B388FF', facing:'user', frame:'oval',
+      tag:'Skin, symmetry and grooming insights from a selfie.',
       icon:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/><path d="M12 12v4M9 16h6"/>',
-      checks:['Skin condition read','Facial symmetry analysis','Hair and grooming tips'] },
-    voice:{ name:'Voice', color:'#5EEAD4', tag:'Record a clip for speaking and delivery feedback.',
+      hint:'Center your face in the oval, even light',
+      checks:['Skin condition read','Facial symmetry analysis','Hair and grooming tips'],
+      label:'Looks score',
+      tips:['Good facial symmetry — your strong side is the left, angle to it for photos.','Skin looks a little dry on the forehead — a light moisturiser will even tone.','Tidy the brow line to frame the eyes more sharply.','Drink more water today; it shows on the skin within a day.'] },
+    voice:{ name:'Voice', color:'#5EEAD4', facing:'audio', frame:'',
+      tag:'Record a clip for speaking and delivery feedback.',
       icon:'<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/>',
-      checks:['Pace, clarity and filler words','Tone and confidence read','Drills to sharpen delivery'] }
+      hint:'Speak naturally for a few seconds',
+      checks:['Pace, clarity and filler words','Tone and confidence read','Drills to sharpen delivery'],
+      label:'Delivery score',
+      tips:['Clear pace overall — slow the first sentence to land with authority.','A few filler "ums" — pause silently instead; it reads as confidence.','Pitch stays a little flat; vary it to hold attention.','Record one 30-sec take daily this week and compare.'] }
   };
 
   var type=(new URLSearchParams(location.search).get('type')||'physique').toLowerCase();
   var s=SCANS[type]||SCANS.physique;
 
+  // theme
   document.documentElement.style.setProperty('--sc', s.color);
-  document.getElementById('ambBg').style.setProperty('--sc', s.color);
+  $('#ambBg').style.setProperty('--sc', s.color);
   $('#title').textContent=s.name+' Scanner';
   $('#name').textContent=s.name;
   $('#tag').textContent=s.tag;
   $('#hero-ic').innerHTML=svg(s.icon);
-
-  var badge=$('#badge'), badgeT=$('#badge-t');
-  if(s.live){ badge.classList.add('live'); badgeT.textContent='Live now'; }
-  else { badgeT.textContent='Coming with the full app'; }
-
+  $('#camTT').textContent=s.name+' scan';
+  $('#camHint').textContent=s.hint;
   $('#checks').innerHTML=s.checks.map(function(c){
     return '<div class="row"><div class="ck">'+svg('<path d="M5 12l4 4 10-11"/>')+'</div><span>'+c+'</span></div>';
   }).join('');
+  var rt=$('#reticle'); if(s.frame) rt.classList.add(s.frame);
 
-  var cta=$('#cta'), note=$('#note');
-  if(s.live && s.go){
-    cta.setAttribute('href', s.go);
-    cta.innerHTML=svg('<path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/>')+'<span>'+s.cta+'</span>';
-    note.textContent='Runs on your device — your camera frames never leave the phone.';
-  } else {
-    cta.classList.add('soon'); cta.removeAttribute('href');
-    var notified=false;
-    try{ notified=localStorage.getItem('coreScanNotify.'+type)==='1'; }catch(e){}
-    function paint(){ cta.innerHTML = notified ? svg('<path d="M5 12l4 4 10-11"/>')+'<span>You’ll be notified</span>' : '<span>Notify me at launch</span>'; }
-    paint();
-    cta.addEventListener('click', function(){
-      notified=true; try{ localStorage.setItem('coreScanNotify.'+type,'1'); }catch(e){}
-      paint(); var t=$('#toast'); t.textContent='Great — we’ll let you know when '+s.name+' is ready'; t.classList.add('show');
-      clearTimeout(t._t); t._t=setTimeout(function(){ t.classList.remove('show'); },2000);
-    });
-    note.textContent='This scanner launches with the full app.';
+  function grade(n){ return n>=90?'Elite':n>=80?'Strong':n>=70?'Solid':n>=60?'Developing':'Needs work'; }
+  function miniRing(el,n,color){
+    var r=18,c=2*Math.PI*r;
+    el.innerHTML='<circle cx="23" cy="23" r="'+r+'" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="5"/>'
+      +'<circle cx="23" cy="23" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="5" stroke-linecap="round" '
+      +'stroke-dasharray="'+c+'" stroke-dashoffset="'+(c*(1-n/100))+'" transform="rotate(-90 23 23)"/>';
   }
+
+  // ── last saved result for this scanner ──
+  function readScans(){ try{ return JSON.parse(ls('coreScans.v1','[]'))||[]; }catch(e){ return []; } }
+  function updateLast(){
+    var all=readScans().filter(function(x){return x.type===type;});
+    if(!all.length) return;
+    var lastR=all[all.length-1];
+    miniRing($('#lsRing'), lastR.score, s.color);
+    var ago=Math.max(0,Math.round((Date.now()-lastR.ts)/86400000));
+    $('#lsV').textContent=lastR.score+' / 100 · '+(ago===0?'today':ago+'d ago');
+    $('#last').classList.add('show');
+  }
+  updateLast();
+
+  // ── camera ──
+  var cam=$('#cam'), video=$('#video'), canvas=$('#canvas');
+  var stream=null, facing=s.facing==='user'?'user':'environment', isVoice=s.facing==='audio';
+  var snapDataUrl=null, audioCtx=null, analyser=null, waveRAF=null;
+
+  async function startStream(){
+    try{
+      if(stream){ stream.getTracks().forEach(function(t){t.stop();}); stream=null; }
+      if(isVoice){
+        stream=await navigator.mediaDevices.getUserMedia({ audio:true });
+        setupWave(stream);
+      } else {
+        stream=await navigator.mediaDevices.getUserMedia({ video:{ facingMode:facing }, audio:false });
+        video.srcObject=stream; cam.classList.toggle('front', facing==='user');
+      }
+      return true;
+    }catch(e){
+      toast('Camera unavailable — running a demo scan');
+      return false;
+    }
+  }
+
+  function setupWave(st){
+    try{
+      audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+      var src=audioCtx.createMediaStreamSource(st);
+      analyser=audioCtx.createAnalyser(); analyser.fftSize=64; src.connect(analyser);
+      var wave=$('#wave'); wave.innerHTML=''; var bars=[];
+      for(var i=0;i<20;i++){ var b=document.createElement('b'); wave.appendChild(b); bars.push(b); }
+      var data=new Uint8Array(analyser.frequencyBinCount);
+      (function tick(){
+        analyser.getByteFrequencyData(data);
+        for(var i=0;i<bars.length;i++){ var v=data[i]||0; bars[i].style.height=(10+v/255*100).toFixed(0)+'px'; }
+        waveRAF=requestAnimationFrame(tick);
+      })();
+    }catch(e){}
+  }
+
+  function openCam(){
+    cam.classList.add('on');
+    cam.classList.toggle('voice', isVoice);
+    startStream().then(function(ok){ cam._demo=!ok; });
+  }
+  function stopCam(){
+    cam.classList.remove('on','scanning');
+    if(stream){ try{stream.getTracks().forEach(function(t){t.stop();});}catch(e){} stream=null; }
+    if(waveRAF) cancelAnimationFrame(waveRAF);
+    if(audioCtx){ try{audioCtx.close();}catch(e){} audioCtx=null; }
+    video.srcObject=null;
+  }
+
+  // capture current frame -> data url (for the result snapshot)
+  function snap(){
+    if(isVoice || cam._demo || !video.videoWidth){ snapDataUrl=null; return; }
+    try{
+      var W=video.videoWidth, H=video.videoHeight, side=Math.min(W,H);
+      canvas.width=240; canvas.height=240;
+      var cx=(W-side)/2, cy=(H-side)/2, ctx=canvas.getContext('2d');
+      if(facing==='user'){ ctx.translate(240,0); ctx.scale(-1,1); }
+      ctx.drawImage(video, cx, cy, side, side, 0, 0, 240, 240);
+      snapDataUrl=canvas.toDataURL('image/jpeg',0.7);
+    }catch(e){ snapDataUrl=null; }
+  }
+
+  // ── analyze ──
+  var anFg=$('#anFg'), AN_R=58, AN_C=2*Math.PI*AN_R;
+  anFg.setAttribute('stroke-dasharray', AN_C);
+  function runAnalyze(){
+    cam.classList.add('scanning');
+    $('#camHint').textContent='Hold still — scanning…';
+    setTimeout(function(){
+      snap();
+      stopCam();
+      var an=$('#analyze'); an.classList.add('on');
+      var p=0, anPct=$('#anPct'), anLbl=$('#anLbl');
+      var labels=['Analyzing…','Reading details…','Scoring…','Finishing up…'];
+      anFg.setAttribute('stroke-dashoffset', AN_C);
+      var iv=setInterval(function(){
+        p=Math.min(100, p + (4+Math.random()*9));
+        anPct.textContent=Math.round(p)+'%';
+        anFg.setAttribute('stroke-dashoffset', AN_C*(1-p/100));
+        anLbl.textContent=labels[Math.min(labels.length-1, Math.floor(p/26))];
+        if(p>=100){ clearInterval(iv); setTimeout(function(){ an.classList.remove('on'); showResult(); }, 320); }
+      }, 180);
+    }, 1500); // let the scan line sweep first
+  }
+
+  // ── result ──
+  function pick(arr,k){ var a=arr.slice(), out=[]; while(a.length&&out.length<k){ out.push(a.splice(Math.floor(Math.random()*a.length),1)[0]); } return out; }
+  function showResult(){
+    var score=62+Math.floor(Math.random()*33); // 62–94
+    var tips=pick(s.tips,3);
+    var R=78, C=2*Math.PI*R;
+    var res=$('#result');
+    res.innerHTML=
+      '<button class="res-close" id="resClose" type="button" aria-label="Done">'+svg('<path d="M6 6l12 12M18 6L6 18"/>')+'</button>'
+      +(snapDataUrl?'<img class="res-snap" src="'+snapDataUrl+'" alt="scan"/>':'')
+      +'<div class="res-score"><svg class="res-ring" viewBox="0 0 172 172">'
+        +'<circle class="bg" cx="86" cy="86" r="'+R+'"></circle>'
+        +'<circle class="fg" id="resFg" cx="86" cy="86" r="'+R+'" stroke-dasharray="'+C+'" stroke-dashoffset="'+C+'"></circle>'
+        +'<text x="86" y="80" text-anchor="middle" class="res-num" id="resNum" fill="#fff" style="font:900 46px -apple-system,sans-serif;letter-spacing:-2px">0</text>'
+        +'<text x="86" y="104" text-anchor="middle" fill="#9AA1B7" style="font:700 13px -apple-system,sans-serif" id="resOf">/ 100</text>'
+      +'</svg>'
+      +'<div class="res-grade">'+grade(score)+'</div></div>'
+      +'<div class="res-title">'+s.label+'</div>'
+      +'<div class="res-sub">'+(cam._demo?'Demo result — allow camera for a real scan.':'Based on your '+s.name.toLowerCase()+' scan just now.')+'</div>'
+      +'<div class="res-sec">Coach notes</div>'
+      +tips.map(function(t){return '<div class="tip"><div class="ti">'+svg('<path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="3.2"/>')+'</div><span>'+t+'</span></div>';}).join('')
+      +'<div class="res-actions">'
+        +'<button class="btn again" id="btnAgain" type="button">'+svg('<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>')+'Scan again</button>'
+        +'<button class="btn save" id="btnSave" type="button">'+svg('<path d="M5 12l4 4 10-11"/>')+'Save to profile</button>'
+      +'</div>';
+    res.classList.add('on');
+    // animate the ring + number
+    var fg=$('#resFg'); requestAnimationFrame(function(){ fg.setAttribute('stroke-dashoffset', C*(1-score/100)); });
+    var numEl=$('#resNum'), n0=0, t0=performance.now();
+    (function count(t){ var p=Math.min(1,(t-t0)/1000); numEl.textContent=Math.round(score*(1-Math.pow(1-p,3))); if(p<1) requestAnimationFrame(count); })(t0);
+    try{ if(navigator.vibrate) navigator.vibrate([0,30,40,20]); }catch(e){}
+
+    $('#resClose').addEventListener('click', function(){ res.classList.remove('on'); updateLast(); });
+    $('#btnAgain').addEventListener('click', function(){ res.classList.remove('on'); openCam(); });
+    var saved=false;
+    $('#btnSave').addEventListener('click', function(){
+      if(saved) return; saved=true;
+      var all=readScans(); all.push({ type:type, name:s.name, score:score, label:s.label, tips:tips, ts:Date.now() });
+      lsSet('coreScans.v1', JSON.stringify(all.slice(-60)));
+      lsSet('coreLastScan', JSON.stringify({ type:type, score:score, ts:Date.now() }));
+      var b=$('#btnSave'); b.classList.add('done'); b.innerHTML=svg('<path d="M5 12l4 4 10-11"/>')+'Saved to profile';
+      toast(s.name+' scan saved · '+score+'/100'); updateLast();
+    });
+  }
+
+  // ── wire up ──
+  $('#cta').addEventListener('click', openCam);
+  $('#shutter').addEventListener('click', function(){ if(!cam.classList.contains('scanning')) runAnalyze(); });
+  $('#camX').addEventListener('click', stopCam);
+  $('#camFlip').addEventListener('click', function(){ facing=(facing==='user'?'environment':'user'); startStream(); });
+
+  var toastEl=$('#toast');
+  function toast(m){ toastEl.textContent=m; toastEl.classList.add('show'); clearTimeout(toastEl._t); toastEl._t=setTimeout(function(){ toastEl.classList.remove('show'); }, 2200); }
+
+  // be a good citizen: release the camera if the page is hidden/closed
+  window.addEventListener('pagehide', stopCam);
+  document.addEventListener('visibilitychange', function(){ if(document.hidden && cam.classList.contains('on') && !cam.classList.contains('scanning')) stopCam(); });
 })();
 </script>
 </body>
