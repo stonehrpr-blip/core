@@ -155,6 +155,27 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .ov-stat .v.up{color:var(--good);}
 .ov-stat .v.dn{color:var(--str);}
 .ov-stat .k{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-top:5px;}
+/* Recovery */
+.rec-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.recm{display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:13px;background:var(--bg-card);border:1px solid var(--border);}
+.recm-d{width:8px;height:8px;border-radius:50%;flex:none;background:#5A6076;}
+.recm.ready .recm-d{background:#34D399;box-shadow:0 0 8px rgba(52,211,153,.6);}
+.recm.mid .recm-d{background:#FFCB3D;}
+.recm.worked .recm-d{background:var(--mc,#FF6B6B);}
+.recm b{font-size:12.5px;font-weight:700;flex:1;}
+.recm-s{font-size:10.5px;font-weight:800;color:var(--dim);white-space:nowrap;}
+.recm.ready .recm-s{color:#34D399;}
+.recm.mid .recm-s{color:#FFCB3D;}
+/* Program adherence banner */
+.progb{width:100%;display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:16px;cursor:pointer;text-align:left;margin-bottom:6px;
+  border:1px solid color-mix(in srgb,#B388FF 36%,transparent);background:color-mix(in srgb,#B388FF 12%,transparent);transition:transform .12s;}
+.progb:active{transform:scale(.99);}
+.progb-tx{flex:1;min-width:0;}
+.progb-k{font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#B388FF;display:block;}
+.progb b{font-size:15px;font-weight:900;color:#fff;display:block;margin:2px 0;}
+.progb-s{font-size:11.5px;color:var(--muted);}
+.progb-go{font-size:13px;font-weight:800;color:#1a1226;background:#B388FF;padding:9px 16px;border-radius:11px;flex:none;}
+.ov-empty,.rec-empty2{padding:24px;text-align:center;color:var(--dim);font-size:12.5px;border-radius:18px;background:var(--card);border:1px solid var(--line,var(--border));}
 /* AI program builder */
 .prog-scroll{overflow-y:auto;-webkit-overflow-scrolling:touch;padding-top:4px;}
 .prog-q{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin:16px 2px 9px;}
@@ -427,6 +448,10 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
         <span id="insightTx"></span>
       </div>
 
+      <!-- Recovery — which muscles are fresh / ready to train -->
+      <div class="sec"><h2>Recovery</h2><span class="meta" id="recMeta"></span></div>
+      <div id="recovery"></div>
+
       <!-- Training overview — show-up calendar, gaps, week-over-week -->
       <div class="sec"><h2>Training overview</h2><span class="meta" id="ovMeta"></span></div>
       <div class="card ov" id="trainOverview"></div>
@@ -660,6 +685,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   function renderOverview(){
     var host=qs('#trainOverview'); if(!host) return;
     var hist=(store().history||[]);
+    if(!hist.length){ host.innerHTML='<div class="ov-empty">Log your first workout to start your overview — your show-up calendar and trend build from here.</div>'; var mo=qs('#ovMeta'); if(mo) mo.textContent=''; return; }
     var trained={}; hist.forEach(function(h){ if(h&&h.ts) trained[dKey(new Date(h.ts))]=true; });
     var today=new Date(); today.setHours(0,0,0,0); var dow=today.getDay();
     function wkSessions(off){ var sun=new Date(today); sun.setDate(today.getDate()-dow-7*off); var c=0;
@@ -744,13 +770,33 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     var m=qs('#prMeta'); if(m) m.textContent=arr.length+' lift'+(arr.length>1?'s':'');
   }
 
+  // ── Recovery: which muscles are fresh / ready vs recently worked ──
+  function renderRecovery(){
+    var host=qs('#recovery'); if(!host) return;
+    var s=store(), now=Date.now(), ready=0;
+    host.innerHTML='<div class="rec-row">'+MUSCLES.map(function(m){
+      var mm=(s.muscles||{})[m.id]||{}, last=mm.lastTs||0, st, cls;
+      if(!last){ st='Fresh'; cls='ready'; }
+      else { var h=(now-last)/3600000;
+        if(h>=48){ st='Ready'; cls='ready'; }
+        else if(h>=24){ st='Recovering'; cls='mid'; }
+        else { st=Math.max(1,Math.round(h))+'h ago'; cls='worked'; } }
+      if(cls==='ready') ready++;
+      return '<div class="recm '+cls+'" style="--mc:'+mColor(m.id)+'"><span class="recm-d"></span><b>'+m.name+'</b><span class="recm-s">'+st+'</span></div>';
+    }).join('')+'</div>';
+    var meta=qs('#recMeta'); if(meta) meta.textContent=ready+' ready to train';
+  }
+
   // ── Dynamic greeting meta + Coach's Pick from the real training data ──
   function renderHeaderInsight(){
     var s=store(), hist=s.history||[], inten=allIntensity();
     var today=new Date(); today.setHours(0,0,0,0); var dow=today.getDay();
     var sun=new Date(today); sun.setDate(today.getDate()-dow);
     var thisW=hist.filter(function(h){return h.ts>=sun.getTime();}).length;
-    var meta=qs('#greetMeta'); if(meta) meta.textContent='Strength · '+(thisW?(thisW+' session'+(thisW>1?'s':'')+' this week'):'no sessions yet this week');
+    // weekly streak: consecutive weeks with ≥1 session (this week optional)
+    function weekHas(off){ var ss=new Date(today); ss.setDate(today.getDate()-dow-7*off); var ee=new Date(ss); ee.setDate(ss.getDate()+7); return hist.some(function(h){return h.ts>=ss.getTime()&&h.ts<ee.getTime();}); }
+    var streak=0; for(var w=(weekHas(0)?0:1); w<52; w++){ if(weekHas(w)) streak++; else break; }
+    var meta=qs('#greetMeta'); if(meta) meta.textContent='Strength · '+(thisW?(thisW+' session'+(thisW>1?'s':'')+' this week'):'no sessions yet this week')+(streak>=2?(' · '+streak+'-wk streak'):'');
     var ranked=MUSCLES.map(function(m){return {id:m.id,name:m.name,t:inten[m.id].t};}).sort(function(a,b){return a.t-b.t;});
     var weak=ranked[0];
     var ft=qs('#featTitle'), fs=qs('#featSub');
@@ -818,13 +864,26 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
             '<span class="hv">+'+h.str+' STR</span></div>';
         }).join('')+'</div>'
       : '<div class="card"><div class="empty">No workouts logged yet.<br>Tap a suggestion or Log a Workout to start.</div></div>';
+    // saved-program adherence — surface the next day to do
+    var prog=(s.routines||[]).filter(function(r){return r.program;});
+    prog.sort(function(a,b){ return (((a.name.match(/Day (\d+)/)||[])[1]||0)) - (((b.name.match(/Day (\d+)/)||[])[1]||0)); });
+    var progBanner='';
+    if(prog.length){
+      var nd=prog[(s.programDay||0)%prog.length];
+      progBanner='<div class="sec"><h2>Your Program</h2><span class="meta">'+prog.length+' days</span></div>'
+        +'<button class="progb" id="progNext" data-id="'+nd.id+'"><span class="progb-tx"><span class="progb-k">Next up</span><b>'+nd.name+'</b><span class="progb-s">'+nd.exercises.length+' exercises</span></span><span class="progb-go">Start</span></button>';
+    }
     w.innerHTML=
+      progBanner+
       '<div class="sec"><h2>Suggested Today</h2><span class="meta">'+goalTip+'</span></div>'+
       '<div class="sugg fade">'+sug+'</div>'+
       '<div style="margin-top:12px"><button class="btn str" id="logBtn">+ Log a Workout</button></div>'+
       '<div class="sec"><h2>Recent Workouts</h2></div>'+hist;
     w.querySelectorAll('.sug').forEach(function(b){ b.addEventListener('click',function(){ sfx('tick'); openSheet(this.getAttribute('data-m')); }); });
     qs('#logBtn').addEventListener('click',function(){ sfx('tick'); openSheet(ranked[0].id); });
+    var pn=qs('#progNext'); if(pn) pn.addEventListener('click',function(){
+      var s2=store(); s2.programDay=(s2.programDay||0)+1; save(s2); sfx('tick'); startRoutine(this.getAttribute('data-id'));
+    });
   }
 
   /* ───────── Workout sheet ───────── */
@@ -906,7 +965,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     addBody(strGain,'workout:'+id); addXp(xpGain,'workout:'+id);
     sfx('xp');
     closeSheet();
-    renderChip(); renderDiagram(); renderWorkout(); renderOverview(); renderPRs(); renderHeaderInsight();
+    renderChip(); renderDiagram(); renderWorkout(); renderOverview(); renderPRs(); renderRecovery(); renderHeaderInsight();
     if(prHits.length){ sfx('reward'); toast('🏆 New PR — '+prHits[0]+(prHits.length>1?(' +'+(prHits.length-1)+' more'):'')); }
     else { toast('+'+strGain+' Strength · +'+xpGain+' XP'); }
   });
@@ -1003,7 +1062,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     s.history.unshift({id:id2,ts:Date.now(),muscle:primary,exercises:entries,totalSets:totalSets,xp:xpGain,str:strGain,routine:r.name});
     if(s.history.length>60) s.history.length=60; save(s);
     addBody(strGain,'workout:'+id2); addXp(xpGain,'workout:'+id2); sfx('xp');
-    renderChip(); renderDiagram(); renderWorkout(); renderOverview(); renderPRs(); renderHeaderInsight(); toast('Logged '+r.name+' · +'+strGain+' STR');
+    renderChip(); renderDiagram(); renderWorkout(); renderOverview(); renderPRs(); renderRecovery(); renderHeaderInsight(); toast('Logged '+r.name+' · +'+strGain+' STR');
   }
 
   /* ───────── Bodyweight tab ───────── */
@@ -1102,7 +1161,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   var apBtn=qs('#actProgram'); if(apBtn) apBtn.addEventListener('click',function(){ sfx('tick'); openProgram(); });
   progScrim.addEventListener('click',closeProgram);
 
-  renderChip(); renderDiagram(); renderWorkout(); renderOverview(); renderPRs(); renderHeaderInsight();
+  renderChip(); renderDiagram(); renderWorkout(); renderOverview(); renderPRs(); renderRecovery(); renderHeaderInsight();
   window.addEventListener('coreStateChange',renderChip);
   window.addEventListener('focus',function(){ renderDiagram(); });
 })();
