@@ -312,7 +312,7 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
       tag:'Body composition, symmetry and progress over time.',
       icon:'<path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/>',
       hint:'Stand back so your whole body is in frame',
-      checks:['Body-fat & muscle read from a photo','Symmetry and weak-point flags','Progress tracked scan-to-scan'],
+      checks:['On-device body detection — starts when you’re fully in frame','Guided 360° capture: front, both sides and back','Symmetry, posture & proportion read','Your angle photos saved to track progress'],
       label:'Physique score',
       tips:['Upper body leads your lower — add a dedicated leg day to even out proportions.','Shoulders sit slightly forward (side view) — daily wall-angels + rows will pull them back.','Back width is your quickest win — 2 pull sessions/week widens the V-taper.','Core is defined but could read tighter — drop body-fat ~2% to sharpen it.','Left/right symmetry is good; favour single-arm work to keep it balanced.','Same time + same light each scan makes the week-to-week trend honest.'] },
     food:{ name:'Food', color:'#34D399', facing:'environment', frame:'wide',
@@ -395,6 +395,7 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
   var stream=null, facing=s.facing==='user'?'user':'environment', isVoice=s.facing==='audio';
   var snapDataUrl=null, audioCtx=null, analyser=null, waveRAF=null;
   var isPhysique=(type==='physique'), shots=[];
+  var detector=null, poseRAF=null, gateStable=0;
   var ANG=[{k:'front',label:'Face the camera'},{k:'right',label:'Turn to your right side'},
            {k:'back',label:'Turn around — back to camera'},{k:'left',label:'Turn to your left side'}];
 
@@ -435,11 +436,14 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
     cam.classList.add('on');
     cam.classList.toggle('voice', isVoice);
     cam.classList.toggle('physique', isPhysique);
-    if(isPhysique){ renderDots(0); setProg(0); $('#phyzCount').textContent=''; $('#camHint').textContent='Stand back so your whole body fits the ring, then tap to begin'; }
-    startStream().then(function(ok){ cam._demo=!ok; });
+    if(isPhysique){ renderDots(0); setProg(0); $('#phyzCount').textContent=''; $('#camHint').textContent='Starting camera…'; }
+    startStream().then(function(ok){ cam._demo=!ok; if(isPhysique) runPhysique(); });
   }
   function stopCam(){
     cam.classList.remove('on','scanning');
+    if(poseRAF){ clearTimeout(poseRAF); poseRAF=null; }
+    if(detector){ try{ detector.dispose(); }catch(e){} detector=null; }
+    gateStable=0;
     if(stream){ try{stream.getTracks().forEach(function(t){t.stop();});}catch(e){} stream=null; }
     if(waveRAF) cancelAnimationFrame(waveRAF);
     if(audioCtx){ try{audioCtx.close();}catch(e){} audioCtx=null; }
@@ -497,15 +501,66 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
   function setProg(n){ var el=$('#phyzProg'); if(el) el.style.strokeDashoffset=(590.6*(1-n/4)).toFixed(1); }
   function renderDots(done){ var d=$('#phyzDots'); if(!d) return; var h=''; for(var i=0;i<4;i++) h+='<span class="pd'+(i<done?' on':'')+'"></span>'; d.innerHTML=h; }
   function phyzFlash(){ var f=document.createElement('div'); f.className='phyz-flash'; cam.appendChild(f); setTimeout(function(){ f.remove(); },260); }
-  function runPhysique(){
-    cam.classList.add('phyz-scanning'); shots=[]; renderDots(0); setProg(0);
+  // Lazy-load TensorFlow.js + MoveNet only when the physique scan needs it.
+  function loadPose(cb){
+    if(window.poseDetection && window.tf){ cb(true); return; }
+    function load(src,next){ var sc=document.createElement('script'); sc.async=true; sc.src=src; sc.onload=next; sc.onerror=function(){ cb(false); }; document.head.appendChild(sc); }
+    load('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js', function(){
+      load('https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@2.1.3/dist/pose-detection.min.js', function(){ cb(!!window.poseDetection); });
+    });
+  }
+  function kp(p,n){ for(var i=0;i<p.keypoints.length;i++){ if(p.keypoints[i].name===n) return p.keypoints[i]; } return null; }
+  function startPoseGate(){
+    $('#camHint').textContent='Loading body detection…'; $('#phyzCount').textContent='';
+    loadPose(function(ok){
+      if(!ok || !window.poseDetection){ simulatedGate(); return; }
+      window.poseDetection.createDetector(window.poseDetection.SupportedModels.MoveNet,
+        { modelType: window.poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING })
+        .then(function(det){ detector=det; cam.classList.add('phyz-scanning'); gateStable=0;
+          $('#camHint').textContent='Step back so your whole body is in the ring'; loopGate(); })
+        .catch(function(){ simulatedGate(); });
+    });
+  }
+  function loopGate(){
+    if(!detector || !cam.classList.contains('on')) return;
+    detector.estimatePoses(video,{maxPoses:1}).then(function(poses){
+      var Hh=video.videoHeight||1, msg='Step back so your whole body is visible', good=false;
+      if(poses && poses.length){
+        var p=poses[0];
+        var need=['nose','left_shoulder','right_shoulder','left_hip','right_hip','left_knee','right_knee','left_ankle','right_ankle'];
+        var miss=0; for(var i=0;i<need.length;i++){ var k=kp(p,need[i]); if(!k||k.score<0.35) miss++; }
+        var nose=kp(p,'nose'), la=kp(p,'left_ankle'), ra=kp(p,'right_ankle');
+        var ankY=Math.max(la?la.y:0, ra?ra.y:0);
+        if(miss>2) msg='Step back — show your full body';
+        else if(nose && nose.y>0.34*Hh) msg='Step back — get your head near the top';
+        else if(ankY && ankY<0.74*Hh) msg='Step back — I can’t see your feet';
+        else if(nose && nose.y<0.03*Hh) msg='Lower the phone slightly';
+        else { good=true; msg='Hold still…'; }
+      }
+      $('#camHint').textContent=msg;
+      if(good){ if(!gateStable) gateStable=Date.now(); if(Date.now()-gateStable>1000){ passGate(); return; } }
+      else gateStable=0;
+      poseRAF=setTimeout(loopGate, 110);
+    }).catch(function(){ poseRAF=setTimeout(loopGate, 200); });
+  }
+  function passGate(){
+    if(poseRAF){ clearTimeout(poseRAF); poseRAF=null; }
+    if(detector){ try{ detector.dispose(); }catch(e){} detector=null; }
+    cam.classList.add('phyz-scanning');
+    $('#camHint').textContent=''; $('#phyzCount').textContent='Body detected ✓';
+    try{ if(navigator.vibrate) navigator.vibrate(40); }catch(_){}
+    setTimeout(function(){ captureAngle(0); }, 800);
+  }
+  function simulatedGate(){   // fallback when the pose model can't load (offline etc.)
+    cam.classList.add('phyz-scanning');
     $('#camHint').textContent='Stand back — fit your whole body in the ring';
     $('#phyzCount').textContent='Detecting body…';
-    setTimeout(function(){
-      $('#phyzCount').textContent='Body detected ✓';
-      try{ if(navigator.vibrate) navigator.vibrate(40); }catch(_){}
-      setTimeout(function(){ captureAngle(0); }, 800);
-    }, 2400);
+    setTimeout(function(){ $('#phyzCount').textContent='Body detected ✓'; setTimeout(function(){ captureAngle(0); },800); },2400);
+  }
+  function runPhysique(){
+    shots=[]; renderDots(0); setProg(0); $('#phyzCount').textContent='';
+    if(cam._demo){ simulatedGate(); return; }   // no real camera → demo path
+    startPoseGate();
   }
   function captureAngle(i){
     if(i>=ANG.length){ finishPhysique(); return; }
@@ -603,8 +658,8 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
   // ── wire up ──
   $('#cta').addEventListener('click', openCam);
   $('#shutter').addEventListener('click', function(){
-    if(cam.classList.contains('scanning')||cam.classList.contains('phyz-scanning')) return;
-    if(isPhysique) runPhysique(); else runAnalyze();
+    if(isPhysique){ if(detector) passGate(); return; }   // tap = skip detection, start capturing
+    if(!cam.classList.contains('scanning')) runAnalyze();
   });
   $('#camX').addEventListener('click', stopCam);
   $('#camFlip').addEventListener('click', function(){ facing=(facing==='user'?'environment':'user'); startStream(); });
