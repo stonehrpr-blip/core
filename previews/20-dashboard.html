@@ -503,8 +503,8 @@ body.edit-active .nav{display:none;}
     transition:stroke-dashoffset 1.15s cubic-bezier(.22,1,.36,1);
     filter:drop-shadow(0 0 7px rgba(10,132,255,0.55));}
   .ls-ring-gem{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;}
-  .ls-ring-gem img{width:118px;height:118px;object-fit:contain;
-    filter:drop-shadow(0 0 22px color-mix(in srgb,var(--rkc,#0A84FF) 60%,transparent));
+  .ls-ring-gem img{width:152px;height:152px;object-fit:contain;
+    filter:drop-shadow(0 0 24px color-mix(in srgb,var(--rkc,#0A84FF) 60%,transparent));
     animation:lsGemFloat 5s ease-in-out infinite;}
   @keyframes lsGemFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
   .ls-hero-num{font-size:54px;font-weight:900;letter-spacing:-2.2px;line-height:1;color:#fff;margin-top:4px;}
@@ -534,6 +534,16 @@ body.edit-active .nav{display:none;}
   .rt-sub{font-size:12px;color:var(--muted);margin-top:3px;display:block;}
   .rt-count{flex:none;font-size:12px;font-weight:800;color:#fff;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.10);
     padding:5px 10px;border-radius:999px;margin-top:1px;}
+
+  /* week day-strip */
+  .daystrip{display:flex;justify-content:space-between;gap:4px;margin:-2px 0 16px;}
+  .ds-day{flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;}
+  .ds-dow{font-size:11px;font-weight:700;color:var(--muted);}
+  .ds-num{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:14px;font-weight:700;color:var(--text);background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);}
+  .ds-day.today .ds-dow{color:#fff;}
+  .ds-day.today .ds-num{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 6px 16px rgba(10,132,255,0.40);}
+  .ds-day.future .ds-dow,.ds-day.future .ds-num{opacity:.5;}
 
   /* task cards */
   .rt-list{display:flex;flex-direction:column;gap:9px;}
@@ -746,6 +756,7 @@ body.edit-active .nav{display:none;}
         <div><span class="rt-title">Today's routine</span><span class="rt-sub" id="rtSub">Tap a task to edit · check it off as you go</span></div>
         <span class="rt-count" id="rtCount">0/0</span>
       </div>
+      <div class="daystrip" id="dayStrip"></div>
       <div class="rt-list" id="rtList"></div>
 
       <button class="rt-build" id="rtBuild">
@@ -1341,6 +1352,22 @@ body.edit-active .nav{display:none;}
     var g=$('rankBarGem'); if(g) g.innerHTML='<img src="assets/ranks/'+r.name.toLowerCase()+'.png" alt="'+r.name+'">';
     if($('rankBarName')) $('rankBarName').textContent=r.name;
     animCount($('rankBarScore'), xp);
+  })();
+
+  // ---- week day-strip (this week, today highlighted) ----
+  (function buildDayStrip(){
+    var el=$('dayStrip'); if(!el) return;
+    var dows=['S','M','T','W','T','F','S'];
+    var now=new Date(), dow=now.getDay();
+    var sun=new Date(now); sun.setDate(now.getDate()-dow); sun.setHours(0,0,0,0);
+    var today=new Date(now); today.setHours(0,0,0,0);
+    var html='';
+    for(var i=0;i<7;i++){
+      var d=new Date(sun); d.setDate(sun.getDate()+i);
+      var cls = d.getTime()===today.getTime() ? ' today' : (d>today ? ' future' : '');
+      html+='<div class="ds-day'+cls+'"><span class="ds-dow">'+dows[i]+'</span><span class="ds-num">'+d.getDate()+'</span></div>';
+    }
+    el.innerHTML=html;
   })();
 
   // ---- the 6 life scores ----
