@@ -141,6 +141,40 @@
     .stat .v.b{color:var(--accent);}
     .stat .k{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-top:4px;}
 
+    /* ── Focus overview + records ── */
+    .fov{padding:16px 16px 14px;border-radius:18px;background:var(--card);border:1px solid var(--line);}
+    .ov-stats{display:flex;gap:10px;margin-bottom:15px;}
+    .ov-stat{flex:1;text-align:center;}
+    .ov-stat .v{font-size:23px;font-weight:900;color:#fff;letter-spacing:-0.6px;line-height:1;}
+    .ov-stat .v.up{color:var(--accent);}
+    .ov-stat .k{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-top:5px;}
+    .ov-cal-dow{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:5px;}
+    .ov-cal-dow span{text-align:center;font-size:9px;font-weight:800;color:var(--dim);text-transform:uppercase;}
+    .ov-week{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:5px;}
+    .ov-cell{aspect-ratio:1;border-radius:7px;background:rgba(255,255,255,0.045);border:1px solid rgba(255,255,255,0.05);
+      display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;color:var(--dim);}
+    .ov-cell.on{background:color-mix(in srgb,var(--accent) 60%,transparent);border-color:color-mix(in srgb,var(--accent) 85%,transparent);color:#fff;}
+    .ov-cell.today{box-shadow:0 0 0 2px var(--text);}
+    .ov-cell.future{opacity:.35;}
+    .ov-vol{margin-top:14px;padding-top:13px;border-top:1px solid var(--line);}
+    .ov-vol-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px;}
+    .ov-vol-h .l{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);}
+    .ov-vol-h .r{font-size:11px;font-weight:700;color:var(--muted);}
+    .ov-bars{display:flex;align-items:flex-end;gap:6px;height:46px;}
+    .ov-bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;justify-content:flex-end;}
+    .ov-bar i{width:100%;border-radius:5px 5px 2px 2px;background:color-mix(in srgb,var(--accent) 55%,transparent);min-height:3px;transition:height .5s cubic-bezier(.22,1,.36,1);}
+    .ov-bar.now i{background:var(--accent);}
+    .ov-bar span{font-size:8.5px;font-weight:700;color:var(--dim);}
+    .ov-imp{display:flex;align-items:center;gap:9px;margin-top:13px;padding-top:13px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted);line-height:1.4;}
+    .ov-imp svg{width:17px;height:17px;flex:none;}
+    .ov-imp b{color:#fff;font-weight:800;}
+    .rec-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+    .rec{border-radius:15px;background:var(--card);border:1px solid var(--line);padding:14px;}
+    .rec .rv{font-size:22px;font-weight:900;color:var(--accent);letter-spacing:-.6px;line-height:1;}
+    .rec .rv small{font-size:11px;color:var(--muted);font-weight:700;}
+    .rec .rk{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-top:6px;}
+    .rec-empty{padding:20px;text-align:center;color:var(--dim);font-size:12.5px;border-radius:15px;background:var(--card);border:1px solid var(--line);}
+
     /* ── FOCUS MODE OVERLAY ── */
     .focus-mode{position:absolute;inset:0;z-index:80;background:radial-gradient(60% 50% at 50% 38%,rgba(10,132,255,0.10),transparent 70%),#04040B;
       display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px 28px;text-align:center;}
@@ -308,6 +342,14 @@
           <div class="stat"><div class="v" id="stDistract">0</div><div class="k">Distractions</div></div>
         </div>
 
+        <!-- SECTION 6: OVERVIEW -->
+        <div class="sec-l"><span>Focus Overview</span><span class="ln"></span><span id="fovMeta" style="color:var(--dim)"></span></div>
+        <div class="fov" id="focusOverview"></div>
+
+        <!-- SECTION 7: RECORDS -->
+        <div class="sec-l"><span>Personal Records</span><span class="ln"></span></div>
+        <div id="focusRecords"></div>
+
       </div>
 
       <nav class="nav" aria-label="Primary">
@@ -378,10 +420,25 @@
 
     // ── focus-local store (zones/streak/stats live here; XP + Focus stat route to coreState) ──
     var FKEY = 'coreFocus.v1';
-    function fdefault(){ return { zones:{prefrontal:0,parietal:0,temporal:0,limbic:0,occipital:0}, sessions:0, totalMin:0, distractions:0, streak:0, lastDay:null, week:[], lastTick:null, lastRaise:{} }; }
+    function fdefault(){ return { zones:{prefrontal:0,parietal:0,temporal:0,limbic:0,occipital:0}, sessions:0, totalMin:0, distractions:0, streak:0, bestStreak:0, lastDay:null, week:[], history:[], lastTick:null, lastRaise:{} }; }
     function fread(){ try{ var r=localStorage.getItem(FKEY); if(!r) return fdefault(); var o=JSON.parse(r); var d=fdefault(); o.zones=Object.assign(d.zones,o.zones||{}); return Object.assign(d,o); }catch(e){ return fdefault(); } }
     function fwrite(o){ try{ localStorage.setItem(FKEY, JSON.stringify(o)); }catch(e){} }
     var F = fread();
+    // demo: ~5 weeks of focus sessions so the overview / records / trend populate
+    try{
+      if(/[?&]demo=1/.test(location.search) && (!F.history || !F.history.length)){
+        var dn=Date.now();
+        var DH=[[0,50,'prefrontal'],[0,25,'parietal'],[1,45,'prefrontal'],[3,30,'temporal'],[4,60,'prefrontal'],
+                [6,25,'parietal'],[8,45,'prefrontal'],[10,50,'prefrontal'],[11,30,'temporal'],[13,25,'parietal'],
+                [15,60,'prefrontal'],[17,45,'prefrontal'],[20,30,'temporal'],[22,50,'prefrontal'],[24,25,'parietal'],
+                [28,45,'prefrontal'],[30,30,'temporal']];
+        F.history=DH.map(function(e){ return { ts:dn-e[0]*86400000+9*3600000, min:e[1], zone:e[2] }; });
+        F.sessions=F.history.length;
+        F.totalMin=F.history.reduce(function(a,h){return a+h.min;},0);
+        F.streak=3; F.bestStreak=6; F.distractions=4; F.lastDay=new Date().toDateString();
+        fwrite(F);
+      }
+    }catch(e){}
 
     var ZONES = {
       prefrontal:{ label:'Deep Work',  color:'var(--z-prefrontal)', tip:'prefrontal cortex' },
@@ -490,7 +547,59 @@
       qs('#stDistract').textContent = F.distractions;
     }
     function renderXp(){ try{ qs('#xpVal').textContent = (S.read().xp||0).toLocaleString(); }catch(e){} }
-    function renderAll(){ renderBrain(); renderLegend(); renderMissions(); renderStreak(); renderStats(); renderXp(); }
+    // ── Focus overview (consistency over time) + records ──
+    function dKey(d){ return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
+    function fmtMin(m){ m=Math.round(m||0); if(m>=60){ var h=Math.floor(m/60), r=m%60; return h+'h'+(r?(' '+r+'m'):''); } return m+'m'; }
+    function renderOverview(){
+      var host=qs('#focusOverview'); if(!host) return;
+      var hist=F.history||[];
+      var byDay={}; hist.forEach(function(h){ if(h&&h.ts) byDay[dKey(new Date(h.ts))]=true; });
+      var today=new Date(); today.setHours(0,0,0,0); var dow=today.getDay(), GOAL=5;
+      function wkS(off){ var sun=new Date(today); sun.setDate(today.getDate()-dow-7*off); var c=0; for(var i=0;i<7;i++){ var d=new Date(sun); d.setDate(sun.getDate()+i); if(d<=today&&byDay[dKey(d)]) c++; } return c; }
+      var thisW=wkS(0), lastW=wkS(1), diff=thisW-lastW;
+      var d30=0; for(var i=0;i<30;i++){ var d=new Date(today); d.setDate(today.getDate()-i); if(byDay[dKey(d)]) d30++; }
+      var gap=0,maxGap=0; for(var j=34;j>=0;j--){ var dd=new Date(today); dd.setDate(today.getDate()-j); if(byDay[dKey(dd)]) gap=0; else { gap++; if(gap>maxGap) maxGap=gap; } }
+      function wkMin(off){ var sun=new Date(today); sun.setDate(today.getDate()-dow-7*off); var e=new Date(sun); e.setDate(sun.getDate()+7); return hist.reduce(function(a,h){ return (h.ts>=sun.getTime()&&h.ts<e.getTime())?a+(h.min||0):a; },0); }
+      var vols=[]; for(var v=5;v>=0;v--) vols.push(wkMin(v));
+      var vmax=Math.max.apply(null,vols.concat([1]));
+      var startSun=new Date(today); startSun.setDate(today.getDate()-dow-7*4);
+      var dows=['S','M','T','W','T','F','S'];
+      var cal='<div class="ov-cal-dow">'+dows.map(function(x){return '<span>'+x+'</span>';}).join('')+'</div>';
+      for(var w=0;w<5;w++){ cal+='<div class="ov-week">'; for(var k=0;k<7;k++){ var c=new Date(startSun); c.setDate(startSun.getDate()+w*7+k); c.setHours(0,0,0,0);
+        var on=byDay[dKey(c)], isToday=c.getTime()===today.getTime(), isFut=c.getTime()>today.getTime();
+        cal+='<div class="ov-cell'+(on?' on':'')+(isToday?' today':'')+(isFut?' future':'')+'">'+c.getDate()+'</div>'; } cal+='</div>'; }
+      var bars='<div class="ov-vol"><div class="ov-vol-h"><span class="l">Weekly focus</span><span class="r">'+fmtMin(vols[5])+' this week</span></div><div class="ov-bars">'
+        +vols.map(function(val,i){ var hh=Math.round(val/vmax*100); return '<div class="ov-bar'+(i===5?' now':'')+'"><i style="height:'+hh+'%"></i><span>'+(i===5?'now':(5-i)+'w')+'</span></div>'; }).join('')+'</div></div>';
+      var onPace=thisW>=GOAL, behind=GOAL-thisW;
+      var imp = onPace ? '<b>On pace</b> — '+thisW+' of '+GOAL+' sessions this week. '+(diff>0?(diff+' more than last week.'):'Nice work.')
+        : '<b>'+behind+' to go</b> for your weekly goal of '+GOAL+'. '+(diff>0?(diff+' ahead of last week.'):diff<0?'Slower than last week — squeeze one in.':'');
+      var icon=(onPace||diff>=0)?'<path d="M3 17l6-6 4 4 7-8"/><path d="M21 7v5h-5"/>':'<path d="M3 7l6 6 4-4 7 8"/><path d="M21 17v-5h-5"/>';
+      host.innerHTML='<div class="ov-stats">'
+        +'<div class="ov-stat"><div class="v '+(onPace?'up':'')+'">'+thisW+'<span style="font-size:13px;color:var(--dim)"> / '+GOAL+'</span></div><div class="k">This week</div></div>'
+        +'<div class="ov-stat"><div class="v">'+d30+'</div><div class="k">30-day</div></div>'
+        +'<div class="ov-stat"><div class="v">'+maxGap+'</div><div class="k">Days skipped</div></div>'
+        +'</div>'+cal+bars
+        +'<div class="ov-imp"><svg viewBox="0 0 24 24" fill="none" stroke="'+((onPace||diff>=0)?'var(--accent)':'#FF8A7A')+'" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'+icon+'</svg><span>'+imp+'</span></div>';
+      var meta=qs('#fovMeta'); if(meta) meta.textContent=d30+' in 30 days';
+    }
+    function renderRecords(){
+      var host=qs('#focusRecords'); if(!host) return;
+      var hist=F.history||[];
+      if(!hist.length){ host.innerHTML='<div class="rec-empty">Complete a session to set your first records.</div>'; return; }
+      var longest=0; hist.forEach(function(h){ if((h.min||0)>longest) longest=h.min; });
+      var byDay={}; hist.forEach(function(h){ var k=dKey(new Date(h.ts)); byDay[k]=(byDay[k]||0)+(h.min||0); });
+      var bestDay=0; for(var k in byDay){ if(byDay[k]>bestDay) bestDay=byDay[k]; }
+      var bestStreak=Math.max(F.bestStreak||0, F.streak||0);
+      var totalH=Math.round((F.totalMin||0)/60*10)/10;
+      host.innerHTML='<div class="rec-grid">'
+        +'<div class="rec"><div class="rv">'+fmtMin(longest)+'</div><div class="rk">Longest session</div></div>'
+        +'<div class="rec"><div class="rv">'+fmtMin(bestDay)+'</div><div class="rk">Best day</div></div>'
+        +'<div class="rec"><div class="rv">'+bestStreak+'<small> days</small></div><div class="rk">Best streak</div></div>'
+        +'<div class="rec"><div class="rv">'+totalH+'<small>h</small></div><div class="rk">Total focus</div></div>'
+        +'</div>';
+    }
+
+    function renderAll(){ renderBrain(); renderLegend(); renderMissions(); renderStreak(); renderStats(); renderOverview(); renderRecords(); renderXp(); }
 
     // ── duration selection ──
     var selMin = 25;
@@ -567,6 +676,7 @@
       F.zones.limbic = Math.max(0, F.zones.limbic - gain*0.4);
       F.zones.occipital = Math.max(0, (z!=='occipital') ? F.zones.occipital - gain*0.25 : F.zones.occipital + gain);
       F.sessions++; F.totalMin += mins;
+      F.history = F.history||[]; F.history.unshift({ ts:Date.now(), min:mins, zone:z }); if(F.history.length>200) F.history.length=200;
       bumpStreak();
       fwrite(F);
       // feed the real core loop
@@ -583,6 +693,7 @@
       if(F.lastDay === today) return;                 // already counted today
       var y = new Date(Date.now()-86400000).toDateString();
       F.streak = (F.lastDay===y) ? F.streak+1 : 1;    // continue or restart
+      F.bestStreak = Math.max(F.bestStreak||0, F.streak);
       F.lastDay = today;
       sfx('streak_grow');
     }
