@@ -155,6 +155,25 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .ov-stat .v.up{color:var(--good);}
 .ov-stat .v.dn{color:var(--str);}
 .ov-stat .k{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-top:5px;}
+/* AI program builder */
+.prog-scroll{overflow-y:auto;-webkit-overflow-scrolling:touch;padding-top:4px;}
+.prog-q{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin:16px 2px 9px;}
+.prog-opts{display:flex;flex-wrap:wrap;gap:8px;}
+.prog-opt{flex:1 1 0;min-width:84px;padding:12px 10px;border-radius:13px;background:var(--bg-card);border:1px solid var(--border);
+  color:var(--muted);font:inherit;font-size:13px;font-weight:800;cursor:pointer;text-align:center;transition:.15s;}
+.prog-opt.on{color:#fff;border-color:#B388FF;background:color-mix(in srgb,#B388FF 16%,transparent);}
+.prog-day{border-radius:16px;background:var(--bg-card);border:1px solid var(--border);padding:13px 15px;margin-bottom:10px;}
+.prog-day-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;}
+.prog-day-h b{font-size:14.5px;font-weight:900;}
+.prog-day-h span{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#B388FF;}
+.prog-ex{display:flex;align-items:center;gap:9px;padding:6px 0;font-size:13px;color:#D7DCEA;}
+.prog-ex i{width:6px;height:6px;border-radius:50%;flex:none;background:var(--mc,#B388FF);font-style:normal;}
+.prog-ex b{font-weight:700;}
+.prog-ex span{color:var(--dim);font-size:11.5px;margin-left:auto;}
+.prog-foot{display:flex;gap:10px;margin-top:6px;padding-top:14px;}
+.btn.prog{background:#B388FF;box-shadow:0 6px 16px rgba(179,136,255,.25);}
+.ov-month{font-size:11.5px;font-weight:800;letter-spacing:.03em;color:var(--text);margin-bottom:11px;}
+.ov-cell.blank{background:transparent;border:none;}
 .ov-cal-dow{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:5px;}
 .ov-cal-dow span{text-align:center;font-size:9px;font-weight:800;color:var(--dim);text-transform:uppercase;}
 .ov-week{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:5px;}
@@ -446,6 +465,14 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   </div>
 
   <div class="toast" id="toast"></div>
+
+  <!-- AI Program builder -->
+  <div class="scrim" id="progScrim"></div>
+  <div class="sheet" id="progSheet">
+    <div class="grip"></div>
+    <div class="sheet-hd"><b>Build a Program</b><span class="lvlpill" id="progStep" style="--mc:#B388FF">Set up</span></div>
+    <div class="prog-scroll" id="progBody"></div>
+  </div>
 </div>
 
 <script src="_lib/core-sfx.js"></script>
@@ -650,16 +677,25 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
       +'</div></div>';
     var gap=0,maxGap=0; for(var j=34;j>=0;j--){ var dd=new Date(today); dd.setDate(today.getDate()-j);
       if(trained[dKey(dd)]) gap=0; else { gap++; if(gap>maxGap) maxGap=gap; } }
-    // 5-week calendar grid (Sun-start), ending this week
-    var startSun=new Date(today); startSun.setDate(today.getDate()-dow-7*4);
+    // Month calendar — always starts on the 1st of the current month
+    var mFirst=new Date(today.getFullYear(), today.getMonth(), 1);
+    var firstDow=mFirst.getDay();
+    var daysInMonth=new Date(today.getFullYear(), today.getMonth()+1, 0).getDate();
+    var monthName=mFirst.toLocaleDateString(undefined,{month:'long',year:'numeric'});
     var dows=['S','M','T','W','T','F','S'];
-    var cal='<div class="ov-cal-dow">'+dows.map(function(x){return '<span>'+x+'</span>';}).join('')+'</div>';
-    for(var w=0; w<5; w++){
+    var cells=[]; for(var b=0;b<firstDow;b++) cells.push(0);
+    for(var dn=1;dn<=daysInMonth;dn++) cells.push(dn);
+    while(cells.length%7!==0) cells.push(0);
+    var cal='<div class="ov-month">'+monthName+'</div>'
+      +'<div class="ov-cal-dow">'+dows.map(function(x){return '<span>'+x+'</span>';}).join('')+'</div>';
+    for(var w=0; w<cells.length/7; w++){
       cal+='<div class="ov-week">';
       for(var k=0;k<7;k++){
-        var c=new Date(startSun); c.setDate(startSun.getDate()+w*7+k); c.setHours(0,0,0,0);
+        var dnum=cells[w*7+k];
+        if(!dnum){ cal+='<div class="ov-cell blank"></div>'; continue; }
+        var c=new Date(today.getFullYear(), today.getMonth(), dnum); c.setHours(0,0,0,0);
         var isT=trained[dKey(c)], isToday=c.getTime()===today.getTime(), isFut=c.getTime()>today.getTime();
-        cal+='<div class="ov-cell'+(isT?' trained':'')+(isToday?' today':'')+(isFut?' future':'')+'">'+c.getDate()+'</div>';
+        cal+='<div class="ov-cell'+(isT?' trained':'')+(isToday?' today':'')+(isFut?' future':'')+'">'+dnum+'</div>';
       }
       cal+='</div>';
     }
@@ -992,6 +1028,80 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   Array.prototype.forEach.call(document.querySelectorAll('#genderToggle .gt-opt'),function(b){
     b.addEventListener('click',function(){ setGender(this.getAttribute('data-g')); sfx('tick'); renderDiagram(); });
   });
+  /* ───────── AI Program builder ───────── */
+  var PROG={ goal:null, days:null, eq:null, plan:null };
+  var SPLITS={
+    3:[{n:'Push',m:['chest','shoulders','arms']},{n:'Pull',m:['back','arms']},{n:'Legs',m:['legs','core']}],
+    4:[{n:'Upper A',m:['chest','back','shoulders']},{n:'Lower A',m:['legs','core']},{n:'Upper B',m:['shoulders','arms','chest']},{n:'Lower B',m:['legs','core']}],
+    5:[{n:'Push',m:['chest','shoulders','arms']},{n:'Pull',m:['back','arms']},{n:'Legs',m:['legs','core']},{n:'Upper',m:['chest','back','shoulders']},{n:'Lower',m:['legs','core']}]
+  };
+  var GOAL_REPS={ muscle:'8–12 reps', fat:'12–20 reps · short rest', strength:'4–6 reps · heavy', fitness:'10–15 reps' };
+  function pickEx(muscles, eq){
+    var out=[], used={};
+    muscles.forEach(function(mu){
+      var list=(EX[mu]||[]).filter(function(e){ return e.equip.indexOf(eq)>=0; });
+      if(eq==='bodyweight') list=list.concat(HOME_ALTS[mu]||[]);
+      if(!list.length) list=EX[mu]||[];
+      var n=0;
+      for(var i=0;i<list.length && n<2;i++){ var k=mu+':'+list[i].name; if(used[k]) continue; used[k]=1; out.push({muscle:mu,name:list[i].name}); n++; }
+    });
+    return out.slice(0,6);
+  }
+  function generatePlan(){
+    var split=SPLITS[PROG.days]||SPLITS[3];
+    PROG.plan=split.map(function(day,i){ return { name:'Day '+(i+1)+' · '+day.n, exercises:pickEx(day.m, PROG.eq) }; });
+  }
+  var progScrim=qs('#progScrim'), progSheet=qs('#progSheet');
+  function openProgram(){
+    var s=store();
+    PROG={ goal:s.setup.goal||'muscle', days:4, eq:s.setup.equipment||'full', plan:null };
+    renderProgSetup();
+    progScrim.classList.add('show'); progSheet.classList.add('show');
+  }
+  function closeProgram(){ progScrim.classList.remove('show'); progSheet.classList.remove('show'); }
+  function opts(key, list){
+    return '<div class="prog-opts">'+list.map(function(o){
+      return '<button class="prog-opt'+(PROG[key]===o[0]?' on':'')+'" data-k="'+key+'" data-v="'+o[0]+'">'+o[1]+'</button>';
+    }).join('')+'</div>';
+  }
+  function renderProgSetup(){
+    qs('#progStep').textContent='Set up';
+    qs('#progBody').innerHTML=
+      '<div class="prog-q">Your goal</div>'+opts('goal',[['muscle','Build muscle'],['strength','Get stronger'],['fat','Lose fat'],['fitness','General fitness']])
+      +'<div class="prog-q">Days per week</div>'+opts('days',[[3,'3 days'],[4,'4 days'],[5,'5 days']])
+      +'<div class="prog-q">Equipment</div>'+opts('eq',[['full','Full gym'],['dumbbells','Dumbbells'],['bodyweight','Bodyweight']])
+      +'<div class="prog-foot"><button class="btn prog" id="progGen">Generate program</button></div>';
+    Array.prototype.forEach.call(document.querySelectorAll('#progBody .prog-opt'),function(b){
+      b.addEventListener('click',function(){ var k=b.getAttribute('data-k'), v=b.getAttribute('data-v'); PROG[k]=(k==='days')?+v:v; sfx('tick'); renderProgSetup(); });
+    });
+    qs('#progGen').addEventListener('click',function(){ sfx('confirm'); generatePlan(); renderProgPreview(); });
+  }
+  function renderProgPreview(){
+    qs('#progStep').textContent=PROG.days+'-day plan';
+    var goalLbl={muscle:'Build muscle',strength:'Get stronger',fat:'Lose fat',fitness:'General fitness'}[PROG.goal]||'';
+    var html='<div class="prog-q">'+goalLbl+' · '+GOAL_REPS[PROG.goal]+'</div>';
+    html+=PROG.plan.map(function(day){
+      return '<div class="prog-day"><div class="prog-day-h"><b>'+day.name+'</b><span>'+day.exercises.length+' moves</span></div>'
+        +day.exercises.map(function(e){ return '<div class="prog-ex" style="--mc:'+mColor(e.muscle)+'"><i></i><b>'+e.name+'</b><span>'+mInfo(e.muscle).name+'</span></div>'; }).join('')
+        +'</div>';
+    }).join('');
+    html+='<div class="prog-foot"><button class="btn ghost" id="progBack" style="flex:0 0 34%">Back</button><button class="btn prog" id="progSave" style="flex:1">Save program</button></div>';
+    qs('#progBody').innerHTML=html;
+    qs('#progBack').addEventListener('click',function(){ sfx('tick'); renderProgSetup(); });
+    qs('#progSave').addEventListener('click',saveProgram);
+  }
+  function saveProgram(){
+    var s=store(); s.routines=s.routines||[];
+    PROG.plan.slice().reverse().forEach(function(day){
+      s.routines.unshift({ id:'pr'+Date.now()+Math.floor(Math.random()*999), name:day.name, exercises:day.exercises, ts:Date.now(), program:true });
+    });
+    save(s); sfx('reward'); closeProgram();
+    toast(PROG.plan.length+'-day program saved');
+    showTab('exercises');
+  }
+  var apBtn=qs('#actProgram'); if(apBtn) apBtn.addEventListener('click',function(){ sfx('tick'); openProgram(); });
+  progScrim.addEventListener('click',closeProgram);
+
   renderChip(); renderDiagram(); renderWorkout(); renderOverview(); renderPRs(); renderHeaderInsight();
   window.addEventListener('coreStateChange',renderChip);
   window.addEventListener('focus',function(){ renderDiagram(); });
@@ -1018,7 +1128,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     clearTimeout(t._t); t._t=setTimeout(function(){ t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(10px)'; }, 1900);
   }
   var qw=q('#actQuick'); if(qw) qw.addEventListener('click', function(){ sfx('tick'); scrollTo('#figs'); });
-  var bp=q('#actProgram'); if(bp) bp.addEventListener('click', function(){ sfx('tick'); toast('Program builder is coming soon'); });
+  /* actProgram is wired in the main script (it needs the exercise library). */
   var fc=q('#featCard'); if(fc) fc.addEventListener('click', function(e){ e.preventDefault(); sfx('tick'); scrollTo('#workout'); });
 })();
 </script>
