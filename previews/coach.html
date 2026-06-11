@@ -348,6 +348,30 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
 
   sendBtn.addEventListener('click', send);
   input.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); send(); } });
+
+  // ── Arrived from a scanner's "Discuss with Coach"? Seed the conversation ──
+  function coachScanReply(seed){
+    var sc=seed.score|0, nm=(seed.name||'scan').toLowerCase();
+    var lead = sc>=85 ? "That's a strong "+nm+" score — you're clearly putting the work in."
+      : sc>=70 ? "Solid "+nm+" result. There's a clear path to push it higher."
+      : "Good baseline to build from — small, consistent changes move this number fast.";
+    var focus = (seed.tips && seed.tips.length) ? " First thing I'd focus on: "+String(seed.tips[0]).replace(/\.$/,'')+"." : "";
+    return lead + focus + " Want me to turn this into a simple 2-week plan?";
+  }
+  async function seedFromScan(){
+    var seed=null; try{ seed=JSON.parse(localStorage.getItem('coreCoachSeed')||'null'); }catch(e){}
+    if(!seed) return;
+    try{ localStorage.removeItem('coreCoachSeed'); }catch(e){}
+    var umsg='I just did my '+seed.name+' scan and scored '+seed.score+'/100. What should I work on?';
+    bubble('user', umsg);
+    convo.push({ role:'user', content: umsg + (seed.tips&&seed.tips.length ? (' (App notes: '+seed.tips.join('; ')+'.)') : '') });
+    var typing=bubble('ai','•••'); typing.classList.add('typing');
+    var fb=localReply(convo[convo.length-1].content), reply=null;
+    if(window.CORE_BACKEND_READY){ try{ reply=await getReply(); }catch(e){} }
+    if(!reply || reply===fb) reply=coachScanReply(seed);
+    typing.remove(); bubble('ai', reply); convo.push({ role:'assistant', content:reply });
+  }
+  seedFromScan();
 })();
 </script>
   <script src="_lib/core-background.js"></script>

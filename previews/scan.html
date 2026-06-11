@@ -170,6 +170,9 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
 .btn.save{color:#02030A;background:var(--sc,#0A84FF);box-shadow:0 10px 26px color-mix(in srgb,var(--sc,#0A84FF) 30%,transparent);}
 .btn.save.done{background:var(--green);box-shadow:none;}
 .btn.again{color:var(--text);background:rgba(255,255,255,0.06);border:1px solid var(--border);}
+.btn.coach{width:100%;flex:none;margin-top:10px;color:#fff;
+  background:color-mix(in srgb, var(--sc,#0A84FF) 22%, rgba(255,255,255,0.04));
+  border:1px solid color-mix(in srgb, var(--sc,#0A84FF) 42%, transparent);}
 
 .toast{position:absolute;left:50%;bottom:40px;transform:translateX(-50%) translateY(10px);z-index:120;
   background:rgba(10,12,22,0.94);border:1px solid var(--border);color:var(--text);font-size:12.5px;font-weight:600;
@@ -454,7 +457,8 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
       +'<div class="res-actions">'
         +'<button class="btn again" id="btnAgain" type="button">'+svg('<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>')+'Scan again</button>'
         +'<button class="btn save" id="btnSave" type="button">'+svg('<path d="M5 12l4 4 10-11"/>')+'Save to profile</button>'
-      +'</div>';
+      +'</div>'
+      +'<button class="btn coach" id="btnCoach" type="button">'+svg('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>')+'Discuss with Coach</button>';
     res.classList.add('on');
     // animate the ring + number
     var fg=$('#resFg'); requestAnimationFrame(function(){ fg.setAttribute('stroke-dashoffset', C*(1-score/100)); });
@@ -465,13 +469,24 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
     $('#resClose').addEventListener('click', function(){ res.classList.remove('on'); updateLast(); });
     $('#btnAgain').addEventListener('click', function(){ res.classList.remove('on'); openCam(); });
     var saved=false;
-    $('#btnSave').addEventListener('click', function(){
+    function persist(){
       if(saved) return; saved=true;
       var all=readScans(); all.push({ type:type, name:s.name, score:score, label:s.label, tips:tips, ts:Date.now() });
       lsSet('coreScans.v1', JSON.stringify(all.slice(-60)));
       lsSet('coreLastScan', JSON.stringify({ type:type, score:score, ts:Date.now() }));
+      updateLast();
+    }
+    $('#btnSave').addEventListener('click', function(){
+      persist();
       var b=$('#btnSave'); b.classList.add('done'); b.innerHTML=svg('<path d="M5 12l4 4 10-11"/>')+'Saved to profile';
-      toast(s.name+' scan saved · '+score+'/100'); updateLast();
+      toast(s.name+' scan saved · '+score+'/100');
+    });
+    // hand the result to the AI coach to talk through
+    $('#btnCoach').addEventListener('click', function(){
+      persist();
+      lsSet('coreCoachSeed', JSON.stringify({ type:type, name:s.name, label:s.label, score:score, tips:tips, ts:Date.now() }));
+      try{ window.coreSfx&&window.coreSfx('click'); }catch(_){}
+      location.href='coach.html';
     });
   }
 
