@@ -156,6 +156,9 @@
     .ov-cell.on{background:color-mix(in srgb,var(--accent) 60%,transparent);border-color:color-mix(in srgb,var(--accent) 85%,transparent);color:#fff;}
     .ov-cell.today{box-shadow:0 0 0 2px var(--text);}
     .ov-cell.future{opacity:.35;}
+    .ov-cell.blank{background:transparent;border:none;}
+    .ov-month{font-size:11.5px;font-weight:800;letter-spacing:.03em;color:var(--text);margin-bottom:11px;}
+    .ov-empty{padding:24px;text-align:center;color:var(--dim);font-size:12.5px;border-radius:18px;background:var(--card);border:1px solid var(--line);}
     .ov-vol{margin-top:14px;padding-top:13px;border-top:1px solid var(--line);}
     .ov-vol-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px;}
     .ov-vol-h .l{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);}
@@ -553,6 +556,7 @@
     function renderOverview(){
       var host=qs('#focusOverview'); if(!host) return;
       var hist=F.history||[];
+      if(!hist.length){ host.innerHTML='<div class="ov-empty">Complete your first session to start your overview — your show-up calendar and trend build from here.</div>'; var m0=qs('#fovMeta'); if(m0) m0.textContent=''; return; }
       var byDay={}; hist.forEach(function(h){ if(h&&h.ts) byDay[dKey(new Date(h.ts))]=true; });
       var today=new Date(); today.setHours(0,0,0,0); var dow=today.getDay(), GOAL=5;
       function wkS(off){ var sun=new Date(today); sun.setDate(today.getDate()-dow-7*off); var c=0; for(var i=0;i<7;i++){ var d=new Date(sun); d.setDate(sun.getDate()+i); if(d<=today&&byDay[dKey(d)]) c++; } return c; }
@@ -562,12 +566,23 @@
       function wkMin(off){ var sun=new Date(today); sun.setDate(today.getDate()-dow-7*off); var e=new Date(sun); e.setDate(sun.getDate()+7); return hist.reduce(function(a,h){ return (h.ts>=sun.getTime()&&h.ts<e.getTime())?a+(h.min||0):a; },0); }
       var vols=[]; for(var v=5;v>=0;v--) vols.push(wkMin(v));
       var vmax=Math.max.apply(null,vols.concat([1]));
-      var startSun=new Date(today); startSun.setDate(today.getDate()-dow-7*4);
+      // Month calendar — always starts on the 1st of the current month
+      var mFirst=new Date(today.getFullYear(), today.getMonth(), 1);
+      var firstDow=mFirst.getDay();
+      var daysInMonth=new Date(today.getFullYear(), today.getMonth()+1, 0).getDate();
+      var monthName=mFirst.toLocaleDateString(undefined,{month:'long',year:'numeric'});
       var dows=['S','M','T','W','T','F','S'];
-      var cal='<div class="ov-cal-dow">'+dows.map(function(x){return '<span>'+x+'</span>';}).join('')+'</div>';
-      for(var w=0;w<5;w++){ cal+='<div class="ov-week">'; for(var k=0;k<7;k++){ var c=new Date(startSun); c.setDate(startSun.getDate()+w*7+k); c.setHours(0,0,0,0);
-        var on=byDay[dKey(c)], isToday=c.getTime()===today.getTime(), isFut=c.getTime()>today.getTime();
-        cal+='<div class="ov-cell'+(on?' on':'')+(isToday?' today':'')+(isFut?' future':'')+'">'+c.getDate()+'</div>'; } cal+='</div>'; }
+      var cells=[]; for(var b=0;b<firstDow;b++) cells.push(0);
+      for(var dnn=1;dnn<=daysInMonth;dnn++) cells.push(dnn);
+      while(cells.length%7!==0) cells.push(0);
+      var cal='<div class="ov-month">'+monthName+'</div><div class="ov-cal-dow">'+dows.map(function(x){return '<span>'+x+'</span>';}).join('')+'</div>';
+      for(var w=0; w<cells.length/7; w++){ cal+='<div class="ov-week">';
+        for(var k=0;k<7;k++){ var dnum=cells[w*7+k];
+          if(!dnum){ cal+='<div class="ov-cell blank"></div>'; continue; }
+          var c=new Date(today.getFullYear(), today.getMonth(), dnum); c.setHours(0,0,0,0);
+          var on=byDay[dKey(c)], isToday=c.getTime()===today.getTime(), isFut=c.getTime()>today.getTime();
+          cal+='<div class="ov-cell'+(on?' on':'')+(isToday?' today':'')+(isFut?' future':'')+'">'+dnum+'</div>'; }
+        cal+='</div>'; }
       var bars='<div class="ov-vol"><div class="ov-vol-h"><span class="l">Weekly focus</span><span class="r">'+fmtMin(vols[5])+' this week</span></div><div class="ov-bars">'
         +vols.map(function(val,i){ var hh=Math.round(val/vmax*100); return '<div class="ov-bar'+(i===5?' now':'')+'"><i style="height:'+hh+'%"></i><span>'+(i===5?'now':(5-i)+'w')+'</span></div>'; }).join('')+'</div></div>';
       var onPace=thisW>=GOAL, behind=GOAL-thisW;
@@ -591,11 +606,18 @@
       var bestDay=0; for(var k in byDay){ if(byDay[k]>bestDay) bestDay=byDay[k]; }
       var bestStreak=Math.max(F.bestStreak||0, F.streak||0);
       var totalH=Math.round((F.totalMin||0)/60*10)/10;
+      // sharpest brain zone (highest positive activation) + focus quality
+      var fz=['prefrontal','parietal','temporal'], topZ=null, topV=-1;
+      fz.forEach(function(z){ var v=F.zones[z]||0; if(v>topV){ topV=v; topZ=z; } });
+      var zoneName=(topV>0&&topZ)?ZONES[topZ].label:'—';
+      var quality=((F.sessions||0)+(F.distractions||0))>0 ? Math.round(F.sessions/(F.sessions+F.distractions)*100) : 100;
       host.innerHTML='<div class="rec-grid">'
         +'<div class="rec"><div class="rv">'+fmtMin(longest)+'</div><div class="rk">Longest session</div></div>'
         +'<div class="rec"><div class="rv">'+fmtMin(bestDay)+'</div><div class="rk">Best day</div></div>'
         +'<div class="rec"><div class="rv">'+bestStreak+'<small> days</small></div><div class="rk">Best streak</div></div>'
         +'<div class="rec"><div class="rv">'+totalH+'<small>h</small></div><div class="rk">Total focus</div></div>'
+        +'<div class="rec"><div class="rv" style="font-size:16px;letter-spacing:-.2px">'+zoneName+'</div><div class="rk">Sharpest zone</div></div>'
+        +'<div class="rec"><div class="rv">'+quality+'<small>%</small></div><div class="rk">Focus quality</div></div>'
         +'</div>';
     }
 
