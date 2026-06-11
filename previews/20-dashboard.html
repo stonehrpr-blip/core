@@ -490,23 +490,28 @@ body.edit-active .nav{display:none;}
   #dashMain{flex:1;overflow-y:auto;overflow-x:hidden;padding:4px 18px 96px;scrollbar-width:none;}
   #dashMain::-webkit-scrollbar{display:none;}
 
-  /* Life Score — centered, no box */
-  .ls-hero{text-align:center;padding:14px 0 24px;}
-  .ls-hero-num{font-size:66px;font-weight:900;letter-spacing:-3px;line-height:1;color:var(--lsc,#fff);text-shadow:0 4px 30px color-mix(in srgb,var(--lsc,#0A84FF) 35%,transparent);}
-  .ls-hero-lbl{font-size:11px;font-weight:800;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-top:9px;}
-  .ls-hero-rank{display:inline-flex;align-items:center;gap:9px;margin-top:15px;padding:6px 15px 6px 6px;border-radius:6px;text-decoration:none;position:relative;overflow:hidden;
-    background:linear-gradient(110deg, color-mix(in srgb,var(--rkc,#0A84FF) 26%, #08080f), #08080f);
-    border:1px solid color-mix(in srgb,var(--rkc,#0A84FF) 48%, transparent);transition:transform .12s;
-    clip-path:polygon(0 0, calc(100% - 9px) 0, 100% 9px, 100% 100%, 0 100%);
-    box-shadow:0 0 18px color-mix(in srgb,var(--rkc,#0A84FF) 22%, transparent);}
-  .ls-hero-rank::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--rkc,#0A84FF);box-shadow:0 0 9px var(--rkc,#0A84FF);}
-  .ls-hero-rank:active{transform:scale(.97);}
-  .ls-hero-gem{width:30px;height:30px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:5px;
-    background:radial-gradient(circle, color-mix(in srgb,var(--rkc,#0A84FF) 18%,#05050b), #05050a 72%);
-    border:1px solid color-mix(in srgb,var(--rkc,#0A84FF) 50%,transparent);box-shadow:inset 0 0 8px rgba(0,0,0,.6);}
-  .ls-hero-gem img{width:80%;height:80%;object-fit:contain;filter:drop-shadow(0 1px 6px var(--rkc,rgba(122,166,255,.6)));}
-  .ls-hero-rank b{font-size:14px;font-weight:900;font-style:italic;text-transform:uppercase;letter-spacing:-0.2px;color:#fff;}
-  .ls-hero-xp{color:var(--muted);font-weight:700;font-size:12px;}
+  /* Life Score — ring + rank gem centrepiece */
+  .ls-hero{text-align:center;padding:8px 0 22px;}
+  .ls-ring-wrap{position:relative;display:block;width:236px;height:236px;margin:0 auto 2px;text-decoration:none;-webkit-tap-highlight-color:transparent;transition:transform .14s;}
+  .ls-ring-wrap:active{transform:scale(.98);}
+  .ls-ring-glow{position:absolute;left:50%;top:50%;width:168px;height:168px;transform:translate(-50%,-50%);border-radius:50%;pointer-events:none;
+    background:radial-gradient(circle, color-mix(in srgb,var(--rkc,#0A84FF) 32%,transparent), transparent 70%);}
+  .ls-ring{position:relative;width:100%;height:100%;transform:rotate(-90deg);}
+  .ls-ring circle{fill:none;stroke-width:12;stroke-linecap:round;}
+  .ls-ring-bg{stroke:rgba(255,255,255,0.07);}
+  .ls-ring-fg{stroke:url(#lsGrad);stroke-dasharray:666;stroke-dashoffset:666;
+    transition:stroke-dashoffset 1.15s cubic-bezier(.22,1,.36,1);
+    filter:drop-shadow(0 0 7px rgba(10,132,255,0.55));}
+  .ls-ring-gem{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+  .ls-ring-gem img{width:118px;height:118px;object-fit:contain;
+    filter:drop-shadow(0 0 22px color-mix(in srgb,var(--rkc,#0A84FF) 60%,transparent));
+    animation:lsGemFloat 5s ease-in-out infinite;}
+  @keyframes lsGemFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+  .ls-hero-num{font-size:54px;font-weight:900;letter-spacing:-2.2px;line-height:1;color:#fff;margin-top:4px;}
+  .ls-hero-lbl{font-size:10.5px;font-weight:800;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-top:7px;}
+  .ls-hero-rankname{display:inline-block;margin-top:11px;font-size:15px;font-weight:700;text-decoration:none;}
+  .ls-hero-rankname b{color:var(--rkc,#0A84FF);font-weight:900;font-style:italic;text-transform:uppercase;letter-spacing:-0.2px;}
+  .ls-hero-xp{color:var(--muted);font-weight:600;font-size:13px;}
 
   /* the 6 life scores */
   .stats6{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
@@ -709,12 +714,26 @@ body.edit-active .nav{display:none;}
     <div class="scroll" id="dashMain">
       <!-- Combined rank + Life Score hero -->
       <!-- Life Score — big, centered, no box — with rank + XP below -->
+      <!-- Life Score hero: ring + rank gem in the centre, score + rank below -->
       <div class="ls-hero" id="lsHero">
+        <a class="ls-ring-wrap" id="rankBar" href="24-ranks.html" aria-label="View your rank">
+          <span class="ls-ring-glow"></span>
+          <svg class="ls-ring" viewBox="0 0 240 240" aria-hidden="true">
+            <defs>
+              <linearGradient id="lsGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#0A84FF"/>
+                <stop offset="1" stop-color="#5EC8FF"/>
+              </linearGradient>
+            </defs>
+            <circle class="ls-ring-bg" cx="120" cy="120" r="106"/>
+            <circle class="ls-ring-fg" id="lsRingFg" cx="120" cy="120" r="106"/>
+          </svg>
+          <span class="ls-ring-gem" id="rankBarGem"></span>
+        </a>
         <div class="ls-hero-num" id="lsNum">0</div>
         <div class="ls-hero-lbl">Life Score</div>
-        <a class="ls-hero-rank" id="rankBar" href="24-ranks.html">
-          <span class="ls-hero-gem" id="rankBarGem"></span>
-          <span><b id="rankBarName">Moonstone</b><span class="ls-hero-xp"> · <span id="rankBarScore">0</span> XP</span></span>
+        <a class="ls-hero-rankname" id="rankNameLink" href="24-ranks.html">
+          <b id="rankBarName">Moonstone</b><span class="ls-hero-xp"> · <span id="rankBarScore">0</span> XP</span>
         </a>
       </div>
 
@@ -1316,14 +1335,12 @@ body.edit-active .nav{display:none;}
   (function paintRank(){
     var xp=parseInt(ls('coreXP','0'),10)||0, idx=0;
     for(var i=0;i<RANKS.length;i++){ if(xp>=RANKS[i].xp) idx=i; }
-    var r=RANKS[idx], nx=RANKS[Math.min(idx+1,RANKS.length-1)];
-    var bar=$('rankBar'); if(bar) bar.style.setProperty('--rkc',r.color);
+    var r=RANKS[idx];
+    // rank colour drives the centre gem glow + the rank name beneath the ring
+    var hero=$('lsHero'); if(hero) hero.style.setProperty('--rkc',r.color);
     var g=$('rankBarGem'); if(g) g.innerHTML='<img src="assets/ranks/'+r.name.toLowerCase()+'.png" alt="'+r.name+'">';
     if($('rankBarName')) $('rankBarName').textContent=r.name;
-    if($('rankTier')) $('rankTier').textContent='Rank '+(idx+1)+' of '+RANKS.length;
     animCount($('rankBarScore'), xp);
-    var pct = idx>=RANKS.length-1 ? 100 : Math.max(4,Math.min(100,Math.round((xp-r.xp)/(nx.xp-r.xp)*100)));
-    setTimeout(function(){ if($('rankBarFill')) $('rankBarFill').style.width=pct+'%'; },140);
   })();
 
   // ---- the 6 life scores ----
@@ -1571,6 +1588,10 @@ body.edit-active .nav{display:none;}
     var col = score>=70?'#30D158':score>=40?'#FFD60A':score>0?'#FF9F0A':'#5E6B8A';
     var hero=$('lsHero'); if(hero) hero.style.setProperty('--lsc',col);
     animCount($('lsNum'), score, function(n){ return Math.round(n); });
+    // fill the ring to the life score (out of 100)
+    var ring=$('lsRingFg');
+    if(ring){ var C=666, pc=Math.max(0,Math.min(100,score));
+      setTimeout(function(){ ring.style.strokeDashoffset = C*(1-pc/100); },170); }
     if($('lsSub')) $('lsSub').textContent = score>=70?'Strong — keep it up':score>=40?'Building momentum':score>0?'Off to a good start':'Build your routine to grow it';
   }
 
