@@ -6,7 +6,7 @@
   <title>CORE — Ranks</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#02020A" />
-  <meta name="description" content="CORE ranks — climb from Moonstone to Diamond. See your current rank, XP progress and the rewards each gem unlocks." />
+  <meta name="description" content="CORE ranks — climb the 7 tiers from Novice to Vanguard. See your current rank, XP progress and the rewards each rank unlocks." />
   <link rel="stylesheet" href="_lib/core-responsive.css" />
   <link rel="stylesheet" href="_lib/core-background.css" />
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
@@ -62,9 +62,14 @@
     .gt{font-size:14px;font-weight:800;}
     .gd{font-size:12.5px;color:var(--muted);line-height:1.45;margin-top:2px;}
 
-    /* ladder — clean, colourful rank cards */
-    .ladder{display:flex;flex-direction:column;gap:13px;}
-    .lr{display:flex;align-items:center;gap:14px;padding:12px 13px 12px 15px;cursor:pointer;text-align:left;overflow:hidden;position:relative;width:100%;
+    /* ladder — grouped into tiers (Novice → Vanguard) */
+    .ladder{display:flex;flex-direction:column;gap:24px;}
+    .tier{display:flex;flex-direction:column;gap:9px;}
+    .tier-head{display:flex;align-items:center;gap:11px;padding:0 2px;}
+    .tier-name{font-size:13px;font-weight:900;font-style:italic;text-transform:uppercase;letter-spacing:.06em;
+      color:color-mix(in srgb,var(--tc) 78%,#fff);white-space:nowrap;}
+    .tier-line{flex:1;height:1px;background:linear-gradient(90deg,color-mix(in srgb,var(--tc) 45%,transparent),transparent);}
+    .lr{display:flex;align-items:center;gap:14px;padding:11px 13px 11px 14px;cursor:pointer;text-align:left;overflow:hidden;position:relative;width:100%;
       border-radius:18px;border:none;
       background:linear-gradient(105deg, color-mix(in srgb,var(--rc) 22%,#0c0d17) 0%, color-mix(in srgb,var(--rc) 8%,#0a0a12) 56%, #0a0a12 100%);
       box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--rc) 36%,transparent);
@@ -164,8 +169,8 @@
         <div class="sec">How to rank up</div>
         <div class="guide">
           <div class="gstep"><div class="gn">1</div><div><div class="gt">Earn XP every day</div><div class="gd">Finishing your routine, holding streaks and completing quests all feed your XP.</div></div></div>
-          <div class="gstep"><div class="gn">2</div><div><div class="gt">Cross the threshold</div><div class="gd">Each gem unlocks at a set XP. Fill the bar to break into the next rank.</div></div></div>
-          <div class="gstep"><div class="gn">3</div><div><div class="gt">Unlock perks</div><div class="gd">Higher ranks unlock frames, auras and bonuses. Tap any gem to preview its rewards.</div></div></div>
+          <div class="gstep"><div class="gn">2</div><div><div class="gt">Cross the threshold</div><div class="gd">Each rank unlocks at a set XP. Fill the bar to break into the next one.</div></div></div>
+          <div class="gstep"><div class="gn">3</div><div><div class="gt">Unlock perks</div><div class="gd">Higher tiers unlock frames, auras and bonuses. Tap any rank to preview its rewards.</div></div></div>
         </div>
         <div class="sec" id="ladderSec">The 10 ranks</div>
         <div class="ladder" id="ladder"></div>
@@ -216,21 +221,34 @@
   setTimeout(function(){ var hf=$('hf'); if(hf) hf.style.width=pct+'%'; },150);
 
   // section label driven by the data so it never drifts from the list
-  var secEl=$('ladderSec'); if(secEl) secEl.textContent='The '+RANKS.length+' ranks';
+  var secEl=$('ladderSec'); if(secEl) secEl.textContent='The ladder · '+RANKS.length+' ranks';
 
-  // ladder
-  $('ladder').innerHTML=RANKS.map(function(r,i){
+  // ladder — grouped by tier (Novice, Initiate, … Vanguard)
+  function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+  var groups=[];
+  RANKS.forEach(function(r,i){
+    var tier=(r.key||'').split('-')[0];
+    var g=groups[groups.length-1];
+    if(!g||g.tier!==tier){ g={tier:tier,color:r.color,rows:[]}; groups.push(g); }
+    g.rows.push({r:r,i:i});
+  });
+  function rowHTML(r,i){
     var state = i<idx?'unlocked' : i===idx?'current':'locked';
     var pill = state==='current'?'<span class="lr-pill cur">Current</span>'
       : state==='unlocked'?'<span class="lr-pill unl">Unlocked</span>'
       : '<span class="lr-pill lock">'+fmt(r.xp)+' XP</span>';
     var aria=r.name+', rank '+(i+1)+' of '+RANKS.length+', '
       +(state==='current'?'your current rank':state==='unlocked'?'unlocked':'locked — unlocks at '+fmt(r.xp)+' XP');
-    return '<button class="lr '+state+'" data-i="'+i+'" style="--rc:'+r.color+';animation-delay:'+(0.04*i).toFixed(2)+'s" aria-label="'+aria+'">'
+    return '<button class="lr '+state+'" data-i="'+i+'" style="--rc:'+r.color+';animation-delay:'+(0.03*i).toFixed(2)+'s" aria-label="'+aria+'">'
       +'<span class="lr-gem">'+gemImg(r)+'</span>'
-      +'<span class="lr-body"><span class="lr-name">'+r.name+'</span><span class="lr-xp">Rank '+pad(i+1)+' · '+(i===0?'Start':fmt(r.xp)+' XP')+'</span></span>'
+      +'<span class="lr-body"><span class="lr-name">'+r.name+'</span><span class="lr-xp">'+(i===0?'Starting rank':fmt(r.xp)+' XP')+'</span></span>'
       +'<span class="lr-right">'+pill+'<svg class="lr-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>'
       +'</button>';
+  }
+  $('ladder').innerHTML=groups.map(function(g){
+    return '<div class="tier" style="--tc:'+g.color+'">'
+      +'<div class="tier-head"><span class="tier-name">'+cap(g.tier)+'</span><span class="tier-line"></span></div>'
+      +'<div class="tier-rows">'+g.rows.map(function(o){return rowHTML(o.r,o.i);}).join('')+'</div></div>';
   }).join('');
 
   // for higher ranks, ease the current row into view (low ranks already sit
