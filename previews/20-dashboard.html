@@ -508,6 +508,10 @@ body.edit-active .nav{display:none;}
     filter:drop-shadow(0 0 24px color-mix(in srgb,var(--rkc,#0A84FF) 60%,transparent));
     animation:lsGemFloat 5s ease-in-out infinite;}
   @keyframes lsGemFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+  .ls-ring-gem.rankup img{animation:rankUpPulse .95s cubic-bezier(.22,1.6,.4,1);}
+  @keyframes rankUpPulse{0%{transform:scale(1);}
+    42%{transform:scale(1.26);filter:drop-shadow(0 0 34px color-mix(in srgb,var(--rkc,#0A84FF) 95%,transparent)) brightness(1.45);}
+    100%{transform:scale(1);}}
   .ls-hero-num{font-size:54px;font-weight:900;letter-spacing:-2.2px;line-height:1;color:#fff;margin-top:4px;}
   .ls-hero-lbl{font-size:10.5px;font-weight:800;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-top:7px;}
   .ls-hero-rankname{display:inline-block;margin-top:11px;font-size:15px;font-weight:700;text-decoration:none;}
@@ -1324,24 +1328,41 @@ body.edit-active .nav{display:none;}
 
   // ---- rank header ----
   var RANKS = window.CORE_RANKS || [{name:'Novice I',key:'novice-1',color:'#C77D3A',xp:0}];
-  // count-up animation for numbers
-  function animCount(el,to,fmt){
-    if(!el) return; to=to||0; var from=0, t0=null, dur=900;
+  // count-up animation for numbers (optionally from a given start value)
+  function animCount(el,to,fmt,from){
+    if(!el) return; to=to||0; from=(from==null?0:from); var t0=null, dur=900;
     fmt=fmt||function(n){return Math.round(n).toLocaleString();};
     function step(ts){ if(!t0)t0=ts; var p=Math.min(1,(ts-t0)/dur); var e=1-Math.pow(1-p,3);
       el.textContent=fmt(from+(to-from)*e); if(p<1) requestAnimationFrame(step); }
     requestAnimationFrame(step);
   }
-  (function paintRank(){
-    var xp=parseInt(ls('coreXP','0'),10)||0, idx=0;
-    for(var i=0;i<RANKS.length;i++){ if(xp>=RANKS[i].xp) idx=i; }
-    var r=RANKS[idx];
-    // rank colour drives the centre gem glow + the rank name beneath the ring
+  function rankIdx(xp){ var idx=0; for(var i=0;i<RANKS.length;i++){ if(xp>=RANKS[i].xp) idx=i; } return idx; }
+  function paintRank(fromXp){
+    var xp=parseInt(ls('coreXP','0'),10)||0, idx=rankIdx(xp), r=RANKS[idx];
     var hero=$('lsHero'); if(hero) hero.style.setProperty('--rkc',r.color);
     var g=$('rankBarGem'); if(g) g.innerHTML='<img src="assets/ranks/'+r.key+'.png" alt="'+r.name+'">';
     if($('rankBarName')) $('rankBarName').textContent=r.name;
-    animCount($('rankBarScore'), xp);
-  })();
+    animCount($('rankBarScore'), xp, null, fromXp);
+    return idx;
+  }
+  var curRankIdx = paintRank(0);
+
+  // ── XP simulation: completing tasks earns XP and moves the rank ──
+  var XP_PER_TASK = 25;
+  function awardXp(delta){
+    var xp=parseInt(ls('coreXP','0'),10)||0, prev=rankIdx(xp);
+    var nv=Math.max(0, xp+delta);
+    lsSet('coreXP', String(nv));
+    var newIdx=paintRank(xp);   // animate the number from old → new
+    if(newIdx>prev) rankUp(RANKS[newIdx]);
+    curRankIdx=newIdx;
+  }
+  function rankUp(r){
+    var gem=$('rankBarGem'); if(gem){ gem.classList.remove('rankup'); void gem.offsetWidth; gem.classList.add('rankup'); setTimeout(function(){ gem.classList.remove('rankup'); },1000); }
+    var t=$('toast'); if(t){ t.textContent='⬆ Ranked up — '+r.name+'!'; t.className='toast show'; clearTimeout(t._rt); t._rt=setTimeout(function(){ t.className='toast'; },2600); }
+    try{ window.coreSfx&&window.coreSfx('rankup'); }catch(_){}
+    try{ if(navigator.vibrate) navigator.vibrate([0,45,40,90]); }catch(_){}
+  }
 
   // ---- week day-strip (this week, today highlighted) ----
   (function buildDayStrip(){
@@ -1489,10 +1510,13 @@ body.edit-active .nav{display:none;}
       if(act==='toggle'){
         t.done=!t.done;
         if(cardEl){ cardEl.classList.toggle('done',t.done); if(t.done){ cardEl.classList.remove('pop'); void cardEl.offsetWidth; cardEl.classList.add('pop'); spawnXp(cardEl); } }
+        awardXp(t.done ? XP_PER_TASK : -XP_PER_TASK);
         try{window.coreSfx&&window.coreSfx(t.done?'confirm':'tap');}catch(_){}
       } else if(act==='inc'){
+        var wasDone=t.done;
         t.detail.count=(t.detail.count||0)+1; if(t.detail.count>=t.detail.goal) t.done=true;
-        if(cardEl){ var dl=cardEl.querySelector('.rt-detail'); if(dl) dl.textContent=detailText(t); cardEl.classList.toggle('done',t.done); }
+        if(cardEl){ var dl=cardEl.querySelector('.rt-detail'); if(dl) dl.textContent=detailText(t); cardEl.classList.toggle('done',t.done); if(t.done&&!wasDone) spawnXp(cardEl); }
+        if(t.done&&!wasDone) awardXp(XP_PER_TASK);
         try{window.coreSfx&&window.coreSfx('tick');}catch(_){}
       }
       save(tasks); updateProgress(); return;
@@ -1501,7 +1525,7 @@ body.edit-active .nav{display:none;}
   });
   function byId(id){ for(var i=0;i<tasks.length;i++) if(tasks[i].id===id) return tasks[i]; return null; }
   function spawnXp(cardEl){
-    var fl=document.createElement('div'); fl.className='xp-float'; fl.textContent='+5 XP';
+    var fl=document.createElement('div'); fl.className='xp-float'; fl.textContent='+'+XP_PER_TASK+' XP';
     fl.style.left='14px'; fl.style.top='-2px';
     cardEl.appendChild(fl); setTimeout(function(){ fl.remove(); },1000);
   }
