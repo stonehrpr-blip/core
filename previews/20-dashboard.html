@@ -523,10 +523,8 @@ body.edit-active .nav{display:none;}
   .stat6-ic{width:30px;height:30px;border-radius:9px;flex:none;display:flex;align-items:center;justify-content:center;
     background:color-mix(in srgb,var(--sc) 22%,rgba(255,255,255,0.05));border:1px solid color-mix(in srgb,var(--sc) 36%,transparent);}
   .stat6-ic svg{width:17px;height:17px;stroke:color-mix(in srgb,var(--sc) 80%,#fff);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;}
-  .stat6-val{font-size:21px;font-weight:900;color:#fff;letter-spacing:-0.5px;font-variant-numeric:tabular-nums;}
-  .stat6-name{font-size:12.5px;font-weight:700;color:rgba(255,255,255,0.82);margin-top:9px;}
-  .stat6-graph{margin-top:7px;height:34px;}
-  .stat6-graph svg{width:100%;height:100%;display:block;overflow:visible;}
+  .stat6-name{font-size:12.5px;font-weight:700;color:rgba(255,255,255,0.82);margin-top:10px;}
+  .stat6-val{font-size:30px;font-weight:900;color:var(--sc,#fff);letter-spacing:-1px;font-variant-numeric:tabular-nums;margin-top:4px;line-height:1;}
 
   /* routine heading + guidance */
   .rt-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;padding:0 2px;}
@@ -1387,20 +1385,10 @@ body.edit-active .nav{display:none;}
     box.innerHTML=STATS.map(function(s){
       var v=Math.max(0,Math.min(100,Math.round(st[s.model]||0)));
       return '<a class="stat6" href="'+s.page+'" style="--sc:'+s.color+'">'
-        +'<div class="stat6-top"><span class="stat6-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'+s.icon+'</svg></span><span class="stat6-val" data-v="'+v+'">0</span></div>'
+        +'<div class="stat6-top"><span class="stat6-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'+s.icon+'</svg></span></div>'
         +'<div class="stat6-name">'+s.name+'</div>'
-        +'<div class="stat6-graph" data-k="'+s.key+'"></div></a>';
+        +'<div class="stat6-val" data-v="'+v+'">0</div></a>';
     }).join('');
-    // line graphs (same engine as the original Stat Trends)
-    var DC=window.dashCharts;
-    if(DC){
-      var pts=DC.getHistory(30);
-      var reduced=!!(window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches);
-      STATS.forEach(function(s){
-        var g=box.querySelector('.stat6-graph[data-k="'+s.key+'"]');
-        if(g) DC.lineChart(g,{values:DC.series(pts,s.model),labels:[],color:s.color,height:34,reducedMotion:reduced,animate:true});
-      });
-    }
     setTimeout(function(){
       box.querySelectorAll('.stat6-val').forEach(function(el){ animCount(el, +el.getAttribute('data-v')); });
     },160);
