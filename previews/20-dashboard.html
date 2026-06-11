@@ -514,18 +514,6 @@ body.edit-active .nav{display:none;}
   .ls-hero-rankname b{color:var(--rkc,#0A84FF);font-weight:900;font-style:italic;text-transform:uppercase;letter-spacing:-0.2px;}
   .ls-hero-xp{color:var(--muted);font-weight:600;font-size:13px;}
 
-  /* the 6 life scores */
-  .stats6{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
-  .stat6{display:block;padding:13px 14px;border-radius:16px;text-decoration:none;
-    background:linear-gradient(135deg, color-mix(in srgb,var(--sc,#0A84FF) 14%, rgba(255,255,255,0.03)), rgba(255,255,255,0.02));
-    border:1px solid color-mix(in srgb,var(--sc,#0A84FF) 24%, rgba(255,255,255,0.07));transition:transform .12s;}
-  .stat6:active{transform:scale(.985);}
-  .stat6-top{display:flex;align-items:center;justify-content:space-between;}
-  .stat6-ic{width:30px;height:30px;border-radius:9px;flex:none;display:flex;align-items:center;justify-content:center;
-    background:color-mix(in srgb,var(--sc) 22%,rgba(255,255,255,0.05));border:1px solid color-mix(in srgb,var(--sc) 36%,transparent);}
-  .stat6-ic svg{width:17px;height:17px;stroke:color-mix(in srgb,var(--sc) 80%,#fff);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;}
-  .stat6-name{font-size:12.5px;font-weight:700;color:rgba(255,255,255,0.82);margin-top:10px;}
-  .stat6-val{font-size:30px;font-weight:900;color:var(--sc,#fff);letter-spacing:-1px;font-variant-numeric:tabular-nums;margin-top:4px;line-height:1;}
 
   /* routine heading + guidance */
   .rt-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;padding:0 2px;}
@@ -754,12 +742,8 @@ body.edit-active .nav{display:none;}
       <!-- Week day-strip, right under the rank -->
       <div class="daystrip" id="dayStrip"></div>
 
-      <!-- The 6 life scores -->
-      <div class="rt-head"><div><span class="rt-title">Life Scores</span><span class="rt-sub">Tap a stat to dive in</span></div></div>
-      <div class="stats6" id="stats6"></div>
-
-      <!-- Stat trends (per-stat line graphs) -->
-      <div class="rt-head" style="margin-top:22px"><div><span class="rt-title">Stat trends</span><span class="rt-sub">Your last 30 days</span></div></div>
+      <!-- Life Scores — shown as per-stat trend graphs -->
+      <div class="rt-head"><div><span class="rt-title">Life Scores</span><span class="rt-sub">Tap a stat to dive in · last 30 days</span></div></div>
       <div class="dc-mini-grid trends-card" id="statTrends"></div>
 
       <!-- Routine to-do -->
@@ -1384,22 +1368,7 @@ body.edit-active .nav{display:none;}
     {key:'social',name:'Social',model:'social',color:'#B388FF',page:'social.html',icon:'<circle cx="9" cy="8" r="3.2"/><path d="M3.4 20a5.6 5.6 0 0 1 11.2 0M16 5.2a3.2 3.2 0 0 1 0 6M18.7 20a5.6 5.6 0 0 0-3.1-5"/>'},
     {key:'purpose',name:'Purpose',model:'willpower',color:'#5EEAD4',page:'willpower.html',icon:'<circle cx="12" cy="12" r="8.5"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z"/>'}
   ];
-  function paintStats(){
-    var box=$('stats6'); if(!box) return;
-    var st={}; try{ st=(window.coreState && coreState.read && coreState.read().stats)||{}; }catch(e){}
-    box.innerHTML=STATS.map(function(s){
-      var v=Math.max(0,Math.min(100,Math.round(st[s.model]||0)));
-      return '<a class="stat6" href="'+s.page+'" style="--sc:'+s.color+'">'
-        +'<div class="stat6-top"><span class="stat6-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'+s.icon+'</svg></span></div>'
-        +'<div class="stat6-name">'+s.name+'</div>'
-        +'<div class="stat6-val" data-v="'+v+'">0</div></a>';
-    }).join('');
-    setTimeout(function(){
-      box.querySelectorAll('.stat6-val').forEach(function(el){ animCount(el, +el.getAttribute('data-v')); });
-    },160);
-  }
-
-  // Per-stat trend line graphs — now a fixed section on the main dashboard.
+  // Life Scores — rendered as per-stat trend graphs (name + value + 30d trend).
   function paintTrends(){
     var box=$('statTrends'); if(!box) return;
     var DC=window.dashCharts; if(!DC) return;
@@ -1734,7 +1703,6 @@ body.edit-active .nav{display:none;}
 
   render(true);
   paintLifeScore();
-  paintStats();
   paintTrends();
   window.addEventListener('coreStateChange', paintTrends);
 })();
