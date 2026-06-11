@@ -176,6 +176,27 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .progb-s{font-size:11.5px;color:var(--muted);}
 .progb-go{font-size:13px;font-weight:800;color:#1a1226;background:#B388FF;padding:9px 16px;border-radius:11px;flex:none;}
 .ov-empty,.rec-empty2{padding:24px;text-align:center;color:var(--dim);font-size:12.5px;border-radius:18px;background:var(--card);border:1px solid var(--line,var(--border));}
+/* Physique progress card */
+.phy{border-radius:18px;background:var(--card);border:1px solid var(--border);padding:14px;}
+.phy-top{display:flex;align-items:center;gap:14px;margin-bottom:12px;}
+.phy-score{width:58px;height:58px;flex:none;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:color-mix(in srgb,var(--str) 16%,transparent);border:1px solid color-mix(in srgb,var(--str) 34%,transparent);}
+.phy-score b{font-size:22px;font-weight:900;color:var(--str);line-height:1;}
+.phy-score span{font-size:8px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:2px;}
+.phy-meta{flex:1;min-width:0;}
+.phy-meta b{font-size:14px;font-weight:800;color:#fff;display:block;}
+.phy-meta span{font-size:11.5px;color:var(--dim);}
+.phy-new{flex:none;font-size:12px;font-weight:800;color:#fff;background:var(--str);padding:8px 14px;border-radius:11px;text-decoration:none;}
+.phy-shots{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+.phy-shots .pc{text-align:center;}
+.phy-shots .pc img{width:100%;aspect-ratio:.62;object-fit:cover;border-radius:9px;border:1px solid var(--border);background:#05050c;display:block;}
+.phy-shots .pc span{font-size:8px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin-top:3px;display:block;}
+.phy-empty{border-radius:18px;background:var(--card);border:1px solid var(--border);padding:18px;display:flex;align-items:center;gap:14px;}
+.phy-empty .pe-ic{width:46px;height:46px;flex:none;border-radius:13px;display:flex;align-items:center;justify-content:center;color:var(--str);
+  background:color-mix(in srgb,var(--str) 14%,transparent);border:1px solid color-mix(in srgb,var(--str) 30%,transparent);}
+.phy-empty .pe-ic svg{width:24px;height:24px;}
+.phy-empty .pe-tx{flex:1;}.phy-empty .pe-tx b{font-size:13.5px;font-weight:800;color:#fff;display:block;}
+.phy-empty .pe-tx span{font-size:11.5px;color:var(--dim);}
 /* AI program builder */
 .prog-scroll{overflow-y:auto;-webkit-overflow-scrolling:touch;padding-top:4px;}
 .prog-q{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin:16px 2px 9px;}
@@ -459,6 +480,10 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
       <!-- Personal records -->
       <div class="sec"><h2>Personal Records</h2><span class="meta" id="prMeta"></span></div>
       <div class="card pr-card" id="prCard"></div>
+
+      <!-- Physique progress (latest scan photos + score) -->
+      <div class="sec"><h2>Physique</h2><span class="meta" id="phyMeta"></span></div>
+      <div id="physiqueCard"></div>
 
       <!-- 3. Workout section (setup OR active) -->
       <div id="workout"></div>
@@ -787,6 +812,36 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     var meta=qs('#recMeta'); if(meta) meta.textContent=ready+' ready to train';
   }
 
+  // ── Physique progress: latest scan score + the saved angle photos ──
+  function lsj(k){ try{ return JSON.parse(localStorage.getItem(k)||'null'); }catch(e){ return null; } }
+  function renderPhysique(){
+    var host=qs('#physiqueCard'); if(!host) return;
+    var scans=(lsj('coreScans.v1')||[]).filter(function(x){return x&&x.type==='physique';});
+    var shots=lsj('corePhysiqueShots.v1');
+    var last=scans.length?scans[scans.length-1]:null;
+    var meta=qs('#phyMeta'); if(meta) meta.textContent= last?(scans.length+' scan'+(scans.length>1?'s':'')):'';
+    if(!last && !(shots&&shots.shots&&shots.shots.length)){
+      host.innerHTML='<a class="phy-empty" href="physique-scan.html"><span class="pe-ic">'
+        +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg></span>'
+        +'<span class="pe-tx"><b>Take your first physique scan</b><span>360° body scan · tracked over time</span></span>'
+        +'<span class="phy-new">Scan</span></a>';
+      return;
+    }
+    var imgs='';
+    if(shots&&shots.shots&&shots.shots.length){
+      imgs='<div class="phy-shots">'+['front','right','back','left'].map(function(k){
+        var sh=null; for(var i=0;i<shots.shots.length;i++){ if(shots.shots[i].k===k){ sh=shots.shots[i]; break; } }
+        var inner=(sh&&sh.url)?'<img src="'+sh.url+'" alt="'+k+'"/>':'<div style="aspect-ratio:.62;border-radius:9px;background:rgba(255,255,255,.05);border:1px solid var(--border)"></div>';
+        return '<div class="pc">'+inner+'<span>'+k+'</span></div>';
+      }).join('')+'</div>';
+    }
+    var score=last?last.score:'—', when=last?ago(last.ts):(shots?ago(shots.ts):'');
+    host.innerHTML='<div class="phy"><div class="phy-top">'
+      +'<div class="phy-score"><b>'+score+'</b><span>Score</span></div>'
+      +'<div class="phy-meta"><b>Physique score</b><span>Last scan '+when+'</span></div>'
+      +'<a class="phy-new" href="physique-scan.html">New scan</a></div>'+imgs+'</div>';
+  }
+
   // ── Dynamic greeting meta + Coach's Pick from the real training data ──
   function renderHeaderInsight(){
     var s=store(), hist=s.history||[], inten=allIntensity();
@@ -965,7 +1020,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     addBody(strGain,'workout:'+id); addXp(xpGain,'workout:'+id);
     sfx('xp');
     closeSheet();
-    renderChip(); renderDiagram(); renderWorkout(); renderOverview(); renderPRs(); renderRecovery(); renderHeaderInsight();
+    renderChip(); renderDiagram(); renderWorkout(); renderOverview(); renderPRs(); renderRecovery(); renderPhysique(); renderHeaderInsight();
     if(prHits.length){ sfx('reward'); toast('🏆 New PR — '+prHits[0]+(prHits.length>1?(' +'+(prHits.length-1)+' more'):'')); }
     else { toast('+'+strGain+' Strength · +'+xpGain+' XP'); }
   });
@@ -1062,7 +1117,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     s.history.unshift({id:id2,ts:Date.now(),muscle:primary,exercises:entries,totalSets:totalSets,xp:xpGain,str:strGain,routine:r.name});
     if(s.history.length>60) s.history.length=60; save(s);
     addBody(strGain,'workout:'+id2); addXp(xpGain,'workout:'+id2); sfx('xp');
-    renderChip(); renderDiagram(); renderWorkout(); renderOverview(); renderPRs(); renderRecovery(); renderHeaderInsight(); toast('Logged '+r.name+' · +'+strGain+' STR');
+    renderChip(); renderDiagram(); renderWorkout(); renderOverview(); renderPRs(); renderRecovery(); renderPhysique(); renderHeaderInsight(); toast('Logged '+r.name+' · +'+strGain+' STR');
   }
 
   /* ───────── Bodyweight tab ───────── */
@@ -1161,9 +1216,10 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   var apBtn=qs('#actProgram'); if(apBtn) apBtn.addEventListener('click',function(){ sfx('tick'); openProgram(); });
   progScrim.addEventListener('click',closeProgram);
 
-  renderChip(); renderDiagram(); renderWorkout(); renderOverview(); renderPRs(); renderRecovery(); renderHeaderInsight();
+  renderChip(); renderDiagram(); renderWorkout(); renderOverview(); renderPRs(); renderRecovery(); renderPhysique(); renderHeaderInsight();
   window.addEventListener('coreStateChange',renderChip);
-  window.addEventListener('focus',function(){ renderDiagram(); });
+  window.addEventListener('focus',function(){ renderDiagram(); renderPhysique(); });
+  document.addEventListener('visibilitychange',function(){ if(!document.hidden) renderPhysique(); });
 })();
 </script>
 <script>
