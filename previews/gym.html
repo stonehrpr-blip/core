@@ -147,6 +147,25 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 
 /* ── History ── */
 .hist{display:flex;flex-direction:column;}
+/* Training overview */
+.ov{padding:16px 16px 14px;}
+.ov-stats{display:flex;gap:10px;margin-bottom:15px;}
+.ov-stat{flex:1;text-align:center;}
+.ov-stat .v{font-size:23px;font-weight:900;color:#fff;letter-spacing:-0.6px;line-height:1;}
+.ov-stat .v.up{color:var(--good);}
+.ov-stat .v.dn{color:var(--str);}
+.ov-stat .k{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-top:5px;}
+.ov-cal-dow{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:5px;}
+.ov-cal-dow span{text-align:center;font-size:9px;font-weight:800;color:var(--dim);text-transform:uppercase;}
+.ov-week{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:5px;}
+.ov-cell{aspect-ratio:1;border-radius:7px;background:rgba(255,255,255,0.045);border:1px solid rgba(255,255,255,0.05);
+  display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;color:var(--dim);}
+.ov-cell.trained{background:color-mix(in srgb,var(--str) 62%,transparent);border-color:color-mix(in srgb,var(--str) 85%,transparent);color:#fff;}
+.ov-cell.today{box-shadow:0 0 0 2px var(--text);}
+.ov-cell.future{opacity:.35;}
+.ov-imp{display:flex;align-items:center;gap:9px;margin-top:13px;padding-top:13px;border-top:1px solid var(--border);font-size:12.5px;color:var(--muted);line-height:1.4;}
+.ov-imp svg{width:17px;height:17px;flex:none;}
+.ov-imp b{color:#fff;font-weight:800;}
 .hrow{display:flex;align-items:center;gap:11px;padding:12px 14px;border-bottom:1px solid var(--border);}
 .hrow:last-child{border-bottom:none;}
 .hrow .hi{width:32px;height:32px;flex:none;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--mc);background:color-mix(in srgb,var(--mc) 15%,transparent);border:1px solid color-mix(in srgb,var(--mc) 30%,transparent);}
@@ -345,6 +364,10 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
           <b>Build a Program</b><span>Your custom plan</span>
         </button>
       </div>
+
+      <!-- Training overview — show-up calendar, gaps, week-over-week -->
+      <div class="sec"><h2>Training overview</h2><span class="meta" id="ovMeta"></span></div>
+      <div class="card ov" id="trainOverview"></div>
 
       <!-- 2. Muscle map — colour-coded by training; tiny inline body-type toggle -->
       <div class="sec"><h2>Muscle Map</h2><span class="meta" id="lastTrained"></span></div>
@@ -578,6 +601,46 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   }
   function ago(ts){ var s=Math.max(1,(Date.now()-ts)/1000); if(s<3600)return Math.round(s/60)+'m ago'; var h=s/3600; if(h<24)return Math.round(h)+'h ago'; return Math.round(h/24)+'d ago'; }
 
+  // ── Training overview: when you show up, gaps, week-over-week ──
+  function dKey(d){ return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
+  function renderOverview(){
+    var host=qs('#trainOverview'); if(!host) return;
+    var hist=(store().history||[]);
+    var trained={}; hist.forEach(function(h){ if(h&&h.ts) trained[dKey(new Date(h.ts))]=true; });
+    var today=new Date(); today.setHours(0,0,0,0); var dow=today.getDay();
+    function wkSessions(off){ var sun=new Date(today); sun.setDate(today.getDate()-dow-7*off); var c=0;
+      for(var i=0;i<7;i++){ var d=new Date(sun); d.setDate(sun.getDate()+i); if(d<=today&&trained[dKey(d)]) c++; } return c; }
+    var thisW=wkSessions(0), lastW=wkSessions(1), diff=thisW-lastW;
+    var d30=0; for(var i=0;i<30;i++){ var d=new Date(today); d.setDate(today.getDate()-i); if(trained[dKey(d)]) d30++; }
+    var gap=0,maxGap=0; for(var j=34;j>=0;j--){ var dd=new Date(today); dd.setDate(today.getDate()-j);
+      if(trained[dKey(dd)]) gap=0; else { gap++; if(gap>maxGap) maxGap=gap; } }
+    // 5-week calendar grid (Sun-start), ending this week
+    var startSun=new Date(today); startSun.setDate(today.getDate()-dow-7*4);
+    var dows=['S','M','T','W','T','F','S'];
+    var cal='<div class="ov-cal-dow">'+dows.map(function(x){return '<span>'+x+'</span>';}).join('')+'</div>';
+    for(var w=0; w<5; w++){
+      cal+='<div class="ov-week">';
+      for(var k=0;k<7;k++){
+        var c=new Date(startSun); c.setDate(startSun.getDate()+w*7+k); c.setHours(0,0,0,0);
+        var isT=trained[dKey(c)], isToday=c.getTime()===today.getTime(), isFut=c.getTime()>today.getTime();
+        cal+='<div class="ov-cell'+(isT?' trained':'')+(isToday?' today':'')+(isFut?' future':'')+'">'+c.getDate()+'</div>';
+      }
+      cal+='</div>';
+    }
+    var imp = diff>0 ? '<b>'+diff+' more</b> session'+(diff>1?'s':'')+' than last week — keep it rolling.'
+      : diff<0 ? '<b>'+Math.abs(diff)+' fewer</b> than last week — get one in today.'
+      : (thisW>0?'Matching last week. One more pulls you ahead.':'No sessions yet this week — start strong.');
+    var icon = diff>=0 ? '<path d="M3 17l6-6 4 4 7-8"/><path d="M21 7v5h-5"/>' : '<path d="M3 7l6 6 4-4 7 8"/><path d="M21 17v-5h-5"/>';
+    host.innerHTML=
+      '<div class="ov-stats">'
+      +'<div class="ov-stat"><div class="v '+(diff>0?'up':diff<0?'dn':'')+'">'+thisW+'</div><div class="k">This week</div></div>'
+      +'<div class="ov-stat"><div class="v">'+d30+'</div><div class="k">30-day</div></div>'
+      +'<div class="ov-stat"><div class="v">'+maxGap+'</div><div class="k">Days skipped</div></div>'
+      +'</div>'+cal
+      +'<div class="ov-imp"><svg viewBox="0 0 24 24" fill="none" stroke="'+(diff>=0?'var(--good)':'var(--str)')+'" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'+icon+'</svg><span>'+imp+'</span></div>';
+    var meta=qs('#ovMeta'); if(meta) meta.textContent=d30+' in 30 days';
+  }
+
   /* ───────── Workout section: setup OR active ───────── */
   var pendingSetup={place:null,equipment:null,goal:null};
   function renderWorkout(){
@@ -719,7 +782,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     addBody(strGain,'workout:'+id); addXp(xpGain,'workout:'+id);
     sfx('xp');
     closeSheet();
-    renderChip(); renderDiagram(); renderWorkout();
+    renderChip(); renderDiagram(); renderWorkout(); renderOverview();
     toast('+'+strGain+' Strength · +'+xpGain+' XP');
   });
 
@@ -742,11 +805,12 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
         /* back intentionally absent -> undertrained insight */
       };
       if(!d.history.length){
-        d.history=[
-          {id:'wd1',ts:now-1*86400000,muscle:'chest',exercises:[{name:'Bench Press',sets:4,reps:8,weight:60},{name:'Cable Fly',sets:3,reps:12,weight:0}],totalSets:7,xp:71,str:2},
-          {id:'wd2',ts:now-2*86400000,muscle:'arms',exercises:[{name:'Curls',sets:3,reps:12,weight:14}],totalSets:3,xp:39,str:1},
-          {id:'wd3',ts:now-3*86400000,muscle:'legs',exercises:[{name:'Squats',sets:4,reps:8,weight:80}],totalSets:4,xp:42,str:1}
-        ];
+        // ~5 weeks of sessions with realistic gaps (powers the training overview)
+        var H=[[1,'chest',7],[2,'arms',3],[3,'legs',4],[6,'back',5],[8,'chest',6],
+               [10,'shoulders',4],[13,'legs',5],[15,'arms',3],[17,'core',3],
+               [20,'chest',6],[22,'back',5],[24,'legs',4],[29,'arms',3],[31,'chest',6]];
+        d.history=H.map(function(e,i){ return {id:'wd'+i,ts:now-e[0]*86400000,muscle:e[1],
+          exercises:[{name:'Session',sets:e[2],reps:8,weight:60}],totalSets:e[2],xp:e[2]*10,str:1}; });
       }
       if(!d.routines||!d.routines.length){ d.routines=[{id:'rd1',name:'Push Day',exercises:[{muscle:'chest',name:'Bench Press'},{muscle:'shoulders',name:'Overhead Press'},{muscle:'arms',name:'Tricep Dips'}],ts:now-2*86400000}]; }
       if(!d.bodyweight||!d.bodyweight.length){ d.bodyweight=[{ts:now-28*86400000,kg:82.5},{ts:now-21*86400000,kg:82},{ts:now-14*86400000,kg:81.3},{ts:now-7*86400000,kg:80.8},{ts:now-86400000,kg:80.4}]; }
@@ -810,7 +874,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     s.history.unshift({id:id2,ts:Date.now(),muscle:primary,exercises:entries,totalSets:totalSets,xp:xpGain,str:strGain,routine:r.name});
     if(s.history.length>60) s.history.length=60; save(s);
     addBody(strGain,'workout:'+id2); addXp(xpGain,'workout:'+id2); sfx('xp');
-    renderChip(); renderDiagram(); renderWorkout(); toast('Logged '+r.name+' · +'+strGain+' STR');
+    renderChip(); renderDiagram(); renderWorkout(); renderOverview(); toast('Logged '+r.name+' · +'+strGain+' STR');
   }
 
   /* ───────── Bodyweight tab ───────── */
@@ -835,7 +899,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   Array.prototype.forEach.call(document.querySelectorAll('#genderToggle .gt-opt'),function(b){
     b.addEventListener('click',function(){ setGender(this.getAttribute('data-g')); sfx('tick'); renderDiagram(); });
   });
-  renderChip(); renderDiagram(); renderWorkout();
+  renderChip(); renderDiagram(); renderWorkout(); renderOverview();
   window.addEventListener('coreStateChange',renderChip);
   window.addEventListener('focus',function(){ renderDiagram(); });
 })();
