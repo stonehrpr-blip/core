@@ -153,6 +153,9 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
 .snap-cell{flex:1;max-width:74px;text-align:center;}
 .snap-cell img{width:100%;aspect-ratio:.62;object-fit:cover;border-radius:10px;border:1px solid var(--border);background:#05050c;display:block;}
 .snap-ph{width:100%;aspect-ratio:.62;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid var(--border);}
+.nb-ic{width:70px;height:70px;margin:8px auto 14px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  color:var(--sc,#FF6B6B);background:color-mix(in srgb,var(--sc,#FF6B6B) 14%,transparent);border:1px solid color-mix(in srgb,var(--sc,#FF6B6B) 32%,transparent);}
+.nb-ic svg{width:34px;height:34px;}
 .snap-cell span{display:block;font-size:8.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:4px;}
 
 /* analyzing overlay */
@@ -299,6 +302,8 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
   <div class="toast" id="toast"></div>
 </div>
 
+<script src="_lib/core-config.js"></script>
+<script src="_lib/core-sfx.js"></script>
 <script>
 (function(){
   "use strict";
@@ -396,6 +401,7 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
   var snapDataUrl=null, audioCtx=null, analyser=null, waveRAF=null;
   var isPhysique=(type==='physique'), shots=[];
   var detector=null, poseRAF=null, gateStable=0;
+  var aiResult=null, aiPending=false;
   var ANG=[{k:'front',label:'Face the camera'},{k:'right',label:'Turn to your right side'},
            {k:'back',label:'Turn around — back to camera'},{k:'left',label:'Turn to your left side'}];
 
@@ -477,8 +483,16 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
       anPct.textContent=Math.round(p)+'%';
       anFg.setAttribute('stroke-dashoffset', AN_C*(1-p/100));
       anLbl.textContent=labels[Math.min(labels.length-1, Math.floor(p/26))];
-      if(p>=100){ clearInterval(iv); setTimeout(function(){ an.classList.remove('on'); showResult(); }, 320); }
+      if(p>=100){ clearInterval(iv); finishAnalyze(an); }
     }, 180);
+  }
+  function finishAnalyze(an){
+    var t0=Date.now();
+    (function chk(){
+      if(!aiPending || Date.now()-t0>6000){ an.classList.remove('on'); showResult(); return; }
+      $('#anLbl').textContent='Scoring with AI…';
+      setTimeout(chk, 200);
+    })();
   }
   function runAnalyze(){   // single-capture types (food, outfit, looks, posture)
     cam.classList.add('scanning');
@@ -585,14 +599,63 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
     stopCam();
     // keep the captured angles in the "backfiles" (latest physique scan)
     try{ lsSet('corePhysiqueShots.v1', JSON.stringify({ ts:Date.now(), shots:shots })); }catch(e){}
+    // kick off the real vision-AI scoring in parallel with the analyze animation
+    aiResult=null; aiPending=true;
+    requestPhysiqueAI().then(function(r){ aiResult=r; aiPending=false; }).catch(function(){ aiResult=null; aiPending=false; });
     doAnalyze();
+  }
+  // Send the front photo to the physique-scan vision backend; resolve with its
+  // read, or reject → the result falls back to the simulated score.
+  function requestPhysiqueAI(){
+    return new Promise(function(resolve,reject){
+      var c=window.CORE_CONFIG;
+      if(!c||!c.SUPABASE_URL||!c.SUPABASE_ANON_KEY){ reject(); return; }
+      var img=null;
+      for(var i=0;i<shots.length;i++){ if(shots[i].k==='front'&&shots[i].url){ img=shots[i].url; break; } }
+      if(!img){ for(var j=0;j<shots.length;j++){ if(shots[j].url){ img=shots[j].url; break; } } }
+      if(!img){ reject(); return; }
+      fetch(c.SUPABASE_URL+'/functions/v1/physique-scan',{
+        method:'POST',
+        headers:{ 'content-type':'application/json','authorization':'Bearer '+c.SUPABASE_ANON_KEY,'apikey':c.SUPABASE_ANON_KEY },
+        body:JSON.stringify({ image: img, mediaType:'image/jpeg' })
+      }).then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(d){ if(d && (d.isBody===true || d.isBody===false)) resolve(d); else reject(); })
+        .catch(reject);
+    });
   }
 
   // ── result ──
   function pick(arr,k){ var a=arr.slice(), out=[]; while(a.length&&out.length<k){ out.push(a.splice(Math.floor(Math.random()*a.length),1)[0]); } return out; }
+  function showNotBody(){
+    var res=$('#result');
+    res.innerHTML='<button class="res-close" id="resClose" type="button" aria-label="Done">'+svg('<path d="M6 6l12 12M18 6L6 18"/>')+'</button>'
+      +'<div class="nb-ic">'+svg('<circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/>')+'</div>'
+      +'<div class="res-title">Couldn’t read a body</div>'
+      +'<div class="res-sub">Stand back so your whole body is in frame, in good light, and scan again.</div>'
+      +'<div class="res-actions"><button class="btn save" id="btnAgain2" type="button">'+svg('<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>')+'Scan again</button></div>';
+    res.classList.add('on');
+    $('#resClose').addEventListener('click', function(){ res.classList.remove('on'); });
+    $('#btnAgain2').addEventListener('click', function(){ res.classList.remove('on'); openCam(); });
+  }
   function showResult(){
-    var score=62+Math.floor(Math.random()*33); // 62–94
-    var tips=pick(s.tips,3);
+    var ai = isPhysique ? aiResult : null;
+    if(ai && ai.isBody===false){ showNotBody(); return; }
+    var score, tips, gradeTxt, subTxt;
+    if(ai && ai.rank && typeof ai.rank.score==='number'){
+      score=Math.max(0,Math.min(100,Math.round(ai.rank.score)));
+      gradeTxt=ai.rank.tier || grade(score);
+      var WP={chest:'Add incline pressing for upper-chest fullness.',back:'2 pull sessions a week to widen your back.',shoulders:'Lateral raises to round out your delts.',arms:'Direct curls + extensions to bring your arms up.',legs:'Prioritise squats — your legs need the volume.',core:'Tighten nutrition and add core work to sharpen the midsection.'};
+      tips=[]; if(ai.summary) tips.push(ai.summary);
+      (ai.weakPoints||[]).forEach(function(k){ if(WP[k]) tips.push(WP[k]); });
+      if(!tips.length) tips=pick(s.tips,3);
+      tips=tips.slice(0,4);
+      subTxt='Scored by CORE vision AI from your photo.';
+    } else {
+      score=62+Math.floor(Math.random()*33);
+      tips=pick(s.tips,3);
+      gradeTxt=grade(score);
+      subTxt=cam._demo?'Demo result — allow camera for a real scan.':'Based on your '+s.name.toLowerCase()+' scan just now.';
+    }
     var R=78, C=2*Math.PI*R;
     var res=$('#result');
     // physique → gallery of the 4 captured angles; others → single snapshot
@@ -614,9 +677,9 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
         +'<text x="86" y="80" text-anchor="middle" class="res-num" id="resNum" fill="#fff" style="font:900 46px -apple-system,sans-serif;letter-spacing:-2px">0</text>'
         +'<text x="86" y="104" text-anchor="middle" fill="#9AA1B7" style="font:700 13px -apple-system,sans-serif" id="resOf">/ 100</text>'
       +'</svg>'
-      +'<div class="res-grade">'+grade(score)+'</div></div>'
+      +'<div class="res-grade">'+gradeTxt+'</div></div>'
       +'<div class="res-title">'+s.label+'</div>'
-      +'<div class="res-sub">'+(cam._demo?'Demo result — allow camera for a real scan.':'Based on your '+s.name.toLowerCase()+' scan just now.')+'</div>'
+      +'<div class="res-sub">'+subTxt+'</div>'
       +'<div class="res-sec">Coach notes</div>'
       +tips.map(function(t){return '<div class="tip"><div class="ti">'+svg('<path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="3.2"/>')+'</div><span>'+t+'</span></div>';}).join('')
       +'<div class="res-actions">'
