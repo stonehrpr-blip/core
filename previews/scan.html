@@ -122,6 +122,39 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
 .cam.voice .wave{display:flex;}
 .wave b{width:6px;border-radius:3px;background:var(--sc,#0A84FF);height:10px;box-shadow:0 0 10px color-mix(in srgb,var(--sc,#0A84FF) 60%,transparent);}
 
+/* ── Physique 360 capture ── */
+#GREEN{--g:#34D399;}
+.phyz{position:absolute;inset:0;z-index:2;display:none;}
+.cam.physique .reticle,.cam.physique .scanline{display:none!important;}
+.cam.physique .phyz{display:block;}
+.phyz-ring{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);width:252px;height:252px;}
+.phyz-svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);}
+.phyz-svg circle{fill:none;stroke-width:5;}
+.pr-bg{stroke:rgba(255,255,255,0.16);}
+.pr-fg{stroke:#34D399;stroke-linecap:round;stroke-dasharray:590.6;stroke-dashoffset:590.6;
+  transition:stroke-dashoffset .55s cubic-bezier(.22,1,.36,1);filter:drop-shadow(0 0 7px rgba(52,211,153,.7));}
+.phyz-guide{position:absolute;inset:16px;border-radius:50%;border:2px dashed rgba(255,255,255,0.34);}
+.phyz-body{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:78px;height:118px;color:rgba(255,255,255,0.5);}
+.phyz-body svg{width:100%;height:100%;}
+.phyz-bar{position:absolute;left:18px;right:18px;height:4px;border-radius:4px;top:18px;display:none;
+  background:linear-gradient(90deg,transparent,#34D399,transparent);box-shadow:0 0 18px 4px rgba(52,211,153,.65);}
+.cam.phyz-scanning .phyz-bar{display:block;animation:phyzSweep 1.5s ease-in-out infinite;}
+@keyframes phyzSweep{0%{top:20px;}50%{top:228px;}100%{top:20px;}}
+.cam.phyz-scanning .phyz-guide{border-color:rgba(52,211,153,0.6);}
+.phyz-count{position:absolute;left:0;right:0;top:calc(40% + 150px);text-align:center;color:#fff;font-size:34px;font-weight:900;
+  text-shadow:0 2px 14px rgba(0,0,0,.6);min-height:42px;}
+.phyz-dots{position:absolute;left:0;right:0;bottom:128px;display:flex;justify-content:center;gap:10px;}
+.phyz-dots .pd{width:30px;height:5px;border-radius:3px;background:rgba(255,255,255,0.22);transition:.3s;}
+.phyz-dots .pd.on{background:#34D399;box-shadow:0 0 10px rgba(52,211,153,.7);}
+.phyz-flash{position:absolute;inset:0;z-index:4;background:#fff;animation:phyzFlash .25s ease forwards;pointer-events:none;}
+@keyframes phyzFlash{from{opacity:.85;}to{opacity:0;}}
+/* result snapshot gallery (4 angles) */
+.snap-row{display:flex;gap:7px;justify-content:center;margin-bottom:6px;}
+.snap-cell{flex:1;max-width:74px;text-align:center;}
+.snap-cell img{width:100%;aspect-ratio:.62;object-fit:cover;border-radius:10px;border:1px solid var(--border);background:#05050c;display:block;}
+.snap-ph{width:100%;aspect-ratio:.62;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid var(--border);}
+.snap-cell span{display:block;font-size:8.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:4px;}
+
 /* analyzing overlay */
 .analyze{position:absolute;inset:0;z-index:95;background:rgba(3,4,12,0.86);backdrop-filter:blur(14px);
   display:none;flex-direction:column;align-items:center;justify-content:center;gap:22px;}
@@ -228,6 +261,17 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
     <div class="reticle" id="reticle"></div>
     <div class="scanline"><i></i></div>
     <div class="wave" id="wave"></div>
+    <!-- Physique: circular body guide + 360 capture -->
+    <div class="phyz" id="phyz">
+      <div class="phyz-ring">
+        <svg class="phyz-svg" viewBox="0 0 200 200"><circle class="pr-bg" cx="100" cy="100" r="94"/><circle class="pr-fg" id="phyzProg" cx="100" cy="100" r="94"/></svg>
+        <div class="phyz-guide"></div>
+        <div class="phyz-body"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2.6"/><path d="M12 8v7M12 10l-5 3M12 10l5 3M12 15l-3 6M12 15l3 6"/></svg></div>
+        <div class="phyz-bar" id="phyzBar"></div>
+      </div>
+      <div class="phyz-count" id="phyzCount"></div>
+      <div class="phyz-dots" id="phyzDots"></div>
+    </div>
     <div class="cam-top">
       <button class="cam-x" id="camX" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       <span class="cam-tt" id="camTT">Scan</span>
@@ -270,7 +314,7 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
       hint:'Stand back so your whole body is in frame',
       checks:['Body-fat & muscle read from a photo','Symmetry and weak-point flags','Progress tracked scan-to-scan'],
       label:'Physique score',
-      tips:['Your shoulders read slightly ahead of your hips — brace your core in photos to gauge true posture.','Add one extra pull session this week to balance push/pull development.','Lighting from the front flattens definition — side light shows real progress.','Lock a weekly same-time scan so the trend is honest.'] },
+      tips:['Upper body leads your lower — add a dedicated leg day to even out proportions.','Shoulders sit slightly forward (side view) — daily wall-angels + rows will pull them back.','Back width is your quickest win — 2 pull sessions/week widens the V-taper.','Core is defined but could read tighter — drop body-fat ~2% to sharpen it.','Left/right symmetry is good; favour single-arm work to keep it balanced.','Same time + same light each scan makes the week-to-week trend honest.'] },
     food:{ name:'Food', color:'#34D399', facing:'environment', frame:'wide',
       tag:'Point your camera at a meal for an instant health read.',
       icon:'<path d="M12 20.5s-7.2-4.6-7.2-9.8A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 7.2 3.7c0 5.2-7.2 9.8-7.2 9.8Z"/>',
@@ -350,6 +394,9 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
   var cam=$('#cam'), video=$('#video'), canvas=$('#canvas');
   var stream=null, facing=s.facing==='user'?'user':'environment', isVoice=s.facing==='audio';
   var snapDataUrl=null, audioCtx=null, analyser=null, waveRAF=null;
+  var isPhysique=(type==='physique'), shots=[];
+  var ANG=[{k:'front',label:'Face the camera'},{k:'right',label:'Turn to your right side'},
+           {k:'back',label:'Turn around — back to camera'},{k:'left',label:'Turn to your left side'}];
 
   async function startStream(){
     try{
@@ -387,6 +434,8 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
   function openCam(){
     cam.classList.add('on');
     cam.classList.toggle('voice', isVoice);
+    cam.classList.toggle('physique', isPhysique);
+    if(isPhysique){ renderDots(0); setProg(0); $('#phyzCount').textContent=''; $('#camHint').textContent='Stand back so your whole body fits the ring, then tap to begin'; }
     startStream().then(function(ok){ cam._demo=!ok; });
   }
   function stopCam(){
@@ -413,24 +462,75 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
   // ── analyze ──
   var anFg=$('#anFg'), AN_R=58, AN_C=2*Math.PI*AN_R;
   anFg.setAttribute('stroke-dasharray', AN_C);
-  function runAnalyze(){
+  function doAnalyze(){
+    var an=$('#analyze'); an.classList.add('on');
+    var p=0, anPct=$('#anPct'), anLbl=$('#anLbl');
+    var labels=isPhysique?['Reading proportions…','Checking symmetry…','Scoring physique…','Finishing up…']
+                         :['Analyzing…','Reading details…','Scoring…','Finishing up…'];
+    anFg.setAttribute('stroke-dashoffset', AN_C);
+    var iv=setInterval(function(){
+      p=Math.min(100, p + (4+Math.random()*9));
+      anPct.textContent=Math.round(p)+'%';
+      anFg.setAttribute('stroke-dashoffset', AN_C*(1-p/100));
+      anLbl.textContent=labels[Math.min(labels.length-1, Math.floor(p/26))];
+      if(p>=100){ clearInterval(iv); setTimeout(function(){ an.classList.remove('on'); showResult(); }, 320); }
+    }, 180);
+  }
+  function runAnalyze(){   // single-capture types (food, outfit, looks, posture)
     cam.classList.add('scanning');
     $('#camHint').textContent='Hold still — scanning…';
+    setTimeout(function(){ snap(); stopCam(); doAnalyze(); }, 1500);
+  }
+
+  // ── Physique: guided 360° capture (front · right · back · left) ──
+  function snapPortrait(){
+    if(cam._demo||!video.videoWidth) return null;
+    try{
+      var W=video.videoWidth,H=video.videoHeight, cw2=Math.min(W,H*0.62), ch2=Math.min(H,W/0.62);
+      var cx=(W-cw2)/2, cy=(H-ch2)/2, ctx=canvas.getContext('2d');
+      canvas.width=150; canvas.height=242;
+      if(facing==='user'){ ctx.setTransform(1,0,0,1,0,0); ctx.translate(150,0); ctx.scale(-1,1); } else { ctx.setTransform(1,0,0,1,0,0); }
+      ctx.drawImage(video, cx, cy, cw2, ch2, 0,0,150,242);
+      return canvas.toDataURL('image/jpeg',0.6);
+    }catch(e){ return null; }
+  }
+  function setProg(n){ var el=$('#phyzProg'); if(el) el.style.strokeDashoffset=(590.6*(1-n/4)).toFixed(1); }
+  function renderDots(done){ var d=$('#phyzDots'); if(!d) return; var h=''; for(var i=0;i<4;i++) h+='<span class="pd'+(i<done?' on':'')+'"></span>'; d.innerHTML=h; }
+  function phyzFlash(){ var f=document.createElement('div'); f.className='phyz-flash'; cam.appendChild(f); setTimeout(function(){ f.remove(); },260); }
+  function runPhysique(){
+    cam.classList.add('phyz-scanning'); shots=[]; renderDots(0); setProg(0);
+    $('#camHint').textContent='Stand back — fit your whole body in the ring';
+    $('#phyzCount').textContent='Detecting body…';
     setTimeout(function(){
-      snap();
-      stopCam();
-      var an=$('#analyze'); an.classList.add('on');
-      var p=0, anPct=$('#anPct'), anLbl=$('#anLbl');
-      var labels=['Analyzing…','Reading details…','Scoring…','Finishing up…'];
-      anFg.setAttribute('stroke-dashoffset', AN_C);
-      var iv=setInterval(function(){
-        p=Math.min(100, p + (4+Math.random()*9));
-        anPct.textContent=Math.round(p)+'%';
-        anFg.setAttribute('stroke-dashoffset', AN_C*(1-p/100));
-        anLbl.textContent=labels[Math.min(labels.length-1, Math.floor(p/26))];
-        if(p>=100){ clearInterval(iv); setTimeout(function(){ an.classList.remove('on'); showResult(); }, 320); }
-      }, 180);
-    }, 1500); // let the scan line sweep first
+      $('#phyzCount').textContent='Body detected ✓';
+      try{ if(navigator.vibrate) navigator.vibrate(40); }catch(_){}
+      setTimeout(function(){ captureAngle(0); }, 800);
+    }, 2400);
+  }
+  function captureAngle(i){
+    if(i>=ANG.length){ finishPhysique(); return; }
+    var a=ANG[i];
+    $('#camHint').textContent=a.label+'  ·  '+(i+1)+' of 4';
+    var n=3; $('#phyzCount').textContent=n;
+    try{window.coreSfx&&window.coreSfx('tick');}catch(_){}
+    var iv=setInterval(function(){
+      n--;
+      if(n>0){ $('#phyzCount').textContent=n; try{window.coreSfx&&window.coreSfx('tick');}catch(_){} return; }
+      clearInterval(iv); $('#phyzCount').textContent='';
+      var url=snapPortrait();
+      shots.push({k:a.k,label:a.k.charAt(0).toUpperCase()+a.k.slice(1),url:url});
+      phyzFlash(); renderDots(shots.length); setProg(shots.length);
+      try{window.coreSfx&&window.coreSfx('confirm');}catch(_){}
+      try{ if(navigator.vibrate) navigator.vibrate(30); }catch(_){}
+      setTimeout(function(){ captureAngle(i+1); }, 650);
+    }, 1000);
+  }
+  function finishPhysique(){
+    cam.classList.remove('phyz-scanning','physique');
+    stopCam();
+    // keep the captured angles in the "backfiles" (latest physique scan)
+    try{ lsSet('corePhysiqueShots.v1', JSON.stringify({ ts:Date.now(), shots:shots })); }catch(e){}
+    doAnalyze();
   }
 
   // ── result ──
@@ -440,9 +540,19 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
     var tips=pick(s.tips,3);
     var R=78, C=2*Math.PI*R;
     var res=$('#result');
+    // physique → gallery of the 4 captured angles; others → single snapshot
+    var gallery='';
+    if(isPhysique){
+      gallery='<div class="snap-row">'+ANG.map(function(a){
+        var sh=null; for(var i=0;i<shots.length;i++){ if(shots[i].k===a.k){ sh=shots[i]; break; } }
+        var inner=(sh&&sh.url)?'<img src="'+sh.url+'" alt="'+a.k+'"/>':'<div class="snap-ph"></div>';
+        return '<div class="snap-cell">'+inner+'<span>'+a.k+'</span></div>';
+      }).join('')+'</div>';
+    }
     res.innerHTML=
       '<button class="res-close" id="resClose" type="button" aria-label="Done">'+svg('<path d="M6 6l12 12M18 6L6 18"/>')+'</button>'
-      +(snapDataUrl?'<img class="res-snap" src="'+snapDataUrl+'" alt="scan"/>':'')
+      +gallery
+      +((!isPhysique&&snapDataUrl)?'<img class="res-snap" src="'+snapDataUrl+'" alt="scan"/>':'')
       +'<div class="res-score"><svg class="res-ring" viewBox="0 0 172 172">'
         +'<circle class="bg" cx="86" cy="86" r="'+R+'"></circle>'
         +'<circle class="fg" id="resFg" cx="86" cy="86" r="'+R+'" stroke-dasharray="'+C+'" stroke-dashoffset="'+C+'"></circle>'
@@ -492,7 +602,10 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
 
   // ── wire up ──
   $('#cta').addEventListener('click', openCam);
-  $('#shutter').addEventListener('click', function(){ if(!cam.classList.contains('scanning')) runAnalyze(); });
+  $('#shutter').addEventListener('click', function(){
+    if(cam.classList.contains('scanning')||cam.classList.contains('phyz-scanning')) return;
+    if(isPhysique) runPhysique(); else runAnalyze();
+  });
   $('#camX').addEventListener('click', stopCam);
   $('#camFlip').addEventListener('click', function(){ facing=(facing==='user'?'environment':'user'); startStream(); });
 
