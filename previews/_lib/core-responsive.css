@@ -25,6 +25,24 @@
   --core-safe-right:  env(safe-area-inset-right, 0px);
 }
 
+/* ── Canonical phone frame — identical size & bezel on every page ──────
+   Every preview is designed on a 390×844 canvas. A few pages had drifted on
+   the bezel shadow; these rules pin EVERY framed page to the exact same size,
+   corner radius and bezel so they all read as one device and sit evenly. The
+   phone-class media query further down still overrides these to fill the
+   screen edge-to-edge on real phones. Scoped to .phone, so frameless pages
+   (e.g. the gallery index) are untouched. */
+.phone {
+  width: 390px !important;
+  height: 844px !important;
+  border-radius: 56px !important;
+  box-shadow:
+    0 40px 100px rgba(0,0,0,0.6),
+    0 0 0 1px rgba(255,255,255,0.06),
+    0 0 0 10px #0a0a12,
+    0 0 0 11px #2b2b38 !important;
+}
+
 /* ── Universal base — applies on every device ──────────────────────── */
 
 /* Apple HIG: every tappable element needs a 44pt hitbox */
