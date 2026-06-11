@@ -157,21 +157,11 @@
   </div>
 
   <script src="_lib/core-background.js"></script>
+  <script src="_lib/core-ranks.js"></script>
 <script>
 (function(){
-  // 10 gemstone ranks (common -> legendary): colour + XP gate + what it unlocks.
-  var RANKS = [
-    { name:'Moonstone', color:'#C7D0E8', xp:0,     perks:['Daily life score','Streak tracking','AI Coach unlocked','Daily quests'] },
-    { name:'Amber',     color:'#FF9F0A', xp:500,   perks:['Custom quests','Amber profile frame','Weekly review'] },
-    { name:'Topaz',     color:'#FFD60A', xp:1500,  perks:['Habit insights','Topaz frame','Streak freeze ×1'] },
-    { name:'Carnelian', color:'#E0533A', xp:3500,  perks:['Advanced stats','Carnelian frame','Coach personalities'] },
-    { name:'Jade',      color:'#30D158', xp:7000,  perks:['Focus tools','Jade frame','Milestone rewards'] },
-    { name:'Turquoise', color:'#40D0E0', xp:12000, perks:['Leaderboards','Turquoise frame','Bonus XP events'] },
-    { name:'Amethyst',  color:'#BF5AF2', xp:20000, perks:['Premium quests','Amethyst aura','Streak freeze ×3'] },
-    { name:'Sapphire',  color:'#0A84FF', xp:32000, perks:['Elite coach','Sapphire aura','Exclusive chests'] },
-    { name:'Ruby',      color:'#FF375F', xp:50000, perks:['Prestige badge','Ruby aura','Double-XP weekends'] },
-    { name:'Diamond',   color:'#EAF2FF', xp:80000, perks:['Legend status','Diamond aura','Everything unlocked'] }
-  ];
+  // 21 ranks across 7 tiers — shared ladder so reveal mirrors the rest of the app.
+  var RANKS = window.CORE_RANKS || [];
   // Detailed brilliant-cut gem — balanced octagon, gradient body, full facet pattern + sparkle.
   function gemSvg(color){
     return '<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">'
@@ -200,9 +190,8 @@
 
   var card=document.getElementById('rankCard');
   card.style.setProperty('--rc', rank.color);
-  // Real gem artwork (from the rank-set image) — exact look, keyed transparent.
-  var gemKey = rank.name.toLowerCase();
-  document.getElementById('rankGem').innerHTML = '<img src="assets/ranks/'+gemKey+'.png" alt="'+rank.name+'" />';
+  // Real emblem artwork — keyed transparent PNG per rank.
+  document.getElementById('rankGem').innerHTML = '<img src="assets/ranks/'+rank.key+'.png" alt="'+rank.name+'" />';
   document.getElementById('rankName').textContent = rank.name;
   var pad2=function(n){return (n<10?'0':'')+n;};
   document.getElementById('rankTier').textContent = 'Rank '+pad2(idx+1)+' // '+RANKS.length;

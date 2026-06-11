@@ -885,6 +885,7 @@ body.edit-active .nav{display:none;}
 <script src="_lib/dash-charts.js"></script>
 <script src="_lib/dash-widgets.js"></script>
 <script src="_lib/core-help.js"></script>
+<script src="_lib/core-ranks.js"></script>
 <script>
 (function(){
   var S  = window.coreState;
@@ -1330,13 +1331,7 @@ body.edit-active .nav{display:none;}
   function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
 
   // ---- rank header ----
-  var RANKS=[
-    {name:'Moonstone',color:'#C7D0E8',xp:0},{name:'Amber',color:'#FF9F0A',xp:500},
-    {name:'Topaz',color:'#FFD60A',xp:1500},{name:'Carnelian',color:'#E0533A',xp:3500},
-    {name:'Jade',color:'#30D158',xp:7000},{name:'Turquoise',color:'#40D0E0',xp:12000},
-    {name:'Amethyst',color:'#BF5AF2',xp:20000},{name:'Sapphire',color:'#0A84FF',xp:32000},
-    {name:'Ruby',color:'#FF375F',xp:50000},{name:'Diamond',color:'#EAF2FF',xp:80000}
-  ];
+  var RANKS = window.CORE_RANKS || [{name:'Novice I',key:'novice-1',color:'#C77D3A',xp:0}];
   // count-up animation for numbers
   function animCount(el,to,fmt){
     if(!el) return; to=to||0; var from=0, t0=null, dur=900;
@@ -1351,7 +1346,7 @@ body.edit-active .nav{display:none;}
     var r=RANKS[idx];
     // rank colour drives the centre gem glow + the rank name beneath the ring
     var hero=$('lsHero'); if(hero) hero.style.setProperty('--rkc',r.color);
-    var g=$('rankBarGem'); if(g) g.innerHTML='<img src="assets/ranks/'+r.name.toLowerCase()+'.png" alt="'+r.name+'">';
+    var g=$('rankBarGem'); if(g) g.innerHTML='<img src="assets/ranks/'+r.key+'.png" alt="'+r.name+'">';
     if($('rankBarName')) $('rankBarName').textContent=r.name;
     animCount($('rankBarScore'), xp);
   })();
