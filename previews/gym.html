@@ -166,6 +166,29 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .ov-imp{display:flex;align-items:center;gap:9px;margin-top:13px;padding-top:13px;border-top:1px solid var(--border);font-size:12.5px;color:var(--muted);line-height:1.4;}
 .ov-imp svg{width:17px;height:17px;flex:none;}
 .ov-imp b{color:#fff;font-weight:800;}
+/* weekly volume mini-bars */
+.ov-vol{margin-top:14px;padding-top:13px;border-top:1px solid var(--border);}
+.ov-vol-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px;}
+.ov-vol-h .l{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);}
+.ov-vol-h .r{font-size:11px;font-weight:700;color:var(--muted);}
+.ov-bars{display:flex;align-items:flex-end;gap:6px;height:46px;}
+.ov-bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;justify-content:flex-end;}
+.ov-bar i{width:100%;border-radius:5px 5px 2px 2px;background:color-mix(in srgb,var(--str) 55%,transparent);min-height:3px;transition:height .5s cubic-bezier(.22,1,.36,1);}
+.ov-bar.now i{background:var(--str);}
+.ov-bar span{font-size:8.5px;font-weight:700;color:var(--dim);}
+/* personal records */
+.pr-card{padding:4px 0;}
+.prrow{display:flex;align-items:center;gap:12px;padding:12px 15px;border-bottom:1px solid var(--border);}
+.prrow:last-child{border-bottom:none;}
+.pr-medal{width:34px;height:34px;flex:none;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;
+  background:color-mix(in srgb,var(--str) 16%,transparent);border:1px solid color-mix(in srgb,var(--str) 30%,transparent);}
+.pr-tx{flex:1;min-width:0;}
+.pr-tx b{font-size:13.5px;font-weight:700;color:#fff;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pr-tx span{font-size:11px;color:var(--dim);}
+.pr-w{font-size:15px;font-weight:900;color:var(--str);white-space:nowrap;}
+.pr-w small{font-size:10px;font-weight:700;color:var(--muted);}
+.pr-w i{font-style:normal;font-size:11px;font-weight:700;color:var(--muted);}
+.pr-empty{padding:22px;text-align:center;color:var(--dim);font-size:12.5px;}
 .hrow{display:flex;align-items:center;gap:11px;padding:12px 14px;border-bottom:1px solid var(--border);}
 .hrow:last-child{border-bottom:none;}
 .hrow .hi{width:32px;height:32px;flex:none;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--mc);background:color-mix(in srgb,var(--mc) 15%,transparent);border:1px solid color-mix(in srgb,var(--mc) 30%,transparent);}
@@ -368,6 +391,10 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
       <!-- Training overview — show-up calendar, gaps, week-over-week -->
       <div class="sec"><h2>Training overview</h2><span class="meta" id="ovMeta"></span></div>
       <div class="card ov" id="trainOverview"></div>
+
+      <!-- Personal records -->
+      <div class="sec"><h2>Personal Records</h2><span class="meta" id="prMeta"></span></div>
+      <div class="card pr-card" id="prCard"></div>
 
       <!-- 2. Muscle map — colour-coded by training; tiny inline body-type toggle -->
       <div class="sec"><h2>Muscle Map</h2><span class="meta" id="lastTrained"></span></div>
@@ -611,7 +638,16 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     function wkSessions(off){ var sun=new Date(today); sun.setDate(today.getDate()-dow-7*off); var c=0;
       for(var i=0;i<7;i++){ var d=new Date(sun); d.setDate(sun.getDate()+i); if(d<=today&&trained[dKey(d)]) c++; } return c; }
     var thisW=wkSessions(0), lastW=wkSessions(1), diff=thisW-lastW;
+    var GOAL=4; // weekly session target
     var d30=0; for(var i=0;i<30;i++){ var d=new Date(today); d.setDate(today.getDate()-i); if(trained[dKey(d)]) d30++; }
+    // weekly volume (total sets) for the last 6 weeks
+    function wkVolume(off){ var sun=new Date(today); sun.setDate(today.getDate()-dow-7*off); var e=new Date(sun); e.setDate(sun.getDate()+7);
+      return hist.reduce(function(a,h){ return (h.ts>=sun.getTime()&&h.ts<e.getTime()) ? a+(h.totalSets||0) : a; },0); }
+    var vols=[]; for(var v=5; v>=0; v--){ vols.push(wkVolume(v)); }
+    var vmax=Math.max.apply(null,vols.concat([1]));
+    var bars='<div class="ov-vol"><div class="ov-vol-h"><span class="l">Weekly volume</span><span class="r">'+vols[5]+' sets this week</span></div><div class="ov-bars">'
+      +vols.map(function(val,i){ var h=Math.round(val/vmax*100); return '<div class="ov-bar'+(i===5?' now':'')+'"><i style="height:'+h+'%"></i><span>'+(i===5?'now':(5-i)+'w')+'</span></div>'; }).join('')
+      +'</div></div>';
     var gap=0,maxGap=0; for(var j=34;j>=0;j--){ var dd=new Date(today); dd.setDate(today.getDate()-j);
       if(trained[dKey(dd)]) gap=0; else { gap++; if(gap>maxGap) maxGap=gap; } }
     // 5-week calendar grid (Sun-start), ending this week
@@ -627,18 +663,67 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
       }
       cal+='</div>';
     }
-    var imp = diff>0 ? '<b>'+diff+' more</b> session'+(diff>1?'s':'')+' than last week — keep it rolling.'
-      : diff<0 ? '<b>'+Math.abs(diff)+' fewer</b> than last week — get one in today.'
-      : (thisW>0?'Matching last week. One more pulls you ahead.':'No sessions yet this week — start strong.');
-    var icon = diff>=0 ? '<path d="M3 17l6-6 4 4 7-8"/><path d="M21 7v5h-5"/>' : '<path d="M3 7l6 6 4-4 7 8"/><path d="M21 17v-5h-5"/>';
+    var behind=GOAL-thisW, onPace=thisW>=GOAL;
+    var imp = onPace ? '<b>On pace</b> — '+thisW+' of '+GOAL+' this week. '+(diff>0?diff+' more than last week.':'Strong work.')
+      : '<b>'+behind+' to go</b> to hit your weekly goal of '+GOAL+'. '+(diff>0?(diff+' ahead of last week.'):diff<0?('Slower than last week — get one in.'):'');
+    var icon = (onPace||diff>=0) ? '<path d="M3 17l6-6 4 4 7-8"/><path d="M21 7v5h-5"/>' : '<path d="M3 7l6 6 4-4 7 8"/><path d="M21 17v-5h-5"/>';
     host.innerHTML=
       '<div class="ov-stats">'
-      +'<div class="ov-stat"><div class="v '+(diff>0?'up':diff<0?'dn':'')+'">'+thisW+'</div><div class="k">This week</div></div>'
+      +'<div class="ov-stat"><div class="v '+(onPace?'up':diff<0?'dn':'')+'">'+thisW+'<span style="font-size:13px;color:var(--dim)"> / '+GOAL+'</span></div><div class="k">This week</div></div>'
       +'<div class="ov-stat"><div class="v">'+d30+'</div><div class="k">30-day</div></div>'
       +'<div class="ov-stat"><div class="v">'+maxGap+'</div><div class="k">Days skipped</div></div>'
-      +'</div>'+cal
-      +'<div class="ov-imp"><svg viewBox="0 0 24 24" fill="none" stroke="'+(diff>=0?'var(--good)':'var(--str)')+'" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'+icon+'</svg><span>'+imp+'</span></div>';
+      +'</div>'+cal+bars
+      +'<div class="ov-imp"><svg viewBox="0 0 24 24" fill="none" stroke="'+((onPace||diff>=0)?'var(--good)':'var(--str)')+'" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'+icon+'</svg><span>'+imp+'</span></div>';
     var meta=qs('#ovMeta'); if(meta) meta.textContent=d30+' in 30 days';
+  }
+
+  // ── Personal records: best weight (+ est. 1RM) per lift ──
+  function computePRs(){
+    var hist=(store().history||[]).slice().sort(function(a,b){return a.ts-b.ts;});
+    var prs={};
+    hist.forEach(function(h){ (h.exercises||[]).forEach(function(e){
+      if(!e||!e.name||!(e.weight>0)) return;
+      var oneRM=e.weight*(1+(e.reps||1)/30);
+      var cur=prs[e.name];
+      if(!cur || e.weight>cur.weight){ prs[e.name]={weight:e.weight,reps:e.reps||0,oneRM:oneRM,ts:h.ts}; }
+    }); });
+    return prs;
+  }
+  // which exercises in `entries` beat the current PR (call BEFORE saving the new log)
+  function newPRs(entries){
+    var prs=computePRs(), out=[];
+    (entries||[]).forEach(function(e){ if(e&&e.name&&e.weight>0 && (!prs[e.name]||e.weight>prs[e.name].weight)) out.push(e.name); });
+    return out;
+  }
+  function renderPRs(){
+    var host=qs('#prCard'); if(!host) return;
+    var prs=computePRs();
+    var arr=Object.keys(prs).map(function(n){return {name:n,p:prs[n]};}).sort(function(a,b){return b.p.oneRM-a.p.oneRM;}).slice(0,5);
+    if(!arr.length){ host.innerHTML='<div class="pr-empty">Log a weighted lift to set your first record.</div>'; var m0=qs('#prMeta'); if(m0) m0.textContent=''; return; }
+    host.innerHTML=arr.map(function(o){
+      return '<div class="prrow"><span class="pr-medal">🏆</span>'
+        +'<span class="pr-tx"><b>'+o.name+'</b><span>est. 1RM '+Math.round(o.p.oneRM)+' kg</span></span>'
+        +'<span class="pr-w">'+o.p.weight+'<small>kg</small> <i>×'+o.p.reps+'</i></span></div>';
+    }).join('');
+    var m=qs('#prMeta'); if(m) m.textContent=arr.length+' lift'+(arr.length>1?'s':'');
+  }
+
+  // ── Dynamic greeting meta + Coach's Pick from the real training data ──
+  function renderHeaderInsight(){
+    var s=store(), hist=s.history||[], inten=allIntensity();
+    var today=new Date(); today.setHours(0,0,0,0); var dow=today.getDay();
+    var sun=new Date(today); sun.setDate(today.getDate()-dow);
+    var thisW=hist.filter(function(h){return h.ts>=sun.getTime();}).length;
+    var meta=qs('#greetMeta'); if(meta) meta.textContent='Strength · '+(thisW?(thisW+' session'+(thisW>1?'s':'')+' this week'):'no sessions yet this week');
+    var ranked=MUSCLES.map(function(m){return {id:m.id,name:m.name,t:inten[m.id].t};}).sort(function(a,b){return a.t-b.t;});
+    var weak=ranked[0];
+    var ft=qs('#featTitle'), fs=qs('#featSub');
+    if(ft&&fs){
+      if(thisW===0){ ft.textContent='Kick off your week'; fs.textContent='No sessions yet — a quick '+weak.name+' workout sets the tone.'; }
+      else if(weak.t<0.12){ ft.textContent='Train '+weak.name+' next'; fs.textContent=weak.name+' is undertrained — bring it up to balance your physique.'; }
+      else if(thisW>=4){ ft.textContent=thisW+' sessions — you’re on fire'; fs.textContent='Great consistency this week. Keep '+weak.name+' in the rotation.'; }
+      else { ft.textContent=thisW+' in this week — keep rolling'; fs.textContent=weak.name+' is your next focus to stay balanced.'; }
+    }
   }
 
   /* ───────── Workout section: setup OR active ───────── */
@@ -690,8 +775,10 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     }).join('');
     var hist=s.history.length
       ? '<div class="card hist">'+s.history.slice(0,5).map(function(h){
+          var top=(h.exercises||[]).slice().sort(function(a,b){return (b.weight||0)-(a.weight||0);})[0];
+          var sub=(top&&top.weight>0) ? (top.name+' · '+top.weight+'kg · '+h.totalSets+' sets') : (h.totalSets+' sets · '+h.exercises.length+' exercises');
           return '<div class="hrow" style="--mc:'+mColor(h.muscle)+'"><span class="hi">'+ICO+'</span>'+
-            '<span class="ht"><b>'+mInfo(h.muscle).name+'</b><span>'+h.totalSets+' sets · '+h.exercises.length+' exercises · '+ago(h.ts)+'</span></span>'+
+            '<span class="ht"><b>'+mInfo(h.muscle).name+'</b><span>'+sub+' · '+ago(h.ts)+'</span></span>'+
             '<span class="hv">+'+h.str+' STR</span></div>';
         }).join('')+'</div>'
       : '<div class="card"><div class="empty">No workouts logged yet.<br>Tap a suggestion or Log a Workout to start.</div></div>';
@@ -769,6 +856,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     var chosen=Object.keys(sel).filter(function(k){return sel[k].on;});
     if(!chosen.length) return;
     var entries=chosen.map(function(nm){ return {name:nm,sets:sel[nm].sets,reps:sel[nm].reps,weight:sel[nm].weight||0}; });
+    var prHits=newPRs(entries);   // check before this log is saved
     var totalSets=entries.reduce(function(a,e){return a+e.sets;},0);
     var id='w'+Date.now();
     var xpGain=Math.max(30,Math.round(totalSets*8+entries.length*5));
@@ -782,8 +870,9 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     addBody(strGain,'workout:'+id); addXp(xpGain,'workout:'+id);
     sfx('xp');
     closeSheet();
-    renderChip(); renderDiagram(); renderWorkout(); renderOverview();
-    toast('+'+strGain+' Strength · +'+xpGain+' XP');
+    renderChip(); renderDiagram(); renderWorkout(); renderOverview(); renderPRs(); renderHeaderInsight();
+    if(prHits.length){ sfx('reward'); toast('🏆 New PR — '+prHits[0]+(prHits.length>1?(' +'+(prHits.length-1)+' more'):'')); }
+    else { toast('+'+strGain+' Strength · +'+xpGain+' XP'); }
   });
 
   /* ───────── Chip + toast ───────── */
@@ -805,12 +894,16 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
         /* back intentionally absent -> undertrained insight */
       };
       if(!d.history.length){
-        // ~5 weeks of sessions with realistic gaps (powers the training overview)
-        var H=[[1,'chest',7],[2,'arms',3],[3,'legs',4],[6,'back',5],[8,'chest',6],
-               [10,'shoulders',4],[13,'legs',5],[15,'arms',3],[17,'core',3],
-               [20,'chest',6],[22,'back',5],[24,'legs',4],[29,'arms',3],[31,'chest',6]];
+        // ~5 weeks of named, progressively-heavier sessions (powers overview, PRs, volume)
+        var H=[
+          [1,'chest','Bench Press',4,8,65],[2,'arms','Barbell Curl',3,10,18],[3,'legs','Squat',4,8,90],
+          [6,'back','Deadlift',3,5,110],[8,'chest','Bench Press',4,8,62.5],[10,'shoulders','Overhead Press',4,8,40],
+          [13,'legs','Squat',4,8,85],[15,'arms','Barbell Curl',3,10,16],[17,'core','Hanging Leg Raise',3,12,0],
+          [20,'chest','Bench Press',4,8,60],[22,'back','Deadlift',3,5,105],[24,'legs','Squat',4,8,82.5],
+          [29,'arms','Barbell Curl',3,10,15],[31,'chest','Bench Press',4,8,57.5]
+        ];
         d.history=H.map(function(e,i){ return {id:'wd'+i,ts:now-e[0]*86400000,muscle:e[1],
-          exercises:[{name:'Session',sets:e[2],reps:8,weight:60}],totalSets:e[2],xp:e[2]*10,str:1}; });
+          exercises:[{name:e[2],sets:e[3],reps:e[4],weight:e[5]}],totalSets:e[3],xp:e[3]*10,str:1}; });
       }
       if(!d.routines||!d.routines.length){ d.routines=[{id:'rd1',name:'Push Day',exercises:[{muscle:'chest',name:'Bench Press'},{muscle:'shoulders',name:'Overhead Press'},{muscle:'arms',name:'Tricep Dips'}],ts:now-2*86400000}]; }
       if(!d.bodyweight||!d.bodyweight.length){ d.bodyweight=[{ts:now-28*86400000,kg:82.5},{ts:now-21*86400000,kg:82},{ts:now-14*86400000,kg:81.3},{ts:now-7*86400000,kg:80.8},{ts:now-86400000,kg:80.4}]; }
@@ -874,7 +967,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     s.history.unshift({id:id2,ts:Date.now(),muscle:primary,exercises:entries,totalSets:totalSets,xp:xpGain,str:strGain,routine:r.name});
     if(s.history.length>60) s.history.length=60; save(s);
     addBody(strGain,'workout:'+id2); addXp(xpGain,'workout:'+id2); sfx('xp');
-    renderChip(); renderDiagram(); renderWorkout(); renderOverview(); toast('Logged '+r.name+' · +'+strGain+' STR');
+    renderChip(); renderDiagram(); renderWorkout(); renderOverview(); renderPRs(); renderHeaderInsight(); toast('Logged '+r.name+' · +'+strGain+' STR');
   }
 
   /* ───────── Bodyweight tab ───────── */
@@ -899,7 +992,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   Array.prototype.forEach.call(document.querySelectorAll('#genderToggle .gt-opt'),function(b){
     b.addEventListener('click',function(){ setGender(this.getAttribute('data-g')); sfx('tick'); renderDiagram(); });
   });
-  renderChip(); renderDiagram(); renderWorkout(); renderOverview();
+  renderChip(); renderDiagram(); renderWorkout(); renderOverview(); renderPRs(); renderHeaderInsight();
   window.addEventListener('coreStateChange',renderChip);
   window.addEventListener('focus',function(){ renderDiagram(); });
 })();
