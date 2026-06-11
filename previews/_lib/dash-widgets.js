@@ -482,51 +482,7 @@
         host._cleanup = function () { window.removeEventListener('coreStateChange', onUpdate); };
       }
     },
-
-    // ── Per-stat trend mini-graphs (OPTIONAL chart) ──
-    stattrend: {
-      id: 'stattrend', title: 'Stat Trends',
-      icon: '<path d="M3 12l4-4 4 4 4-6 6 8M3 20h18"/>',
-      render: function (host) {
-        var cs = S(), DC = window.dashCharts;
-        if (!cs || !DC) { host.innerHTML = '<div class="w-empty">Loading…</div>'; return; }
-        var reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches);
-        var defs = cs.STAT_DEFS || [];
-        var range = 30, painted = false;
-
-        function draw() {
-          var pts = DC.getHistory(range);
-          var html = segHeadHTML(range) + '<div class="dc-mini-grid">';
-          defs.forEach(function (d) {
-            // route to the stat's page (gym/focus/wealth …) or stat.html?s=<key>
-            var href = d.page || ('stat.html?s=' + d.key);
-            html += '<a href="' + href + '" class="dc-mini" aria-label="' + d.name + '"><div class="dc-mini-head">' +
-              '<span class="dc-mini-dot" style="background:' + (d.color || 'var(--blue)') + '"></span>' +
-              '<span class="dc-mini-name">' + d.name + '</span>' +
-              '<svg class="dc-mini-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>' +
-              '</div>' +
-              '<div class="dc-mini-host" data-k="' + d.key + '"></div></a>';
-          });
-          host.innerHTML = html + '</div>';
-          defs.forEach(function (d) {
-            DC.lineChart(host.querySelector('[data-k="' + d.key + '"]'), {
-              values: DC.series(pts, d.key),
-              labels: [],
-              color: d.color || '#0A84FF',
-              height: 38,
-              reducedMotion: reduced,
-              animate: !painted
-            });
-          });
-          painted = true;
-          wireSeg(host, function (r) { if (r !== range) { range = r; painted = false; } draw(); });
-        }
-        draw();
-        function onUpdate() { draw(); }
-        window.addEventListener('coreStateChange', onUpdate);
-        host._cleanup = function () { window.removeEventListener('coreStateChange', onUpdate); };
-      }
-    },
+    // Stat Trends moved to a fixed section on the main dashboard (see 20-dashboard.html).
 
   };
 

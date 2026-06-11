@@ -411,6 +411,7 @@ body.edit-active .nav{display:none;}
 .dc-dot{position:absolute;width:7px;height:7px;border-radius:50%;transform:translate(-50%,-50%);}
 .dc-axis{display:flex;justify-content:space-between;margin-top:4px;font-size:9.5px;font-weight:700;color:var(--dim);letter-spacing:.02em;}
 .dc-mini-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:rgba(255,255,255,.05);}
+.trends-card{border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);}
 .dc-mini{display:block;text-decoration:none;color:inherit;cursor:pointer;
   background:rgba(2,2,16,.6);padding:11px 12px 9px;
   transition:background .14s,transform .1s cubic-bezier(.2,.8,.2,1);}
@@ -756,6 +757,10 @@ body.edit-active .nav{display:none;}
       <!-- The 6 life scores -->
       <div class="rt-head"><div><span class="rt-title">Life Scores</span><span class="rt-sub">Tap a stat to dive in</span></div></div>
       <div class="stats6" id="stats6"></div>
+
+      <!-- Stat trends (per-stat line graphs) -->
+      <div class="rt-head" style="margin-top:22px"><div><span class="rt-title">Stat trends</span><span class="rt-sub">Your last 30 days</span></div></div>
+      <div class="dc-mini-grid trends-card" id="statTrends"></div>
 
       <!-- Routine to-do -->
       <div class="rt-head">
@@ -1394,6 +1399,25 @@ body.edit-active .nav{display:none;}
     },160);
   }
 
+  // Per-stat trend line graphs — now a fixed section on the main dashboard.
+  function paintTrends(){
+    var box=$('statTrends'); if(!box) return;
+    var DC=window.dashCharts; if(!DC) return;
+    var pts=DC.getHistory(30);
+    var reduced=!!(window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches);
+    box.innerHTML=STATS.map(function(s){
+      return '<a class="dc-mini" href="'+s.page+'" aria-label="'+s.name+' trend">'
+        +'<div class="dc-mini-head"><span class="dc-mini-dot" style="background:'+s.color+'"></span>'
+        +'<span class="dc-mini-name">'+s.name+'</span>'
+        +'<svg class="dc-mini-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>'
+        +'<div class="dc-mini-host" data-k="'+s.model+'"></div></a>';
+    }).join('');
+    STATS.forEach(function(s){
+      var h=box.querySelector('.dc-mini-host[data-k="'+s.model+'"]');
+      if(h) DC.lineChart(h,{values:DC.series(pts,s.model),labels:[],color:s.color,height:38,reducedMotion:reduced,animate:true});
+    });
+  }
+
   // ---- icons + templates ----
   var IC={
     water:'<path d="M12 3c4 5 6 7.5 6 11a6 6 0 0 1-12 0c0-3.5 2-6 6-11z"/>',
@@ -1711,6 +1735,8 @@ body.edit-active .nav{display:none;}
   render(true);
   paintLifeScore();
   paintStats();
+  paintTrends();
+  window.addEventListener('coreStateChange', paintTrends);
 })();
 </script>
 </body>
