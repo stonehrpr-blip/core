@@ -427,6 +427,41 @@ body.edit-active .nav{display:none;}
 .dc-mini-host .dc-cap-val{font-size:16px;}
 .dc-mini-host .dc-cap-delta{font-size:9.5px;}
 .dc-mini-host .dc-axis{display:none;}
+/* dashboard extras: focus-area nudge + weekly recap + tile peek */
+.dash-nudge{display:flex;align-items:center;gap:12px;margin-top:12px;padding:13px 14px;border-radius:16px;text-decoration:none;color:inherit;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--sc,#0A84FF) 16%,rgba(255,255,255,.02)),rgba(255,255,255,.02));
+  border:1px solid color-mix(in srgb,var(--sc,#0A84FF) 30%,rgba(255,255,255,.08));}
+.dash-nudge .dn-ic{width:42px;height:42px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;color:var(--sc,#0A84FF);background:color-mix(in srgb,var(--sc,#0A84FF) 16%,transparent);}
+.dash-nudge .dn-ic svg{width:22px;height:22px;}
+.dash-nudge .dn-t{flex:1;min-width:0;}
+.dash-nudge .dn-t b{display:block;font-size:14px;font-weight:800;color:#fff;}
+.dash-nudge .dn-t span{font-size:11.5px;color:var(--muted);line-height:1.4;display:block;margin-top:2px;}
+.dash-nudge .dn-cta{flex:none;font-size:12px;font-weight:800;color:var(--sc,#0A84FF);padding:7px 13px;border-radius:999px;background:color-mix(in srgb,var(--sc,#0A84FF) 16%,transparent);}
+.dash-recap{margin-top:11px;padding:14px;border-radius:16px;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.08);}
+.dr-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px;}
+.dr-head .dr-l{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);}
+.dr-pts{font-size:14px;font-weight:900;color:#34D399;}
+.dr-row{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);padding:4px 0;}
+.dr-row b{color:#fff;font-weight:700;}
+.dr-dot{width:8px;height:8px;border-radius:50%;flex:none;}
+.dr-row .dr-v{margin-left:auto;font-weight:800;font-variant-numeric:tabular-nums;}
+.dr-v.up{color:#34D399;} .dr-v.dn{color:#FF6B6B;}
+.peek-wrap{position:absolute;inset:0;z-index:94;display:none;align-items:center;justify-content:center;padding:34px;}
+.peek-wrap.on{display:flex;}
+.peek-scrim{position:absolute;inset:0;background:rgba(2,3,12,.6);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);}
+.peek-card{position:relative;width:252px;border-radius:20px;padding:18px;background:linear-gradient(180deg,#141622,#0c0d16);border:1px solid rgba(255,255,255,.1);box-shadow:0 30px 70px rgba(0,0,0,.55);animation:peekPop .26s cubic-bezier(.2,1.4,.4,1);}
+@keyframes peekPop{from{opacity:0;transform:scale(.9);}to{opacity:1;transform:scale(1);}}
+.pk-top{display:flex;align-items:center;gap:11px;}
+.pk-ic{width:40px;height:40px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;}
+.pk-ic svg{width:21px;height:21px;}
+.pk-top b{font-size:15px;font-weight:800;color:#fff;display:block;}
+.pk-top .pk-sub{font-size:11px;color:var(--dim);}
+.pk-row{display:flex;align-items:flex-end;justify-content:space-between;margin:14px 0 2px;}
+.pk-big{font-size:34px;font-weight:900;letter-spacing:-1px;color:#fff;line-height:1;}
+.pk-delta{font-size:12px;font-weight:800;}
+.pk-delta.up{color:#34D399;} .pk-delta.dn{color:#FF6B6B;}
+.pk-host{height:38px;margin:8px 0 2px;}
+.pk-open{display:block;margin-top:12px;text-align:center;padding:11px;border-radius:12px;font-size:13.5px;font-weight:800;text-decoration:none;color:#fff;}
 
 @media(prefers-reduced-motion:reduce){
   .widget-wrap{animation:none;}
@@ -752,6 +787,10 @@ body.edit-active .nav{display:none;}
       <div class="rt-head"><div><span class="rt-title">Life Scores</span><span class="rt-sub">Tap a stat to dive in · last 30 days</span></div></div>
       <div class="dc-mini-grid trends-card" id="statTrends"></div>
 
+      <!-- Focus-area nudge + weekly recap -->
+      <div id="dashNudge"></div>
+      <div id="dashRecap"></div>
+
       <!-- Routine to-do -->
       <div class="rt-head">
         <div><span class="rt-title">Today's routine</span><span class="rt-sub" id="rtSub">Tap a task to edit · check it off as you go</span></div>
@@ -767,6 +806,12 @@ body.edit-active .nav{display:none;}
       <!-- Customizable widgets -->
       <div class="rt-head wg-head"><div><span class="rt-title">Widgets</span><span class="rt-sub">Tap the gear up top to add or reorder</span></div></div>
       <div id="widgetScroll"></div>
+    </div>
+
+    <!-- Long-press peek for a life tile -->
+    <div class="peek-wrap" id="peekWrap">
+      <div class="peek-scrim" id="peekScrim"></div>
+      <div class="peek-card" id="peekCard"></div>
     </div>
 
     <!-- Build sheet: AI or templates -->
@@ -934,7 +979,8 @@ body.edit-active .nav{display:none;}
     var g = h>=5&&h<12?'Good morning':h>=12&&h<17?'Good afternoon':h>=17&&h<21?'Good evening':'Good night';
     var s = S ? S.read() : {};
     var name = (s.profile&&s.profile.name) ? s.profile.name.split(' ')[0] : '';
-    qs('#dashGreeting').textContent = g + (name ? ', '+name : '');
+    var mo=''; try{ var d=statData(); if(d){ var upN=d.filter(function(x){return x.delta>0;}).length; if(upN>=4) mo=' · on a roll'; else if(upN>0) mo=' · '+upN+' rising'; } }catch(e){}
+    qs('#dashGreeting').textContent = g + (name ? ', '+name : '') + mo;
   }
   updateHeader();
   setInterval(updateHeader,30000);
@@ -1408,6 +1454,62 @@ body.edit-active .nav{display:none;}
     STATS.forEach(function(s){
       var h=box.querySelector('.dc-mini-host[data-k="'+s.model+'"]');
       if(h) DC.lineChart(h,{values:DC.series(pts,s.model),labels:[],color:s.color,height:38,reducedMotion:reduced,animate:true});
+    });
+    attachPeek(box);
+    renderExtras();
+    try{ updateHeader(); }catch(e){}   // refresh greeting momentum now that data is ready
+  }
+
+  // ── Dashboard extras: focus-area nudge, weekly recap, long-press tile peek ──
+  function statData(){
+    var DC=window.dashCharts; if(!DC) return null;
+    var pts; try{ pts=DC.getHistory(30); }catch(e){ return null; }
+    if(!pts || !pts.length) return null;
+    return STATS.map(function(s){
+      var ser=DC.series(pts,s.model)||[];
+      var now=ser.length?ser[ser.length-1]:0;
+      var prev=ser.length>7?ser[ser.length-8]:(ser.length?ser[0]:0);
+      return { s:s, ser:ser, now:Math.round(now||0), delta:Math.round((now||0)-(prev||0)) };
+    });
+  }
+  function renderExtras(){
+    var d=statData(), nu=$('dashNudge'), re=$('dashRecap');
+    if(!d){ if(nu)nu.innerHTML=''; if(re)re.innerHTML=''; return; }
+    var low=d.slice().sort(function(a,b){return a.now-b.now;})[0];
+    if(nu) nu.innerHTML='<a class="dash-nudge" href="'+low.s.page+'" style="--sc:'+low.s.color+'" aria-label="Improve '+low.s.name+'">'
+      +'<span class="dn-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'+low.s.icon+'</svg></span>'
+      +'<span class="dn-t"><b>'+low.s.name+' needs you</b><span>Your lowest area at '+low.now+'. A quick win here lifts your Life Score the most.</span></span>'
+      +'<span class="dn-cta">Improve</span></a>';
+    var byD=d.slice().sort(function(a,b){return b.delta-a.delta;});
+    var top=byD[0], bot=byD[byD.length-1];
+    var gained=d.reduce(function(a,x){return a+Math.max(0,x.delta);},0);
+    var rows='<div class="dr-row"><span class="dr-dot" style="background:'+top.s.color+'"></span>Top gain · <b>'+top.s.name+'</b><span class="dr-v up">'+(top.delta>=0?'+':'')+top.delta+'</span></div>';
+    if(bot.delta<0) rows+='<div class="dr-row"><span class="dr-dot" style="background:'+bot.s.color+'"></span>Needs work · <b>'+bot.s.name+'</b><span class="dr-v dn">'+bot.delta+'</span></div>';
+    if(re) re.innerHTML='<div class="dash-recap"><div class="dr-head"><span class="dr-l">This week</span><span class="dr-pts">+'+gained+' pts</span></div>'+rows+'</div>';
+  }
+  function showPeek(item){
+    var w=$('peekWrap'), c=$('peekCard'); if(!w||!c||!item) return;
+    var up=item.delta>=0;
+    c.innerHTML='<div class="pk-top"><span class="pk-ic" style="color:'+item.s.color+';background:color-mix(in srgb,'+item.s.color+' 18%,transparent)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'+item.s.icon+'</svg></span><div><b>'+item.s.name+'</b><span class="pk-sub">Life area</span></div></div>'
+      +'<div class="pk-row"><div class="pk-big">'+item.now+'</div><div class="pk-delta '+(up?'up':'dn')+'">'+(up?'+':'')+item.delta+' · 7d</div></div>'
+      +'<div class="pk-host" id="pkHost"></div>'
+      +'<a class="pk-open" href="'+item.s.page+'" style="background:'+item.s.color+'">Open '+item.s.name+'</a>';
+    w.classList.add('on');
+    try{ var DC=window.dashCharts; if(DC) DC.lineChart($('pkHost'),{values:item.ser,labels:[],color:item.s.color,height:38,animate:false}); }catch(e){}
+    try{ if(navigator.vibrate) navigator.vibrate(12); }catch(e){}
+  }
+  (function(){ var w=$('peekWrap'); if(!w) return; var sc=$('peekScrim'); if(sc) sc.addEventListener('click',function(){ w.classList.remove('on'); }); })();
+  function attachPeek(box){
+    var data=statData(); if(!data) return;
+    Array.prototype.forEach.call(box.querySelectorAll('.dc-mini'),function(tile,i){
+      var timer=null;
+      function start(){ tile.__peeked=false; clearTimeout(timer); timer=setTimeout(function(){ tile.__peeked=true; showPeek(data[i]); },420); }
+      function cancel(){ clearTimeout(timer); }
+      tile.addEventListener('pointerdown',start);
+      tile.addEventListener('pointerup',cancel);
+      tile.addEventListener('pointerleave',cancel);
+      tile.addEventListener('pointercancel',cancel);
+      tile.addEventListener('click',function(e){ if(tile.__peeked){ e.preventDefault(); e.stopPropagation(); tile.__peeked=false; } },true);
     });
   }
 
