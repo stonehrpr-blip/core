@@ -213,6 +213,17 @@
 
     /* ── SECTION 2: START ── */
     .startwrap{margin-top:4px;}
+    .resume-card{display:flex;align-items:center;gap:12px;width:100%;text-align:left;margin-bottom:12px;padding:12px 14px;border-radius:16px;cursor:pointer;
+      background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 20%,var(--card)),var(--card) 70%);border:1px solid color-mix(in srgb,var(--accent) 38%,transparent);transition:transform .12s;}
+    .resume-card:active{transform:scale(.98);}
+    .resume-card .rc-ic{width:40px;height:40px;flex:none;border-radius:11px;display:flex;align-items:center;justify-content:center;color:#fff;
+      background:var(--accent);box-shadow:0 4px 12px rgba(10,132,255,.35);}
+    .resume-card .rc-ic svg{width:18px;height:18px;margin-left:2px;}
+    .resume-card .rc-t{flex:1;min-width:0;}
+    .resume-card .rc-t b{display:block;font-size:14.5px;font-weight:800;color:#fff;letter-spacing:-.2px;}
+    .resume-card .rc-t span{font-size:11.5px;color:var(--muted);}
+    .resume-card .rc-go{color:var(--accent);flex:none;display:flex;}
+    .resume-card .rc-go svg{width:20px;height:20px;}
     .dur-row{display:flex;gap:9px;margin-bottom:12px;}
     .dur{flex:1;padding:12px 0;border-radius:14px;background:var(--card);border:1px solid var(--line);
       color:var(--muted);font:inherit;font-size:15px;font-weight:800;cursor:pointer;text-align:center;transition:transform .12s,border-color .15s,background .15s,color .15s;}
@@ -440,6 +451,11 @@
         <!-- SECTION 2: START FOCUS -->
         <div class="sec-l"><span>Start a Session</span><span class="ln"></span></div>
         <div class="startwrap">
+          <button class="resume-card" id="resumeBtn" type="button" style="display:none">
+            <span class="rc-ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+            <span class="rc-t"><b id="resumeT">Resume</b><span id="resumeS">Pick up your last session</span></span>
+            <span class="rc-go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+          </button>
           <div class="dur-row" id="durRow">
             <button class="dur on" data-min="25"><b>25</b><span>min</span></button>
             <button class="dur" data-min="45"><b>45</b><span>min</span></button>
@@ -598,6 +614,7 @@
         F.sessions=F.history.length;
         F.totalMin=F.history.reduce(function(a,h){return a+h.min;},0);
         F.streak=3; F.bestStreak=6; F.distractions=4; F.lastDay=new Date().toDateString();
+        F.lastSession={min:45,zone:'prefrontal',xp:70,label:'Deep Work'};
         fwrite(F);
       }
     }catch(e){}
@@ -789,6 +806,18 @@
     });
     qs('#startBtn').onclick = function(){ startSession(selMin, 'prefrontal', selMin>=60?100:selMin>=45?70:40, 'Deep Work'); };
 
+    // Resume last session — one tap to repeat your most recent focus block
+    function renderResume(){
+      var btn=qs('#resumeBtn'); if(!btn) return;
+      var ls=F.lastSession;
+      if(!ls || !ls.min){ btn.style.display='none'; return; }
+      qs('#resumeT').textContent='Resume '+ls.label;
+      qs('#resumeS').textContent=ls.min+' min · '+(ZONES[ls.zone]?ZONES[ls.zone].label:'Focus');
+      btn.style.display='flex';
+    }
+    qs('#resumeBtn').onclick = function(){ var ls=F.lastSession; if(ls&&ls.min) startSession(ls.min, ls.zone, ls.xp, ls.label); };
+    renderResume();
+
     // ── FOCUS MODE / timer ──
     var RING_LEN = 2*Math.PI*99; // ~622
     var sess = null, ticker = null;
@@ -796,6 +825,7 @@
 
     function fmt(s){ var m=Math.floor(s/60), ss=s%60; return m+':'+(ss<10?'0':'')+ss; }
     function startSession(min, zone, xp, label){
+      F.lastSession = { min:min, zone:zone, xp:xp, label:label }; fwrite(F); renderResume();
       sess = { min:min, zone:zone, xp:xp, label:label, total: (FAST?min:min*60), left:(FAST?min:min*60), interrupted:false, armed:false };
       qs('#fmTag').textContent = label;
       qs('#fmZone').textContent = 'Training ' + ZONES[zone].tip;
