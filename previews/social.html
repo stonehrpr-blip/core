@@ -701,7 +701,9 @@
       saveDuels(); renderChallenges(); sfx('tap'); toast('Challenge accepted — '+c.t);
       if(done&&won){ winsBump(); victory(c.t, reward); try{ renderSocialOverview(); renderSocialRecords(); }catch(e){} }
     }
-    function winsBump(){ var w=pjson('coreChallengeWins',[]); w.push(Date.now()); try{localStorage.setItem('coreChallengeWins',JSON.stringify(w));}catch(e){} }
+    function winsBump(){ var w=pjson('coreChallengeWins',[]); w.push(Date.now()); try{localStorage.setItem('coreChallengeWins',JSON.stringify(w));}catch(e){}
+      try{ if(S&&S.addStat){ S.addStat('social', 4, 'social:challenge-win'); S.addXp(20, 'social:challenge-win'); } }catch(e){}  // feeds the Social life-score
+    }
 
     /* ── discipline feed ── */
     var FEED_T=[

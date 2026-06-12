@@ -441,6 +441,7 @@
   </div>
 
   <script src="_lib/core-sfx.js"></script>
+  <script src="_lib/core-state.js"></script>
   <script>
   (function(){
     "use strict";
@@ -566,6 +567,7 @@
       sfx(a.b>=6?'reward':'coin');
       logEvt(a.t,'+'+a.h);
       var dk=hDayKey(new Date()); st.dayLog=st.dayLog||{}; st.dayLog[dk]=(st.dayLog[dk]||0)+1;
+      try{ if(window.coreState){ window.coreState.addStat('health', Math.max(1,Math.round((a.h||4)/4)), 'health:'+a.id); window.coreState.addXp(8, 'health:'+a.id); } }catch(e){}  // feeds the Health life-score
       pulseGlow();
       save(); paint();
       renderConsistency(); renderHealthRecords();
@@ -792,7 +794,9 @@
       }).join('');
       Array.prototype.forEach.call(host.querySelectorAll('.tcard'),function(b){ b.addEventListener('click',function(){
         var id=b.getAttribute('data-t'), g=TG.filter(function(x){return x.id===id;})[0], tt=ensureTargets();
+        var was=(tt[id]||0)>=g.goal;
         tt[id]=Math.round(((tt[id]||0)+g.step)*10)/10; if(tt[id]>g.goal*2) tt[id]=g.goal*2; save();
+        if(!was && tt[id]>=g.goal){ try{ if(window.coreState){ window.coreState.addStat('health',2,'health:target-'+id); window.coreState.addXp(6,'health:target-'+id); } }catch(e){} }
         sfx(tt[id]>=g.goal?'levelup':'tick'); try{ if(navigator.vibrate) navigator.vibrate(10); }catch(e){} renderTargets();
       }); });
       var meta=$('targMeta'); if(meta){ var hit=TG.filter(function(g){return (t[g.id]||0)>=g.goal;}).length; meta.textContent=hit+'/3 hit'; }
@@ -825,7 +829,7 @@
     Array.prototype.forEach.call(document.querySelectorAll('.htool'),function(b){ b.addEventListener('click',function(){ openHTool(b.getAttribute('data-htool')); }); });
     // hero quick-actions
     (function(){
-      function bump(id,step){ var t=ensureTargets(); t[id]=Math.round(((t[id]||0)+step)*10)/10; var g=TG.filter(function(x){return x.id===id;})[0]; if(g&&t[id]>g.goal*2) t[id]=g.goal*2; save(); sfx('tick'); try{ if(navigator.vibrate) navigator.vibrate(10); }catch(e){} renderTargets(); }
+      function bump(id,step){ var t=ensureTargets(), g=TG.filter(function(x){return x.id===id;})[0], was=(t[id]||0)>=(g?g.goal:1e9); t[id]=Math.round(((t[id]||0)+step)*10)/10; if(g&&t[id]>g.goal*2) t[id]=g.goal*2; save(); if(g&&!was&&t[id]>=g.goal){ try{ if(window.coreState){ window.coreState.addStat('health',2,'health:target-'+id); window.coreState.addXp(6,'health:target-'+id); } }catch(e){} } sfx('tick'); try{ if(navigator.vibrate) navigator.vibrate(10); }catch(e){} renderTargets(); }
       var w=$('haWater'); if(w) w.addEventListener('click',function(){ bump('water',1); });
       var s=$('haSleep'); if(s) s.addEventListener('click',function(){ bump('sleep',0.5); });
       var bm=$('haBmi'); if(bm) bm.addEventListener('click',function(){ openHTool('bmi'); });

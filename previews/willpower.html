@@ -676,6 +676,7 @@
       logEvent(a.msg+' completed', d, true);
       var el=$('.rec[data-id="'+id+'"]'); if(el && !reduce){ el.classList.add('pulse'); setTimeout(function(){ el && el.classList.remove('pulse'); },720); }
       logDayAct();
+      try{ if(S&&S.addStat){ S.addStat('purpose', 2, 'willpower:recover'); S.addXp(8, 'willpower:recover'); } }catch(e){}  // feeds the Purpose life-score
       sfx(a.gain>=12?'levelup':'win'); maybeShake(); save(); render();
       try{ renderPurposeOverview(); renderPurposeRecords(); }catch(e){}
     }
@@ -710,6 +711,7 @@
       st.boostUntil=now()+30000; st.pendingUrge=false;
       logEvent('Resisted — '+c.name.replace(/ \(.*\)/,''), d, true);
       logDayAct();
+      try{ if(S&&S.addStat){ S.addStat('purpose', 3, 'willpower:resist'); S.addXp(12, 'willpower:resist'); } }catch(e){}  // feeds the Purpose life-score
       sfx('win'); save(); render();
       try{ renderPurposeOverview(); renderPurposeRecords(); }catch(e){}
     }
