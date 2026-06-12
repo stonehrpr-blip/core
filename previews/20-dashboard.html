@@ -418,6 +418,9 @@ body.edit-active .nav{display:none;}
 .dc-mini::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--sc,#0A84FF);opacity:.45;transition:opacity .14s;}
 .dc-mini:active{background:color-mix(in srgb,var(--sc,#0A84FF) 10%,rgba(255,255,255,.03));transform:scale(.98);}
 .dc-mini:active::before{opacity:1;}
+.dc-mini.justEarned{animation:earnPulse 1.1s ease 0s 2;}
+@keyframes earnPulse{0%,100%{background:rgba(2,2,16,.6);}50%{background:color-mix(in srgb,var(--sc,#0A84FF) 18%,rgba(2,2,16,.6));}}
+.dc-mini.justEarned::before{opacity:1;box-shadow:0 0 10px var(--sc,#0A84FF);}
 .dc-mini-head{display:flex;align-items:center;gap:7px;margin-bottom:4px;}
 .dc-mini-dot{width:7px;height:7px;border-radius:50%;flex:none;box-shadow:0 0 7px var(--sc,transparent);}
 .dc-mini-name{font-size:11px;font-weight:700;color:var(--muted);flex:1;min-width:0;
@@ -1465,7 +1468,26 @@ body.edit-active .nav{display:none;}
     });
     attachPeek(box);
     renderExtras();
+    flashRecentEarn();
     try{ updateHeader(); }catch(e){}   // refresh greeting momentum now that data is ready
+  }
+
+  // Pulse the tile you most recently earned in (closes the earn -> dashboard loop)
+  var _lastFlashTs=0;
+  function flashRecentEarn(){
+    try{
+      if(!S||!S.read) return; var s=S.read(); var led=s.xpLedger||[]; if(!led.length) return;
+      var e=led[0]; if(!e || (Date.now()-e.ts)>10*60000 || e.ts===_lastFlashTs) return;
+      var r=(e.reason||'').toLowerCase();
+      var key = /focus|deep|study/.test(r)?'focus' : /workout|strength|\bbody\b|gym/.test(r)?'strength'
+        : /wealth|money|save|income|expense|\btx\b/.test(r)?'wealth' : /health|water|steps|sleep|target/.test(r)?'health'
+        : /social|challenge|\bwin\b/.test(r)?'social' : /willpower|purpose|resist|recover|urge/.test(r)?'purpose':'';
+      if(!key) return;
+      var idx=-1; STATS.forEach(function(x,i){ if(x.key===key) idx=i; }); if(idx<0) return;
+      var t=document.querySelectorAll('#statTrends .dc-mini')[idx]; if(!t) return;
+      _lastFlashTs=e.ts; t.classList.remove('justEarned'); void t.offsetWidth; t.classList.add('justEarned');
+      setTimeout(function(){ t.classList.remove('justEarned'); }, 2400);
+    }catch(e){}
   }
 
   // ── Dashboard extras: focus-area nudge, weekly recap, long-press tile peek ──
