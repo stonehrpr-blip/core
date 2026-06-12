@@ -44,6 +44,9 @@
   .back { width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; background:var(--bg-card); border:1px solid var(--border); color:var(--text); text-decoration:none; transition:transform .12s; }
   .back:active{ transform:scale(.92); } .back svg{ width:20px; height:20px; }
   .topbar .ttl { position:absolute; left:50%; transform:translateX(-50%); font-size:13px; font-weight:800; letter-spacing:0.2em; text-transform:uppercase; color:var(--text); }
+  .topright{ display:flex; align-items:center; gap:8px; }
+  .help-btn{ width:30px; height:30px; flex:none; border-radius:50%; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:#9AA1B7; font-size:14px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:.16s; }
+  .help-btn:active{ transform:scale(.92); }
   .coinchip { display:inline-flex; align-items:center; gap:6px; height:36px; padding:0 13px; border-radius:999px; background:rgba(10,132,255,0.12); border:1px solid rgba(10,132,255,0.32); font-size:13.5px; font-weight:900; color:var(--coin2); cursor:pointer; text-decoration:none; transition:transform .12s; }
   .coinchip:active{ transform:scale(.95); } .coinchip svg{ width:16px; height:16px; color:var(--coin); }
 
@@ -261,7 +264,10 @@
       <div class="topbar">
         <a class="back" data-fallback="20-dashboard.html" href="20-dashboard.html" aria-label="Back to dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></a>
         <span class="ttl">Wealth</span>
-        <a class="coinchip" href="27-shop.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/></svg><span id="coinTop">0</span></a>
+        <div class="topright">
+          <a class="coinchip" href="27-shop.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/></svg><span id="coinTop">0</span></a>
+          <button class="help-btn" id="helpBtn" aria-label="Wealth help">?</button>
+        </div>
       </div>
 
       <div class="scroll">
@@ -366,6 +372,14 @@
   <script src="_lib/core-state.js"></script>
   <script src="_lib/core-toast.js"></script>
   <script src="_lib/core-back.js"></script>
+  <script src="_lib/core-help.js"></script>
+  <script>try{window.coreHelp&&window.coreHelp.attach('helpBtn',{title:'Wealth',bullets:[
+    'Log income and expenses to grow your Wealth score and keep your cashflow positive.',
+    'The cashflow calendar shows the days you logged money in vs out — aim for green.',
+    'Build savings and watch your net-worth trend climb week over week.',
+    'Records track your best saving streaks, biggest months, and milestones.',
+    'Staying in the black raises your Wealth score and earns XP toward your level.'
+  ]});}catch(e){}</script>
   <script>
   (function(){
     "use strict";

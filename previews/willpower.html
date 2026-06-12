@@ -48,6 +48,9 @@
   .back svg{ width:20px; height:20px; }
   .ttl{ position:absolute; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:8px; font-size:13px; font-weight:800; letter-spacing:0.24em; text-transform:uppercase; }
   .live{ display:inline-flex; align-items:center; gap:5px; font-size:8.5px; font-weight:800; letter-spacing:0.14em; color:var(--accent); }
+  .topright{ display:flex; align-items:center; gap:8px; }
+  .help-btn{ width:30px; height:30px; flex:none; border-radius:50%; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:#9AA1B7; font-size:14px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:.16s; }
+  .help-btn:active{ transform:scale(.92); }
   .live i{ width:6px; height:6px; border-radius:50%; background:var(--accent); animation:livePulse 1.8s ease-in-out infinite; }
   @keyframes livePulse{ 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.35;transform:scale(0.7);} }
   .mutebtn{ width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; background:var(--bg-card); border:1px solid var(--border); color:var(--muted); cursor:pointer; }
@@ -260,7 +263,10 @@
       <div class="topbar">
         <a class="back" href="20-dashboard.html" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></a>
         <span class="ttl">Willpower <span class="live"><i></i>LIVE</span></span>
-        <button class="mutebtn" id="mute" aria-label="Toggle sound"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19 12a7 7 0 0 0-3-5.7M16 9a3 3 0 0 1 0 6" id="muteOn"/></svg></button>
+        <div class="topright">
+          <button class="mutebtn" id="mute" aria-label="Toggle sound"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19 12a7 7 0 0 0-3-5.7M16 9a3 3 0 0 1 0 6" id="muteOn"/></svg></button>
+          <button class="help-btn" id="helpBtn" aria-label="Willpower help">?</button>
+        </div>
       </div>
 
       <div class="scroll">
@@ -766,5 +772,13 @@
   })();
   </script>
   <script src="_lib/core-back.js"></script>
+  <script src="_lib/core-help.js"></script>
+  <script>try{window.coreHelp&&window.coreHelp.attach('helpBtn',{title:'Willpower',bullets:[
+    'Your energy core reflects your willpower right now — feed it with disciplined actions.',
+    'Resisting temptations and completing hard tasks charges the core and builds your score.',
+    'Log daily wins to keep your streak alive; skipped days let the core drain.',
+    'Records track your longest streaks and strongest stretches of discipline.',
+    'Staying disciplined raises your Willpower score and earns XP toward your level.'
+  ]});}catch(e){}</script>
 </body>
 </html>
