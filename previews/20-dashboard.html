@@ -412,12 +412,14 @@ body.edit-active .nav{display:none;}
 .dc-axis{display:flex;justify-content:space-between;margin-top:4px;font-size:9.5px;font-weight:700;color:var(--dim);letter-spacing:.02em;}
 .dc-mini-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:rgba(255,255,255,.05);}
 .trends-card{border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);}
-.dc-mini{display:block;text-decoration:none;color:inherit;cursor:pointer;
+.dc-mini{display:block;text-decoration:none;color:inherit;cursor:pointer;position:relative;
   background:rgba(2,2,16,.6);padding:11px 12px 9px;
   transition:background .14s,transform .1s cubic-bezier(.2,.8,.2,1);}
-.dc-mini:active{background:rgba(255,255,255,.04);transform:scale(.98);}
+.dc-mini::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--sc,#0A84FF);opacity:.45;transition:opacity .14s;}
+.dc-mini:active{background:color-mix(in srgb,var(--sc,#0A84FF) 10%,rgba(255,255,255,.03));transform:scale(.98);}
+.dc-mini:active::before{opacity:1;}
 .dc-mini-head{display:flex;align-items:center;gap:7px;margin-bottom:4px;}
-.dc-mini-dot{width:7px;height:7px;border-radius:50%;flex:none;}
+.dc-mini-dot{width:7px;height:7px;border-radius:50%;flex:none;box-shadow:0 0 7px var(--sc,transparent);}
 .dc-mini-name{font-size:11px;font-weight:700;color:var(--muted);flex:1;min-width:0;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .dc-mini-chev{width:12px;height:12px;color:var(--dim);flex:none;}
@@ -1397,7 +1399,7 @@ body.edit-active .nav{display:none;}
     var pts=DC.getHistory(30);
     var reduced=!!(window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches);
     box.innerHTML=STATS.map(function(s){
-      return '<a class="dc-mini" href="'+s.page+'" aria-label="'+s.name+' trend">'
+      return '<a class="dc-mini" href="'+s.page+'" style="--sc:'+s.color+'" aria-label="'+s.name+' trend">'
         +'<div class="dc-mini-head"><span class="dc-mini-dot" style="background:'+s.color+'"></span>'
         +'<span class="dc-mini-name">'+s.name+'</span>'
         +'<svg class="dc-mini-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>'
