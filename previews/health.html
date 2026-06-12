@@ -60,6 +60,15 @@
   .greet-eyebrow .gd{ width:7px; height:7px; border-radius:50%; background:var(--good); box-shadow:0 0 8px var(--good); }
   .greet h1{ margin:0; font-size:30px; font-weight:800; letter-spacing:-0.8px; line-height:1.05; }
   .greet p{ margin:5px 0 0; font-size:14px; color:var(--muted); }
+  /* action grid (matches Strength) */
+  .act-grid{ display:grid; grid-template-columns:1fr 1fr; gap:11px; margin-top:14px; }
+  .act-card{ display:flex; flex-direction:column; align-items:flex-start; padding:16px; border-radius:20px; text-align:left; cursor:pointer; background:rgba(255,255,255,0.022); border:1px solid rgba(255,255,255,0.07); color:inherit; text-decoration:none; font:inherit; transition:transform .12s, border-color .2s; }
+  .act-card:active{ transform:scale(.97); }
+  .act-card:hover{ border-color:color-mix(in srgb, var(--ac,#0A84FF) 45%, transparent); }
+  .act-ic{ width:44px; height:44px; border-radius:13px; display:flex; align-items:center; justify-content:center; margin-bottom:14px; color:var(--ac,#0A84FF); background:color-mix(in srgb, var(--ac,#0A84FF) 15%, transparent); border:1px solid color-mix(in srgb, var(--ac,#0A84FF) 30%, transparent); }
+  .act-ic svg{ width:22px; height:22px; }
+  .act-card b{ font-size:15.5px; font-weight:800; letter-spacing:-0.2px; }
+  .act-card>span:last-child{ font-size:11.5px; color:var(--muted); margin-top:3px; line-height:1.35; }
   /* today's targets */
   .targets{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
   .tcard{ padding:13px 8px 11px; border-radius:16px; background:var(--bg-card); border:1px solid var(--border); text-align:center; cursor:pointer; font:inherit; color:inherit; transition:transform .12s; }
@@ -317,6 +326,14 @@
           </div>
           <div class="trend"><span class="tarrow" id="tArrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><path d="M6 15l6-6 6 6"/></svg></span><span id="trendTxt">Recovering</span> · <b id="netTxt">+0.0/min</b></div>
           <div class="pops" id="pops"></div>
+        </div>
+
+        <!-- Quick actions -->
+        <div class="act-grid">
+          <button class="act-card" id="haWater" type="button" style="--ac:#0A84FF"><span class="act-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c4 5 6 7.5 6 11a6 6 0 0 1-12 0c0-3.5 2-6 6-11z"/></svg></span><b>Log Water</b><span>+1 glass</span></button>
+          <button class="act-card" id="haSleep" type="button" style="--ac:#B388FF"><span class="act-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></span><b>Log Sleep</b><span>+30 min</span></button>
+          <button class="act-card" id="haBmi" type="button" style="--ac:#34D399"><span class="act-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20a8 8 0 1 1 16 0z"/><path d="M12 12l4-4"/></svg></span><b>BMI</b><span>Body mass index</span></button>
+          <button class="act-card" id="haCal" type="button" style="--ac:#FFCB3D"><span class="act-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1.6 3.6 4 4.6 4 8a4 4 0 0 1-8 0c0-1.3.5-2.1 1-2.7C9 11 12 8 12 3z"/></svg></span><b>Calories</b><span>Daily target</span></button>
         </div>
 
         <!-- HABIT BOSS -->
@@ -806,6 +823,14 @@
       }
     }
     Array.prototype.forEach.call(document.querySelectorAll('.htool'),function(b){ b.addEventListener('click',function(){ openHTool(b.getAttribute('data-htool')); }); });
+    // hero quick-actions
+    (function(){
+      function bump(id,step){ var t=ensureTargets(); t[id]=Math.round(((t[id]||0)+step)*10)/10; var g=TG.filter(function(x){return x.id===id;})[0]; if(g&&t[id]>g.goal*2) t[id]=g.goal*2; save(); sfx('tick'); try{ if(navigator.vibrate) navigator.vibrate(10); }catch(e){} renderTargets(); }
+      var w=$('haWater'); if(w) w.addEventListener('click',function(){ bump('water',1); });
+      var s=$('haSleep'); if(s) s.addEventListener('click',function(){ bump('sleep',0.5); });
+      var bm=$('haBmi'); if(bm) bm.addEventListener('click',function(){ openHTool('bmi'); });
+      var ca=$('haCal'); if(ca) ca.addEventListener('click',function(){ openHTool('cal'); });
+    })();
 
     /* ── boot ──────────────────────────────────────────────── */
     // demo: ~5 weeks of daily health actions so the overview populates
