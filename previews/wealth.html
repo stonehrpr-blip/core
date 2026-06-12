@@ -146,6 +146,42 @@
 
   /* WEALTH STATS grid */
   .statgrid{ display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+  /* Money overview + records */
+  .wov{padding:16px 16px 14px;border-radius:18px;background:var(--bg-card);border:1px solid var(--border);}
+  .ov-stats{display:flex;gap:10px;margin-bottom:15px;}
+  .ov-stat{flex:1;text-align:center;min-width:0;}
+  .ov-stat .v{font-size:19px;font-weight:900;color:#fff;letter-spacing:-0.5px;line-height:1;white-space:nowrap;}
+  .ov-stat .v.up{color:#34D399;} .ov-stat .v.dn{color:#FF6B6B;}
+  .ov-stat .k{font-size:9px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--dim);margin-top:5px;}
+  .ov-month{font-size:11.5px;font-weight:800;letter-spacing:.03em;color:var(--text);margin-bottom:11px;}
+  .ov-cal-dow{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:5px;}
+  .ov-cal-dow span{text-align:center;font-size:9px;font-weight:800;color:var(--dim);text-transform:uppercase;}
+  .ov-week{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:5px;}
+  .ov-cell{aspect-ratio:1;border-radius:7px;background:rgba(255,255,255,0.045);border:1px solid rgba(255,255,255,0.05);
+    display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;color:var(--dim);}
+  .ov-cell.save{background:color-mix(in srgb,#34D399 55%,transparent);border-color:color-mix(in srgb,#34D399 80%,transparent);color:#fff;}
+  .ov-cell.spend{background:color-mix(in srgb,#FF6B6B 38%,transparent);border-color:color-mix(in srgb,#FF6B6B 60%,transparent);color:#fff;}
+  .ov-cell.today{box-shadow:0 0 0 2px var(--text);}
+  .ov-cell.future{opacity:.35;} .ov-cell.blank{background:transparent;border:none;}
+  .ov-vol{margin-top:14px;padding-top:13px;border-top:1px solid var(--border);}
+  .ov-vol-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px;}
+  .ov-vol-h .l{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);}
+  .ov-vol-h .r{font-size:11px;font-weight:700;color:var(--muted);}
+  .ov-bars{display:flex;align-items:flex-end;gap:6px;height:46px;}
+  .ov-bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;justify-content:flex-end;}
+  .ov-bar i{width:100%;border-radius:5px 5px 2px 2px;background:color-mix(in srgb,#FF6B6B 50%,transparent);min-height:3px;transition:height .5s;}
+  .ov-bar.now i{background:#FF6B6B;}
+  .ov-bar span{font-size:8.5px;font-weight:700;color:var(--dim);}
+  .ov-imp{display:flex;align-items:center;gap:9px;margin-top:13px;padding-top:13px;border-top:1px solid var(--border);font-size:12.5px;color:var(--muted);line-height:1.4;}
+  .ov-imp svg{width:17px;height:17px;flex:none;} .ov-imp b{color:#fff;font-weight:800;}
+  .ov-legend{display:flex;gap:14px;margin-top:11px;font-size:10px;font-weight:700;color:var(--dim);}
+  .ov-legend i{width:9px;height:9px;border-radius:3px;display:inline-block;margin-right:5px;vertical-align:-1px;}
+  .rec-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+  .rec{border-radius:15px;background:var(--bg-card);border:1px solid var(--border);padding:14px;}
+  .rec .rv{font-size:18px;font-weight:900;color:var(--accent);letter-spacing:-.5px;line-height:1;white-space:nowrap;}
+  .rec .rv small{font-size:11px;color:var(--muted);font-weight:700;}
+  .rec .rk{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-top:6px;}
+  .ov-empty{padding:24px;text-align:center;color:var(--dim);font-size:12.5px;border-radius:18px;background:var(--bg-card);border:1px solid var(--border);}
   .scard{ padding:14px; border-radius:16px; background:var(--bg-card); border:1px solid var(--border); cursor:pointer; transition:transform .12s, border-color .2s; }
   .scard:active{ transform:scale(.98); }
   .scard .sl{ font-size:10.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:6px; }
@@ -271,6 +307,14 @@
         <!-- SECTION 7: INSIGHTS -->
         <div class="sec"><h2>Insights</h2></div>
         <div class="insights" id="insights"></div>
+
+        <!-- SECTION 8: MONEY OVERVIEW -->
+        <div class="sec"><h2>Money Overview</h2><span class="meta" id="wovMeta"></span></div>
+        <div class="wov" id="wealthOverview"></div>
+
+        <!-- SECTION 9: RECORDS -->
+        <div class="sec"><h2>Records</h2></div>
+        <div id="wealthRecords"></div>
       </div>
 
       <button class="fab" id="fab" type="button" aria-label="Add transaction"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
@@ -663,6 +707,75 @@
       });
     }
 
+    // ── Money overview (cashflow calendar, savings, spend trend) + records ──
+    function money(n){ n=Math.round(n||0); var neg=n<0; return (neg?'-$':'$')+Math.abs(n).toLocaleString(); }
+    function renderWealthOverview(){
+      var host=qs('#wealthOverview'); if(!host) return;
+      var tx=W.transactions||[];
+      if(!tx.length){ host.innerHTML='<div class="ov-empty">Add a few transactions to see your money overview.</div>'; var m0=qs('#wovMeta'); if(m0) m0.textContent=''; return; }
+      var today=new Date(); today.setHours(0,0,0,0); var y=today.getFullYear(), mo=today.getMonth(), dow=today.getDay();
+      function inMonth(ts,off){ var a=new Date(y,mo-off,1).getTime(), b=new Date(y,mo-off+1,1).getTime(); return ts>=a&&ts<b; }
+      function income(off){ return tx.filter(function(t){return t.amount>0&&inMonth(t.ts,off);}).reduce(function(a,t){return a+t.amount;},0); }
+      function spend(off){ return Math.abs(tx.filter(function(t){return t.amount<0&&t.category!=='Savings'&&inMonth(t.ts,off);}).reduce(function(a,t){return a+t.amount;},0)); }
+      var inc=income(0), sp=spend(0), net=inc-sp, lastNet=income(1)-spend(1), rate= inc>0?Math.round(net/inc*100):0;
+      var dayNet={}; tx.forEach(function(t){ var d=new Date(t.ts); if(d.getFullYear()===y&&d.getMonth()===mo){ dayNet[d.getDate()]=(dayNet[d.getDate()]||0)+t.amount; } });
+      var mFirst=new Date(y,mo,1), firstDow=mFirst.getDay(), dim=new Date(y,mo+1,0).getDate();
+      var monthName=mFirst.toLocaleDateString(undefined,{month:'long',year:'numeric'}), dows=['S','M','T','W','T','F','S'];
+      var cells=[]; for(var b=0;b<firstDow;b++) cells.push(0);
+      for(var dn=1;dn<=dim;dn++) cells.push(dn);
+      while(cells.length%7) cells.push(0);
+      var cal='<div class="ov-month">'+monthName+'</div><div class="ov-cal-dow">'+dows.map(function(x){return '<span>'+x+'</span>';}).join('')+'</div>';
+      for(var w=0; w<cells.length/7; w++){ cal+='<div class="ov-week">';
+        for(var k=0;k<7;k++){ var dnum=cells[w*7+k];
+          if(!dnum){ cal+='<div class="ov-cell blank"></div>'; continue; }
+          var c=new Date(y,mo,dnum); c.setHours(0,0,0,0);
+          var n=dayNet[dnum], cls= n==null?'' : n>0?' save' : n<0?' spend':'';
+          cal+='<div class="ov-cell'+cls+(c.getTime()===today.getTime()?' today':'')+(c.getTime()>today.getTime()?' future':'')+'">'+dnum+'</div>'; }
+        cal+='</div>'; }
+      function wkSpend(off){ var sun=new Date(today); sun.setDate(today.getDate()-dow-7*off); var e=new Date(sun); e.setDate(sun.getDate()+7); return Math.abs(tx.filter(function(t){return t.amount<0&&t.category!=='Savings'&&t.ts>=sun.getTime()&&t.ts<e.getTime();}).reduce(function(a,t){return a+t.amount;},0)); }
+      var vols=[]; for(var v=5;v>=0;v--) vols.push(wkSpend(v));
+      var vmax=Math.max.apply(null,vols.concat([1]));
+      var bars='<div class="ov-vol"><div class="ov-vol-h"><span class="l">Weekly spending</span><span class="r">'+money(vols[5])+' this week</span></div><div class="ov-bars">'
+        +vols.map(function(val,i){ var hh=Math.round(val/vmax*100); return '<div class="ov-bar'+(i===5?' now':'')+'"><i style="height:'+hh+'%"></i><span>'+(i===5?'now':(5-i)+'w')+'</span></div>'; }).join('')+'</div></div>';
+      var up=net>=lastNet;
+      var imp = net>=0 ? '<b>'+money(net)+' saved</b> this month ('+rate+'% of income). '+(up?'Up from last month.':'Down from last month.')
+        : '<b>'+money(Math.abs(net))+' over</b> this month — spending beat income. Trim one category to flip it.';
+      var icon=up?'<path d="M3 17l6-6 4 4 7-8"/><path d="M21 7v5h-5"/>':'<path d="M3 7l6 6 4-4 7 8"/><path d="M21 17v-5h-5"/>';
+      host.innerHTML='<div class="ov-stats">'
+        +'<div class="ov-stat"><div class="v up">'+money(inc)+'</div><div class="k">Income</div></div>'
+        +'<div class="ov-stat"><div class="v dn">'+money(sp)+'</div><div class="k">Spent</div></div>'
+        +'<div class="ov-stat"><div class="v '+(net>=0?'up':'dn')+'">'+money(net)+'</div><div class="k">Saved</div></div>'
+        +'</div>'+cal
+        +'<div class="ov-legend"><span><i style="background:#34D399"></i>Net‑positive day</span><span><i style="background:#FF6B6B"></i>Spent day</span></div>'+bars
+        +'<div class="ov-imp"><svg viewBox="0 0 24 24" fill="none" stroke="'+(up?'#34D399':'#FF6B6B')+'" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'+icon+'</svg><span>'+imp+'</span></div>';
+      var meta=qs('#wovMeta'); if(meta) meta.textContent=rate+'% saved';
+    }
+    function renderWealthRecords(){
+      var host=qs('#wealthRecords'); if(!host) return;
+      var tx=W.transactions||[];
+      if(!tx.length){ host.innerHTML='<div class="ov-empty">Records appear once you log transactions.</div>'; return; }
+      var bigInc=0, bigExp=0, byCat={}, byDay={};
+      tx.forEach(function(t){
+        if(t.amount>0){ if(t.amount>bigInc) bigInc=t.amount; }
+        else if(t.category!=='Savings'){ var a=Math.abs(t.amount); if(a>bigExp) bigExp=a; byCat[t.category||'Other']=(byCat[t.category||'Other']||0)+a; }
+        var d=new Date(t.ts); d.setHours(0,0,0,0); byDay[d.getTime()]=(byDay[d.getTime()]||0)+t.amount;
+      });
+      var bestDay=0; for(var dd in byDay){ if(byDay[dd]>bestDay) bestDay=byDay[dd]; }
+      var topCat='—', topV=-1; for(var c in byCat){ if(byCat[c]>topV){ topV=byCat[c]; topCat=c; } }
+      var totalNet=tx.reduce(function(a,t){ return t.category==='Savings'?a:a+t.amount; },0);
+      var today=new Date(); today.setHours(0,0,0,0);
+      function spentOn(off){ var d=new Date(today); d.setDate(today.getDate()-off); var t1=d.getTime(), t2=t1+86400000; return tx.some(function(t){return t.amount<0&&t.category!=='Savings'&&t.ts>=t1&&t.ts<t2;}); }
+      var noSpend=0; for(var i=0;i<60;i++){ if(spentOn(i)) break; noSpend++; }
+      host.innerHTML='<div class="rec-grid">'
+        +'<div class="rec"><div class="rv">'+money(bigInc)+'</div><div class="rk">Biggest income</div></div>'
+        +'<div class="rec"><div class="rv">'+money(bigExp)+'</div><div class="rk">Biggest expense</div></div>'
+        +'<div class="rec"><div class="rv">'+money(bestDay)+'</div><div class="rk">Best day</div></div>'
+        +'<div class="rec"><div class="rv" style="font-size:15px">'+topCat+'</div><div class="rk">Top spend</div></div>'
+        +'<div class="rec"><div class="rv">'+noSpend+'<small> days</small></div><div class="rk">No-spend streak</div></div>'
+        +'<div class="rec"><div class="rv">'+money(totalNet)+'</div><div class="rk">Net all-time</div></div>'
+        +'</div>';
+    }
+
     // ── ADD-MONEY SHEET ──────────────────────────────────────────────
     var CATS={ expense:[['Food',ICON.food],['Coffee',ICON.coffee],['Shopping',ICON.shopping],['Transport',ICON.transport],['Bills',ICON.bills],['Fun',ICON.fun],['Savings',ICON.savings]],
                income:[['Salary',ICON.salary],['Freelance',ICON.briefcase],['Gift',ICON.gift],['Refund',ICON.refund]] };
@@ -703,7 +816,7 @@
     Array.prototype.forEach.call(qs('#seg').children, function(b){ b.addEventListener('click', function(){ setType(b.getAttribute('data-type')); SFX('tick'); }); });
 
     function syncCoins(){ try{ qs('#coinTop').textContent=(S.read().coins||0).toLocaleString(); }catch(e){} }
-    function renderAll(){ renderCore(); renderBank(); renderTx(); renderSubs(); renderMissions(); renderStats(); renderInsights(); syncCoins(); }
+    function renderAll(){ renderCore(); renderBank(); renderTx(); renderSubs(); renderMissions(); renderStats(); renderInsights(); renderWealthOverview(); renderWealthRecords(); syncCoins(); }
 
     window.addEventListener('coreStateChange', syncCoins);
     window.addEventListener('core:progress-updated', syncCoins);
