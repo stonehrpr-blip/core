@@ -78,6 +78,14 @@
   .why-add input{ flex:1; min-width:0; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); border-radius:11px; padding:11px 12px; color:var(--text); font:inherit; font-size:13.5px; outline:none; }
   .why-add button{ flex:none; padding:0 16px; border-radius:11px; border:1px dashed rgba(255,255,255,.16); background:rgba(255,255,255,.03); color:var(--muted); font:inherit; font-weight:800; font-size:13px; cursor:pointer; }
   .why-empty{ padding:14px; border-radius:13px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); color:var(--dim); font-size:12.5px; text-align:center; margin-bottom:8px; }
+  /* slip / relapse log */
+  .slip-clean{ display:flex; align-items:center; gap:13px; padding:14px 16px; border-radius:16px; background:rgba(52,211,153,.08); border:1px solid rgba(52,211,153,.22); margin-bottom:10px; }
+  .slip-clean .sc-n{ font-size:30px; font-weight:900; color:#34D399; letter-spacing:-1px; line-height:1; flex:none; }
+  .slip-clean .sc-t b{ font-size:14px; font-weight:800; color:#fff; display:block; } .slip-clean .sc-t span{ font-size:11.5px; color:var(--muted); }
+  .slip{ padding:11px 13px; border-radius:13px; background:rgba(255,255,255,.03); border:1px solid var(--border); margin-bottom:8px; }
+  .slip-top{ display:flex; justify-content:space-between; margin-bottom:7px; } .slip-d{ font-size:11.5px; font-weight:800; color:#FF8A7A; }
+  .slip-note{ width:100%; background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:9px; padding:9px 11px; color:var(--text); font:inherit; font-size:12.5px; outline:none; }
+  .slip-log-btn{ width:100%; margin-top:4px; padding:12px; border-radius:13px; border:1px dashed rgba(255,255,255,.14); background:rgba(255,255,255,.02); color:var(--muted); font:inherit; font-weight:800; font-size:13px; cursor:pointer; -webkit-appearance:none; appearance:none; }
   .scroll::-webkit-scrollbar{ display:none; }
 
   .topbar{ position:relative; display:flex; align-items:center; justify-content:space-between; padding:6px 16px 8px; }
@@ -413,6 +421,10 @@
         <div class="sec"><h2>Records</h2></div>
         <div id="purposeRecords"></div>
 
+        <!-- SLIP LOG -->
+        <div class="sec"><h2>Slip log</h2><span class="meta" id="slipMeta"></span></div>
+        <div id="slipHost"></div>
+
         <!-- ecosystem links -->
         <div class="links">
           <a class="lk" href="21-quests.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;vertical-align:-2px;margin-right:2px"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/></svg> <b>Quests</b> +restore</a>
@@ -724,7 +736,19 @@
       var d=applyDelta(-7, true);
       var p=st.pressures[0]; if(p){ p.active=true; p.impact=Math.min(22,p.impact+4); }
       st.pendingUrge=false; logEvent('Gave in to the urge', d, false);
-      sfx('error'); maybeShake(); save(); render();
+      st.relapses=st.relapses||[]; st.relapses.unshift({ts:Date.now(),note:''}); if(st.relapses.length>50) st.relapses.length=50;
+      sfx('error'); maybeShake(); save(); render(); try{ renderRelapse(); }catch(e){}
+    }
+    function slipDate(ts){ var d=new Date(ts); return d.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' · '+d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'}); }
+    function renderRelapse(){
+      var host=$('#slipHost'); if(!host) return; st.relapses=st.relapses||[]; var rl=st.relapses;
+      var since=rl.length?Math.floor((Date.now()-rl[0].ts)/86400000):null;
+      var head='<div class="slip-clean"><div class="sc-n">'+(rl.length?since:'∞')+'</div><div class="sc-t"><b>'+(rl.length?(since+' day'+(since===1?'':'s')+' since last slip'):'No slips logged')+'</b><span>'+(rl.length?'Every clean day rebuilds control.':'Log a slip only if it happens — then plan the recovery.')+'</span></div></div>';
+      var list=rl.slice(0,6).map(function(r,i){ return '<div class="slip"><div class="slip-top"><span class="slip-d">'+slipDate(r.ts)+'</span></div><input class="slip-note" data-i="'+i+'" placeholder="What triggered it? (reflection)" maxlength="80" value="'+esc(r.note||'')+'" /></div>'; }).join('');
+      host.innerHTML=head+(rl.length?('<div class="slip-list">'+list+'</div>'):'')+'<button class="slip-log-btn" id="slipLog" type="button">+ Log a slip</button>';
+      Array.prototype.forEach.call(host.querySelectorAll('.slip-note'),function(inp){ inp.addEventListener('change',function(){ var i=parseInt(inp.getAttribute('data-i'),10); if(st.relapses[i]){ st.relapses[i].note=inp.value; save(); } }); });
+      var lb=$('#slipLog'); if(lb) lb.addEventListener('click',function(){ st.relapses=st.relapses||[]; st.relapses.unshift({ts:Date.now(),note:''}); save(); sfx('tap'); renderRelapse(); });
+      var meta=$('#slipMeta'); if(meta) meta.textContent=rl.length?(rl.length+' logged'):'';
     }
     function closeSheet(){ $('#sheetwrap').classList.remove('on'); }
 
@@ -879,7 +903,7 @@
       var w=$('#wpWhy'); if(w) w.addEventListener('click',function(){ var el=$('#whyHost'); if(el){ try{ el.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){} } });
     })();
     render();
-    renderPurposeOverview(); renderPurposeRecords(); renderIntent(); renderWhy();
+    renderPurposeOverview(); renderPurposeRecords(); renderIntent(); renderWhy(); renderRelapse();
     setInterval(tick, 1000);
     // cooldown ticking (visual)
     setInterval(function(){ if(document.querySelector('.rec.cool')) renderRecovery(); }, 1000);
