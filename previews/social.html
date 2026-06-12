@@ -54,6 +54,11 @@
     text-decoration:none; color:var(--dim); transition:color .2s,transform .15s; }
   .nav svg{ width:23px; height:23px; } .nav .nl{ font-size:10px; font-weight:800; } .nav .item:active{ transform:translateY(1px); }
   .nav .item.active{ color:var(--text); } .nav .item.active svg{ color:var(--accent); }
+  .ptabs{ display:flex; gap:2px; padding:0 0 2px; margin:2px 0 8px; }
+  .ptab{ flex:1; appearance:none; background:none; border:none; font:inherit; cursor:pointer; color:var(--muted); font-size:13px; font-weight:800; padding:8px 4px 11px; position:relative; }
+  .ptab.on{ color:var(--text); }
+  .ptab.on::after{ content:""; position:absolute; left:50%; transform:translateX(-50%); bottom:3px; width:26px; height:2.5px; border-radius:2px; background:var(--accent); }
+  .ppane{ display:none; } .ppane.on{ display:block; }
   .sec{ display:flex; align-items:center; gap:8px; margin:24px 4px 12px; font-size:12px; font-weight:800; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); }
   .sec .ic{ width:16px; height:16px; flex:none; opacity:.9; }
   .sec .meta{ margin-left:auto; font-size:10px; letter-spacing:.1em; color:var(--dim); font-weight:800; }
@@ -277,6 +282,11 @@
       </div>
 
       <div class="scroll">
+        <div class="ptabs" id="ptabs">
+          <button class="ptab on" data-pane="main" type="button">Arena</button>
+          <button class="ptab" data-pane="progress" type="button">Progress</button>
+        </div>
+        <div class="ppane on" data-pane="main">
         <!-- HERO -->
         <div class="hero" id="hero" role="button" tabindex="0" aria-label="Your CORE profile">
           <div class="aura"></div>
@@ -317,6 +327,8 @@
         <div id="duels"></div>
         <div id="chalList"></div>
 
+        </div><!-- /pane main -->
+        <div class="ppane" data-pane="progress">
         <!-- WIN OVERVIEW -->
         <div class="sec">
           <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0zM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3"/></svg>
@@ -337,6 +349,7 @@
           Discipline Feed <span class="meta">progress only</span>
         </div>
         <div class="feed" id="feed"></div>
+        </div><!-- /pane progress -->
       </div>
       <nav class="nav" aria-label="Primary">
         <a class="item active" href="20-dashboard.html" aria-current="page">
@@ -753,6 +766,7 @@
   })();
   </script>
   <script src="_lib/core-back.js"></script>
+  <script>(function(){var ts=document.getElementById('ptabs');if(!ts)return;ts.addEventListener('click',function(e){var b=e.target.closest('.ptab');if(!b)return;var p=b.getAttribute('data-pane');Array.prototype.forEach.call(ts.querySelectorAll('.ptab'),function(x){x.classList.toggle('on',x===b);});Array.prototype.forEach.call(document.querySelectorAll('.ppane'),function(x){x.classList.toggle('on',x.getAttribute('data-pane')===p);});var sc=document.querySelector('.scroll');if(sc)sc.scrollTop=0;try{window.coreSfx&&window.coreSfx('tick');}catch(e){}});})();</script>
   <script src="_lib/core-help.js"></script>
   <script>try{window.coreHelp&&window.coreHelp.attach('helpBtn',{title:'Social',bullets:[
     'Your reputation rank rises as you build real-world social wins and challenges.',

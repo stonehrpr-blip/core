@@ -49,6 +49,11 @@
 
   .frame{ position:absolute; inset:0; z-index:10; display:flex; flex-direction:column; padding:54px 0 0; }
   .scroll{ flex:1; overflow-y:auto; padding:2px 16px 108px; -webkit-overflow-scrolling:touch; }
+  .ptabs{ display:flex; gap:2px; padding:0 0 2px; margin:2px 0 8px; }
+  .ptab{ flex:1; appearance:none; background:none; border:none; font:inherit; cursor:pointer; color:var(--muted); font-size:13px; font-weight:800; padding:8px 4px 11px; position:relative; }
+  .ptab.on{ color:var(--text); }
+  .ptab.on::after{ content:""; position:absolute; left:50%; transform:translateX(-50%); bottom:3px; width:26px; height:2.5px; border-radius:2px; background:var(--good); }
+  .ppane{ display:none; } .ppane.on{ display:block; }
   .scroll::-webkit-scrollbar{ display:none; }
 
   .topbar{ position:relative; display:flex; align-items:center; justify-content:space-between; padding:6px 18px 6px; }
@@ -240,7 +245,11 @@
       </div>
 
       <div class="scroll">
-
+        <div class="ptabs" id="ptabs">
+          <button class="ptab on" data-pane="main" type="button">Today</button>
+          <button class="ptab" data-pane="progress" type="button">Progress</button>
+        </div>
+        <div class="ppane on" data-pane="main">
         <!-- HEALTH HERO -->
         <div class="hero" id="hero">
           <span class="statePill" id="statePill"><span class="pdot"></span><span id="stateTxt">PEAK CONDITION</span></span>
@@ -282,6 +291,8 @@
           <button class="cbtn crelapse" id="relapseBtn"><span class="ct"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px;margin-right:3px"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>Relapse hit</span><span class="cs">Simulate a setback</span></button>
         </div>
 
+        </div><!-- /pane main -->
+        <div class="ppane" data-pane="progress">
         <!-- HEALTH OVERVIEW -->
         <div class="sec"><h2>Health Overview</h2><span class="meta" id="hovMeta"></span></div>
         <div class="hov" id="healthOverview"></div>
@@ -300,6 +311,7 @@
         </div>
 
         <div class="disc">CORE Health is a motivational game system that reflects your habits — not a medical reading or health advice.</div>
+        </div><!-- /pane progress -->
       </div>
 
       <!-- relapse banner -->
@@ -688,6 +700,7 @@
   })();
   </script>
   <script src="_lib/core-back.js"></script>
+  <script>(function(){var ts=document.getElementById('ptabs');if(!ts)return;ts.addEventListener('click',function(e){var b=e.target.closest('.ptab');if(!b)return;var p=b.getAttribute('data-pane');Array.prototype.forEach.call(ts.querySelectorAll('.ptab'),function(x){x.classList.toggle('on',x===b);});Array.prototype.forEach.call(document.querySelectorAll('.ppane'),function(x){x.classList.toggle('on',x.getAttribute('data-pane')===p);});var sc=document.querySelector('.scroll');if(sc)sc.scrollTop=0;try{window.coreSfx&&window.coreSfx('tick');}catch(e){}});})();</script>
   <script src="_lib/core-help.js"></script>
   <script>try{window.coreHelp&&window.coreHelp.attach('helpBtn',{title:'Health',bullets:[
     'Your Health ring reflects sleep, movement, nutrition and hydration — keep it full.',

@@ -41,6 +41,11 @@
 
   .frame{ position:absolute; inset:0; z-index:10; display:flex; flex-direction:column; padding:54px 0 0; font-family:'Chakra Petch',-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif; }
   .scroll{ flex:1; overflow-y:auto; padding:2px 16px 108px; -webkit-overflow-scrolling:touch; }
+  .ptabs{ display:flex; gap:2px; padding:0 0 2px; margin:2px 0 8px; }
+  .ptab{ flex:1; appearance:none; background:none; border:none; font:inherit; cursor:pointer; color:var(--muted); font-size:13px; font-weight:800; padding:8px 4px 11px; position:relative; }
+  .ptab.on{ color:var(--text); }
+  .ptab.on::after{ content:""; position:absolute; left:50%; transform:translateX(-50%); bottom:3px; width:26px; height:2.5px; border-radius:2px; background:var(--accent); }
+  .ppane{ display:none; } .ppane.on{ display:block; }
   .scroll::-webkit-scrollbar{ display:none; }
 
   .topbar{ position:relative; display:flex; align-items:center; justify-content:space-between; padding:6px 16px 8px; }
@@ -270,6 +275,11 @@
       </div>
 
       <div class="scroll">
+        <div class="ptabs" id="ptabs">
+          <button class="ptab on" data-pane="main" type="button">Today</button>
+          <button class="ptab" data-pane="progress" type="button">Progress</button>
+        </div>
+        <div class="ppane on" data-pane="main">
         <!-- ENERGY CORE -->
         <section class="core" id="core">
           <div class="shadow"></div>
@@ -332,6 +342,8 @@
           </div>
         </div>
 
+        </div><!-- /pane main -->
+        <div class="ppane" data-pane="progress">
         <!-- PURPOSE OVERVIEW -->
         <div class="sec"><h2>Purpose Overview</h2><span class="meta" id="povMeta"></span></div>
         <div class="pov" id="purposeOverview"></div>
@@ -347,6 +359,7 @@
           <a class="lk" href="stat.html?s=focus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;vertical-align:-2px;margin-right:2px"><path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-1 5 3 3 0 0 0 1 5 3 3 0 0 0 6 0V4a3 3 0 0 0-3 0zM15 4a3 3 0 0 1 3 3 3 3 0 0 1 1 5 3 3 0 0 1-1 5"/></svg> <b>Focus</b> +regen</a>
           <a class="lk" href="23-profile.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;vertical-align:-2px;margin-right:2px"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg> <b>CORE Score</b></a>
         </div>
+        </div><!-- /pane progress -->
       </div>
 
       <!-- coping sheet -->
@@ -772,6 +785,7 @@
   })();
   </script>
   <script src="_lib/core-back.js"></script>
+  <script>(function(){var ts=document.getElementById('ptabs');if(!ts)return;ts.addEventListener('click',function(e){var b=e.target.closest('.ptab');if(!b)return;var p=b.getAttribute('data-pane');Array.prototype.forEach.call(ts.querySelectorAll('.ptab'),function(x){x.classList.toggle('on',x===b);});Array.prototype.forEach.call(document.querySelectorAll('.ppane'),function(x){x.classList.toggle('on',x.getAttribute('data-pane')===p);});var sc=document.querySelector('.scroll');if(sc)sc.scrollTop=0;try{window.coreSfx&&window.coreSfx('tick');}catch(e){}});})();</script>
   <script src="_lib/core-help.js"></script>
   <script>try{window.coreHelp&&window.coreHelp.attach('helpBtn',{title:'Willpower',bullets:[
     'Your energy core reflects your willpower right now — feed it with disciplined actions.',
