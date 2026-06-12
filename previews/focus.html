@@ -1710,7 +1710,8 @@
       'Progress: your streak, calendar, records, best focus times and achievements build as you go.'
     ]}); }catch(e){}
     // time-based greeting (mirrors Strength)
-    try{ var hr=new Date().getHours(); qs('#greetHi').textContent = (hr<12?'Good morning.':hr<18?'Good afternoon.':'Good evening.');
+    try{ var hr=new Date().getHours(), gword=hr<12?'Good morning':hr<18?'Good afternoon':'Good evening', nm=''; try{ nm=(JSON.parse(localStorage.getItem('coreOnboardTrial')||'{}').name||'').trim(); }catch(e){}
+      qs('#greetHi').textContent = gword+(nm?', '+nm:'')+'.';
       var gm=qs('#greetMeta'); if(gm) gm.textContent = F.streak>0 ? ('Focus · '+F.streak+'-day streak') : 'Focus · train your mind'; }catch(e){}
 
     try{ if(S.applyStatTick) S.applyStatTick(); }catch(e){}  // shared daily stat tick (same cadence)

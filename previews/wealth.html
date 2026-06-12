@@ -938,7 +938,8 @@
       var g=qs('#actGoal'); if(g) g.addEventListener('click', function(){ openNewGoal(); });
       var t=qs('#actTools'); if(t) t.addEventListener('click', function(){ openMoneyTool('compound'); });
       var s=qs('#actSpend'); if(s) s.addEventListener('click', function(){ var tab=document.querySelector('#ptabs .ptab[data-pane="progress"]'); if(tab) tab.click(); var d=qs('#spendDonut'); if(d) setTimeout(function(){ try{ d.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){} }, 80); });
-      var hr=new Date().getHours(), hi=qs('#greetHi'); if(hi) hi.textContent = hr<12?'Good morning.':hr<18?'Good afternoon.':'Good evening.';
+      var hr=new Date().getHours(), gword=hr<12?'Good morning':hr<18?'Good afternoon':'Good evening', nm=''; try{ nm=(JSON.parse(localStorage.getItem('coreOnboardTrial')||'{}').name||'').trim(); }catch(e){}
+      var hi=qs('#greetHi'); if(hi) hi.textContent = gword+(nm?', '+nm:'')+'.';
     })();
     qs('#sheetbg').addEventListener('click', closeSheet);
     qs('#saveTx').addEventListener('click', saveTx);
