@@ -104,6 +104,12 @@
     .lock-status .ls-s{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4;}
     .lock-scan{display:flex;align-items:center;gap:11px;padding:18px 16px;border-radius:16px;background:var(--card);border:1px solid var(--line);color:var(--muted);font-size:12.5px;font-weight:700;}
     .lock-scan .spin{width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,.13);border-top-color:#A78BFA;animation:spin .7s linear infinite;flex:none;}
+    .lock-detect{text-align:center;padding:30px 14px 8px;}
+    .ld-ic{width:62px;height:62px;margin:0 auto 16px;border-radius:18px;display:flex;align-items:center;justify-content:center;color:#A78BFA;
+      background:color-mix(in srgb,#8B5CF6 14%,transparent);border:1px solid color-mix(in srgb,#8B5CF6 28%,transparent);}
+    .ld-ic svg{width:31px;height:31px;}
+    .ld-t{font-size:18px;font-weight:900;letter-spacing:-.3px;}
+    .ld-s{font-size:12.5px;color:var(--muted);line-height:1.5;margin:8px 14px 18px;}
     @keyframes spin{to{transform:rotate(360deg);}}
     .app-list{display:flex;flex-direction:column;gap:8px;}
     .app{display:flex;align-items:center;gap:12px;padding:8px 10px;border-radius:16px;background:var(--card);border:1px solid var(--line);transition:border-color .2s,background .2s,opacity .3s;}
@@ -467,9 +473,10 @@
     .lk-sched .lks-ic{width:38px;height:38px;border-radius:11px;flex:none;display:flex;align-items:center;justify-content:center;color:#A78BFA;background:color-mix(in srgb,#8B5CF6 14%,transparent);}
     .lk-sched .lks-ic svg{width:19px;height:19px;}
     .lk-sched .lks-t{flex:1;min-width:0;} .lk-sched .lks-t b{font-size:13.5px;font-weight:800;color:#fff;display:block;} .lk-sched .lks-t span{font-size:11px;color:var(--muted);}
-    .lk-tog{width:46px;height:28px;border-radius:99px;border:none;background:rgba(255,255,255,.12);position:relative;cursor:pointer;flex:none;transition:background .2s;}
-    .lk-tog::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .2s;}
-    .lk-tog.on{background:#8B5CF6;} .lk-tog.on::after{transform:translateX(18px);}
+    .lk-tog{-webkit-appearance:none;appearance:none;width:50px;height:30px;padding:0;margin:0;border-radius:999px;border:none;
+      background:rgba(255,255,255,.16);position:relative;cursor:pointer;flex:none;transition:background .2s;box-sizing:border-box;}
+    .lk-tog::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.35);transition:transform .2s;}
+    .lk-tog.on{background:#8B5CF6;} .lk-tog.on::after{transform:translateX(20px);}
     .lk-revoke{width:100%;margin-top:10px;padding:11px;border-radius:12px;border:1px solid var(--line);background:none;color:var(--dim);font:inherit;font-size:12px;font-weight:700;cursor:pointer;}
     /* progress: heatmap + achievements */
     .heat{padding:16px;border-radius:18px;background:var(--card);border:1px solid var(--line);}
@@ -506,7 +513,7 @@
     /* centered uppercase topbar */
     .frame{padding-top:54px;}
     .hdr{justify-content:space-between;gap:8px;position:relative;}
-    .back{border-radius:12px;background:var(--card2);}
+    .back{border-radius:50%;background:var(--card2);}
     .hdr .ttl{position:absolute;left:50%;transform:translateX(-50%);font-size:13px;font-weight:800;letter-spacing:0.2em;text-transform:uppercase;flex:none;}
     .topright{display:flex;align-items:center;gap:8px;}
     .fchip{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:999px;text-decoration:none;
@@ -1450,10 +1457,18 @@
       }
       if(LK.locked){ LK.savedMs=(LK.savedMs||0)+(LK.until-LK.started); LK.locked=false; lwrite(); }  // expired naturally → bank the time
       stopLockTimer();
-      // one-time "scanning your apps" reveal so the list feels pulled from the device
+      // detect step — see what apps are installed before listing them
       if(!LK.scanned){
-        host.innerHTML='<div class="lock-scan"><span class="spin"></span>Scanning the apps on your device…</div>';
-        setTimeout(function(){ LK.scanned=true; lwrite(); if(qsPane()==='lock') renderLock(); },820);
+        host.innerHTML='<div class="lock-detect">'
+          +'<div class="ld-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M10 5.5h4"/><circle cx="11.5" cy="13" r="3"/><path d="M13.7 15.2l2.3 2.3"/></svg></div>'
+          +'<div class="ld-t">Find the apps on your phone</div>'
+          +'<div class="ld-s">CORE checks which apps are installed so you can pick what to block. This stays on your device.</div>'
+          +'<button class="lock-cta" id="lockScan">Scan my apps</button></div>';
+        var sb=qs('#lockScan'); if(sb) sb.addEventListener('click',function(){
+          host.innerHTML='<div class="lock-scan"><span class="spin"></span>Scanning the apps on your device…</div>';
+          sfx('tick');
+          setTimeout(function(){ LK.scanned=true; lwrite(); if(qsPane()==='lock') renderLock(); },1100);
+        });
         return;
       }
       var sel=LK.blocked.length;
