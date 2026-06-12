@@ -217,6 +217,16 @@
     .lz .dot{width:9px;height:9px;border-radius:50%;flex:none;box-shadow:0 0 8px currentColor;}
     .lz b{color:var(--text);font-weight:800;font-variant-numeric:tabular-nums;}
 
+    /* ── Coach's Pick: suggested session ── */
+    .feat{display:block;width:100%;text-align:left;margin:14px 0 2px;padding:16px 17px;border-radius:20px;text-decoration:none;color:inherit;cursor:pointer;font:inherit;
+      background:linear-gradient(135deg,rgba(10,132,255,.16),rgba(255,255,255,.02));border:1px solid rgba(10,132,255,.32);transition:transform .12s;}
+    .feat:active{transform:scale(.99);}
+    .feat-flag{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:800;color:#6FA8FF;margin-bottom:7px;}
+    .feat-flag svg{width:15px;height:15px;}
+    .feat b{display:block;font-size:18px;font-weight:900;letter-spacing:-.3px;color:#fff;}
+    .feat span{display:block;font-size:13px;color:var(--muted);line-height:1.45;margin-top:4px;}
+    .feat-go{display:inline-flex;align-items:center;gap:6px;margin-top:11px;font-size:13px;font-weight:800;color:#6FA8FF;}
+    .feat-go svg{width:15px;height:15px;}
     /* ── SECTION 0: TODAY'S GOAL ── */
     .goal-card{display:flex;align-items:center;gap:16px;padding:16px;border-radius:18px;background:var(--card);border:1px solid var(--line);margin-top:12px;}
     .goal-ring{position:relative;width:74px;height:74px;flex:none;}
@@ -623,6 +633,10 @@
           <h1 id="greetHi">Good evening.</h1>
           <p>Ready to lock in?</p>
         </div>
+
+        <!-- Coach's Pick: suggested session -->
+        <button class="feat" id="focusSuggest" type="button"></button>
+
         <!-- SECTION 0: TODAY'S GOAL -->
         <div class="goal-card">
           <div class="goal-ring">
@@ -1152,7 +1166,27 @@
       var n=ACH.filter(function(a){return a.on;}).length, meta=qs('#achMeta'); if(meta) meta.textContent=n+'/'+ACH.length;
     }
 
-    function renderAll(){ renderGoal(); renderBrain(); renderLegend(); renderMissions(); renderStreak(); renderStats(); renderOverview(); renderRecords(); renderHeat(); renderAch(); renderXp(); }
+    // Coach's Pick — recommends the right next session (progressive overload for attention)
+    function renderSuggest(){
+      var host=qs('#focusSuggest'); if(!host) return;
+      var hist=F.history||[], recent=hist.slice(0,8).filter(function(h){return h&&h.min;});
+      var avg=recent.length?Math.round(recent.reduce(function(a,h){return a+h.min;},0)/recent.length):0;
+      var sug=avg?Math.min(120,Math.max(25,Math.round(avg*1.15/5)*5)):25;   // nudge ~15% above recent average
+      var label='Deep Work', why;
+      var p=PLANS.filter(function(x){return x.id===PL.activeId;})[0];
+      if(p){ var el=(Date.now()-(PL.startTs||Date.now()))/86400000, cur=Math.max(0,Math.min(p.phases.length-1,Math.floor(el/p.durDays*p.phases.length)));
+        label='Deep Work'; why='Plan · '+p.phases[cur].t; }
+      else if((F.task||'').trim()){ why='Working on: '+F.task.trim(); }
+      else if(avg){ why='Your recent blocks average '+avg+' min — push a little past it'; }
+      else { why='Start small and build the habit'; }
+      var xp=sug>=60?100:sug>=45?70:40;
+      host.innerHTML='<span class="feat-flag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V4M4 4h12l-2 4 2 4H4"/></svg>Coach’s Pick</span>'
+        +'<b>Focus for '+sug+' minutes</b><span>'+why+'</span>'
+        +'<span class="feat-go">Start now<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>';
+      host.onclick=function(){ startSession(sug,'prefrontal',xp,label); };
+    }
+
+    function renderAll(){ renderSuggest(); renderGoal(); renderBrain(); renderLegend(); renderMissions(); renderStreak(); renderStats(); renderOverview(); renderRecords(); renderHeat(); renderAch(); renderXp(); }
 
     // ── duration selection ──
     var selMin = 25;
