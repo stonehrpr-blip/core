@@ -255,6 +255,17 @@
     .start-btn:active{transform:scale(0.97);box-shadow:0 6px 16px rgba(10,132,255,0.24);}
     .start-btn svg{width:20px;height:20px;}
 
+    /* ── SOUNDSCAPE ── */
+    .amb-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch;}
+    .amb-row::-webkit-scrollbar{display:none;}
+    .amb{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:66px;padding:11px 8px;border-radius:14px;
+      background:var(--card);border:1px solid var(--line);color:var(--muted);font:inherit;font-size:11.5px;font-weight:800;cursor:pointer;transition:transform .12s,border-color .16s,background .16s,color .16s;}
+    .amb:active{transform:scale(.94);}
+    .amb svg{width:23px;height:23px;}
+    .amb.on{color:#cfe0ff;border-color:rgba(10,132,255,.5);background:rgba(10,132,255,.12);}
+    .amb.on.playing svg{animation:ambpulse 1.9s ease-in-out infinite;color:var(--accent);}
+    @keyframes ambpulse{0%,100%{opacity:.55;transform:scale(.96);}50%{opacity:1;transform:scale(1.08);}}
+
     /* ── MISSIONS ── */
     .filt-note{display:none;align-items:center;justify-content:space-between;gap:8px;margin:2px 2px 10px;font-size:12px;color:var(--muted);}
     .filt-note.show{display:flex;}
@@ -495,6 +506,16 @@
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
             Start Focus
           </button>
+        </div>
+
+        <!-- SECTION 2b: SOUNDSCAPE -->
+        <div class="sec-l"><span>Soundscape</span><span class="ln"></span><span id="ambState" style="color:var(--dim)"></span></div>
+        <div class="amb-row" id="ambRow">
+          <button class="amb on" data-amb="off" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5Z"/><path d="M22 9l-6 6M16 9l6 6"/></svg>Off</button>
+          <button class="amb" data-amb="rain" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 14a4 4 0 0 1-1-7.9A5 5 0 0 1 16 6a3.5 3.5 0 0 1 1 6.9"/><path d="M8 18l-1 2M12 18l-1 2M16 18l-1 2"/></svg>Rain</button>
+          <button class="amb" data-amb="waves" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8c2-2 4-2 6 0s4 2 6 0 4-2 6 0M2 14c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/></svg>Waves</button>
+          <button class="amb" data-amb="brown" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h2l2-6 3 16 3-12 2 8 2-4h4"/></svg>Brown</button>
+          <button class="amb" data-amb="cafe" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M17 9h2a2 2 0 0 1 0 4h-2"/><path d="M8 2v2M11 2v2"/></svg>Café</button>
         </div>
 
         <!-- SECTION 3: MISSIONS -->
@@ -862,6 +883,45 @@
     qs('#resumeBtn').onclick = function(){ var ls=F.lastSession; if(ls&&ls.min) startSession(ls.min, ls.zone, ls.xp, ls.label); };
     renderResume();
 
+    // ── SOUNDSCAPE: procedural ambient audio (no files — synthesised via Web Audio) ──
+    var AudioCtx = window.AudioContext||window.webkitAudioContext;
+    var actx=null, ambNodes=null;
+    function ensureCtx(){ if(!actx && AudioCtx){ try{ actx=new AudioCtx(); }catch(e){} } if(actx && actx.state==='suspended'){ try{ actx.resume(); }catch(e){} } return actx; }
+    function noiseBuffer(ctx){ var len=ctx.sampleRate*2, b=ctx.createBuffer(1,len,ctx.sampleRate), d=b.getChannelData(0), last=0;
+      for(var i=0;i<len;i++){ var w=Math.random()*2-1; last=(last+0.02*w)/1.02; d[i]=last*3.5; } return b; } // brown-ish base noise
+    function stopAmbient(){ if(!ambNodes) return; var n=ambNodes; ambNodes=null; try{ n.gain.gain.setTargetAtTime(0,actx.currentTime,0.25); setTimeout(function(){ try{n.src.stop();}catch(e){} try{if(n.lfo)n.lfo.stop();}catch(e){} },500); }catch(e){} }
+    function playAmbient(type){
+      stopAmbient();
+      if(!type || type==='off') return;
+      var ctx=ensureCtx(); if(!ctx) return;
+      var src=ctx.createBufferSource(); src.buffer=noiseBuffer(ctx); src.loop=true;
+      var filt=ctx.createBiquadFilter(), gain=ctx.createGain(), lfo=null; gain.gain.value=0; var target=0.4;
+      if(type==='brown'){ filt.type='lowpass'; filt.frequency.value=420; target=0.55; }
+      else if(type==='rain'){ filt.type='highpass'; filt.frequency.value=1100; target=0.5; }
+      else if(type==='cafe'){ filt.type='lowpass'; filt.frequency.value=620; target=0.35; }
+      else if(type==='waves'){ filt.type='lowpass'; filt.frequency.value=700; target=0.5;
+        lfo=ctx.createOscillator(); lfo.type='sine'; lfo.frequency.value=0.12; var lg=ctx.createGain(); lg.gain.value=0.32; lfo.connect(lg); lg.connect(gain.gain); lfo.start(); }
+      src.connect(filt); filt.connect(gain); gain.connect(ctx.destination); src.start();
+      gain.gain.setTargetAtTime(target, ctx.currentTime, 0.7);
+      ambNodes={src:src,filt:filt,gain:gain,lfo:lfo};
+    }
+    function renderAmb(){
+      var sel=F.ambient||'off', playing=!!ambNodes;
+      Array.prototype.forEach.call(qs('#ambRow').querySelectorAll('.amb'),function(b){
+        var on=b.getAttribute('data-amb')===sel;
+        b.classList.toggle('on',on); b.classList.toggle('playing',on && playing && sel!=='off');
+      });
+      var st=qs('#ambState'); if(st) st.textContent = (playing&&sel!=='off') ? 'Playing' : '';
+    }
+    Array.prototype.forEach.call(qs('#ambRow').querySelectorAll('.amb'),function(b){
+      b.onclick=function(){ var t=b.getAttribute('data-amb');
+        if(t==='off' || (t===F.ambient && ambNodes)){ F.ambient='off'; stopAmbient(); }
+        else { F.ambient=t; playAmbient(t); }
+        fwrite(F); sfx('tick'); renderAmb();
+      };
+    });
+    renderAmb();
+
     // ── FOCUS MODE / timer ──
     var RING_LEN = 2*Math.PI*99; // ~622
     var sess = null, ticker = null;
@@ -877,6 +937,7 @@
       updateRing();
       qs('#focusMode').classList.add('show');
       sfx('confirm');
+      if(F.ambient && F.ambient!=='off'){ playAmbient(F.ambient); renderAmb(); }  // bring the soundscape in
       setPaused(false);
       startTicker();
     }
