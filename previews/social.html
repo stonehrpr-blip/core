@@ -59,6 +59,23 @@
   .ptab.on{ color:var(--text); }
   .ptab.on::after{ content:""; position:absolute; left:50%; transform:translateX(-50%); bottom:3px; width:26px; height:2.5px; border-radius:2px; background:var(--accent); }
   .ppane{ display:none; } .ppane.on{ display:block; }
+  /* reputation breakdown */
+  .rep-card{ padding:15px 16px; border-radius:18px; background:rgba(255,255,255,.022); border:1px solid rgba(255,255,255,.08); }
+  .rep-total{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:13px; }
+  .rep-total .rt-n{ font-size:26px; font-weight:900; color:#fff; letter-spacing:-.6px; }
+  .rep-total .rt-l{ font-size:11px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); }
+  .rep-f{ margin:9px 0; }
+  .rep-f .rf-top{ display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:5px; }
+  .rf-top .rf-k{ color:var(--muted); font-weight:700; } .rf-top .rf-v{ color:#fff; font-weight:800; }
+  .rep-f .rf-bar{ height:8px; border-radius:99px; background:rgba(255,255,255,.06); overflow:hidden; }
+  .rep-f .rf-fill{ display:block; height:100%; border-radius:99px; transition:width .6s cubic-bezier(.22,1,.36,1); }
+  /* create challenge */
+  .chal-new{ width:100%; margin-top:6px; padding:13px; border-radius:14px; border:1px dashed rgba(255,255,255,.14); background:rgba(255,255,255,.02); color:var(--muted); font:inherit; font-weight:800; font-size:13px; cursor:pointer; }
+  .cc-label{ font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:12px 2px 7px; }
+  .cc-input{ width:100%; padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.04); color:var(--text); font:inherit; font-size:15px; font-weight:600; outline:none; }
+  .cc-seg{ display:flex; gap:8px; }
+  .cc-seg button{ flex:1; padding:10px; border-radius:11px; border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.04); color:var(--muted); font:inherit; font-weight:800; font-size:13px; cursor:pointer; }
+  .cc-seg button.on{ background:rgba(10,132,255,.18); border-color:rgba(10,132,255,.5); color:#cfe0ff; }
   .sec{ display:flex; align-items:center; gap:8px; margin:24px 4px 12px; font-size:12px; font-weight:800; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); }
   .sec .ic{ width:16px; height:16px; flex:none; opacity:.9; }
   .sec .meta{ margin-left:auto; font-size:10px; letter-spacing:.1em; color:var(--dim); font-weight:800; }
@@ -329,6 +346,13 @@
 
         </div><!-- /pane main -->
         <div class="ppane" data-pane="progress">
+        <!-- REPUTATION BREAKDOWN -->
+        <div class="sec">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 7-8"/><path d="M21 7v5h-5"/></svg>
+          Reputation <span class="meta">what builds your score</span>
+        </div>
+        <div id="repBreak"></div>
+
         <!-- WIN OVERVIEW -->
         <div class="sec">
           <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0zM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3"/></svg>
@@ -577,6 +601,41 @@
     function saveDuels(){ try{ localStorage.setItem('coreDuels',JSON.stringify(accepted)); }catch(e){} }
     function oppFor(id){ var pool=ALL.filter(function(p){return !p.you;}); return pool[hash(id+ME.name)%pool.length]; }
 
+    // custom (user-created) challenges, merged with the built-ins
+    function customChallenges(){ return pjson('coreCustomChallenges',[]); }
+    function allChallenges(){ return CHALLENGES.concat(customChallenges()); }
+    function openCreateChallenge(){
+      var seg='<div class="cc-seg" id="ccDays"><button data-d="3" type="button">3 days</button><button data-d="5" class="on" type="button">5 days</button><button data-d="7" type="button">7 days</button></div>';
+      qs('#sheet').innerHTML='<div class="cc-label">Challenge name</div><input class="cc-input" id="ccName" placeholder="e.g. No Sugar Week" autocomplete="off" />'
+        +'<div class="cc-label">Goal / how to win</div><input class="cc-input" id="ccGoal" placeholder="e.g. Most clean days" autocomplete="off" />'
+        +'<div class="cc-label">Length</div>'+seg
+        +'<button class="saction" id="ccCreate">Create &amp; invite</button>';
+      Array.prototype.forEach.call(qs('#ccDays').querySelectorAll('button'),function(b){ b.addEventListener('click',function(){ Array.prototype.forEach.call(qs('#ccDays').querySelectorAll('button'),function(x){x.classList.toggle('on',x===b);}); }); });
+      qs('#ccCreate').addEventListener('click',function(){
+        var nm=(qs('#ccName').value||'').trim(); if(!nm){ toast('Name your challenge'); return; }
+        var gl=(qs('#ccGoal').value||'').trim()||'Most consistent wins', dEl=qs('#ccDays .on'), days=dEl?parseInt(dEl.getAttribute('data-d'),10):5;
+        var list=customChallenges(); list.push({id:'cc'+Date.now(),t:nm,s:gl,days:days,custom:true}); try{localStorage.setItem('coreCustomChallenges',JSON.stringify(list));}catch(e){}
+        closeSheet(); sfx('confirm'); toast('Challenge created — '+nm); renderChallenges();
+      });
+      qs('#ovl').classList.add('show'); sfx('tap');
+    }
+
+    // reputation breakdown — exactly the coreScore factors for "you"
+    function renderRep(){
+      var host=qs('#repBreak'); if(!host) return; var p=ME;
+      var F=[
+        {k:'Health',  v:p.health*3.5,             c:'#34D399', raw:p.health+'%'},
+        {k:'Control', v:p.control*2.5,             c:'#0A84FF', raw:p.control+'%'},
+        {k:'Streak',  v:Math.min(p.streak,90)*3,   c:'#FFCB3D', raw:p.streak+'d'},
+        {k:'Quests',  v:Math.min(p.quests,60)*1.5, c:'#B388FF', raw:p.quests},
+        {k:'Wins',    v:Math.min(p.wins,6)*15,     c:'#FF6B6B', raw:p.wins}
+      ];
+      var total=F.reduce(function(a,f){return a+f.v;},0)||1;
+      host.innerHTML='<div class="rep-card"><div class="rep-total"><span class="rt-n">'+Math.round(total)+'</span><span class="rt-l">Reputation points</span></div>'
+        +F.map(function(f){ var pct=Math.round(f.v/total*100); return '<div class="rep-f"><div class="rf-top"><span class="rf-k">'+f.k+' · '+f.raw+'</span><span class="rf-v">'+Math.round(f.v)+' pts</span></div><div class="rf-bar"><span class="rf-fill" style="width:'+pct+'%;background:'+f.c+'"></span></div></div>'; }).join('')
+        +'</div>';
+    }
+
     function renderChallenges(){
       var duels=qs('#duels'); duels.innerHTML=accepted.map(function(d){
         var opp=d.opp, rk=rankForScore(opp.score||600);
@@ -592,13 +651,14 @@
       }).join('');
       var actIds={}; accepted.forEach(function(d){actIds[d.id]=1;});
       qs('#chMeta').textContent = accepted.length?accepted.length+' active':'pick your battle';
-      qs('#chalList').innerHTML = CHALLENGES.filter(function(c){return !actIds[c.id];}).map(function(c){
-        return '<div class="chal"><div class="ci">'+c.icon+'</div><div class="cb"><div class="ct">'+c.t+'</div><div class="cs">'+c.s+' · '+c.days+' days</div></div>'
+      qs('#chalList').innerHTML = allChallenges().filter(function(c){return !actIds[c.id];}).map(function(c){
+        return '<div class="chal"><div class="ci">'+(c.icon||ICONS.shield(19))+'</div><div class="cb"><div class="ct">'+c.t+(c.custom?' <span style="color:var(--accent);font-size:10px;font-weight:800">· yours</span>':'')+'</div><div class="cs">'+c.s+' · '+c.days+' days</div></div>'
           + '<button data-cid="'+c.id+'">Accept</button></div>';
-      }).join('');
+      }).join('') + '<button class="chal-new" id="chalNew" type="button">+ Create your own challenge</button>';
+      var cn=qs('#chalNew'); if(cn) cn.addEventListener('click',openCreateChallenge);
     }
     function acceptChallenge(cid){
-      var c=CHALLENGES.find(function(x){return x.id===cid;}); if(!c) return;
+      var c=allChallenges().find(function(x){return x.id===cid;}); if(!c) return;
       var opp=oppFor(cid);
       var mine=clamp(ME.control + Math.round(rnd(cid,1)*16-4),5,100);
       var theirs=clamp(opp.control + Math.round(rnd(cid+'b',1)*14-2),5,100);
@@ -762,7 +822,7 @@
     }catch(e){}
 
     renderHero(); renderLB('global'); renderChallenges(); seedFeed(); liveFeed();
-    renderSocialOverview(); renderSocialRecords();
+    renderSocialOverview(); renderSocialRecords(); renderRep();
   })();
   </script>
   <script src="_lib/core-back.js"></script>
