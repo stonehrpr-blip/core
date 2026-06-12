@@ -478,6 +478,44 @@
     .lk-tog::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.35);transition:transform .2s;}
     .lk-tog.on{background:#8B5CF6;} .lk-tog.on::after{transform:translateX(20px);}
     .lk-revoke{width:100%;margin-top:10px;padding:11px;border-radius:12px;border:1px solid var(--line);background:none;color:var(--dim);font:inherit;font-size:12px;font-weight:700;cursor:pointer;}
+    /* "Choose apps" row that opens the Apple-style picker */
+    .lk-choose{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 14px;border-radius:14px;background:var(--card);border:1px solid var(--line);cursor:pointer;transition:transform .12s;}
+    .lk-choose:active{transform:scale(.99);}
+    .lk-choose .lkc-ic{width:42px;height:42px;border-radius:11px;flex:none;display:flex;align-items:center;justify-content:center;color:#A78BFA;background:color-mix(in srgb,#8B5CF6 14%,transparent);}
+    .lk-choose .lkc-ic svg{width:21px;height:21px;}
+    .lk-choose .lkc-t{flex:1;min-width:0;}
+    .lk-choose .lkc-t b{font-size:14.5px;font-weight:800;color:#fff;display:block;}
+    .lk-choose .lkc-mini{display:flex;gap:4px;align-items:center;margin-top:6px;flex-wrap:wrap;}
+    .lk-choose .lkc-mini .app-logo{width:22px;height:22px;border-radius:6px;box-shadow:none;}
+    .lk-choose .lkc-mini .app-logo svg{width:13px;height:13px;}
+    .lk-choose .lkc-mini span{font-size:11.5px;color:var(--muted);font-weight:600;}
+    .lk-choose .lkc-chev{color:var(--dim);flex:none;}
+    .lk-choose .lkc-chev svg{width:20px;height:20px;}
+    /* iOS-style "Choose Apps" sheet (mimics Screen Time picker) */
+    .asheet{position:absolute;inset:0;z-index:96;display:none;align-items:flex-end;}
+    .asheet.on{display:flex;}
+    .as-scrim{position:absolute;inset:0;background:rgba(0,0,0,.5);}
+    .as-card{position:relative;width:100%;max-height:84%;display:flex;flex-direction:column;background:#1C1C1E;border-radius:14px 14px 0 0;overflow:hidden;animation:asUp .34s cubic-bezier(.2,.9,.3,1);}
+    @keyframes asUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+    .as-nav{display:flex;align-items:center;justify-content:space-between;padding:15px 18px 13px;border-bottom:.5px solid rgba(255,255,255,.12);}
+    .as-nav button{-webkit-appearance:none;appearance:none;background:none;border:none;font:inherit;font-size:16px;color:#0A84FF;cursor:pointer;padding:0;}
+    .as-nav .as-done{font-weight:700;}
+    .as-nav .as-ttl{font-size:16px;font-weight:700;color:#fff;}
+    .as-sub{font-size:12.5px;color:#8E8E93;padding:14px 22px 7px;font-weight:500;}
+    .as-list{overflow-y:auto;padding:0 16px calc(24px + env(safe-area-inset-bottom));}
+    .as-list::-webkit-scrollbar{display:none;}
+    .as-group{background:#2C2C2E;border-radius:11px;overflow:hidden;}
+    .as-row{display:flex;align-items:center;gap:12px;padding:8px 13px;cursor:pointer;border-bottom:.5px solid rgba(255,255,255,.09);}
+    .as-row:last-child{border-bottom:none;}
+    .as-row:active{background:rgba(255,255,255,.05);}
+    .as-row .app-logo{width:38px;height:38px;border-radius:9px;}
+    .as-row .app-logo svg{width:22px;height:22px;}
+    .as-name{flex:1;min-width:0;display:flex;flex-direction:column;}
+    .as-name b{font-size:15px;font-weight:600;color:#fff;}
+    .as-cat{font-size:12px;color:#8E8E93;font-weight:500;}
+    .as-check{width:23px;height:23px;border-radius:50%;border:1.5px solid #5A5A5E;flex:none;display:flex;align-items:center;justify-content:center;color:#fff;transition:.12s;}
+    .as-check svg{width:13px;height:13px;opacity:0;}
+    .as-row.on .as-check{background:#0A84FF;border-color:#0A84FF;} .as-row.on .as-check svg{opacity:1;}
     /* progress: heatmap + achievements */
     .heat{padding:16px;border-radius:18px;background:var(--card);border:1px solid var(--line);}
     .heat-row{display:flex;gap:6px;align-items:flex-end;height:64px;}
@@ -812,6 +850,20 @@
         <button class="clist-item" data-c="1" type="button"><span class="ci-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4L19 7"/></svg></span><span>Water within reach</span></button>
         <button class="clist-item" data-c="2" type="button"><span class="ci-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4L19 7"/></svg></span><span>One tab, one task only</span></button>
         <button class="pop-btn" id="clistGo" style="margin-top:14px">Begin focus</button>
+      </div>
+    </div>
+
+    <!-- iOS-style "Choose Apps" picker (mimics the Screen Time app picker) -->
+    <div class="asheet" id="appleSheet">
+      <div class="as-scrim" id="asScrim"></div>
+      <div class="as-card">
+        <div class="as-nav">
+          <button id="asCancel" type="button">Cancel</button>
+          <span class="as-ttl">Choose Apps</span>
+          <button class="as-done" id="asDone" type="button">Done</button>
+        </div>
+        <div class="as-sub">Apps &amp; websites to limit</div>
+        <div class="as-list"><div class="as-group" id="asGroup"></div></div>
       </div>
     </div>
 
@@ -1474,21 +1526,21 @@
       var sel=LK.blocked.length;
       var durLabel=(DURS.filter(function(x){return x.id===LK.durId;})[0]||DURS[1]).label;
       var durs=DURS.map(function(x){ return '<button class="lock-dur'+(LK.durId===x.id?' on':'')+'" data-d="'+x.id+'" type="button">'+x.label+'</button>'; }).join('');
-      var rows=LOCK_APPS.map(function(a){ var on=LK.blocked.indexOf(a.id)>=0;
-        return '<div class="app'+(on?' locked':'')+'" data-app="'+a.id+'">'+appTile(a)
-          +'<div class="app-name"><b>'+a.n+'</b><span>'+(on?'Will be locked':a.cat)+'</span></div>'
-          +'<button class="app-lock" data-a="'+a.id+'" type="button" aria-label="Lock '+a.n+'">'+(on?LOCK_SHUT:LOCK_OPEN)+'</button></div>'; }).join('');
+      var miniLogos=LK.blocked.slice(0,6).map(function(id){ var a=appById(id); return a?'<span class="app-logo" style="background:'+a.bg+'"><svg viewBox="0 0 24 24">'+a.logo+'</svg></span>':''; }).join('');
+      var chooseSummary = sel
+        ? '<div class="lkc-mini">'+miniLogos+(sel>6?'<span>+'+(sel-6)+'</span>':'')+'</div>'
+        : '<div class="lkc-mini"><span>Tap to pick from your apps</span></div>';
       var presets=LOCK_PRESETS.map(function(pr){ return '<button class="lk-preset" data-pr="'+pr.id+'" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+pr.icon+'</svg>'+pr.label+'</button>'; }).join('');
       var scheds=LOCK_SCHEDS.map(function(sc){ var on=!!(LK.sched&&LK.sched[sc.id]); return '<div class="lk-sched"><span class="lks-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+sc.icon+'</svg></span><div class="lks-t"><b>'+sc.t+'</b><span>'+sc.s+'</span></div><button class="lk-tog'+(on?' on':'')+'" data-sc="'+sc.id+'" type="button" aria-label="Toggle '+sc.t+'"></button></div>'; }).join('');
-      host.innerHTML='<div class="lock-status'+(sel?' armed':'')+'"><span class="ls-dot"></span><div><div class="ls-t">'+(sel?(sel+' app'+(sel>1?'s':'')+' ready'):'No apps selected')+'</div><div class="ls-s">Tap the lock on any app, then start your lock-in.</div></div></div>'
+      host.innerHTML='<div class="lock-status'+(sel?' armed':'')+'"><span class="ls-dot"></span><div><div class="ls-t">'+(sel?(sel+' app'+(sel>1?'s':'')+' ready'):'No apps selected')+'</div><div class="ls-s">Choose apps, set a duration, then lock in.</div></div></div>'
         +lkStatsHtml()
         +'<div class="blk-head"><span>Quick presets</span></div>'
         +'<div class="lk-presets">'+presets+'</div>'
         +'<div class="blk-head"><span>How long</span><b>'+durLabel+'</b></div>'
         +'<div class="lock-durs">'+durs+'</div>'
-        +'<div class="blk-head"><span>Your apps</span><b>'+sel+' to lock</b></div>'
-        +'<div class="app-list">'+rows+'</div>'
-        +'<button class="lock-cta" id="lockGo"'+(sel?'':' style="opacity:.5"')+'>'+(sel?('Lock In · '+durLabel):'Select apps to lock')+'</button>'
+        +'<div class="blk-head"><span>Apps to block</span><b>'+sel+' selected</b></div>'
+        +'<button class="lk-choose" id="lkChoose" type="button"><span class="lkc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg></span><span class="lkc-t"><b>Choose apps to block</b>'+chooseSummary+'</span><span class="lkc-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span></button>'
+        +'<button class="lock-cta" id="lockGo"'+(sel?'':' style="opacity:.5"')+'>'+(sel?('Lock In · '+durLabel):'Choose apps to lock')+'</button>'
         +'<div class="blk-head"><span>Auto-lock schedule</span></div>'
         +scheds
         +'<div class="lock-note">CORE asks your phone for Screen Time access, then blocks these apps until the timer ends. Schedules and full system-wide enforcement run in the background from the CORE app.</div>'
@@ -1497,23 +1549,34 @@
       Array.prototype.forEach.call(host.querySelectorAll('.lk-tog'),function(b){ b.addEventListener('click',function(){ var id=b.getAttribute('data-sc'); LK.sched=LK.sched||{}; LK.sched[id]=!LK.sched[id]; lwrite(); b.classList.toggle('on',LK.sched[id]); sfx('tick'); toast(LK.sched[id]?'Schedule on — CORE locks automatically':'Schedule off'); }); });
       var rev=qs('#lkRevoke'); if(rev) rev.addEventListener('click',function(){ LK.permission=false; lwrite(); sfx('tap'); toast('Screen Time access revoked'); renderLock(); });
       Array.prototype.forEach.call(host.querySelectorAll('.lock-dur'),function(b){ b.addEventListener('click',function(){ LK.durId=b.getAttribute('data-d'); lwrite(); sfx('tick'); renderLock(); }); });
-      Array.prototype.forEach.call(host.querySelectorAll('.app-lock'),function(b){ b.addEventListener('click',function(){
-        var id=b.getAttribute('data-a'), i=LK.blocked.indexOf(id), row=b.closest('.app');
-        if(i>=0){ LK.blocked.splice(i,1); if(row) row.classList.remove('locked'); }
-        else { LK.blocked.push(id); if(row){ row.classList.add('locked','sealing'); } b.innerHTML=LOCK_SHUT; b.classList.add('snap'); }
-        lwrite(); sfx(i>=0?'tick':'click'); try{ if(navigator.vibrate) navigator.vibrate(15); }catch(e){}
-        // update status + cta without a full re-render so the snap animation plays
-        var n=LK.blocked.length, st=host.querySelector('.lock-status'), go=qs('#lockGo');
-        if(st){ st.classList.toggle('armed',n>0); st.querySelector('.ls-t').textContent=n?(n+' app'+(n>1?'s':'')+' ready'):'No apps selected'; }
-        var hd=host.querySelectorAll('.blk-head b'); if(hd[1]) hd[1].textContent=n+' to lock';
-        var nm=row&&row.querySelector('.app-name span'); if(nm) nm.textContent=(i>=0)?appById(id).cat:'Will be locked';
-        if(go){ go.style.opacity=n?'':'.5'; go.textContent=n?('Lock In · '+durLabel):'Select apps to lock'; }
-      }); });
+      var lc=qs('#lkChoose'); if(lc) lc.addEventListener('click', openAppleSheet);
       var go=qs('#lockGo'); if(go) go.addEventListener('click',function(){
-        if(!LK.blocked.length){ toast('Tap the lock on an app first'); return; }
+        if(!LK.blocked.length){ openAppleSheet(); return; }
         requestLockPermission(doLockNow);
       });
     }
+    // iOS-style "Choose Apps" picker
+    var appleSel=null;
+    function openAppleSheet(){
+      appleSel = LK.blocked.slice();
+      var g=qs('#asGroup'); if(!g) return;
+      g.innerHTML = LOCK_APPS.map(function(a){ var on=appleSel.indexOf(a.id)>=0;
+        return '<div class="as-row'+(on?' on':'')+'" data-a="'+a.id+'">'+appTile(a)
+          +'<span class="as-name"><b>'+a.n+'</b><span class="as-cat">'+a.cat+'</span></span>'
+          +'<span class="as-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4L19 7"/></svg></span></div>'; }).join('');
+      Array.prototype.forEach.call(g.querySelectorAll('.as-row'),function(r){ r.addEventListener('click',function(){
+        var id=r.getAttribute('data-a'), i=appleSel.indexOf(id);
+        if(i>=0){ appleSel.splice(i,1); r.classList.remove('on'); } else { appleSel.push(id); r.classList.add('on'); }
+        sfx('tick'); try{ if(navigator.vibrate) navigator.vibrate(8); }catch(e){}
+      }); });
+      qs('#appleSheet').classList.add('on'); sfx('tick');
+    }
+    (function(){ var sh=qs('#appleSheet'); if(!sh) return;
+      var done=qs('#asDone'), cancel=qs('#asCancel'), scrim=qs('#asScrim');
+      if(done) done.addEventListener('click',function(){ if(appleSel){ LK.blocked=appleSel.slice(); lwrite(); } sh.classList.remove('on'); sfx('confirm'); renderLock(); });
+      if(cancel) cancel.addEventListener('click',function(){ sh.classList.remove('on'); sfx('tap'); });
+      if(scrim) scrim.addEventListener('click',function(){ sh.classList.remove('on'); });
+    })();
     function qsPane(){ var b=document.querySelector('#fseg button.on'); return b?b.getAttribute('data-pane'):''; }
     function doLockNow(){
       var dur=DURS.filter(function(x){return x.id===LK.durId;})[0]||DURS[1];
