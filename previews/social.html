@@ -74,6 +74,11 @@
   .act-ic svg{ width:22px; height:22px; }
   .act-card b{ font-size:15.5px; font-weight:800; letter-spacing:-0.2px; }
   .act-card>span:last-child{ font-size:11.5px; color:var(--muted); margin-top:3px; line-height:1.35; }
+  /* weekly wins */
+  .sw-card{ display:flex; align-items:center; gap:14px; padding:15px 16px; border-radius:18px; background:rgba(255,255,255,.022); border:1px solid rgba(255,255,255,.08); }
+  .sw-card .sw-n{ font-size:32px; font-weight:900; color:var(--accent); letter-spacing:-1px; line-height:1; flex:none; }
+  .sw-card .sw-t b{ font-size:14px; font-weight:800; color:#fff; display:block; }
+  .sw-card .sw-t span{ font-size:11.5px; color:var(--muted); }
   /* reputation breakdown */
   .rep-card{ padding:15px 16px; border-radius:18px; background:rgba(255,255,255,.022); border:1px solid rgba(255,255,255,.08); }
   .rep-total{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:13px; }
@@ -382,6 +387,10 @@
 
         </div><!-- /pane main -->
         <div class="ppane" data-pane="progress">
+        <!-- WEEKLY WINS -->
+        <div class="sec"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> This week</div>
+        <div id="socialWeek"></div>
+
         <!-- REPUTATION BREAKDOWN -->
         <div class="sec">
           <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 7-8"/><path d="M21 7v5h-5"/></svg>
@@ -657,6 +666,13 @@
       qs('#ovl').classList.add('show'); sfx('tap');
     }
 
+    // weekly wins recap
+    function renderSocialWeek(){
+      var host=qs('#socialWeek'); if(!host) return; var wins=pjson('coreChallengeWins',[])||[], now=Date.now();
+      var tW=wins.filter(function(t){return now-t<7*864e5;}).length, lW=wins.filter(function(t){var a=now-t; return a>=7*864e5 && a<14*864e5;}).length, diff=tW-lW;
+      host.innerHTML='<div class="sw-card"><div class="sw-n">'+tW+'</div><div class="sw-t"><b>challenge win'+(tW===1?'':'s')+' this week</b><span>'+(diff>0?('+'+diff+' vs last week'):diff<0?(diff+' vs last week'):'same as last week')+'</span></div></div>';
+    }
+
     // reputation breakdown — exactly the coreScore factors for "you"
     function renderRep(){
       var host=qs('#repBreak'); if(!host) return; var p=ME;
@@ -869,7 +885,7 @@
       var f=qs('#scFeed'); if(f) f.addEventListener('click',function(){ gotoProg('#feed'); });
     })();
     renderHero(); renderLB('global'); renderChallenges(); seedFeed(); liveFeed();
-    renderSocialOverview(); renderSocialRecords(); renderRep();
+    renderSocialOverview(); renderSocialRecords(); renderRep(); renderSocialWeek();
   })();
   </script>
   <script src="_lib/core-back.js"></script>

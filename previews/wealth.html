@@ -71,6 +71,15 @@
   .goal-pct{ font-size:11px; font-weight:800; color:var(--muted); margin-top:6px; }
   .goal-add{ width:100%; padding:12px; border-radius:13px; border:1px dashed var(--border); background:rgba(255,255,255,.02); color:var(--muted); font:inherit; font-weight:800; font-size:13px; cursor:pointer; }
   .goal-empty{ padding:14px; border-radius:14px; background:var(--bg-card); border:1px solid var(--border); color:var(--dim); font-size:12.5px; text-align:center; margin-bottom:9px; }
+  /* net worth trend */
+  .nw-card{ padding:16px; border-radius:18px; background:var(--bg-card); border:1px solid var(--border); }
+  .nw-top{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+  .nw-l{ font-size:10px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); }
+  .nw-v{ font-size:24px; font-weight:900; color:#fff; letter-spacing:-.6px; margin-top:3px; }
+  .nw-d{ font-size:12px; font-weight:800; } .nw-d.up{ color:var(--good); } .nw-d.dn{ color:#FF6B6B; }
+  .nw-svg{ width:100%; height:70px; display:block; margin-top:2px; }
+  .nw-area{ fill:rgba(10,132,255,.12); stroke:none; }
+  .nw-line{ fill:none; stroke:var(--accent); stroke-width:2; vector-effect:non-scaling-stroke; stroke-linejoin:round; stroke-linecap:round; }
   /* spending donut */
   .donut-wrap{ display:flex; align-items:center; gap:16px; padding:14px; }
   .donut{ width:118px; height:118px; border-radius:50%; flex:none; position:relative; }
@@ -402,6 +411,10 @@
 
         </div><!-- /pane main -->
         <div class="ppane" data-pane="progress">
+        <!-- NET WORTH TREND -->
+        <div class="sec"><h2>Net worth</h2><span class="meta">last 30 days</span></div>
+        <div id="netWorth"></div>
+
         <!-- SPENDING BREAKDOWN -->
         <div class="sec"><h2>Spending breakdown</h2><span class="meta" id="spendMeta"></span></div>
         <div class="card" id="spendDonut"></div>
@@ -989,6 +1002,21 @@
       qs('#fgAdd').addEventListener('click',function(){ var a=parseFloat(qs('#fgAmt').value)||0; if(a<=0) return; g.saved=Math.round((g.saved+a)*100)/100; saveW(W); SFX('confirm'); try{ if(S&&S.addXp) S.addXp(5,'wealth:save'); }catch(e){} toast(g.saved>=g.target?(g.name+' reached! 🎉'):('Added $'+gmoney(a)+' to '+g.name),'success'); closeWSheet(); renderGoals(); });
     }
 
+    // ── Net worth trend (cumulative balance over 30 days) ──
+    function renderNetWorth(){
+      var host=qs('#netWorth'); if(!host) return;
+      var txs=W.transactions.slice().sort(function(a,b){return a.ts-b.ts;}), base=W.balance||0;
+      var end=new Date(); end.setHours(23,59,59,999);
+      var pts=[]; for(var i=29;i>=0;i--){ var d=new Date(end); d.setDate(end.getDate()-i); var t=d.getTime(), bal=base;
+        for(var j=0;j<txs.length;j++){ if(txs[j].ts<=t) bal+=txs[j].amount; else break; } pts.push(bal); }
+      var cur=liveBalance(), first=pts[0], delta=cur-first;
+      var mn=Math.min.apply(null,pts), mx=Math.max.apply(null,pts), rng=(mx-mn)||1, WD=300, HT=70;
+      var line=pts.map(function(v,i){ var x=(i/(pts.length-1))*WD, y=HT-((v-mn)/rng)*(HT-10)-5; return (i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1); }).join(' ');
+      var area=line+' L'+WD+' '+HT+' L0 '+HT+' Z';
+      host.innerHTML='<div class="nw-card"><div class="nw-top"><div><div class="nw-l">Net worth</div><div class="nw-v">$'+gmoney(Math.round(cur))+'</div></div><div class="nw-d '+(delta>=0?'up':'dn')+'">'+(delta>=0?'+':'−')+'$'+gmoney(Math.round(Math.abs(delta)))+' · 30d</div></div>'
+        +'<svg class="nw-svg" viewBox="0 0 300 70" preserveAspectRatio="none"><path class="nw-area" d="'+area+'"/><path class="nw-line" d="'+line+'"/></svg></div>';
+    }
+
     // ── Spending breakdown donut (this month, by category) ──
     function renderSpendDonut(){
       var host=qs('#spendDonut'); if(!host) return;
@@ -1023,7 +1051,7 @@
     }
     Array.prototype.forEach.call(document.querySelectorAll('.wtool'),function(b){ b.addEventListener('click',function(){ openMoneyTool(b.getAttribute('data-wtool')); }); });
 
-    function renderAll(){ renderCore(); renderBank(); renderTx(); renderSubs(); renderGoals(); renderMissions(); renderStats(); renderInsights(); renderWealthOverview(); renderWealthRecords(); renderSpendDonut(); syncCoins(); }
+    function renderAll(){ renderCore(); renderBank(); renderTx(); renderSubs(); renderGoals(); renderMissions(); renderStats(); renderInsights(); renderWealthOverview(); renderWealthRecords(); renderNetWorth(); renderSpendDonut(); syncCoins(); }
 
     window.addEventListener('coreStateChange', syncCoins);
     window.addEventListener('core:progress-updated', syncCoins);
