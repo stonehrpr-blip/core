@@ -43,6 +43,40 @@
   .ptab.on{ color:var(--text); }
   .ptab.on::after{ content:""; position:absolute; left:50%; transform:translateX(-50%); bottom:3px; width:26px; height:2.5px; border-radius:2px; background:var(--accent); }
   .ppane{ display:none; } .ppane.on{ display:block; }
+  /* savings goals */
+  .goal{ padding:13px 14px; border-radius:16px; background:var(--bg-card); border:1px solid var(--border); margin-bottom:9px; }
+  .goal-top{ display:flex; align-items:center; gap:11px; margin-bottom:10px; }
+  .goal-ic{ width:38px; height:38px; border-radius:11px; flex:none; display:flex; align-items:center; justify-content:center; color:var(--gold2); background:rgba(10,132,255,.12); border:1px solid rgba(10,132,255,.28); }
+  .goal-ic svg{ width:20px; height:20px; }
+  .goal-t{ flex:1; min-width:0; } .goal-t b{ font-size:14px; font-weight:800; display:block; } .goal-t span{ font-size:11.5px; color:var(--muted); }
+  .goal-fund{ flex:none; padding:8px 14px; border-radius:999px; border:none; background:var(--accent); color:#fff; font:inherit; font-weight:800; font-size:12px; cursor:pointer; }
+  .goal-bar{ height:9px; border-radius:99px; background:rgba(255,255,255,.07); overflow:hidden; }
+  .goal-fill{ display:block; height:100%; border-radius:99px; background:linear-gradient(90deg,#0A84FF,#5EC8FF); transition:width .6s cubic-bezier(.22,1,.36,1); }
+  .goal-pct{ font-size:11px; font-weight:800; color:var(--muted); margin-top:6px; }
+  .goal-add{ width:100%; padding:12px; border-radius:13px; border:1px dashed var(--border); background:rgba(255,255,255,.02); color:var(--muted); font:inherit; font-weight:800; font-size:13px; cursor:pointer; }
+  .goal-empty{ padding:14px; border-radius:14px; background:var(--bg-card); border:1px solid var(--border); color:var(--dim); font-size:12.5px; text-align:center; margin-bottom:9px; }
+  /* spending donut */
+  .donut-wrap{ display:flex; align-items:center; gap:16px; padding:14px; }
+  .donut{ width:118px; height:118px; border-radius:50%; flex:none; position:relative; }
+  .donut-hole{ position:absolute; inset:17px; border-radius:50%; background:#0c0c16; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .donut-hole b{ font-size:15px; font-weight:900; color:#fff; } .donut-hole span{ font-size:9px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--dim); }
+  .donut-legend{ flex:1; min-width:0; display:flex; flex-direction:column; gap:6px; }
+  .don-li{ display:flex; align-items:center; gap:8px; font-size:12px; } .don-dot{ width:9px; height:9px; border-radius:50%; flex:none; } .don-k{ flex:1; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .don-v{ font-weight:800; color:#fff; }
+  /* money tools */
+  .wtools-grid{ display:grid; grid-template-columns:1fr 1fr; gap:11px; }
+  .wtool{ display:flex; align-items:center; gap:10px; padding:13px; border-radius:16px; background:var(--bg-card); border:1px solid var(--border); cursor:pointer; text-align:left; font:inherit; color:inherit; transition:transform .12s; }
+  .wtool:active{ transform:scale(.97); }
+  .wtool .wti{ width:36px; height:36px; border-radius:10px; flex:none; display:flex; align-items:center; justify-content:center; color:var(--gold2); background:rgba(10,132,255,.12); border:1px solid rgba(10,132,255,.28); }
+  .wtool .wti svg{ width:19px; height:19px; }
+  .wtool b{ font-size:13px; font-weight:800; display:block; } .wtool>span:last-child>span{ font-size:10.5px; color:var(--muted); }
+  /* reusable sheet inputs/outputs (goals + tools) */
+  .wf-label{ font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:12px 2px 7px; }
+  .wf-input{ width:100%; padding:13px 14px; border-radius:12px; border:1px solid var(--border); background:var(--bg-card); color:var(--text); font:inherit; font-size:16px; font-weight:700; outline:none; }
+  .wf-input:focus{ border-color:rgba(10,132,255,.5); }
+  .wf-out{ margin-top:16px; padding:16px; border-radius:14px; background:rgba(10,132,255,.08); border:1px solid rgba(10,132,255,.22); text-align:center; }
+  .wf-big{ font-size:30px; font-weight:900; letter-spacing:-1px; color:#fff; line-height:1; }
+  .wf-sub{ font-size:12px; color:var(--muted); margin-top:6px; }
+  .wf-btn{ width:100%; margin-top:16px; padding:14px; border-radius:14px; border:none; background:var(--accent); color:#fff; font:inherit; font-weight:900; font-size:15px; cursor:pointer; }
   .scroll::-webkit-scrollbar{ display:none; }
 
   .topbar { position:relative; display:flex; align-items:center; justify-content:space-between; padding:6px 18px 8px; }
@@ -312,6 +346,10 @@
         <div id="subAlertSlot"></div>
         <div class="subs" id="subs"></div>
 
+        <!-- SAVINGS GOALS -->
+        <div class="sec"><h2>Savings Goals</h2><span class="meta" id="goalMeta"></span></div>
+        <div id="goalsHost"></div>
+
         <!-- SECTION 5: WEALTH MISSIONS -->
         <div class="sec"><h2>Wealth Missions</h2><span class="meta" id="missionMeta"></span></div>
         <div class="missions" id="missions"></div>
@@ -326,6 +364,10 @@
 
         </div><!-- /pane main -->
         <div class="ppane" data-pane="progress">
+        <!-- SPENDING BREAKDOWN -->
+        <div class="sec"><h2>Spending breakdown</h2><span class="meta" id="spendMeta"></span></div>
+        <div class="card" id="spendDonut"></div>
+
         <!-- SECTION 8: MONEY OVERVIEW -->
         <div class="sec"><h2>Money Overview</h2><span class="meta" id="wovMeta"></span></div>
         <div class="wov" id="wealthOverview"></div>
@@ -333,6 +375,13 @@
         <!-- SECTION 9: RECORDS -->
         <div class="sec"><h2>Records</h2></div>
         <div id="wealthRecords"></div>
+
+        <!-- MONEY TOOLS -->
+        <div class="sec"><h2>Money Tools</h2></div>
+        <div class="wtools-grid">
+          <button class="wtool" data-wtool="compound" type="button"><span class="wti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 7-8"/><path d="M21 7v5h-5"/></svg></span><span><b>Compound</b><span>Grow savings</span></span></button>
+          <button class="wtool" data-wtool="afford" type="button"><span class="wti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.5 12.5a1.5 1.5 0 0 0 1.5 1.2h8a1.5 1.5 0 0 0 1.5-1.2L21 7H6"/></svg></span><span><b>Can I afford?</b><span>Months to save</span></span></button>
+        </div>
         </div><!-- /pane progress -->
       </div>
 
@@ -377,6 +426,16 @@
         <div class="catlabel">Category</div>
         <div class="cats" id="cats"></div>
         <button class="savebtn" id="saveTx" type="button">Add transaction</button>
+      </div>
+    </div>
+
+    <!-- Reusable sheet: goals + money tools -->
+    <div class="sheetwrap" id="wSheet">
+      <div class="sheetbg" id="wSheetBg"></div>
+      <div class="sheet">
+        <div class="grip"></div>
+        <h3 id="wSheetTtl">Title</h3>
+        <div id="wSheetBody"></div>
       </div>
     </div>
   </div>
@@ -469,6 +528,10 @@
           { id:'s2', name:'Spotify', cost:11.99, nextDays:3,  emoji:ICON.headphones },
           { id:'s3', name:'iCloud',  cost:4.99,  nextDays:21, emoji:ICON.cloud },
           { id:'s4', name:'Gym',     cost:29.0,  nextDays:14, emoji:ICON.gym }
+        ],
+        goals: [
+          { id:'g1', name:'Emergency Fund', target:1000, saved:420 },
+          { id:'g2', name:'New Laptop',     target:1500, saved:300 }
         ],
         missionsDone: {},           // id -> ts
         cancelledCount: 0,
@@ -845,7 +908,73 @@
     Array.prototype.forEach.call(qs('#seg').children, function(b){ b.addEventListener('click', function(){ setType(b.getAttribute('data-type')); SFX('tick'); }); });
 
     function syncCoins(){ try{ qs('#coinTop').textContent=(S.read().coins||0).toLocaleString(); }catch(e){} }
-    function renderAll(){ renderCore(); renderBank(); renderTx(); renderSubs(); renderMissions(); renderStats(); renderInsights(); renderWealthOverview(); renderWealthRecords(); syncCoins(); }
+    // ── reusable sheet ──
+    function openWSheet(title,html){ var s=qs('#wSheet'); if(!s) return; qs('#wSheetTtl').textContent=title; qs('#wSheetBody').innerHTML=html; s.classList.add('open'); SFX('tick'); }
+    function closeWSheet(){ var s=qs('#wSheet'); if(s) s.classList.remove('open'); }
+    (function(){ var bg=qs('#wSheetBg'); if(bg) bg.addEventListener('click',closeWSheet); })();
+    function gmoney(n){ n=Math.round((n||0)*100)/100; return n.toLocaleString(undefined,{maximumFractionDigits:2}); }
+
+    // ── Savings goals ──
+    var JAR_IC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 11a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 8z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg>';
+    function renderGoals(){
+      var host=qs('#goalsHost'); if(!host) return; W.goals=W.goals||[];
+      var meta=qs('#goalMeta'), add='<button class="goal-add" id="goalAdd" type="button">+ New savings goal</button>';
+      if(!W.goals.length){ host.innerHTML='<div class="goal-empty">Set a savings goal and watch the jar fill up.</div>'+add; if(meta) meta.textContent=''; }
+      else {
+        var reached=W.goals.filter(function(g){return g.saved>=g.target;}).length;
+        host.innerHTML=W.goals.map(function(g){ var pct=g.target>0?Math.min(100,Math.round(g.saved/g.target*100)):0, done=g.saved>=g.target;
+          return '<div class="goal"><div class="goal-top"><span class="goal-ic">'+JAR_IC+'</span><div class="goal-t"><b>'+g.name+'</b><span>$'+gmoney(g.saved)+' of $'+gmoney(g.target)+'</span></div><button class="goal-fund" data-fund="'+g.id+'" type="button">Add</button></div><div class="goal-bar"><span class="goal-fill" style="width:'+pct+'%"></span></div><div class="goal-pct">'+pct+'%'+(done?' · reached 🎉':'')+'</div></div>';
+        }).join('')+add;
+        if(meta) meta.textContent=W.goals.length+' goal'+(W.goals.length>1?'s':'')+(reached?' · '+reached+' reached':'');
+      }
+      var ga=qs('#goalAdd'); if(ga) ga.addEventListener('click',openNewGoal);
+      Array.prototype.forEach.call(host.querySelectorAll('.goal-fund'),function(b){ b.addEventListener('click',function(){ openFundGoal(b.getAttribute('data-fund')); }); });
+    }
+    function openNewGoal(){
+      openWSheet('New savings goal','<div class="wf-label">Goal name</div><input class="wf-input" id="ngName" placeholder="e.g. Emergency Fund" /><div class="wf-label">Target amount ($)</div><input class="wf-input" id="ngTarget" type="number" inputmode="decimal" placeholder="1000" /><button class="wf-btn" id="ngCreate" type="button">Create goal</button>');
+      qs('#ngCreate').addEventListener('click',function(){ var nm=(qs('#ngName').value||'').trim(), tg=parseFloat(qs('#ngTarget').value)||0; if(!nm||tg<=0){ toast('Add a name and target'); return; } W.goals=W.goals||[]; W.goals.push({id:'g'+Date.now(),name:nm,target:Math.round(tg*100)/100,saved:0}); saveW(W); SFX('confirm'); closeWSheet(); renderGoals(); });
+    }
+    function openFundGoal(id){
+      var g=(W.goals||[]).filter(function(x){return x.id===id;})[0]; if(!g) return;
+      openWSheet('Add to '+g.name,'<div class="wf-label">Amount to add ($)</div><input class="wf-input" id="fgAmt" type="number" inputmode="decimal" placeholder="50" /><div class="wf-sub" style="margin-top:9px">$'+gmoney(g.saved)+' of $'+gmoney(g.target)+' saved</div><button class="wf-btn" id="fgAdd" type="button">Add to jar</button>');
+      qs('#fgAdd').addEventListener('click',function(){ var a=parseFloat(qs('#fgAmt').value)||0; if(a<=0) return; g.saved=Math.round((g.saved+a)*100)/100; saveW(W); SFX('confirm'); try{ if(S&&S.addXp) S.addXp(5,'wealth:save'); }catch(e){} toast(g.saved>=g.target?(g.name+' reached! 🎉'):('Added $'+gmoney(a)+' to '+g.name),'success'); closeWSheet(); renderGoals(); });
+    }
+
+    // ── Spending breakdown donut (this month, by category) ──
+    function renderSpendDonut(){
+      var host=qs('#spendDonut'); if(!host) return;
+      var now=new Date(), mStart=new Date(now.getFullYear(),now.getMonth(),1).getTime();
+      var by={}; W.transactions.forEach(function(t){ if(t.amount<0 && t.ts>=mStart && t.category!=='Savings') by[t.category]=(by[t.category]||0)+Math.abs(t.amount); });
+      var cats=Object.keys(by).map(function(k){return {k:k,v:by[k]};}).sort(function(a,b){return b.v-a.v;});
+      var total=cats.reduce(function(a,c){return a+c.v;},0), meta=qs('#spendMeta');
+      if(!total){ host.innerHTML='<div style="text-align:center;color:var(--dim);font-size:12.5px;padding:16px">No spending logged this month yet.</div>'; if(meta) meta.textContent=''; return; }
+      var COLORS=['#0A84FF','#FF6B6B','#FFCB3D','#34D399','#B388FF','#5EEAD4','#FF8A7A','#9AA1B7'];
+      var acc=0, stops=[]; cats.forEach(function(c,i){ var f=c.v/total*100; stops.push(COLORS[i%COLORS.length]+' '+acc.toFixed(2)+'% '+(acc+f).toFixed(2)+'%'); acc+=f; });
+      var legend=cats.map(function(c,i){ return '<div class="don-li"><span class="don-dot" style="background:'+COLORS[i%COLORS.length]+'"></span><span class="don-k">'+c.k+'</span><span class="don-v">$'+gmoney(c.v)+'</span></div>'; }).join('');
+      host.innerHTML='<div class="donut-wrap"><div class="donut" style="background:conic-gradient('+stops.join(',')+')"><div class="donut-hole"><b>$'+gmoney(Math.round(total))+'</b><span>spent</span></div></div><div class="donut-legend">'+legend+'</div></div>';
+      if(meta) meta.textContent=cats.length+' categories';
+    }
+
+    // ── Money tools ──
+    function openMoneyTool(which){
+      if(which==='compound'){
+        openWSheet('Compound Growth','<div class="wf-label">Starting amount ($)</div><input class="wf-input" id="ciP" type="number" value="1000" inputmode="decimal"/><div class="wf-label">Monthly contribution ($)</div><input class="wf-input" id="ciM" type="number" value="100" inputmode="decimal"/><div class="wf-label">Annual return (%)</div><input class="wf-input" id="ciR" type="number" value="7" inputmode="decimal"/><div class="wf-label">Years</div><input class="wf-input" id="ciY" type="number" value="10" inputmode="numeric"/><div id="ciOut"></div>');
+        var calc=function(){ var P=parseFloat(qs('#ciP').value)||0, M=parseFloat(qs('#ciM').value)||0, r=(parseFloat(qs('#ciR').value)||0)/100/12, n=(parseInt(qs('#ciY').value,10)||0)*12, out=qs('#ciOut'); if(!out) return;
+          var fv=r>0?(P*Math.pow(1+r,n)+M*((Math.pow(1+r,n)-1)/r)):(P+M*n), contrib=P+M*n, growth=fv-contrib;
+          out.innerHTML='<div class="wf-out"><div class="wf-big">$'+gmoney(Math.round(fv))+'</div><div class="wf-sub">after '+(n/12)+' yrs · $'+gmoney(Math.round(growth))+' is growth</div></div>'; };
+        ['ciP','ciM','ciR','ciY'].forEach(function(id){ qs('#'+id).addEventListener('input',calc); }); calc();
+      } else {
+        openWSheet('Can I Afford It?','<div class="wf-label">Item price ($)</div><input class="wf-input" id="afP" type="number" value="500" inputmode="decimal"/><div class="wf-label">You can save / month ($)</div><input class="wf-input" id="afM" type="number" value="150" inputmode="decimal"/><div id="afOut"></div>');
+        var calc2=function(){ var price=parseFloat(qs('#afP').value)||0, per=parseFloat(qs('#afM').value)||0, bal=liveBalance(), out=qs('#afOut'); if(!out) return; if(price<=0){ out.innerHTML=''; return; }
+          if(bal>=price){ out.innerHTML='<div class="wf-out"><div class="wf-big">Yes ✓</div><div class="wf-sub">Your balance ($'+gmoney(Math.round(bal))+') covers it now.</div></div>'; return; }
+          var need=price-bal, months=per>0?Math.ceil(need/per):Infinity;
+          out.innerHTML='<div class="wf-out"><div class="wf-big">'+(isFinite(months)?(months+' mo'):'—')+'</div><div class="wf-sub">'+(isFinite(months)?('to save the extra $'+gmoney(Math.round(need))):'enter a monthly amount')+'</div></div>'; };
+        ['afP','afM'].forEach(function(id){ qs('#'+id).addEventListener('input',calc2); }); calc2();
+      }
+    }
+    Array.prototype.forEach.call(document.querySelectorAll('.wtool'),function(b){ b.addEventListener('click',function(){ openMoneyTool(b.getAttribute('data-wtool')); }); });
+
+    function renderAll(){ renderCore(); renderBank(); renderTx(); renderSubs(); renderGoals(); renderMissions(); renderStats(); renderInsights(); renderWealthOverview(); renderWealthRecords(); renderSpendDonut(); syncCoins(); }
 
     window.addEventListener('coreStateChange', syncCoins);
     window.addEventListener('core:progress-updated', syncCoins);
