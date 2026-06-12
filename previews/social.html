@@ -311,7 +311,7 @@
         </div>
         <div class="ppane on" data-pane="main">
         <div class="greet">
-          <div class="greet-eyebrow"><span class="gd"></span><span>Social · earn your rank</span></div>
+          <div class="greet-eyebrow"><span class="gd"></span><span id="greetMeta">Social · earn your rank</span></div>
           <h1 id="greetHi">Good evening.</h1>
           <p>Where do you rank today?</p>
         </div>
@@ -840,7 +840,7 @@
 <script src="_lib/core-pagefx.js"></script>
   <script>(function(){var ts=document.getElementById('ptabs');if(!ts)return;ts.addEventListener('click',function(e){var b=e.target.closest('.ptab');if(!b)return;var p=b.getAttribute('data-pane');Array.prototype.forEach.call(ts.querySelectorAll('.ptab'),function(x){x.classList.toggle('on',x===b);});Array.prototype.forEach.call(document.querySelectorAll('.ppane'),function(x){x.classList.toggle('on',x.getAttribute('data-pane')===p);});var sc=document.querySelector('.scroll');if(sc)sc.scrollTop=0;try{window.coreSfx&&window.coreSfx('tick');}catch(e){}});})();</script>
 
-  <script>(function(){var e=document.getElementById('greetHi');if(!e)return;var h=new Date().getHours(),g=h<12?'Good morning':h<18?'Good afternoon':'Good evening',n='';try{n=(JSON.parse(localStorage.getItem('coreOnboardTrial')||'{}').name||'').trim();}catch(x){}e.textContent=g+(n?', '+n:'')+'.';})();</script>
+  <script>(function(){var e=document.getElementById('greetHi');var h=new Date().getHours(),g=h<12?'Good morning':h<18?'Good afternoon':'Good evening',n='';try{n=(JSON.parse(localStorage.getItem('coreOnboardTrial')||'{}').name||'').trim();}catch(x){}if(e)e.textContent=g+(n?', '+n:'')+'.';var m=document.getElementById('greetMeta');if(m){var w=0;try{w=(JSON.parse(localStorage.getItem('coreChallengeWins')||'[]')||[]).length;}catch(x){}m.textContent='Social · '+(w>0?w+' win'+(w>1?'s':''):'earn your rank');}})();</script>
   <script src="_lib/core-help.js"></script>
   <script>try{window.coreHelp&&window.coreHelp.attach('helpBtn',{title:'Social',bullets:[
     'Your reputation rank rises as you build real-world social wins and challenges.',
