@@ -46,6 +46,12 @@
   .ptab.on{ color:var(--text); }
   .ptab.on::after{ content:""; position:absolute; left:50%; transform:translateX(-50%); bottom:3px; width:26px; height:2.5px; border-radius:2px; background:var(--accent); }
   .ppane{ display:none; } .ppane.on{ display:block; }
+  /* greeting (matches Strength / Focus) */
+  .greet{ margin:8px 2px 2px; }
+  .greet-eyebrow{ display:inline-flex; align-items:center; gap:7px; font-size:11px; font-weight:800; letter-spacing:.03em; color:var(--muted); margin-bottom:9px; }
+  .greet-eyebrow .gd{ width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 8px var(--accent); }
+  .greet h1{ margin:0; font-size:30px; font-weight:800; letter-spacing:-0.8px; line-height:1.05; }
+  .greet p{ margin:5px 0 0; font-size:14px; color:var(--muted); }
   /* daily intention */
   .int-card{ display:flex; align-items:center; gap:10px; padding:14px; border-radius:16px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); }
   .int-card.set{ flex-direction:column; align-items:flex-start; gap:2px; }
@@ -297,6 +303,11 @@
           <button class="ptab" data-pane="progress" type="button">Progress</button>
         </div>
         <div class="ppane on" data-pane="main">
+        <div class="greet">
+          <div class="greet-eyebrow"><span class="gd"></span><span>Willpower · stay disciplined</span></div>
+          <h1 id="greetHi">Good evening.</h1>
+          <p>What will you resist today?</p>
+        </div>
         <!-- ENERGY CORE -->
         <section class="core" id="core">
           <div class="shadow"></div>
@@ -842,6 +853,8 @@
   <script src="_lib/core-back.js"></script>
 <script src="_lib/core-pagefx.js"></script>
   <script>(function(){var ts=document.getElementById('ptabs');if(!ts)return;ts.addEventListener('click',function(e){var b=e.target.closest('.ptab');if(!b)return;var p=b.getAttribute('data-pane');Array.prototype.forEach.call(ts.querySelectorAll('.ptab'),function(x){x.classList.toggle('on',x===b);});Array.prototype.forEach.call(document.querySelectorAll('.ppane'),function(x){x.classList.toggle('on',x.getAttribute('data-pane')===p);});var sc=document.querySelector('.scroll');if(sc)sc.scrollTop=0;try{window.coreSfx&&window.coreSfx('tick');}catch(e){}});})();</script>
+
+  <script>(function(){var e=document.getElementById('greetHi');if(!e)return;var h=new Date().getHours();e.textContent=h<12?'Good morning.':h<18?'Good afternoon.':'Good evening.';})();</script>
   <script src="_lib/core-help.js"></script>
   <script>try{window.coreHelp&&window.coreHelp.attach('helpBtn',{title:'Willpower',bullets:[
     'Your energy core reflects your willpower right now — feed it with disciplined actions.',
