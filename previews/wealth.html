@@ -43,6 +43,22 @@
   .ptab.on{ color:var(--text); }
   .ptab.on::after{ content:""; position:absolute; left:50%; transform:translateX(-50%); bottom:3px; width:26px; height:2.5px; border-radius:2px; background:var(--accent); }
   .ppane{ display:none; } .ppane.on{ display:block; }
+  /* greeting + action grid (matches Strength / Focus) */
+  .greet{ margin:12px 2px 2px; }
+  .greet-eyebrow{ display:inline-flex; align-items:center; gap:7px; font-size:11px; font-weight:800; letter-spacing:.03em; color:var(--muted); margin-bottom:9px; }
+  .greet-eyebrow .gd{ width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 8px var(--accent); }
+  .greet h1{ margin:0; font-size:30px; font-weight:800; letter-spacing:-0.8px; line-height:1.05; }
+  .greet p{ margin:5px 0 0; font-size:14px; color:var(--muted); }
+  .act-grid{ display:grid; grid-template-columns:1fr 1fr; gap:11px; margin-top:14px; }
+  .act-card{ display:flex; flex-direction:column; align-items:flex-start; padding:16px; border-radius:20px; text-align:left; cursor:pointer;
+    background:rgba(255,255,255,0.022); border:1px solid rgba(255,255,255,0.07); color:inherit; text-decoration:none; font:inherit; transition:transform .12s, border-color .2s; }
+  .act-card:active{ transform:scale(.97); }
+  .act-card:hover{ border-color:color-mix(in srgb, var(--ac,#0A84FF) 45%, transparent); }
+  .act-ic{ width:44px; height:44px; border-radius:13px; display:flex; align-items:center; justify-content:center; margin-bottom:14px;
+    color:var(--ac,#0A84FF); background:color-mix(in srgb, var(--ac,#0A84FF) 15%, transparent); border:1px solid color-mix(in srgb, var(--ac,#0A84FF) 30%, transparent); }
+  .act-ic svg{ width:22px; height:22px; }
+  .act-card b{ font-size:15.5px; font-weight:800; letter-spacing:-0.2px; }
+  .act-card>span:last-child{ font-size:11.5px; color:var(--muted); margin-top:3px; line-height:1.35; }
   /* savings goals */
   .goal{ padding:13px 14px; border-radius:16px; background:var(--bg-card); border:1px solid var(--border); margin-bottom:9px; }
   .goal-top{ display:flex; align-items:center; gap:11px; margin-bottom:10px; }
@@ -315,6 +331,12 @@
           <button class="ptab" data-pane="progress" type="button">Progress</button>
         </div>
         <div class="ppane on" data-pane="main">
+        <!-- Greeting -->
+        <div class="greet">
+          <div class="greet-eyebrow"><span class="gd"></span><span id="greetMeta">Wealth · build your stack</span></div>
+          <h1 id="greetHi">Good evening.</h1>
+          <p>How's the money looking today?</p>
+        </div>
         <!-- SECTION 1: MONEY CORE -->
         <div class="moneycore" id="moneycore">
           <span class="coreState" id="coreStateLabel">Stable</span>
@@ -327,6 +349,14 @@
           <div class="balVal" id="balVal"><span class="cur">$</span><span id="balNum">0</span></div>
           <div class="weekDelta up" id="weekDelta">+$0 this week</div>
           <div class="coreBlurb" id="coreBlurb">Your Money Core reflects how you handle money — earn, save and cut waste to make it radiant.</div>
+        </div>
+
+        <!-- Quick actions -->
+        <div class="act-grid">
+          <button class="act-card" id="actAdd" type="button" style="--ac:#0A84FF"><span class="act-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span><b>Add Money</b><span>Log income or expense</span></button>
+          <button class="act-card" id="actGoal" type="button" style="--ac:#FFCB3D"><span class="act-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 11a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 8z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg></span><b>Savings Goal</b><span>Start or fund a jar</span></button>
+          <button class="act-card" id="actTools" type="button" style="--ac:#B388FF"><span class="act-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 7-8"/><path d="M21 7v5h-5"/></svg></span><b>Money Tools</b><span>Compound &amp; afford</span></button>
+          <button class="act-card" id="actSpend" type="button" style="--ac:#34D399"><span class="act-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v9l6 3"/><circle cx="12" cy="12" r="9"/></svg></span><b>Spending</b><span>See the breakdown</span></button>
         </div>
 
         <!-- SECTION 2: CONNECT BANK -->
@@ -902,6 +932,14 @@
     qs('#bankBtn').addEventListener('click', connectBank);
     qs('#fab').addEventListener('click', openSheet);
     qs('#addTxLink').addEventListener('click', openSheet);
+    // hero quick-actions + greeting (Strength/Focus-style)
+    (function(){
+      var a=qs('#actAdd'); if(a) a.addEventListener('click', openSheet);
+      var g=qs('#actGoal'); if(g) g.addEventListener('click', function(){ openNewGoal(); });
+      var t=qs('#actTools'); if(t) t.addEventListener('click', function(){ openMoneyTool('compound'); });
+      var s=qs('#actSpend'); if(s) s.addEventListener('click', function(){ var tab=document.querySelector('#ptabs .ptab[data-pane="progress"]'); if(tab) tab.click(); var d=qs('#spendDonut'); if(d) setTimeout(function(){ try{ d.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){} }, 80); });
+      var hr=new Date().getHours(), hi=qs('#greetHi'); if(hi) hi.textContent = hr<12?'Good morning.':hr<18?'Good afternoon.':'Good evening.';
+    })();
     qs('#sheetbg').addEventListener('click', closeSheet);
     qs('#saveTx').addEventListener('click', saveTx);
     qs('#amtInput').addEventListener('input', updateSave);
