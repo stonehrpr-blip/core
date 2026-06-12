@@ -46,6 +46,23 @@
   .ptab.on{ color:var(--text); }
   .ptab.on::after{ content:""; position:absolute; left:50%; transform:translateX(-50%); bottom:3px; width:26px; height:2.5px; border-radius:2px; background:var(--accent); }
   .ppane{ display:none; } .ppane.on{ display:block; }
+  /* daily intention */
+  .int-card{ display:flex; align-items:center; gap:10px; padding:14px; border-radius:16px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); }
+  .int-card.set{ flex-direction:column; align-items:flex-start; gap:2px; }
+  .int-card .int-q{ font-size:11px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); }
+  .int-card .int-t{ font-size:16px; font-weight:800; color:#fff; line-height:1.35; }
+  .int-card .int-edit{ margin-top:6px; background:none; border:none; color:var(--muted); font:inherit; font-weight:800; font-size:12px; cursor:pointer; padding:0; }
+  .int-card input{ flex:1; min-width:0; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); border-radius:10px; padding:11px 12px; color:var(--text); font:inherit; font-size:14px; outline:none; }
+  .int-card .int-set{ flex:none; padding:11px 16px; border-radius:10px; border:none; background:var(--accent); color:#fff; font:inherit; font-weight:800; font-size:13px; cursor:pointer; }
+  /* your why */
+  .why{ display:flex; align-items:center; gap:10px; padding:11px 13px; border-radius:13px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); margin-bottom:8px; }
+  .why .why-q{ width:26px; height:26px; flex:none; border-radius:8px; display:flex; align-items:center; justify-content:center; color:var(--accent); background:color-mix(in srgb,var(--accent) 14%,transparent); font-weight:900; font-size:16px; }
+  .why .why-t{ flex:1; min-width:0; font-size:13.5px; font-weight:600; color:var(--text); line-height:1.35; }
+  .why .why-x{ flex:none; background:none; border:none; color:var(--dim); font-size:18px; cursor:pointer; padding:0 4px; line-height:1; }
+  .why-add{ display:flex; gap:8px; margin-top:2px; }
+  .why-add input{ flex:1; min-width:0; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); border-radius:11px; padding:11px 12px; color:var(--text); font:inherit; font-size:13.5px; outline:none; }
+  .why-add button{ flex:none; padding:0 16px; border-radius:11px; border:1px dashed rgba(255,255,255,.16); background:rgba(255,255,255,.03); color:var(--muted); font:inherit; font-weight:800; font-size:13px; cursor:pointer; }
+  .why-empty{ padding:14px; border-radius:13px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); color:var(--dim); font-size:12.5px; text-align:center; margin-bottom:8px; }
   .scroll::-webkit-scrollbar{ display:none; }
 
   .topbar{ position:relative; display:flex; align-items:center; justify-content:space-between; padding:6px 16px 8px; }
@@ -296,6 +313,10 @@
           <div class="coredesc" id="coredesc"></div>
         </section>
 
+        <!-- DAILY INTENTION -->
+        <div class="sec"><h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px;margin-right:3px"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.4"/></svg>Today's intention</h2><span class="meta" id="intMeta"></span></div>
+        <div id="intentHost"></div>
+
         <!-- HABIT PRESSURE -->
         <div class="sec"><h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px;margin-right:3px"><path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></svg>Habit Pressure</h2><span class="meta bad" id="drainMeta">0%/h drain</span></div>
         <div class="boss" id="boss">
@@ -316,6 +337,10 @@
         <!-- RECOVERY -->
         <div class="sec"><h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px;margin-right:3px"><path d="M12 3c1.6 3.6 4 4.6 4 8a4 4 0 0 1-8 0c0-1.3.5-2.1 1-2.7C9 11 12 8 12 3z"/></svg>Recovery Actions</h2><span class="meta good">restore energy</span></div>
         <div class="grid" id="recovery"></div>
+
+        <!-- YOUR WHY -->
+        <div class="sec"><h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px;margin-right:3px"><path d="M12 21s-7-4.3-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.7-7 10-7 10z"/></svg>Your Why</h2><span class="meta" id="whyMeta"></span></div>
+        <div id="whyHost"></div>
 
         <!-- HISTORY -->
         <div class="sec"><h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px;margin-right:3px"><path d="M4 20V4M4 20h16M8 16v-4M12 16V8M16 16v-7"/></svg>Willpower History</h2><span class="meta" id="histMeta">session</span></div>
@@ -471,6 +496,8 @@
              log:[], history:[], cooldowns:{}, urgesToday:0, lastTick:now(), boostUntil:0, dayLog:{} };
     }
     if(!st.dayLog) st.dayLog={};
+    st.intention = (st.intention && typeof st.intention==='object') ? st.intention : {date:'',text:''};
+    if(!Array.isArray(st.whys)) st.whys = ['Be present for the people I love','Wake up proud of yesterday'];
     // merge external pressures if a Habit Boss system published them
     try{ var ext=localStorage.getItem('coreHabitPressures'); if(ext){ var arr=JSON.parse(ext); if(arr&&arr.length) st.pressures=arr; } }catch(e){}
     if(!st.history.length){ // seed a believable last-hour curve
@@ -777,8 +804,36 @@
       }
     }catch(e){}
 
+    // ── Daily intention + Your Why ──
+    function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function wToday(){ var d=new Date(); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
+    var editingInt=false;
+    function renderIntent(){
+      var host=$('#intentHost'); if(!host) return;
+      st.intention=st.intention||{date:'',text:''};
+      if(st.intention.date!==wToday()) st.intention.text='';   // fresh intention each day
+      var txt=st.intention.text||'';
+      if(txt && !editingInt){
+        host.innerHTML='<div class="int-card set"><div class="int-q">Today I will</div><div class="int-t">'+esc(txt)+'</div><button class="int-edit" id="intEdit" type="button">Edit</button></div>';
+        $('#intEdit').addEventListener('click',function(){ editingInt=true; renderIntent(); });
+      } else {
+        host.innerHTML='<div class="int-card"><input id="intIn" placeholder="Today I will…" maxlength="80" value="'+esc(txt)+'" /><button class="int-set" id="intSet" type="button">Set</button></div>';
+        $('#intSet').addEventListener('click',function(){ var v=($('#intIn').value||'').trim(); st.intention={date:wToday(),text:v}; save(); editingInt=false; sfx('confirm'); renderIntent(); });
+      }
+      var meta=$('#intMeta'); if(meta) meta.textContent=(st.intention.text&&!editingInt)?'set ✓':'';
+    }
+    function renderWhy(){
+      var host=$('#whyHost'); if(!host) return; st.whys=st.whys||[];
+      var rows=st.whys.length? st.whys.map(function(w,i){ return '<div class="why"><span class="why-q">“</span><span class="why-t">'+esc(w)+'</span><button class="why-x" data-i="'+i+'" type="button" aria-label="Remove">×</button></div>'; }).join('')
+        : '<div class="why-empty">Add the reasons you’re building willpower — read them when an urge hits.</div>';
+      host.innerHTML=rows+'<div class="why-add"><input id="whyIn" placeholder="Add a reason…" maxlength="80" /><button id="whyAdd" type="button">Add</button></div>';
+      Array.prototype.forEach.call(host.querySelectorAll('.why-x'),function(b){ b.addEventListener('click',function(){ st.whys.splice(parseInt(b.getAttribute('data-i'),10),1); save(); sfx('tap'); renderWhy(); }); });
+      $('#whyAdd').addEventListener('click',function(){ var v=($('#whyIn').value||'').trim(); if(!v) return; st.whys.push(v); save(); sfx('confirm'); renderWhy(); });
+      var meta=$('#whyMeta'); if(meta) meta.textContent=st.whys.length?(st.whys.length+' reason'+(st.whys.length>1?'s':'')):'';
+    }
+
     render();
-    renderPurposeOverview(); renderPurposeRecords();
+    renderPurposeOverview(); renderPurposeRecords(); renderIntent(); renderWhy();
     setInterval(tick, 1000);
     // cooldown ticking (visual)
     setInterval(function(){ if(document.querySelector('.rec.cool')) renderRecovery(); }, 1000);
