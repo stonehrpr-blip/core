@@ -229,6 +229,10 @@
     .goal-chips button.on{background:rgba(10,132,255,.14);border-color:rgba(10,132,255,.5);color:#cfe0ff;}
     /* ── SECTION 2: START ── */
     .startwrap{margin-top:4px;}
+    .task-input{width:100%;margin-bottom:12px;padding:14px 15px;border-radius:14px;border:1px solid var(--line);background:var(--card);
+      color:var(--text);font:inherit;font-size:14.5px;font-weight:600;outline:none;transition:border-color .16s,background .16s;}
+    .task-input::placeholder{color:var(--dim);font-weight:600;}
+    .task-input:focus{border-color:rgba(10,132,255,.5);background:rgba(10,132,255,.06);}
     .resume-card{display:flex;align-items:center;gap:12px;width:100%;text-align:left;margin-bottom:12px;padding:12px 14px;border-radius:16px;cursor:pointer;
       background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 20%,var(--card)),var(--card) 70%);border:1px solid color-mix(in srgb,var(--accent) 38%,transparent);transition:transform .12s;}
     .resume-card:active{transform:scale(.98);}
@@ -346,6 +350,7 @@
       display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px 28px;text-align:center;}
     .focus-mode.show{display:flex;}
     .fm-tag{font-size:11px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+    .fm-task{font-size:22px;font-weight:900;letter-spacing:-.4px;color:#fff;margin-bottom:8px;max-width:286px;line-height:1.2;}
     .fm-zone{font-size:14px;font-weight:700;color:var(--muted);margin-bottom:30px;}
     .ring-wrap{position:relative;width:228px;height:228px;}
     .ring-wrap svg{width:100%;height:100%;transform:rotate(-90deg);}
@@ -492,6 +497,7 @@
         <!-- SECTION 2: START FOCUS -->
         <div class="sec-l"><span>Start a Session</span><span class="ln"></span></div>
         <div class="startwrap">
+          <input class="task-input" id="taskInput" type="text" maxlength="60" placeholder="What are you working on?" autocomplete="off">
           <button class="resume-card" id="resumeBtn" type="button" style="display:none">
             <span class="rc-ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
             <span class="rc-t"><b id="resumeT">Resume</b><span id="resumeS">Pick up your last session</span></span>
@@ -592,6 +598,7 @@
     <!-- FOCUS MODE -->
     <div class="focus-mode" id="focusMode">
       <div class="fm-tag" id="fmTag">Deep Work</div>
+      <div class="fm-task" id="fmTask" style="display:none"></div>
       <div class="fm-zone" id="fmZone">Training prefrontal cortex</div>
       <div class="ring-wrap">
         <div class="pulse-orb"></div>
@@ -666,6 +673,7 @@
         F.totalMin=F.history.reduce(function(a,h){return a+h.min;},0);
         F.streak=3; F.bestStreak=6; F.distractions=4; F.lastDay=new Date().toDateString();
         F.lastSession={min:45,zone:'prefrontal',xp:70,label:'Deep Work'};
+        F.task='Finish history essay';
         fwrite(F);
       }
     }catch(e){}
@@ -883,6 +891,9 @@
     qs('#resumeBtn').onclick = function(){ var ls=F.lastSession; if(ls&&ls.min) startSession(ls.min, ls.zone, ls.xp, ls.label); };
     renderResume();
 
+    // "What are you working on?" — task label carried into focus mode
+    var taskIn=qs('#taskInput'); if(taskIn){ taskIn.value=F.task||''; taskIn.oninput=function(){ F.task=this.value; fwrite(F); }; }
+
     // ── SOUNDSCAPE: procedural ambient audio (no files — synthesised via Web Audio) ──
     var AudioCtx = window.AudioContext||window.webkitAudioContext;
     var actx=null, ambNodes=null;
@@ -932,6 +943,8 @@
       F.lastSession = { min:min, zone:zone, xp:xp, label:label }; fwrite(F); renderResume();
       sess = { min:min, zone:zone, xp:xp, label:label, total: (FAST?min:min*60), left:(FAST?min:min*60), interrupted:false, armed:false };
       qs('#fmTag').textContent = label;
+      var task=(F.task||'').trim(), ft=qs('#fmTask');
+      if(ft){ if(task){ ft.textContent=task; ft.style.display=''; } else { ft.style.display='none'; } }
       qs('#fmZone').textContent = 'Training ' + ZONES[zone].tip;
       qs('#fmEnd').textContent = 'End session'; qs('#fmEnd').classList.remove('armed');
       updateRing();
