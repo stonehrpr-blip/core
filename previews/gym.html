@@ -381,6 +381,23 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .qw-card .qw-plus{font-size:9px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--qc,#FF6B6B);}
 .qw-card.done{animation:qwDone .55s ease;}
 @keyframes qwDone{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--qc,#FF6B6B) 60%,transparent);}100%{box-shadow:0 0 0 15px transparent;}}
+/* explore list + dedicated detail pages */
+.explore{display:flex;flex-direction:column;gap:9px;}
+.ex-row{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:13px 14px;border-radius:16px;background:rgba(255,255,255,0.022);border:1px solid rgba(255,255,255,0.08);color:inherit;font:inherit;cursor:pointer;-webkit-appearance:none;appearance:none;transition:transform .12s,border-color .18s;}
+.ex-row:active{transform:scale(.99);}
+.ex-row .ex-ic{width:40px;height:40px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;color:var(--ec,#FF6B6B);background:color-mix(in srgb,var(--ec,#FF6B6B) 14%,transparent);border:1px solid color-mix(in srgb,var(--ec,#FF6B6B) 28%,transparent);}
+.ex-row .ex-ic svg{width:21px;height:21px;}
+.ex-row .ex-t{flex:1;min-width:0;} .ex-row .ex-t b{font-size:14.5px;font-weight:800;display:block;} .ex-row .ex-t span{font-size:11.5px;color:var(--muted);}
+.ex-row .ex-chev{color:var(--dim);flex:none;display:flex;} .ex-row .ex-chev svg{width:18px;height:18px;}
+.detail{position:absolute;inset:0;z-index:75;background:var(--bg-base,#02020A);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .32s cubic-bezier(.2,.8,.2,1);visibility:hidden;}
+.detail.on{transform:translateX(0);visibility:visible;}
+.detail-hd{display:flex;align-items:center;gap:10px;padding:54px 18px 12px;flex:none;border-bottom:1px solid rgba(255,255,255,0.06);}
+.detail-back{display:inline-flex;align-items:center;gap:3px;background:none;border:none;color:var(--blue,#0A84FF);font:inherit;font-weight:800;font-size:15px;cursor:pointer;-webkit-appearance:none;appearance:none;padding:0;}
+.detail-back svg{width:18px;height:18px;}
+.detail-hd h2{margin:0;font-size:17px;font-weight:900;}
+.detail-hd .meta{margin-left:auto;font-size:11px;font-weight:800;color:var(--dim);}
+.detail-body{flex:1;overflow-y:auto;padding:16px 18px 40px;}
+.detail-body::-webkit-scrollbar{display:none;}
 .tools-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:2px;}
 .tool-card{display:flex;align-items:center;gap:11px;padding:12px;border-radius:16px;cursor:pointer;text-align:left;background:rgba(255,255,255,0.022);border:1px solid rgba(255,255,255,0.08);color:inherit;font:inherit;transition:transform .12s,border-color .18s;}
 .tool-card:active{transform:scale(.97);}
@@ -531,48 +548,18 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
         <button class="tool-card" data-tool="orm" type="button"><span class="tc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v3a5 5 0 0 1-10 0z"/><path d="M7 5H4v1a3 3 0 0 0 3 3M17 5h3v1a3 3 0 0 1-3 3M9 13h6l-1 4h-4z"/></svg></span><span><b>1RM Calc</b><span>Est. max</span></span></button>
       </div>
 
-      <!-- Muscle map — right below the action boxes -->
-      <div class="sec"><h2>Muscle Map</h2><span class="meta" id="lastTrained"></span></div>
-      <div class="card diagram">
-        <div style="display:flex;justify-content:center">
-          <div class="gender-toggle" id="genderToggle">
-            <button class="gt-opt" data-g="male" type="button">Male</button>
-            <button class="gt-opt" data-g="female" type="button">Female</button>
-          </div>
-        </div>
-        <div class="figs" id="figs">
-          <div class="figwrap" id="figwrap"></div>
-        </div>
-        <div class="map-empty" id="mapEmpty" style="display:none">Log a workout to light up your muscle map.</div>
-        <div class="maplegend" id="maplegend"></div>
-      </div>
-      <div class="insight" id="insight" style="display:none">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2Z"/><path d="M9 21h6"/></svg>
-        <span id="insightTx"></span>
-      </div>
-
-      <!-- Recovery — which muscles are fresh / ready to train -->
-      <div class="sec"><h2>Recovery</h2><span class="meta" id="recMeta"></span></div>
-      <div id="recovery"></div>
-
-      <!-- Weekly volume by muscle group -->
-      <div class="sec"><h2>Weekly volume</h2><span class="meta" id="volMeta"></span></div>
-      <div class="card" id="volCard" style="padding:13px 16px"></div>
-
-      <!-- Training overview — show-up calendar, gaps, week-over-week -->
-      <div class="sec"><h2>Training overview</h2><span class="meta" id="ovMeta"></span></div>
-      <div class="card ov" id="trainOverview"></div>
-
-      <!-- Personal records -->
-      <div class="sec"><h2>Personal Records</h2><span class="meta" id="prMeta"></span></div>
-      <div class="card pr-card" id="prCard"></div>
-
-      <!-- Physique progress (latest scan photos + score) -->
-      <div class="sec"><h2>Physique</h2><span class="meta" id="phyMeta"></span></div>
-      <div id="physiqueCard"></div>
-
       <!-- 3. Workout section (setup OR active) -->
       <div id="workout"></div>
+
+      <!-- Explore — each opens a dedicated full-screen page -->
+      <div class="sec"><h2>Your Strength</h2><span class="meta">tap to explore</span></div>
+      <div class="explore">
+        <button class="ex-row" data-detail="map" type="button" style="--ec:#FF6B6B"><span class="ex-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2.4"/><path d="M12 7.5v6M8 9l4 1.5L16 9M9 21l3-7 3 7"/></svg></span><span class="ex-t"><b>Muscle Map</b><span>What you've trained · recovery heat</span></span><span class="ex-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span></button>
+        <button class="ex-row" data-detail="recovery" type="button" style="--ec:#34D399"><span class="ex-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.3-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.7-7 10-7 10z"/></svg></span><span class="ex-t"><b>Recovery</b><span>Which muscles are ready</span></span><span class="ex-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span></button>
+        <button class="ex-row" data-detail="overview" type="button" style="--ec:#0A84FF"><span class="ex-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span><span class="ex-t"><b>Training Overview</b><span>Calendar, streaks &amp; volume</span></span><span class="ex-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span></button>
+        <button class="ex-row" data-detail="records" type="button" style="--ec:#FFCB3D"><span class="ex-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v3a5 5 0 0 1-10 0z"/><path d="M7 5H4v1a3 3 0 0 0 3 3M17 5h3v1a3 3 0 0 1-3 3M9 13h6l-1 4h-4z"/></svg></span><span class="ex-t"><b>Personal Records</b><span>Your best lifts &amp; 1RMs</span></span><span class="ex-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span></button>
+        <button class="ex-row" data-detail="physique" type="button" style="--ec:#B388FF"><span class="ex-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3.2"/></svg></span><span class="ex-t"><b>Physique</b><span>Scan score &amp; progress photos</span></span><span class="ex-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span></button>
+      </div>
       </div><!-- /paneProgress -->
       <div class="pane" id="paneExercises" hidden></div>
       <div class="pane" id="paneBody" hidden></div>
@@ -585,6 +572,40 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
       <a class="item" href="community.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="nl">Community</span></a>
       <a class="item" href="24-more.html"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2.5"/><circle cx="12" cy="12" r="2.5"/><circle cx="19" cy="12" r="2.5"/></svg><span class="nl">More</span></a>
     </nav>
+
+    <!-- ===== Dedicated detail pages (clean, one topic each) ===== -->
+    <div class="detail" id="d-map">
+      <div class="detail-hd"><button class="detail-back" data-close type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>Back</button><h2>Muscle Map</h2><span class="meta" id="lastTrained"></span></div>
+      <div class="detail-body">
+        <div class="card diagram">
+          <div style="display:flex;justify-content:center"><div class="gender-toggle" id="genderToggle"><button class="gt-opt" data-g="male" type="button">Male</button><button class="gt-opt" data-g="female" type="button">Female</button></div></div>
+          <div class="figs" id="figs"><div class="figwrap" id="figwrap"></div></div>
+          <div class="map-empty" id="mapEmpty" style="display:none">Log a workout to light up your muscle map.</div>
+          <div class="maplegend" id="maplegend"></div>
+        </div>
+        <div class="insight" id="insight" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2Z"/><path d="M9 21h6"/></svg><span id="insightTx"></span></div>
+      </div>
+    </div>
+    <div class="detail" id="d-recovery">
+      <div class="detail-hd"><button class="detail-back" data-close type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>Back</button><h2>Recovery</h2><span class="meta" id="recMeta"></span></div>
+      <div class="detail-body"><div id="recovery"></div></div>
+    </div>
+    <div class="detail" id="d-overview">
+      <div class="detail-hd"><button class="detail-back" data-close type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>Back</button><h2>Training Overview</h2><span class="meta" id="ovMeta"></span></div>
+      <div class="detail-body">
+        <div class="card ov" id="trainOverview"></div>
+        <div class="sec"><h2>Weekly volume</h2><span class="meta" id="volMeta"></span></div>
+        <div class="card" id="volCard" style="padding:13px 16px"></div>
+      </div>
+    </div>
+    <div class="detail" id="d-records">
+      <div class="detail-hd"><button class="detail-back" data-close type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>Back</button><h2>Personal Records</h2><span class="meta" id="prMeta"></span></div>
+      <div class="detail-body"><div class="card pr-card" id="prCard"></div></div>
+    </div>
+    <div class="detail" id="d-physique">
+      <div class="detail-hd"><button class="detail-back" data-close type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>Back</button><h2>Physique</h2><span class="meta" id="phyMeta"></span></div>
+      <div class="detail-body"><div id="physiqueCard"></div></div>
+    </div>
   </div>
 
   <!-- Workout sheet -->
@@ -1144,6 +1165,23 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     var host=qs('#quickWins'); if(!host) return;
     host.innerHTML=QUICK.map(function(q){ return '<a class="qw-card" href="strength-camera.html?ex='+q.id+'" style="--qc:'+q.c+'"><span class="qw-ic">'+QW_CAM+'</span><b>'+q.name+'</b><span class="qw-plus">Track reps</span></a>'; }).join('');
   }
+
+  /* ───────── Explore — dedicated detail pages ───────── */
+  function openDetail(id){
+    var d=qs('#d-'+id); if(!d) return;
+    try{
+      if(id==='map') renderDiagram();
+      else if(id==='recovery') renderRecovery();
+      else if(id==='overview'){ renderOverview(); try{ renderVolume(); }catch(e){} }
+      else if(id==='records') renderPRs();
+      else if(id==='physique') renderPhysique();
+    }catch(e){}
+    d.classList.add('on'); sfx('tick');
+    var b=d.querySelector('.detail-body'); if(b) b.scrollTop=0;
+  }
+  function closeDetail(d){ if(d) d.classList.remove('on'); sfx('tap'); }
+  Array.prototype.forEach.call(document.querySelectorAll('.ex-row'),function(b){ b.addEventListener('click',function(){ openDetail(b.getAttribute('data-detail')); }); });
+  Array.prototype.forEach.call(document.querySelectorAll('.detail [data-close]'),function(b){ b.addEventListener('click',function(){ closeDetail(b.closest('.detail')); }); });
 
   /* ───────── demo seed (for ?demo=1 screenshots) ───────── */
   try{
