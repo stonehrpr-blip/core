@@ -527,18 +527,25 @@ body.edit-active .nav{display:none;}
 .st-toggle{display:inline-flex;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:9px;padding:2px;}
 .st-toggle button{border:none;background:none;color:var(--muted);font:inherit;font-size:10px;font-weight:800;letter-spacing:0;text-transform:none;padding:3px 8px;border-radius:7px;cursor:pointer;-webkit-appearance:none;appearance:none;}
 .st-toggle button.on{background:var(--blue,#0A84FF);color:#fff;}
-.dq-card{padding:15px 17px;border-radius:18px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.08);}
-.dq-card .dq-mark{width:16px;height:16px;color:var(--blue,#0A84FF);opacity:.6;margin-bottom:7px;display:block;}
-.dq-card p{margin:0;font-size:13px;font-weight:500;line-height:1.55;color:rgba(248,250,254,.82);font-style:italic;}
-.lscore-card{position:relative;padding:22px 18px 18px;border-radius:20px;background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.015));border:1px solid rgba(255,255,255,.08);text-align:center;}
-.ls-rank-link{position:absolute;top:16px;right:16px;display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;}
-.ls-rank-link svg{width:13px;height:13px;}
-.ls-big{font-size:64px;font-weight:900;letter-spacing:-2px;color:#fff;line-height:1;}
-.ls-cap{font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--dim,#4F5570);margin-top:4px;}
+.dq-card{display:flex;align-items:flex-start;gap:10px;padding:10px 13px;border-radius:13px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.08);}
+.dq-card .dq-mark{width:13px;height:13px;color:var(--blue,#0A84FF);opacity:.55;margin-top:1px;flex:none;}
+.dq-card p{margin:0;font-size:11.5px;font-weight:500;line-height:1.45;color:rgba(248,250,254,.8);font-style:italic;}
+.lscore-card{position:relative;overflow:hidden;padding:24px 18px 18px;border-radius:20px;text-align:center;
+  background:radial-gradient(130% 90% at 50% -12%,color-mix(in srgb,var(--lsc,#0A84FF) 18%,transparent),transparent 62%),linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.012));
+  border:1px solid color-mix(in srgb,var(--lsc,#0A84FF) 26%,rgba(255,255,255,.08));transition:border-color .8s ease;animation:lsCardIn .5s ease both;}
+@keyframes lsCardIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.ls-rank-link{position:absolute;top:15px;right:15px;display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;z-index:2;}
+.ls-rank-link svg{width:13px;height:13px;transition:transform .2s;} .ls-rank-link:active svg{transform:translateX(2px);}
+.ls-big{font-size:64px;font-weight:900;letter-spacing:-2px;color:#fff;line-height:1;font-variant-numeric:tabular-nums;text-shadow:0 0 34px color-mix(in srgb,var(--lsc,#0A84FF) 55%,transparent);animation:lsPop .65s cubic-bezier(.2,1.5,.4,1) both;}
+@keyframes lsPop{0%{opacity:0;transform:scale(.82);}100%{opacity:1;transform:scale(1);}}
+.ls-cap{font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--dim,#4F5570);margin-top:5px;}
 .ls-xprow{display:flex;justify-content:space-between;align-items:baseline;margin:18px 2px 7px;font-size:12.5px;font-weight:700;color:var(--muted);}
 .ls-xprow b{color:#fff;font-weight:800;}
-.ls-xpbar{height:7px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;}
-.ls-xpfill{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#0A84FF,#5EC8FF);transition:width 1s cubic-bezier(.22,1,.36,1);}
+.ls-xpbar{position:relative;height:7px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;}
+.ls-xpfill{position:relative;display:block;height:100%;border-radius:99px;overflow:hidden;background:linear-gradient(90deg,#0A84FF,#5EC8FF);box-shadow:0 0 10px rgba(10,132,255,.45);transition:width 1.1s cubic-bezier(.22,1,.36,1);}
+.ls-xpfill::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);transform:translateX(-120%);animation:lsShimmer 2.6s ease-in-out infinite;}
+@keyframes lsShimmer{0%{transform:translateX(-120%);}55%,100%{transform:translateX(260%);}}
+@media(prefers-reduced-motion:reduce){.lscore-card,.ls-big,.ls-xpfill::after{animation:none!important;}}
 .legacy-hidden{display:none!important;}
 #dayStrip,.edit-hint,#editHint{display:none!important;}
 </style>
