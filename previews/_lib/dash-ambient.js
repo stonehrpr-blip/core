@@ -33,8 +33,10 @@
   function initParticles() {
     stars = []; shots = []; rain = []; snow = []; ripples = []; lightningTTL = 0;
 
-    // Always: a light star field — sparse, covering the whole screen top to bottom
-    for (var i = 0; i < 16; i++) stars.push({
+    // Always: a light star field — sparse, covering the whole screen top to bottom.
+    // Pages can set window.CORE_STARS to override the count (e.g. strength pages use fewer).
+    var STAR_N = (typeof window.CORE_STARS === 'number') ? window.CORE_STARS : 16;
+    for (var i = 0; i < STAR_N; i++) stars.push({
       x: Math.random() * W,
       y: Math.random() * H,
       r: 0.28 + Math.random() * 1.6,
