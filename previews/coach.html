@@ -365,24 +365,25 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
   function renderBanner(){
     if(!banner) return;
     if(aiConnected()){
-      bannerTx.innerHTML='<strong>OpenAI connected.</strong> Real AI replies are on. Tap to change or remove your key.';
+      var prov=/^gsk_/.test(coreAI.getKey())?'Groq':'OpenAI';
+      bannerTx.innerHTML='<strong>'+prov+' connected.</strong> Real AI replies are on. Tap to change or remove your key.';
       banner.style.borderColor='rgba(52,211,153,0.35)';
     } else if(window.CORE_BACKEND_READY){
       bannerTx.innerHTML='<strong>Your Coach is live.</strong> Tap to connect your own OpenAI key for personalised replies.';
     } else {
-      bannerTx.innerHTML='<strong>Connect OpenAI for real replies.</strong> Tap here and paste your API key — it stays in this browser, no account or server needed.';
+      bannerTx.innerHTML='<strong>Connect AI for real replies.</strong> Tap here and paste a key — free Groq (gsk_…) or OpenAI (sk-…). It stays in this browser, no server needed.';
     }
   }
   function connectAI(){
     if(!window.coreAI){ toast('AI module not loaded'); return; }
     var cur=coreAI.getKey();
-    var k=window.prompt(cur?'Update your OpenAI API key (leave blank to remove):':'Paste your OpenAI API key (starts with sk-…). It stays only in this browser.', cur||'');
+    var k=window.prompt(cur?'Update your AI key (leave blank to remove):':'Paste your AI key — free Groq (gsk_…) or OpenAI (sk-…). It stays only in this browser.', cur||'');
     if(k===null) return;                 // cancelled
     k=k.trim();
-    if(k && !/^sk-/.test(k)){ toast('That doesn’t look like an OpenAI key (sk-…)'); return; }
+    if(k && !/^(sk-|gsk_)/.test(k)){ toast('Use a Groq (gsk_…) or OpenAI (sk-…) key'); return; }
     coreAI.setKey(k);
     renderBanner();
-    toast(k ? 'OpenAI connected — real replies on' : 'AI key removed');
+    toast(k ? 'AI connected — real replies on' : 'AI key removed');
   }
   if(banner) banner.addEventListener('click', connectAI);
   renderBanner();

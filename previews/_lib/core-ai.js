@@ -26,6 +26,16 @@
   const API_BASE       = 'https://api.openai.com/v1';
   const TIMEOUT_MS     = 60000;
 
+  // Provider is chosen from the key prefix so users can paste a paid OpenAI key
+  // (sk-…) OR a free Groq key (gsk_…) — both speak the same chat-completions API.
+  function providerFor(key) {
+    if (/^gsk_/.test(key || '')) return {
+      name: 'Groq', base: 'https://api.groq.com/openai/v1',
+      text: 'llama-3.3-70b-versatile', vision: 'llama-3.3-70b-versatile', plan: 'llama-3.3-70b-versatile'
+    };
+    return { name: 'OpenAI', base: API_BASE, text: MODEL_TEXT, vision: MODEL_VISION, plan: MODEL_PLAN };
+  }
+
   function getKey() {
     try { return localStorage.getItem(KEY_LS) || ''; } catch (e) { return ''; }
   }
@@ -93,9 +103,14 @@
   // ── Core chat call ───────────────────────────────────────────────────
   async function chat(messages, opts = {}) {
     if (!hasKey()) return scriptedResponse(messages);
+    const pv = providerFor(getKey());
+    let model = pv.text;
+    if (opts.role === 'plan') model = pv.plan;
+    else if (opts.role === 'vision') model = pv.vision;
+    else if (opts.model && pv.name === 'OpenAI') model = opts.model;
     const sys = systemPrompt(opts.role);
     const body = {
-      model: opts.model || MODEL_TEXT,
+      model,
       messages: [{ role: 'system', content: sys }, ...messages],
       temperature: opts.temperature ?? 0.7,
       max_tokens: opts.maxTokens ?? 600,
@@ -103,7 +118,7 @@
     const ctl = new AbortController();
     const timer = setTimeout(() => ctl.abort(), TIMEOUT_MS);
     try {
-      const r = await fetch(`${API_BASE}/chat/completions`, {
+      const r = await fetch(`${pv.base}/chat/completions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -63,7 +63,7 @@
 
         <div class="lab">AI Coach</div>
         <div class="group">
-          <div class="row"><div class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a3 3 0 0 1 3 3 3 3 0 0 1 0 6 3 3 0 0 1-3 3 3 3 0 0 1-3-3 3 3 0 0 1 0-6 3 3 0 0 1 3-3Z"/><path d="M12 15v6M9 21h6"/></svg></div><div class="rb"><b>OpenAI key</b><span id="aiKeyVal">Not connected</span></div><button class="mini" id="aiKeyBtn">Connect</button></div>
+          <div class="row"><div class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a3 3 0 0 1 3 3 3 3 0 0 1 0 6 3 3 0 0 1-3 3 3 3 0 0 1-3-3 3 3 0 0 1 0-6 3 3 0 0 1 3-3Z"/><path d="M12 15v6M9 21h6"/></svg></div><div class="rb"><b>AI key</b><span id="aiKeyVal">Not connected</span></div><button class="mini" id="aiKeyBtn">Connect</button></div>
         </div>
 
         <div class="lab">Preferences</div>
@@ -168,17 +168,18 @@
       function mask(k){ return k ? k.slice(0,5)+'…'+k.slice(-4) : ''; }
       function render(){
         var has=window.coreAI && coreAI.hasKey();
-        val.textContent = has ? ('Connected · '+mask(coreAI.getKey())) : 'Not connected';
+        var prov=has ? (/^gsk_/.test(coreAI.getKey())?'Groq':'OpenAI') : '';
+        val.textContent = has ? (prov+' · '+mask(coreAI.getKey())) : 'Not connected';
         val.style.color = has ? 'var(--green,#34D399)' : '';
         btn.textContent = has ? 'Change' : 'Connect';
       }
       btn.addEventListener('click', function(){
         if(!window.coreAI){ toast('AI module not loaded'); return; }
         var cur=coreAI.getKey();
-        var k=window.prompt(cur?'Update your OpenAI API key (leave blank to remove):':'Paste your OpenAI API key (sk-…). It stays only in this browser.', cur||'');
+        var k=window.prompt(cur?'Update your AI key (leave blank to remove):':'Paste your AI key — free Groq (gsk_…) or OpenAI (sk-…). It stays only in this browser.', cur||'');
         if(k===null) return; k=k.trim();
-        if(k && !/^sk-/.test(k)){ toast('That doesn’t look like an OpenAI key (sk-…)'); return; }
-        coreAI.setKey(k); render(); toast(k?'OpenAI connected':'AI key removed');
+        if(k && !/^(sk-|gsk_)/.test(k)){ toast('Use a Groq (gsk_…) or OpenAI (sk-…) key'); return; }
+        coreAI.setKey(k); render(); toast(k?'AI connected':'AI key removed');
       });
       render();
     })();
