@@ -370,6 +370,17 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .feat span{display:block;font-size:13px;color:var(--muted);line-height:1.45;margin-top:4px;}
 .act-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:14px;}
 /* Tools grid + tool sheet */
+/* quick wins */
+.qw-note{font-size:12px;color:var(--muted);line-height:1.45;margin:-2px 2px 10px;}
+.qw-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;}
+.qw-card{display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 6px;border-radius:15px;background:rgba(255,255,255,0.022);border:1px solid rgba(255,255,255,0.08);color:inherit;font:inherit;cursor:pointer;-webkit-appearance:none;appearance:none;transition:transform .12s,border-color .18s;}
+.qw-card:active{transform:scale(.95);}
+.qw-card .qw-ic{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--qc,#FF6B6B);background:color-mix(in srgb,var(--qc,#FF6B6B) 14%,transparent);border:1px solid color-mix(in srgb,var(--qc,#FF6B6B) 28%,transparent);}
+.qw-card .qw-ic svg{width:18px;height:18px;}
+.qw-card b{font-size:11.5px;font-weight:800;text-align:center;line-height:1.1;}
+.qw-card .qw-plus{font-size:9px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--qc,#FF6B6B);}
+.qw-card.done{animation:qwDone .55s ease;}
+@keyframes qwDone{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--qc,#FF6B6B) 60%,transparent);}100%{box-shadow:0 0 0 15px transparent;}}
 .tools-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:2px;}
 .tool-card{display:flex;align-items:center;gap:11px;padding:12px;border-radius:16px;cursor:pointer;text-align:left;background:rgba(255,255,255,0.022);border:1px solid rgba(255,255,255,0.08);color:inherit;font:inherit;transition:transform .12s,border-color .18s;}
 .tool-card:active{transform:scale(.97);}
@@ -505,6 +516,11 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
           <b>Build a Program</b><span>Your custom plan</span>
         </button>
       </div>
+
+      <!-- Quick wins -->
+      <div class="sec"><h2>Quick wins</h2><span class="meta">easy +Strength</span></div>
+      <div class="qw-note">Every set you log lifts your Strength score and lights up that muscle. No gym needed — tap one to start.</div>
+      <div class="qw-grid" id="quickWins"></div>
 
       <!-- Tools -->
       <div class="sec"><h2>Tools</h2></div>
@@ -1111,6 +1127,32 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   function renderChip(){ var e=qs('#strVal'); if(e) e.textContent=Math.round(strengthVal()); }
   var toastT; function toast(m){ var t=qs('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(function(){t.classList.remove('show');},1800); }
 
+  /* ───────── Quick wins — easy one-tap Strength ───────── */
+  var QUICK=[
+    {name:'Push-ups',muscle:'chest',str:1,reps:15},
+    {name:'Squats',muscle:'legs',str:1,reps:20},
+    {name:'Plank',muscle:'core',str:1,reps:1},
+    {name:'Pull-ups',muscle:'back',str:1,reps:8},
+    {name:'Pike Push-ups',muscle:'shoulders',str:1,reps:12},
+    {name:'Dips',muscle:'arms',str:1,reps:12}
+  ];
+  function quickLog(q){
+    var totalSets=3, xpGain=Math.max(20,totalSets*8), strGain=q.str||1;
+    var s=store(), m=s.muscles[q.muscle]||{score:0,lastTs:0,sessions:0};
+    m.score=(m.score||0)+totalSets*1.1; m.lastTs=Date.now(); m.sessions=(m.sessions||0)+1; s.muscles[q.muscle]=m;
+    s.history.unshift({id:'q'+Date.now(),ts:Date.now(),muscle:q.muscle,exercises:[{name:q.name,sets:totalSets,reps:q.reps||12,weight:0}],totalSets:totalSets,xp:xpGain,str:strGain});
+    if(s.history.length>60) s.history.length=60; save(s);
+    addBody(strGain,'quickwin:'+q.name); addXp(xpGain,'quickwin:'+q.name);
+    sfx('reward'); try{ if(navigator.vibrate) navigator.vibrate(12); }catch(e){}
+    toast('+'+strGain+' Strength · '+q.name);
+    renderChip(); renderDiagram(); renderOverview(); renderPRs(); renderRecovery(); renderHeaderInsight(); try{ renderVolume(); }catch(e){}
+  }
+  function renderQuickWins(){
+    var host=qs('#quickWins'); if(!host) return;
+    host.innerHTML=QUICK.map(function(q,i){ return '<button class="qw-card" data-i="'+i+'" type="button" style="--qc:'+mColor(q.muscle)+'"><span class="qw-ic">'+ICO+'</span><b>'+q.name+'</b><span class="qw-plus">+'+q.str+' STR</span></button>'; }).join('');
+    Array.prototype.forEach.call(host.querySelectorAll('.qw-card'),function(b){ b.addEventListener('click',function(){ quickLog(QUICK[parseInt(b.getAttribute('data-i'),10)]); b.classList.remove('done'); void b.offsetWidth; b.classList.add('done'); }); });
+  }
+
   /* ───────── demo seed (for ?demo=1 screenshots) ───────── */
   try{
     if(/[?&]demo=1/.test(location.search)){
@@ -1401,7 +1443,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   var apBtn=qs('#actProgram'); if(apBtn) apBtn.addEventListener('click',function(){ sfx('tick'); openProgram(); });
   progScrim.addEventListener('click',closeProgram);
 
-  renderChip(); renderDiagram(); renderWorkout(); renderOverview(); renderPRs(); renderRecovery(); renderPhysique(); renderHeaderInsight();
+  renderChip(); renderDiagram(); renderWorkout(); renderOverview(); renderPRs(); renderRecovery(); renderPhysique(); renderHeaderInsight(); renderQuickWins();
   window.addEventListener('coreStateChange',renderChip);
   window.addEventListener('focus',function(){ renderDiagram(); renderPhysique(); });
   document.addEventListener('visibilitychange',function(){ if(!document.hidden) renderPhysique(); });
