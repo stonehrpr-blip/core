@@ -507,6 +507,39 @@ body.edit-active .nav{display:none;}
 
   /* iOS: keep custom button-cards from picking up native button chrome */
   .act-card,.feat,.tool-card,.htool,.wtool,.lk-choose,.lk-preset,.amb,.sopt,.tcard,.goal-fund,.goal-add,.mlog,.chal-new,.saction,.lk-tog{-webkit-appearance:none;appearance:none;}
+
+/* ===== Clean dashboard redesign ===== */
+.dash-header{display:block;padding:8px 18px 6px;}
+.dh-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.dh-logo{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:800;letter-spacing:.22em;color:#fff;}
+.dh-logo i{width:7px;height:7px;border-radius:50%;background:var(--blue,#0A84FF);box-shadow:0 0 9px var(--blue,#0A84FF);}
+.dh-greet{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+.dash-greeting{font-size:28px;font-weight:800;letter-spacing:-.6px;line-height:1.05;color:#fff;}
+.dh-time{margin-top:6px;font-size:12.5px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:6px;}
+.dh-time .dh-wx{display:inline-flex;width:15px;height:15px;color:var(--muted);} .dh-time .dh-wx svg{width:15px;height:15px;}
+.dh-gactions{display:flex;align-items:center;gap:8px;flex:none;}
+.iconbtn{width:34px;height:34px;flex:none;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;-webkit-appearance:none;appearance:none;}
+.iconbtn svg{width:18px;height:18px;}
+.iconbtn:active{transform:scale(.92);}
+.dash-sec{font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:20px 2px 9px;}
+.dash-sec.st-head{display:flex;align-items:center;justify-content:space-between;}
+.st-toggle{display:inline-flex;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:2px;}
+.st-toggle button{border:none;background:none;color:var(--muted);font:inherit;font-size:11px;font-weight:800;letter-spacing:0;text-transform:none;padding:5px 11px;border-radius:8px;cursor:pointer;-webkit-appearance:none;appearance:none;}
+.st-toggle button.on{background:var(--blue,#0A84FF);color:#fff;}
+.dq-card{padding:15px 17px;border-radius:18px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.08);}
+.dq-card .dq-mark{width:16px;height:16px;color:var(--blue,#0A84FF);opacity:.6;margin-bottom:7px;display:block;}
+.dq-card p{margin:0;font-size:13px;font-weight:500;line-height:1.55;color:rgba(248,250,254,.82);font-style:italic;}
+.lscore-card{position:relative;padding:22px 18px 18px;border-radius:20px;background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.015));border:1px solid rgba(255,255,255,.08);text-align:center;}
+.ls-rank-link{position:absolute;top:16px;right:16px;display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;}
+.ls-rank-link svg{width:13px;height:13px;}
+.ls-big{font-size:64px;font-weight:900;letter-spacing:-2px;color:#fff;line-height:1;}
+.ls-cap{font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--dim,#4F5570);margin-top:4px;}
+.ls-xprow{display:flex;justify-content:space-between;align-items:baseline;margin:18px 2px 7px;font-size:12.5px;font-weight:700;color:var(--muted);}
+.ls-xprow b{color:#fff;font-weight:800;}
+.ls-xpbar{height:7px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;}
+.ls-xpfill{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#0A84FF,#5EC8FF);transition:width 1s cubic-bezier(.22,1,.36,1);}
+.legacy-hidden{display:none!important;}
+#dayStrip,.edit-hint,#editHint{display:none!important;}
 </style>
   <link rel="stylesheet" href="_lib/core-responsive.css">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
@@ -739,22 +772,30 @@ body.edit-active .nav{display:none;}
   <div class="frame">
     <!-- Single clean header: greeting · streak + coins + customize -->
     <div class="dash-header">
-      <div class="dash-greeting" id="dashGreeting">Good morning</div>
-      <div class="dash-actions">
-        <a class="chip flame" href="26-streak.html" aria-label="View streak">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3-1 4-1 6 0 1 1 2 1 2s2-1 2-3c2 2 3 4 3 7a5 5 0 0 1-10 0c0-3 2-5 3-7 1 2 2 2 2 2s0-3 0-7Z"/></svg>
-          <span id="cStreak">0</span>
-        </a>
-        <a class="chip coin" href="27-shop.html" aria-label="Open shop">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/></svg>
-          <span id="cCoins">0</span>
-        </a>
-        <button class="dash-gear" id="gearBtn" aria-label="Customize dashboard">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
-            <circle cx="12" cy="12" r="3"/>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-          </svg>
-        </button>
+      <div class="dh-top">
+        <span class="dh-logo"><i></i>CORE</span>
+        <div class="dash-actions">
+          <a class="chip flame" href="26-streak.html" aria-label="View streak">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3-1 4-1 6 0 1 1 2 1 2s2-1 2-3c2 2 3 4 3 7a5 5 0 0 1-10 0c0-3 2-5 3-7 1 2 2 2 2 2s0-3 0-7Z"/></svg>
+            <span id="cStreak">0</span>
+          </a>
+          <a class="chip coin" href="27-shop.html" aria-label="Open shop">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/></svg>
+            <span id="cCoins">0</span>
+          </a>
+        </div>
+      </div>
+      <div class="dh-greet">
+        <div class="dh-greet-l">
+          <div class="dash-greeting" id="dashGreeting">Good morning</div>
+          <div class="dh-time"><span id="dashTime">—</span><span class="dh-wx" id="dashWeatherGlyph"></span></div>
+        </div>
+        <div class="dh-gactions">
+          <button class="iconbtn" id="helpBtn" aria-label="Help">?</button>
+          <button class="iconbtn dash-gear" id="gearBtn" aria-label="Customize dashboard">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -766,57 +807,37 @@ body.edit-active .nav{display:none;}
 
     <!-- ===== Routine dashboard (rank + to-do + AI builder) ===== -->
     <div class="scroll" id="dashMain">
-      <!-- Combined rank + Life Score hero -->
-      <!-- Life Score — big, centered, no box — with rank + XP below -->
-      <!-- Life Score hero: ring + rank gem in the centre, score + rank below -->
-      <div class="ls-hero" id="lsHero">
-        <a class="ls-ring-wrap" id="rankBar" href="24-ranks.html" aria-label="View your rank">
-          <span class="ls-ring-glow"></span>
-          <svg class="ls-ring" viewBox="0 0 240 240" aria-hidden="true">
-            <defs>
-              <linearGradient id="lsGrad" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stop-color="#0A84FF"/>
-                <stop offset="1" stop-color="#5EC8FF"/>
-              </linearGradient>
-            </defs>
-            <circle class="ls-ring-bg" cx="120" cy="120" r="106"/>
-            <circle class="ls-ring-fg" id="lsRingFg" cx="120" cy="120" r="106"/>
-          </svg>
-          <span class="ls-ring-gem" id="rankBarGem"></span>
-        </a>
-        <div class="ls-hero-num" id="lsNum">0</div>
-        <div class="ls-hero-lbl">Life Score</div>
-        <a class="ls-hero-rankname" id="rankNameLink" href="24-ranks.html">
-          <b id="rankBarName">Moonstone</b><span class="ls-hero-xp"> · <span id="rankBarScore">0</span> XP</span>
-        </a>
+      <!-- Daily quote -->
+      <div class="dash-sec">Daily quote</div>
+      <div class="dq-card"><svg class="dq-mark" viewBox="0 0 24 24" fill="currentColor"><path d="M7 7h4v4l-2 4H6l2-4V7zm7 0h4v4l-2 4h-3l2-4V7z"/></svg><p id="dashQuote">Small steps every day.</p></div>
+
+      <!-- Life Score -->
+      <div class="dash-sec">Life Score</div>
+      <div class="lscore-card" id="lsHero">
+        <a class="ls-rank-link" id="rankBar" href="24-ranks.html" aria-label="View your rank">Rank <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a>
+        <div class="ls-big" id="lsNum">0</div>
+        <div class="ls-cap">Life Score</div>
+        <div class="ls-xprow"><span id="lsLevel">Lv 1</span><span><b id="rankBarScore">0</b> XP</span></div>
+        <div class="ls-xpbar"><span class="ls-xpfill" id="lsXpFill"></span></div>
       </div>
 
-      <!-- Week day-strip, right under the rank -->
-      <div class="daystrip" id="dayStrip"></div>
-
-      <!-- Life Scores — shown as per-stat trend graphs -->
-      <div class="rt-head"><div><span class="rt-title">Life Scores</span><span class="rt-sub">Tap a stat to dive in · last 30 days</span></div></div>
+      <!-- Stat trends -->
+      <div class="dash-sec st-head"><span>Stat trends</span><div class="st-toggle" id="stToggle"><button data-d="7" type="button">7d</button><button class="on" data-d="30" type="button">30d</button></div></div>
       <div class="dc-mini-grid trends-card" id="statTrends"></div>
 
-      <!-- Focus-area nudge + weekly recap -->
+      <!-- kept: focus nudge + weekly recap -->
       <div id="dashNudge"></div>
       <div id="dashRecap"></div>
 
-      <!-- Routine to-do -->
-      <div class="rt-head">
-        <div><span class="rt-title">Today's routine</span><span class="rt-sub" id="rtSub">Tap a task to edit · check it off as you go</span></div>
-        <span class="rt-count" id="rtCount">0/0</span>
+      <!-- legacy (routine + widgets) kept but hidden for the clean layout -->
+      <div class="legacy-hidden" aria-hidden="true">
+        <div class="daystrip" id="dayStrip"></div>
+        <div class="rt-head"><div><span class="rt-title">Today's routine</span><span class="rt-sub" id="rtSub">Tap a task to edit</span></div><span class="rt-count" id="rtCount">0/0</span></div>
+        <div class="rt-list" id="rtList"></div>
+        <button class="rt-build" id="rtBuild" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.6 4.6L18 9l-4.4 1.4L12 15l-1.6-4.6L6 9l4.4-1.4z"/></svg>Build your routine</button>
+        <div class="rt-head wg-head"><div><span class="rt-title">Widgets</span></div></div>
+        <div id="widgetScroll"></div>
       </div>
-      <div class="rt-list" id="rtList"></div>
-
-      <button class="rt-build" id="rtBuild">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.6 4.6L18 9l-4.4 1.4L12 15l-1.6-4.6L6 9l4.4-1.4z"/><path d="M5 17l.8 2.2L8 20l-2.2.8L5 23l-.8-2.2L2 20l2.2-.8z"/></svg>
-        Build your routine
-      </button>
-
-      <!-- Customizable widgets -->
-      <div class="rt-head wg-head"><div><span class="rt-title">Widgets</span><span class="rt-sub">Tap the gear up top to add or reorder</span></div></div>
-      <div id="widgetScroll"></div>
     </div>
 
     <!-- Long-press peek for a life tile -->
@@ -992,8 +1013,17 @@ body.edit-active .nav{display:none;}
     var name = (s.profile&&s.profile.name) ? s.profile.name.split(' ')[0] : '';
     var mo=''; try{ var d=statData(); if(d){ var upN=d.filter(function(x){return x.delta>0;}).length; if(upN>=4) mo=' · on a roll'; else if(upN>0) mo=' · '+upN+' rising'; } }catch(e){}
     qs('#dashGreeting').textContent = g + (name ? ', '+name : '') + mo;
+    var t=new Date(), hh=t.getHours(), mm=t.getMinutes(), ap=hh>=12?'PM':'AM', h12=hh%12||12;
+    var te=qs('#dashTime'); if(te) te.textContent=h12+':'+(mm<10?'0':'')+mm+' '+ap;
+    var gl=qs('#dashWeatherGlyph'); if(gl && !gl.innerHTML){ try{ gl.innerHTML=GLYPHS[timeGlyphKey()]||''; }catch(e){} }
   }
   updateHeader();
+  // daily quote (rotates by day) + help sheet
+  (function(){
+    var QUOTES=["Hard work beats talent when talent doesn't work hard.","Small steps every day add up to big change.","Discipline is choosing what you want most over what you want now.","You don't have to be extreme, just consistent.","The pain of discipline weighs ounces; regret weighs tons.","Win the morning, win the day.","Motivation gets you started; habit keeps you going.","Be stronger than your strongest excuse.","Show up — especially when you don't feel like it.","Your future is built by what you do today, not tomorrow."];
+    var q=qs('#dashQuote'); if(q){ var doy=Math.floor((Date.now()-new Date(new Date().getFullYear(),0,0))/86400000); q.textContent=QUOTES[doy%QUOTES.length]; }
+    try{ if(window.coreHelp) coreHelp.attach('helpBtn',{title:'Dashboard',bullets:['Your Life Score is the average of your six stats — tap Rank to see your progress.','Tap a stat tile to open that area; long-press it to peek without leaving home.','Switch the trend window between 7 and 30 days.','The flame and coin pills track your streak and coins.','Tap the gear to customise your routine and widgets.']}); }catch(e){}
+  })();
   setInterval(updateHeader,30000);
 
   // Real weather (rain/snow/cloud/fog) overrides the icon; clear skies fall
@@ -1403,6 +1433,10 @@ body.edit-active .nav{display:none;}
     var g=$('rankBarGem'); if(g) g.innerHTML='<img src="assets/ranks/'+r.key+'.png" alt="'+r.name+'">';
     if($('rankBarName')) $('rankBarName').textContent=r.name;
     animCount($('rankBarScore'), xp, null, fromXp);
+    // flat level + XP-to-next-rank progress bar
+    var lv=$('lsLevel'); if(lv) lv.textContent='Lv '+(idx+1);
+    var next=(idx+1<RANKS.length)?RANKS[idx+1].xp:r.xp+1, cur=r.xp, pct=next>cur?Math.max(0,Math.min(1,(xp-cur)/(next-cur))):1;
+    var fill=$('lsXpFill'); if(fill) setTimeout(function(){ fill.style.width=(pct*100).toFixed(1)+'%'; },180);
     return idx;
   }
   var curRankIdx = paintRank(0);
@@ -1449,11 +1483,12 @@ body.edit-active .nav{display:none;}
     {key:'social',name:'Social',model:'social',color:'#B388FF',page:'social.html',icon:'<circle cx="9" cy="8" r="3.2"/><path d="M3.4 20a5.6 5.6 0 0 1 11.2 0M16 5.2a3.2 3.2 0 0 1 0 6M18.7 20a5.6 5.6 0 0 0-3.1-5"/>'},
     {key:'purpose',name:'Purpose',model:'willpower',color:'#5EEAD4',page:'willpower.html',icon:'<circle cx="12" cy="12" r="8.5"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z"/>'}
   ];
-  // Life Scores — rendered as per-stat trend graphs (name + value + 30d trend).
+  // Life Scores — rendered as per-stat trend graphs (name + value + trend).
+  var trendWin=30;
   function paintTrends(){
     var box=$('statTrends'); if(!box) return;
     var DC=window.dashCharts; if(!DC) return;
-    var pts=DC.getHistory(30);
+    var pts=DC.getHistory(trendWin);
     var reduced=!!(window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches);
     box.innerHTML=STATS.map(function(s){
       return '<a class="dc-mini" href="'+s.page+'" style="--sc:'+s.color+'" aria-label="'+s.name+' trend">'
@@ -1863,6 +1898,7 @@ body.edit-active .nav{display:none;}
   render(true);
   paintLifeScore();
   paintTrends();
+  (function(){ var tg=$('stToggle'); if(!tg) return; tg.addEventListener('click',function(e){ var b=e.target.closest('button[data-d]'); if(!b) return; trendWin=parseInt(b.getAttribute('data-d'),10)||30; Array.prototype.forEach.call(tg.querySelectorAll('button'),function(x){x.classList.toggle('on',x===b);}); try{window.coreSfx&&window.coreSfx('tick');}catch(e){} paintTrends(); }); })();
   window.addEventListener('coreStateChange', paintTrends);
 })();
 </script>
