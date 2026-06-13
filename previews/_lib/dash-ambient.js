@@ -33,10 +33,10 @@
   function initParticles() {
     stars = []; shots = []; rain = []; snow = []; ripples = []; lightningTTL = 0;
 
-    // Always: full star field
-    for (var i = 0; i < 120; i++) stars.push({
+    // Always: full star field — covers the whole screen, top to bottom
+    for (var i = 0; i < 150; i++) stars.push({
       x: Math.random() * W,
-      y: Math.random() * (H * 0.72),
+      y: Math.random() * (H * 0.98),
       r: 0.28 + Math.random() * 1.6,
       ph: Math.random() * Math.PI * 2,
       spd: 0.25 + Math.random() * 1.0,
