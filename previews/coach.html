@@ -225,11 +225,11 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
         </div>
       </div>
 
-      <!-- Coming banner -->
-      <div class="coming-banner">
+      <!-- Connect / status banner (rendered by JS) -->
+      <button class="coming-banner" id="coachBanner" type="button" style="width:calc(100% - 36px);text-align:left;font:inherit;cursor:pointer;-webkit-appearance:none;appearance:none;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
-        <div class="coming-text"><strong>Your Coach is live.</strong> Chat any time, and every scanner runs right on your device — tap one to scan and your score saves to your profile.</div>
-      </div>
+        <div class="coming-text" id="coachBannerTx"><strong>Your Coach is live.</strong> Chat any time — your scans and stats feed the conversation.</div>
+      </button>
 
     </div>
 
@@ -262,6 +262,7 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
 
 <script src="_lib/core-config.js"></script>
 <script src="_lib/core-state.js"></script>
+<script src="_lib/core-ai.js"></script>
 <script src="_lib/dash-ambient.js"></script>
 <script>if(window.dashAmbient)window.dashAmbient.init();</script>
 <script>
@@ -319,6 +320,14 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
   }
 
   async function getReply(){
+    // 1) User's own OpenAI key (pasted in-app, stays in their browser) — real replies, no server needed.
+    try{
+      if(window.coreAI && coreAI.hasKey()){
+        var ar=await coreAI.chat(convo.slice(-12), { role:'coach' });
+        if(ar && ar.ok && ar.text) return ar.text;
+      }
+    }catch(e){}
+    // 2) Hosted proxy (Supabase edge function → Claude), if configured.
     try{
       var c=window.CORE_CONFIG;
       if(c && c.SUPABASE_URL && c.SUPABASE_ANON_KEY){
@@ -349,6 +358,34 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
 
   sendBtn.addEventListener('click', send);
   input.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); send(); } });
+
+  // ── Connect your own OpenAI key (stored only in this browser) ──
+  var banner=$('#coachBanner'), bannerTx=$('#coachBannerTx');
+  function aiConnected(){ return !!(window.coreAI && coreAI.hasKey()); }
+  function renderBanner(){
+    if(!banner) return;
+    if(aiConnected()){
+      bannerTx.innerHTML='<strong>OpenAI connected.</strong> Real AI replies are on. Tap to change or remove your key.';
+      banner.style.borderColor='rgba(52,211,153,0.35)';
+    } else if(window.CORE_BACKEND_READY){
+      bannerTx.innerHTML='<strong>Your Coach is live.</strong> Tap to connect your own OpenAI key for personalised replies.';
+    } else {
+      bannerTx.innerHTML='<strong>Connect OpenAI for real replies.</strong> Tap here and paste your API key — it stays in this browser, no account or server needed.';
+    }
+  }
+  function connectAI(){
+    if(!window.coreAI){ toast('AI module not loaded'); return; }
+    var cur=coreAI.getKey();
+    var k=window.prompt(cur?'Update your OpenAI API key (leave blank to remove):':'Paste your OpenAI API key (starts with sk-…). It stays only in this browser.', cur||'');
+    if(k===null) return;                 // cancelled
+    k=k.trim();
+    if(k && !/^sk-/.test(k)){ toast('That doesn’t look like an OpenAI key (sk-…)'); return; }
+    coreAI.setKey(k);
+    renderBanner();
+    toast(k ? 'OpenAI connected — real replies on' : 'AI key removed');
+  }
+  if(banner) banner.addEventListener('click', connectAI);
+  renderBanner();
 
   // ── Arrived from a scanner's "Discuss with Coach"? Seed the conversation ──
   function coachScanReply(seed){
