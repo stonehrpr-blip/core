@@ -539,7 +539,6 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
       <!-- Muscle Map -->
       <div class="sec"><h2>Muscle Map</h2><span class="meta" id="lastTrained"></span></div>
       <div class="card diagram">
-        <div style="display:flex;justify-content:center"><div class="gender-toggle" id="genderToggle"><button class="gt-opt" data-g="male" type="button">Male</button><button class="gt-opt" data-g="female" type="button">Female</button></div></div>
         <div class="figs" id="figs"><div class="figwrap" id="figwrap"></div></div>
         <div class="map-empty" id="mapEmpty" style="display:none">Log a workout to light up your muscle map.</div>
         <div class="maplegend" id="maplegend"></div>
@@ -881,9 +880,9 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   function heatFor(lvl){ return HEAT[lvl]||HEAT[0]; }
   var MGROUPS=['chest','back','shoulders','arms','legs','core']; // trainable groups drawn over the base silhouette
   function renderDiagram(){
-    var g=getGender(), inten=allIntensity(), recId=recommendMuscle();
-    Array.prototype.forEach.call(document.querySelectorAll('#genderToggle .gt-opt'),function(b){ b.classList.toggle('on', b.getAttribute('data-g')===g); });
-    var fw=qs('#figwrap'), bm=window.CoreBodyMap && window.CoreBodyMap[g], anyTrained=false;
+    var inten=allIntensity(), recId=recommendMuscle();
+    // single clean, non-gendered figure (the female data had a stray head artifact)
+    var fw=qs('#figwrap'), bm=window.CoreBodyMap && (window.CoreBodyMap.male || window.CoreBodyMap.female), anyTrained=false;
     function sideSvg(side){
       var parts=side.parts;
       var s='<svg class="bodysvg" viewBox="'+side.vb+'" preserveAspectRatio="xMidYMid meet">';
