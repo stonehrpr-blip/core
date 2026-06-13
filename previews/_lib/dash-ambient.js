@@ -34,7 +34,7 @@
     stars = []; shots = []; rain = []; snow = []; ripples = []; lightningTTL = 0;
 
     // Always: a light star field — sparse, covering the whole screen top to bottom
-    for (var i = 0; i < 30; i++) stars.push({
+    for (var i = 0; i < 16; i++) stars.push({
       x: Math.random() * W,
       y: Math.random() * H,
       r: 0.28 + Math.random() * 1.6,
