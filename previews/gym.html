@@ -373,7 +373,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 /* quick wins */
 .qw-note{font-size:12px;color:var(--muted);line-height:1.45;margin:-2px 2px 10px;}
 .qw-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;}
-.qw-card{display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 6px;border-radius:15px;background:rgba(255,255,255,0.022);border:1px solid rgba(255,255,255,0.08);color:inherit;font:inherit;cursor:pointer;-webkit-appearance:none;appearance:none;transition:transform .12s,border-color .18s;}
+.qw-card{display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 6px;border-radius:15px;background:linear-gradient(180deg,color-mix(in srgb,var(--qc,#FF6B6B) 12%,transparent),rgba(255,255,255,0.012));border:1px solid color-mix(in srgb,var(--qc,#FF6B6B) 28%,rgba(255,255,255,0.08));color:inherit;font:inherit;text-decoration:none;cursor:pointer;-webkit-appearance:none;appearance:none;transition:transform .12s,border-color .18s;}
 .qw-card:active{transform:scale(.95);}
 .qw-card .qw-ic{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--qc,#FF6B6B);background:color-mix(in srgb,var(--qc,#FF6B6B) 14%,transparent);border:1px solid color-mix(in srgb,var(--qc,#FF6B6B) 28%,transparent);}
 .qw-card .qw-ic svg{width:18px;height:18px;}
@@ -519,7 +519,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 
       <!-- Quick wins -->
       <div class="sec"><h2>Quick wins</h2><span class="meta">easy +Strength</span></div>
-      <div class="qw-note">Every set you log lifts your Strength score and lights up that muscle. No gym needed — tap one to start.</div>
+      <div class="qw-note">Tap a movement — CORE opens the camera and counts your reps automatically. Every rep adds Strength.</div>
       <div class="qw-grid" id="quickWins"></div>
 
       <!-- Tools -->
@@ -741,22 +741,23 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   var HALF_LIFE=4, T_HIGH=11; // ~3 solid sessions reaches "strong"; halves every 4 idle days
   function intensity(id){
     var m=(store().muscles||{})[id];
-    if(!m||!m.score) return {t:0,level:'none',eff:0};
+    if(!m||!m.score) return {t:0,lvl:0,eff:0};
     var days=Math.max(0,(Date.now()-(m.lastTs||0))/86400000);
     var eff=m.score*Math.pow(0.5,days/HALF_LIFE);
     var t=Math.max(0,Math.min(1,eff/T_HIGH));
-    var level=t<0.08?'none':t<0.34?'low':t<0.68?'mid':'high';
-    return {t:t,level:level,eff:eff};
+    var lvl = t<=0.05 ? 0 : Math.min(7, Math.ceil(t*7));   // 8 bands: 0 untrained .. 7 maxed
+    return {t:t,lvl:lvl,eff:eff};
   }
   function allIntensity(){ var o={}; MUSCLES.forEach(function(m){ o[m.id]=intensity(m.id); }); return o; }
-  function levelLabel(l){ return l==='none'?'Untrained':l==='low'?'Started':l==='mid'?'Building':'Strong'; }
+  function levelLabel(l){ return (HEAT[l]||HEAT[0]).label; }
 
   /* ───────── Muscle map — real anatomical SVG (react-native-body-highlighter data), colour-coded ───────── */
   function getGender(){ return store().gender==='female'?'female':'male'; }
   function setGender(g){ var s=store(); s.gender=(g==='female'?'female':'male'); save(s); }
   // heat scale (training intensity) — also drives the legend
-  var HEAT=[ {k:'none',c:'#5A6072',label:'Untrained'},{k:'low',c:'#F4C24B',label:'Light'},{k:'mid',c:'#FF8A45',label:'Moderate'},{k:'high',c:'#FF5A5A',label:'Hard'} ];
-  function heatFor(level){ for(var i=0;i<HEAT.length;i++) if(HEAT[i].k===level) return HEAT[i]; return HEAT[0]; }
+  // 8-step training-heat ramp: untrained (slate) -> activated -> warming -> building -> worked -> strong -> hard -> maxed (red)
+  var HEAT=[ {c:'#5A6072',label:'Untrained'},{c:'#5E8BD6',label:'Activated'},{c:'#3FB9A6',label:'Warming'},{c:'#4FC26B',label:'Building'},{c:'#F4C24B',label:'Worked'},{c:'#FB9B3C',label:'Strong'},{c:'#FB6A2E',label:'Hard'},{c:'#FF4D4D',label:'Maxed'} ];
+  function heatFor(lvl){ return HEAT[lvl]||HEAT[0]; }
   var MGROUPS=['chest','back','shoulders','arms','legs','core']; // trainable groups drawn over the base silhouette
   function renderDiagram(){
     var g=getGender(), inten=allIntensity();
@@ -768,9 +769,9 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
       if(parts.base) s+='<path class="base" d="'+parts.base+'"></path>';
       MGROUPS.forEach(function(grp){
         var d=parts[grp]; if(!d) return;
-        var it=inten[grp]||{level:'none',t:0}; if(it.t>0) anyTrained=true;
+        var it=inten[grp]||{lvl:0,t:0}; if(it.t>0) anyTrained=true;
         var st='';
-        if(it.level!=='none'){ var h=heatFor(it.level); st=' style="fill:'+h.c+';fill-opacity:'+(0.34+it.t*0.55).toFixed(2)+'"'; }
+        if(it.lvl>0){ var h=heatFor(it.lvl); st=' style="fill:'+h.c+';fill-opacity:'+(0.42+it.t*0.5).toFixed(2)+'"'; }
         s+='<path class="mg" data-m="'+grp+'" d="'+d+'"'+st+'></path>';
       });
       return s+'</svg>';
@@ -787,7 +788,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   }
   function renderInsight(inten){
     var el=qs('#insight'), tx=qs('#insightTx');
-    var arr=MUSCLES.map(function(m){ return {id:m.id,name:m.name,t:inten[m.id].t,level:inten[m.id].level}; });
+    var arr=MUSCLES.map(function(m){ return {id:m.id,name:m.name,t:inten[m.id].t,lvl:inten[m.id].lvl}; });
     var trained=arr.filter(function(a){return a.t>0;});
     if(!trained.length){ el.style.display='none'; return; }
     el.style.display='flex';
@@ -796,7 +797,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     var msg;
     if(low.t<0.1){ msg='Your '+low.name+' is undertrained — give it a session.'; }
     else if(high.t-low.t>0.45){ msg=high.name+' is well ahead — balance it with '+low.name+'.'; }
-    else if(high.level==='high'){ msg=high.name+' is progressing well. Keep the streak going.'; }
+    else if(high.lvl>=6){ msg=high.name+' is progressing well. Keep the streak going.'; }
     else { msg=high.name+' is building nicely — stay consistent.'; }
     tx.textContent=msg;
   }
@@ -1045,7 +1046,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     curMuscle=muscle; sel={};
     var info=mInfo(muscle), it=intensity(muscle), col=mColor(muscle);
     qs('#shIcon').innerHTML=ICO; qs('#shIcon').style.color=col; qs('#shName').textContent=info.name;
-    qs('#shLvl').textContent=levelLabel(it.level); qs('#shLvl').style.setProperty('--mc',col);
+    qs('#shLvl').textContent=levelLabel(it.lvl); qs('#shLvl').style.setProperty('--mc',col);
     qs('#shSub').textContent='Select exercises, set your sets · reps · weight, then finish.';
     var list=exFor(muscle), el=qs('#exlist'); el.innerHTML='';
     list.forEach(function(ex){
@@ -1127,30 +1128,21 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   function renderChip(){ var e=qs('#strVal'); if(e) e.textContent=Math.round(strengthVal()); }
   var toastT; function toast(m){ var t=qs('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(function(){t.classList.remove('show');},1800); }
 
-  /* ───────── Quick wins — easy one-tap Strength ───────── */
+  /* ───────── Quick wins — open the camera, it counts that movement ───────── */
   var QUICK=[
-    {name:'Push-ups',muscle:'chest',str:1,reps:15},
-    {name:'Squats',muscle:'legs',str:1,reps:20},
-    {name:'Plank',muscle:'core',str:1,reps:1},
-    {name:'Pull-ups',muscle:'back',str:1,reps:8},
-    {name:'Pike Push-ups',muscle:'shoulders',str:1,reps:12},
-    {name:'Dips',muscle:'arms',str:1,reps:12}
+    {id:'pushups',     name:'Push-ups',     muscle:'chest',     c:'#FF6B6B'},
+    {id:'pushwide',    name:'Wide Push-ups',muscle:'chest',     c:'#FF8A5B'},
+    {id:'pushdiamond', name:'Diamond',      muscle:'arms',      c:'#FF5BA8'},
+    {id:'squats',      name:'Squats',       muscle:'legs',      c:'#34D399'},
+    {id:'squatsumo',   name:'Sumo Squats',  muscle:'legs',      c:'#2BD4B0'},
+    {id:'squatjump',   name:'Jump Squats',  muscle:'legs',      c:'#19C3E6'},
+    {id:'pullups',     name:'Pull-ups',     muscle:'back',      c:'#4A8FFF'},
+    {id:'chinups',     name:'Chin-ups',     muscle:'back',      c:'#8A6BFF'}
   ];
-  function quickLog(q){
-    var totalSets=3, xpGain=Math.max(20,totalSets*8), strGain=q.str||1;
-    var s=store(), m=s.muscles[q.muscle]||{score:0,lastTs:0,sessions:0};
-    m.score=(m.score||0)+totalSets*1.1; m.lastTs=Date.now(); m.sessions=(m.sessions||0)+1; s.muscles[q.muscle]=m;
-    s.history.unshift({id:'q'+Date.now(),ts:Date.now(),muscle:q.muscle,exercises:[{name:q.name,sets:totalSets,reps:q.reps||12,weight:0}],totalSets:totalSets,xp:xpGain,str:strGain});
-    if(s.history.length>60) s.history.length=60; save(s);
-    addBody(strGain,'quickwin:'+q.name); addXp(xpGain,'quickwin:'+q.name);
-    sfx('reward'); try{ if(navigator.vibrate) navigator.vibrate(12); }catch(e){}
-    toast('+'+strGain+' Strength · '+q.name);
-    renderChip(); renderDiagram(); renderOverview(); renderPRs(); renderRecovery(); renderHeaderInsight(); try{ renderVolume(); }catch(e){}
-  }
+  var QW_CAM='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.4"/></svg>';
   function renderQuickWins(){
     var host=qs('#quickWins'); if(!host) return;
-    host.innerHTML=QUICK.map(function(q,i){ return '<button class="qw-card" data-i="'+i+'" type="button" style="--qc:'+mColor(q.muscle)+'"><span class="qw-ic">'+ICO+'</span><b>'+q.name+'</b><span class="qw-plus">+'+q.str+' STR</span></button>'; }).join('');
-    Array.prototype.forEach.call(host.querySelectorAll('.qw-card'),function(b){ b.addEventListener('click',function(){ quickLog(QUICK[parseInt(b.getAttribute('data-i'),10)]); b.classList.remove('done'); void b.offsetWidth; b.classList.add('done'); }); });
+    host.innerHTML=QUICK.map(function(q){ return '<a class="qw-card" href="strength-camera.html?ex='+q.id+'" style="--qc:'+q.c+'"><span class="qw-ic">'+QW_CAM+'</span><b>'+q.name+'</b><span class="qw-plus">Track reps</span></a>'; }).join('');
   }
 
   /* ───────── demo seed (for ?demo=1 screenshots) ───────── */

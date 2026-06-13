@@ -728,6 +728,8 @@
 
     function init(){
       initSelect();
+      // deep-link: ?ex=<id> opens straight into that movement (from Strength quick wins)
+      try{ var pm=(location.search.match(/[?&]ex=([a-z]+)/i)||[])[1]; if(pm && EXOS.some(function(e){return e.id===pm;})) startSession(pm); }catch(e){}
       // "?" help sheet
       try{
         if(window.coreHelp){
