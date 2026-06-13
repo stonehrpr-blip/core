@@ -114,6 +114,35 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   background:rgba(255,107,107,0.07);border:1px solid rgba(255,107,107,0.2);}
 .insight svg{width:16px;height:16px;color:var(--str);flex:none;}
 .insight span{font-size:12.5px;font-weight:600;line-height:1.4;color:rgba(248,250,254,.85);}
+/* ── Body status (balance + readiness + AI) ── */
+.bodystat{display:flex;align-items:center;gap:13px;margin-top:11px;padding:12px 14px;border-radius:15px;
+  background:rgba(255,255,255,0.028);border:1px solid var(--border);}
+.bs-ring{position:relative;width:48px;height:48px;flex:none;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:conic-gradient(var(--str,#FF6B6B) calc(var(--p,0)*1%), rgba(255,255,255,0.08) 0);}
+.bs-ring::after{content:"";position:absolute;inset:4px;border-radius:50%;background:#0c0f17;}
+.bs-ring b{position:relative;z-index:1;font-size:15px;font-weight:900;line-height:1;}
+.bs-ring span{position:relative;z-index:1;font-size:7.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:1px;}
+.bs-msg{font-size:12.5px;font-weight:600;line-height:1.45;color:rgba(248,250,254,.88);}
+.bs-msg b{font-weight:800;}
+.bs-msg.bs-ai{font-weight:500;color:rgba(248,250,254,.92);}
+.bs-hint{display:block;margin-top:3px;font-size:10.5px;font-weight:700;color:var(--muted);}
+.readyrow{display:flex;gap:8px;margin-top:9px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px;}
+.readyrow::-webkit-scrollbar{display:none;}
+.ai-train{flex:none;display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:999px;cursor:pointer;
+  font:inherit;font-size:11.5px;font-weight:800;color:#06122b;background:linear-gradient(135deg,#5BB1FF,#9F8FFF);border:none;
+  -webkit-appearance:none;appearance:none;white-space:nowrap;box-shadow:0 4px 14px rgba(91,177,255,.28);}
+.ai-train:disabled{opacity:.6;}
+.ai-train svg{width:14px;height:14px;}
+.ready-chip{flex:none;display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:999px;cursor:pointer;
+  font:inherit;font-size:11.5px;font-weight:800;color:var(--text);white-space:nowrap;-webkit-appearance:none;appearance:none;
+  background:color-mix(in srgb,var(--mc,#34D399) 12%,transparent);border:1px solid color-mix(in srgb,var(--mc,#34D399) 32%,transparent);}
+.ready-chip .rc-dot{width:7px;height:7px;border-radius:50%;background:var(--mc,#34D399);box-shadow:0 0 7px var(--mc,#34D399);}
+.bodysvg .mg.rec{animation:recPulse 1.7s ease-in-out infinite;}
+@keyframes recPulse{0%,100%{filter:drop-shadow(0 0 1.5px rgba(47,203,110,.55));}50%{filter:drop-shadow(0 0 5px rgba(47,203,110,1));}}
+@media(prefers-reduced-motion:reduce){.bodysvg .mg.rec{animation:none;filter:drop-shadow(0 0 3px rgba(47,203,110,.9));}}
+.sh-cam{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:8px 13px;border-radius:11px;text-decoration:none;
+  font-size:12px;font-weight:800;color:#FF6B6B;background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.28);-webkit-appearance:none;}
+.sh-cam svg{width:14px;height:14px;}
 .legend{display:flex;justify-content:center;gap:14px;margin-top:11px;}
 .legend i{display:inline-flex;align-items:center;gap:5px;font-size:9.5px;font-weight:700;color:var(--dim);font-style:normal;}
 .legend i b{width:8px;height:8px;border-radius:50%;display:inline-block;}
@@ -510,6 +539,10 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
       </div>
       <div class="insight" id="insight" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2Z"/><path d="M9 21h6"/></svg><span id="insightTx"></span></div>
 
+      <!-- Body status: balance + readiness + AI suggestion -->
+      <div class="bodystat" id="bodyStat"></div>
+      <div class="readyrow" id="readyRow"></div>
+
       <!-- Greeting -->
       <div class="greet">
         <div class="greet-eyebrow"><span class="gd"></span><span id="greetMeta">Strength · keep building</span></div>
@@ -640,6 +673,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 
 <script src="_lib/core-sfx.js"></script>
 <script src="_lib/core-state.js"></script>
+<script src="_lib/core-ai.js"></script>
 <script>try{window.coreState&&coreState.applyStatTick&&coreState.applyStatTick();}catch(e){}</script>
 <script src="_lib/core-bodymap.js"></script>
 <script src="_lib/core-back.js"></script>
@@ -771,6 +805,73 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   function allIntensity(){ var o={}; MUSCLES.forEach(function(m){ o[m.id]=intensity(m.id); }); return o; }
   function levelLabel(l){ return (HEAT[l]||HEAT[0]).label; }
 
+  /* ───────── Readiness / balance / recommendation ───────── */
+  // t = recent training load (decays). High t = just worked hard = fatigued; low = recovered/ready.
+  function readiness(id){
+    var it=intensity(id), m=(store().muscles||{})[id];
+    var label, col;
+    if(it.t>=0.55){ label='Fatigued'; col='#FF7A2E'; }
+    else if(it.t>=0.28){ label='Working'; col='#EFC024'; }
+    else { label='Fresh'; col='#2FCB6E'; }
+    return { t:it.t, eff:it.eff, label:label, col:col, fresh:it.t<0.28, trained:!!(m&&m.score) };
+  }
+  function balanceInfo(){
+    var ms=store().muscles||{};
+    var vals=MUSCLES.map(function(m){ return { id:m.id, name:m.name, eff:intensity(m.id).eff, score:(ms[m.id]&&ms[m.id].score)||0 }; });
+    if(!vals.some(function(v){return v.score>0;})) return { score:null, laggard:null, vals:vals };
+    var effs=vals.map(function(v){return v.eff;});
+    var max=Math.max.apply(null,effs);
+    var spread = max>0 ? (max-Math.min.apply(null,effs))/max : 0;
+    var score=Math.max(0,Math.min(100,Math.round(100*(1-spread))));
+    var laggard=vals.slice().sort(function(a,b){return a.eff-b.eff;})[0];
+    return { score:score, laggard:laggard, vals:vals };
+  }
+  // freshest + most neglected muscle to train today
+  function recommendMuscle(){
+    var cand=MUSCLES.map(function(m){ var rd=readiness(m.id); return { id:m.id, eff:rd.eff, fresh:rd.fresh }; });
+    var fresh=cand.filter(function(c){return c.fresh;});
+    var pool=(fresh.length?fresh:cand).slice().sort(function(a,b){return a.eff-b.eff;});
+    return pool[0].id;
+  }
+  // muscle → default camera movement (chest/shoulders→push, back→pull, legs→squat, arms→diamond)
+  var CAM_FOR={ chest:'pushups', shoulders:'pushups', arms:'pushdiamond', back:'pullups', legs:'squats' };
+
+  function renderStatus(){
+    var bs=qs('#bodyStat'), rr=qs('#readyRow'); if(!bs||!rr) return;
+    var bal=balanceInfo();
+    if(bal.score===null){
+      bs.innerHTML='<div class="bs-msg">Log a workout to see your body balance and what to train.</div>';
+    } else {
+      var lag=bal.laggard?mInfo(bal.laggard.id).name:'';
+      var msg = bal.score>=80 ? 'Well balanced — keep the rotation going.' : ('<b>'+lag+'</b> is lagging — train it to even out.');
+      bs.innerHTML='<div class="bs-ring" style="--p:'+bal.score+'"><b>'+bal.score+'</b><span>Bal</span></div><div class="bs-msg">'+msg+'</div>';
+    }
+    var fresh=MUSCLES.filter(function(m){ return readiness(m.id).fresh; });
+    var chips=fresh.map(function(m){ return '<button class="ready-chip" data-m="'+m.id+'" style="--mc:'+mColor(m.id)+'"><span class="rc-dot"></span>'+m.name+'</button>'; }).join('');
+    rr.innerHTML='<button class="ai-train" id="aiTrain" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>What should I train?</button>'+chips;
+    Array.prototype.forEach.call(rr.querySelectorAll('.ready-chip'),function(b){ b.addEventListener('click',function(){ sfx('tick'); openSheet(b.getAttribute('data-m')); }); });
+    var ai=qs('#aiTrain'); if(ai) ai.addEventListener('click', aiTrain);
+  }
+  async function aiTrain(){
+    var bs=qs('#bodyStat'), btn=qs('#aiTrain');
+    var rec=recommendMuscle(), recName=mInfo(rec).name, top=(exFor(rec)[0]||{}).name||'';
+    var rule='<b>'+recName+'</b> is your best pick today — it\'s fresh'+(top?(' · try '+top):'')+'.';
+    if(!(window.coreAI && coreAI.hasKey())){
+      bs.innerHTML='<div class="bs-msg">'+rule+'<span class="bs-hint">Connect AI in the Coach for a full session plan.</span></div>';
+      sfx('tick'); return;
+    }
+    if(btn){ btn.disabled=true; btn.textContent='Thinking…'; }
+    var ctx=MUSCLES.map(function(m){ return mInfo(m.id).name+': '+readiness(m.id).label.toLowerCase(); }).join(', ');
+    var bal=balanceInfo(), lagTxt=bal.laggard?(' My '+mInfo(bal.laggard.id).name+' is the most neglected.'):'';
+    var prompt='Muscle readiness right now — '+ctx+'.'+lagTxt+' Give me one short workout for today: 3-4 exercises with sets x reps, focusing on fresh or neglected muscles and avoiding fatigued ones. Keep it under 70 words, no preamble.';
+    try{
+      var r=await coreAI.chat([{ role:'user', content:prompt }], { maxTokens:230, temperature:0.6 });
+      if(r && r.text){ bs.innerHTML='<div class="bs-msg bs-ai">'+r.text.replace(/</g,'&lt;').replace(/\n/g,'<br>')+'</div>'; }
+      else throw 0;
+    }catch(e){ bs.innerHTML='<div class="bs-msg">'+rule+'</div>'; }
+    if(btn){ btn.disabled=false; btn.textContent='What should I train?'; }
+  }
+
   /* ───────── Muscle map — real anatomical SVG (react-native-body-highlighter data), colour-coded ───────── */
   function getGender(){ return store().gender==='female'?'female':'male'; }
   function setGender(g){ var s=store(); s.gender=(g==='female'?'female':'male'); save(s); }
@@ -780,7 +881,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   function heatFor(lvl){ return HEAT[lvl]||HEAT[0]; }
   var MGROUPS=['chest','back','shoulders','arms','legs','core']; // trainable groups drawn over the base silhouette
   function renderDiagram(){
-    var g=getGender(), inten=allIntensity();
+    var g=getGender(), inten=allIntensity(), recId=recommendMuscle();
     Array.prototype.forEach.call(document.querySelectorAll('#genderToggle .gt-opt'),function(b){ b.classList.toggle('on', b.getAttribute('data-g')===g); });
     var fw=qs('#figwrap'), bm=window.CoreBodyMap && window.CoreBodyMap[g], anyTrained=false;
     function sideSvg(side){
@@ -790,9 +891,10 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
       MGROUPS.forEach(function(grp){
         var d=parts[grp]; if(!d) return;
         var it=inten[grp]||{lvl:0,t:0}; if(it.t>0) anyTrained=true;
-        var st='';
+        var isRec=(grp===recId), st='';
         if(it.lvl>0){ var h=heatFor(it.lvl); st=' style="fill:'+h.c+';fill-opacity:'+(0.66+it.t*0.30).toFixed(2)+';stroke:'+h.c+';stroke-width:0.6;stroke-opacity:0.9"'; }
-        s+='<path class="mg" data-m="'+grp+'" d="'+d+'"'+st+'></path>';
+        else if(isRec){ st=' style="stroke:#2FCB6E;stroke-width:1.1;stroke-opacity:0.95"'; }
+        s+='<path class="mg'+(isRec?' rec':'')+'" data-m="'+grp+'" d="'+d+'"'+st+'></path>';
       });
       return s+'</svg>';
     }
@@ -803,6 +905,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     var me=qs('#mapEmpty'); if(me) me.style.display=anyTrained?'none':'block';
     var lg=qs('#maplegend'); if(lg) lg.innerHTML=HEAT.map(function(h){ return '<i><b style="background:'+h.c+'"></b>'+h.label+'</i>'; }).join('');
     renderInsight(inten);
+    try{ renderStatus(); }catch(e){}
     var s=store(), last=s.history[0];
     qs('#lastTrained').textContent = last ? ('Last: '+mInfo(last.muscle).name+' · '+ago(last.ts)) : '';
   }
@@ -1067,7 +1170,9 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     var info=mInfo(muscle), it=intensity(muscle), col=mColor(muscle);
     qs('#shIcon').innerHTML=ICO; qs('#shIcon').style.color=col; qs('#shName').textContent=info.name;
     qs('#shLvl').textContent=levelLabel(it.lvl); qs('#shLvl').style.setProperty('--mc',col);
-    qs('#shSub').textContent='Select exercises, set your sets · reps · weight, then finish.';
+    var rd=readiness(muscle), camId=CAM_FOR[muscle];
+    var camBtn = camId ? '<a class="sh-cam" href="strength-camera.html?ex='+camId+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.2"/></svg>Count reps on camera</a>' : '';
+    qs('#shSub').innerHTML='<span style="color:'+rd.col+';font-weight:800">'+rd.label+'</span> · pick exercises, set your sets · reps · weight, then finish.'+camBtn;
     var list=exFor(muscle), el=qs('#exlist'); el.innerHTML='';
     list.forEach(function(ex){
       sel[ex.name]={on:false,sets:ex.sets,reps:ex.reps,weight:0};
