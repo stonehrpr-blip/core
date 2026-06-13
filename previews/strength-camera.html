@@ -330,13 +330,14 @@
     var PGND='<line x1="7" y1="40" x2="41" y2="40" stroke-opacity="0.26"/>',
         SGND='<line x1="7" y1="44" x2="41" y2="44" stroke-opacity="0.26"/>',
         BAR ='<line x1="7" y1="6" x2="41" y2="6" stroke-opacity="0.55"/>';
-    // Push-ups (side view) — straight plank, hands & feet planted, chest lowers as the elbow bends.
-    var PSV='<svg class="formdemo" viewBox="0 0 64 48" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="42" x2="58" y2="42" stroke-opacity="0.28"/>';
-    function pushSV(hcx,hcy,rest,active){ return PSV+'<circle r="3.6">'+fdAnim('cx',hcx,'2.2s')+fdAnim('cy',hcy,'2.2s')+'</circle><path d="'+rest+'">'+fdAnim('d',rest+';'+active+';'+rest,'2.2s')+'</path></svg>'; }
+    // Push-ups (side view) — one clean straight-plank rep; the variant is shown by the
+    // hand base on the floor: wide bar / shoulder-width / together-diamond.
+    var PSV='<svg class="formdemo" viewBox="0 0 64 48" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="42" x2="58" y2="42" stroke-opacity="0.22"/>';
+    function pushSV(base){ return PSV+base+'<circle r="3.6">'+fdAnim('cx','13;14;13','2.2s')+fdAnim('cy','23;32;23','2.2s')+'</circle><path d="M18 26 L52 42 M18 42 L18 33 L18 26">'+fdAnim('d','M18 26 L52 42 M18 42 L18 33 L18 26;M19 35 L52 42 M18 42 L23 39 L19 35;M18 26 L52 42 M18 42 L18 33 L18 26','2.2s')+'</path></svg>'; }
     var FORM_EX={
-      pushups:    pushSV('13;14;13','23;32;23','M18 26 L52 42 M18 42 L18 34 L18 26','M19 35 L52 42 M18 42 L25 40 L19 35'),
-      pushwide:   pushSV('13;15;13','23;33;23','M18 26 L52 42 M16 42 L16 34 L18 26','M20 36 L52 42 M16 42 L28 40 L20 36'),
-      pushdiamond:pushSV('13;14;13','23;31;23','M18 26 L52 42 M21 42 L20 34 L18 26','M19 34 L52 42 M21 42 L21 38 L19 34'),
+      pushups:    pushSV('<line x1="14" y1="42" x2="22" y2="42" stroke-width="3.8" stroke-linecap="round"/>'),
+      pushwide:   pushSV('<line x1="9" y1="42" x2="27" y2="42" stroke-width="3.8" stroke-linecap="round"/>'),
+      pushdiamond:pushSV('<path d="M18 39.5 L20.5 42 L18 44.5 L15.5 42 Z" fill="currentColor" stroke="none"/>'),
       // Squats (front view) — feet planted, knees track out. Stance varies; jump leaves the floor.
       squats:     fdSvg('0 0 48 50',SGND,'8;16;8','M24 26 L20 34 L18 43 M24 26 L28 34 L30 43 M24 12 L24 26 M24 12 L19 22 M24 12 L29 22','M24 34 L16 38 L18 43 M24 34 L32 38 L30 43 M24 20 L24 34 M24 20 L15 18 M24 20 L33 18','2.1s'),
       squatsumo:  fdSvg('0 0 48 50',SGND,'10;20;10','M24 27 L19 35 L17 42 M24 27 L29 35 L31 42 M24 14 L24 27 M24 14 L19 23 M24 14 L29 23','M24 36 L15 40 L17 42 M24 36 L33 40 L31 42 M24 24 L24 36 M24 24 L18 21 M24 24 L30 21','2.1s'),
