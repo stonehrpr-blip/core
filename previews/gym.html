@@ -773,8 +773,8 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   function getGender(){ return store().gender==='female'?'female':'male'; }
   function setGender(g){ var s=store(); s.gender=(g==='female'?'female':'male'); save(s); }
   // heat scale (training intensity) — also drives the legend
-  // 8-step training-heat ramp: untrained (slate) -> activated -> warming -> building -> worked -> strong -> hard -> maxed (red)
-  var HEAT=[ {c:'#5A6072',label:'Untrained'},{c:'#5E8BD6',label:'Activated'},{c:'#3FB9A6',label:'Warming'},{c:'#4FC26B',label:'Building'},{c:'#F4C24B',label:'Worked'},{c:'#FB9B3C',label:'Strong'},{c:'#FB6A2E',label:'Hard'},{c:'#FF4D4D',label:'Maxed'} ];
+  // 8-step cool→hot heatmap: untrained (slate) → blue → cyan → teal → green → gold → orange → red (maxed)
+  var HEAT=[ {c:'#3B4150',label:'Untrained'},{c:'#4F7DFF',label:'Activated'},{c:'#19B5E6',label:'Warming'},{c:'#13CE9C',label:'Building'},{c:'#5FD13A',label:'Worked'},{c:'#F5C518',label:'Strong'},{c:'#FF7A2E',label:'Hard'},{c:'#FF3B47',label:'Maxed'} ];
   function heatFor(lvl){ return HEAT[lvl]||HEAT[0]; }
   var MGROUPS=['chest','back','shoulders','arms','legs','core']; // trainable groups drawn over the base silhouette
   function renderDiagram(){
@@ -789,7 +789,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
         var d=parts[grp]; if(!d) return;
         var it=inten[grp]||{lvl:0,t:0}; if(it.t>0) anyTrained=true;
         var st='';
-        if(it.lvl>0){ var h=heatFor(it.lvl); st=' style="fill:'+h.c+';fill-opacity:'+(0.42+it.t*0.5).toFixed(2)+'"'; }
+        if(it.lvl>0){ var h=heatFor(it.lvl); st=' style="fill:'+h.c+';fill-opacity:'+(0.66+it.t*0.30).toFixed(2)+';stroke:'+h.c+';stroke-width:0.6;stroke-opacity:0.9"'; }
         s+='<path class="mg" data-m="'+grp+'" d="'+d+'"'+st+'></path>';
       });
       return s+'</svg>';
