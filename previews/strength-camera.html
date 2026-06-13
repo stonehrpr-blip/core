@@ -331,13 +331,15 @@
     var PGND='<line x1="7" y1="40" x2="41" y2="40" stroke-opacity="0.26"/>',
         SGND='<line x1="7" y1="44" x2="41" y2="44" stroke-opacity="0.26"/>',
         BAR ='<line x1="7" y1="6" x2="41" y2="6" stroke-opacity="0.55"/>';
-    // Push-ups (side view) — one clean straight-plank rep, no hand marks.
+    // Push-ups (side view) — clean straight-plank rep; variants differ by elbow flare:
+    // diamond tucks the elbow in tight, standard is moderate, wide flares it out.
     var PSV='<svg class="formdemo" viewBox="0 0 64 48" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="42" x2="58" y2="42" stroke-opacity="0.22"/>';
-    function pushSV(){ return PSV+'<circle r="3.6">'+fdAnim('cx','13;14;13','2.2s')+fdAnim('cy','23;32;23','2.2s')+'</circle><path d="M18 26 L52 42 M18 42 L18 33 L18 26">'+fdAnim('d','M18 26 L52 42 M18 42 L18 33 L18 26;M19 35 L52 42 M18 42 L23 39 L19 35;M18 26 L52 42 M18 42 L18 33 L18 26','2.2s')+'</path></svg>'; }
+    function pushSV(hx,ex){ var up='M18 26 L52 42 M'+hx+' 42 L'+hx+' 33 L18 26', dn='M19 35 L52 42 M'+hx+' 42 L'+ex+' 39 L19 35';
+      return PSV+'<circle r="3.6">'+fdAnim('cx','13;14;13','2.2s')+fdAnim('cy','23;32;23','2.2s')+'</circle><path d="'+up+'">'+fdAnim('d',up+';'+dn+';'+up,'2.2s')+'</path></svg>'; }
     var FORM_EX={
-      pushups:    pushSV(),
-      pushwide:   pushSV(),
-      pushdiamond:pushSV(),
+      pushups:    pushSV(18,23),
+      pushwide:   pushSV(18,26),
+      pushdiamond:pushSV(20,20),
       // Squats (front view) — feet planted, knees track out. Stance varies; jump leaves the floor.
       squats:     fdSvg('0 0 48 50',SGND,'8;16;8','M24 26 L20 34 L18 43 M24 26 L28 34 L30 43 M24 12 L24 26 M24 12 L19 22 M24 12 L29 22','M24 34 L16 38 L18 43 M24 34 L32 38 L30 43 M24 20 L24 34 M24 20 L15 18 M24 20 L33 18','2.1s'),
       squatsumo:  fdSvg('0 0 48 50',SGND,'10;20;10','M24 27 L19 35 L17 42 M24 27 L29 35 L31 42 M24 14 L24 27 M24 14 L19 23 M24 14 L29 23','M24 36 L15 40 L17 42 M24 36 L33 40 L31 42 M24 24 L24 36 M24 24 L18 21 M24 24 L30 21','2.1s'),
@@ -814,5 +816,6 @@
     if(document.readyState!=='loading') init(); else document.addEventListener('DOMContentLoaded', init);
   })();
   </script>
+  <script src="_lib/core-pagefx.js"></script>
 </body>
 </html>

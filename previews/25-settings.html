@@ -48,9 +48,11 @@
 </head>
 <body>
   <div class="phone">
+    <div id="ambCelestial" style="position:absolute;inset:0;pointer-events:none;z-index:0;"></div>
     <div class="bg"></div><div class="notch"></div>
     <div class="frame">
-      <div class="hdr"><a class="back" href="23-profile.html" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"/></svg></a><div class="ttl">Settings</div></div>
+      <div class="hdr"><a class="back" href="23-profile.html" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"/></svg></a><div class="ttl">Settings</div>
+      <button id="helpBtn" aria-label="Help" style="margin-left:auto;width:34px;height:34px;flex:none;border-radius:50%;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:#9AA1B7;font:800 14px -apple-system,sans-serif;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;-webkit-appearance:none;appearance:none;">?</button></div>
       <div class="scroll">
         <div class="lab">Account</div>
         <div class="group">
@@ -96,8 +98,10 @@
     var toastT; function toast(m){ var t=qs('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(function(){t.classList.remove('show');},1600); }
     function copyText(t,cb){ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(cb,fb);} else fb(); function fb(){ try{var ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);}catch(e){} cb&&cb(); } }
 
-    // account
-    var pid=pget('corePlayerId','CORE-XXXX-XXXX'); qs('#pidVal').textContent=pid;
+    // account — generate a real Player ID if one doesn't exist yet (so it never shows a placeholder)
+    function ensurePlayerId(){ var id=pget('corePlayerId',null);
+      if(!id){ var c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',a='',b=''; for(var i=0;i<4;i++){a+=c.charAt(Math.floor(Math.random()*c.length));b+=c.charAt(Math.floor(Math.random()*c.length));} id='CORE-'+a+'-'+b; pset('corePlayerId',id); } return id; }
+    var pid=ensurePlayerId(); qs('#pidVal').textContent=pid;
     var s=S.read(); qs('#classVal').textContent=(s.class||'Warrior').replace(/^\w/,function(c){return c.toUpperCase();});
     var nm=''; try{ var t=JSON.parse(localStorage.getItem('coreOnboardTrial')||'{}'); nm=t.name||t.firstName||''; }catch(e){}
     var ni=qs('#nameInput'); ni.value=nm||'Player';
@@ -153,5 +157,10 @@
   })();
   </script>
   <script src="_lib/core-back.js"></script>
+  <script src="_lib/dash-ambient.js"></script>
+  <script>if(window.dashAmbient)try{window.dashAmbient.init();}catch(e){}</script>
+  <script src="_lib/core-pagefx.js"></script>
+  <script src="_lib/core-help.js"></script>
+  <script>if(window.coreHelp)window.coreHelp.attach("helpBtn",{"title":"Settings","bullets":["Manage your account, notifications and preferences here.","Review legal and privacy info anytime.","Your data stays on your device unless you choose to sync."]});</script>
 </body>
 </html>

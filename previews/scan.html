@@ -224,6 +224,7 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
 </head>
 <body>
 <div class="phone">
+    <div id="ambCelestial" style="position:absolute;inset:0;pointer-events:none;z-index:0;"></div>
   <div id="ambBg"></div>
   <div class="notch"></div>
   <div class="home-indicator"></div>
@@ -232,6 +233,7 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
     <div class="top">
       <a class="back" href="coach.html" aria-label="Back to Coach"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></a>
       <h1 id="title">Scanner</h1>
+      <button id="helpBtn" aria-label="Help" style="margin-left:auto;width:34px;height:34px;flex:none;border-radius:50%;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:#9AA1B7;font:800 14px -apple-system,sans-serif;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;-webkit-appearance:none;appearance:none;">?</button>
     </div>
 
     <div class="scroll">
@@ -304,6 +306,7 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
 
 <script src="_lib/core-config.js"></script>
 <script src="_lib/core-sfx.js"></script>
+<script src="_lib/core-state.js"></script>
 <script>
 (function(){
   "use strict";
@@ -656,6 +659,15 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
       gradeTxt=grade(score);
       subTxt=cam._demo?'Demo result — allow camera for a real scan.':'Based on your '+s.name.toLowerCase()+' scan just now.';
     }
+    // Feed the scan score into CORE stats (physique→Strength, food/posture→Health, looks/outfit/voice→Social)
+    try{
+      if(window.coreState && coreState.addStat){
+        var SM={physique:'strength',food:'health',posture:'health',outfit:'social',looks:'social',voice:'social'};
+        var stat=SM[type]||'health', gain=Math.max(1,Math.round(score/40));
+        coreState.addStat(stat,gain,s.name+' scan');
+        if(coreState.addXp) coreState.addXp(Math.round(gain*8),s.name.toLowerCase()+'-scan');
+      }
+    }catch(e){}
     var R=78, C=2*Math.PI*R;
     var res=$('#result');
     // physique → gallery of the 4 captured angles; others → single snapshot
@@ -736,5 +748,9 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
 })();
 </script>
   <script src="_lib/core-pagefx.js"></script>
+  <script src="_lib/dash-ambient.js"></script>
+  <script>if(window.dashAmbient)try{window.dashAmbient.init();}catch(e){}</script>
+  <script src="_lib/core-help.js"></script>
+  <script>if(window.coreHelp)window.coreHelp.attach("helpBtn",{"title":"Scanner","bullets":["Point your camera to scan food, physique, outfit, posture or looks.","CORE vision AI scores each scan 0–100 with quick tips.","Physique feeds Strength, food feeds Health, looks & style feed Social."]});</script>
 </body>
 </html>
