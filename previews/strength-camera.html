@@ -146,6 +146,20 @@
   .multilbl.hot{ animation:multipulse .5s ease; } @keyframes multipulse{ 0%,100%{transform:scale(1);} 50%{transform:scale(1.22);} }
 
   .cwrap{ position:relative; display:flex; flex-direction:column; align-items:center; }
+  /* Depth ring around the rep number — fills as you lower */
+  .depthring{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:148px; height:148px; pointer-events:none; }
+  .depthring circle{ fill:none; stroke-linecap:round; }
+  .depthring .dr-bg{ stroke:rgba(255,255,255,0.12); stroke-width:6; }
+  .depthring .dr-fg{ stroke:var(--str,#0A84FF); stroke-width:6; stroke-dasharray:339.3; stroke-dashoffset:339.3; transform:rotate(-90deg); transform-origin:60px 60px; transition:stroke-dashoffset .08s linear, stroke .15s; filter:drop-shadow(0 0 6px color-mix(in srgb,var(--str,#0A84FF) 70%,transparent)); }
+  .cwrap.full .dr-fg{ stroke:#34D399; }
+  .cwrap.full{ animation:ringFlash .4s ease; } @keyframes ringFlash{ 0%{transform:scale(1.06);} 100%{transform:scale(1);} }
+  /* Get-ready countdown */
+  .countdown{ position:absolute; inset:0; z-index:8; display:none; align-items:center; justify-content:center; pointer-events:none; }
+  .countdown.on{ display:flex; }
+  .countdown b{ font-size:130px; font-weight:900; color:#fff; letter-spacing:-4px; text-shadow:0 0 50px rgba(10,132,255,0.6); animation:cdPop .8s ease both; }
+  .countdown b.go{ font-size:88px; color:#34D399; text-shadow:0 0 50px rgba(52,211,153,0.6); }
+  @keyframes cdPop{ 0%{transform:scale(1.7);opacity:0;} 25%{opacity:1;} 100%{transform:scale(1);opacity:1;} }
+  @media (prefers-reduced-motion:reduce){ .countdown b{ animation:none; } }
   .counter .cnum{ font-size:92px; font-weight:800; letter-spacing:-3px; line-height:0.9; font-variant-numeric:tabular-nums; text-shadow:0 0 30px rgba(10,132,255,0.42); }
   .counter .cnum.bump{ animation:bump .28s cubic-bezier(.2,1.5,.4,1); } @keyframes bump{ 0%{transform:scale(1);} 40%{transform:scale(1.22);} 100%{transform:scale(1);} }
   .counter .pts{ font-size:14.5px; font-weight:800; color:#fff; margin-top:2px; font-variant-numeric:tabular-nums; letter-spacing:-0.2px; }
@@ -200,6 +214,9 @@
     background:color-mix(in srgb, var(--accent) 9%, transparent); border:1px solid color-mix(in srgb, var(--accent) 28%, transparent); }
   .sum-coach .sc-ic{ flex:none; width:18px; height:18px; color:var(--accent); margin-top:1px; } .sum-coach .sc-ic svg{ width:18px; height:18px; }
   .sum-coach span:last-child{ font-size:12.5px; font-weight:600; line-height:1.45; color:rgba(248,250,254,.92); }
+  .rest-timer{ display:flex; align-items:center; justify-content:center; gap:7px; margin:0 0 14px; font-size:13px; font-weight:800; color:var(--muted); }
+  .rest-timer b{ color:#fff; font-variant-numeric:tabular-nums; } .rest-timer .rt-dot{ width:7px; height:7px; border-radius:50%; background:#34D399; box-shadow:0 0 8px #34D399; animation:holoBlink 1.4s ease-in-out infinite; }
+  @keyframes holoBlink{ 0%,100%{opacity:1;} 50%{opacity:.35;} }
   .sumhead h2{ margin:0; font-size:23px; font-weight:800; letter-spacing:-0.6px; } .sumhead p{ margin:5px 0 0; font-size:12.5px; color:var(--muted); }
   .big3{ display:flex; gap:9px; margin:18px 0; } .big3 .b{ flex:1; border-radius:18px; padding:16px 8px; text-align:center; border:1px solid var(--border); background:var(--bg-card); } .big3 .bn{ font-size:24px; font-weight:800; font-variant-numeric:tabular-nums; } .big3 .bl{ font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-top:3px; font-weight:700; } .big3 .b.str .bn{ color:var(--accent); } .big3 .b.xp .bn{ color:var(--accent); }
   .bigbtn{ width:100%; border:none; border-radius:18px; padding:16px; font-size:15px; font-weight:800; cursor:pointer; color:#fff; background:var(--accent); transition:transform .12s; } .bigbtn:active{ transform:scale(0.97); }
@@ -244,6 +261,7 @@
         <div class="camgrad"></div>
         <div class="poplayer" id="popLayer"></div>
         <div class="guide" id="guideTxt"></div>
+        <div class="countdown" id="countdown"></div>
         <div class="livetop">
           <span class="pill"><span class="d"></span><span id="liveEx">Push-ups</span></span>
           <span class="lt-right">
@@ -260,6 +278,7 @@
           <div class="multi"><div class="multibar"><i id="multiFill"></i></div><span class="multilbl" id="multiLbl">×1.0</span></div>
           <div class="clbl">Reps</div>
           <div class="cwrap">
+            <svg class="depthring" id="depthRing" viewBox="0 0 120 120"><circle class="dr-bg" cx="60" cy="60" r="54"/><circle class="dr-fg" id="drFg" cx="60" cy="60" r="54"/></svg>
             <div class="cnum" id="cnum">0</div>
           </div>
           <div class="pts"><b id="pts">0</b> <span class="u">pts</span></div>
@@ -455,6 +474,28 @@
     var armLmin=180, armRmin=180, holoCtx=null, lastSay='';  // per-arm effort + coach
     var scoreL=0, scoreR=0, faceTimer=null, talkTimer=null;  // arm scores + coach face state
     var sessMin=180;  // deepest tracked angle this set (for the AI recap)
+    var armed=false, cdActive=false, cdStartAt=0, lastMoveAt=0, prevAng=null, restInt=null, lastCd='';
+    var RINGC=339.3;  // 2π·54
+    function framingCheck(L){
+      if(!(L[11].visibility>0.5&&L[12].visibility>0.5&&L[23].visibility>0.4&&L[24].visibility>0.4))
+        return {ok:false,msg:'SHOW YOUR WHOLE BODY',short:'Show your whole body'};
+      var key=[11,12,23,24,27,28], xs=[], ys=[];
+      for(var i=0;i<key.length;i++){ var p=L[key[i]]; if(p.visibility>0.3){ xs.push(p.x); ys.push(p.y); } }
+      if(xs.length>=4){ var span=Math.max(Math.max.apply(null,xs)-Math.min.apply(null,xs), Math.max.apply(null,ys)-Math.min.apply(null,ys));
+        if(span<0.3) return {ok:false,msg:'STEP CLOSER',short:'Step closer'}; }
+      return {ok:true};
+    }
+    function showCountdown(t, go){ var el=$('#countdown'); if(!el) return;
+      if(t!==lastCd){ lastCd=t; el.innerHTML='<b'+(go?' class="go"':'')+'>'+t+'</b>'; try{ sfx(go?'confirm':'tick'); }catch(e){} }
+      el.classList.add('on'); }
+    function hideCountdown(){ var el=$('#countdown'); if(el){ el.classList.remove('on'); el.innerHTML=''; } lastCd=''; }
+    function setRing(frac){ var fg=$('#drFg'); if(fg){ frac=Math.max(0,Math.min(1,frac||0)); fg.style.strokeDashoffset=(RINGC*(1-frac)).toFixed(1); } }
+    function ringFull(){ var cw=$('.cwrap'); if(cw){ cw.classList.remove('full'); void cw.offsetWidth; cw.classList.add('full'); } }
+    function startRest(){ var el=$('#restTimer'); if(!el) return; var t0=Date.now(); stopRest();
+      function tick(){ var s=Math.floor((Date.now()-t0)/1000), mm=Math.floor(s/60), ss=s%60; el.innerHTML='<span class="rt-dot"></span>Resting <b>'+mm+':'+(ss<10?'0':'')+ss+'</b>'; }
+      tick(); restInt=setInterval(tick,1000); }
+    function stopRest(){ if(restInt){ clearInterval(restInt); restInt=null; } }
+    function autoEnd(){ if(!armed) return; armed=false; if(reps>0) finish(); }
     // Coach facial expressions — instant reactions
     var FACE_DEF={ neutral:{m:'M39 66 Q50 71 61 66',h:0,b:0}, happy:{m:'M36 63 Q50 78 64 63',h:1,b:0}, concerned:{m:'M41 70 Q50 63 59 70',h:0,b:1}, excited:{m:'M39 62 Q50 81 61 62',h:0,b:0} };
     function applyFace(st){ var f=FACE_DEF[st]||FACE_DEF.neutral; var mo=$('#cfMouth'); if(mo) mo.setAttribute('d',f.m);
@@ -729,6 +770,7 @@
       reps=0; points=0; ptsShown=0; mult=1; combo=0; lastRepTime=0; lastRepAt=0; phase='up'; angEMA=null; seenHi=null; seenLo=null; lastGuide=''; lastL=null; _mw=-1; _ml=''; resetRange();
       xpInto=0; xpNeed=150; xpLevel=1; xpShown=0;
       armLmin=180; armRmin=180; lastSay=''; scoreL=0; scoreR=0; sessMin=180;
+      armed=false; cdActive=false; prevAng=null; lastMoveAt=0; try{ hideCountdown(); setRing(0); stopRest(); }catch(e){}
       sfx('confirm'); haptic();
       document.documentElement.style.setProperty('--str', cur.c);
       $('#liveEx').textContent=cur.name; $('#silho').innerHTML=formFor(cur.id)+'<span class="fd-cap">'+formTip(cur.id)+'</span>';
@@ -834,13 +876,15 @@
           '<div class="b"><div class="bn">'+best+(isNew?'<span class="newmax">★</span>':'')+'</div><div class="bl">Max</div></div>'+
           '<div class="b str"><div class="bn">'+points.toLocaleString()+'</div><div class="bl">Score</div></div></div>'+
         '<div class="subline">+'+strGain+' Strength · +'+xpGain+' XP'+(isNew?' · <b style="color:#FFCB3D">New max!</b>':'')+'</div>'+
+        '<div class="rest-timer" id="restTimer"></div>'+
         '<div class="sum-coach" id="sumCoach"><span class="sc-ic">'+RECAP_IC+'</span><span>Analyzing your set…</span></div>'+
         '<button class="bigbtn" id="sumDone">Done</button>'+
         '<button class="againbtn" id="sumAgain">Go again</button>';
       $('#sumScrim').classList.add('show'); $('#sumSheet').classList.add('show');
+      armed=false; startRest();
       try{ aiRecap(); }catch(e){}
-      $('#sumDone').addEventListener('click', function(){ location.href='gym.html'; });
-      $('#sumAgain').addEventListener('click', function(){ $('#sumScrim').classList.remove('show'); $('#sumSheet').classList.remove('show'); startSession(lastMode); });
+      $('#sumDone').addEventListener('click', function(){ stopRest(); location.href='gym.html'; });
+      $('#sumAgain').addEventListener('click', function(){ stopRest(); $('#sumScrim').classList.remove('show'); $('#sumSheet').classList.remove('show'); startSession(lastMode); });
     }
 
     // ── Pose loop ────────────────────────────────────────────────────────
@@ -884,25 +928,26 @@
       var cam=$('#cam'); camW=cam.clientWidth; camH=cam.clientHeight;
       if(!L){ setTrack('Step into frame'); setGuide('STEP INTO FRAME'); angEMA=null; lastL=null; return; }
       lastL=L;
-      // Glowing colour-coded skeleton (left arm orange, right arm green) + the
-      // top-right coach hologram mirror. Canvas shares the video's object-fit.
-      // skeleton overlay hidden (tracking still runs underneath)
-      // Per-arm effort — track each arm's deepest elbow bend this rep (arm moves only)
+      var cfg=POSE_CFG[cur&&cur.id]; if(!cfg){ setTrack('● Live'); return; }
+      var fam=famOf(cur.id);
+      // ── #1 Framing + get-ready countdown (before counting starts) ──
+      var fr=framingCheck(L);
+      if(!fr.ok){ setTrack(fr.short); setGuide(fr.msg, true); angEMA=null; phase='up'; resetRange(); setRing(0);
+        if(!armed){ cdActive=false; hideCountdown(); }   // only re-run countdown if we haven't started yet
+        return; }
+      if(!armed){
+        if(!cdActive){ cdActive=true; cdStartAt=performance.now(); }
+        var elc=performance.now()-cdStartAt, n=3-Math.floor(elc/800);
+        if(n>0){ showCountdown(String(n)); setTrack('● Get ready'); setGuide(''); return; }
+        showCountdown('GO', true); armed=true; cdActive=false; lastRepAt=performance.now(); lastMoveAt=performance.now(); prevAng=null;
+        setTimeout(hideCountdown, 500); setGuide(cfg.gUp);
+      }
+      // ── Armed: track each arm's deepest bend this rep (arm moves only) ──
       if(isArmFam()){
         var aL=angleAt(L,11,13,15,W,H), aR=angleAt(L,12,14,16,W,H);
         if(aL!=null) armLmin=Math.min(armLmin,aL);
         if(aR!=null) armRmin=Math.min(armRmin,aR);
       }
-
-      var cfg=POSE_CFG[cur&&cur.id]; if(!cfg){ setTrack('● Live'); return; }
-      var fam=famOf(cur.id);
-      // Anti-fake gate #1 — your core body (both shoulders + both hips) must be
-      // in frame, so you can't game it with just an arm. No orientation gate:
-      // push-ups viewed from a floor phone read as "vertical" and were wrongly
-      // rejected. The real-movement + range gates below stop the actual fakes.
-      var coreVis = L[11].visibility>0.5 && L[12].visibility>0.5 && L[23].visibility>0.4 && L[24].visibility>0.4;
-      if(!coreVis){ setTrack('Show your whole body'); setGuide('SHOW YOUR WHOLE BODY', true); angEMA=null; phase='up'; resetRange(); return; }
-      if(lastGuide==='SHOW YOUR WHOLE BODY'||lastGuide==='STEP INTO FRAME'||lastGuide==='FACE THE CAMERA') setGuide(cfg.gUp);
       var raw=exAngle(L,cfg,W,H);
       if(raw==null){ setTrack('Turn so your '+cfg.label+' show'); setGuide('FACE THE CAMERA'); angEMA=null; return; }
       setTrack('● Tracking');
@@ -916,10 +961,16 @@
       seenHi=Math.max(ang, seenHi-0.06); seenLo=Math.min(ang, seenLo+0.06);
       var rng=seenHi-seenLo, downTh=cfg.down, upTh=cfg.up;
       if(rng>=45){ downTh=seenHi-rng*0.55; upTh=seenHi-rng*0.25; }
+      // #2 depth ring — 0 at the top of the rep, full at the bottom
+      setRing((upTh-ang)/(upTh-downTh));
+      // #3 auto set-end — after a few reps, no rep + no movement for a while = set done
+      if(prevAng!=null && Math.abs(ang-prevAng)>2.2) lastMoveAt=performance.now();
+      prevAng=ang;
+      if(reps>=2 && phase==='up' && performance.now()-lastRepAt>6500 && performance.now()-lastMoveAt>4000){ autoEnd(); return; }
       var lc=cfg.live(L,W,H); if(lc) cue(lc.t, 'warn');
       // Rep state machine + hold-for-bonus, with big guide text.
       if(phase==='up' && ang<downTh){
-        phase='down'; downAt=performance.now(); holdReady=true; holdScored=false;
+        phase='down'; downAt=performance.now(); holdReady=true; holdScored=false; ringFull();
         setGuide(cfg.gDn);                              // bottom reached → drive back up
         if(reps%4===0) cue('Hold for +2', 'bonus');     // prompt occasionally, not every rep
       } else if(phase==='down'){
