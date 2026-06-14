@@ -275,6 +275,7 @@
     background:radial-gradient(80% 100% at 50% 0%, color-mix(in srgb,var(--str,#0A84FF) 16%,transparent), transparent 70%); }
   .bigbtn{ width:100%; border:none; border-radius:18px; padding:16px; font-size:15px; font-weight:800; cursor:pointer; color:#fff; background:var(--accent); transition:transform .12s; } .bigbtn:active{ transform:scale(0.97); }
   .againbtn{ width:100%; margin-top:9px; border:1px solid var(--border); background:rgba(255,255,255,0.05); color:var(--text); border-radius:16px; padding:13px; font-size:13px; font-weight:700; cursor:pointer; }
+  .sumbtns2{ display:flex; gap:9px; } .sumbtns2 .againbtn{ flex:1; }
   @media (prefers-reduced-motion:reduce){ .scan{ animation:none!important; } }
 </style>
   <link rel="stylesheet" href="_lib/core-responsive.css">
@@ -303,6 +304,7 @@
         <div class="modetog" id="modeTog">
           <button class="mt-opt on" data-mode="reps" type="button">Free reps</button>
           <button class="mt-opt" data-mode="timed" type="button">60s timer</button>
+          <button class="mt-opt" data-mode="plan" type="button">AI plan</button>
         </div>
         <div class="exsel" id="exsel"></div>
         <div class="histwrap" id="histWrap"></div>
@@ -538,6 +540,7 @@
     var repBest=0, repTarget=10;  // #6 goal + #8 personal-best
     var setNum=1, sessionLog=[];           // #10 multiple sets per workout
     var timedMode=false, timedDur=60, timedStart=0, timedInt=null;   // #11 60-second AMRAP
+    var planMode=false, plan=null, lastRt=null;   // #16 AI workout plan + last summary rating
     var armed=false, cdActive=false, cdStartAt=0, lastMoveAt=0, prevAng=null, restInt=null, lastCd='';
     var RINGC=339.3;  // 2π·54
     function framingCheck(L){
@@ -820,7 +823,21 @@
     }
 
     // #10 workout flow — a workout is one or more sets of the same movement
-    function beginWorkout(id){ setNum=1; sessionLog=[]; startSession(id); }
+    function calRate(){ return /^push/.test(cur.id)?0.5 : /^(squat|sumo|jump)/.test(cur.id)?0.45 : 0.9; }
+    // #16 rep-target plan per set (instant rule-based; AI refines it if a key is set)
+    function rulePlan(id){ var b=(readMax()[id]||0)||10; return [Math.max(5,Math.round(b*0.8)), Math.max(5,Math.round(b*0.65)), Math.max(4,Math.round(b*0.5))]; }
+    async function aiPlan(id){
+      if(!(window.coreAI && coreAI.hasKey())) return;
+      var ex=EXOS.find(function(e){ return e.id===id; }), best=readMax()[id]||0;
+      var prompt='Make a 3-set '+ex.name+' workout. My best single set is '+(best||'unknown')+' reps. Reply with ONLY a JSON array of 3 integers (rep targets per set), descending and realistic, e.g. [12,10,8].';
+      try{ var r=await coreAI.chat([{role:'user',content:prompt}], {maxTokens:40, temperature:0.4});
+        if(r && r.ok && r.text){ var arr=JSON.parse((r.text.match(/\[[^\]]*\]/)||['[]'])[0]);
+          if(Array.isArray(arr) && arr.length){ plan=arr.map(function(n){ return Math.max(1,Math.round(n)); });
+            if(planMode && cur){ repTarget=plan[Math.min(setNum-1,plan.length-1)]; var gt=$('#goalTxt'); if(gt) gt.textContent=reps+' / '+repTarget; updateSetBadge(); } } }
+      }catch(e){}
+    }
+    function updateSetBadge(){ var sb=$('#setBadge'); if(sb) sb.textContent = (planMode&&plan) ? ('Set '+setNum+'/'+plan.length) : ('Set '+setNum); }
+    function beginWorkout(id){ setNum=1; sessionLog=[]; plan = planMode ? rulePlan(id) : null; startSession(id); if(planMode) aiPlan(id); }
     function nextSet(){ setNum++; stopRest(); $('#sumScrim').classList.remove('show'); $('#sumSheet').classList.remove('show'); startSession(cur.id); }
     function endWorkout(){ stopRest(); saveSession(); location.href='gym.html'; }
     function saveSession(){
@@ -828,8 +845,31 @@
       try{
         var hist=JSON.parse(localStorage.getItem('core.reps.history.v1')||'[]');
         var totalReps=sessionLog.reduce(function(a,s){ return a+s.reps; },0);
-        hist.unshift({ ex:cur.id, name:cur.name, ts:Date.now(), sets:sessionLog.map(function(s){ return s.reps; }), total:totalReps, mode:(timedMode?'timed':'reps') });
+        hist.unshift({ ex:cur.id, name:cur.name, ts:Date.now(), sets:sessionLog.map(function(s){ return s.reps; }), total:totalReps, mode:(planMode?'plan':timedMode?'timed':'reps') });
         localStorage.setItem('core.reps.history.v1', JSON.stringify(hist.slice(0,30)));
+      }catch(e){}
+    }
+    // #13 shareable result card (PNG → native share or download)
+    function hexA(hex,a){ var m=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})/i.exec(hex)||[]; return 'rgba('+parseInt(m[1]||'10',16)+','+parseInt(m[2]||'84',16)+','+parseInt(m[3]||'ff',16)+','+a+')'; }
+    function shareCard(){
+      try{
+        var c=document.createElement('canvas'); c.width=1080; c.height=1350; var g=c.getContext('2d');
+        var col=(cur&&cur.c)||'#0A84FF';
+        var grd=g.createLinearGradient(0,0,0,1350); grd.addColorStop(0,'#0A1530'); grd.addColorStop(0.5,'#04040E'); grd.addColorStop(1,'#0A0A16'); g.fillStyle=grd; g.fillRect(0,0,1080,1350);
+        var rg=g.createRadialGradient(540,440,40,540,440,660); rg.addColorStop(0,hexA(col,0.30)); rg.addColorStop(1,'rgba(0,0,0,0)'); g.fillStyle=rg; g.fillRect(0,0,1080,980);
+        var wkReps=sessionLog.reduce(function(a,s){ return a+s.reps; },0), wkSets=sessionLog.length||1;
+        g.textAlign='center'; g.fillStyle='#9FC6FF'; g.font='900 36px -apple-system,Inter,sans-serif'; g.fillText('●  C O R E', 540, 150);
+        g.fillStyle='#fff'; g.font='800 58px -apple-system,Inter,sans-serif'; g.fillText(cur.name, 540, 360);
+        g.fillStyle=col; g.font='900 300px -apple-system,Inter,sans-serif'; g.fillText(String(wkReps), 540, 740);
+        g.fillStyle='#9AA1B7'; g.font='800 44px -apple-system,Inter,sans-serif'; g.fillText('TOTAL REPS', 540, 820);
+        g.fillStyle='#fff'; g.font='700 42px -apple-system,Inter,sans-serif'; g.fillText(wkSets+' set'+(wkSets>1?'s':'')+(lastRt?(' · '+lastRt.t):''), 540, 960);
+        g.fillStyle='#5B6072'; g.font='700 32px -apple-system,Inter,sans-serif'; g.fillText('Tracked live with the CORE camera', 540, 1290);
+        c.toBlob(function(blob){ if(!blob) return;
+          var file=new File([blob],'core-workout.png',{type:'image/png'});
+          if(navigator.canShare && navigator.canShare({files:[file]})){ navigator.share({files:[file], title:'My CORE workout'}).catch(function(){}); }
+          else { var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='core-workout.png'; document.body.appendChild(a); a.click(); a.remove(); }
+        },'image/png');
+        sfx('tick');
       }catch(e){}
     }
     // #12 recent-sessions list on the picker
@@ -850,9 +890,10 @@
       armLmin=180; armRmin=180; lastSay=''; scoreL=0; scoreR=0; sessMin=180;
       armed=false; cdActive=false; prevAng=null; lastMoveAt=0; endCd=false; lastRepTime=0;
       repBest=(readMax()[cur.id]||0); repTarget=repBest>0?repBest:10;   // #6 goal = beat your best (or 10 to start)
+      if(planMode && plan) repTarget=plan[Math.min(setNum-1, plan.length-1)];   // #16 plan target for this set
       var _gf=$('#goalFill'), _gt=$('#goalTxt'), _mb=$('#multBadge'); if(_gf)_gf.style.width='0%'; if(_gt)_gt.textContent='0 / '+repTarget; if(_mb)_mb.classList.remove('on');
       timedStart=0;
-      var _sb=$('#setBadge'); if(_sb) _sb.textContent='Set '+setNum;
+      updateSetBadge();
       var _tp=$('#setTimer'); if(_tp){ _tp.style.display=timedMode?'inline-flex':'none'; _tp.classList.remove('low'); _tp.textContent='1:00'; }
       try{ hideCountdown(); hideEndCd(); setRing(0); stopRest(); }catch(e){}
       sfx('confirm'); haptic();
@@ -962,34 +1003,37 @@
       // Personal max for this variant + rank/rating from the reps done.
       var mx=readMax(), prev=mx[cur.id]||0, isNew=reps>prev, best=Math.max(prev,reps);
       if(isNew){ mx[cur.id]=reps; writeMax(mx); }
-      var rt=ratingFor(reps, cur.diff);
+      var rt=ratingFor(reps, cur.diff); lastRt=rt;
       sfx('reward');
       sessionLog.push({ reps:reps, points:points });   // #10 record this set
       var wkSets=sessionLog.length, wkReps=sessionLog.reduce(function(a,s){ return a+s.reps; },0);
+      var setCal=Math.round(reps*calRate()), wkCal=Math.round(wkReps*calRate());   // #14 calories
+      var planDone = planMode && plan && setNum>=plan.length;
       $('#sumBody').innerHTML=
         '<div class="sum-hero">'+
           '<div class="rankbadge" style="color:'+rt.c+';border-color:'+rt.c+'">'+rt.l+'</div>'+
-          '<div class="sh-rt" style="color:'+rt.c+'">Set '+setNum+' done</div>'+
+          '<div class="sh-rt" style="color:'+rt.c+'">'+(planDone?'Workout done':'Set '+setNum+' done')+'</div>'+
           '<div class="sh-ex">'+cur.name+' · '+rt.t+(isNew?' · <span class="sh-new">NEW BEST</span>':'')+'</div>'+
         '</div>'+
         '<div class="sum-score"><div class="ss-num" id="sumScore">0</div><div class="ss-lbl">POINTS</div></div>'+
         '<div class="big3">'+
           '<div class="b"><div class="bn">'+reps+'</div><div class="bl">Reps</div></div>'+
           '<div class="b"><div class="bn">'+best+(isNew?'<span class="newmax">★</span>':'')+'</div><div class="bl">Best</div></div>'+
-          '<div class="b str"><div class="bn">+'+strGain+'</div><div class="bl">Strength</div></div>'+
+          '<div class="b str"><div class="bn">~'+setCal+'</div><div class="bl">Cal</div></div>'+
         '</div>'+
-        (wkSets>1 ? '<div class="sh-xp"><b style="color:#fff">Workout: '+wkReps+' reps</b> over '+wkSets+' sets · +'+xpGain+' XP</div>' : '<div class="sh-xp">+'+xpGain+' XP earned</div>')+
+        (wkSets>1 ? '<div class="sh-xp"><b style="color:#fff">Workout: '+wkReps+' reps · ~'+wkCal+' cal</b> · '+wkSets+' sets · +'+xpGain+' XP</div>' : '<div class="sh-xp">+'+strGain+' Strength · +'+xpGain+' XP</div>')+
         '<div class="rest-timer" id="restTimer"></div>'+
         '<div class="sum-coach" id="sumCoach"><span class="sc-ic">'+RECAP_IC+'</span><span>Analyzing your set…</span></div>'+
-        '<button class="bigbtn" id="sumNext">Next set</button>'+
-        '<button class="againbtn" id="sumFinish">Finish workout</button>';
+        (planDone ? '' : '<button class="bigbtn" id="sumNext">Next set'+(planMode&&plan?(' · aim '+plan[Math.min(setNum,plan.length-1)]):'')+'</button>')+
+        '<div class="sumbtns2"><button class="againbtn" id="sumShare">Share</button><button class="againbtn" id="sumFinish">Finish workout</button></div>';
       $('#sumScrim').classList.add('show'); $('#sumSheet').classList.add('show');
       armed=false; startRest();
       (function(){ var t=$('#sumScore'); if(!t) return; var tg=points, t0=performance.now();
         function step(now){ var p=Math.min(1,(now-t0)/700); t.textContent=Math.round(tg*(1-Math.pow(1-p,3))).toLocaleString(); if(p<1) requestAnimationFrame(step); }
         requestAnimationFrame(step); })();
       try{ aiRecap(); }catch(e){}
-      $('#sumNext').addEventListener('click', function(){ nextSet(); });
+      var _sn=$('#sumNext'); if(_sn) _sn.addEventListener('click', function(){ nextSet(); });
+      $('#sumShare').addEventListener('click', shareCard);
       $('#sumFinish').addEventListener('click', function(){ endWorkout(); });
     }
 
@@ -1117,7 +1161,7 @@
       try{ renderHistory(); }catch(e){}
       // #11 mode toggle
       Array.prototype.forEach.call(document.querySelectorAll('#modeTog .mt-opt'), function(b){ b.addEventListener('click', function(){
-        timedMode=(b.getAttribute('data-mode')==='timed');
+        var md=b.getAttribute('data-mode'); timedMode=(md==='timed'); planMode=(md==='plan');
         Array.prototype.forEach.call(document.querySelectorAll('#modeTog .mt-opt'), function(x){ x.classList.toggle('on', x===b); }); sfx('tick');
       }); });
       // deep-link: ?ex=<id> opens straight into that movement (from Strength quick wins)
