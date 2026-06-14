@@ -118,16 +118,17 @@
   .holo-say.say-warn{ color:#FFC24B; }
   @media (prefers-reduced-motion:reduce){ .holo-dot{ animation:none; } }
   /* Per-arm effort bars — bottom */
-  /* Per-arm strength — left side; pips cycle, count climbs each rep */
-  .armbars{ position:absolute; left:12px; bottom:124px; z-index:6; display:flex; flex-direction:column; gap:11px; pointer-events:none; align-items:flex-start; }
-  .vb{ display:flex; align-items:center; gap:7px; }
-  .vb-k{ font-size:11px; font-weight:900; width:10px; text-shadow:0 1px 4px rgba(0,0,0,.6); }
-  .vb-pips{ display:flex; gap:4px; }
-  .vb-pips i{ width:17px; height:7px; border-radius:4px; background:rgba(255,255,255,0.14); box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12); transition:background .16s,box-shadow .16s; }
-  .vb-pips i.on{ background:var(--pc); box-shadow:0 0 10px var(--pc); }
-  .vb-pips.bump i.on{ animation:pipPop .4s ease; }
-  .vb-n{ font-size:13px; font-weight:900; min-width:14px; text-shadow:0 1px 5px rgba(0,0,0,.6); }
-  @keyframes pipPop{ 0%{transform:scale(1.55);} 100%{transform:scale(1);} }
+  /* Per-arm strength — clean frosted card, bottom-left */
+  .armhud{ position:absolute; left:14px; bottom:120px; z-index:6; width:120px; padding:9px 12px 10px; border-radius:14px; pointer-events:none;
+    background:rgba(8,12,22,0.42); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border:1px solid rgba(255,255,255,0.09); box-shadow:0 6px 20px rgba(0,0,0,0.3); }
+  .ah-t{ font-size:7.5px; font-weight:900; letter-spacing:.18em; color:rgba(255,255,255,0.46); margin-bottom:5px; }
+  .ah-row{ display:flex; align-items:center; gap:7px; margin-top:6px; }
+  .ah-k{ font-size:10px; font-weight:900; width:8px; }
+  .ah-tr{ flex:1; height:5px; border-radius:999px; background:rgba(255,255,255,0.14); overflow:hidden; }
+  .ah-tr i{ display:block; height:100%; width:0%; border-radius:999px; box-shadow:0 0 8px currentColor; transition:width .5s cubic-bezier(.2,.9,.2,1); }
+  .ah-n{ font-size:12px; font-weight:900; min-width:13px; text-align:right; font-variant-numeric:tabular-nums; }
+  .armhud.pulse .ah-tr i{ animation:ahPulse .5s ease; }
+  @keyframes ahPulse{ 0%{filter:brightness(1.9);} 100%{filter:brightness(1);} }
   .lt-right{ display:flex; align-items:center; gap:7px; }
   .pmute{ width:30px; height:30px; padding:0; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; -webkit-appearance:none; appearance:none; border:none; }
   .pmute svg{ width:15px; height:15px; }
@@ -160,6 +161,12 @@
   .countdown b.go{ font-size:88px; color:#34D399; text-shadow:0 0 50px rgba(52,211,153,0.6); }
   @keyframes cdPop{ 0%{transform:scale(1.7);opacity:0;} 25%{opacity:1;} 100%{transform:scale(1);opacity:1;} }
   @media (prefers-reduced-motion:reduce){ .countdown b{ animation:none; } }
+  /* End-of-set countdown (when you pause) */
+  .endcd{ position:absolute; left:0; right:0; top:40%; z-index:8; display:none; flex-direction:column; align-items:center; gap:8px; pointer-events:none; }
+  .endcd.on{ display:flex; }
+  .ec-num{ width:66px; height:66px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:900; color:#fff;
+    background:rgba(8,12,22,0.55); border:2.5px solid #FF6B6B; box-shadow:0 0 26px rgba(255,107,107,0.5); }
+  .ec-lbl{ font-size:11.5px; font-weight:800; color:rgba(255,255,255,0.88); text-shadow:0 1px 6px rgba(0,0,0,.6); }
   .counter .cnum{ font-size:92px; font-weight:800; letter-spacing:-3px; line-height:0.9; font-variant-numeric:tabular-nums; text-shadow:0 0 30px rgba(10,132,255,0.42); }
   .counter .cnum.bump{ animation:bump .28s cubic-bezier(.2,1.5,.4,1); } @keyframes bump{ 0%{transform:scale(1);} 40%{transform:scale(1.22);} 100%{transform:scale(1);} }
   .counter .pts{ font-size:14.5px; font-weight:800; color:#fff; margin-top:2px; font-variant-numeric:tabular-nums; letter-spacing:-0.2px; }
@@ -218,7 +225,22 @@
   .rest-timer b{ color:#fff; font-variant-numeric:tabular-nums; } .rest-timer .rt-dot{ width:7px; height:7px; border-radius:50%; background:#34D399; box-shadow:0 0 8px #34D399; animation:holoBlink 1.4s ease-in-out infinite; }
   @keyframes holoBlink{ 0%,100%{opacity:1;} 50%{opacity:.35;} }
   .sumhead h2{ margin:0; font-size:23px; font-weight:800; letter-spacing:-0.6px; } .sumhead p{ margin:5px 0 0; font-size:12.5px; color:var(--muted); }
-  .big3{ display:flex; gap:9px; margin:18px 0; } .big3 .b{ flex:1; border-radius:18px; padding:16px 8px; text-align:center; border:1px solid var(--border); background:var(--bg-card); } .big3 .bn{ font-size:24px; font-weight:800; font-variant-numeric:tabular-nums; } .big3 .bl{ font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-top:3px; font-weight:700; } .big3 .b.str .bn{ color:var(--accent); } .big3 .b.xp .bn{ color:var(--accent); }
+  /* premium summary */
+  .sum-hero{ text-align:center; margin-top:2px; }
+  .sum-hero .rankbadge{ width:82px; height:82px; font-size:40px; border-radius:24px; margin:4px auto 10px; }
+  .sh-rt{ font-size:25px; font-weight:900; letter-spacing:-0.6px; line-height:1; }
+  .sh-ex{ font-size:12.5px; color:var(--muted); font-weight:600; margin-top:5px; }
+  .sh-new{ color:#FFCB3D; font-weight:900; font-size:10px; letter-spacing:.06em; padding:2px 6px; border-radius:6px; background:rgba(255,203,61,0.14); }
+  .sum-score{ text-align:center; margin:16px 0 4px; }
+  .ss-num{ font-size:56px; font-weight:900; letter-spacing:-2px; line-height:1; font-variant-numeric:tabular-nums; background:linear-gradient(180deg,#fff,#9FC6FF); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+  .ss-lbl{ font-size:9px; font-weight:900; letter-spacing:.24em; color:var(--muted); margin-top:5px; }
+  .sh-xp{ text-align:center; font-size:11.5px; color:var(--muted); font-weight:700; margin:8px 0 16px; }
+  .big3{ display:flex; gap:9px; margin:16px 0 0; }
+  .big3 .b{ flex:1; border-radius:16px; padding:15px 8px; text-align:center; border:1px solid rgba(255,255,255,0.08); background:linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.018)); }
+  .big3 .bn{ font-size:24px; font-weight:900; font-variant-numeric:tabular-nums; } .big3 .bl{ font-size:8.5px; color:var(--muted); text-transform:uppercase; letter-spacing:1.2px; margin-top:4px; font-weight:800; }
+  .big3 .b.str{ border-color:color-mix(in srgb,var(--accent) 30%,transparent); } .big3 .b.str .bn{ color:var(--accent); }
+  .sheet::before{ content:""; position:absolute; top:0; left:0; right:0; height:120px; border-radius:30px 30px 0 0; pointer-events:none;
+    background:radial-gradient(80% 100% at 50% 0%, color-mix(in srgb,var(--str,#0A84FF) 16%,transparent), transparent 70%); }
   .bigbtn{ width:100%; border:none; border-radius:18px; padding:16px; font-size:15px; font-weight:800; cursor:pointer; color:#fff; background:var(--accent); transition:transform .12s; } .bigbtn:active{ transform:scale(0.97); }
   .againbtn{ width:100%; margin-top:9px; border:1px solid var(--border); background:rgba(255,255,255,0.05); color:var(--text); border-radius:16px; padding:13px; font-size:13px; font-weight:700; cursor:pointer; }
   @media (prefers-reduced-motion:reduce){ .scan{ animation:none!important; } }
@@ -262,6 +284,7 @@
         <div class="poplayer" id="popLayer"></div>
         <div class="guide" id="guideTxt"></div>
         <div class="countdown" id="countdown"></div>
+        <div class="endcd" id="endCd"><div class="ec-num" id="endCdN">5</div><div class="ec-lbl">Keep moving — or the set ends</div></div>
         <div class="livetop">
           <span class="pill"><span class="d"></span><span id="liveEx">Push-ups</span></span>
           <span class="lt-right">
@@ -286,10 +309,11 @@
         </div>
         <div class="cuewrap"><div class="cue" id="cueEl"></div></div>
 
-        <!-- Per-arm strength — left side; 2 pips cycle (1→2→cycle), count climbs in 1s -->
-        <div class="armbars" id="armBars">
-          <div class="vb"><span class="vb-k" style="color:#FF9F0A">L</span><div class="vb-pips" id="pipsL" style="--pc:#FF9F0A"><i></i><i></i></div><span class="vb-n" id="abLn" style="color:#FF9F0A">0</span></div>
-          <div class="vb"><span class="vb-k" style="color:#34D399">R</span><div class="vb-pips" id="pipsR" style="--pc:#34D399"><i></i><i></i></div><span class="vb-n" id="abRn" style="color:#34D399">0</span></div>
+        <!-- Per-arm strength — clean frosted card, bottom-left -->
+        <div class="armhud" id="armBars">
+          <div class="ah-t">ARM BALANCE</div>
+          <div class="ah-row"><span class="ah-k" style="color:#FF9F0A">L</span><div class="ah-tr"><i id="abL" style="background:#FF9F0A;color:#FF9F0A"></i></div><b class="ah-n" id="abLn" style="color:#FF9F0A">0</b></div>
+          <div class="ah-row"><span class="ah-k" style="color:#34D399">R</span><div class="ah-tr"><i id="abR" style="background:#34D399;color:#34D399"></i></div><b class="ah-n" id="abRn" style="color:#34D399">0</b></div>
         </div>
         <div class="livebtns">
           <div class="row2"><button class="gb" id="camToggle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px"><path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg> Camera</button><button class="gb fin" id="finBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px"><path d="M5 12l4 4 10-11"/></svg> Finish</button></div>
@@ -495,7 +519,12 @@
       function tick(){ var s=Math.floor((Date.now()-t0)/1000), mm=Math.floor(s/60), ss=s%60; el.innerHTML='<span class="rt-dot"></span>Resting <b>'+mm+':'+(ss<10?'0':'')+ss+'</b>'; }
       tick(); restInt=setInterval(tick,1000); }
     function stopRest(){ if(restInt){ clearInterval(restInt); restInt=null; } }
-    function autoEnd(){ if(!armed) return; armed=false; if(reps>0) finish(); }
+    function autoEnd(){ if(!armed) return; armed=false; hideEndCd(); if(reps>0) finish(); }
+    var endCd=false, endCdStart=0, lastEc=-1;
+    function showEndCd(n){ var el=$('#endCd'); if(!el) return; el.classList.add('on'); if(n!==lastEc){ lastEc=n; var num=$('#endCdN'); if(num) num.textContent=n; try{ sfx('tick'); }catch(e){} } }
+    function hideEndCd(){ var el=$('#endCd'); if(el) el.classList.remove('on'); lastEc=-1; }
+    var ENC=['Keep going — strong!','Nice pace, don\'t stop!','You\'ve got more in you!','Looking strong — push!','Almost there — keep it up!'];
+    function encourage(){ var t=ENC[Math.floor(reps/5)%ENC.length]; cue(t,'good'); try{ coachSpeak(t); }catch(e){} }
     // Coach facial expressions — instant reactions
     var FACE_DEF={ neutral:{m:'M39 66 Q50 71 61 66',h:0,b:0}, happy:{m:'M36 63 Q50 78 64 63',h:1,b:0}, concerned:{m:'M41 70 Q50 63 59 70',h:0,b:1}, excited:{m:'M39 62 Q50 81 61 62',h:0,b:0} };
     function applyFace(st){ var f=FACE_DEF[st]||FACE_DEF.neutral; var mo=$('#cfMouth'); if(mo) mo.setAttribute('d',f.m);
@@ -571,25 +600,22 @@
       for(var sy=0; sy<H; sy+=3){ holoCtx.fillRect(0,sy,W,1); }
       holoCtx.globalAlpha=1;
     }
-    // 2 pips cycle: 1 lit after rep 1, 2 after rep 2, then cycle (1,2,1,2…) as the count climbs
-    function setPips(container, score){
-      if(!container) return;
-      var pips=container.querySelectorAll('i'), lit=score>0?(((score-1)%2)+1):0;
-      for(var k=0;k<pips.length;k++) pips[k].classList.toggle('on', k<lit);
-      container.classList.remove('bump'); void container.offsetWidth; container.classList.add('bump');
-    }
     function paintArmBars(){
-      var nL=$('#abLn'), nR=$('#abRn'); if(nL) nL.textContent=scoreL; if(nR) nR.textContent=scoreR;
-      setPips($('#pipsL'), scoreL); setPips($('#pipsR'), scoreR);
+      var mx=Math.max(scoreL,scoreR,1);
+      var eL=$('#abL'), eR=$('#abR'), nL=$('#abLn'), nR=$('#abRn');
+      if(eL) eL.style.width=(scoreL/mx*100).toFixed(0)+'%';
+      if(eR) eR.style.width=(scoreR/mx*100).toFixed(0)+'%';
+      if(nL) nL.textContent=scoreL; if(nR) nR.textContent=scoreR;
     }
     function updateArmBars(cfg){
-      // award +1 (scores only ever climb in 1s) to the arm(s) that did the work this rep
+      // +1 (scores only climb in 1s) to the arm(s) that did the work this rep
       var dl=armLmin, dr=armRmin;
       if(dl<170 || dr<170){
         if(Math.abs(dl-dr)<12){ scoreL++; scoreR++; }
         else if(dl<dr) scoreL++; else scoreR++;
       }
       paintArmBars();
+      var ab=$('#armBars'); if(ab){ ab.classList.remove('pulse'); void ab.offsetWidth; ab.classList.add('pulse'); }
       armLmin=180; armRmin=180;
     }
 
@@ -770,7 +796,7 @@
       reps=0; points=0; ptsShown=0; mult=1; combo=0; lastRepTime=0; lastRepAt=0; phase='up'; angEMA=null; seenHi=null; seenLo=null; lastGuide=''; lastL=null; _mw=-1; _ml=''; resetRange();
       xpInto=0; xpNeed=150; xpLevel=1; xpShown=0;
       armLmin=180; armRmin=180; lastSay=''; scoreL=0; scoreR=0; sessMin=180;
-      armed=false; cdActive=false; prevAng=null; lastMoveAt=0; try{ hideCountdown(); setRing(0); stopRest(); }catch(e){}
+      armed=false; cdActive=false; prevAng=null; lastMoveAt=0; endCd=false; try{ hideCountdown(); hideEndCd(); setRing(0); stopRest(); }catch(e){}
       sfx('confirm'); haptic();
       document.documentElement.style.setProperty('--str', cur.c);
       $('#liveEx').textContent=cur.name; $('#silho').innerHTML=formFor(cur.id)+'<span class="fd-cap">'+formTip(cur.id)+'</span>';
@@ -870,18 +896,27 @@
       var rt=ratingFor(reps, cur.diff);
       sfx('reward');
       $('#sumBody').innerHTML=
-        '<div class="sumhead"><div class="rankbadge" style="color:'+rt.c+';border-color:'+rt.c+'">'+rt.l+'</div>'+
-          '<h2>'+rt.t+'</h2><p>'+cur.name+' · rank '+rt.l+'</p></div>'+
-        '<div class="big3"><div class="b"><div class="bn">'+reps+'</div><div class="bl">Reps</div></div>'+
-          '<div class="b"><div class="bn">'+best+(isNew?'<span class="newmax">★</span>':'')+'</div><div class="bl">Max</div></div>'+
-          '<div class="b str"><div class="bn">'+points.toLocaleString()+'</div><div class="bl">Score</div></div></div>'+
-        '<div class="subline">+'+strGain+' Strength · +'+xpGain+' XP'+(isNew?' · <b style="color:#FFCB3D">New max!</b>':'')+'</div>'+
+        '<div class="sum-hero">'+
+          '<div class="rankbadge" style="color:'+rt.c+';border-color:'+rt.c+'">'+rt.l+'</div>'+
+          '<div class="sh-rt" style="color:'+rt.c+'">'+rt.t+'</div>'+
+          '<div class="sh-ex">'+cur.name+(isNew?' · <span class="sh-new">NEW BEST</span>':'')+'</div>'+
+        '</div>'+
+        '<div class="sum-score"><div class="ss-num" id="sumScore">0</div><div class="ss-lbl">POINTS</div></div>'+
+        '<div class="big3">'+
+          '<div class="b"><div class="bn">'+reps+'</div><div class="bl">Reps</div></div>'+
+          '<div class="b"><div class="bn">'+best+(isNew?'<span class="newmax">★</span>':'')+'</div><div class="bl">Best</div></div>'+
+          '<div class="b str"><div class="bn">+'+strGain+'</div><div class="bl">Strength</div></div>'+
+        '</div>'+
+        '<div class="sh-xp">+'+xpGain+' XP earned</div>'+
         '<div class="rest-timer" id="restTimer"></div>'+
         '<div class="sum-coach" id="sumCoach"><span class="sc-ic">'+RECAP_IC+'</span><span>Analyzing your set…</span></div>'+
-        '<button class="bigbtn" id="sumDone">Done</button>'+
-        '<button class="againbtn" id="sumAgain">Go again</button>';
+        '<button class="bigbtn" id="sumAgain">Go again</button>'+
+        '<button class="againbtn" id="sumDone">Done</button>';
       $('#sumScrim').classList.add('show'); $('#sumSheet').classList.add('show');
       armed=false; startRest();
+      (function(){ var t=$('#sumScore'); if(!t) return; var tg=points, t0=performance.now();
+        function step(now){ var p=Math.min(1,(now-t0)/700); t.textContent=Math.round(tg*(1-Math.pow(1-p,3))).toLocaleString(); if(p<1) requestAnimationFrame(step); }
+        requestAnimationFrame(step); })();
       try{ aiRecap(); }catch(e){}
       $('#sumDone').addEventListener('click', function(){ stopRest(); location.href='gym.html'; });
       $('#sumAgain').addEventListener('click', function(){ stopRest(); $('#sumScrim').classList.remove('show'); $('#sumSheet').classList.remove('show'); startSession(lastMode); });
@@ -963,10 +998,16 @@
       if(rng>=45){ downTh=seenHi-rng*0.55; upTh=seenHi-rng*0.25; }
       // #2 depth ring — 0 at the top of the rep, full at the bottom
       setRing((upTh-ang)/(upTh-downTh));
-      // #3 auto set-end — after a few reps, no rep + no movement for a while = set done
+      // #3 set-end — pause at the top → a visible "keep moving or it ends" countdown
       if(prevAng!=null && Math.abs(ang-prevAng)>2.2) lastMoveAt=performance.now();
       prevAng=ang;
-      if(reps>=2 && phase==='up' && performance.now()-lastRepAt>6500 && performance.now()-lastMoveAt>4000){ autoEnd(); return; }
+      var idle = reps>=1 && phase==='up' && (performance.now()-lastRepAt>3000) && (performance.now()-lastMoveAt>2000);
+      if(idle){
+        if(!endCd){ endCd=true; endCdStart=performance.now(); try{ coachSpeak('Keep going, or rest now.'); }catch(e){} }
+        var er=5-Math.floor((performance.now()-endCdStart)/1000);
+        if(er<=0){ autoEnd(); return; }
+        showEndCd(er); setGuide('KEEP GOING'); return;   // hold counting while resting
+      } else if(endCd){ endCd=false; hideEndCd(); }
       var lc=cfg.live(L,W,H); if(lc) cue(lc.t, 'warn');
       // Rep state machine + hold-for-bonus, with big guide text.
       if(phase==='up' && ang<downTh){
@@ -990,10 +1031,12 @@
     }
     function finishRep(cfg, held){
       countRep(held?2:1, held);
+      if(endCd){ endCd=false; hideEndCd(); }   // any rep cancels the end-countdown
       setFace(held?'excited':'happy', 1000);   // instant coach reaction
       if(isArmFam()) updateArmBars(cfg);   // climb the two arm bars each rep
       if(held){ cue('HOLD BONUS +2', 'bonus', true); }
-      else { var s=cfg.summary(repMin,repMax); if(s && (!s.ok || reps%5===0)) cue(s.t, s.ok?'good':'warn'); }
+      else if(reps>0 && reps%5===0){ encourage(); }     // periodic "keep going"
+      else { var s=cfg.summary(repMin,repMax); if(s && !s.ok) cue(s.t, 'warn'); }
       resetRange();
     }
 
