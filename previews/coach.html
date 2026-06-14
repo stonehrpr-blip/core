@@ -320,23 +320,11 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
   }
 
   async function getReply(){
-    // 1) User's own OpenAI key (pasted in-app, stays in their browser) — real replies, no server needed.
+    // Real AI via coreAI — routes to your local key OR the hosted proxy (Cloudflare worker) automatically.
     try{
-      if(window.coreAI && coreAI.hasKey()){
+      if(window.coreAI && coreAI.chat){
         var ar=await coreAI.chat(convo.slice(-12), { role:'coach' });
-        if(ar && ar.ok && ar.text) return ar.text;
-      }
-    }catch(e){}
-    // 2) Hosted proxy (Supabase edge function → Claude), if configured.
-    try{
-      var c=window.CORE_CONFIG;
-      if(c && c.SUPABASE_URL && c.SUPABASE_ANON_KEY){
-        var r=await fetch(c.SUPABASE_URL+'/functions/v1/ai-coach', {
-          method:'POST',
-          headers:{ 'content-type':'application/json', 'authorization':'Bearer '+c.SUPABASE_ANON_KEY, 'apikey':c.SUPABASE_ANON_KEY },
-          body:JSON.stringify({ tone:'balanced', messages: convo.slice(-12) })
-        });
-        if(r.ok){ var d=await r.json(); if(d && d.reply) return d.reply; }
+        if(ar && ar.ok && ar.text && !ar.fallback) return ar.text;   // got a real reply
       }
     }catch(e){}
     return localReply(convo.length ? convo[convo.length-1].content : '');
