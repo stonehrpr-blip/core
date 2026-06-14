@@ -737,12 +737,7 @@
       var xpT=Math.max(0,Math.min(100, xpInto/xpNeed*100));
       if(Math.abs(xpT-xpShown)>0.3){ xpShown += (xpT-xpShown)*0.2; $('#xpFill').style.width=xpShown.toFixed(1)+'%'; }
       $('#xpWrap').classList.toggle('boost', mult>=1.5);
-      // "Can't stop for >10s" — warn in the last 3s, then break the streak.
-      if(poseRunning && combo>0 && lastRepTime){
-        var idle=performance.now()-lastRepTime;
-        if(idle>10000){ breakCombo(); }
-        else if(idle>7000){ setGuide("DON'T STOP "+Math.ceil((10000-idle)/1000), true); }
-      }
+      // (old "DON'T STOP" streak-break removed — the on-screen end-of-set countdown handles pausing)
       requestAnimationFrame(uiLoop);
     }
 
