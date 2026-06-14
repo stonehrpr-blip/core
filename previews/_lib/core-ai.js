@@ -100,9 +100,34 @@
     ].filter(Boolean).join('\n');
   }
 
+  // ── Hosted proxy (your OpenAI key lives on the server, invisible to users) ──
+  function proxyBase() {
+    try { var c = window.CORE_CONFIG; return (c && c.SUPABASE_URL && c.SUPABASE_ANON_KEY) ? c : null; } catch (e) { return null; }
+  }
+  async function proxyCall(payload) {
+    const c = proxyBase(); if (!c) return null;
+    const ctl = new AbortController(); const timer = setTimeout(() => ctl.abort(), TIMEOUT_MS);
+    try {
+      const r = await fetch(c.SUPABASE_URL + '/functions/v1/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': c.SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + c.SUPABASE_ANON_KEY },
+        body: JSON.stringify(payload), signal: ctl.signal,
+      });
+      clearTimeout(timer);
+      if (!r.ok) return null;
+      const j = await r.json();
+      return (j && j.reply) ? j.reply : null;
+    } catch (e) { clearTimeout(timer); return null; }
+  }
+
   // ── Core chat call ───────────────────────────────────────────────────
   async function chat(messages, opts = {}) {
-    if (!hasKey()) return scriptedResponse(messages);
+    // No personal key? Route through the hosted proxy (server holds the key). Else canned fallback.
+    if (!hasKey()) {
+      const reply = await proxyCall({ type: 'chat', messages: messages, context: opts.context, role: opts.role });
+      if (reply) return { ok: true, text: reply, proxied: true };
+      return scriptedResponse(messages);
+    }
     const pv = providerFor(getKey());
     let model = pv.text;
     if (opts.role === 'plan') model = pv.plan;
@@ -146,8 +171,12 @@
   // ── Vision (image input for proof-of-work) ───────────────────────────
   // image: { dataUrl } or { url }
   async function visionCheck(taskTitle, image, opts = {}) {
-    if (!hasKey()) return { ok: false, fallback: true, verdict: 'review', confidence: 0,
-                            text: 'AI vision unavailable (no key) — manual review required.' };
+    if (!hasKey()) {
+      const reply = await proxyCall({ type: 'vision', image: image.dataUrl || image.url,
+        prompt: 'Task: "' + taskTitle + '". ' + (opts.prompt || 'Give one short, specific, encouraging tip on this photo.') });
+      if (reply) return { ok: true, verdict: 'review', confidence: 0.6, text: reply, proxied: true };
+      return { ok: false, fallback: true, verdict: 'review', confidence: 0, text: 'AI vision unavailable — manual review.' };
+    }
     const userContent = [
       { type: 'text', text: `Task: "${taskTitle}". User uploaded this photo as proof of completion. ` +
           `Reply with strict JSON only: {"verdict":"pass|fail|review","confidence":0.0-1.0,"reason":"..."}. ` +
@@ -224,10 +253,13 @@
     } catch (e) {}
   }
 
+  // true when AI is available either via the hosted proxy (server key) or a personal key
+  function ready() { return hasKey() || !!proxyBase(); }
+  function usingProxy() { return !hasKey() && !!proxyBase(); }
   window.coreAI = {
     chat, visionCheck, generatePlan, enhancePrompt,
     profile, recentActivity, systemPrompt, logActivity,
-    hasKey, getKey, setKey,
+    hasKey, getKey, setKey, ready, usingProxy,
     KEY_LS, MODEL_TEXT, MODEL_VISION, MODEL_PLAN
   };
 })();

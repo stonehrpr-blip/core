@@ -364,12 +364,10 @@ html,body{height:100%;background:#0A0A14;display:flex;align-items:center;justify
   function aiConnected(){ return !!(window.coreAI && coreAI.hasKey()); }
   function renderBanner(){
     if(!banner) return;
-    if(aiConnected()){
-      var prov=/^gsk_/.test(coreAI.getKey())?'Groq':'OpenAI';
-      bannerTx.innerHTML='<strong>'+prov+' connected.</strong> Real AI replies are on. Tap to change or remove your key.';
+    var proxy = !!(window.coreAI && coreAI.usingProxy && coreAI.usingProxy());
+    if(aiConnected() || proxy){
+      bannerTx.innerHTML='<strong>Your Coach is live.</strong> Ask anything — training, food, focus, motivation.';
       banner.style.borderColor='rgba(52,211,153,0.35)';
-    } else if(window.CORE_BACKEND_READY){
-      bannerTx.innerHTML='<strong>Your Coach is live.</strong> Tap to connect your own OpenAI key for personalised replies.';
     } else {
       bannerTx.innerHTML='<strong>Connect AI for real replies.</strong> Tap here and paste a key — free Groq (gsk_…) or OpenAI (sk-…). It stays in this browser, no server needed.';
     }
