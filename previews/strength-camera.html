@@ -527,13 +527,13 @@
     var angEMA=null, cueTimer=null, lastDetect=0, lastGuide='';
     var seenHi=null, seenLo=null;                     // adaptive calibration (per-person range)
     var lastL=null, camW=0, camH=0;                   // for popping numbers out of the body
-    var DETECT_MS=85;  // cap pose inference to ~12fps — lower lag, plenty for reps
+    var DETECT_MS=55;  // ~18fps — catches faster reps without missing the bottom
     // Minimal skeleton: body limbs only (no face mesh), hand-drawn (cheaper than DrawingUtils).
     var BODY=[[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],[23,25],[25,27],[24,26],[26,28]];
     var JOINTS=[11,12,13,14,15,16,23,24,25,26,27,28];
     var xpInto=0, xpNeed=150, xpLevel=1, xpShown=0;   // XP bar + level
-    var MINROM=30;                                     // min range of motion (deg) to count a rep
-    var refLo=1, refHi=0, MINSHIFT=0.03;               // body must actually translate (anti-fake)
+    var MINROM=20;                                     // min range of motion (deg) to count a rep (lenient)
+    var refLo=1, refHi=0, MINSHIFT=0.008;              // body must translate a little (anti-fake, gentle)
     var armLmin=180, armRmin=180, holoCtx=null, lastSay='';  // per-arm effort + coach
     var scoreL=0, scoreR=0, faceTimer=null, talkTimer=null;  // arm scores + coach face state
     var sessMin=180;  // deepest tracked angle this set (for the AI recap)
@@ -1125,16 +1125,16 @@
       var raw=exAngle(L,cfg,W,H);
       if(raw==null){ setTrack('Turn so your '+cfg.label+' show'); setGuide('FACE THE CAMERA'); angEMA=null; return; }
       setTrack('● Tracking');
-      angEMA = angEMA==null ? raw : angEMA*0.55 + raw*0.45;   // smooth jitter → reliable counting
+      angEMA = angEMA==null ? raw : angEMA*0.45 + raw*0.55;   // lighter smoothing → more responsive crossings
       var ang=angEMA;
-      repMin=Math.min(repMin,ang); repMax=Math.max(repMax,ang); sessMin=Math.min(sessMin,ang);
+      repMin=Math.min(repMin,raw); repMax=Math.max(repMax,raw); sessMin=Math.min(sessMin,raw);   // true ROM from raw angle
       var refY=(L[fam.ref[0]].y+L[fam.ref[1]].y)/2; refLo=Math.min(refLo,refY); refHi=Math.max(refHi,refY);
       // Adaptive calibration: learn this person's real extended/contracted
       // angles and set thresholds from them, so it counts properly for anyone.
       if(seenHi==null){ seenHi=ang; seenLo=ang; }
       seenHi=Math.max(ang, seenHi-0.06); seenLo=Math.min(ang, seenLo+0.06);
       var rng=seenHi-seenLo, downTh=cfg.down, upTh=cfg.up;
-      if(rng>=45){ downTh=seenHi-rng*0.55; upTh=seenHi-rng*0.25; }
+      if(rng>=30){ downTh=seenHi-rng*0.5; upTh=seenHi-rng*0.22; }   // adapt to the person's real range sooner
       // #2 depth ring — 0 at the top of the rep, full at the bottom
       setRing((upTh-ang)/(upTh-downTh));
       // #3 set-end — pause at the top → a visible "keep moving or it ends" countdown
