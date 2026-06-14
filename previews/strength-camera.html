@@ -839,7 +839,28 @@
     function updateSetBadge(){ var sb=$('#setBadge'); if(sb) sb.textContent = (planMode&&plan) ? ('Set '+setNum+'/'+plan.length) : ('Set '+setNum); }
     function beginWorkout(id){ setNum=1; sessionLog=[]; plan = planMode ? rulePlan(id) : null; startSession(id); if(planMode) aiPlan(id); }
     function nextSet(){ setNum++; stopRest(); $('#sumScrim').classList.remove('show'); $('#sumSheet').classList.remove('show'); startSession(cur.id); }
-    function endWorkout(){ stopRest(); saveSession(); location.href='gym.html'; }
+    // Completing a workout slowly lights up the Strength muscle map (gym diagram).
+    // Push→chest(+triceps), Pull→back(+biceps→arms), Squat→legs(+core). Cumulative & gentle.
+    function upgradeDiagram(){
+      try{
+        var totalReps=sessionLog.reduce(function(a,s){ return a+s.reps; },0);
+        if(!totalReps || !cur) return;
+        var GK='coreGym.v1', g; try{ g=JSON.parse(localStorage.getItem(GK)); }catch(e){ g=null; }
+        if(!g || typeof g!=='object') g={};
+        if(!g.muscles || typeof g.muscles!=='object') g.muscles={};
+        if(!Array.isArray(g.history)) g.history=[];
+        var diffM = cur.diff==='hard'?1.3:cur.diff==='medium'?1.15:1;
+        var add = totalReps*0.06*diffM, now=Date.now();   // ~20 reps ≈ +1.2 score (builds over sessions)
+        function bump(mid, amt){ var m=g.muscles[mid]||{score:0,lastTs:0,sessions:0}; m.score=(m.score||0)+amt; m.lastTs=now; m.sessions=(m.sessions||0)+1; g.muscles[mid]=m; }
+        var SEC={ chest:'arms', back:'arms', legs:'core' };
+        bump(cur.muscle, add);
+        if(SEC[cur.muscle]) bump(SEC[cur.muscle], add*0.4);
+        g.history.unshift({ id:'cam-'+now, ts:now, muscle:cur.muscle, exercises:[{ name:cur.name, sets:sessionLog.length, reps:totalReps, weight:0 }], totalSets:sessionLog.length, str:Math.round(totalReps*diffM*0.1), xp:Math.round(totalReps*2*diffM), source:'camera' });
+        g.history=g.history.slice(0,40);
+        localStorage.setItem(GK, JSON.stringify(g));
+      }catch(e){}
+    }
+    function endWorkout(){ stopRest(); upgradeDiagram(); saveSession(); location.href='gym.html'; }
     function saveSession(){
       if(!sessionLog.length) return;
       try{
