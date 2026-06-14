@@ -118,22 +118,40 @@
   .holo-hd{ position:relative; width:100%; display:flex; align-items:center; justify-content:center; gap:5px; font-size:8.5px; font-weight:900; letter-spacing:.18em; color:#7FD4FF; }
   .holo-mute{ position:absolute; right:0; top:50%; transform:translateY(-50%); width:15px; height:15px; padding:0; border:none; background:none; color:#7FD4FF; cursor:pointer; -webkit-appearance:none; appearance:none; display:flex; align-items:center; justify-content:center; }
   .holo-mute svg{ width:13px; height:13px; }
-  .holo canvas{ background:radial-gradient(70% 70% at 50% 42%, rgba(40,140,255,0.12), transparent 75%); border-radius:10px; }
+  /* Coach face — reacts with expressions, mouth flaps when talking */
+  .cface{ width:104px; height:104px; display:block; filter:drop-shadow(0 0 8px rgba(60,170,255,0.45)); }
+  .cf-head{ fill:rgba(40,120,220,0.14); stroke:#7FD4FF; stroke-width:2.4; transition:stroke .15s; }
+  .cf-ant{ stroke:#7FD4FF; stroke-width:2.4; stroke-linecap:round; }
+  .cf-antd{ fill:#34D399; }
+  .cf-eye{ fill:#9FE0FF; }
+  .cf-arc{ fill:none; stroke:#9FE0FF; stroke-width:3.4; stroke-linecap:round; }
+  .cf-brow{ stroke:#FFC24B; stroke-width:3; stroke-linecap:round; }
+  .cf-mouth{ fill:none; stroke:#9FE0FF; stroke-width:3.4; stroke-linecap:round; transform-box:fill-box; transform-origin:center; }
+  .cface.happy .cf-head{ stroke:#34D399; } .cface.happy .cf-mouth,.cface.happy .cf-arc{ stroke:#8CF0C0; }
+  .cface.concerned .cf-head{ stroke:#FFB23E; } .cface.concerned .cf-mouth{ stroke:#FFC24B; }
+  .cface.excited{ animation:cfBounce .5s ease; } .cface.excited .cf-head{ stroke:#34D399; } .cface.excited .cf-mouth{ stroke:#8CF0C0; }
+  @keyframes cfBounce{ 0%,100%{transform:translateY(0);} 45%{transform:translateY(-5px);} }
+  .cface.speaking .cf-mouth{ animation:cfTalk .24s ease-in-out infinite alternate; }
+  @keyframes cfTalk{ from{transform:scaleY(0.5);} to{transform:scaleY(1.7);} }
+  @media (prefers-reduced-motion:reduce){ .cface.speaking .cf-mouth,.cface.excited{ animation:none; } }
   .holo-dot{ width:6px; height:6px; border-radius:50%; background:#34D399; box-shadow:0 0 8px #34D399; animation:holoBlink 1.6s ease-in-out infinite; }
   @keyframes holoBlink{ 0%,100%{opacity:1;} 50%{opacity:.4;} }
-  .holo canvas{ width:120px; height:150px; display:block; filter:drop-shadow(0 0 6px rgba(60,180,255,0.5)); }
   .holo-say{ font-size:10px; font-weight:700; line-height:1.3; text-align:center; color:#EaF4ff; min-height:26px;
     display:flex; align-items:center; justify-content:center; padding:0 2px; }
   .holo-say.say-warn{ color:#FFC24B; }
   @media (prefers-reduced-motion:reduce){ .holo-dot{ animation:none; } }
   /* Per-arm effort bars — bottom */
-  .armbars{ position:absolute; left:18px; right:18px; bottom:96px; z-index:6; display:flex; flex-direction:column; gap:7px; pointer-events:none; }
-  .ab{ display:flex; align-items:center; gap:9px; }
-  .ab-k{ flex:none; width:42px; font-size:9.5px; font-weight:900; letter-spacing:.06em; text-shadow:0 1px 4px rgba(0,0,0,.6); }
-  .ab-tr{ flex:1; height:7px; border-radius:999px; background:rgba(255,255,255,0.12); overflow:hidden; box-shadow:inset 0 0 0 1px rgba(255,255,255,0.08); }
-  .ab-tr i{ display:block; height:100%; width:0%; border-radius:999px; transition:width .45s cubic-bezier(.2,.9,.2,1); }
-  .armbars.pulse .ab-tr i{ animation:abPulse .5s ease; }
-  @keyframes abPulse{ 0%{filter:brightness(1.8);} 100%{filter:brightness(1);} }
+  /* Per-arm strength — vertical bars that climb each rep */
+  .armbars{ position:absolute; left:0; right:0; bottom:94px; z-index:6; display:flex; justify-content:center; gap:22px; pointer-events:none; }
+  .vb{ display:flex; flex-direction:column; align-items:center; gap:5px; }
+  .vb-n{ font-size:15px; font-weight:900; line-height:1; text-shadow:0 1px 6px rgba(0,0,0,.65); transition:transform .2s; }
+  .vb-col{ position:relative; width:14px; height:76px; border-radius:8px; background:rgba(255,255,255,0.12); overflow:hidden; box-shadow:inset 0 0 0 1px rgba(255,255,255,0.1); }
+  .vb-fill{ position:absolute; left:0; right:0; bottom:0; height:0%; border-radius:8px; box-shadow:0 0 12px currentColor; transition:height .45s cubic-bezier(.2,.9,.2,1); }
+  .vb-k{ font-size:11px; font-weight:900; letter-spacing:.06em; text-shadow:0 1px 4px rgba(0,0,0,.6); }
+  .armbars.pulse .vb-fill{ animation:abPulse .5s ease; }
+  .armbars.pulse .vb-n{ animation:vbPop .4s ease; }
+  @keyframes abPulse{ 0%{filter:brightness(2);} 100%{filter:brightness(1);} }
+  @keyframes vbPop{ 0%{transform:scale(1.5);} 100%{transform:scale(1);} }
   .livetop .pill{ font-size:11px; font-weight:700; padding:6px 12px; border-radius:999px; background:rgba(0,0,0,0.5); border:1px solid var(--border); }
   .livetop .pill .d{ display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--accent); margin-right:6px; animation:pulse 1.2s infinite; vertical-align:1px; } @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.3;} }
 
@@ -243,7 +261,6 @@
         <div class="camgrad"></div>
         <div class="poplayer" id="popLayer"></div>
         <div class="guide" id="guideTxt"></div>
-        <div class="zoom" id="zoomMeter"><button type="button" data-fit="contain">0.5×</button><button type="button" data-fit="cover" class="on">1×</button></div>
         <div class="livetop">
           <span class="pill"><span class="d"></span><span id="liveEx">Push-ups</span></span>
           <span class="pill" id="camState">Camera off</span>
@@ -252,8 +269,15 @@
         <!-- AI coach hologram (top-right): live wireframe of you + spoken cues -->
         <div class="holo" id="holo">
           <div class="holo-hd"><span class="holo-dot"></span>COACH<button class="holo-mute" id="holoMute" type="button" aria-label="Toggle coach voice"></button></div>
-          <canvas id="holoCv" width="120" height="150"></canvas>
-          <div class="holo-say" id="holoSay">Get into position…</div>
+          <svg class="cface" id="coachFace" viewBox="0 0 100 100">
+            <rect class="cf-head" x="18" y="14" width="64" height="72" rx="22"/>
+            <line class="cf-ant" x1="50" y1="14" x2="50" y2="5"/><circle class="cf-antd" cx="50" cy="4" r="3"/>
+            <g id="cfEyesN"><circle class="cf-eye" cx="38" cy="47" r="6"/><circle class="cf-eye" cx="62" cy="47" r="6"/></g>
+            <g id="cfEyesH" style="display:none"><path class="cf-arc" d="M32 49 Q38 41 44 49"/><path class="cf-arc" d="M56 49 Q62 41 68 49"/></g>
+            <g id="cfBrows" style="display:none"><line class="cf-brow" x1="32" y1="36" x2="45" y2="40"/><line class="cf-brow" x1="68" y1="36" x2="55" y2="40"/></g>
+            <path class="cf-mouth" id="cfMouth" d="M39 66 Q50 71 61 66"/>
+          </svg>
+          <div class="holo-say" id="holoSay">Get ready…</div>
         </div>
         <div class="xpwrap" id="xpWrap">
           <span class="xplvl">LV <b id="xpLvl">1</b></span>
@@ -271,10 +295,10 @@
         </div>
         <div class="cuewrap"><div class="cue" id="cueEl"></div></div>
 
-        <!-- Per-arm effort — two bars, refreshed every rep -->
+        <!-- Per-arm strength — two vertical bars that climb in 1s each rep -->
         <div class="armbars" id="armBars">
-          <div class="ab"><span class="ab-k" style="color:#FF9F0A">L ARM</span><div class="ab-tr"><i id="abL" style="background:linear-gradient(90deg,#FF9F0A,#FFC24B)"></i></div></div>
-          <div class="ab"><span class="ab-k" style="color:#34D399">R ARM</span><div class="ab-tr"><i id="abR" style="background:linear-gradient(90deg,#34D399,#7BE5B0)"></i></div></div>
+          <div class="vb"><span class="vb-n" id="abLn" style="color:#FF9F0A">0</span><div class="vb-col"><i class="vb-fill" id="abL" style="background:linear-gradient(180deg,#FFC24B,#FF9F0A);color:#FF9F0A"></i></div><span class="vb-k" style="color:#FF9F0A">L</span></div>
+          <div class="vb"><span class="vb-n" id="abRn" style="color:#34D399">0</span><div class="vb-col"><i class="vb-fill" id="abR" style="background:linear-gradient(180deg,#7BE5B0,#34D399);color:#34D399"></i></div><span class="vb-k" style="color:#34D399">R</span></div>
         </div>
         <div class="livebtns">
           <div class="row2"><button class="gb" id="camToggle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px"><path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg> Camera</button><button class="gb fin" id="finBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px"><path d="M5 12l4 4 10-11"/></svg> Finish</button></div>
@@ -455,7 +479,21 @@
     var xpInto=0, xpNeed=150, xpLevel=1, xpShown=0;   // XP bar + level
     var MINROM=30;                                     // min range of motion (deg) to count a rep
     var refLo=1, refHi=0, MINSHIFT=0.03;               // body must actually translate (anti-fake)
-    var armLmin=180, armRmin=180, holoCtx=null, lastSay='';  // per-arm effort + coach hologram
+    var armLmin=180, armRmin=180, holoCtx=null, lastSay='';  // per-arm effort + coach
+    var scoreL=0, scoreR=0, faceTimer=null, talkTimer=null;  // arm scores + coach face state
+    // Coach facial expressions — instant reactions
+    var FACE_DEF={ neutral:{m:'M39 66 Q50 71 61 66',h:0,b:0}, happy:{m:'M36 63 Q50 78 64 63',h:1,b:0}, concerned:{m:'M41 70 Q50 63 59 70',h:0,b:1}, excited:{m:'M39 62 Q50 81 61 62',h:0,b:0} };
+    function applyFace(st){ var f=FACE_DEF[st]||FACE_DEF.neutral; var mo=$('#cfMouth'); if(mo) mo.setAttribute('d',f.m);
+      var en=$('#cfEyesN'), eh=$('#cfEyesH'), br=$('#cfBrows');
+      if(en) en.style.display=f.h?'none':''; if(eh) eh.style.display=f.h?'':'none'; if(br) br.style.display=f.b?'':'none'; }
+    function setFace(st, ttl){ var fc=$('#coachFace'); if(!fc) return;
+      fc.classList.remove('happy','concerned','excited'); if(st&&st!=='neutral') fc.classList.add(st);
+      applyFace(st||'neutral');
+      if(faceTimer) clearTimeout(faceTimer);
+      if(ttl) faceTimer=setTimeout(function(){ setFace('neutral'); }, ttl); }
+    function coachTalk(t){ var fc=$('#coachFace'); if(!fc) return; fc.classList.add('speaking');
+      var ms=Math.min(2200, 500+(t?String(t).length:6)*55);
+      if(talkTimer) clearTimeout(talkTimer); talkTimer=setTimeout(function(){ fc.classList.remove('speaking'); }, ms); }
     // colour-coded limbs: left arm orange, right arm green, rest cyan
     var LIMBS=[ {c:[11,12],a:'#CFE9FF'},{c:[11,13],a:'#FF9F0A'},{c:[13,15],a:'#FF9F0A'},{c:[12,14],a:'#34D399'},{c:[14,16],a:'#34D399'},
       {c:[11,23],a:'#CFE9FF'},{c:[12,24],a:'#CFE9FF'},{c:[23,24],a:'#CFE9FF'},{c:[23,25],a:'#CFE9FF'},{c:[25,27],a:'#CFE9FF'},{c:[24,26],a:'#CFE9FF'},{c:[26,28],a:'#CFE9FF'} ];
@@ -475,7 +513,7 @@
         window.speechSynthesis.speak(u);
       }catch(e){}
     }
-    function coachSay(t, warn){ if(!t||t===lastSay) return; lastSay=t; var s=$('#holoSay'); if(s){ s.textContent=t; s.className='holo-say'+(warn?' say-warn':''); } coachSpeak(t); }
+    function coachSay(t, warn){ if(!t||t===lastSay) return; lastSay=t; var s=$('#holoSay'); if(s){ s.textContent=t; s.className='holo-say'+(warn?' say-warn':''); } coachSpeak(t); coachTalk(t); }
     function drawSkeleton(L,W,H){
       ctx.lineCap='round'; ctx.lineJoin='round';
       for(var pass=0; pass<2; pass++){
@@ -518,10 +556,21 @@
       for(var sy=0; sy<H; sy+=3){ holoCtx.fillRect(0,sy,W,1); }
       holoCtx.globalAlpha=1;
     }
+    function paintArmBars(){
+      var mx=Math.max(scoreL,scoreR,1);
+      var eL=$('#abL'), eR=$('#abR'), nL=$('#abLn'), nR=$('#abRn');
+      if(eL) eL.style.height=(scoreL/mx*100).toFixed(0)+'%';
+      if(eR) eR.style.height=(scoreR/mx*100).toFixed(0)+'%';
+      if(nL) nL.textContent=scoreL; if(nR) nR.textContent=scoreR;
+    }
     function updateArmBars(cfg){
-      function work(minA){ if(minA>=170) return 0; return Math.max(0,Math.min(1,(cfg.up-minA)/(cfg.up-cfg.down)))*100; }
-      var l=work(armLmin), r=work(armRmin);
-      var eL=$('#abL'), eR=$('#abR'); if(eL) eL.style.width=l.toFixed(0)+'%'; if(eR) eR.style.width=r.toFixed(0)+'%';
+      // award +1 (scores only ever climb in 1s) to the arm(s) that did the work this rep
+      var dl=armLmin, dr=armRmin;
+      if(dl<170 || dr<170){
+        if(Math.abs(dl-dr)<12){ scoreL++; scoreR++; }
+        else if(dl<dr) scoreL++; else scoreR++;
+      }
+      paintArmBars();
       var ab=$('#armBars'); if(ab){ ab.classList.remove('pulse'); void ab.offsetWidth; ab.classList.add('pulse'); }
       armLmin=180; armRmin=180;
     }
@@ -602,6 +651,7 @@
       var el=$('#cueEl'); if(!el) return;
       el.innerHTML=txt; el.className='cue '+(kind||'')+' show';
       clearTimeout(cueTimer); cueTimer=setTimeout(function(){ el.classList.remove('show'); }, 1050);
+      if(kind==='warn') setFace('concerned',1400); else if(kind==='bonus') setFace('excited',1400); else if(kind==='good') setFace('happy',1000);
     }
     // Big guide text ("LOWER", "PUSH UP", "HOLD"…). Only writes on change.
     function setGuide(t, warn){ if(t===lastGuide) return; lastGuide=t; var g=$('#guideTxt'); coachSay(SAY[t]||t, warn); if(!g) return; g.textContent=t; g.className='guide show'+(warn?' warn':''); }
@@ -701,15 +751,15 @@
       cur=EXOS.find(function(e){ return e.id===id; });
       reps=0; points=0; ptsShown=0; mult=1; combo=0; lastRepTime=0; lastRepAt=0; phase='up'; angEMA=null; seenHi=null; seenLo=null; lastGuide=''; lastL=null; _mw=-1; _ml=''; resetRange();
       xpInto=0; xpNeed=150; xpLevel=1; xpShown=0;
-      armLmin=180; armRmin=180; lastSay='';
+      armLmin=180; armRmin=180; lastSay=''; scoreL=0; scoreR=0;
       sfx('confirm'); haptic();
       document.documentElement.style.setProperty('--str', cur.c);
       $('#liveEx').textContent=cur.name; $('#silho').innerHTML=formFor(cur.id)+'<span class="fd-cap">'+formTip(cur.id)+'</span>';
-      // coach hologram + per-arm bars (arm movements only)
+      // coach face + per-arm bars (arm movements only)
       var hs=$('#holoSay'); if(hs){ hs.className='holo-say'; hs.textContent=formTip(cur.id)||'Get into position…'; }
-      if(holoCtx){ var _h=$('#holoCv'); holoCtx.clearRect(0,0,_h.width,_h.height); }
+      setFace('neutral');
       var ab=$('#armBars'); if(ab) ab.style.display=isArmFam()?'flex':'none';
-      var _l=$('#abL'),_r=$('#abR'); if(_l)_l.style.width='0%'; if(_r)_r.style.width='0%';
+      paintArmBars();
       $('#cnum').textContent='0'; $('#pts').textContent='0'; $('#cgain').textContent='+0.00 Strength';
       $('#multiFill').style.width='0%'; $('#multiLbl').textContent='×1.0';
       $('#xpLvl').textContent='1'; $('#xpFill').style.width='0%'; $('#xpWrap').classList.remove('boost','levelup');
@@ -833,7 +883,6 @@
       // Glowing colour-coded skeleton (left arm orange, right arm green) + the
       // top-right coach hologram mirror. Canvas shares the video's object-fit.
       drawSkeleton(L,W,H);
-      try{ drawHolo(L); }catch(e){}
       // Per-arm effort — track each arm's deepest elbow bend this rep (arm moves only)
       if(isArmFam()){
         var aL=angleAt(L,11,13,15,W,H), aR=angleAt(L,12,14,16,W,H);
@@ -886,7 +935,8 @@
     }
     function finishRep(cfg, held){
       countRep(held?2:1, held);
-      if(isArmFam()) updateArmBars(cfg);   // refresh the two arm bars each rep
+      setFace(held?'excited':'happy', 1000);   // instant coach reaction
+      if(isArmFam()) updateArmBars(cfg);   // climb the two arm bars each rep
       if(held){ cue('HOLD BONUS +2', 'bonus', true); }
       else { var s=cfg.summary(repMin,repMax); if(s && (!s.ok || reps%5===0)) cue(s.t, s.ok?'good':'warn'); }
       resetRange();
