@@ -578,6 +578,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     if(seed){ newChat(); bubble('ai', seed); convo.push({ role:'assistant', content:seed }); persistActive(); started=true; return; }
     if(started) return;                       // keep the conversation already on screen
     started=true;
+    if(freshSession){ newChat(); return; }    // new app session → always start a fresh chat
     var recent=sortedChats()[0];
     if(recent) resumeChat(recent.id); else newChat();
   }
@@ -626,6 +627,12 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     askConfirm("Clear all saved chats? This can't be undone.", 'Clear all', function(){ store.chats=[]; saveStore(); newChat(); renderHistory(); });
   });
   loadStore();
+
+  // The coach opens a fresh chat on every app launch/restart, while saved chats
+  // stay in History. sessionStorage survives in-app navigation but is cleared when
+  // the app is closed — so a missing marker means this is a brand-new app session.
+  var freshSession=false;
+  try{ if(!sessionStorage.getItem('coreCoachSession')){ freshSession=true; sessionStorage.setItem('coreCoachSession','1'); } }catch(e){}
 
   // ── Confirm dialog ──
   var _confirmFn=null;
