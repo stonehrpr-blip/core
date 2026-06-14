@@ -20,7 +20,7 @@ window.CORE_CONFIG = {
   OAUTH_REDIRECT_URL: (location.origin || "http://localhost:8000") + "/04-sign-in.html",
   // Hosted AI proxy (Cloudflare Worker URL). Paste your worker URL here, e.g.
   // "https://core-ai.your-name.workers.dev" — then all AI features use your key invisibly.
-  AI_PROXY_URL: "",
+  AI_PROXY_URL: "https://core-ai.stonehrpr.workers.dev",
 };
 
 // Convenience flag — true when a real backend is configured.
