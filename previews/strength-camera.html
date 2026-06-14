@@ -161,6 +161,20 @@
   .goalbar i{ display:block; height:100%; width:0%; border-radius:999px; background:var(--str,#0A84FF); box-shadow:0 0 10px var(--str,#0A84FF); transition:width .4s cubic-bezier(.2,.9,.2,1); }
   .goaltxt{ font-size:9px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
   .ah-t b{ color:#fff; }
+  /* #11 mode toggle on the picker */
+  .modetog{ display:flex; gap:4px; padding:4px; border-radius:14px; background:rgba(255,255,255,0.05); border:1px solid var(--border); margin:0 0 16px; }
+  .mt-opt{ flex:1; padding:10px; border-radius:11px; border:none; background:none; color:var(--muted); font:inherit; font-size:12.5px; font-weight:800; cursor:pointer; -webkit-appearance:none; appearance:none; transition:.16s; }
+  .mt-opt.on{ background:var(--accent); color:#fff; }
+  /* #12 history on the picker */
+  .histwrap{ margin-top:18px; }
+  .hist-h{ font-size:10px; font-weight:900; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin:0 2px 9px; }
+  .hist-row{ display:flex; align-items:center; gap:11px; padding:11px 13px; border-radius:14px; border:1px solid var(--border); background:var(--bg-card); margin-bottom:8px; }
+  .hist-row .hr-t{ flex:1; } .hist-row .hr-t b{ font-size:13.5px; font-weight:800; } .hist-row .hr-t span{ display:block; font-size:11px; color:var(--muted); margin-top:1px; }
+  .hist-row .hr-v{ font-size:15px; font-weight:900; color:var(--accent); } .hist-row .hr-v span{ font-size:10px; color:var(--muted); font-weight:700; }
+  /* set badge + timer pill */
+  .setbadge{ color:var(--str,#0A84FF); font-weight:900; }
+  .timerpill{ font-variant-numeric:tabular-nums; font-weight:900; color:#fff; }
+  .timerpill.low{ color:#FF6B6B; border-color:rgba(255,107,107,0.5); }
   /* #8 new-best flash */
   .live.prflash::before{ content:""; position:absolute; inset:0; z-index:9; pointer-events:none; background:radial-gradient(circle at 50% 44%, rgba(255,203,61,0.28), transparent 62%); animation:prFlash .6s ease forwards; }
   @keyframes prFlash{ 0%{opacity:1;} 100%{opacity:0;} }
@@ -286,7 +300,12 @@
       <!-- SELECT -->
       <div class="pick" id="pick">
         <div class="lead" id="pickLead">Pick a movement</div>
+        <div class="modetog" id="modeTog">
+          <button class="mt-opt on" data-mode="reps" type="button">Free reps</button>
+          <button class="mt-opt" data-mode="timed" type="button">60s timer</button>
+        </div>
         <div class="exsel" id="exsel"></div>
+        <div class="histwrap" id="histWrap"></div>
         <div class="ratebar"><span style="display:inline-flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg></span><div class="rr">You earn <b id="rateTxt">0.01</b> Strength per rep. <span id="plusHint"></span></div></div>
       </div>
 
@@ -304,7 +323,8 @@
         <div class="countdown" id="countdown"></div>
         <div class="endcd" id="endCd"><div class="ec-num" id="endCdN">5</div><div class="ec-lbl">Keep moving — or the set ends</div></div>
         <div class="livetop">
-          <span class="pill"><span class="d"></span><span id="liveEx">Push-ups</span></span>
+          <span class="pill"><span class="d"></span><span id="liveEx">Push-ups</span> <span class="setbadge" id="setBadge">Set 1</span></span>
+          <span class="pill timerpill" id="setTimer" style="display:none">1:00</span>
           <span class="pill" id="camState">Camera off</span>
         </div>
         <div class="xpwrap" id="xpWrap">
@@ -516,6 +536,8 @@
     var scoreL=0, scoreR=0, faceTimer=null, talkTimer=null;  // arm scores + coach face state
     var sessMin=180;  // deepest tracked angle this set (for the AI recap)
     var repBest=0, repTarget=10;  // #6 goal + #8 personal-best
+    var setNum=1, sessionLog=[];           // #10 multiple sets per workout
+    var timedMode=false, timedDur=60, timedStart=0, timedInt=null;   // #11 60-second AMRAP
     var armed=false, cdActive=false, cdStartAt=0, lastMoveAt=0, prevAng=null, restInt=null, lastCd='';
     var RINGC=339.3;  // 2π·54
     function framingCheck(L){
@@ -753,7 +775,13 @@
       var xpT=Math.max(0,Math.min(100, xpInto/xpNeed*100));
       if(Math.abs(xpT-xpShown)>0.3){ xpShown += (xpT-xpShown)*0.2; $('#xpFill').style.width=xpShown.toFixed(1)+'%'; }
       $('#xpWrap').classList.toggle('boost', mult>=1.5);
-      // (old "DON'T STOP" streak-break removed — the on-screen end-of-set countdown handles pausing)
+      // #11 timed-mode clock — counts down, ends the set at 0
+      if(timedMode && armed && timedStart){
+        var rem=Math.max(0, timedDur-(performance.now()-timedStart)/1000);
+        var ss=Math.floor(rem%60), tp=$('#setTimer');
+        if(tp){ tp.textContent=Math.floor(rem/60)+':'+(ss<10?'0':'')+ss; tp.classList.toggle('low', rem<=10); }
+        if(rem<=0){ timedStart=0; autoEnd(); }
+      }
       requestAnimationFrame(uiLoop);
     }
 
@@ -787,8 +815,32 @@
       }).join('');
       $('#exsel').innerHTML=html;
       $('#vBack').addEventListener('click', function(){ renderCats(); });
-      Array.prototype.forEach.call(document.querySelectorAll('#exsel .exo'), function(x){ x.addEventListener('click', function(){ startSession(x.getAttribute('data-id')); }); });
+      Array.prototype.forEach.call(document.querySelectorAll('#exsel .exo'), function(x){ x.addEventListener('click', function(){ beginWorkout(x.getAttribute('data-id')); }); });
       var pk=$('#pick'); if(pk) pk.scrollTop=0;
+    }
+
+    // #10 workout flow — a workout is one or more sets of the same movement
+    function beginWorkout(id){ setNum=1; sessionLog=[]; startSession(id); }
+    function nextSet(){ setNum++; stopRest(); $('#sumScrim').classList.remove('show'); $('#sumSheet').classList.remove('show'); startSession(cur.id); }
+    function endWorkout(){ stopRest(); saveSession(); location.href='gym.html'; }
+    function saveSession(){
+      if(!sessionLog.length) return;
+      try{
+        var hist=JSON.parse(localStorage.getItem('core.reps.history.v1')||'[]');
+        var totalReps=sessionLog.reduce(function(a,s){ return a+s.reps; },0);
+        hist.unshift({ ex:cur.id, name:cur.name, ts:Date.now(), sets:sessionLog.map(function(s){ return s.reps; }), total:totalReps, mode:(timedMode?'timed':'reps') });
+        localStorage.setItem('core.reps.history.v1', JSON.stringify(hist.slice(0,30)));
+      }catch(e){}
+    }
+    // #12 recent-sessions list on the picker
+    function renderHistory(){
+      var w=$('#histWrap'); if(!w) return;
+      var hist=[]; try{ hist=JSON.parse(localStorage.getItem('core.reps.history.v1')||'[]'); }catch(e){}
+      if(!hist.length){ w.innerHTML=''; return; }
+      function ago(ts){ var s=(Date.now()-ts)/1000; if(s<3600) return Math.round(s/60)+'m ago'; if(s<86400) return Math.round(s/3600)+'h ago'; return Math.round(s/86400)+'d ago'; }
+      w.innerHTML='<div class="hist-h">Recent sessions</div>'+hist.slice(0,5).map(function(h){
+        return '<div class="hist-row"><div class="hr-t"><b>'+h.name+'</b><span>'+h.sets.length+' set'+(h.sets.length>1?'s':'')+' · '+ago(h.ts)+'</span></div><div class="hr-v">'+h.total+' <span>reps</span></div></div>';
+      }).join('');
     }
 
     function startSession(id){
@@ -799,6 +851,9 @@
       armed=false; cdActive=false; prevAng=null; lastMoveAt=0; endCd=false; lastRepTime=0;
       repBest=(readMax()[cur.id]||0); repTarget=repBest>0?repBest:10;   // #6 goal = beat your best (or 10 to start)
       var _gf=$('#goalFill'), _gt=$('#goalTxt'), _mb=$('#multBadge'); if(_gf)_gf.style.width='0%'; if(_gt)_gt.textContent='0 / '+repTarget; if(_mb)_mb.classList.remove('on');
+      timedStart=0;
+      var _sb=$('#setBadge'); if(_sb) _sb.textContent='Set '+setNum;
+      var _tp=$('#setTimer'); if(_tp){ _tp.style.display=timedMode?'inline-flex':'none'; _tp.classList.remove('low'); _tp.textContent='1:00'; }
       try{ hideCountdown(); hideEndCd(); setRing(0); stopRest(); }catch(e){}
       sfx('confirm'); haptic();
       document.documentElement.style.setProperty('--str', cur.c);
@@ -909,11 +964,13 @@
       if(isNew){ mx[cur.id]=reps; writeMax(mx); }
       var rt=ratingFor(reps, cur.diff);
       sfx('reward');
+      sessionLog.push({ reps:reps, points:points });   // #10 record this set
+      var wkSets=sessionLog.length, wkReps=sessionLog.reduce(function(a,s){ return a+s.reps; },0);
       $('#sumBody').innerHTML=
         '<div class="sum-hero">'+
           '<div class="rankbadge" style="color:'+rt.c+';border-color:'+rt.c+'">'+rt.l+'</div>'+
-          '<div class="sh-rt" style="color:'+rt.c+'">'+rt.t+'</div>'+
-          '<div class="sh-ex">'+cur.name+(isNew?' · <span class="sh-new">NEW BEST</span>':'')+'</div>'+
+          '<div class="sh-rt" style="color:'+rt.c+'">Set '+setNum+' done</div>'+
+          '<div class="sh-ex">'+cur.name+' · '+rt.t+(isNew?' · <span class="sh-new">NEW BEST</span>':'')+'</div>'+
         '</div>'+
         '<div class="sum-score"><div class="ss-num" id="sumScore">0</div><div class="ss-lbl">POINTS</div></div>'+
         '<div class="big3">'+
@@ -921,19 +978,19 @@
           '<div class="b"><div class="bn">'+best+(isNew?'<span class="newmax">★</span>':'')+'</div><div class="bl">Best</div></div>'+
           '<div class="b str"><div class="bn">+'+strGain+'</div><div class="bl">Strength</div></div>'+
         '</div>'+
-        '<div class="sh-xp">+'+xpGain+' XP earned</div>'+
+        (wkSets>1 ? '<div class="sh-xp"><b style="color:#fff">Workout: '+wkReps+' reps</b> over '+wkSets+' sets · +'+xpGain+' XP</div>' : '<div class="sh-xp">+'+xpGain+' XP earned</div>')+
         '<div class="rest-timer" id="restTimer"></div>'+
         '<div class="sum-coach" id="sumCoach"><span class="sc-ic">'+RECAP_IC+'</span><span>Analyzing your set…</span></div>'+
-        '<button class="bigbtn" id="sumAgain">Go again</button>'+
-        '<button class="againbtn" id="sumDone">Done</button>';
+        '<button class="bigbtn" id="sumNext">Next set</button>'+
+        '<button class="againbtn" id="sumFinish">Finish workout</button>';
       $('#sumScrim').classList.add('show'); $('#sumSheet').classList.add('show');
       armed=false; startRest();
       (function(){ var t=$('#sumScore'); if(!t) return; var tg=points, t0=performance.now();
         function step(now){ var p=Math.min(1,(now-t0)/700); t.textContent=Math.round(tg*(1-Math.pow(1-p,3))).toLocaleString(); if(p<1) requestAnimationFrame(step); }
         requestAnimationFrame(step); })();
       try{ aiRecap(); }catch(e){}
-      $('#sumDone').addEventListener('click', function(){ stopRest(); location.href='gym.html'; });
-      $('#sumAgain').addEventListener('click', function(){ stopRest(); $('#sumScrim').classList.remove('show'); $('#sumSheet').classList.remove('show'); startSession(lastMode); });
+      $('#sumNext').addEventListener('click', function(){ nextSet(); });
+      $('#sumFinish').addEventListener('click', function(){ endWorkout(); });
     }
 
     // ── Pose loop ────────────────────────────────────────────────────────
@@ -989,6 +1046,7 @@
         var elc=performance.now()-cdStartAt, n=3-Math.floor(elc/800);
         if(n>0){ showCountdown(String(n)); setTrack('● Get ready'); setGuide(''); return; }
         showCountdown('GO', true); armed=true; cdActive=false; lastRepAt=performance.now(); lastMoveAt=performance.now(); prevAng=null;
+        if(timedMode && !timedStart) timedStart=performance.now();   // #11 start the 60s clock
         setTimeout(hideCountdown, 500); setGuide(cfg.gUp);
       }
       // ── Armed: track each arm's deepest bend this rep (arm moves only) ──
@@ -1015,7 +1073,7 @@
       // #3 set-end — pause at the top → a visible "keep moving or it ends" countdown
       if(prevAng!=null && Math.abs(ang-prevAng)>2.2) lastMoveAt=performance.now();
       prevAng=ang;
-      var idle = reps>=1 && phase==='up' && (performance.now()-lastRepAt>3000) && (performance.now()-lastMoveAt>2000);
+      var idle = !timedMode && reps>=1 && phase==='up' && (performance.now()-lastRepAt>3000) && (performance.now()-lastMoveAt>2000);
       if(idle){
         if(!endCd){ endCd=true; endCdStart=performance.now(); }
         var er=5-Math.floor((performance.now()-endCdStart)/1000);
@@ -1056,8 +1114,14 @@
 
     function init(){
       initSelect();
+      try{ renderHistory(); }catch(e){}
+      // #11 mode toggle
+      Array.prototype.forEach.call(document.querySelectorAll('#modeTog .mt-opt'), function(b){ b.addEventListener('click', function(){
+        timedMode=(b.getAttribute('data-mode')==='timed');
+        Array.prototype.forEach.call(document.querySelectorAll('#modeTog .mt-opt'), function(x){ x.classList.toggle('on', x===b); }); sfx('tick');
+      }); });
       // deep-link: ?ex=<id> opens straight into that movement (from Strength quick wins)
-      try{ var pm=(location.search.match(/[?&]ex=([a-z]+)/i)||[])[1]; if(pm && EXOS.some(function(e){return e.id===pm;})) startSession(pm); }catch(e){}
+      try{ var pm=(location.search.match(/[?&]ex=([a-z]+)/i)||[])[1]; if(pm && EXOS.some(function(e){return e.id===pm;})) beginWorkout(pm); }catch(e){}
       // "?" help sheet
       try{
         if(window.coreHelp){
