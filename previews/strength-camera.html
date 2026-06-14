@@ -195,7 +195,11 @@
   .sumhead{ text-align:center; } .sumhead .ring{ width:84px; height:84px; margin:6px auto 12px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:40px; color:var(--accent); background:radial-gradient(circle at 50% 40%, color-mix(in srgb,var(--accent) 26%,transparent), color-mix(in srgb,var(--accent) 4%,transparent)); box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 40%,transparent); animation:pop .5s cubic-bezier(.2,1.4,.4,1) both; } @keyframes pop{ from{transform:scale(.3); opacity:0;} to{transform:scale(1); opacity:1;} }
   .sumhead .rankbadge{ width:96px; height:96px; margin:6px auto 12px; border-radius:26px; display:flex; align-items:center; justify-content:center; font-size:48px; font-weight:900; border:2px solid currentColor; background:radial-gradient(circle at 50% 38%, color-mix(in srgb, currentColor 26%, transparent), color-mix(in srgb, currentColor 5%, transparent)); box-shadow:0 0 30px color-mix(in srgb, currentColor 30%, transparent); animation:pop .5s cubic-bezier(.2,1.4,.4,1) both; }
   .big3 .bn .newmax{ font-size:13px; color:#FFCB3D; vertical-align:super; margin-left:1px; }
-  .subline{ text-align:center; font-size:12.5px; color:var(--muted); font-weight:600; margin:-4px 0 16px; }
+  .subline{ text-align:center; font-size:12.5px; color:var(--muted); font-weight:600; margin:-4px 0 14px; }
+  .sum-coach{ display:flex; gap:10px; align-items:flex-start; margin:0 0 16px; padding:12px 14px; border-radius:15px;
+    background:color-mix(in srgb, var(--accent) 9%, transparent); border:1px solid color-mix(in srgb, var(--accent) 28%, transparent); }
+  .sum-coach .sc-ic{ flex:none; width:18px; height:18px; color:var(--accent); margin-top:1px; } .sum-coach .sc-ic svg{ width:18px; height:18px; }
+  .sum-coach span:last-child{ font-size:12.5px; font-weight:600; line-height:1.45; color:rgba(248,250,254,.92); }
   .sumhead h2{ margin:0; font-size:23px; font-weight:800; letter-spacing:-0.6px; } .sumhead p{ margin:5px 0 0; font-size:12.5px; color:var(--muted); }
   .big3{ display:flex; gap:9px; margin:18px 0; } .big3 .b{ flex:1; border-radius:18px; padding:16px 8px; text-align:center; border:1px solid var(--border); background:var(--bg-card); } .big3 .bn{ font-size:24px; font-weight:800; font-variant-numeric:tabular-nums; } .big3 .bl{ font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-top:3px; font-weight:700; } .big3 .b.str .bn{ color:var(--accent); } .big3 .b.xp .bn{ color:var(--accent); }
   .bigbtn{ width:100%; border:none; border-radius:18px; padding:16px; font-size:15px; font-weight:800; cursor:pointer; color:#fff; background:var(--accent); transition:transform .12s; } .bigbtn:active{ transform:scale(0.97); }
@@ -289,6 +293,7 @@
 
   <script src="_lib/core-sfx.js"></script>
   <script src="_lib/core-state.js"></script>
+  <script src="_lib/core-ai.js"></script>
   <script src="_lib/core-gym-data.js"></script>
   <script src="_lib/core-strength.js"></script>
   <script>window.CORE_STARS=7;</script>
@@ -449,6 +454,7 @@
     var refLo=1, refHi=0, MINSHIFT=0.03;               // body must actually translate (anti-fake)
     var armLmin=180, armRmin=180, holoCtx=null, lastSay='';  // per-arm effort + coach
     var scoreL=0, scoreR=0, faceTimer=null, talkTimer=null;  // arm scores + coach face state
+    var sessMin=180;  // deepest tracked angle this set (for the AI recap)
     // Coach facial expressions — instant reactions
     var FACE_DEF={ neutral:{m:'M39 66 Q50 71 61 66',h:0,b:0}, happy:{m:'M36 63 Q50 78 64 63',h:1,b:0}, concerned:{m:'M41 70 Q50 63 59 70',h:0,b:1}, excited:{m:'M39 62 Q50 81 61 62',h:0,b:0} };
     function applyFace(st){ var f=FACE_DEF[st]||FACE_DEF.neutral; var mo=$('#cfMouth'); if(mo) mo.setAttribute('d',f.m);
@@ -722,7 +728,7 @@
       cur=EXOS.find(function(e){ return e.id===id; });
       reps=0; points=0; ptsShown=0; mult=1; combo=0; lastRepTime=0; lastRepAt=0; phase='up'; angEMA=null; seenHi=null; seenLo=null; lastGuide=''; lastL=null; _mw=-1; _ml=''; resetRange();
       xpInto=0; xpNeed=150; xpLevel=1; xpShown=0;
-      armLmin=180; armRmin=180; lastSay=''; scoreL=0; scoreR=0;
+      armLmin=180; armRmin=180; lastSay=''; scoreL=0; scoreR=0; sessMin=180;
       sfx('confirm'); haptic();
       document.documentElement.style.setProperty('--str', cur.c);
       $('#liveEx').textContent=cur.name; $('#silho').innerHTML=formFor(cur.id)+'<span class="fd-cap">'+formTip(cur.id)+'</span>';
@@ -780,6 +786,31 @@
     }
     function stopCam(){ stopPose(); if(stream){ stream.getTracks().forEach(function(t){ t.stop(); }); stream=null; } $('#vid').srcObject=null; $('#silho').style.display='flex'; lastTrack=''; setTrack('Camera off'); $('#camToggle').innerHTML=GI.camera+' Turn on camera'; }
 
+    // End-of-set coaching recap — instant rule-based line, upgraded by AI if a key is set.
+    function buildRecap(){
+      if(isArmFam() && (scoreL+scoreR)>0){
+        var diff=Math.abs(scoreL-scoreR), tot=Math.max(scoreL,scoreR,1);
+        if(diff/tot>=0.25){ return 'Your '+(scoreL<scoreR?'left':'right')+' arm did less of the work — pause an extra beat at the bottom on that side next set.'; }
+      }
+      var cfg=POSE_CFG[cur.id];
+      if(cfg && sessMin<180 && sessMin>cfg.down+14) return 'Push for a little more depth next set — aim for a full range every rep.';
+      return 'Clean set — good depth and balance. Try +2 reps next time.';
+    }
+    var RECAP_IC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.6" fill="currentColor"/></svg>';
+    async function aiRecap(){
+      var host=$('#sumCoach'); if(!host) return;
+      host.innerHTML='<span class="sc-ic">'+RECAP_IC+'</span><span>'+buildRecap()+'</span>';
+      if(!(window.coreAI && coreAI.hasKey())) return;
+      host.querySelector('span:last-child').textContent='Coach is reviewing your set…';
+      var cfg=POSE_CFG[cur.id];
+      var bal = isArmFam()? ('Arm work split L'+scoreL+' / R'+scoreR+'.') : '';
+      var depth = (cfg&&sessMin<180)? ('Deepest joint angle reached '+Math.round(sessMin)+'°, target around '+cfg.down+'°.') : '';
+      var prompt='I just finished a set of '+reps+' '+cur.name+'. '+bal+' '+depth+' In ONE short sentence (under 24 words, no preamble), give me a specific, encouraging tip for my next set.';
+      try{ var r=await coreAI.chat([{role:'user',content:prompt}], {maxTokens:80, temperature:0.6});
+        if(r && r.ok && r.text){ host.innerHTML='<span class="sc-ic">'+RECAP_IC+'</span><span>'+r.text.replace(/</g,'&lt;').trim()+'</span>'; }
+        else host.innerHTML='<span class="sc-ic">'+RECAP_IC+'</span><span>'+buildRecap()+'</span>';
+      }catch(e){ host.innerHTML='<span class="sc-ic">'+RECAP_IC+'</span><span>'+buildRecap()+'</span>'; }
+    }
     function finish(){
       stopCam(); stopUI();
       lastMode=cur.id;
@@ -803,9 +834,11 @@
           '<div class="b"><div class="bn">'+best+(isNew?'<span class="newmax">★</span>':'')+'</div><div class="bl">Max</div></div>'+
           '<div class="b str"><div class="bn">'+points.toLocaleString()+'</div><div class="bl">Score</div></div></div>'+
         '<div class="subline">+'+strGain+' Strength · +'+xpGain+' XP'+(isNew?' · <b style="color:#FFCB3D">New max!</b>':'')+'</div>'+
+        '<div class="sum-coach" id="sumCoach"><span class="sc-ic">'+RECAP_IC+'</span><span>Analyzing your set…</span></div>'+
         '<button class="bigbtn" id="sumDone">Done</button>'+
         '<button class="againbtn" id="sumAgain">Go again</button>';
       $('#sumScrim').classList.add('show'); $('#sumSheet').classList.add('show');
+      try{ aiRecap(); }catch(e){}
       $('#sumDone').addEventListener('click', function(){ location.href='gym.html'; });
       $('#sumAgain').addEventListener('click', function(){ $('#sumScrim').classList.remove('show'); $('#sumSheet').classList.remove('show'); startSession(lastMode); });
     }
@@ -875,7 +908,7 @@
       setTrack('● Tracking');
       angEMA = angEMA==null ? raw : angEMA*0.55 + raw*0.45;   // smooth jitter → reliable counting
       var ang=angEMA;
-      repMin=Math.min(repMin,ang); repMax=Math.max(repMax,ang);
+      repMin=Math.min(repMin,ang); repMax=Math.max(repMax,ang); sessMin=Math.min(sessMin,ang);
       var refY=(L[fam.ref[0]].y+L[fam.ref[1]].y)/2; refLo=Math.min(refLo,refY); refHi=Math.max(refHi,refY);
       // Adaptive calibration: learn this person's real extended/contracted
       // angles and set thresholds from them, so it counts properly for anyone.
