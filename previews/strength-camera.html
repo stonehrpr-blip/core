@@ -147,11 +147,23 @@
   .multilbl.hot{ animation:multipulse .5s ease; } @keyframes multipulse{ 0%,100%{transform:scale(1);} 50%{transform:scale(1.22);} }
 
   .cwrap{ position:relative; display:flex; flex-direction:column; align-items:center; }
-  /* Depth ring around the rep number — fills as you lower */
-  .depthring{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:148px; height:148px; pointer-events:none; }
+  /* #3 Depth ring around the rep number — bigger, fills as you lower */
+  .depthring{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:176px; height:176px; pointer-events:none; }
   .depthring circle{ fill:none; stroke-linecap:round; }
-  .depthring .dr-bg{ stroke:rgba(255,255,255,0.12); stroke-width:6; }
-  .depthring .dr-fg{ stroke:var(--str,#0A84FF); stroke-width:6; stroke-dasharray:339.3; stroke-dashoffset:339.3; transform:rotate(-90deg); transform-origin:60px 60px; transition:stroke-dashoffset .08s linear, stroke .15s; filter:drop-shadow(0 0 6px color-mix(in srgb,var(--str,#0A84FF) 70%,transparent)); }
+  .depthring .dr-bg{ stroke:rgba(255,255,255,0.12); stroke-width:7.5; }
+  .depthring .dr-fg{ stroke:var(--str,#0A84FF); stroke-width:7.5; stroke-dasharray:339.3; stroke-dashoffset:339.3; transform:rotate(-90deg); transform-origin:60px 60px; transition:stroke-dashoffset .08s linear, stroke .15s; filter:drop-shadow(0 0 8px color-mix(in srgb,var(--str,#0A84FF) 75%,transparent)); }
+  /* multiplier badge (clean, only shows when active) */
+  .multbadge{ position:absolute; top:8px; right:-4px; transform:translateX(100%); font-size:15px; font-weight:900; color:#FFCB3D; text-shadow:0 0 14px rgba(255,203,61,.55); opacity:0; transition:opacity .2s; white-space:nowrap; }
+  .multbadge.on{ opacity:1; } .multbadge.bump{ animation:mbBump .4s ease; } @keyframes mbBump{ 0%{transform:translateX(100%) scale(1.6);} 100%{transform:translateX(100%) scale(1);} }
+  /* #6 rep goal bar */
+  .goalwrap{ display:flex; flex-direction:column; align-items:center; gap:5px; margin-top:6px; }
+  .goalbar{ width:128px; height:5px; border-radius:999px; background:rgba(255,255,255,0.14); overflow:hidden; }
+  .goalbar i{ display:block; height:100%; width:0%; border-radius:999px; background:var(--str,#0A84FF); box-shadow:0 0 10px var(--str,#0A84FF); transition:width .4s cubic-bezier(.2,.9,.2,1); }
+  .goaltxt{ font-size:9px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+  .ah-t b{ color:#fff; }
+  /* #8 new-best flash */
+  .live.prflash::before{ content:""; position:absolute; inset:0; z-index:9; pointer-events:none; background:radial-gradient(circle at 50% 44%, rgba(255,203,61,0.28), transparent 62%); animation:prFlash .6s ease forwards; }
+  @keyframes prFlash{ 0%{opacity:1;} 100%{opacity:0;} }
   .cwrap.full .dr-fg{ stroke:#34D399; }
   .cwrap.full{ animation:ringFlash .4s ease; } @keyframes ringFlash{ 0%{transform:scale(1.06);} 100%{transform:scale(1);} }
   /* Get-ready countdown */
@@ -167,7 +179,7 @@
   .ec-num{ width:66px; height:66px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:900; color:#fff;
     background:rgba(8,12,22,0.55); border:2.5px solid #FF6B6B; box-shadow:0 0 26px rgba(255,107,107,0.5); }
   .ec-lbl{ font-size:11.5px; font-weight:800; color:rgba(255,255,255,0.88); text-shadow:0 1px 6px rgba(0,0,0,.6); }
-  .counter .cnum{ font-size:92px; font-weight:800; letter-spacing:-3px; line-height:0.9; font-variant-numeric:tabular-nums; text-shadow:0 0 30px rgba(10,132,255,0.42); }
+  .counter .cnum{ font-size:92px; font-weight:800; letter-spacing:-3px; line-height:0.9; font-variant-numeric:tabular-nums; text-shadow:0 0 32px color-mix(in srgb, var(--str,#0A84FF) 50%, transparent); }
   .counter .cnum.bump{ animation:bump .28s cubic-bezier(.2,1.5,.4,1); } @keyframes bump{ 0%{transform:scale(1);} 40%{transform:scale(1.22);} 100%{transform:scale(1);} }
   .counter .pts{ font-size:14.5px; font-weight:800; color:#fff; margin-top:2px; font-variant-numeric:tabular-nums; letter-spacing:-0.2px; }
   .counter .pts b{ color:var(--accent); } .counter .pts .u{ color:var(--muted); font-size:11px; font-weight:700; }
@@ -306,7 +318,9 @@
           <div class="cwrap">
             <svg class="depthring" id="depthRing" viewBox="0 0 120 120"><circle class="dr-bg" cx="60" cy="60" r="54"/><circle class="dr-fg" id="drFg" cx="60" cy="60" r="54"/></svg>
             <div class="cnum" id="cnum">0</div>
+            <span class="multbadge" id="multBadge">×2</span>
           </div>
+          <div class="goalwrap"><div class="goalbar"><i id="goalFill"></i></div><span class="goaltxt" id="goalTxt">0 / 10</span></div>
           <div class="pts"><b id="pts">0</b> <span class="u">pts</span></div>
           <div class="cgain" id="cgain">+0.00 Strength</div>
         </div>
@@ -314,7 +328,7 @@
 
         <!-- Per-arm strength — clean frosted card, bottom-left -->
         <div class="armhud" id="armBars">
-          <div class="ah-t">ARM BALANCE</div>
+          <div class="ah-t">ARM BALANCE <b id="ahBal">100%</b></div>
           <div class="ah-row"><span class="ah-k" style="color:#FF9F0A">L</span><div class="ah-tr"><i id="abL" style="background:#FF9F0A;color:#FF9F0A"></i></div><b class="ah-n" id="abLn" style="color:#FF9F0A">0</b></div>
           <div class="ah-row"><span class="ah-k" style="color:#34D399">R</span><div class="ah-tr"><i id="abR" style="background:#34D399;color:#34D399"></i></div><b class="ah-n" id="abRn" style="color:#34D399">0</b></div>
         </div>
@@ -501,6 +515,7 @@
     var armLmin=180, armRmin=180, holoCtx=null, lastSay='';  // per-arm effort + coach
     var scoreL=0, scoreR=0, faceTimer=null, talkTimer=null;  // arm scores + coach face state
     var sessMin=180;  // deepest tracked angle this set (for the AI recap)
+    var repBest=0, repTarget=10;  // #6 goal + #8 personal-best
     var armed=false, cdActive=false, cdStartAt=0, lastMoveAt=0, prevAng=null, restInt=null, lastCd='';
     var RINGC=339.3;  // 2π·54
     function framingCheck(L){
@@ -591,10 +606,11 @@
     }
     function paintArmBars(){
       var mx=Math.max(scoreL,scoreR,1);
-      var eL=$('#abL'), eR=$('#abR'), nL=$('#abLn'), nR=$('#abRn');
+      var eL=$('#abL'), eR=$('#abR'), nL=$('#abLn'), nR=$('#abRn'), bal=$('#ahBal');
       if(eL) eL.style.width=(scoreL/mx*100).toFixed(0)+'%';
       if(eR) eR.style.width=(scoreR/mx*100).toFixed(0)+'%';
       if(nL) nL.textContent=scoreL; if(nR) nR.textContent=scoreR;
+      if(bal) bal.textContent=((scoreL+scoreR)>0 ? Math.round(100-Math.abs(scoreL-scoreR)/mx*100) : 100)+'%';
     }
     function updateArmBars(cfg){
       // +1 (scores only climb in 1s) to the arm(s) that did the work this rep
@@ -720,7 +736,7 @@
       }
     }
     // Milestone multiplier: +0.1× every MILESTONE reps in the current streak.
-    function milestoneHit(){ var ml=$('#multiLbl'); ml.classList.remove('hot'); void ml.offsetWidth; ml.classList.add('hot'); sfx('coin'); cue('MILESTONE ×'+mult.toFixed(1), 'bonus', true); }
+    function milestoneHit(){ var mb=$('#multBadge'); if(mb){ mb.textContent='×'+mult.toFixed(1); mb.classList.add('on'); mb.classList.remove('bump'); void mb.offsetWidth; mb.classList.add('bump'); } sfx('coin'); cue('MULTIPLIER ×'+mult.toFixed(1), 'bonus', true); }
     // Stopping for >10s breaks the streak → multiplier back to ×1.0.
     function breakCombo(){ if(combo===0 && mult===1) return; combo=0; mult=1; var g=$('#guideTxt'); if(g) g.className='guide'; lastGuide=''; cue('Streak reset — keep moving!', 'warn', true); }
     // One rAF loop while live: eases the points number + decays the multiplier.
@@ -780,7 +796,10 @@
       reps=0; points=0; ptsShown=0; mult=1; combo=0; lastRepTime=0; lastRepAt=0; phase='up'; angEMA=null; seenHi=null; seenLo=null; lastGuide=''; lastL=null; _mw=-1; _ml=''; resetRange();
       xpInto=0; xpNeed=150; xpLevel=1; xpShown=0;
       armLmin=180; armRmin=180; lastSay=''; scoreL=0; scoreR=0; sessMin=180;
-      armed=false; cdActive=false; prevAng=null; lastMoveAt=0; endCd=false; try{ hideCountdown(); hideEndCd(); setRing(0); stopRest(); }catch(e){}
+      armed=false; cdActive=false; prevAng=null; lastMoveAt=0; endCd=false; lastRepTime=0;
+      repBest=(readMax()[cur.id]||0); repTarget=repBest>0?repBest:10;   // #6 goal = beat your best (or 10 to start)
+      var _gf=$('#goalFill'), _gt=$('#goalTxt'), _mb=$('#multBadge'); if(_gf)_gf.style.width='0%'; if(_gt)_gt.textContent='0 / '+repTarget; if(_mb)_mb.classList.remove('on');
+      try{ hideCountdown(); hideEndCd(); setRing(0); stopRest(); }catch(e){}
       sfx('confirm'); haptic();
       document.documentElement.style.setProperty('--str', cur.c);
       $('#liveEx').textContent=cur.name; $('#silho').innerHTML=formFor(cur.id)+'<span class="fd-cap">'+formTip(cur.id)+'</span>';
@@ -803,20 +822,30 @@
 
     // Count n reps (n=2 on a held bottom). Multiplier steps +0.1× per milestone.
     function countRep(n, held){
-      reps += 1; combo += 1; lastRepTime=performance.now();   // one exercise = +1, always
+      var now=performance.now(), interval = lastRepTime ? now-lastRepTime : 9999;   // #7 tempo
+      reps += 1; combo += 1; lastRepTime=now;   // one exercise = +1, always
       var nm=Math.min(MAXMULT, +(1+Math.floor(combo/MILESTONE)*0.1).toFixed(1));
       if(nm>mult){ mult=nm; milestoneHit(); }
       // Score (XP) only climbs while a multiplier is active, and only by 1 at a time.
-      // Reps just count reps — they don't add to the score.
       var gain = (mult>1) ? (held?2:1) : 0;
-      points += gain;
-      xpInto += gain;
+      points += gain; xpInto += gain;
       while(xpInto>=xpNeed){ xpInto-=xpNeed; xpLevel++; xpNeed=150+xpLevel*40; levelUp(); }
-      sfx('coin'); haptic();                                     // ding on every completed rep
+      sfx('coin'); haptic();
       var num=$('#cnum'); num.textContent=reps; num.classList.remove('bump'); void num.offsetWidth; num.classList.add('bump');
-      $('#cgain').textContent='+'+(reps*rate).toFixed(2)+' Strength';
-      if(gain) burstAtBody('+'+gain, held);   // only pop a number when the score actually moves
+      // #6 goal progress
+      var gf=$('#goalFill'), gt=$('#goalTxt');
+      if(gf) gf.style.width=Math.min(100, reps/repTarget*100).toFixed(0)+'%';
+      if(gt) gt.textContent=reps+' / '+repTarget;
+      // multiplier badge
+      var mb=$('#multBadge'); if(mb){ if(mult>1){ mb.textContent='×'+mult.toFixed(1); mb.classList.add('on'); } else mb.classList.remove('on'); }
+      // #7 tempo nudge for rushed reps
+      if(interval<620 && reps>2) cue('Control it — slow down', 'warn');
+      // #8 personal-best / goal celebration
+      if(repBest>0 && reps===repBest+1) celebratePR();
+      else if(repBest===0 && reps===repTarget) { sfx('reward'); cue('🎯 GOAL HIT!', 'bonus', true); }
+      if(gain) burstAtBody('+'+gain, held);
     }
+    function celebratePR(){ sfx('reward'); cue('🔥 NEW BEST!', 'bonus', true); burstAtBody('★', true); var l=$('#live'); if(l){ l.classList.remove('prflash'); void l.offsetWidth; l.classList.add('prflash'); } }
     function levelUp(){
       $('#xpLvl').textContent=xpLevel;
       var w=$('#xpWrap'); w.classList.remove('levelup'); void w.offsetWidth; w.classList.add('levelup');
