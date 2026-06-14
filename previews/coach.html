@@ -85,6 +85,8 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .cp-back{width:38px;height:38px;flex:none;border-radius:50%;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.07);color:#fff;
   display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-appearance:none;appearance:none;padding:0;}
 .cp-back svg{width:19px;height:19px;}
+/* keep round buttons perfectly circular despite the global 44px min-height */
+.cp-back,.cp-iconbtn,.cp-quiz-x,.cp-hist-del,.cp-hist-edit{min-height:0;}
 .cp-av{position:relative;width:42px;height:42px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;
   background:radial-gradient(circle at 35% 30%, #5BB1FF, #0A84FF 45%, #6F70FF);box-shadow:0 0 22px rgba(47,143,255,0.5), inset 0 1px 2px rgba(255,255,255,0.3);}
 .cp-av svg{width:23px;height:23px;color:#fff;}
@@ -179,6 +181,19 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .cp-confirm-no{background:rgba(255,255,255,0.06);color:#EAF0FB;}
 .cp-confirm-yes{background:linear-gradient(135deg,#FF5A5A,#E0356B);border:none;color:#fff;}
 .cp-confirm-btns button:active{transform:scale(.96);}
+.cp-prompt{position:absolute;inset:0;z-index:21;display:flex;align-items:center;justify-content:center;
+  background:rgba(4,6,14,0.62);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);opacity:0;visibility:hidden;transition:opacity .25s;padding:16px;}
+.cp-prompt.on{opacity:1;visibility:visible;}
+.cp-prompt-card{width:100%;max-width:320px;background:linear-gradient(180deg,#141A2C,#0C1020);border:1px solid rgba(255,255,255,0.1);
+  border-radius:22px;padding:20px;box-shadow:0 24px 60px rgba(0,0,0,0.5);transform:scale(.94);transition:transform .25s;}
+.cp-prompt.on .cp-prompt-card{transform:scale(1);}
+.cp-prompt-title{font-size:15px;font-weight:800;color:#fff;margin-bottom:12px;}
+.cp-prompt-input{width:100%;box-sizing:border-box;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.16);border-radius:13px;
+  padding:12px 14px;font:inherit;font-size:14px;color:#fff;outline:none;margin-bottom:16px;}
+.cp-prompt-input:focus{border-color:rgba(10,132,255,0.6);}
+.cp-prompt-save{flex:1;padding:12px;border-radius:13px;font:inherit;font-size:14px;font-weight:800;cursor:pointer;border:none;
+  background:linear-gradient(135deg,#0A84FF,#6F70FF);color:#fff;transition:transform .1s;}
+.cp-prompt-save:active{transform:scale(.96);}
 /* header action buttons — new chat + saved-chat history */
 .cp-iconbtn{width:38px;height:38px;flex:none;border-radius:50%;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);
   color:#C7D2E8;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-appearance:none;appearance:none;padding:0;transition:background .15s, transform .12s;}
@@ -193,7 +208,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .cp-hist-title{flex:1;font-size:18px;font-weight:900;letter-spacing:-0.3px;color:#fff;}
 .cp-hist-list{flex:1;overflow-y:auto;padding:4px 12px 14px;display:flex;flex-direction:column;gap:8px;}
 .cp-hist-list::-webkit-scrollbar{display:none;}
-.cp-hist-item{position:relative;display:flex;flex-direction:column;gap:2px;padding:13px 46px 13px 15px;border-radius:16px;
+.cp-hist-item{position:relative;display:flex;flex-direction:column;gap:2px;padding:13px 82px 13px 15px;border-radius:16px;
   border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.05);cursor:pointer;transition:background .15s;
   animation:msgIn .26s cubic-bezier(.2,.9,.3,1) both;}
 .cp-hist-item:active{background:rgba(255,255,255,0.10);}
@@ -204,6 +219,10 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   background:rgba(255,255,255,0.06);color:#9AA1B7;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-appearance:none;appearance:none;padding:0;}
 .cp-hist-del svg{width:15px;height:15px;}
 .cp-hist-del:active{background:rgba(255,80,80,0.28);color:#fff;}
+.cp-hist-edit{position:absolute;right:44px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;border:none;
+  background:rgba(255,255,255,0.06);color:#9AA1B7;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-appearance:none;appearance:none;padding:0;}
+.cp-hist-edit svg{width:15px;height:15px;}
+.cp-hist-edit:active{background:rgba(10,132,255,0.28);color:#fff;}
 .cp-hist-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 48px;
   color:var(--muted);font-size:13px;line-height:1.6;}
 .cp-hist-empty.hide{display:none;}
@@ -289,7 +308,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     <div class="topbar">
       <div class="brand"><span class="dot"></span><span class="wm">CORE</span></div>
       <span class="topbar-title">Coach</span>
-      <button id="helpBtn" aria-label="Help" style="margin-left:auto;width:34px;height:34px;flex:none;border-radius:50%;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:#9AA1B7;font:800 14px -apple-system,sans-serif;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;-webkit-appearance:none;appearance:none;">?</button>
+      <button id="helpBtn" aria-label="Help" style="margin-left:auto;width:34px;height:34px;min-height:34px;flex:none;border-radius:50%;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:#9AA1B7;font:800 14px -apple-system,sans-serif;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;-webkit-appearance:none;appearance:none;">?</button>
     </div>
 
     <div class="scroll">
@@ -444,6 +463,18 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
         </div>
       </div>
 
+      <!-- Rename chat -->
+      <div class="cp-prompt" id="cpRename" aria-hidden="true">
+        <div class="cp-prompt-card">
+          <div class="cp-prompt-title">Rename chat</div>
+          <input class="cp-prompt-input" id="cpRenameInput" type="text" maxlength="60" placeholder="Chat name" enterkeyhint="done" />
+          <div class="cp-confirm-btns">
+            <button class="cp-confirm-no" id="cpRenameCancel" type="button">Cancel</button>
+            <button class="cp-prompt-save" id="cpRenameSave" type="button">Save</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Confirm dialog -->
       <div class="cp-confirm" id="cpConfirm" aria-hidden="true">
         <div class="cp-confirm-card">
@@ -517,7 +548,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     var rec=recordById(activeId);
     if(!rec){ rec={ id:activeId, created:Date.now() }; store.chats.push(rec); }
     rec.messages=convo.slice();
-    rec.title=titleFor(convo);
+    rec.title=rec.customTitle || titleFor(convo);   // keep a user-set name
     rec.updated=Date.now();
     saveStore();
   }
@@ -567,6 +598,9 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
       var t=document.createElement('div'); t.className='cp-hist-t'; t.textContent=rec.title||'Chat';
       var p=document.createElement('div'); p.className='cp-hist-p'; p.textContent=previewFor(rec.messages);
       var tm=document.createElement('div'); tm.className='cp-hist-time'; tm.textContent=relTime(rec.updated||rec.created||Date.now());
+      var edit=document.createElement('button'); edit.className='cp-hist-edit'; edit.type='button'; edit.setAttribute('aria-label','Rename chat');
+      edit.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
+      edit.addEventListener('click', function(e){ e.stopPropagation(); openRename(rec); });
       var del=document.createElement('button'); del.className='cp-hist-del'; del.type='button'; del.setAttribute('aria-label','Delete chat');
       del.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>';
       del.addEventListener('click', function(e){
@@ -577,7 +611,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
           saveStore(); renderHistory();
         });
       });
-      el.appendChild(t); el.appendChild(p); el.appendChild(tm); el.appendChild(del);
+      el.appendChild(t); el.appendChild(p); el.appendChild(tm); el.appendChild(edit); el.appendChild(del);
       el.addEventListener('click', function(){ resumeChat(rec.id); closeHistory(); });
       list.appendChild(el);
     });
@@ -603,6 +637,80 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   $('#cpConfirmNo').addEventListener('click', closeConfirm);
   $('#cpConfirmYes').addEventListener('click', function(){ var fn=_confirmFn; closeConfirm(); if(fn) fn(); });
   $('#cpConfirm').addEventListener('click', function(e){ if(e.target===this) closeConfirm(); });
+
+  // ── Rename a saved chat ──
+  var _renameId=null;
+  function openRename(rec){
+    _renameId=rec.id;
+    var inp=$('#cpRenameInput'); inp.value=rec.title||'';
+    var m=$('#cpRename'); m.classList.add('on'); m.setAttribute('aria-hidden','false');
+    setTimeout(function(){ inp.focus(); inp.select(); }, 60);
+  }
+  function closeRename(){ var m=$('#cpRename'); m.classList.remove('on'); m.setAttribute('aria-hidden','true'); _renameId=null; }
+  function saveRename(){
+    var name=$('#cpRenameInput').value.trim(), rec=recordById(_renameId);
+    if(rec){
+      if(name){ rec.customTitle=name; rec.title=name; }
+      else { delete rec.customTitle; rec.title=titleFor(rec.messages||[]); }   // empty clears the custom name
+      saveStore();
+    }
+    closeRename(); renderHistory();
+  }
+  $('#cpRenameCancel').addEventListener('click', closeRename);
+  $('#cpRenameSave').addEventListener('click', saveRename);
+  $('#cpRename').addEventListener('click', function(e){ if(e.target===this) closeRename(); });
+  $('#cpRenameInput').addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); saveRename(); } });
+
+  // ── Natural-language commands (typo-tolerant) ──
+  function levo(a,b){
+    var m=a.length, n=b.length; if(!m) return n; if(!n) return m;
+    var prev=[], cur=[], i, j;
+    for(j=0;j<=n;j++) prev[j]=j;
+    for(i=1;i<=m;i++){ cur[0]=i;
+      for(j=1;j<=n;j++){ var c=a.charAt(i-1)===b.charAt(j-1)?0:1; cur[j]=Math.min(prev[j]+1, cur[j-1]+1, prev[j-1]+c); }
+      for(j=0;j<=n;j++) prev[j]=cur[j];
+    }
+    return prev[n];
+  }
+  function tokenize(s){ return s.toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(Boolean); }
+  function nearWord(t,w){ var max = w.length<=4 ? 1 : 2; return t===w || levo(t,w)<=max; }   // allow more slop on longer words
+  function hasAny(tokens,words){ for(var i=0;i<tokens.length;i++) for(var j=0;j<words.length;j++) if(nearWord(tokens[i],words[j])) return true; return false; }
+  function detectCommand(text){
+    var tk=tokenize(text); if(!tk.length) return null;
+    var ACT=['build','make','create','new','start','design','setup','generate','give','want','need','set'];
+    var CHAT=['chat','chats','conversation','conversations','convo','convos','thread'];
+    // build a routine
+    if(hasAny(tk,['routine','rutine','routene','rountine','ruteen','plan','program','schedule']) && (hasAny(tk,ACT) || tk.length<=2))
+      return openQuiz;
+    // what can you do / commands
+    if(hasAny(tk,['commands','command']) || (hasAny(tk,['what']) && hasAny(tk,['do','can']) && hasAny(tk,['you']) && tk.length<=7))
+      return showCommandHelp;
+    // clear everything
+    if(hasAny(tk,['clear','delete','wipe','erase','remove']) && hasAny(tk,['all','everything']))
+      return function(){ askConfirm("Clear all saved chats? This can't be undone.",'Clear all',function(){ store.chats=[]; saveStore(); newChat(); renderHistory(); }); };
+    // show saved chats / history
+    if(hasAny(tk,['history','saved','previous','past','recent','earlier']) && (hasAny(tk,CHAT) || hasAny(tk,['show','open','see'])))
+      return openHistory;
+    // rename this chat
+    if(hasAny(tk,['rename','retitle']) || (hasAny(tk,['name','title','call']) && hasAny(tk,['this','it'].concat(CHAT))))
+      return function(){ var rec=recordById(activeId); if(rec) openRename(rec); };
+    // new / fresh chat, start over
+    if(hasAny(tk,['new','fresh','reset','clear','start','restart']) && (hasAny(tk,CHAT) || hasAny(tk,['over'])))
+      return function(){ newChat(); if(input) input.focus(); };
+    return null;
+  }
+  function showCommandHelp(){
+    if(!activeId) newChat();
+    var sg=$('#cpSuggest'); if(sg) sg.classList.add('hide');
+    var msg="I can chat about anything — and I can run a few things for you right from here:\n\n"
+      +"- **Build a routine** — say *\"build me a routine\"* and I'll ask a few quick questions, then make a plan\n"
+      +"- **New chat** — *\"start a new chat\"*\n"
+      +"- **Saved chats** — *\"show my history\"*\n"
+      +"- **Rename this chat** — *\"rename this chat\"*\n"
+      +"- **Clear everything** — *\"clear all chats\"*\n\n"
+      +"Don't worry about typos — I'll figure out what you mean.";
+    bubble('ai', msg); convo.push({ role:'assistant', content: msg }); persistActive();
+  }
 
   // ── Routine builder — guided popup questions, then a tailored plan ──
   var ROUTINE_Q=[
@@ -792,8 +900,9 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     var t=input.value.trim();
     if(!t || busy) return;
     input.value=''; autogrow();
-    // typing "build me a routine" launches the guided builder instead of a chat reply
-    if(/\b(build|make|create|design|set up|give me)\b.*\broutine\b|\broutine\b.*\b(plan|builder)\b|^routine$/i.test(t)){ openQuiz(); return; }
+    // typed commands ("build a routine", "show history", "rename chat"…) run instead of a chat reply — typo-tolerant
+    var cmd=detectCommand(t);
+    if(cmd){ cmd(); return; }
     var sg=$('#cpSuggest'); if(sg) sg.classList.add('hide');   // hide quick prompts after first message
     setBusy(true);
     if(!activeId) newChat();
