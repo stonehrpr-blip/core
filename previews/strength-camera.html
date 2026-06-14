@@ -811,15 +811,16 @@
       reps += n; combo += n; lastRepTime=performance.now();
       var nm=Math.min(MAXMULT, +(1+Math.floor(combo/MILESTONE)*0.1).toFixed(1));
       if(nm>mult){ mult=nm; milestoneHit(); }
-      var gain=Math.round(BASE_PTS*n*mult*((cur&&cur.pf)||1));   // harder modes score more
+      // Score (XP) only climbs while a multiplier is active, and only by 1 at a time.
+      // Reps just count reps — they don't add to the score.
+      var gain = (mult>1) ? 1 : 0;
       points += gain;
-      // Feed the XP bar; a hot multiplier "boosts" XP gain. Roll levels over.
-      xpInto += Math.round(gain*(mult>=1.5?1.5:1));
+      xpInto += gain;
       while(xpInto>=xpNeed){ xpInto-=xpNeed; xpLevel++; xpNeed=150+xpLevel*40; levelUp(); }
       sfx('coin'); haptic();                                     // ding on every completed rep
       var num=$('#cnum'); num.textContent=reps; num.classList.remove('bump'); void num.offsetWidth; num.classList.add('bump');
       $('#cgain').textContent='+'+(reps*rate).toFixed(2)+' Strength';
-      burstAtBody('+'+gain, held);   // number pops out of the body
+      if(gain) burstAtBody('+'+gain, held);   // only pop a number when the score actually moves
     }
     function levelUp(){
       $('#xpLvl').textContent=xpLevel;
