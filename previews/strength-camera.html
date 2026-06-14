@@ -53,7 +53,7 @@
 
   .top{ display:flex; align-items:center; gap:12px; padding:54px 20px 6px; position:relative; z-index:12; }
   .back{ -webkit-appearance:none; appearance:none; width:36px; height:36px; flex:none; padding:0; border-radius:50%; border:1px solid var(--border); background:rgba(255,255,255,0.06); color:var(--text); font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-  .top h1{ margin:0; font-size:20px; font-weight:800; letter-spacing:-0.6px; flex:1; }
+  .top h1{ margin:0; font-size:17px; font-weight:800; letter-spacing:-0.4px; flex:1; }
   .plusbadge{ font-size:9px; font-weight:800; letter-spacing:0.8px; padding:4px 9px; border-radius:999px; background:var(--accent); color:#fff; }
   .plusbadge.off{ background:rgba(255,255,255,0.06); color:var(--muted); border:1px solid var(--border); }
 
@@ -101,7 +101,7 @@
   .zoom button.on{ background:rgba(255,255,255,0.18); color:#fff; }
   /* big guide text */
   .guide{ position:absolute; left:0; right:0; top:30%; z-index:6; text-align:center; pointer-events:none;
-    font-size:36px; font-weight:900; letter-spacing:1px; text-transform:uppercase; color:rgba(255,255,255,0.94);
+    font-size:25px; font-weight:900; letter-spacing:0.4px; text-transform:uppercase; color:rgba(255,255,255,0.92);
     text-shadow:0 2px 26px rgba(0,0,0,0.65); opacity:0; transform:translateY(8px) scale(.96);
     transition:opacity .2s ease, transform .26s cubic-bezier(.16,1,.3,1); }
   .guide.show{ opacity:1; transform:translateY(0) scale(1); }
@@ -111,29 +111,6 @@
   @keyframes scan{ 0%,100%{top:14%;} 50%{top:80%;} }
   .camgrad{ position:absolute; inset:0; background:linear-gradient(180deg, rgba(2,2,10,0.5) 0%, transparent 25%, transparent 55%, rgba(2,2,10,0.85) 100%); }
   .livetop{ position:relative; z-index:5; display:flex; align-items:center; justify-content:space-between; padding:56px 20px 0; }
-  /* AI coach hologram — top-right */
-  .holo{ position:absolute; top:104px; right:14px; z-index:7; width:128px; display:flex; flex-direction:column; align-items:center; gap:4px;
-    padding:8px 8px 9px; border-radius:16px; background:rgba(6,12,24,0.45); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
-    border:1px solid rgba(91,200,255,0.30); box-shadow:0 0 22px rgba(40,160,255,0.18), inset 0 0 18px rgba(40,160,255,0.06); }
-  .holo-hd{ position:relative; width:100%; display:flex; align-items:center; justify-content:center; gap:5px; font-size:8.5px; font-weight:900; letter-spacing:.18em; color:#7FD4FF; }
-  .holo-mute{ position:absolute; right:0; top:50%; transform:translateY(-50%); width:15px; height:15px; padding:0; border:none; background:none; color:#7FD4FF; cursor:pointer; -webkit-appearance:none; appearance:none; display:flex; align-items:center; justify-content:center; }
-  .holo-mute svg{ width:13px; height:13px; }
-  /* Coach face — reacts with expressions, mouth flaps when talking */
-  .cface{ width:104px; height:104px; display:block; filter:drop-shadow(0 0 8px rgba(60,170,255,0.45)); }
-  .cf-head{ fill:rgba(40,120,220,0.14); stroke:#7FD4FF; stroke-width:2.4; transition:stroke .15s; }
-  .cf-ant{ stroke:#7FD4FF; stroke-width:2.4; stroke-linecap:round; }
-  .cf-antd{ fill:#34D399; }
-  .cf-eye{ fill:#9FE0FF; }
-  .cf-arc{ fill:none; stroke:#9FE0FF; stroke-width:3.4; stroke-linecap:round; }
-  .cf-brow{ stroke:#FFC24B; stroke-width:3; stroke-linecap:round; }
-  .cf-mouth{ fill:none; stroke:#9FE0FF; stroke-width:3.4; stroke-linecap:round; transform-box:fill-box; transform-origin:center; }
-  .cface.happy .cf-head{ stroke:#34D399; } .cface.happy .cf-mouth,.cface.happy .cf-arc{ stroke:#8CF0C0; }
-  .cface.concerned .cf-head{ stroke:#FFB23E; } .cface.concerned .cf-mouth{ stroke:#FFC24B; }
-  .cface.excited{ animation:cfBounce .5s ease; } .cface.excited .cf-head{ stroke:#34D399; } .cface.excited .cf-mouth{ stroke:#8CF0C0; }
-  @keyframes cfBounce{ 0%,100%{transform:translateY(0);} 45%{transform:translateY(-5px);} }
-  .cface.speaking .cf-mouth{ animation:cfTalk .24s ease-in-out infinite alternate; }
-  @keyframes cfTalk{ from{transform:scaleY(0.5);} to{transform:scaleY(1.7);} }
-  @media (prefers-reduced-motion:reduce){ .cface.speaking .cf-mouth,.cface.excited{ animation:none; } }
   .holo-dot{ width:6px; height:6px; border-radius:50%; background:#34D399; box-shadow:0 0 8px #34D399; animation:holoBlink 1.6s ease-in-out infinite; }
   @keyframes holoBlink{ 0%,100%{opacity:1;} 50%{opacity:.4;} }
   .holo-say{ font-size:10px; font-weight:700; line-height:1.3; text-align:center; color:#EaF4ff; min-height:26px;
@@ -141,22 +118,24 @@
   .holo-say.say-warn{ color:#FFC24B; }
   @media (prefers-reduced-motion:reduce){ .holo-dot{ animation:none; } }
   /* Per-arm effort bars — bottom */
-  /* Per-arm strength — vertical bars that climb each rep */
-  .armbars{ position:absolute; left:0; right:0; bottom:94px; z-index:6; display:flex; justify-content:center; gap:22px; pointer-events:none; }
-  .vb{ display:flex; flex-direction:column; align-items:center; gap:5px; }
-  .vb-n{ font-size:15px; font-weight:900; line-height:1; text-shadow:0 1px 6px rgba(0,0,0,.65); transition:transform .2s; }
-  .vb-col{ position:relative; width:14px; height:76px; border-radius:8px; background:rgba(255,255,255,0.12); overflow:hidden; box-shadow:inset 0 0 0 1px rgba(255,255,255,0.1); }
-  .vb-fill{ position:absolute; left:0; right:0; bottom:0; height:0%; border-radius:8px; box-shadow:0 0 12px currentColor; transition:height .45s cubic-bezier(.2,.9,.2,1); }
-  .vb-k{ font-size:11px; font-weight:900; letter-spacing:.06em; text-shadow:0 1px 4px rgba(0,0,0,.6); }
-  .armbars.pulse .vb-fill{ animation:abPulse .5s ease; }
-  .armbars.pulse .vb-n{ animation:vbPop .4s ease; }
-  @keyframes abPulse{ 0%{filter:brightness(2);} 100%{filter:brightness(1);} }
-  @keyframes vbPop{ 0%{transform:scale(1.5);} 100%{transform:scale(1);} }
-  .livetop .pill{ font-size:11px; font-weight:700; padding:6px 12px; border-radius:999px; background:rgba(0,0,0,0.5); border:1px solid var(--border); }
+  /* Per-arm strength — left side; pips cycle, count climbs each rep */
+  .armbars{ position:absolute; left:12px; bottom:124px; z-index:6; display:flex; flex-direction:column; gap:11px; pointer-events:none; align-items:flex-start; }
+  .vb{ display:flex; align-items:center; gap:7px; }
+  .vb-k{ font-size:11px; font-weight:900; width:10px; text-shadow:0 1px 4px rgba(0,0,0,.6); }
+  .vb-pips{ display:flex; gap:4px; }
+  .vb-pips i{ width:17px; height:7px; border-radius:4px; background:rgba(255,255,255,0.14); box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12); transition:background .16s,box-shadow .16s; }
+  .vb-pips i.on{ background:var(--pc); box-shadow:0 0 10px var(--pc); }
+  .vb-pips.bump i.on{ animation:pipPop .4s ease; }
+  .vb-n{ font-size:13px; font-weight:900; min-width:14px; text-shadow:0 1px 5px rgba(0,0,0,.6); }
+  @keyframes pipPop{ 0%{transform:scale(1.55);} 100%{transform:scale(1);} }
+  .lt-right{ display:flex; align-items:center; gap:7px; }
+  .pmute{ width:30px; height:30px; padding:0; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; -webkit-appearance:none; appearance:none; border:none; }
+  .pmute svg{ width:15px; height:15px; }
+  .livetop .pill{ font-size:10px; font-weight:700; padding:5px 10px; border-radius:999px; background:rgba(0,0,0,0.5); border:1px solid var(--border); }
   .livetop .pill .d{ display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--accent); margin-right:6px; animation:pulse 1.2s infinite; vertical-align:1px; } @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.3;} }
 
   .counter{ position:relative; z-index:5; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-  .counter .clbl{ font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:2px; font-weight:700; }
+  .counter .clbl{ font-size:9.5px; color:var(--muted); text-transform:uppercase; letter-spacing:1.5px; font-weight:700; }
 
   /* speed multiplier bar — fills the faster you rep */
   .multi{ display:flex; align-items:center; gap:9px; width:188px; margin-bottom:14px; }
@@ -167,11 +146,11 @@
   .multilbl.hot{ animation:multipulse .5s ease; } @keyframes multipulse{ 0%,100%{transform:scale(1);} 50%{transform:scale(1.22);} }
 
   .cwrap{ position:relative; display:flex; flex-direction:column; align-items:center; }
-  .counter .cnum{ font-size:124px; font-weight:800; letter-spacing:-5px; line-height:0.9; font-variant-numeric:tabular-nums; text-shadow:0 0 44px rgba(10,132,255,0.45); }
+  .counter .cnum{ font-size:92px; font-weight:800; letter-spacing:-3px; line-height:0.9; font-variant-numeric:tabular-nums; text-shadow:0 0 30px rgba(10,132,255,0.42); }
   .counter .cnum.bump{ animation:bump .28s cubic-bezier(.2,1.5,.4,1); } @keyframes bump{ 0%{transform:scale(1);} 40%{transform:scale(1.22);} 100%{transform:scale(1);} }
-  .counter .pts{ font-size:17px; font-weight:800; color:#fff; margin-top:2px; font-variant-numeric:tabular-nums; letter-spacing:-0.2px; }
-  .counter .pts b{ color:var(--accent); } .counter .pts .u{ color:var(--muted); font-size:12px; font-weight:700; }
-  .counter .cgain{ font-size:13px; color:var(--accent); font-weight:700; margin-top:5px; opacity:.9; }
+  .counter .pts{ font-size:14.5px; font-weight:800; color:#fff; margin-top:2px; font-variant-numeric:tabular-nums; letter-spacing:-0.2px; }
+  .counter .pts b{ color:var(--accent); } .counter .pts .u{ color:var(--muted); font-size:11px; font-weight:700; }
+  .counter .cgain{ font-size:11.5px; color:var(--accent); font-weight:700; margin-top:4px; opacity:.9; }
 
   /* particle + floating "+N" layer, centred on the number */
   .poplayer{ position:absolute; inset:0; pointer-events:none; z-index:9; }
@@ -184,7 +163,7 @@
 
   /* clean popup cue — a single slot that cross-fades (no stacking) */
   .cuewrap{ position:absolute; left:0; right:0; top:63%; z-index:8; display:flex; justify-content:center; pointer-events:none; }
-  .cue{ display:inline-flex; align-items:center; gap:8px; padding:10px 18px; border-radius:18px; font-size:14.5px; font-weight:800; letter-spacing:-0.2px;
+  .cue{ display:inline-flex; align-items:center; gap:7px; padding:8px 15px; border-radius:16px; font-size:12.5px; font-weight:800; letter-spacing:-0.2px;
     background:rgba(8,10,18,0.62); border:1px solid rgba(255,255,255,0.10); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
     color:#fff; box-shadow:0 10px 30px rgba(0,0,0,0.4); white-space:nowrap;
     opacity:0; transform:translateY(9px) scale(.96); transition:opacity .24s ease, transform .3s cubic-bezier(.16,1,.3,1); }
@@ -263,21 +242,10 @@
         <div class="guide" id="guideTxt"></div>
         <div class="livetop">
           <span class="pill"><span class="d"></span><span id="liveEx">Push-ups</span></span>
-          <span class="pill" id="camState">Camera off</span>
-        </div>
-
-        <!-- AI coach hologram (top-right): live wireframe of you + spoken cues -->
-        <div class="holo" id="holo">
-          <div class="holo-hd"><span class="holo-dot"></span>COACH<button class="holo-mute" id="holoMute" type="button" aria-label="Toggle coach voice"></button></div>
-          <svg class="cface" id="coachFace" viewBox="0 0 100 100">
-            <rect class="cf-head" x="18" y="14" width="64" height="72" rx="22"/>
-            <line class="cf-ant" x1="50" y1="14" x2="50" y2="5"/><circle class="cf-antd" cx="50" cy="4" r="3"/>
-            <g id="cfEyesN"><circle class="cf-eye" cx="38" cy="47" r="6"/><circle class="cf-eye" cx="62" cy="47" r="6"/></g>
-            <g id="cfEyesH" style="display:none"><path class="cf-arc" d="M32 49 Q38 41 44 49"/><path class="cf-arc" d="M56 49 Q62 41 68 49"/></g>
-            <g id="cfBrows" style="display:none"><line class="cf-brow" x1="32" y1="36" x2="45" y2="40"/><line class="cf-brow" x1="68" y1="36" x2="55" y2="40"/></g>
-            <path class="cf-mouth" id="cfMouth" d="M39 66 Q50 71 61 66"/>
-          </svg>
-          <div class="holo-say" id="holoSay">Get ready…</div>
+          <span class="lt-right">
+            <button class="pill pmute" id="holoMute" type="button" aria-label="Toggle coach voice"></button>
+            <span class="pill" id="camState">Camera off</span>
+          </span>
         </div>
         <div class="xpwrap" id="xpWrap">
           <span class="xplvl">LV <b id="xpLvl">1</b></span>
@@ -295,10 +263,10 @@
         </div>
         <div class="cuewrap"><div class="cue" id="cueEl"></div></div>
 
-        <!-- Per-arm strength — two vertical bars that climb in 1s each rep -->
+        <!-- Per-arm strength — left side; 2 pips cycle (1→2→cycle), count climbs in 1s -->
         <div class="armbars" id="armBars">
-          <div class="vb"><span class="vb-n" id="abLn" style="color:#FF9F0A">0</span><div class="vb-col"><i class="vb-fill" id="abL" style="background:linear-gradient(180deg,#FFC24B,#FF9F0A);color:#FF9F0A"></i></div><span class="vb-k" style="color:#FF9F0A">L</span></div>
-          <div class="vb"><span class="vb-n" id="abRn" style="color:#34D399">0</span><div class="vb-col"><i class="vb-fill" id="abR" style="background:linear-gradient(180deg,#7BE5B0,#34D399);color:#34D399"></i></div><span class="vb-k" style="color:#34D399">R</span></div>
+          <div class="vb"><span class="vb-k" style="color:#FF9F0A">L</span><div class="vb-pips" id="pipsL" style="--pc:#FF9F0A"><i></i><i></i></div><span class="vb-n" id="abLn" style="color:#FF9F0A">0</span></div>
+          <div class="vb"><span class="vb-k" style="color:#34D399">R</span><div class="vb-pips" id="pipsR" style="--pc:#34D399"><i></i><i></i></div><span class="vb-n" id="abRn" style="color:#34D399">0</span></div>
         </div>
         <div class="livebtns">
           <div class="row2"><button class="gb" id="camToggle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px"><path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg> Camera</button><button class="gb fin" id="finBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px"><path d="M5 12l4 4 10-11"/></svg> Finish</button></div>
@@ -556,12 +524,16 @@
       for(var sy=0; sy<H; sy+=3){ holoCtx.fillRect(0,sy,W,1); }
       holoCtx.globalAlpha=1;
     }
+    // 2 pips cycle: 1 lit after rep 1, 2 after rep 2, then cycle (1,2,1,2…) as the count climbs
+    function setPips(container, score){
+      if(!container) return;
+      var pips=container.querySelectorAll('i'), lit=score>0?(((score-1)%2)+1):0;
+      for(var k=0;k<pips.length;k++) pips[k].classList.toggle('on', k<lit);
+      container.classList.remove('bump'); void container.offsetWidth; container.classList.add('bump');
+    }
     function paintArmBars(){
-      var mx=Math.max(scoreL,scoreR,1);
-      var eL=$('#abL'), eR=$('#abR'), nL=$('#abLn'), nR=$('#abRn');
-      if(eL) eL.style.height=(scoreL/mx*100).toFixed(0)+'%';
-      if(eR) eR.style.height=(scoreR/mx*100).toFixed(0)+'%';
-      if(nL) nL.textContent=scoreL; if(nR) nR.textContent=scoreR;
+      var nL=$('#abLn'), nR=$('#abRn'); if(nL) nL.textContent=scoreL; if(nR) nR.textContent=scoreR;
+      setPips($('#pipsL'), scoreL); setPips($('#pipsR'), scoreR);
     }
     function updateArmBars(cfg){
       // award +1 (scores only ever climb in 1s) to the arm(s) that did the work this rep
@@ -571,7 +543,6 @@
         else if(dl<dr) scoreL++; else scoreR++;
       }
       paintArmBars();
-      var ab=$('#armBars'); if(ab){ ab.classList.remove('pulse'); void ab.offsetWidth; ab.classList.add('pulse'); }
       armLmin=180; armRmin=180;
     }
 
