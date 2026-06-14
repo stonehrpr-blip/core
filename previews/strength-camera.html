@@ -544,12 +544,10 @@
     var armed=false, cdActive=false, cdStartAt=0, lastMoveAt=0, prevAng=null, restInt=null, lastCd='';
     var RINGC=339.3;  // 2π·54
     function framingCheck(L){
-      if(!(L[11].visibility>0.5&&L[12].visibility>0.5&&L[23].visibility>0.4&&L[24].visibility>0.4))
-        return {ok:false,msg:'SHOW YOUR WHOLE BODY',short:'Show your whole body'};
-      var key=[11,12,23,24,27,28], xs=[], ys=[];
-      for(var i=0;i<key.length;i++){ var p=L[key[i]]; if(p.visibility>0.3){ xs.push(p.x); ys.push(p.y); } }
-      if(xs.length>=4){ var span=Math.max(Math.max.apply(null,xs)-Math.min.apply(null,xs), Math.max.apply(null,ys)-Math.min.apply(null,ys));
-        if(span<0.3) return {ok:false,msg:'STEP CLOSER',short:'Step closer'}; }
+      // lenient: just need shoulders + hips roughly in view so the count-in can start
+      var sh = (L[11].visibility>0.4)||(L[12].visibility>0.4);
+      var hp = (L[23].visibility>0.35)||(L[24].visibility>0.35);
+      if(!(sh && hp)) return {ok:false, msg:'SHOW YOUR WHOLE BODY', short:'Show your whole body'};
       return {ok:true};
     }
     function showCountdown(t, go){ var el=$('#countdown'); if(!el) return;
@@ -839,28 +837,31 @@
     function updateSetBadge(){ var sb=$('#setBadge'); if(sb) sb.textContent = (planMode&&plan) ? ('Set '+setNum+'/'+plan.length) : ('Set '+setNum); }
     function beginWorkout(id){ setNum=1; sessionLog=[]; plan = planMode ? rulePlan(id) : null; startSession(id); if(planMode) aiPlan(id); }
     function nextSet(){ setNum++; stopRest(); $('#sumScrim').classList.remove('show'); $('#sumSheet').classList.remove('show'); startSession(cur.id); }
-    // Completing a workout slowly lights up the Strength muscle map (gym diagram).
-    // Push→chest(+triceps), Pull→back(+biceps→arms), Squat→legs(+core). Cumulative & gentle.
-    function upgradeDiagram(){
+    // Each finished set lights up the Strength muscle map (gym diagram, store coreGym.v1).
+    // Push→chest(+triceps), Pull→back(+biceps→arms), Squat→legs(+core). Cumulative & it decays.
+    var GYMK='coreGym.v1';
+    function gymStore(){ var g; try{ g=JSON.parse(localStorage.getItem(GYMK)); }catch(e){ g=null; } if(!g||typeof g!=='object') g={}; if(!g.muscles||typeof g.muscles!=='object') g.muscles={}; if(!Array.isArray(g.history)) g.history=[]; return g; }
+    function bumpMuscle(setReps){
       try{
-        var totalReps=sessionLog.reduce(function(a,s){ return a+s.reps; },0);
-        if(!totalReps || !cur) return;
-        var GK='coreGym.v1', g; try{ g=JSON.parse(localStorage.getItem(GK)); }catch(e){ g=null; }
-        if(!g || typeof g!=='object') g={};
-        if(!g.muscles || typeof g.muscles!=='object') g.muscles={};
-        if(!Array.isArray(g.history)) g.history=[];
-        var diffM = cur.diff==='hard'?1.3:cur.diff==='medium'?1.15:1;
-        var add = totalReps*0.06*diffM, now=Date.now();   // ~20 reps ≈ +1.2 score (builds over sessions)
-        function bump(mid, amt){ var m=g.muscles[mid]||{score:0,lastTs:0,sessions:0}; m.score=(m.score||0)+amt; m.lastTs=now; m.sessions=(m.sessions||0)+1; g.muscles[mid]=m; }
+        if(!setReps || !cur) return;
+        var g=gymStore(), diffM=cur.diff==='hard'?1.3:cur.diff==='medium'?1.15:1, add=setReps*0.14*diffM, now=Date.now();
+        function b(mid,amt){ var m=g.muscles[mid]||{score:0,lastTs:0,sessions:0}; m.score=(m.score||0)+amt; m.lastTs=now; g.muscles[mid]=m; }
         var SEC={ chest:'arms', back:'arms', legs:'core' };
-        bump(cur.muscle, add);
-        if(SEC[cur.muscle]) bump(SEC[cur.muscle], add*0.4);
-        g.history.unshift({ id:'cam-'+now, ts:now, muscle:cur.muscle, exercises:[{ name:cur.name, sets:sessionLog.length, reps:totalReps, weight:0 }], totalSets:sessionLog.length, str:Math.round(totalReps*diffM*0.1), xp:Math.round(totalReps*2*diffM), source:'camera' });
-        g.history=g.history.slice(0,40);
-        localStorage.setItem(GK, JSON.stringify(g));
+        b(cur.muscle, add); if(SEC[cur.muscle]) b(SEC[cur.muscle], add*0.4);
+        localStorage.setItem(GYMK, JSON.stringify(g));
       }catch(e){}
     }
-    function endWorkout(){ stopRest(); upgradeDiagram(); saveSession(); location.href='gym.html'; }
+    function logGymHistory(){
+      try{
+        var totalReps=sessionLog.reduce(function(a,s){ return a+s.reps; },0); if(!totalReps || !cur) return;
+        var g=gymStore(), diffM=cur.diff==='hard'?1.3:cur.diff==='medium'?1.15:1, now=Date.now();
+        var m=g.muscles[cur.muscle]||{score:0,lastTs:0,sessions:0}; m.sessions=(m.sessions||0)+1; m.lastTs=now; g.muscles[cur.muscle]=m;
+        g.history.unshift({ id:'cam-'+now, ts:now, muscle:cur.muscle, exercises:[{ name:cur.name, sets:sessionLog.length, reps:totalReps, weight:0 }], totalSets:sessionLog.length, str:Math.round(totalReps*diffM*0.1), xp:Math.round(totalReps*2*diffM), source:'camera' });
+        g.history=g.history.slice(0,40);
+        localStorage.setItem(GYMK, JSON.stringify(g));
+      }catch(e){}
+    }
+    function endWorkout(){ stopRest(); logGymHistory(); saveSession(); location.href='gym.html'; }
     function saveSession(){
       if(!sessionLog.length) return;
       try{
@@ -938,13 +939,13 @@
     }
 
     // Count n reps (n=2 on a held bottom). Multiplier steps +0.1× per milestone.
-    function countRep(n, held){
+    function countRep(){
       var now=performance.now(), interval = lastRepTime ? now-lastRepTime : 9999;   // #7 tempo
       reps += 1; combo += 1; lastRepTime=now;   // one exercise = +1, always
       var nm=Math.min(MAXMULT, +(1+Math.floor(combo/MILESTONE)*0.1).toFixed(1));
       if(nm>mult){ mult=nm; milestoneHit(); }
       // Score (XP) only climbs while a multiplier is active, and only by 1 at a time.
-      var gain = (mult>1) ? (held?2:1) : 0;
+      var gain = (mult>1) ? 1 : 0;
       points += gain; xpInto += gain;
       while(xpInto>=xpNeed){ xpInto-=xpNeed; xpLevel++; xpNeed=150+xpLevel*40; levelUp(); }
       sfx('coin'); haptic();
@@ -960,7 +961,7 @@
       // #8 personal-best / goal celebration
       if(repBest>0 && reps===repBest+1) celebratePR();
       else if(repBest===0 && reps===repTarget) { sfx('reward'); cue('🎯 GOAL HIT!', 'bonus', true); }
-      if(gain) burstAtBody('+'+gain, held);
+      if(gain) burstAtBody('+'+gain, true);
     }
     function celebratePR(){ sfx('reward'); cue('🔥 NEW BEST!', 'bonus', true); burstAtBody('★', true); var l=$('#live'); if(l){ l.classList.remove('prflash'); void l.offsetWidth; l.classList.add('prflash'); } }
     function levelUp(){
@@ -1027,6 +1028,7 @@
       var rt=ratingFor(reps, cur.diff); lastRt=rt;
       sfx('reward');
       sessionLog.push({ reps:reps, points:points });   // #10 record this set
+      bumpMuscle(reps);   // light up the muscle map immediately for this set
       var wkSets=sessionLog.length, wkReps=sessionLog.reduce(function(a,s){ return a+s.reps; },0);
       var setCal=Math.round(reps*calRate()), wkCal=Math.round(wkReps*calRate());   // #14 calories
       var planDone = planMode && plan && setNum>=plan.length;
@@ -1146,33 +1148,29 @@
         showEndCd(er); setGuide('KEEP GOING'); return;   // hold counting while resting
       } else if(endCd){ endCd=false; hideEndCd(); }
       var lc=cfg.live(L,W,H); if(lc) cue(lc.t, 'warn');
-      // Rep state machine + hold-for-bonus, with big guide text.
+      // Rep state machine (hold-for-bonus removed) with big guide text.
       if(phase==='up' && ang<downTh){
-        phase='down'; downAt=performance.now(); holdReady=true; holdScored=false; ringFull();
+        phase='down'; ringFull();
         setGuide(cfg.gDn);                              // bottom reached → drive back up
-        if(reps%4===0) cue('Hold for +2', 'bonus');     // prompt occasionally, not every rep
       } else if(phase==='down'){
-        if(holdReady && !holdScored && performance.now()-downAt>650){ holdScored=true; setGuide('HOLD'); cue('Hold it!', 'good'); }
         if(ang>upTh){
           var now=performance.now();
           if(now-lastRepAt>400){
             lastRepAt=now;
-            // Anti-fake gate #3 — a real rep needs full range of motion AND
-            // real body translation (not just a flicking joint).
-            if((repMax-repMin)>=MINROM && (refHi-refLo)>=MINSHIFT){ finishRep(cfg, holdScored); }
+            // Anti-fake gate — a real rep needs full range of motion AND real body translation.
+            if((repMax-repMin)>=MINROM && (refHi-refLo)>=MINSHIFT){ finishRep(cfg); }
             else { cue('Use your whole body — full rep', 'warn', true); resetRange(); }
           }
           phase='up'; setGuide(cfg.gUp);                // locked out → lower for the next rep
         }
       }
     }
-    function finishRep(cfg, held){
-      countRep(1, held);   // every rep counts as exactly +1 (1,2,3,4,5…)
+    function finishRep(cfg){
+      countRep(1);   // every rep counts as exactly +1 (1,2,3,4,5…)
       if(endCd){ endCd=false; hideEndCd(); }   // any rep cancels the end-countdown
-      setFace(held?'excited':'happy', 1000);   // instant coach reaction
+      setFace('happy', 1000);   // instant coach reaction
       if(isArmFam()) updateArmBars(cfg);   // climb the two arm bars each rep
-      if(held){ cue('HOLD BONUS +2', 'bonus', true); }
-      else if(reps>0 && reps%5===0){ encourage(); }     // periodic "keep going"
+      if(reps>0 && reps%5===0){ encourage(); }     // periodic "keep going"
       else { var s=cfg.summary(repMin,repMax); if(s && !s.ok) cue(s.t, 'warn'); }
       resetRange();
     }
