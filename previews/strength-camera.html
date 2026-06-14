@@ -808,12 +808,12 @@
 
     // Count n reps (n=2 on a held bottom). Multiplier steps +0.1× per milestone.
     function countRep(n, held){
-      reps += n; combo += n; lastRepTime=performance.now();
+      reps += 1; combo += 1; lastRepTime=performance.now();   // one exercise = +1, always
       var nm=Math.min(MAXMULT, +(1+Math.floor(combo/MILESTONE)*0.1).toFixed(1));
       if(nm>mult){ mult=nm; milestoneHit(); }
       // Score (XP) only climbs while a multiplier is active, and only by 1 at a time.
       // Reps just count reps — they don't add to the score.
-      var gain = (mult>1) ? 1 : 0;
+      var gain = (mult>1) ? (held?2:1) : 0;
       points += gain;
       xpInto += gain;
       while(xpInto>=xpNeed){ xpInto-=xpNeed; xpLevel++; xpNeed=150+xpLevel*40; levelUp(); }
@@ -1020,7 +1020,7 @@
       }
     }
     function finishRep(cfg, held){
-      countRep(held?2:1, held);
+      countRep(1, held);   // every rep counts as exactly +1 (1,2,3,4,5…)
       if(endCd){ endCd=false; hideEndCd(); }   // any rep cancels the end-countdown
       setFace(held?'excited':'happy', 1000);   // instant coach reaction
       if(isArmFam()) updateArmBars(cfg);   // climb the two arm bars each rep
