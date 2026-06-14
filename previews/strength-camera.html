@@ -172,6 +172,12 @@
   .counter .pts{ font-size:14.5px; font-weight:800; color:#fff; margin-top:2px; font-variant-numeric:tabular-nums; letter-spacing:-0.2px; }
   .counter .pts b{ color:var(--accent); } .counter .pts .u{ color:var(--muted); font-size:11px; font-weight:700; }
   .counter .cgain{ font-size:11.5px; color:var(--accent); font-weight:700; margin-top:4px; opacity:.9; }
+  /* cleaner HUD — hide the busy secondary meters (XP / multiplier / gain line) */
+  .xpwrap{ display:none !important; }
+  .counter .multi{ display:none !important; }
+  .counter .cgain{ display:none !important; }
+  .counter{ gap:2px; }
+  .counter .clbl{ font-size:9px; letter-spacing:2px; opacity:.8; }
 
   /* particle + floating "+N" layer, centred on the number */
   .poplayer{ position:absolute; inset:0; pointer-events:none; z-index:9; }
@@ -287,10 +293,7 @@
         <div class="endcd" id="endCd"><div class="ec-num" id="endCdN">5</div><div class="ec-lbl">Keep moving — or the set ends</div></div>
         <div class="livetop">
           <span class="pill"><span class="d"></span><span id="liveEx">Push-ups</span></span>
-          <span class="lt-right">
-            <button class="pill pmute" id="holoMute" type="button" aria-label="Toggle coach voice"></button>
-            <span class="pill" id="camState">Camera off</span>
-          </span>
+          <span class="pill" id="camState">Camera off</span>
         </div>
         <div class="xpwrap" id="xpWrap">
           <span class="xplvl">LV <b id="xpLvl">1</b></span>
@@ -524,7 +527,7 @@
     function showEndCd(n){ var el=$('#endCd'); if(!el) return; el.classList.add('on'); if(n!==lastEc){ lastEc=n; var num=$('#endCdN'); if(num) num.textContent=n; try{ sfx('tick'); }catch(e){} } }
     function hideEndCd(){ var el=$('#endCd'); if(el) el.classList.remove('on'); lastEc=-1; }
     var ENC=['Keep going — strong!','Nice pace, don\'t stop!','You\'ve got more in you!','Looking strong — push!','Almost there — keep it up!'];
-    function encourage(){ var t=ENC[Math.floor(reps/5)%ENC.length]; cue(t,'good'); try{ coachSpeak(t); }catch(e){} }
+    function encourage(){ cue(ENC[Math.floor(reps/5)%ENC.length],'good'); }
     // Coach facial expressions — instant reactions
     var FACE_DEF={ neutral:{m:'M39 66 Q50 71 61 66',h:0,b:0}, happy:{m:'M36 63 Q50 78 64 63',h:1,b:0}, concerned:{m:'M41 70 Q50 63 59 70',h:0,b:1}, excited:{m:'M39 62 Q50 81 61 62',h:0,b:0} };
     function applyFace(st){ var f=FACE_DEF[st]||FACE_DEF.neutral; var mo=$('#cfMouth'); if(mo) mo.setAttribute('d',f.m);
@@ -543,21 +546,7 @@
       {c:[11,23],a:'#CFE9FF'},{c:[12,24],a:'#CFE9FF'},{c:[23,24],a:'#CFE9FF'},{c:[23,25],a:'#CFE9FF'},{c:[25,27],a:'#CFE9FF'},{c:[24,26],a:'#CFE9FF'},{c:[26,28],a:'#CFE9FF'} ];
     var SAY={ 'LOWER':'Lower your chest to the floor','PUSH UP':'Now drive back up — strong!','HOLD':'Hold it… nice and tight','SQUAT':'Sit back and down','STAND UP':'Drive up tall','SUMO DOWN':'Sink into the squat','DRIVE UP':'Drive up!','LOAD':'Load up…','JUMP!':'Explode up!','PULL UP':'Pull your chin over the bar','GET SET':'Get into position…','SHOW YOUR WHOLE BODY':'Step back — show your whole body','STEP INTO FRAME':'Step into frame','FACE THE CAMERA':'Turn so I can see you' };
     function isArmFam(){ return cur && /^(push|pull|chin)/.test(cur.id); }
-    var voiceOn=true, lastSpokeAt=0;
-    try{ voiceOn = localStorage.getItem('coreCoachVoice')!=='0'; }catch(e){}
-    var SPK_ON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H3v6h3l5 4V5z"/><path d="M16 9a3 3 0 0 1 0 6M19 7a6 6 0 0 1 0 10"/></svg>';
-    var SPK_OFF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H3v6h3l5 4V5z"/><path d="M22 9l-6 6M16 9l6 6"/></svg>';
-    function renderMute(){ var vm=$('#holoMute'); if(vm){ vm.innerHTML = voiceOn?SPK_ON:SPK_OFF; vm.style.opacity=voiceOn?'1':'0.5'; } }
-    function coachSpeak(t){
-      try{
-        if(!voiceOn || !window.speechSynthesis || !t) return;
-        var now=performance.now(); if(now-lastSpokeAt<1500) return; lastSpokeAt=now;
-        window.speechSynthesis.cancel();
-        var u=new SpeechSynthesisUtterance(t); u.rate=1.08; u.pitch=1.0; u.volume=1;
-        window.speechSynthesis.speak(u);
-      }catch(e){}
-    }
-    function coachSay(t, warn){ if(!t||t===lastSay) return; lastSay=t; var s=$('#holoSay'); if(s){ s.textContent=t; s.className='holo-say'+(warn?' say-warn':''); } coachSpeak(t); coachTalk(t); }
+    function coachSay(t, warn){ /* voice removed — guidance shows via the big on-screen text */ }
     function drawSkeleton(L,W,H){
       ctx.lineCap='round'; ctx.lineJoin='round';
       for(var pass=0; pass<2; pass++){
@@ -1003,7 +992,7 @@
       prevAng=ang;
       var idle = reps>=1 && phase==='up' && (performance.now()-lastRepAt>3000) && (performance.now()-lastMoveAt>2000);
       if(idle){
-        if(!endCd){ endCd=true; endCdStart=performance.now(); try{ coachSpeak('Keep going, or rest now.'); }catch(e){} }
+        if(!endCd){ endCd=true; endCdStart=performance.now(); }
         var er=5-Math.floor((performance.now()-endCdStart)/1000);
         if(er<=0){ autoEnd(); return; }
         showEndCd(er); setGuide('KEEP GOING'); return;   // hold counting while resting
@@ -1060,13 +1049,6 @@
         }
       }catch(e){}
       $('#camToggle').addEventListener('click', toggleCam);
-      renderMute();
-      var hm=$('#holoMute'); if(hm) hm.addEventListener('click', function(e){ e.stopPropagation();
-        voiceOn=!voiceOn; try{ localStorage.setItem('coreCoachVoice', voiceOn?'1':'0'); }catch(_){}
-        if(!voiceOn && window.speechSynthesis) window.speechSynthesis.cancel();
-        if(voiceOn){ lastSpokeAt=0; coachSpeak('Voice on'); }
-        renderMute(); sfx('tick');
-      });
       Array.prototype.forEach.call(document.querySelectorAll('#zoomMeter button'), function(b){
         b.addEventListener('click', function(){
           $('#cam').style.setProperty('--fit', b.getAttribute('data-fit'));
