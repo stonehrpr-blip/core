@@ -111,6 +111,26 @@
   @keyframes scan{ 0%,100%{top:14%;} 50%{top:80%;} }
   .camgrad{ position:absolute; inset:0; background:linear-gradient(180deg, rgba(2,2,10,0.5) 0%, transparent 25%, transparent 55%, rgba(2,2,10,0.85) 100%); }
   .livetop{ position:relative; z-index:5; display:flex; align-items:center; justify-content:space-between; padding:56px 20px 0; }
+  /* AI coach hologram — top-right */
+  .holo{ position:absolute; top:104px; right:14px; z-index:7; width:128px; display:flex; flex-direction:column; align-items:center; gap:4px;
+    padding:8px 8px 9px; border-radius:16px; background:rgba(6,12,24,0.45); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    border:1px solid rgba(91,200,255,0.30); box-shadow:0 0 22px rgba(40,160,255,0.18), inset 0 0 18px rgba(40,160,255,0.06); }
+  .holo-hd{ display:flex; align-items:center; gap:5px; font-size:8.5px; font-weight:900; letter-spacing:.18em; color:#7FD4FF; }
+  .holo-dot{ width:6px; height:6px; border-radius:50%; background:#34D399; box-shadow:0 0 8px #34D399; animation:holoBlink 1.6s ease-in-out infinite; }
+  @keyframes holoBlink{ 0%,100%{opacity:1;} 50%{opacity:.4;} }
+  .holo canvas{ width:120px; height:150px; display:block; filter:drop-shadow(0 0 6px rgba(60,180,255,0.5)); }
+  .holo-say{ font-size:10px; font-weight:700; line-height:1.3; text-align:center; color:#EaF4ff; min-height:26px;
+    display:flex; align-items:center; justify-content:center; padding:0 2px; }
+  .holo-say.say-warn{ color:#FFC24B; }
+  @media (prefers-reduced-motion:reduce){ .holo-dot{ animation:none; } }
+  /* Per-arm effort bars — bottom */
+  .armbars{ position:absolute; left:18px; right:18px; bottom:96px; z-index:6; display:flex; flex-direction:column; gap:7px; pointer-events:none; }
+  .ab{ display:flex; align-items:center; gap:9px; }
+  .ab-k{ flex:none; width:42px; font-size:9.5px; font-weight:900; letter-spacing:.06em; text-shadow:0 1px 4px rgba(0,0,0,.6); }
+  .ab-tr{ flex:1; height:7px; border-radius:999px; background:rgba(255,255,255,0.12); overflow:hidden; box-shadow:inset 0 0 0 1px rgba(255,255,255,0.08); }
+  .ab-tr i{ display:block; height:100%; width:0%; border-radius:999px; transition:width .45s cubic-bezier(.2,.9,.2,1); }
+  .armbars.pulse .ab-tr i{ animation:abPulse .5s ease; }
+  @keyframes abPulse{ 0%{filter:brightness(1.8);} 100%{filter:brightness(1);} }
   .livetop .pill{ font-size:11px; font-weight:700; padding:6px 12px; border-radius:999px; background:rgba(0,0,0,0.5); border:1px solid var(--border); }
   .livetop .pill .d{ display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--accent); margin-right:6px; animation:pulse 1.2s infinite; vertical-align:1px; } @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.3;} }
 
@@ -225,6 +245,13 @@
           <span class="pill"><span class="d"></span><span id="liveEx">Push-ups</span></span>
           <span class="pill" id="camState">Camera off</span>
         </div>
+
+        <!-- AI coach hologram (top-right): live wireframe of you + spoken cues -->
+        <div class="holo" id="holo">
+          <div class="holo-hd"><span class="holo-dot"></span>COACH</div>
+          <canvas id="holoCv" width="120" height="150"></canvas>
+          <div class="holo-say" id="holoSay">Get into position…</div>
+        </div>
         <div class="xpwrap" id="xpWrap">
           <span class="xplvl">LV <b id="xpLvl">1</b></span>
           <div class="xpbar"><i id="xpFill"></i></div>
@@ -240,6 +267,12 @@
           <div class="cgain" id="cgain">+0.00 Strength</div>
         </div>
         <div class="cuewrap"><div class="cue" id="cueEl"></div></div>
+
+        <!-- Per-arm effort — two bars, refreshed every rep -->
+        <div class="armbars" id="armBars">
+          <div class="ab"><span class="ab-k" style="color:#FF9F0A">L ARM</span><div class="ab-tr"><i id="abL" style="background:linear-gradient(90deg,#FF9F0A,#FFC24B)"></i></div></div>
+          <div class="ab"><span class="ab-k" style="color:#34D399">R ARM</span><div class="ab-tr"><i id="abR" style="background:linear-gradient(90deg,#34D399,#7BE5B0)"></i></div></div>
+        </div>
         <div class="livebtns">
           <div class="row2"><button class="gb" id="camToggle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px"><path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg> Camera</button><button class="gb fin" id="finBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px"><path d="M5 12l4 4 10-11"/></svg> Finish</button></div>
         </div>
@@ -419,6 +452,54 @@
     var xpInto=0, xpNeed=150, xpLevel=1, xpShown=0;   // XP bar + level
     var MINROM=30;                                     // min range of motion (deg) to count a rep
     var refLo=1, refHi=0, MINSHIFT=0.03;               // body must actually translate (anti-fake)
+    var armLmin=180, armRmin=180, holoCtx=null, lastSay='';  // per-arm effort + coach hologram
+    // colour-coded limbs: left arm orange, right arm green, rest cyan
+    var LIMBS=[ {c:[11,12],a:'#CFE9FF'},{c:[11,13],a:'#FF9F0A'},{c:[13,15],a:'#FF9F0A'},{c:[12,14],a:'#34D399'},{c:[14,16],a:'#34D399'},
+      {c:[11,23],a:'#CFE9FF'},{c:[12,24],a:'#CFE9FF'},{c:[23,24],a:'#CFE9FF'},{c:[23,25],a:'#CFE9FF'},{c:[25,27],a:'#CFE9FF'},{c:[24,26],a:'#CFE9FF'},{c:[26,28],a:'#CFE9FF'} ];
+    var SAY={ 'LOWER':'Lower your chest to the floor','PUSH UP':'Now drive back up — strong!','HOLD':'Hold it… nice and tight','SQUAT':'Sit back and down','STAND UP':'Drive up tall','SUMO DOWN':'Sink into the squat','DRIVE UP':'Drive up!','LOAD':'Load up…','JUMP!':'Explode up!','PULL UP':'Pull your chin over the bar','GET SET':'Get into position…','SHOW YOUR WHOLE BODY':'Step back — show your whole body','STEP INTO FRAME':'Step into frame','FACE THE CAMERA':'Turn so I can see you' };
+    function isArmFam(){ return cur && /^(push|pull|chin)/.test(cur.id); }
+    function coachSay(t, warn){ if(!t||t===lastSay) return; lastSay=t; var s=$('#holoSay'); if(!s) return; s.textContent=t; s.className='holo-say'+(warn?' say-warn':''); }
+    function drawSkeleton(L,W,H){
+      ctx.lineCap='round'; ctx.lineJoin='round';
+      for(var pass=0; pass<2; pass++){
+        for(var k=0;k<LIMBS.length;k++){ var lm=LIMBS[k], p=L[lm.c[0]], q=L[lm.c[1]];
+          if(Math.min(p.visibility,q.visibility)<=0.4) continue;
+          ctx.beginPath(); ctx.moveTo(p.x*W,p.y*H); ctx.lineTo(q.x*W,q.y*H);
+          ctx.strokeStyle=lm.a; ctx.globalAlpha = pass===0?0.22:0.96; ctx.lineWidth = pass===0?12:4.5; ctx.stroke();
+        }
+      }
+      ctx.globalAlpha=1;
+      for(var i=0;i<JOINTS.length;i++){ var j=L[JOINTS[i]]; if(j.visibility>0.4){
+        ctx.beginPath(); ctx.arc(j.x*W,j.y*H,5,0,6.283); ctx.fillStyle='#fff'; ctx.fill();
+        ctx.beginPath(); ctx.arc(j.x*W,j.y*H,2.2,0,6.283); ctx.fillStyle='#0A84FF'; ctx.fill();
+      }}
+    }
+    function drawHolo(L){
+      var hc=$('#holoCv'); if(!hc) return;
+      if(!holoCtx) holoCtx=hc.getContext('2d');
+      var W=hc.width, H=hc.height; holoCtx.clearRect(0,0,W,H);
+      var vis=JOINTS.map(function(i){return L[i];}).filter(function(p){return p.visibility>0.4;});
+      if(vis.length<4) return;
+      var minX=1,minY=1,maxX=0,maxY=0;
+      vis.forEach(function(p){ if(p.x<minX)minX=p.x; if(p.x>maxX)maxX=p.x; if(p.y<minY)minY=p.y; if(p.y>maxY)maxY=p.y; });
+      var bw=(maxX-minX)||0.001, bh=(maxY-minY)||0.001, pad=16, sc=Math.min((W-pad*2)/bw,(H-pad*2)/bh);
+      var ox=(W-bw*sc)/2, oy=(H-bh*sc)/2;
+      function tx(x){ return W-(ox+(x-minX)*sc); }   // mirror to match on-screen view
+      function ty(y){ return oy+(y-minY)*sc; }
+      holoCtx.lineCap='round'; holoCtx.lineWidth=2.4; holoCtx.shadowColor='rgba(80,180,255,0.9)'; holoCtx.shadowBlur=6;
+      for(var k=0;k<LIMBS.length;k++){ var lm=LIMBS[k], p=L[lm.c[0]], q=L[lm.c[1]]; if(Math.min(p.visibility,q.visibility)<=0.4) continue;
+        holoCtx.strokeStyle = (lm.a==='#FF9F0A'||lm.a==='#34D399')? lm.a : 'rgba(125,212,255,0.92)';
+        holoCtx.beginPath(); holoCtx.moveTo(tx(p.x),ty(p.y)); holoCtx.lineTo(tx(q.x),ty(q.y)); holoCtx.stroke(); }
+      var nose=L[0]; if(nose&&nose.visibility>0.3){ holoCtx.fillStyle='rgba(160,225,255,0.95)'; holoCtx.beginPath(); holoCtx.arc(tx(nose.x),ty(nose.y),4.5,0,6.283); holoCtx.fill(); }
+      holoCtx.shadowBlur=0;
+    }
+    function updateArmBars(cfg){
+      function work(minA){ if(minA>=170) return 0; return Math.max(0,Math.min(1,(cfg.up-minA)/(cfg.up-cfg.down)))*100; }
+      var l=work(armLmin), r=work(armRmin);
+      var eL=$('#abL'), eR=$('#abR'); if(eL) eL.style.width=l.toFixed(0)+'%'; if(eR) eR.style.width=r.toFixed(0)+'%';
+      var ab=$('#armBars'); if(ab){ ab.classList.remove('pulse'); void ab.offsetWidth; ab.classList.add('pulse'); }
+      armLmin=180; armRmin=180;
+    }
 
     function angleAt(L,a,b,c,W,H){
       var ax=L[a].x*W, ay=L[a].y*H, bx=L[b].x*W, by=L[b].y*H, cx=L[c].x*W, cy=L[c].y*H;
@@ -498,7 +579,7 @@
       clearTimeout(cueTimer); cueTimer=setTimeout(function(){ el.classList.remove('show'); }, 1050);
     }
     // Big guide text ("LOWER", "PUSH UP", "HOLD"…). Only writes on change.
-    function setGuide(t, warn){ if(t===lastGuide) return; lastGuide=t; var g=$('#guideTxt'); if(!g) return; g.textContent=t; g.className='guide show'+(warn?' warn':''); }
+    function setGuide(t, warn){ if(t===lastGuide) return; lastGuide=t; var g=$('#guideTxt'); coachSay(SAY[t]||t, warn); if(!g) return; g.textContent=t; g.className='guide show'+(warn?' warn':''); }
     // Particle burst + floating "+N" — popped out of the body when given x,y
     // (in #popLayer/.live px), else centred on the number.
     function burstAtBody(label, gold){
@@ -595,9 +676,15 @@
       cur=EXOS.find(function(e){ return e.id===id; });
       reps=0; points=0; ptsShown=0; mult=1; combo=0; lastRepTime=0; lastRepAt=0; phase='up'; angEMA=null; seenHi=null; seenLo=null; lastGuide=''; lastL=null; _mw=-1; _ml=''; resetRange();
       xpInto=0; xpNeed=150; xpLevel=1; xpShown=0;
+      armLmin=180; armRmin=180; lastSay='';
       sfx('confirm'); haptic();
       document.documentElement.style.setProperty('--str', cur.c);
       $('#liveEx').textContent=cur.name; $('#silho').innerHTML=formFor(cur.id)+'<span class="fd-cap">'+formTip(cur.id)+'</span>';
+      // coach hologram + per-arm bars (arm movements only)
+      var hs=$('#holoSay'); if(hs){ hs.className='holo-say'; hs.textContent=formTip(cur.id)||'Get into position…'; }
+      if(holoCtx){ var _h=$('#holoCv'); holoCtx.clearRect(0,0,_h.width,_h.height); }
+      var ab=$('#armBars'); if(ab) ab.style.display=isArmFam()?'flex':'none';
+      var _l=$('#abL'),_r=$('#abR'); if(_l)_l.style.width='0%'; if(_r)_r.style.width='0%';
       $('#cnum').textContent='0'; $('#pts').textContent='0'; $('#cgain').textContent='+0.00 Strength';
       $('#multiFill').style.width='0%'; $('#multiLbl').textContent='×1.0';
       $('#xpLvl').textContent='1'; $('#xpFill').style.width='0%'; $('#xpWrap').classList.remove('boost','levelup');
@@ -695,6 +782,7 @@
     }
     function stopPose(){
       poseRunning=false; var cv=$('#pose'); if(cv&&ctx){ ctx.clearRect(0,0,cv.width,cv.height); }
+      if(holoCtx){ var _h=$('#holoCv'); if(_h) holoCtx.clearRect(0,0,_h.width,_h.height); }
       $('#cam').classList.remove('tracking'); lastTrack='';
     }
     function poseLoop(){
@@ -717,14 +805,16 @@
       var cam=$('#cam'); camW=cam.clientWidth; camH=cam.clientHeight;
       if(!L){ setTrack('Step into frame'); setGuide('STEP INTO FRAME'); angEMA=null; lastL=null; return; }
       lastL=L;
-      // Minimal skeleton — thin clean limb lines + small joint dots, body only
-      // (no face mesh). Canvas shares the video's object-fit + mirror via CSS.
-      var col=(cur&&cur.c)||'#5BB1FF', i, p, q, j;
-      ctx.lineWidth=3; ctx.lineCap='round'; ctx.strokeStyle='rgba(255,255,255,0.92)';
-      for(i=0;i<BODY.length;i++){ p=L[BODY[i][0]]; q=L[BODY[i][1]];
-        if(Math.min(p.visibility,q.visibility)>0.4){ ctx.beginPath(); ctx.moveTo(p.x*W,p.y*H); ctx.lineTo(q.x*W,q.y*H); ctx.stroke(); } }
-      ctx.fillStyle=col;
-      for(i=0;i<JOINTS.length;i++){ j=L[JOINTS[i]]; if(j.visibility>0.4){ ctx.beginPath(); ctx.arc(j.x*W,j.y*H,4,0,6.283); ctx.fill(); } }
+      // Glowing colour-coded skeleton (left arm orange, right arm green) + the
+      // top-right coach hologram mirror. Canvas shares the video's object-fit.
+      drawSkeleton(L,W,H);
+      try{ drawHolo(L); }catch(e){}
+      // Per-arm effort — track each arm's deepest elbow bend this rep (arm moves only)
+      if(isArmFam()){
+        var aL=angleAt(L,11,13,15,W,H), aR=angleAt(L,12,14,16,W,H);
+        if(aL!=null) armLmin=Math.min(armLmin,aL);
+        if(aR!=null) armRmin=Math.min(armRmin,aR);
+      }
 
       var cfg=POSE_CFG[cur&&cur.id]; if(!cfg){ setTrack('● Live'); return; }
       var fam=famOf(cur.id);
@@ -771,6 +861,7 @@
     }
     function finishRep(cfg, held){
       countRep(held?2:1, held);
+      if(isArmFam()) updateArmBars(cfg);   // refresh the two arm bars each rep
       if(held){ cue('HOLD BONUS +2', 'bonus', true); }
       else { var s=cfg.summary(repMin,repMax); if(s && (!s.ok || reps%5===0)) cue(s.t, s.ok?'good':'warn'); }
       resetRange();
