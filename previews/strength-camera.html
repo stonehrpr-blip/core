@@ -566,7 +566,7 @@
       pickStage='cat';
       $('#pickLead').style.display=''; $('#pickLead').textContent='Pick a movement';
       $('#exsel').innerHTML = CATS.map(function(c){
-        return '<div class="exo" data-cat="'+c.id+'"><div class="et"><b>'+c.name+'</b><span>'+c.sub+'</span></div><div class="ego">'+GI.chevron+'</div></div>';
+        return '<div class="exo" data-cat="'+c.id+'"><div class="ei" style="color:'+c.c+'">'+(FORM[c.id]||c.emoji)+'</div><div class="et"><b>'+c.name+'</b><span>'+c.sub+'</span></div><div class="ego">'+GI.chevron+'</div></div>';
       }).join('');
       Array.prototype.forEach.call(document.querySelectorAll('#exsel .exo'), function(x){ x.addEventListener('click', function(){ openCat(x.getAttribute('data-cat')); }); });
       var pk=$('#pick'); if(pk) pk.scrollTop=0;
@@ -580,7 +580,7 @@
       html+=c.modes.map(function(mid){
         var e=EXOS.find(function(x){ return x.id===mid; }); if(!e) return '';
         var nm=e.name.replace('Standard ','');
-        return '<div class="exo" data-id="'+e.id+'"><div class="et"><b>'+nm+'</b><span>'+e.sub+'</span></div><div class="ego">'+GI.chevron+'</div></div>';
+        return '<div class="exo" data-id="'+e.id+'"><div class="ei" style="color:'+e.c+'">'+formFor(e.id)+'</div><div class="et"><b>'+nm+'</b><span>'+e.sub+'</span></div><div class="ego">'+GI.chevron+'</div></div>';
       }).join('');
       $('#exsel').innerHTML=html;
       $('#vBack').addEventListener('click', function(){ renderCats(); });
