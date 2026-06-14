@@ -560,12 +560,14 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   function newChat(){
     persistActive();
     activeId=uid(); convo=[];
+    if(typeof setBusy==='function') setBusy(false);   // drop any in-flight reply's spinner
     clearMsgsDOM(); showHero(true); showSuggest(true);
   }
   function resumeChat(id){
     persistActive();
     var rec=recordById(id); if(!rec) return;
     activeId=id; convo=rec.messages.slice();
+    if(typeof setBusy==='function') setBusy(false);
     clearMsgsDOM();
     convo.forEach(function(m){ bubble(m.role==='user'?'user':'ai', m.content); });
     showHero(convo.length===0); showSuggest(convo.length===0);
@@ -913,10 +915,12 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     var sg=$('#cpSuggest'); if(sg) sg.classList.add('hide');   // hide quick prompts after first message
     setBusy(true);
     if(!activeId) newChat();
+    var myId=activeId;                          // remember which chat this reply belongs to
     bubble('user', t); convo.push({ role:'user', content:t }); persistActive();
     var typing=bubble('ai', '•••', false); typing.classList.add('typing');
     var reply;
     try{ reply=await getReply(); }catch(e){ reply=localReply(t); }
+    if(activeId!==myId) return;                 // user hit "+" / switched chats while waiting — drop the stale reply
     typing.remove();
     bubble('ai', reply); convo.push({ role:'assistant', content:reply }); persistActive();
     setBusy(false); input.focus();
