@@ -101,18 +101,22 @@
   }
 
   // ── Hosted proxy (your OpenAI key lives on the server, invisible to users) ──
-  function proxyBase() {
-    try { var c = window.CORE_CONFIG; return (c && c.SUPABASE_URL && c.SUPABASE_ANON_KEY) ? c : null; } catch (e) { return null; }
+  // Prefers a Cloudflare Worker URL (CORE_CONFIG.AI_PROXY_URL); falls back to a Supabase function.
+  function proxyEndpoint() {
+    try {
+      var c = window.CORE_CONFIG; if (!c) return null;
+      if (c.AI_PROXY_URL) return { url: c.AI_PROXY_URL, headers: { 'Content-Type': 'application/json' } };
+      if (c.SUPABASE_URL && c.SUPABASE_ANON_KEY) return { url: c.SUPABASE_URL + '/functions/v1/ai',
+        headers: { 'Content-Type': 'application/json', 'apikey': c.SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + c.SUPABASE_ANON_KEY } };
+      return null;
+    } catch (e) { return null; }
   }
+  function proxyBase() { return proxyEndpoint(); }
   async function proxyCall(payload) {
-    const c = proxyBase(); if (!c) return null;
+    const ep = proxyEndpoint(); if (!ep) return null;
     const ctl = new AbortController(); const timer = setTimeout(() => ctl.abort(), TIMEOUT_MS);
     try {
-      const r = await fetch(c.SUPABASE_URL + '/functions/v1/ai', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'apikey': c.SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + c.SUPABASE_ANON_KEY },
-        body: JSON.stringify(payload), signal: ctl.signal,
-      });
+      const r = await fetch(ep.url, { method: 'POST', headers: ep.headers, body: JSON.stringify(payload), signal: ctl.signal });
       clearTimeout(timer);
       if (!r.ok) return null;
       const j = await r.json();

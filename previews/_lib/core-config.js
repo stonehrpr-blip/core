@@ -18,6 +18,9 @@ window.CORE_CONFIG = {
   SUPABASE_URL: "https://tqjpgknkbfaayrjuwoet.supabase.co",
   SUPABASE_ANON_KEY: "sb_publishable_JoBIDal2xT5r7od1N85qYg_c7J53tHJ",
   OAUTH_REDIRECT_URL: (location.origin || "http://localhost:8000") + "/04-sign-in.html",
+  // Hosted AI proxy (Cloudflare Worker URL). Paste your worker URL here, e.g.
+  // "https://core-ai.your-name.workers.dev" — then all AI features use your key invisibly.
+  AI_PROXY_URL: "",
 };
 
 // Convenience flag — true when a real backend is configured.
