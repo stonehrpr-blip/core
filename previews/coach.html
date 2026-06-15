@@ -194,6 +194,14 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .cp-prompt-save{flex:1;padding:12px;border-radius:13px;font:inherit;font-size:14px;font-weight:800;cursor:pointer;border:none;
   background:linear-gradient(135deg,#0A84FF,#6F70FF);color:#fff;transition:transform .1s;}
 .cp-prompt-save:active{transform:scale(.96);}
+.rt-cta{margin:2px 2px 12px;animation:msgIn .26s cubic-bezier(.2,.9,.3,1) both;}
+.rt-cta-btn{display:inline-flex;align-items:center;gap:9px;padding:13px 18px;border-radius:16px;border:none;cursor:pointer;-webkit-appearance:none;appearance:none;
+  font:inherit;font-size:14px;font-weight:800;color:#fff;background:linear-gradient(135deg,#0A84FF,#6F70FF);box-shadow:0 10px 26px rgba(10,132,255,0.32);transition:transform .12s;}
+.rt-cta-btn:active{transform:scale(.97);}
+.rt-cta-btn svg{width:18px;height:18px;}
+.rt-cta-done{display:inline-flex;align-items:center;gap:8px;padding:12px 16px;border-radius:14px;font-size:13px;font-weight:700;color:#8fe9b8;
+  background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.32);}
+.rt-cta-done svg{width:16px;height:16px;}
 /* header action buttons — new chat + saved-chat history */
 .cp-iconbtn{width:38px;height:38px;flex:none;border-radius:50%;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);
   color:#C7D2E8;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-appearance:none;appearance:none;padding:0;transition:background .15s, transform .12s;}
@@ -783,8 +791,24 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     out+='---\nWant me to swap any days, make it harder/easier, or turn this into a daily checklist? Just say the word.';
     return out;
   }
+  // Concrete daily checklist items per goal — these become the dashboard routine.
+  var ROUTINE_TASKS={
+    'Fitness & strength':  ['10-min mobility warm-up','{time} training session','Hit your protein target','Get 8k+ steps','Lights out for 7–8h sleep'],
+    'Focus & productivity':['Plan your top 3 tasks','{time} deep-work block — phone away','Single-task, no multitasking','Take one real break','Review what you got done'],
+    'Sleep & recovery':    ['Wake at your set time','No caffeine after 2pm','10-min evening wind-down','Screens off 60 min before bed','In bed by your target time'],
+    'Discipline & habits': ['Do your keystone habit first','Tackle the hard thing first','No-zero day — do the minimum','Track it / tick it off','Quick evening review'],
+    'Nutrition & energy':  ['Hit your protein target','Drink 2–3L of water','Eat whole foods, minimal processed','No mindless snacking','Plan tomorrow’s meals']
+  };
+  var GOAL_COLOR={'Fitness & strength':'#FF6B6B','Focus & productivity':'#0A84FF','Sleep & recovery':'#6F70FF','Discipline & habits':'#34D399','Nutrition & energy':'#FFCB3D'};
+  function saveRoutineToDashboard(a){
+    var src=ROUTINE_TASKS[a.goal]||ROUTINE_TASKS['Discipline & habits'];
+    var tasks=src.map(function(t,i){ return { id:'cr'+i, title:t.replace('{time}', a.time||'30 min') }; });
+    var rec={ goal:a.goal, when:a.when, days:a.days, color:(GOAL_COLOR[a.goal]||'#0A84FF'), created:Date.now(), tasks:tasks };
+    try{ localStorage.setItem('coreCoachRoutine.v1', JSON.stringify(rec)); localStorage.removeItem('coreCoachRoutineDone.v1'); }catch(e){}
+  }
   async function finishRoutine(){
     if(!activeId) newChat();
+    var ans=Object.assign({}, quizAns);   // snapshot for the "add to dashboard" action
     var sg=$('#cpSuggest'); if(sg) sg.classList.add('hide');
     var summary='Build me a '+String(quizAns.goal||'').toLowerCase()+' routine — '+quizAns.days+'/week, '+quizAns.time+'/day, '+String(quizAns.when||'').toLowerCase()+', '+String(quizAns.level||'').toLowerCase()+'.';
     bubble('user', summary); convo.push({ role:'user', content: summary }); persistActive();
@@ -801,6 +825,14 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     if(!reply) reply=localRoutine(quizAns);
     typing.remove();
     bubble('ai', reply); convo.push({ role:'assistant', content: reply }); persistActive();
+    // offer to turn the routine into a daily checklist on the dashboard
+    var act=document.createElement('div'); act.className='rt-cta';
+    act.innerHTML='<button class="rt-cta-btn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Add to my dashboard</button>';
+    msgs.appendChild(act); msgs.scrollTop=msgs.scrollHeight;
+    act.querySelector('button').addEventListener('click', function(){
+      saveRoutineToDashboard(ans);
+      act.innerHTML='<div class="rt-cta-done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-11"/></svg>Added to your dashboard — open Home to check it off.</div>';
+    });
     setBusy(false);
   }
 

@@ -837,6 +837,9 @@ body.edit-active .nav{display:none;}
       <div id="dashNudge"></div>
       <div id="dashRecap"></div>
 
+      <!-- Coach-built routine → daily checklist -->
+      <div id="coachRoutineCard"></div>
+
       <!-- legacy (routine + widgets) kept but hidden for the clean layout -->
       <div class="legacy-hidden" aria-hidden="true">
         <div class="daystrip" id="dayStrip"></div>
@@ -1908,6 +1911,56 @@ body.edit-active .nav{display:none;}
   paintTrends();
   (function(){ var tg=$('stToggle'); if(!tg) return; tg.addEventListener('click',function(e){ var b=e.target.closest('button[data-d]'); if(!b) return; trendWin=parseInt(b.getAttribute('data-d'),10)||30; Array.prototype.forEach.call(tg.querySelectorAll('button'),function(x){x.classList.toggle('on',x===b);}); try{window.coreSfx&&window.coreSfx('tick');}catch(e){} paintTrends(); }); })();
   window.addEventListener('coreStateChange', paintTrends);
+})();
+</script>
+
+<style>
+  .croutine{ --c:#0A84FF; border-radius:20px; border:1px solid color-mix(in srgb,var(--c) 28%,transparent);
+    background:linear-gradient(180deg,color-mix(in srgb,var(--c) 12%,transparent),rgba(255,255,255,0.02)); padding:16px; margin:14px 0 4px; }
+  .cr-head{ display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+  .cr-title{ font-size:16px; font-weight:800; color:#fff; letter-spacing:-0.2px; }
+  .cr-sub{ font-size:12px; color:#9AA1B7; font-weight:600; margin-top:2px; }
+  .cr-count{ margin-left:auto; font-size:13px; font-weight:900; color:var(--c); background:color-mix(in srgb,var(--c) 16%,transparent);
+    border:1px solid color-mix(in srgb,var(--c) 30%,transparent); padding:5px 11px; border-radius:999px; }
+  .cr-list{ display:flex; flex-direction:column; gap:8px; }
+  .cr-item{ display:flex; align-items:center; gap:12px; padding:12px 13px; border-radius:13px; border:1px solid rgba(255,255,255,0.07);
+    background:rgba(255,255,255,0.04); color:#E4E8F2; font:inherit; font-size:14px; font-weight:600; text-align:left; cursor:pointer; -webkit-appearance:none; appearance:none; transition:background .15s, transform .1s; }
+  .cr-item:active{ transform:scale(.99); }
+  .cr-box{ width:22px; height:22px; flex:none; border-radius:7px; border:2px solid rgba(255,255,255,0.22); display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size:13px; font-weight:900; transition:.15s; }
+  .cr-item.done{ color:#9AA1B7; }
+  .cr-item.done .cr-tx{ text-decoration:line-through; }
+  .cr-item.done .cr-box{ background:var(--c); border-color:var(--c); }
+  .cr-bar{ height:6px; border-radius:99px; background:rgba(255,255,255,0.09); overflow:hidden; margin-top:12px; }
+  .cr-bar i{ display:block; height:100%; border-radius:99px; background:var(--c); width:0; transition:width .4s cubic-bezier(.22,1,.36,1); }
+</style>
+<script>
+(function(){
+  var host=document.getElementById('coachRoutineCard'); if(!host) return;
+  var R; try{ R=JSON.parse(localStorage.getItem('coreCoachRoutine.v1')||'null'); }catch(e){}
+  if(!R || !R.tasks || !R.tasks.length){ host.innerHTML=''; return; }
+  var today=new Date().toISOString().slice(0,10);
+  var prog; try{ prog=JSON.parse(localStorage.getItem('coreCoachRoutineDone.v1')||'null'); }catch(e){}
+  if(!prog || prog.date!==today){ prog={ date:today, done:{} }; }
+  function save(){ try{ localStorage.setItem('coreCoachRoutineDone.v1', JSON.stringify(prog)); }catch(e){} }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function render(){
+    var doneCount=R.tasks.filter(function(t){ return prog.done[t.id]; }).length;
+    var pct=Math.round(doneCount/R.tasks.length*100);
+    var h='<div class="croutine" style="--c:'+(R.color||'#0A84FF')+'">'
+      +'<div class="cr-head"><div><div class="cr-title">My Routine</div><div class="cr-sub">'+esc(R.goal||'Daily plan')+(R.days?(' · '+esc(R.days)+'/week'):'')+'</div></div><div class="cr-count">'+doneCount+'/'+R.tasks.length+'</div></div>'
+      +'<div class="cr-list">'+R.tasks.map(function(t){ var d=!!prog.done[t.id];
+        return '<button class="cr-item'+(d?' done':'')+'" data-id="'+esc(t.id)+'" type="button"><span class="cr-box">'+(d?'✓':'')+'</span><span class="cr-tx">'+esc(t.title)+'</span></button>';
+      }).join('')
+      +'</div><div class="cr-bar"><i style="width:'+pct+'%"></i></div></div>';
+    host.innerHTML=h;
+    Array.prototype.forEach.call(host.querySelectorAll('.cr-item'), function(b){ b.addEventListener('click', function(){
+      var id=b.getAttribute('data-id'); prog.done[id]=!prog.done[id]; save();
+      try{ window.coreSfx && window.coreSfx(prog.done[id]?'confirm':'tick'); }catch(e){}
+      render();
+    }); });
+  }
+  render();
 })();
 </script>
 </body>
