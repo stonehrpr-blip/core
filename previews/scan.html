@@ -251,6 +251,22 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .pq-upload svg{width:18px;height:18px;}
 .pq-disc{font-size:11px;color:var(--dim,#6b7280);text-align:center;margin-top:16px;line-height:1.5;}
 .pq-btns button:active{transform:scale(.985);}
+/* cleaner landing: section labels, step strip, tips checklist, helper */
+.pq-sec{font-size:10.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:22px 2px 11px;}
+.pq-sec .h{color:var(--sc);letter-spacing:.04em;}
+.pq-steps{display:flex;gap:8px;}
+.pq-step{flex:1;text-align:center;border-radius:16px;border:1px solid var(--border);background:rgba(255,255,255,0.04);padding:13px 6px 11px;}
+.pq-step .num{width:30px;height:30px;margin:0 auto 8px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#06121f;}
+.pq-step .lb{font-size:11px;font-weight:700;color:#cfd6e6;}
+.pq-tips2{border-radius:18px;background:rgba(255,255,255,0.04);border:1px solid var(--border);padding:5px 3px;}
+.pq-tip{display:flex;align-items:center;gap:11px;padding:9px 13px;}
+.pq-tip .ck{width:22px;height:22px;flex:none;border-radius:7px;display:flex;align-items:center;justify-content:center;
+  background:color-mix(in srgb,#34D399 16%,transparent);color:#34D399;}
+.pq-tip .ck svg{width:13px;height:13px;}
+.pq-tip span{font-size:13px;color:#dfe6f2;font-weight:600;line-height:1.4;}
+.pq-help{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--muted);font-weight:600;margin-top:12px;}
+.pq-help svg{width:14px;height:14px;color:var(--sc);}
+.pq-stat .n.col{color:var(--sc);}
 
 /* ── Physique history panel ───────────────────────── */
 .phist{position:absolute;inset:0;z-index:120;background:linear-gradient(180deg,#080a14,#04050c);display:none;flex-direction:column;}
@@ -1249,25 +1265,38 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
     var st=pqStats();
     var cfg=INTRO[type] || { get:(s.checks||[]).slice(0,3).map(function(c){ return [c.split(/[\s—-]/).slice(0,3).join(' '), c]; }), tips:s.hint };
     var GIC=['<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.7" fill="currentColor"/>','<path d="M3 17l6-6 4 4 7-8"/>','<path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="3.4"/>'];
-    var GET=cfg.get.map(function(g,i){ return { t:g[0], d:g[1], i:GIC[i%GIC.length] }; });
+    var GCOL=['#3B9EFF','#34D399','#FFCB3D'];
+    var GET=cfg.get.map(function(g,i){ return { t:g[0], d:g[1], i:GIC[i%GIC.length], c:GCOL[i%GCOL.length] }; });
+    var bestCol=st.total?scoreColor(st.best):'';
     var h='';
     h+='<div class="pq-card">'
       +'<div class="pq-prog-top"><span class="l">'+svg('<path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/>')+'Your Progress</span>'
       +'<button class="pq-vh" id="pqVH" type="button">View History '+svg('<path d="M9 6l6 6-6 6"/>')+'</button></div>'
       +'<div class="pq-stats">'
-        +'<div class="pq-stat best"><div class="n" id="pqBest">'+(st.total?st.best:'—')+'</div><div class="k">Best</div></div>'
+        +'<div class="pq-stat best"><div class="n" id="pqBest"'+(bestCol?' style="color:'+bestCol+'"':'')+'>'+(st.total?st.best:'—')+'</div><div class="k">Best</div></div>'
         +'<div class="pq-stat"><div class="n" id="pqAvg">'+(st.total?st.avg:'—')+'</div><div class="k">Average</div></div>'
         +'<div class="pq-stat"><div class="n" id="pqCount">'+st.total+'</div><div class="k">Scans</div></div>'
       +'</div></div>';
-    h+='<div class="pq-getsec">What you’ll get</div><div class="pq-get">'
-      +GET.map(function(g){ return '<div class="pq-grow"><div class="pq-gic">'+svg(g.i)+'</div><div><div class="pq-gt">'+g.t+'</div><div class="pq-gd">'+g.d+'</div></div></div>'; }).join('')
+    if(isPhysique){
+      var STEPS=[{n:1,l:'Front',c:'#3B9EFF'},{n:2,l:'Right',c:'#34D399'},{n:3,l:'Back',c:'#FFCB3D'},{n:4,l:'Left',c:'#FF6FB5'}];
+      h+='<div class="pq-sec">How it works <span class="h">· 4 angles</span></div><div class="pq-steps">'
+        +STEPS.map(function(p){ return '<div class="pq-step"><div class="num" style="background:'+p.c+'">'+p.n+'</div><div class="lb">'+p.l+'</div></div>'; }).join('')
+        +'</div>';
+    }
+    h+='<div class="pq-sec">What you’ll get</div><div class="pq-get">'
+      +GET.map(function(g){ return '<div class="pq-grow"><div class="pq-gic" style="color:'+g.c+';background:color-mix(in srgb,'+g.c+' 15%,transparent);border-color:color-mix(in srgb,'+g.c+' 30%,transparent)">'+svg(g.i)+'</div><div><div class="pq-gt">'+g.t+'</div><div class="pq-gd">'+g.d+'</div></div></div>'; }).join('')
       +'</div>';
-    h+='<div class="pq-tipsec">Tips for best results</div><div class="pq-tips">'
-      +'<p>'+cfg.tips+'</p></div>';
+    var TIPS=isPhysique
+      ? ['Good, even lighting — avoid harsh shadows','Shirtless or fitted clothing reads your frame best','Stand 6–8 ft back so your whole body fits the ring','Plain background, phone at chest height']
+      : [cfg.tips];
+    h+='<div class="pq-sec">For best results</div><div class="pq-tips2">'
+      +TIPS.map(function(t){ return '<div class="pq-tip"><div class="ck">'+svg('<path d="M20 6L9 17l-5-5"/>')+'</div><span>'+t+'</span></div>'; }).join('')
+      +'</div>';
     h+='<div class="pq-btns">'
       +'<button class="pq-take" id="pqTake" type="button">'+svg('<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>')+'Take Photo</button>'
       +'<button class="pq-upload" id="pqUpload" type="button">'+svg('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5-5 5 5"/><path d="M12 5v12"/>')+(isPhysique?'Upload 4 photos':'Upload from Gallery')+'</button>'
       +'</div>';
+    h+='<div class="pq-help">'+svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>')+(isPhysique?'4 photos · about 10 seconds to score':'Instant AI score, kept private')+'</div>';
     h+='<div class="pq-disc">'+((type==='physique'||type==='looks')?'This analysis is for educational purposes only and not medical advice.':'This analysis is for guidance only.')+'</div>';
     $('#pqIntro').innerHTML=h;
     $('#pqTake').addEventListener('click', openCam);
