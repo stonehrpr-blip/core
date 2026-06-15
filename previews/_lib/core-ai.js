@@ -145,6 +145,8 @@
       temperature: opts.temperature ?? 0.7,
       max_tokens: opts.maxTokens ?? 600,
     };
+    // Force valid JSON output for structured calls (prevents refusals / prose breaking the parse).
+    if (opts.json) body.response_format = { type: 'json_object' };
     const ctl = new AbortController();
     const timer = setTimeout(() => ctl.abort(), TIMEOUT_MS);
     try {

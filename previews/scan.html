@@ -797,7 +797,7 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
       var arr=(Array.isArray(imgs)?imgs:[imgs]).filter(Boolean).slice(0,4);
       if(!arr.length){ reject(); return; }
       var content=[{ type:'text', text:prompt }].concat(arr.map(function(u){ return { type:'image_url', image_url:{ url:u, detail:'low' } }; }));
-      coreAI.chat([{ role:'user', content:content }], { role:'vision', temperature:0.3, maxTokens:400 })
+      coreAI.chat([{ role:'user', content:content }], { role:'vision', temperature:0.3, maxTokens:500, json:true })
         .then(function(r){
           if(!r || !r.ok || !r.text || r.fallback){ if(r && r.reason) lastAIError=r.reason; reject(); return; }
           try{ resolve(parseScanJson(r.text)); }catch(err){ lastAIError='bad AI response'; reject(); }
