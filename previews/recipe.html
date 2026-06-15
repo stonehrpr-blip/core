@@ -93,7 +93,15 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .r-load{display:flex;flex-direction:column;align-items:center;gap:14px;padding:40px 0;}
 .r-spin{width:42px;height:42px;border-radius:50%;border:3px solid rgba(255,255,255,0.12);border-top-color:var(--sc);animation:rspin .8s linear infinite;}
 @keyframes rspin{to{transform:rotate(360deg)}}
-.toast{position:absolute;left:50%;bottom:40px;transform:translateX(-50%) translateY(10px);z-index:120;background:rgba(20,22,32,0.96);
+.r-panel{position:absolute;inset:0;z-index:120;background:linear-gradient(180deg,#0b0a08,#02020A);display:none;flex-direction:column;}
+.r-panel.on{display:flex;animation:rIn .35s ease both;}
+.r-ptop{display:flex;align-items:center;gap:10px;padding:54px 18px 10px;}
+.r-ptop h2{flex:1;font-size:17px;font-weight:800;text-align:center;display:flex;align-items:center;justify-content:center;gap:7px;}
+.r-ptop h2 svg{width:16px;height:16px;color:var(--sc);}
+.r-pbody{flex:1;overflow-y:auto;padding:6px 20px calc(28px + env(safe-area-inset-bottom));}
+.r-pbody::-webkit-scrollbar{display:none;}
+.r-rm{flex:none;width:64px;border-radius:10px;border:1px solid rgba(255,90,90,0.3);background:rgba(255,90,90,0.1);color:#ff6b6b;font:inherit;font-size:12px;font-weight:700;padding:8px 0;cursor:pointer;-webkit-appearance:none;appearance:none;}
+.toast{position:absolute;left:50%;bottom:40px;transform:translateX(-50%) translateY(10px);z-index:130;background:rgba(20,22,32,0.96);
   border:1px solid var(--border);border-radius:13px;padding:11px 16px;font-size:13px;font-weight:600;opacity:0;transition:.25s;pointer-events:none;max-width:80%;text-align:center;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
@@ -136,6 +144,14 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 
         <div class="r-results" id="results"></div>
       </div>
+    </div>
+    <div class="r-panel" id="savedPanel">
+      <div class="r-ptop">
+        <button class="back" id="savedBack" type="button" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Saved Recipes</h2>
+        <span style="width:38px;flex:none"></span>
+      </div>
+      <div class="r-pbody" id="savedBody"></div>
     </div>
     <div class="home-indicator"></div>
     <div class="toast" id="toast"></div>
@@ -285,7 +301,34 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   $('#ingAdd').addEventListener('click', addIngredient);
   $('#ingInput').addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); addIngredient(); } });
   $('#genBtn').addEventListener('click', generate);
-  $('#savedBtn').addEventListener('click', function(){ var n=getSaved().length; toast(n?(n+' recipe'+(n>1?'s':'')+' saved'):'No saved recipes yet'); });
+  function savedCard(r,idx){
+    var ings=(r.ingredients||[]).map(function(x){ return '<li><span class="b">·</span>'+esc(x)+'</li>'; }).join('');
+    var steps=(r.steps||[]).map(function(x,i){ return '<li><span class="b">'+(i+1)+'</span>'+esc(x)+'</li>'; }).join('');
+    var tags=(r.tags||[]).map(function(t){ return '<span class="r-tag">'+esc(t)+'</span>'; }).join('');
+    return '<div class="r-card" data-i="'+idx+'">'
+      +'<div class="r-ctop"><div class="r-cmeta"><div class="r-ctitle">'+esc(r.title)+'</div><div class="r-cdesc">'+esc(r.desc)+'</div></div>'
+        +'<button class="r-rm" data-rm="'+idx+'" type="button">Remove</button></div>'
+      +'<div class="r-meta">'
+        +(r.minutes?'<span class="r-mi">'+svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>')+esc(r.minutes)+' min</span>':'')
+        +(r.calories?'<span class="r-mi">'+svg('<path d="M12 2s4 4 4 8a4 4 0 0 1-8 0c0-1.5 1-3 1-3"/>')+esc(r.calories)+' cal</span>':'')
+        +(r.protein?'<span class="r-mi">'+svg('<path d="M4 7h16M4 12h16M4 17h16"/>')+esc(r.protein)+'g protein</span>':'')
+      +'</div>'
+      +(tags?'<div class="r-tags">'+tags+'</div>':'')
+      +'<button class="r-more" data-more="'+idx+'" type="button">View ingredients & steps '+svg('<path d="M6 9l6 6 6-6"/>')+'</button>'
+      +'<div class="r-detail">'+(ings?'<div class="r-dh">Ingredients</div><ul class="r-list">'+ings+'</ul>':'')+(steps?'<div class="r-dh">Steps</div><ul class="r-list">'+steps+'</ul>':'')+'</div></div>';
+  }
+  function renderSaved(){
+    var saved=getSaved(), body=$('#savedBody');
+    if(!saved.length){ body.innerHTML='<div class="r-empty">No saved recipes yet.<br>Tap <b>Save</b> on any recipe to keep it here.</div>'; return; }
+    body.innerHTML=saved.slice().reverse().map(function(r,i){ return savedCard(r, saved.length-1-i); }).join('');
+    Array.prototype.forEach.call(body.querySelectorAll('[data-more]'), function(b){ b.addEventListener('click', function(){ b.closest('.r-card').classList.toggle('open'); }); });
+    Array.prototype.forEach.call(body.querySelectorAll('[data-rm]'), function(b){ b.addEventListener('click', function(){
+      var sv=getSaved(); sv.splice(+b.getAttribute('data-rm'),1); lsSet('coreRecipesSaved.v1', JSON.stringify(sv)); renderSaved(); renderStats(); toast('Removed from saved');
+    }); });
+  }
+  function openSaved(){ renderSaved(); $('#savedPanel').classList.add('on'); }
+  $('#savedBtn').addEventListener('click', openSaved);
+  $('#savedBack').addEventListener('click', function(){ $('#savedPanel').classList.remove('on'); });
 })();
 </script>
 </body>
