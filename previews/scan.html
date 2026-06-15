@@ -840,16 +840,19 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
     return firstValid(tries);
   }
   // Upload-from-gallery path: score a chosen photo without the camera capture.
-  function analyzeFromImage(url){
-    if(!url) return;
+  function analyzeFromImages(urls){
+    urls=(urls||[]).filter(Boolean);
+    if(!urls.length) return;
     cam._demo=false;
-    snapDataUrl=url;                                  // so non-physique results show the uploaded image
-    shots=[{ k:'front', label:'Front', url:url }];
+    snapDataUrl=urls[0];                              // so non-physique results show the uploaded image
+    var labels=['front','right','back','left'];
+    shots=urls.slice(0,4).map(function(u,i){ var k=isPhysique?(labels[i]||('a'+i)):'front'; return { k:k, label:k.charAt(0).toUpperCase()+k.slice(1), url:u }; });
     try{ lsSet('corePhysiqueShots.v1', JSON.stringify({ ts:Date.now(), shots:shots })); }catch(e){}
     aiResult=null; aiPending=true;
-    requestScanAI(url).then(function(r){ aiResult=r; aiPending=false; }).catch(function(){ aiResult=null; aiPending=false; });
+    requestScanAI(urls.slice(0,4)).then(function(r){ aiResult=r; aiPending=false; }).catch(function(){ aiResult=null; aiPending=false; });
     doAnalyze();
   }
+  function analyzeFromImage(url){ analyzeFromImages([url]); }
 
   // ── result ──
   function pick(arr,k){ var a=arr.slice(), out=[]; while(a.length&&out.length<k){ out.push(a.splice(Math.floor(Math.random()*a.length),1)[0]); } return out; }
@@ -1071,7 +1074,7 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
       +'<p>'+cfg.tips+'</p></div>';
     h+='<div class="pq-btns">'
       +'<button class="pq-take" id="pqTake" type="button">'+svg('<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>')+'Take Photo</button>'
-      +'<button class="pq-upload" id="pqUpload" type="button">'+svg('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5-5 5 5"/><path d="M12 5v12"/>')+'Upload from Gallery</button>'
+      +'<button class="pq-upload" id="pqUpload" type="button">'+svg('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5-5 5 5"/><path d="M12 5v12"/>')+(isPhysique?'Upload 4 photos':'Upload from Gallery')+'</button>'
       +'</div>';
     h+='<div class="pq-disc">'+((type==='physique'||type==='looks')?'This analysis is for educational purposes only and not medical advice.':'This analysis is for guidance only.')+'</div>';
     $('#pqIntro').innerHTML=h;
@@ -1080,11 +1083,18 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
     $('#pqVH').addEventListener('click', openHistory);
   }
   $('#pqFile').addEventListener('change', function(e){
-    var f=e.target.files && e.target.files[0]; if(!f) return;
-    var rd=new FileReader();
-    rd.onload=function(){ analyzeFromImage(rd.result); };
-    rd.readAsDataURL(f);
+    var files=e.target.files ? Array.prototype.slice.call(e.target.files) : [];
     e.target.value='';
+    if(!files.length) return;
+    if(isPhysique && files.length<4){ toast('Pick all 4 angles — front, right, back and left.'); return; }
+    files=files.slice(0,4);
+    var urls=new Array(files.length), pending=files.length;
+    files.forEach(function(f, i){
+      var rd=new FileReader();
+      rd.onload=function(){ urls[i]=rd.result; if(--pending===0) analyzeFromImages(urls); };
+      rd.onerror=function(){ if(--pending===0) analyzeFromImages(urls); };
+      rd.readAsDataURL(f);
+    });
   });
 
   // history panel
@@ -1153,6 +1163,7 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
     var bd=document.querySelector('.hero .badge'); if(bd) bd.style.display='none';
     ['#last','#checksSec','#checks','#cta','#note'].forEach(function(sel){ var el=$(sel); if(el) el.style.display='none'; });
     buildPqIntro();
+    if(isPhysique){ var pf=$('#pqFile'); if(pf) pf.multiple=true; }   // physique upload = all 4 angles
     $('#pqIntro').style.display='block';
     $('#histBtn').style.display='inline-flex';
     var hb=$('#helpBtn'); if(hb) hb.style.display='none';
