@@ -114,6 +114,8 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .shutter{width:74px;height:74px;border-radius:50%;border:4px solid rgba(255,255,255,0.85);background:transparent;
   cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .12s;}
 .shutter:active{transform:scale(.92);}
+.cam.cam-needstart .shutter{animation:shPulse 1.4s ease-in-out infinite;}
+@keyframes shPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.45)}50%{box-shadow:0 0 0 12px rgba(255,255,255,0)}}
 .shutter i{width:56px;height:56px;border-radius:50%;background:#fff;transition:.15s;}
 .scanning .shutter{opacity:.4;pointer-events:none;}
 /* voice mode */
@@ -639,7 +641,7 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
   var stream=null, facing=s.facing==='user'?'user':'environment', isVoice=s.facing==='audio';
   var snapDataUrl=null, audioCtx=null, analyser=null, waveRAF=null;
   var isPhysique=(type==='physique'), shots=[];
-  var detector=null, poseRAF=null, gateStable=0;
+  var detector=null, poseRAF=null, gateStable=0, gateManual=false;
   var aiResult=null, aiPending=false, lastAIError='';
   var ANG=[{k:'front',label:'Face the camera'},{k:'right',label:'Turn to your right side'},
            {k:'back',label:'Turn around — back to camera'},{k:'left',label:'Turn to your left side'}];
@@ -813,19 +815,26 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
       poseRAF=setTimeout(loopGate, 110);
     }).catch(function(){ poseRAF=setTimeout(loopGate, 200); });
   }
-  function passGate(){
-    if(poseRAF){ clearTimeout(poseRAF); poseRAF=null; }
-    if(detector){ try{ detector.dispose(); }catch(e){} detector=null; }
+  function beginCapture(label){
+    gateManual=false;
     cam.classList.add('phyz-scanning');
-    $('#camHint').textContent=''; $('#phyzCount').textContent='Body detected ✓';
+    cam.classList.remove('cam-needstart');
+    $('#camHint').textContent=''; $('#phyzCount').textContent=label||'Body detected ✓';
     try{ if(navigator.vibrate) navigator.vibrate(40); }catch(_){}
     setTimeout(function(){ captureAngle(0); }, 800);
   }
-  function simulatedGate(){   // fallback when the pose model can't load (offline etc.)
-    cam.classList.add('phyz-scanning');
-    $('#camHint').textContent='Stand back — fit your whole body in the ring';
-    $('#phyzCount').textContent='Detecting body…';
-    setTimeout(function(){ $('#phyzCount').textContent='Body detected ✓'; setTimeout(function(){ captureAngle(0); },800); },2400);
+  function passGate(){
+    if(poseRAF){ clearTimeout(poseRAF); poseRAF=null; }
+    if(detector){ try{ detector.dispose(); }catch(e){} detector=null; }
+    beginCapture('Body detected ✓');
+  }
+  // Fallback when the pose model can't load (offline / CDN blocked). We can't
+  // verify a body, so DON'T auto-capture — require a deliberate tap to start.
+  function simulatedGate(){
+    gateManual=true;
+    cam.classList.add('phyz-scanning','cam-needstart');
+    $('#camHint').textContent='Auto-detect unavailable — fit your whole body in the ring, then tap the button to start.';
+    $('#phyzCount').textContent='';
   }
   function runPhysique(){
     shots=[]; renderDots(0); setProg(0); $('#phyzCount').textContent='';
@@ -978,17 +987,17 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
     var labels=['front','right','back','left'];
     var n=Math.min(4,urls.length), tmp=new Array(n), pending=n;
     for(var i=0;i<n;i++){ (function(i){
-      shrinkUrl(urls[i], 360, function(th){
+      shrinkUrl(urls[i], 1080, function(big){ shrinkUrl(big, 360, function(th){   // cap AI image at 1080px
         var k=isPhysique?(labels[i]||('a'+i)):'front';
-        tmp[i]={ k:k, label:k.charAt(0).toUpperCase()+k.slice(1), url:urls[i], thumb:th };
+        tmp[i]={ k:k, label:k.charAt(0).toUpperCase()+k.slice(1), url:big, thumb:th };
         if(--pending===0) go();
-      });
+      }); });
     })(i); }
     function go(){
-      shots=tmp; snapDataUrl=tmp[0].thumb||urls[0];   // non-physique results show the uploaded image
+      shots=tmp; snapDataUrl=tmp[0].thumb||tmp[0].url;   // non-physique results show the uploaded image
       try{ lsSet('corePhysiqueShots.v1', JSON.stringify({ ts:Date.now(), shots:shots.map(function(x){ return { k:x.k, label:x.label, url:x.thumb||x.url }; }) })); }catch(e){}
       aiResult=null; aiPending=true;
-      requestScanAI(urls.slice(0,4)).then(function(r){ aiResult=r; aiPending=false; }).catch(function(){ aiResult=null; aiPending=false; });
+      requestScanAI(tmp.map(function(x){ return x.url; })).then(function(r){ aiResult=r; aiPending=false; }).catch(function(){ aiResult=null; aiPending=false; });
       doAnalyze();
     }
   }
@@ -1001,7 +1010,9 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
   var SLOT_ORDER=[{k:'front',l:'Front'},{k:'right',l:'Right'},{k:'back',l:'Back'},{k:'left',l:'Left'}];
   function cap(k){ return k.charAt(0).toUpperCase()+k.slice(1); }
   function slotCount(){ return SLOT_ORDER.filter(function(o){ return slots[o.k]; }).length; }
-  function readFile(f, cb){ var rd=new FileReader(); rd.onload=function(){ var u=rd.result; shrinkUrl(u,360,function(th){ cb({ url:u, thumb:th }); }); }; rd.onerror=function(){ cb(null); }; rd.readAsDataURL(f); }
+  // Cap the AI image at 1080px (plenty for vision, light on memory/upload) and
+  // derive a 360px thumb for storage. Avoids sending multi-MB phone photos.
+  function readFile(f, cb){ var rd=new FileReader(); rd.onload=function(){ shrinkUrl(rd.result,1080,function(big){ shrinkUrl(big,360,function(th){ cb({ url:big, thumb:th }); }); }); }; rd.onerror=function(){ cb(null); }; rd.readAsDataURL(f); }
   // Ask the vision AI which way each body faces. Resolves to an array of views
   // (same order as input) or null if the AI can't be reached.
   function classifyViews(urls){
@@ -1226,14 +1237,16 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
         return '<div class="snap-cell">'+inner+'<span>'+a.k+'</span></div>';
       }).join('')+'</div>';
     }
-    var bdHtml='';
-    if(isPhysique){
-      var BD = (ai && ai.breakdown) ? {
+    var bdHtml='', BD=null;
+    // Only show the breakdown if the AI actually returned one — never fabricate
+    // sub-scores from the overall number.
+    if(isPhysique && ai && ai.breakdown && typeof ai.breakdown.proportions==='number'){
+      BD = {
         Proportions: clampb(ai.breakdown.proportions),
         Symmetry:    clampb(ai.breakdown.symmetry),
         Muscularity: clampb(ai.breakdown.muscularity),
         Definition:  clampb(ai.breakdown.definition)
-      } : deriveBreakdown(score, ai && ai.weakPoints);
+      };
       bdHtml='<div class="res-sec">Breakdown</div><div class="bd">'
         + Object.keys(BD).map(function(k){ var v=BD[k], col=scoreColor(v);
             return '<div class="bd-row"><span class="bd-dot" style="background:'+col+'"></span><span class="bd-k">'+k+'</span>'
@@ -1339,7 +1352,11 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
   // ── wire up ──
   $('#cta').addEventListener('click', openCam);
   $('#shutter').addEventListener('click', function(){
-    if(isPhysique){ if(detector) passGate(); return; }   // tap = skip detection, start capturing
+    if(isPhysique){
+      if(detector) passGate();                 // detector found a body → tap to begin
+      else if(gateManual) beginCapture('Starting…');  // fallback path → deliberate manual start
+      return;
+    }
     if(!cam.classList.contains('scanning')) runAnalyze();
   });
   $('#camX').addEventListener('click', stopCam);
