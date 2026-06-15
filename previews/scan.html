@@ -618,7 +618,12 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
   function runAnalyze(){   // single-capture types (food, outfit, looks, posture)
     cam.classList.add('scanning');
     $('#camHint').textContent='Hold still — scanning…';
-    setTimeout(function(){ snap(); stopCam(); doAnalyze(); }, 1500);
+    setTimeout(function(){
+      snap(); stopCam();
+      aiResult=null; aiPending=true;
+      requestScanAI(snapDataUrl).then(function(r){ aiResult=r; aiPending=false; }).catch(function(){ aiResult=null; aiPending=false; });
+      doAnalyze();
+    }, 1500);
   }
 
   // ── Physique: guided 360° capture (front · right · back · left) ──
@@ -720,9 +725,9 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
     stopCam();
     // keep the captured angles in the "backfiles" (latest physique scan)
     try{ lsSet('corePhysiqueShots.v1', JSON.stringify({ ts:Date.now(), shots:shots })); }catch(e){}
-    // kick off the real vision-AI scoring in parallel with the analyze animation
+    // kick off the real vision-AI scoring (all 4 angles) in parallel with the analyze animation
     aiResult=null; aiPending=true;
-    requestPhysiqueAI().then(function(r){ aiResult=r; aiPending=false; }).catch(function(){ aiResult=null; aiPending=false; });
+    requestScanAI(shots.map(function(x){ return x.url; })).then(function(r){ aiResult=r; aiPending=false; }).catch(function(){ aiResult=null; aiPending=false; });
     doAnalyze();
   }
   // Score the physique from the captured photo using real vision AI.
@@ -734,11 +739,25 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
     for(var j=0;j<shots.length;j++){ if(shots[j].url) return shots[j].url; }
     return null;
   }
+  // Per-type vision prompts — every scan type now scores through real AI.
+  var AI_PROMPT={
+    physique:'You are CORE\'s physique-analysis vision model. Look at the photo(s) of a person\'s body (front and side/back angles when given) and assess it. '
+      +'Reply with STRICT JSON only, no markdown: {"isBody":true|false,"score":0-100,"tier":"Elite|Strong|Solid|Developing|Needs work","summary":"one honest, specific sentence","weakPoints":["chest"|"back"|"shoulders"|"arms"|"legs"|"core"],"breakdown":{"proportions":0-100,"symmetry":0-100,"muscularity":0-100,"definition":0-100}}. '
+      +'isBody=false if not a clear photo of a human body. score = overall physique development. Be honest, not flattering.',
+    food:'You are CORE\'s nutrition vision model. Look at this meal photo. Reply with STRICT JSON only, no markdown: '
+      +'{"score":0-100,"tier":"Excellent|Good|Balanced|Heavy|Poor","summary":"one sentence with an estimated calorie + protein read","tips":["3 short specific tips to make the meal healthier"]}. score = how healthy the meal is.',
+    posture:'You are CORE\'s posture vision model. Look at this full-body photo and assess head, shoulder and hip alignment. Reply with STRICT JSON only, no markdown: '
+      +'{"score":0-100,"tier":"Excellent|Good|Fair|Needs work","summary":"one sentence on the main alignment issue","tips":["3 short corrective tips"]}.',
+    outfit:'You are CORE\'s style vision model. Look at this outfit photo and assess fit, colour and occasion. Reply with STRICT JSON only, no markdown: '
+      +'{"score":0-100,"tier":"Sharp|Good|Decent|Off","summary":"one honest sentence","tips":["3 short style tips"]}.',
+    looks:'You are CORE\'s grooming vision model. Look at this face selfie and assess skin, facial symmetry and grooming. Be kind and constructive. Reply with STRICT JSON only, no markdown: '
+      +'{"score":0-100,"tier":"Excellent|Good|Fair|Developing","summary":"one constructive sentence","tips":["3 short grooming/skin tips"]}.'
+  };
   function normalizeAI(d){
     if(!d) return null;
-    if(d.rank && typeof d.rank.score==='number'){ d.breakdown=d.breakdown||null; return d; }   // already in result shape
+    if(d.rank && typeof d.rank.score==='number'){ d.breakdown=d.breakdown||null; d.tips=d.tips||null; return d; }   // already in result shape
     var score=(typeof d.score==='number') ? d.score : null;
-    return { isBody:d.isBody, summary:d.summary||'', weakPoints:d.weakPoints||[], breakdown:d.breakdown||null,
+    return { isBody:d.isBody, summary:d.summary||'', weakPoints:d.weakPoints||[], breakdown:d.breakdown||null, tips:(d.tips&&d.tips.length?d.tips:null),
              rank: score==null ? null : { score:score, tier:d.tier||grade(Math.round(score)) } };
   }
   function supabasePhysique(img){
@@ -754,18 +773,14 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
         .catch(reject);
     });
   }
-  function coreAIPhysique(img){
+  function coreAIScan(imgs){
     return new Promise(function(resolve,reject){
       if(!(window.coreAI && coreAI.chat && coreAI.ready && coreAI.ready())){ reject(); return; }
-      var prompt='You are CORE\'s physique-analysis vision model. Look at this photo of a person\'s body and assess it. '
-        +'Reply with STRICT JSON only, no markdown, no extra text: '
-        +'{"isBody":true|false,"score":0-100,"tier":"Elite|Strong|Solid|Developing|Needs work","summary":"one honest, specific sentence",'
-        +'"weakPoints":["chest"|"back"|"shoulders"|"arms"|"legs"|"core"],'
-        +'"breakdown":{"proportions":0-100,"symmetry":0-100,"muscularity":0-100,"definition":0-100}}. '
-        +'Set isBody=false if this is not a clear photo of a human body. score = overall physique development (muscularity, leanness, proportion) from 0-100. '
-        +'breakdown = sub-scores for each of the four metrics. weakPoints = up to 3 muscle groups that most need work. Be honest, not flattering.';
-      var content=[{ type:'text', text:prompt },{ type:'image_url', image_url:{ url:img, detail:'low' } }];
-      coreAI.chat([{ role:'user', content:content }], { role:'vision', temperature:0.3, maxTokens:300 })
+      var prompt=AI_PROMPT[type]; if(!prompt){ reject(); return; }
+      var arr=(Array.isArray(imgs)?imgs:[imgs]).filter(Boolean).slice(0,4);
+      if(!arr.length){ reject(); return; }
+      var content=[{ type:'text', text:prompt }].concat(arr.map(function(u){ return { type:'image_url', image_url:{ url:u, detail:'low' } }; }));
+      coreAI.chat([{ role:'user', content:content }], { role:'vision', temperature:0.3, maxTokens:400 })
         .then(function(r){
           if(!r || !r.ok || !r.text || r.fallback){ reject(); return; }
           try{
@@ -789,10 +804,13 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
       });
     });
   }
-  function requestPhysiqueAI(){
-    var img=frontImage();
-    if(!img) return Promise.reject();
-    return firstValid([ supabasePhysique(img), coreAIPhysique(img) ]);
+  // Score one or more photos through real AI. Physique also tries the dedicated backend.
+  function requestScanAI(imgs){
+    var arr=(Array.isArray(imgs)?imgs:[imgs]).filter(Boolean);
+    if(!arr.length) return Promise.reject();
+    var tries=[ coreAIScan(arr) ];
+    if(isPhysique) tries.unshift(supabasePhysique(arr[0]));
+    return firstValid(tries);
   }
   // Upload-from-gallery path: score a chosen photo without the camera capture.
   function analyzeFromImage(url){
@@ -801,7 +819,7 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
     shots=[{ k:'front', label:'Front', url:url }];
     try{ lsSet('corePhysiqueShots.v1', JSON.stringify({ ts:Date.now(), shots:shots })); }catch(e){}
     aiResult=null; aiPending=true;
-    requestPhysiqueAI().then(function(r){ aiResult=r; aiPending=false; }).catch(function(){ aiResult=null; aiPending=false; });
+    requestScanAI(url).then(function(r){ aiResult=r; aiPending=false; }).catch(function(){ aiResult=null; aiPending=false; });
     doAnalyze();
   }
 
@@ -829,18 +847,22 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
     $('#btnAgain2').addEventListener('click', function(){ res.classList.remove('on'); openCam(); });
   }
   function showResult(){
-    var ai = isPhysique ? aiResult : null;
-    if(ai && ai.isBody===false){ showNotBody(); return; }
+    var ai = aiResult;
+    if(isPhysique && ai && ai.isBody===false){ showNotBody(); return; }
     var score, tips, gradeTxt, subTxt;
     if(ai && ai.rank && typeof ai.rank.score==='number'){
       score=Math.max(0,Math.min(100,Math.round(ai.rank.score)));
       gradeTxt=ai.rank.tier || grade(score);
-      var WP={chest:'Add incline pressing for upper-chest fullness.',back:'2 pull sessions a week to widen your back.',shoulders:'Lateral raises to round out your delts.',arms:'Direct curls + extensions to bring your arms up.',legs:'Prioritise squats — your legs need the volume.',core:'Tighten nutrition and add core work to sharpen the midsection.'};
-      tips=[]; if(ai.summary) tips.push(ai.summary);
-      (ai.weakPoints||[]).forEach(function(k){ if(WP[k]) tips.push(WP[k]); });
-      if(!tips.length) tips=pick(s.tips,3);
+      if(isPhysique){
+        var WP={chest:'Add incline pressing for upper-chest fullness.',back:'2 pull sessions a week to widen your back.',shoulders:'Lateral raises to round out your delts.',arms:'Direct curls + extensions to bring your arms up.',legs:'Prioritise squats — your legs need the volume.',core:'Tighten nutrition and add core work to sharpen the midsection.'};
+        tips=[]; if(ai.summary) tips.push(ai.summary);
+        (ai.weakPoints||[]).forEach(function(k){ if(WP[k]) tips.push(WP[k]); });
+        if(!tips.length) tips=pick(s.tips,3);
+      } else {
+        tips = (ai.tips && ai.tips.length) ? ai.tips.slice(0) : (ai.summary ? [ai.summary] : pick(s.tips,3));
+      }
       tips=tips.slice(0,4);
-      subTxt='Scored by CORE vision AI from your photo.';
+      subTxt='Scored by CORE vision AI from your '+(isPhysique?'photo':'scan')+'.';
     } else {
       score=62+Math.floor(Math.random()*33);
       tips=pick(s.tips,3);
@@ -1078,6 +1100,7 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
     $('#pqIntro').style.display='block';
     $('#histBtn').style.display='inline-flex';
     var hb=$('#helpBtn'); if(hb) hb.style.display='none';
+    if((location.hash||'')==='#history') openHistory();   // deep-link from the profile card
   }
 
   // be a good citizen: release the camera if the page is hidden/closed
