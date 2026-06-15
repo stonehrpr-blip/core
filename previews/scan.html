@@ -781,6 +781,15 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
         .catch(reject);
     });
   }
+  // Parse a model's text reply into our normalized result (or throw).
+  function parseScanJson(text){
+    var txt=String(text||'').replace(/^```json\s*|\s*```$/g,'').trim();
+    var s=txt.indexOf('{'), e=txt.lastIndexOf('}');
+    if(s>=0 && e>s) txt=txt.slice(s,e+1);
+    var j=JSON.parse(txt);
+    if(typeof j.isBody!=='boolean' && typeof j.isMeal!=='boolean' && typeof j.isPerson!=='boolean' && typeof j.score!=='number') throw new Error('no score');
+    return normalizeAI(j);
+  }
   function coreAIScan(imgs){
     return new Promise(function(resolve,reject){
       if(!(window.coreAI && coreAI.chat && coreAI.ready && coreAI.ready())){ reject(); return; }
@@ -791,15 +800,24 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
       coreAI.chat([{ role:'user', content:content }], { role:'vision', temperature:0.3, maxTokens:400 })
         .then(function(r){
           if(!r || !r.ok || !r.text || r.fallback){ reject(); return; }
-          try{
-            var txt=String(r.text).replace(/^```json\s*|\s*```$/g,'').trim();
-            var s=txt.indexOf('{'), e=txt.lastIndexOf('}');
-            if(s>=0 && e>s) txt=txt.slice(s,e+1);
-            var j=JSON.parse(txt);
-            if(typeof j.isBody!=='boolean' && typeof j.isMeal!=='boolean' && typeof j.isPerson!=='boolean' && typeof j.score!=='number'){ reject(); return; }
-            resolve(normalizeAI(j));
-          }catch(err){ reject(); }
+          try{ resolve(parseScanJson(r.text)); }catch(err){ reject(); }
         }, reject);
+    });
+  }
+  // The hosted proxy's dedicated vision endpoint (image-capable — the plain chat
+  // path often can't process images). Mirrors core-ai.js proxyCall({type:'vision'}).
+  function proxyVision(img){
+    return new Promise(function(resolve,reject){
+      var c=window.CORE_CONFIG||{}, prompt=AI_PROMPT[type];
+      if(!img || !prompt){ reject(); return; }
+      var url=c.AI_PROXY_URL || (c.SUPABASE_URL ? c.SUPABASE_URL+'/functions/v1/ai' : null);
+      if(!url){ reject(); return; }
+      var headers={ 'Content-Type':'application/json' };
+      if(!c.AI_PROXY_URL && c.SUPABASE_ANON_KEY){ headers['apikey']=c.SUPABASE_ANON_KEY; headers['Authorization']='Bearer '+c.SUPABASE_ANON_KEY; }
+      fetch(url, { method:'POST', headers:headers, body:JSON.stringify({ type:'vision', image:img, prompt:prompt }) })
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(jj){ if(jj && (jj.reply||jj.text)){ try{ resolve(parseScanJson(jj.reply||jj.text)); }catch(e){ reject(); } } else reject(); })
+        .catch(reject);
     });
   }
   function firstValid(promises){
@@ -816,7 +834,7 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
   function requestScanAI(imgs){
     var arr=(Array.isArray(imgs)?imgs:[imgs]).filter(Boolean);
     if(!arr.length) return Promise.reject();
-    var tries=[ coreAIScan(arr) ];
+    var tries=[ coreAIScan(arr), proxyVision(arr[0]) ];
     if(isPhysique) tries.unshift(supabasePhysique(arr[0]));
     return firstValid(tries);
   }
@@ -875,8 +893,10 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
     if(aiInvalidSubject(ai)){ var m=INVALID_MSG[type]||INVALID_MSG.physique; showMessage(m[0], m[1]); return; }
     // Never fabricate a number — if the AI didn't return a real score, say so.
     if(!(ai && ai.rank && typeof ai.rank.score==='number')){
+      var hasKey=!!(window.coreAI && coreAI.hasKey && coreAI.hasKey());
       if(cam._demo) showMessage('Camera needed for a real score','Allow camera access and scan again for an accurate AI read.');
-      else showMessage('Couldn’t score that one','The AI couldn’t read this clearly — check your connection and try again. We won’t show a guess.');
+      else if(hasKey) showMessage('Couldn’t score that one','The AI didn’t return a read — check your connection and try again.');
+      else showMessage('AI scoring isn’t set up','This needs an AI vision model. Add your own AI key in Settings → AI Setup for instant scoring, then scan again.');
       return;
     }
     var score, tips, gradeTxt, subTxt;
