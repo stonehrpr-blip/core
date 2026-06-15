@@ -306,6 +306,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 </div>
 
 <script src="_lib/core-config.js"></script>
+<script src="_lib/core-ai.js"></script>
 <script src="_lib/core-sfx.js"></script>
 <script src="_lib/core-state.js"></script>
 <script>
@@ -608,24 +609,72 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     requestPhysiqueAI().then(function(r){ aiResult=r; aiPending=false; }).catch(function(){ aiResult=null; aiPending=false; });
     doAnalyze();
   }
-  // Send the front photo to the physique-scan vision backend; resolve with its
-  // read, or reject → the result falls back to the simulated score.
-  function requestPhysiqueAI(){
+  // Score the physique from the captured photo using real vision AI.
+  // Tries the dedicated Supabase backend AND the shared coreAI bridge (personal
+  // key or hosted proxy) in parallel, taking whichever returns a valid read first.
+  // Falls back to the simulated score only if every AI path fails.
+  function frontImage(){
+    for(var i=0;i<shots.length;i++){ if(shots[i].k==='front'&&shots[i].url) return shots[i].url; }
+    for(var j=0;j<shots.length;j++){ if(shots[j].url) return shots[j].url; }
+    return null;
+  }
+  function normalizeAI(d){
+    if(!d) return null;
+    if(d.rank && typeof d.rank.score==='number') return d;            // already in result shape
+    var score=(typeof d.score==='number') ? d.score : null;
+    return { isBody:d.isBody, summary:d.summary||'', weakPoints:d.weakPoints||[],
+             rank: score==null ? null : { score:score, tier:d.tier||grade(Math.round(score)) } };
+  }
+  function supabasePhysique(img){
     return new Promise(function(resolve,reject){
       var c=window.CORE_CONFIG;
       if(!c||!c.SUPABASE_URL||!c.SUPABASE_ANON_KEY){ reject(); return; }
-      var img=null;
-      for(var i=0;i<shots.length;i++){ if(shots[i].k==='front'&&shots[i].url){ img=shots[i].url; break; } }
-      if(!img){ for(var j=0;j<shots.length;j++){ if(shots[j].url){ img=shots[j].url; break; } } }
-      if(!img){ reject(); return; }
       fetch(c.SUPABASE_URL+'/functions/v1/physique-scan',{
         method:'POST',
         headers:{ 'content-type':'application/json','authorization':'Bearer '+c.SUPABASE_ANON_KEY,'apikey':c.SUPABASE_ANON_KEY },
         body:JSON.stringify({ image: img, mediaType:'image/jpeg' })
       }).then(function(r){ return r.ok ? r.json() : null; })
-        .then(function(d){ if(d && (d.isBody===true || d.isBody===false)) resolve(d); else reject(); })
+        .then(function(d){ if(d && (d.isBody===true || d.isBody===false)) resolve(normalizeAI(d)); else reject(); })
         .catch(reject);
     });
+  }
+  function coreAIPhysique(img){
+    return new Promise(function(resolve,reject){
+      if(!(window.coreAI && coreAI.chat && coreAI.ready && coreAI.ready())){ reject(); return; }
+      var prompt='You are CORE\'s physique-analysis vision model. Look at this photo of a person\'s body and assess it. '
+        +'Reply with STRICT JSON only, no markdown, no extra text: '
+        +'{"isBody":true|false,"score":0-100,"tier":"Elite|Strong|Solid|Developing|Needs work","summary":"one honest, specific sentence","weakPoints":["chest"|"back"|"shoulders"|"arms"|"legs"|"core"]}. '
+        +'Set isBody=false if this is not a clear photo of a human body. score = overall physique development (muscularity, leanness, proportion) from 0-100. '
+        +'weakPoints = up to 3 muscle groups that most need work. Be honest, not flattering.';
+      var content=[{ type:'text', text:prompt },{ type:'image_url', image_url:{ url:img, detail:'low' } }];
+      coreAI.chat([{ role:'user', content:content }], { role:'vision', temperature:0.3, maxTokens:300 })
+        .then(function(r){
+          if(!r || !r.ok || !r.text || r.fallback){ reject(); return; }
+          try{
+            var txt=String(r.text).replace(/^```json\s*|\s*```$/g,'').trim();
+            var s=txt.indexOf('{'), e=txt.lastIndexOf('}');
+            if(s>=0 && e>s) txt=txt.slice(s,e+1);
+            var j=JSON.parse(txt);
+            if(typeof j.isBody!=='boolean' && typeof j.score!=='number'){ reject(); return; }
+            resolve(normalizeAI(j));
+          }catch(err){ reject(); }
+        }, reject);
+    });
+  }
+  function firstValid(promises){
+    return new Promise(function(resolve,reject){
+      var pending=promises.length, settled=false;
+      if(!pending){ reject(); return; }
+      promises.forEach(function(pr){
+        Promise.resolve(pr).then(function(v){ if(!settled && v){ settled=true; resolve(v); } else if(--pending<=0 && !settled){ reject(); } },
+          function(){ if(--pending<=0 && !settled){ reject(); } });
+      });
+    });
+  }
+  function requestPhysiqueAI(){
+    var img=frontImage();
+    if(!img) return Promise.reject();
+    return firstValid([ supabasePhysique(img), coreAIPhysique(img) ]);
   }
 
   // ── result ──
