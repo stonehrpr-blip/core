@@ -172,9 +172,38 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .analyze .lbl{font-size:13px;color:var(--muted);font-weight:600;}
 
 /* result sheet */
-.result{position:absolute;inset:0;z-index:96;background:linear-gradient(180deg,#0c0d16,#06070e);
+.result,.organizer{position:absolute;inset:0;z-index:96;background:linear-gradient(180deg,#0c0d16,#06070e);
   display:none;flex-direction:column;padding:64px 22px calc(28px + env(safe-area-inset-bottom));overflow-y:auto;}
-.result.on{display:flex;animation:resIn .4s ease both;}
+.result.on,.organizer.on{display:flex;animation:resIn .4s ease both;}
+.organizer{z-index:97;}
+.org-h{text-align:center;font-size:23px;font-weight:900;letter-spacing:-.5px;margin-top:6px;}
+.org-sub{text-align:center;font-size:12.5px;color:var(--muted);margin-top:7px;line-height:1.5;}
+.org-sub b{color:#cfd6e6;}
+.oslots{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:20px;}
+.oslot{position:relative;aspect-ratio:.74;border-radius:16px;overflow:hidden;cursor:pointer;font:inherit;color:#fff;
+  -webkit-appearance:none;appearance:none;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+  transition:transform .12s,border-color .15s;}
+.oslot:active{transform:scale(.98);}
+.oslot.empty{border:1.5px dashed rgba(255,255,255,0.18);background:rgba(255,255,255,0.03);}
+.oslot.empty .plus{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#9aa1b7;animation:slotPulse 2s ease-in-out infinite;}
+.oslot.empty .plus svg{width:20px;height:20px;}
+@keyframes slotPulse{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.08);opacity:1}}
+.oslot.filled{border:1px solid var(--border);background:#05050c;animation:slotIn .45s cubic-bezier(.22,1,.36,1) both;}
+@keyframes slotIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+.oslot.filled img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+.oslot .ok{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:50%;background:#34d399;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(52,211,153,.5);}
+.oslot .ok svg{width:14px;height:14px;color:#04130c;stroke-width:3;}
+.oslot .re{position:absolute;top:8px;left:8px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.5);
+  display:flex;align-items:center;justify-content:center;}.oslot .re svg{width:13px;height:13px;color:#fff;}
+.oslot .ol{position:relative;z-index:2;font-size:11.5px;font-weight:800;letter-spacing:.04em;}
+.oslot.filled .ol{position:absolute;left:0;right:0;bottom:0;padding:14px 8px 8px;text-align:center;
+  background:linear-gradient(180deg,transparent,rgba(0,0,0,.72));}
+.org-actions{display:flex;flex-direction:column;gap:10px;margin-top:22px;}
+.org-sorting{display:flex;flex-direction:column;align-items:center;gap:14px;padding:50px 0;}
+.org-spin{width:42px;height:42px;border-radius:50%;border:3px solid rgba(255,255,255,0.12);border-top-color:var(--sc);animation:ospin .8s linear infinite;}
+@keyframes ospin{to{transform:rotate(360deg)}}
 @keyframes resIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
 .result::-webkit-scrollbar{display:none;}
 .res-close{position:absolute;top:58px;right:18px;width:38px;height:38px;border-radius:50%;border:1px solid var(--border);
@@ -493,6 +522,9 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
 
   <!-- Result -->
   <div class="result" id="result"></div>
+
+  <!-- Physique angle organizer (sorts uploaded photos into front/right/back/left) -->
+  <div class="organizer" id="organizer"></div>
 
   <!-- Physique history -->
   <div class="phist" id="phist">
@@ -962,6 +994,92 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
   }
   function analyzeFromImage(url){ analyzeFromImages([url]); }
 
+  // ── Physique angle organizer ──────────────────────────────────────
+  // Upload any number of photos; the AI sorts each into front/right/back/left,
+  // then you fill the missing angles (upload or guided scan) before scoring.
+  var slots={front:null,right:null,back:null,left:null}, pendingSlot=null;
+  var SLOT_ORDER=[{k:'front',l:'Front'},{k:'right',l:'Right'},{k:'back',l:'Back'},{k:'left',l:'Left'}];
+  function cap(k){ return k.charAt(0).toUpperCase()+k.slice(1); }
+  function slotCount(){ return SLOT_ORDER.filter(function(o){ return slots[o.k]; }).length; }
+  function readFile(f, cb){ var rd=new FileReader(); rd.onload=function(){ var u=rd.result; shrinkUrl(u,360,function(th){ cb({ url:u, thumb:th }); }); }; rd.onerror=function(){ cb(null); }; rd.readAsDataURL(f); }
+  // Ask the vision AI which way each body faces. Resolves to an array of views
+  // (same order as input) or null if the AI can't be reached.
+  function classifyViews(urls){
+    return new Promise(function(resolve){
+      if(!urls.length || !(window.coreAI && coreAI.chat && coreAI.ready && coreAI.ready())){ resolve(null); return; }
+      var prompt='You are sorting physique photos by camera angle. For EACH image, in order, say which way the body faces the camera. '
+        +'Reply STRICT JSON only, no markdown: {"views":["front"|"back"|"left"|"right", ...]} — exactly one entry per image, in the same order. '
+        +'front = chest/front toward the camera; back = back toward the camera; left = the person’s LEFT side toward the camera; right = the person’s RIGHT side toward the camera. If a photo shows no clear person, use "front".';
+      var content=[{ type:'text', text:prompt }].concat(urls.map(function(u){ return { type:'image_url', image_url:{ url:u, detail:'low' } }; }));
+      coreAI.chat([{ role:'user', content:content }], { role:'vision', temperature:0, maxTokens:120, json:true })
+        .then(function(r){ if(!r||!r.ok||!r.text||r.fallback){ resolve(null); return; }
+          try{ var j=JSON.parse(String(r.text).replace(/^```json\s*|\s*```$/g,'').trim()); resolve(Array.isArray(j.views)?j.views:null); }catch(e){ resolve(null); } },
+          function(){ resolve(null); });
+    });
+  }
+  function placeIntoSlots(items, views){
+    items.forEach(function(it,i){
+      if(!it) return;
+      var v=(views && SLOT_ORDER.some(function(o){return o.k===views[i];})) ? views[i] : null;
+      if(v && !slots[v]){ slots[v]=it; return; }
+      for(var j=0;j<SLOT_ORDER.length;j++){ if(!slots[SLOT_ORDER[j].k]){ slots[SLOT_ORDER[j].k]=it; return; } }
+    });
+  }
+  function handlePhysiqueUploads(files){
+    openOrganizer(true);   // show the sorting spinner immediately
+    var items=new Array(files.length), urls=new Array(files.length), pending=files.length;
+    files.forEach(function(f,i){ readFile(f, function(it){ items[i]=it; urls[i]=it?it.url:null; if(--pending===0) afterRead(); }); });
+    function afterRead(){
+      var valid=urls.filter(Boolean);
+      classifyViews(valid).then(function(views){ placeIntoSlots(items.filter(Boolean), views); renderOrganizer(); });
+    }
+  }
+  function openOrganizer(sorting){
+    var org=$('#organizer');
+    if(sorting){
+      org.innerHTML='<button class="res-close" id="orgClose" type="button" aria-label="Close">'+svg('<path d="M6 6l12 12M18 6L6 18"/>')+'</button>'
+        +'<div class="org-h">Sorting your angles</div>'
+        +'<div class="org-sorting"><div class="org-spin"></div><div class="org-sub">CORE is reading each photo and sorting it into front, back, left and right…</div></div>';
+      org.classList.add('on');
+      var oc=$('#orgClose'); if(oc) oc.addEventListener('click', function(){ org.classList.remove('on'); });
+    } else { org.classList.add('on'); }
+  }
+  function renderOrganizer(){
+    var org=$('#organizer'), n=slotCount();
+    var grid=SLOT_ORDER.map(function(o){ var it=slots[o.k];
+      return it
+        ? '<button class="oslot filled" data-fill="'+o.k+'" type="button"><img src="'+it.thumb+'" alt=""/><span class="ok">'+svg('<path d="M20 6L9 17l-5-5"/>')+'</span><span class="re">'+svg('<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>')+'</span><span class="ol">'+o.l+'</span></button>'
+        : '<button class="oslot empty" data-add="'+o.k+'" type="button"><span class="plus">'+svg('<path d="M12 5v14M5 12h14"/>')+'</span><span class="ol">'+o.l+'</span></button>';
+    }).join('');
+    org.innerHTML='<button class="res-close" id="orgClose" type="button" aria-label="Close">'+svg('<path d="M6 6l12 12M18 6L6 18"/>')+'</button>'
+      +'<div class="org-h">Your angles</div>'
+      +'<div class="org-sub"><b>'+n+' of 4</b> added · more angles = a more accurate score</div>'
+      +'<div class="oslots">'+grid+'</div>'
+      +'<div class="org-actions">'
+        +'<button class="btn save" id="orgScore" type="button"'+(n<1?' disabled style="opacity:.5"':'')+'>'+svg('<path d="M5 12l4 4 10-11"/>')+'Score my physique · '+n+'/4</button>'
+        +'<button class="btn again" id="orgUpload" type="button">'+svg('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5-5 5 5"/><path d="M12 5v12"/>')+'Upload more photos</button>'
+        +'<button class="btn ghost" id="orgCam" type="button">'+svg('<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>')+'Take a guided physique scan</button>'
+      +'</div>';
+    org.classList.add('on');
+    $('#orgClose').addEventListener('click', function(){ org.classList.remove('on'); });
+    Array.prototype.forEach.call(org.querySelectorAll('.oslot.empty'), function(b){ b.addEventListener('click', function(){ pendingSlot=b.getAttribute('data-add'); var pf=$('#pqFile'); pf.multiple=false; pf.click(); }); });
+    Array.prototype.forEach.call(org.querySelectorAll('.oslot.filled'), function(b){ b.addEventListener('click', function(){ pendingSlot=b.getAttribute('data-fill'); var pf=$('#pqFile'); pf.multiple=false; pf.click(); }); });
+    $('#orgUpload').addEventListener('click', function(){ pendingSlot=null; var pf=$('#pqFile'); pf.multiple=true; pf.click(); });
+    $('#orgCam').addEventListener('click', function(){ org.classList.remove('on'); openCam(); });
+    $('#orgScore').addEventListener('click', function(){ if(slotCount()<1) return; scoreFromSlots(); });
+  }
+  function scoreFromSlots(){
+    var ordered=SLOT_ORDER.filter(function(o){ return slots[o.k]; });
+    if(!ordered.length) return;
+    shots=ordered.map(function(o){ var it=slots[o.k]; return { k:o.k, label:o.l, url:it.url, thumb:it.thumb }; });
+    snapDataUrl=shots[0].thumb||shots[0].url; cam._demo=false;
+    $('#organizer').classList.remove('on');
+    try{ lsSet('corePhysiqueShots.v1', JSON.stringify({ ts:Date.now(), shots:shots.map(function(x){ return { k:x.k, label:x.label, url:x.thumb||x.url }; }) })); }catch(e){}
+    aiResult=null; aiPending=true;
+    requestScanAI(shots.map(function(x){ return x.url; })).then(function(r){ aiResult=r; aiPending=false; }).catch(function(){ aiResult=null; aiPending=false; });
+    doAnalyze();
+  }
+
   // ── result ──
   function pick(arr,k){ var a=arr.slice(), out=[]; while(a.length&&out.length<k){ out.push(a.splice(Math.floor(Math.random()*a.length),1)[0]); } return out; }
   function clampb(v){ v=Math.round(+v||0); return Math.max(28,Math.min(99,v)); }
@@ -1294,9 +1412,9 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
       +'</div>';
     h+='<div class="pq-btns">'
       +'<button class="pq-take" id="pqTake" type="button">'+svg('<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>')+'Take Photo</button>'
-      +'<button class="pq-upload" id="pqUpload" type="button">'+svg('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5-5 5 5"/><path d="M12 5v12"/>')+(isPhysique?'Upload 4 photos':'Upload from Gallery')+'</button>'
+      +'<button class="pq-upload" id="pqUpload" type="button">'+svg('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5-5 5 5"/><path d="M12 5v12"/>')+(isPhysique?'Upload photos':'Upload from Gallery')+'</button>'
       +'</div>';
-    h+='<div class="pq-help">'+svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>')+(isPhysique?'4 photos · about 10 seconds to score':'Instant AI score, kept private')+'</div>';
+    h+='<div class="pq-help">'+svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>')+(isPhysique?'Upload 1–4 angles · AI sorts them for you':'Instant AI score, kept private')+'</div>';
     h+='<div class="pq-disc">'+((type==='physique'||type==='looks')?'This analysis is for educational purposes only and not medical advice.':'This analysis is for guidance only.')+'</div>';
     $('#pqIntro').innerHTML=h;
     $('#pqTake').addEventListener('click', openCam);
@@ -1306,16 +1424,17 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
   $('#pqFile').addEventListener('change', function(e){
     var files=e.target.files ? Array.prototype.slice.call(e.target.files) : [];
     e.target.value='';
-    if(!files.length) return;
-    if(isPhysique && files.length<4){ toast('Pick all 4 angles — front, right, back and left.'); return; }
-    files=files.slice(0,4);
-    var urls=new Array(files.length), pending=files.length;
-    files.forEach(function(f, i){
-      var rd=new FileReader();
-      rd.onload=function(){ urls[i]=rd.result; if(--pending===0) analyzeFromImages(urls); };
-      rd.onerror=function(){ if(--pending===0) analyzeFromImages(urls); };
-      rd.readAsDataURL(f);
-    });
+    if(!files.length){ pendingSlot=null; return; }
+    // Filling one specific angle slot (tapped an empty tile)
+    if(isPhysique && pendingSlot){
+      var k=pendingSlot; pendingSlot=null;
+      readFile(files[0], function(it){ slots[k]=it; renderOrganizer(); });
+      return;
+    }
+    // Physique multi-upload → AI sorts them into front/right/back/left
+    if(isPhysique){ handlePhysiqueUploads(files.slice(0,4)); return; }
+    // Other scan types: single photo, score directly
+    var rd=new FileReader(); rd.onload=function(){ analyzeFromImage(rd.result); }; rd.readAsDataURL(files[0]);
   });
 
   // history panel
