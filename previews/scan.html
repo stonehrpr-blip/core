@@ -412,7 +412,7 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
   <div class="phist" id="phist">
     <div class="phist-top">
       <button class="phist-ic" id="phBack" type="button" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
-      <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/></svg>Physique History</h2>
+      <h2><svg id="phistIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/></svg><span id="phistTitle">Physique History</span></h2>
       <button class="phist-ic" id="phNew" type="button" aria-label="New scan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button>
     </div>
     <div class="phist-body" id="phBody"></div>
@@ -816,6 +816,7 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
   function analyzeFromImage(url){
     if(!url) return;
     cam._demo=false;
+    snapDataUrl=url;                                  // so non-physique results show the uploaded image
     shots=[{ k:'front', label:'Front', url:url }];
     try{ lsSet('corePhysiqueShots.v1', JSON.stringify({ ts:Date.now(), shots:shots })); }catch(e){}
     aiResult=null; aiPending=true;
@@ -936,9 +937,9 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
     var saved=false;
     function persist(){
       if(saved) return; saved=true;
-      var all=readScans(); all.push({ type:type, name:s.name, score:score, label:s.label, tips:tips, ts:Date.now(), thumb:(isPhysique?frontImage():null), breakdown:(isPhysique?BD:null), grade:gradeTxt });
+      var all=readScans(); all.push({ type:type, name:s.name, score:score, label:s.label, tips:tips, ts:Date.now(), thumb:(isPhysique?frontImage():snapDataUrl)||null, breakdown:(isPhysique?BD:null), grade:gradeTxt });
       lsSet('coreScans.v1', JSON.stringify(all.slice(-60)));
-      if(isPhysique && typeof refreshPqProgress==='function') refreshPqProgress();
+      if(typeof refreshPqProgress==='function') refreshPqProgress();
       lsSet('coreLastScan', JSON.stringify({ type:type, score:score, ts:Date.now() }));
       updateLast();
     }
@@ -947,8 +948,8 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
       var b=$('#btnSave'); b.classList.add('done'); b.innerHTML=svg('<path d="M5 12l4 4 10-11"/>')+'Saved to profile';
       toast(s.name+' scan saved · '+score+'/100');
     });
-    // physique results auto-save to the profile so progress always tracks
-    if(isPhysique){
+    // results auto-save to the profile so progress always tracks
+    if(!isVoice){
       persist();
       var sb=$('#btnSave'); if(sb){ sb.classList.add('done'); sb.innerHTML=svg('<path d="M5 12l4 4 10-11"/>')+'Saved to profile'; }
     }
@@ -973,8 +974,8 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
   var toastEl=$('#toast');
   function toast(m){ toastEl.textContent=m; toastEl.classList.add('show'); clearTimeout(toastEl._t); toastEl._t=setTimeout(function(){ toastEl.classList.remove('show'); }, 2200); }
 
-  // ── Physique: analysis landing + history (Critique-style) ──
-  function pqScans(){ return readScans().filter(function(x){ return x.type==='physique'; }); }
+  // ── analysis landing + history (works for every scan type) ──
+  function pqScans(){ return readScans().filter(function(x){ return x.type===type; }); }
   function pqStats(){
     var a=pqScans(); if(!a.length) return { best:0, avg:0, total:0 };
     var best=0, sum=0; a.forEach(function(x){ best=Math.max(best, x.score||0); sum+=(x.score||0); });
@@ -992,13 +993,23 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
     if(d===1) return 'yesterday';
     return d+' days ago';
   }
+  var INTRO={
+    physique:{ get:[['Proportions Analysis','Body symmetry & balance breakdown'],['Muscle Assessment','Development & definition scoring'],['Personalized Tips','Actionable improvement suggestions']],
+      tips:'<b>Men:</b> athletic shorts, shirtless preferred<br><b>Women:</b> sports attire showing body shape<br>Stand 6–8 feet from camera, full body visible' },
+    food:{ get:[['Calorie & Macro Read','Protein, carbs and fat per plate'],['Health Score','How balanced the meal is'],['Smarter Swaps','Specific upgrade suggestions']],
+      tips:'Frame the whole plate from above in good, even light so every item is visible.' },
+    posture:{ get:[['Alignment Read','Head, shoulder & hip position'],['Imbalance Flags','Issues highlighted clearly'],['Correction Drills','Daily fixes that actually work']],
+      tips:'Stand side-on with your full body in frame, relaxed and natural — don\'t pose.' },
+    outfit:{ get:[['Fit & Proportion','How the cut suits you'],['Colour & Combo','Palette and pairing tips'],['Occasion Match','The right look for the moment']],
+      tips:'Stand back for a full head-to-toe shot in good light.' },
+    looks:{ get:[['Skin Read','Condition and tone'],['Facial Symmetry','Balance analysis'],['Grooming Tips','Hair and styling pointers']],
+      tips:'Center your face with even lighting and no filters.' }
+  };
   function buildPqIntro(){
     var st=pqStats();
-    var GET=[
-      { t:'Proportions Analysis', d:'Body symmetry & balance breakdown', i:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.7" fill="currentColor"/>' },
-      { t:'Muscle Assessment',    d:'Development & definition scoring',  i:'<path d="M4 7l5 5-5 5M20 7l-5 5 5 5"/>' },
-      { t:'Personalized Tips',    d:'Actionable improvement suggestions',i:'<path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="3.4"/>' }
-    ];
+    var cfg=INTRO[type] || { get:(s.checks||[]).slice(0,3).map(function(c){ return [c.split(/[\s—-]/).slice(0,3).join(' '), c]; }), tips:s.hint };
+    var GIC=['<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.7" fill="currentColor"/>','<path d="M3 17l6-6 4 4 7-8"/>','<path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="3.4"/>'];
+    var GET=cfg.get.map(function(g,i){ return { t:g[0], d:g[1], i:GIC[i%GIC.length] }; });
     var h='';
     h+='<div class="pq-card">'
       +'<div class="pq-prog-top"><span class="l">'+svg('<path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/>')+'Your Progress</span>'
@@ -1012,12 +1023,12 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
       +GET.map(function(g){ return '<div class="pq-grow"><div class="pq-gic">'+svg(g.i)+'</div><div><div class="pq-gt">'+g.t+'</div><div class="pq-gd">'+g.d+'</div></div></div>'; }).join('')
       +'</div>';
     h+='<div class="pq-tipsec">Tips for best results</div><div class="pq-tips">'
-      +'<p><b>Men:</b> athletic shorts, shirtless preferred<br><b>Women:</b> sports attire showing body shape<br>Stand 6–8 feet from camera, full body visible</p></div>';
+      +'<p>'+cfg.tips+'</p></div>';
     h+='<div class="pq-btns">'
       +'<button class="pq-take" id="pqTake" type="button">'+svg('<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>')+'Take Photo</button>'
       +'<button class="pq-upload" id="pqUpload" type="button">'+svg('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5-5 5 5"/><path d="M12 5v12"/>')+'Upload from Gallery</button>'
       +'</div>';
-    h+='<div class="pq-disc">This analysis is for educational purposes only and not medical advice.</div>';
+    h+='<div class="pq-disc">'+((type==='physique'||type==='looks')?'This analysis is for educational purposes only and not medical advice.':'This analysis is for guidance only.')+'</div>';
     $('#pqIntro').innerHTML=h;
     $('#pqTake').addEventListener('click', openCam);
     $('#pqUpload').addEventListener('click', function(){ $('#pqFile').click(); });
@@ -1064,12 +1075,12 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
       +'<div class="ph-tabs">'+['week','month','all'].map(function(r){ return '<button class="ph-tab'+(r===phRange?' on':'')+'" data-r="'+r+'">'+(r.charAt(0).toUpperCase()+r.slice(1))+'</button>'; }).join('')+'</div>'
       +'<div class="ph-chart">'+lineChart(chartPts)+'<div class="ph-cx"><span>'+first+'</span><span>Latest: <b>'+latest+'</b></span><span>'+last+'</span></div></div>';
     h+='<div class="ph-h">All scans</div>';
-    if(!all.length){ h+='<div class="ph-empty">No physique scans yet.<br>Take a photo or upload one to start tracking.</div>'; }
+    if(!all.length){ h+='<div class="ph-empty">No '+s.name.toLowerCase()+' scans yet.<br>Run a scan to start tracking.</div>'; }
     else {
       h+=all.slice().reverse().map(function(x){
-        var thumb=x.thumb?('<img src="'+x.thumb+'" alt=""/>'):svg('<circle cx="12" cy="6.4" r="3.1"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/>');
+        var thumb=x.thumb?('<img src="'+x.thumb+'" alt=""/>'):('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+s.icon+'</svg>');
         return '<div class="ph-item"><div class="ph-thumb">'+thumb+'</div>'
-          +'<div class="ph-meta"><div class="ph-name">Physique Scan</div><div class="ph-time">'+timeAgo(x.ts)+'</div></div>'
+          +'<div class="ph-meta"><div class="ph-name">'+s.name+' Scan</div><div class="ph-time">'+timeAgo(x.ts)+'</div></div>'
           +'<div class="ph-score">'+x.score+'</div>'
           +'<button class="ph-del" data-ts="'+x.ts+'" type="button" aria-label="Delete">'+svg('<path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/>')+'</button></div>';
       }).join('');
@@ -1078,7 +1089,7 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
     Array.prototype.forEach.call($('#phBody').querySelectorAll('.ph-tab'), function(b){ b.addEventListener('click', function(){ phRange=b.getAttribute('data-r'); renderHistory(); }); });
     Array.prototype.forEach.call($('#phBody').querySelectorAll('.ph-del'), function(b){ b.addEventListener('click', function(){
       var ts=+b.getAttribute('data-ts');
-      var keep=readScans().filter(function(x){ return !(x.type==='physique' && x.ts===ts); });
+      var keep=readScans().filter(function(x){ return !(x.type===type && x.ts===ts); });
       lsSet('coreScans.v1', JSON.stringify(keep));
       renderHistory(); refreshPqProgress();
     }); });
@@ -1089,18 +1100,20 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
   $('#histBtn').addEventListener('click', openHistory);
   $('#phNew').addEventListener('click', function(){ closeHistory(); openCam(); });
 
-  if(isPhysique){
+  if(!isVoice){
     document.body.classList.add('pq');
-    $('#title').textContent='Physique Scan';
-    $('#name').textContent='Physique Analysis';
-    $('#tag').textContent='AI-powered physique feedback with personalized improvement tips.';
+    $('#title').textContent=s.name+' Scan';
+    $('#name').textContent=s.name+' Analysis';
+    $('#tag').textContent=s.tag;
     var bd=document.querySelector('.hero .badge'); if(bd) bd.style.display='none';
     ['#last','#checksSec','#checks','#cta','#note'].forEach(function(sel){ var el=$(sel); if(el) el.style.display='none'; });
     buildPqIntro();
     $('#pqIntro').style.display='block';
     $('#histBtn').style.display='inline-flex';
     var hb=$('#helpBtn'); if(hb) hb.style.display='none';
-    if((location.hash||'')==='#history') openHistory();   // deep-link from the profile card
+    var pt=$('#phistTitle'); if(pt) pt.textContent=s.name+' History';
+    var pic=$('#phistIcon'); if(pic) pic.innerHTML=s.icon;
+    if((location.hash||'')==='#history') openHistory();   // deep-link from a profile card
   }
 
   // be a good citizen: release the camera if the page is hidden/closed

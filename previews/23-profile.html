@@ -251,17 +251,17 @@
 
   /* ════ CORE STATS — RPG attribute bars ════ */
   .corestats{ display:flex; flex-direction:column; gap:9px; }
-  .phq{ border-radius:18px; border:1px solid var(--border); background:linear-gradient(180deg,rgba(59,158,255,0.11),rgba(255,255,255,0.02)); padding:16px; cursor:pointer; transition:transform .2s, border-color .2s; }
-  .phq:hover{ transform:translateY(-2px); border-color:rgba(59,158,255,0.5); }
+  .phq{ --c:#3B9EFF; border-radius:18px; border:1px solid var(--border); background:linear-gradient(180deg,color-mix(in srgb,var(--c) 12%,transparent),rgba(255,255,255,0.02)); padding:16px; cursor:pointer; transition:transform .2s, border-color .2s; }
+  .phq:hover{ transform:translateY(-2px); border-color:color-mix(in srgb,var(--c) 50%,transparent); }
   .phq-top{ display:flex; align-items:center; gap:14px; }
   .phq-ring{ width:62px; height:62px; flex:none; }
   .phq-ring circle{ fill:none; stroke-width:7; stroke-linecap:round; }
   .phq-ring .bg{ stroke:rgba(255,255,255,0.10); }
-  .phq-ring .fg{ stroke:#3B9EFF; transform:rotate(-90deg); transform-origin:50% 50%; filter:drop-shadow(0 0 6px rgba(59,158,255,0.5)); transition:stroke-dashoffset 1s cubic-bezier(.22,1,.36,1); }
+  .phq-ring .fg{ stroke:var(--c); transform:rotate(-90deg); transform-origin:50% 50%; filter:drop-shadow(0 0 6px color-mix(in srgb,var(--c) 50%,transparent)); transition:stroke-dashoffset 1s cubic-bezier(.22,1,.36,1); }
   .phq-num{ font:900 19px -apple-system,sans-serif; fill:#fff; }
   .phq-meta{ flex:1; min-width:0; }
   .phq-title{ font-size:15px; font-weight:800; color:#fff; }
-  .phq-grade{ font-size:11px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:#3B9EFF; margin-top:2px; }
+  .phq-grade{ font-size:11px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--c); margin-top:2px; }
   .phq-sub{ font-size:12px; color:var(--muted); margin-top:3px; }
   .phq-thumb{ width:54px; height:54px; border-radius:12px; object-fit:cover; border:1px solid var(--border); flex:none; }
   .phq-stats{ display:flex; gap:10px; margin-top:14px; }
@@ -458,7 +458,7 @@
         <div class="sec"><h2>Core Stats</h2><span class="meta" id="cstatMeta"></span></div>
         <div class="corestats" id="corestats"></div>
 
-        <div class="sec"><h2>Physique</h2><a class="meta" id="phqMore" href="scan.html?type=physique">New scan <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><path d="M9 6l6 6-6 6"/></svg></a></div>
+        <div class="sec"><h2>Scans</h2><a class="meta" id="phqMore" href="coach.html">New scan <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><path d="M9 6l6 6-6 6"/></svg></a></div>
         <div id="phqCard"></div>
 
         <div class="sec"><h2>Current perks</h2><span class="meta" id="perkMeta"></span></div>
@@ -702,35 +702,41 @@
     }
 
     var lastRankIdx=null, builtFor=null, lastStatVals={};
-    function renderPhysique(){
+    var SCAN_META={
+      physique:{c:'#3B9EFF',label:'Physique'}, food:{c:'#34D399',label:'Food'}, posture:{c:'#4A8FFF',label:'Posture'},
+      outfit:{c:'#FFCB3D',label:'Outfit'}, looks:{c:'#B388FF',label:'Looks'}, voice:{c:'#5EEAD4',label:'Voice'}
+    };
+    var SCAN_ORDER=['physique','food','posture','outfit','looks','voice'];
+    function renderScans(){
       var host=qs('#phqCard'); if(!host) return;
       var more=qs('#phqMore');
-      var all=[]; try{ all=(JSON.parse(localStorage.getItem('coreScans.v1')||'[]')||[]).filter(function(x){return x && x.type==='physique';}); }catch(e){}
-      if(!all.length){
-        host.innerHTML='<div class="phq-empty">No physique scans yet. <a href="scan.html?type=physique">Run your first scan</a> to track your progress here.</div>';
-        if(more) more.style.display='none';
-        return;
+      var all=[]; try{ all=JSON.parse(localStorage.getItem('coreScans.v1')||'[]')||[]; }catch(e){}
+      var byType={}; all.forEach(function(x){ if(x&&x.type){ (byType[x.type]=byType[x.type]||[]).push(x); } });
+      var types=SCAN_ORDER.filter(function(t){ return byType[t]&&byType[t].length; });
+      if(!types.length){
+        host.innerHTML='<div class="phq-empty">No scans yet. <a href="coach.html">Run your first scan</a> to track your progress here.</div>';
+        if(more) more.style.display='none'; return;
       }
       if(more) more.style.display='';
-      all.sort(function(a,b){return a.ts-b.ts;});
-      var latest=all[all.length-1], best=0, sum=0;
-      all.forEach(function(x){ best=Math.max(best,x.score||0); sum+=(x.score||0); });
-      var avg=Math.round(sum/all.length), sc=latest.score||0, R=27, C=2*Math.PI*R;
-      var d=Math.floor((Date.now()-latest.ts)/86400000), ago=d<=0?'today':(d===1?'yesterday':d+'d ago');
-      var thumb=latest.thumb?('<img class="phq-thumb" src="'+latest.thumb+'" alt=""/>'):'';
-      host.innerHTML='<div class="phq" id="phqGo" role="button" tabindex="0">'
-        +'<div class="phq-top">'
-          +'<svg class="phq-ring" viewBox="0 0 62 62"><circle class="bg" cx="31" cy="31" r="'+R+'"/><circle class="fg" cx="31" cy="31" r="'+R+'" stroke-dasharray="'+C+'" stroke-dashoffset="'+C+'" id="phqFg"/><text x="31" y="37.5" text-anchor="middle" class="phq-num">'+sc+'</text></svg>'
-          +'<div class="phq-meta"><div class="phq-title">Physique</div><div class="phq-grade">'+(latest.grade||'')+'</div><div class="phq-sub">Last scan '+ago+' · '+sc+'/100</div></div>'
-          +thumb
-        +'</div>'
-        +'<div class="phq-stats">'
-          +'<div class="phq-chip"><div class="n" style="color:#3B9EFF">'+best+'</div><div class="k">Best</div></div>'
-          +'<div class="phq-chip"><div class="n">'+avg+'</div><div class="k">Average</div></div>'
-          +'<div class="phq-chip"><div class="n">'+all.length+'</div><div class="k">Scans</div></div>'
-        +'</div></div>';
-      var fg=qs('#phqFg'); if(fg) requestAnimationFrame(function(){ fg.setAttribute('stroke-dashoffset', C*(1-sc/100)); });
-      var go=qs('#phqGo'); if(go) go.addEventListener('click', function(){ location.href='scan.html?type=physique#history'; });
+      host.innerHTML=types.map(function(t){
+        var arr=byType[t].slice().sort(function(a,b){return a.ts-b.ts;});
+        var latest=arr[arr.length-1], best=0, sum=0; arr.forEach(function(x){ best=Math.max(best,x.score||0); sum+=(x.score||0); });
+        var avg=Math.round(sum/arr.length), sc=latest.score||0, m=SCAN_META[t]||SCAN_META.physique, R=27, C=2*Math.PI*R;
+        var d=Math.floor((Date.now()-latest.ts)/86400000), ago=d<=0?'today':(d===1?'yesterday':d+'d ago');
+        var thumb=latest.thumb?('<img class="phq-thumb" src="'+latest.thumb+'" alt=""/>'):'';
+        return '<div class="phq" data-t="'+t+'" role="button" tabindex="0" style="--c:'+m.c+';margin-bottom:10px;">'
+          +'<div class="phq-top">'
+            +'<svg class="phq-ring" viewBox="0 0 62 62"><circle class="bg" cx="31" cy="31" r="'+R+'"/><circle class="fg" cx="31" cy="31" r="'+R+'" stroke-dasharray="'+C+'" stroke-dashoffset="'+(C*(1-sc/100))+'"/><text x="31" y="37.5" text-anchor="middle" class="phq-num">'+sc+'</text></svg>'
+            +'<div class="phq-meta"><div class="phq-title">'+m.label+'</div><div class="phq-grade">'+(latest.grade||'')+'</div><div class="phq-sub">Last scan '+ago+' · '+sc+'/100</div></div>'
+            +thumb
+          +'</div>'
+          +'<div class="phq-stats">'
+            +'<div class="phq-chip"><div class="n" style="color:'+m.c+'">'+best+'</div><div class="k">Best</div></div>'
+            +'<div class="phq-chip"><div class="n">'+avg+'</div><div class="k">Average</div></div>'
+            +'<div class="phq-chip"><div class="n">'+arr.length+'</div><div class="k">Scans</div></div>'
+          +'</div></div>';
+      }).join('');
+      Array.prototype.forEach.call(host.querySelectorAll('.phq'), function(c){ c.addEventListener('click', function(){ location.href='scan.html?type='+c.getAttribute('data-t')+'#history'; }); });
     }
     function render(){
       var s=S.read(), xp=s.xp||0, level=S.levelFor(xp), into=xp%XP_PER_LEVEL;
@@ -812,7 +818,7 @@
       });
       document.querySelectorAll('#corestats .cval').forEach(function(el){ var to=+el.textContent||0; el.textContent='0'; countUp(el,to); });
 
-      renderPhysique();
+      renderScans();
 
       // stats
       var stats=[{k:'Total XP',v:xp.toLocaleString(),ic:'xp'},{k:'Level',v:level,ic:'level'},{k:'Rank',v:ri.r.label,ic:'rank'},{k:'Power',v:power.toLocaleString(),ic:'power'},{k:'Quests',v:questsDone,ic:'quests'},{k:'Chests',v:chestsOpened,ic:'chest'},{k:'Streak',v:streak,ic:'streak'},{k:'Items',v:inv.length,ic:'items'}];
