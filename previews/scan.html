@@ -317,6 +317,76 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
 .bd-v{width:26px;flex:none;text-align:right;font-size:13px;font-weight:800;color:#fff;}
 .snap-cell img,.snap-cell .snap-ph{aspect-ratio:.62;border-radius:12px;}
 .snap-cell img{box-shadow:0 6px 18px rgba(0,0,0,0.35);}
+
+/* ── colour-coded result + percentile ── */
+.res-pct{display:inline-flex;align-items:center;gap:6px;margin-top:9px;font-size:12px;font-weight:700;color:#aab2c5;}
+.res-pct svg{width:14px;height:14px;color:var(--sc);}.res-pct b{color:#fff;font-weight:900;}
+.res-lead{margin:12px 2px 2px;font-size:14.5px;line-height:1.5;color:#e7ecf6;font-weight:600;text-align:center;}
+.bd-dot{width:9px;height:9px;border-radius:50%;flex:none;box-shadow:0 0 8px currentColor;}
+.res-sec .sec-hint{font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:.02em;text-transform:none;margin-left:6px;}
+/* focus chips (tap → train it) */
+.res-foc{display:flex;flex-direction:column;gap:9px;}
+.foc{display:flex;align-items:center;gap:12px;width:100%;text-align:left;cursor:pointer;-webkit-appearance:none;appearance:none;
+  border:1px solid var(--border);background:rgba(255,255,255,0.045);border-radius:15px;padding:11px 12px;color:#fff;font:inherit;
+  transition:transform .12s,background .15s;}
+.foc:active{transform:scale(.98);background:rgba(255,255,255,0.075);}
+.foc .fi{width:36px;height:36px;flex:none;border-radius:11px;display:flex;align-items:center;justify-content:center;}
+.foc .fi svg{width:18px;height:18px;}
+.foc .ft{flex:1;min-width:0;}
+.foc .ft b{display:block;font-size:14px;font-weight:800;}
+.foc .ft span{display:block;font-size:11.5px;color:var(--muted);margin-top:1px;}
+.foc .fa{color:var(--muted);flex:none;}.foc .fa svg{width:16px;height:16px;}
+.btn.lock{background:linear-gradient(135deg,#7c5cff,#4d2fd6);box-shadow:0 10px 26px rgba(124,92,255,.32);}
+.btn.lock.done{background:rgba(124,92,255,.16);border:1px solid rgba(124,92,255,.5);color:#c9bcff;box-shadow:none;}
+/* history lock chips */
+.ph-lock{flex:none;width:44px;height:44px;min-height:0;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,0.05);
+  color:#9aa1b7;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-appearance:none;appearance:none;padding:0;}
+.ph-lock svg{width:18px;height:18px;}.ph-lock:active{transform:scale(.94);}
+.ph-lk{flex:none;width:44px;height:44px;border-radius:12px;border:1px solid rgba(124,92,255,.5);background:rgba(124,92,255,.15);
+  color:#c9bcff;display:flex;align-items:center;justify-content:center;}.ph-lk svg{width:18px;height:18px;}
+.ph-item.locked{border-color:rgba(124,92,255,.32);background:rgba(124,92,255,.06);}
+.ph-thumb{position:relative;}
+.ph-thumb-lk{position:absolute;right:3px;bottom:3px;width:18px;height:18px;border-radius:6px;background:rgba(124,92,255,.92);
+  display:flex;align-items:center;justify-content:center;}.ph-thumb-lk svg{width:11px;height:11px;color:#fff;}
+.locked-badge{display:inline-flex;align-items:center;gap:4px;color:#b9a8ff;font-size:10.5px;font-weight:800;vertical-align:middle;}
+.locked-badge svg{width:11px;height:11px;}
+/* ── confirm dialog (double-confirm) ── */
+.cdlg{position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;padding:26px;
+  background:rgba(4,6,14,0.66);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);opacity:0;transition:opacity .22s;}
+.cdlg.on{opacity:1;}
+.cdlg-card{width:100%;max-width:322px;border-radius:22px;border:1px solid var(--border);
+  background:linear-gradient(180deg,#171b27,#0e1119);box-shadow:0 30px 70px rgba(0,0,0,0.6);padding:22px;text-align:center;
+  transform:translateY(14px) scale(.96);transition:transform .26s cubic-bezier(.22,1,.36,1);}
+.cdlg.on .cdlg-card{transform:none;}
+.cdlg-ic{width:60px;height:60px;border-radius:18px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(120% 120% at 30% 20%,rgba(124,92,255,.42),rgba(124,92,255,.12));border:1px solid rgba(124,92,255,.5);}
+.cdlg-ic svg{width:28px;height:28px;color:#c9bcff;}
+.cdlg h3{font-size:19px;font-weight:900;letter-spacing:-.3px;}
+.cdlg p{font-size:13.5px;color:var(--muted);line-height:1.5;margin-top:8px;}
+.cdlg-row{display:flex;gap:10px;margin-top:18px;}.cdlg-row .btn{flex:1;}
+.btn.ghost{background:rgba(255,255,255,0.06);border:1px solid var(--border);color:#cfd6e6;}
+.btn.danger2{background:linear-gradient(135deg,#7c5cff,#4d2fd6);color:#fff;}
+/* ── lock ceremony ── */
+.lockc{position:fixed;inset:0;z-index:320;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;
+  background:rgba(4,6,14,0);backdrop-filter:blur(0);-webkit-backdrop-filter:blur(0);transition:background .5s,backdrop-filter .5s;pointer-events:none;}
+.lockc.blur{background:rgba(4,6,14,0.52);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);pointer-events:auto;}
+.lockc-photo{position:relative;width:208px;aspect-ratio:.62;border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,.14);
+  background:#05050c;box-shadow:0 30px 80px rgba(0,0,0,.6);
+  transform:translateY(60vh) scale(.7);opacity:0;transition:transform .7s cubic-bezier(.18,.9,.25,1.05),opacity .5s;}
+.lockc-photo img{width:100%;height:100%;object-fit:cover;display:block;}
+.lockc.in .lockc-photo{transform:translateY(0) scale(1);opacity:1;}
+.lockc.up .lockc-photo{transform:translateY(-40px) scale(.9);}
+.lockc.shake.in .lockc-photo{animation:lockShake .5s cubic-bezier(.36,.07,.19,.97);}
+@keyframes lockShake{10%,90%{transform:translateX(-3px)}20%,80%{transform:translateX(5px)}30%,50%,70%{transform:translateX(-9px)}40%,60%{transform:translateX(9px)}}
+.lockc-lk{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(0);width:74px;height:74px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;background:rgba(124,92,255,.94);box-shadow:0 0 42px rgba(124,92,255,.85);}
+.lockc-lk svg{width:34px;height:34px;color:#fff;}
+.lockc.shake .lockc-lk{animation:lkPop .55s cubic-bezier(.22,1,.36,1) forwards;}
+@keyframes lkPop{0%{transform:translate(-50%,-50%) scale(0)}60%{transform:translate(-50%,-50%) scale(1.28)}100%{transform:translate(-50%,-50%) scale(1)}}
+.lockc-panel{width:100%;max-width:332px;margin-top:22px;opacity:0;transform:translateY(18px);transition:opacity .42s,transform .42s;}
+.lockc.up .lockc-panel{opacity:1;transform:none;}
+.lockc-panel .lh{display:flex;align-items:center;justify-content:center;gap:6px;text-align:center;font-size:12px;font-weight:900;
+  letter-spacing:.06em;color:#c9bcff;margin-bottom:13px;}.lockc-panel .lh svg{width:14px;height:14px;}
 </style>
   <link rel="stylesheet" href="_lib/core-responsive.css">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
@@ -593,27 +663,28 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
   // ── analyze ──
   var anFg=$('#anFg'), AN_R=58, AN_C=2*Math.PI*AN_R;
   anFg.setAttribute('stroke-dasharray', AN_C);
+  // The progress ring tracks the REAL AI call: it eases toward ~92% over the
+  // first ~8.5s, holds there if the model is still thinking, and only fills to
+  // 100% once a genuine score is back. Fast read → ~8.5s; slow read → up to 16s.
   function doAnalyze(){
     var an=$('#analyze'); an.classList.add('on');
-    var p=0, anPct=$('#anPct'), anLbl=$('#anLbl');
-    var labels=isPhysique?['Reading proportions…','Checking symmetry…','Scoring physique…','Finishing up…']
-                         :['Analyzing…','Reading details…','Scoring…','Finishing up…'];
+    var anPct=$('#anPct'), anLbl=$('#anLbl');
+    var labels=isPhysique?['Reading proportions…','Mapping shoulder-to-waist…','Checking left/right symmetry…','Measuring muscularity…','Scoring definition & leanness…','Writing your breakdown…']
+                         :['Analyzing…','Reading details…','Comparing references…','Scoring…','Writing your notes…'];
+    var MIN=8500, MAX=16000, start=performance.now(), p=0;
     anFg.setAttribute('stroke-dashoffset', AN_C);
-    var iv=setInterval(function(){
-      p=Math.min(100, p + (4+Math.random()*9));
-      anPct.textContent=Math.round(p)+'%';
-      anFg.setAttribute('stroke-dashoffset', AN_C*(1-p/100));
-      anLbl.textContent=labels[Math.min(labels.length-1, Math.floor(p/26))];
-      if(p>=100){ clearInterval(iv); finishAnalyze(an); }
-    }, 180);
-  }
-  function finishAnalyze(an){
-    var t0=Date.now();
-    (function chk(){
-      if(!aiPending || Date.now()-t0>15000){ an.classList.remove('on'); showResult(); return; }
-      $('#anLbl').textContent='Scoring with AI…';
-      setTimeout(chk, 200);
-    })();
+    (function frame(now){
+      var el=now-start, aiDone=!aiPending;
+      var ceil=(aiDone && el>=MIN) ? 1 : Math.min(0.92, el/MIN*0.92);   // reserve last 8% for a real score
+      p += (ceil-p)*0.08;
+      if(ceil===1 && p>0.992) p=1;
+      var pct=Math.round(p*100);
+      anPct.textContent=pct+'%';
+      anFg.setAttribute('stroke-dashoffset', AN_C*(1-p));
+      anLbl.textContent=(!aiDone && el>MIN) ? 'Scoring with AI…' : labels[Math.min(labels.length-1, Math.floor(p*labels.length))];
+      if(p>=1 || el>MAX){ an.classList.remove('on'); showResult(); return; }
+      requestAnimationFrame(frame);
+    })(start);
   }
   function runAnalyze(){   // single-capture types (food, outfit, looks, posture)
     cam.classList.add('scanning');
@@ -632,12 +703,23 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
     try{
       var W=video.videoWidth,H=video.videoHeight, cw2=Math.min(W,H*0.62), ch2=Math.min(H,W/0.62);
       var cx=(W-cw2)/2, cy=(H-ch2)/2, ctx=canvas.getContext('2d');
-      canvas.width=150; canvas.height=242;
-      if(facing==='user'){ ctx.setTransform(1,0,0,1,0,0); ctx.translate(150,0); ctx.scale(-1,1); } else { ctx.setTransform(1,0,0,1,0,0); }
-      ctx.drawImage(video, cx, cy, cw2, ch2, 0,0,150,242);
-      return canvas.toDataURL('image/jpeg',0.6);
+      // Capture at real resolution so the vision model can actually read muscle
+      // definition — a 150px thumbnail reads as "no muscle" and scores everyone low.
+      var OW=760, OH=1226;
+      canvas.width=OW; canvas.height=OH;
+      if(facing==='user'){ ctx.setTransform(1,0,0,1,0,0); ctx.translate(OW,0); ctx.scale(-1,1); } else { ctx.setTransform(1,0,0,1,0,0); }
+      ctx.drawImage(video, cx, cy, cw2, ch2, 0,0,OW,OH);
+      return canvas.toDataURL('image/jpeg',0.88);
     }catch(e){ return null; }
   }
+  // Small thumbnails for storage/display — full-res photos are kept in memory only
+  // for the AI call, never written to localStorage (would blow the ~5MB quota).
+  function shrinkCanvas(src,maxW){ try{ var w=Math.min(maxW,src.width||maxW), h=Math.round(w*((src.height||1)/(src.width||1))); var c=document.createElement('canvas'); c.width=w; c.height=h; c.getContext('2d').drawImage(src,0,0,w,h); return c.toDataURL('image/jpeg',0.78); }catch(e){ return null; } }
+  function shrinkUrl(url,maxW,cb){ var im=new Image(); im.onload=function(){ try{ var w=Math.min(maxW,im.naturalWidth||maxW), h=Math.round(w*((im.naturalHeight||1)/(im.naturalWidth||1))); var c=document.createElement('canvas'); c.width=w; c.height=h; c.getContext('2d').drawImage(im,0,0,w,h); cb(c.toDataURL('image/jpeg',0.85)); }catch(e){ cb(url); } }; im.onerror=function(){ cb(url); }; im.src=url; }
+  function frontThumb(){ for(var i=0;i<shots.length;i++){ if(shots[i].k==='front') return shots[i].thumb||shots[i].url; } return (shots[0]&&(shots[0].thumb||shots[0].url))||null; }
+  // colour-code by score: green / amber / red
+  function scoreColor(n){ n=+n||0; return n>=75?'#34d399':n>=55?'#fbbf24':n>=40?'#fb923c':'#fb7185'; }
+  function topPctile(n){ return Math.max(1, Math.min(99, Math.round(100 - (+n||0)*0.95))); }
   function setProg(n){ var el=$('#phyzProg'); if(el) el.style.strokeDashoffset=(590.6*(1-n/4)).toFixed(1); }
   function renderDots(done){ var d=$('#phyzDots'); if(!d) return; var h=''; for(var i=0;i<4;i++) h+='<span class="pd'+(i<done?' on':'')+'"></span>'; d.innerHTML=h; }
   function phyzFlash(){ var f=document.createElement('div'); f.className='phyz-flash'; cam.appendChild(f); setTimeout(function(){ f.remove(); },260); }
@@ -713,7 +795,8 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
       if(n>0){ $('#phyzCount').textContent=n; try{window.coreSfx&&window.coreSfx('tick');}catch(_){} return; }
       clearInterval(iv); $('#phyzCount').textContent='';
       var url=snapPortrait();
-      shots.push({k:a.k,label:a.k.charAt(0).toUpperCase()+a.k.slice(1),url:url});
+      var thumb=(url&&!cam._demo)?shrinkCanvas(canvas,360):url;
+      shots.push({k:a.k,label:a.k.charAt(0).toUpperCase()+a.k.slice(1),url:url,thumb:thumb});
       phyzFlash(); renderDots(shots.length); setProg(shots.length);
       try{window.coreSfx&&window.coreSfx('confirm');}catch(_){}
       try{ if(navigator.vibrate) navigator.vibrate(30); }catch(_){}
@@ -723,8 +806,8 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
   function finishPhysique(){
     cam.classList.remove('phyz-scanning','physique');
     stopCam();
-    // keep the captured angles in the "backfiles" (latest physique scan)
-    try{ lsSet('corePhysiqueShots.v1', JSON.stringify({ ts:Date.now(), shots:shots })); }catch(e){}
+    // keep the captured angles in the "backfiles" (latest physique scan) — thumbs only
+    try{ lsSet('corePhysiqueShots.v1', JSON.stringify({ ts:Date.now(), shots:shots.map(function(x){ return { k:x.k, label:x.label, url:x.thumb||x.url }; }) })); }catch(e){}
     // kick off the real vision-AI scoring (all 4 angles) in parallel with the analyze animation
     aiResult=null; aiPending=true;
     requestScanAI(shots.map(function(x){ return x.url; })).then(function(r){ aiResult=r; aiPending=false; }).catch(function(){ aiResult=null; aiPending=false; });
@@ -796,7 +879,7 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
       var prompt=AI_PROMPT[type]; if(!prompt){ reject(); return; }
       var arr=(Array.isArray(imgs)?imgs:[imgs]).filter(Boolean).slice(0,4);
       if(!arr.length){ reject(); return; }
-      var content=[{ type:'text', text:prompt }].concat(arr.map(function(u){ return { type:'image_url', image_url:{ url:u, detail:'low' } }; }));
+      var content=[{ type:'text', text:prompt }].concat(arr.map(function(u){ return { type:'image_url', image_url:{ url:u, detail:'high' } }; }));
       coreAI.chat([{ role:'user', content:content }], { role:'vision', temperature:0.3, maxTokens:500, json:true })
         .then(function(r){
           if(!r || !r.ok || !r.text || r.fallback){ if(r && r.reason) lastAIError=r.reason; reject(); return; }
@@ -844,13 +927,22 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
     urls=(urls||[]).filter(Boolean);
     if(!urls.length) return;
     cam._demo=false;
-    snapDataUrl=urls[0];                              // so non-physique results show the uploaded image
     var labels=['front','right','back','left'];
-    shots=urls.slice(0,4).map(function(u,i){ var k=isPhysique?(labels[i]||('a'+i)):'front'; return { k:k, label:k.charAt(0).toUpperCase()+k.slice(1), url:u }; });
-    try{ lsSet('corePhysiqueShots.v1', JSON.stringify({ ts:Date.now(), shots:shots })); }catch(e){}
-    aiResult=null; aiPending=true;
-    requestScanAI(urls.slice(0,4)).then(function(r){ aiResult=r; aiPending=false; }).catch(function(){ aiResult=null; aiPending=false; });
-    doAnalyze();
+    var n=Math.min(4,urls.length), tmp=new Array(n), pending=n;
+    for(var i=0;i<n;i++){ (function(i){
+      shrinkUrl(urls[i], 360, function(th){
+        var k=isPhysique?(labels[i]||('a'+i)):'front';
+        tmp[i]={ k:k, label:k.charAt(0).toUpperCase()+k.slice(1), url:urls[i], thumb:th };
+        if(--pending===0) go();
+      });
+    })(i); }
+    function go(){
+      shots=tmp; snapDataUrl=tmp[0].thumb||urls[0];   // non-physique results show the uploaded image
+      try{ lsSet('corePhysiqueShots.v1', JSON.stringify({ ts:Date.now(), shots:shots.map(function(x){ return { k:x.k, label:x.label, url:x.thumb||x.url }; }) })); }catch(e){}
+      aiResult=null; aiPending=true;
+      requestScanAI(urls.slice(0,4)).then(function(r){ aiResult=r; aiPending=false; }).catch(function(){ aiResult=null; aiPending=false; });
+      doAnalyze();
+    }
   }
   function analyzeFromImage(url){ analyzeFromImages([url]); }
 
@@ -865,6 +957,68 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
       Muscularity: clampb(score - (has('arms')||has('legs')||has('back')?6:1)),
       Definition:  clampb(score - (has('core')?8:4))
     };
+  }
+  // ── Focus areas: each weak point deep-links to where you train it ──
+  var LK_ICON='<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>';
+  var IMPROVE={
+    chest:{t:'Build your chest',s:'Incline & flat pressing',c:'#fb7185',href:'gym.html#chest',ic:'<path d="M3 9h18v7a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z"/><path d="M3 9l3-4h12l3 4"/>'},
+    back:{t:'Widen your back',s:'Rows & pull-ups',c:'#fbbf24',href:'gym.html#back',ic:'<path d="M12 3v18M5 8l7-5 7 5M5 16l7 5 7-5"/>'},
+    shoulders:{t:'Round your shoulders',s:'Presses & lateral raises',c:'#34d399',href:'gym.html#shoulders',ic:'<path d="M4 18a8 8 0 0 1 16 0M12 6a3 3 0 1 0 0-0.01"/>'},
+    arms:{t:'Grow your arms',s:'Curls & extensions',c:'#60a5fa',href:'gym.html#arms',ic:'<path d="M6 10v6a2 2 0 0 0 2 2h2M6 10a3 3 0 0 1 6 0v4M14 8h2a2 2 0 0 1 2 2v2"/>'},
+    legs:{t:'Grow your legs',s:'Squats & lunges',c:'#a78bfa',href:'gym.html#legs',ic:'<path d="M8 3v8l-2 10M16 3v8l2 10M8 11h8"/>'},
+    core:{t:'Sharpen your core',s:'Abs & conditioning',c:'#22d3ee',href:'gym.html#core',ic:'<rect x="6" y="3" width="12" height="18" rx="3"/><path d="M9 8h6M9 12h6M9 16h6"/>'}
+  };
+  function focHtml(weak){
+    weak=(weak||[]).filter(function(k){ return IMPROVE[k]; });
+    if(!weak.length) weak=['chest','legs','back'];
+    return weak.slice(0,4).map(function(k){ var m=IMPROVE[k];
+      return '<button class="foc" type="button" data-go="'+m.href+'">'
+        +'<div class="fi" style="background:color-mix(in srgb,'+m.c+' 16%,transparent);color:'+m.c+'">'+svg(m.ic)+'</div>'
+        +'<div class="ft"><b>'+m.t+'</b><span>'+m.s+'</span></div>'
+        +'<div class="fa">'+svg('<path d="M9 6l6 6-6 6"/>')+'</div></button>';
+    }).join('');
+  }
+  function wireFoc(el){ if(!el) return; Array.prototype.forEach.call(el.querySelectorAll('.foc'), function(b){ b.addEventListener('click', function(){ var go=b.getAttribute('data-go'); if(go){ try{window.coreSfx&&window.coreSfx('click');}catch(e){} location.href=go; } }); }); }
+  // ── Confirm dialog (used twice for the lock double-confirm) ──
+  function confirmDialog(o){
+    var d=document.createElement('div'); d.className='cdlg';
+    d.innerHTML='<div class="cdlg-card">'
+      +'<div class="cdlg-ic">'+svg(o.icon||LK_ICON)+'</div>'
+      +'<h3>'+o.title+'</h3><p>'+o.body+'</p>'
+      +'<div class="cdlg-row"><button class="btn ghost" type="button" data-no>'+(o.no||'Cancel')+'</button>'
+      +'<button class="btn danger2" type="button" data-yes>'+(o.yes||'Yes')+'</button></div></div>';
+    document.body.appendChild(d);
+    requestAnimationFrame(function(){ d.classList.add('on'); });
+    function close(cb){ d.classList.remove('on'); setTimeout(function(){ d.remove(); if(cb)cb(); }, 240); }
+    d.querySelector('[data-no]').addEventListener('click', function(){ close(o.onNo); });
+    d.querySelector('[data-yes]').addEventListener('click', function(){ close(o.onYes); });
+  }
+  function lockRecord(ts){ var all=readScans(), ch=false; all.forEach(function(x){ if(x.ts===ts){ x.locked=true; ch=true; } }); if(ch) lsSet('coreScans.v1', JSON.stringify(all)); }
+  // Two yes-popups, then the lock ceremony.
+  function lockFlow(rec, after){
+    confirmDialog({ title:'Lock this photo in?', body:'Locked photos become a permanent benchmark — they can’t be deleted or removed later.', yes:'Lock it in', no:'Not yet',
+      onYes:function(){
+        confirmDialog({ title:'You’re sure? This is final.', body:'Once locked, this photo stays in your profile for good. No take-backs.', yes:'Yes — lock it', no:'Cancel',
+          onYes:function(){ lockRecord(rec.ts); runLockCeremony(rec, after); } });
+      }});
+  }
+  // The ceremony: blur the page, the photo flies up, the lock snaps on with a
+  // shake, then the panel slides up revealing what to build next (tappable).
+  function runLockCeremony(rec, after){
+    var img=rec.thumb || (rec.shots&&rec.shots[0]&&rec.shots[0].url) || frontThumb() || '';
+    var weak=(rec.weak&&rec.weak.length)?rec.weak:((aiResult&&aiResult.weakPoints)||[]);
+    var c=document.createElement('div'); c.className='lockc';
+    c.innerHTML='<div class="lockc-photo"><img src="'+img+'" alt=""/><div class="lockc-lk">'+svg(LK_ICON)+'</div></div>'
+      +'<div class="lockc-panel"><div class="lh">'+svg(LK_ICON)+' LOCKED IN · NOW BUILD THIS</div>'
+      +'<div class="res-foc" id="lockFoc">'+focHtml(weak)+'</div>'
+      +'<button class="btn ghost" id="lockDone" type="button" style="margin-top:14px;width:100%">Done</button></div>';
+    document.body.appendChild(c);
+    wireFoc(c.querySelector('#lockFoc'));
+    c.querySelector('#lockDone').addEventListener('click', function(){ c.classList.remove('blur','up','in'); setTimeout(function(){ c.remove(); if(after)after(); }, 420); });
+    requestAnimationFrame(function(){ c.classList.add('blur'); });
+    setTimeout(function(){ c.classList.add('in'); try{window.coreSfx&&window.coreSfx('whoosh');}catch(e){} }, 70);
+    setTimeout(function(){ c.classList.add('shake'); try{ if(navigator.vibrate) navigator.vibrate([0,45,55,40,90]); }catch(e){} try{window.coreSfx&&window.coreSfx('confirm');}catch(e){} }, 840);
+    setTimeout(function(){ c.classList.add('up'); }, 1520);
   }
   function showMessage(title, sub){
     var res=$('#result');
@@ -947,9 +1101,15 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
         Definition:  clampb(ai.breakdown.definition)
       } : deriveBreakdown(score, ai && ai.weakPoints);
       bdHtml='<div class="res-sec">Breakdown</div><div class="bd">'
-        + Object.keys(BD).map(function(k){ return '<div class="bd-row"><span class="bd-k">'+k+'</span><div class="bd-track"><i data-w="'+BD[k]+'"></i></div><span class="bd-v">'+BD[k]+'</span></div>'; }).join('')
+        + Object.keys(BD).map(function(k){ var v=BD[k], col=scoreColor(v);
+            return '<div class="bd-row"><span class="bd-dot" style="background:'+col+'"></span><span class="bd-k">'+k+'</span>'
+              +'<div class="bd-track"><i data-w="'+v+'" style="background:linear-gradient(90deg,color-mix(in srgb,'+col+' 55%,#0a2f63),'+col+');box-shadow:0 0 10px color-mix(in srgb,'+col+' 50%,transparent)"></i></div>'
+              +'<span class="bd-v" style="color:'+col+'">'+v+'</span></div>'; }).join('')
         + '</div>';
     }
+    // colour-code the whole result card by the overall score (scoped to #result)
+    var SC=scoreColor(score), topP=topPctile(score);
+    var focSec = isPhysique ? ('<div class="res-sec">Focus areas <span class="sec-hint">tap to train</span></div><div class="res-foc" id="resFoc">'+focHtml(ai&&ai.weakPoints)+'</div>') : '';
     res.innerHTML=
       '<button class="res-close" id="resClose" type="button" aria-label="Done">'+svg('<path d="M6 6l12 12M18 6L6 18"/>')+'</button>'
       +gallery
@@ -961,18 +1121,24 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
         +'<text x="86" y="80" text-anchor="middle" class="res-num" id="resNum" fill="#fff" style="font:900 46px -apple-system,sans-serif;letter-spacing:-2px">0</text>'
         +'<text x="86" y="104" text-anchor="middle" fill="#9AA1B7" style="font:700 13px -apple-system,sans-serif" id="resOf">/ 100</text>'
       +'</svg>'
-      +'<div class="res-grade">'+gradeTxt+'</div></div>'
+      +'<div class="res-grade">'+gradeTxt+'</div>'
+      +'<div class="res-pct">'+svg('<path d="M3 17l6-6 4 4 7-8"/>')+'Top <b>'+topP+'%</b> · better than <b>'+(100-topP)+'%</b></div></div>'
       +'<div class="res-title">'+s.label+'</div>'
       +'<div class="res-sub">'+subTxt+'</div>'
+      +(ai&&ai.summary?'<div class="res-lead">'+ai.summary+'</div>':'')
       +bdHtml
+      +focSec
       +'<div class="res-sec">Coach notes</div>'
-      +tips.map(function(t){return '<div class="tip"><div class="ti">'+svg('<path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="3.2"/>')+'</div><span>'+t+'</span></div>';}).join('')
+      +tips.map(function(t){return '<div class="tip"><div class="ti">'+svg('<path d="M20 6L9 17l-5-5"/>')+'</div><span>'+t+'</span></div>';}).join('')
       +'<div class="res-actions">'
         +'<button class="btn again" id="btnAgain" type="button">'+svg('<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>')+'Scan again</button>'
         +'<button class="btn save" id="btnSave" type="button">'+svg('<path d="M5 12l4 4 10-11"/>')+'Save to profile</button>'
       +'</div>'
+      +(isPhysique?'<button class="btn lock" id="btnLock" type="button">'+svg(LK_ICON)+'Lock this in</button>':'')
       +'<button class="btn coach" id="btnCoach" type="button">'+svg('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>')+'Discuss with Coach</button>';
+    res.style.setProperty('--sc', SC);
     res.classList.add('on');
+    wireFoc($('#resFoc'));
     // animate the ring + number
     var fg=$('#resFg'); requestAnimationFrame(function(){ fg.setAttribute('stroke-dashoffset', C*(1-score/100)); });
     var numEl=$('#resNum'), n0=0, t0=performance.now();
@@ -982,10 +1148,29 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
 
     $('#resClose').addEventListener('click', function(){ res.classList.remove('on'); updateLast(); });
     $('#btnAgain').addEventListener('click', function(){ res.classList.remove('on'); openCam(); });
-    var saved=false;
+    var saved=false, savedTs=null;
     function persist(){
       if(saved) return; saved=true;
-      var all=readScans(); all.push({ type:type, name:s.name, score:score, label:s.label, tips:tips, ts:Date.now(), thumb:(isPhysique?frontImage():snapDataUrl)||null, breakdown:(isPhysique?BD:null), grade:gradeTxt });
+      var all=readScans();
+      var rec={ type:type, name:s.name, score:score, label:s.label, tips:tips, ts:Date.now(),
+                thumb:(isPhysique?frontThumb():snapDataUrl)||null, breakdown:(isPhysique?BD:null), grade:gradeTxt,
+                weak:(isPhysique&&ai&&ai.weakPoints)?ai.weakPoints.slice(0,6):[],
+                shots:(isPhysique?shots.map(function(x){ return { k:x.k, url:x.thumb||x.url }; }):null),
+                locked:false };
+      all.push(rec); savedTs=rec.ts;
+      if(isPhysique){
+        // Keep at most 3 physique photos. Locked ones are never dropped; trim the
+        // oldest UNLOCKED first. If 3 are already locked, the new one isn't kept.
+        var phys=all.filter(function(x){ return x.type==='physique'; }).sort(function(a,b){ return a.ts-b.ts; });
+        var others=all.filter(function(x){ return x.type!=='physique'; });
+        while(phys.length>3){
+          var idx=-1; for(var i=0;i<phys.length;i++){ if(!phys[i].locked){ idx=i; break; } }
+          if(idx<0){ break; }
+          if(phys[idx].ts===rec.ts) savedTs=null;   // the new one got bumped (all others locked)
+          phys.splice(idx,1);
+        }
+        all=others.concat(phys);
+      }
       lsSet('coreScans.v1', JSON.stringify(all.slice(-60)));
       if(typeof refreshPqProgress==='function') refreshPqProgress();
       lsSet('coreLastScan', JSON.stringify({ type:type, score:score, ts:Date.now() }));
@@ -1001,6 +1186,13 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
       persist();
       var sb=$('#btnSave'); if(sb){ sb.classList.add('done'); sb.innerHTML=svg('<path d="M5 12l4 4 10-11"/>')+'Saved to profile'; }
     }
+    var lb=$('#btnLock');
+    if(lb) lb.addEventListener('click', function(){
+      persist();
+      if(savedTs==null){ toast('You already have 3 locked photos — unlock one first.'); return; }
+      var rec={ ts:savedTs, thumb:frontThumb(), weak:(ai&&ai.weakPoints)||[], shots:shots.map(function(x){ return { k:x.k, url:x.thumb||x.url }; }) };
+      lockFlow(rec, function(){ lb.classList.add('done'); lb.innerHTML=svg(LK_ICON)+'Locked in'; lb.disabled=true; });
+    });
     // hand the result to the AI coach to talk through
     $('#btnCoach').addEventListener('click', function(){
       persist();
@@ -1134,19 +1326,30 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
     else {
       h+=all.slice().reverse().map(function(x){
         var thumb=x.thumb?('<img src="'+x.thumb+'" alt=""/>'):('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+s.icon+'</svg>');
-        return '<div class="ph-item"><div class="ph-thumb">'+thumb+'</div>'
-          +'<div class="ph-meta"><div class="ph-name">'+s.name+' Scan</div><div class="ph-time">'+timeAgo(x.ts)+'</div></div>'
-          +'<div class="ph-score">'+x.score+'</div>'
-          +'<button class="ph-del" data-ts="'+x.ts+'" type="button" aria-label="Delete">'+svg('<path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/>')+'</button></div>';
+        var locked=!!x.locked, col=scoreColor(x.score);
+        var right = locked
+          ? '<span class="ph-lk" title="Locked in">'+svg(LK_ICON)+'</span>'
+          : (isPhysique?'<button class="ph-lock" data-ts="'+x.ts+'" type="button" aria-label="Lock in">'+svg('<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/>')+'</button>':'')
+            +'<button class="ph-del" data-ts="'+x.ts+'" type="button" aria-label="Delete">'+svg('<path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/>')+'</button>';
+        return '<div class="ph-item'+(locked?' locked':'')+'"><div class="ph-thumb">'+thumb+(locked?'<span class="ph-thumb-lk">'+svg(LK_ICON)+'</span>':'')+'</div>'
+          +'<div class="ph-meta"><div class="ph-name">'+s.name+' Scan'+(locked?' <span class="locked-badge">'+svg(LK_ICON)+'Locked</span>':'')+'</div><div class="ph-time">'+timeAgo(x.ts)+'</div></div>'
+          +'<div class="ph-score" style="color:'+col+';background:color-mix(in srgb,'+col+' 14%,transparent);border-color:color-mix(in srgb,'+col+' 28%,transparent)">'+x.score+'</div>'
+          +right+'</div>';
       }).join('');
     }
     $('#phBody').innerHTML=h;
     Array.prototype.forEach.call($('#phBody').querySelectorAll('.ph-tab'), function(b){ b.addEventListener('click', function(){ phRange=b.getAttribute('data-r'); renderHistory(); }); });
     Array.prototype.forEach.call($('#phBody').querySelectorAll('.ph-del'), function(b){ b.addEventListener('click', function(){
       var ts=+b.getAttribute('data-ts');
-      var keep=readScans().filter(function(x){ return !(x.type===type && x.ts===ts); });
+      var keep=readScans().filter(function(x){ return !(x.type===type && x.ts===ts && !x.locked); });
       lsSet('coreScans.v1', JSON.stringify(keep));
       renderHistory(); refreshPqProgress();
+    }); });
+    Array.prototype.forEach.call($('#phBody').querySelectorAll('.ph-lock'), function(b){ b.addEventListener('click', function(){
+      var ts=+b.getAttribute('data-ts');
+      var rec=readScans().filter(function(x){ return x.type===type && x.ts===ts; })[0];
+      if(!rec) return;
+      lockFlow(rec, function(){ renderHistory(); refreshPqProgress(); });
     }); });
   }
   function openHistory(){ phRange='month'; renderHistory(); $('#phist').classList.add('on'); }
