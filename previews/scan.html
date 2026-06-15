@@ -522,7 +522,7 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
   var snapDataUrl=null, audioCtx=null, analyser=null, waveRAF=null;
   var isPhysique=(type==='physique'), shots=[];
   var detector=null, poseRAF=null, gateStable=0;
-  var aiResult=null, aiPending=false;
+  var aiResult=null, aiPending=false, lastAIError='';
   var ANG=[{k:'front',label:'Face the camera'},{k:'right',label:'Turn to your right side'},
            {k:'back',label:'Turn around — back to camera'},{k:'left',label:'Turn to your left side'}];
 
@@ -799,9 +799,9 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
       var content=[{ type:'text', text:prompt }].concat(arr.map(function(u){ return { type:'image_url', image_url:{ url:u, detail:'low' } }; }));
       coreAI.chat([{ role:'user', content:content }], { role:'vision', temperature:0.3, maxTokens:400 })
         .then(function(r){
-          if(!r || !r.ok || !r.text || r.fallback){ reject(); return; }
-          try{ resolve(parseScanJson(r.text)); }catch(err){ reject(); }
-        }, reject);
+          if(!r || !r.ok || !r.text || r.fallback){ if(r && r.reason) lastAIError=r.reason; reject(); return; }
+          try{ resolve(parseScanJson(r.text)); }catch(err){ lastAIError='bad AI response'; reject(); }
+        }, function(e){ lastAIError=(e&&e.message)||'request failed'; reject(); });
     });
   }
   // The hosted proxy's dedicated vision endpoint (image-capable — the plain chat
@@ -834,6 +834,7 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
   function requestScanAI(imgs){
     var arr=(Array.isArray(imgs)?imgs:[imgs]).filter(Boolean);
     if(!arr.length) return Promise.reject();
+    lastAIError='';
     var tries=[ coreAIScan(arr), proxyVision(arr[0]) ];
     if(isPhysique) tries.unshift(supabasePhysique(arr[0]));
     return firstValid(tries);
@@ -895,7 +896,7 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
     if(!(ai && ai.rank && typeof ai.rank.score==='number')){
       var hasKey=!!(window.coreAI && coreAI.hasKey && coreAI.hasKey());
       if(cam._demo) showMessage('Camera needed for a real score','Allow camera access and scan again for an accurate AI read.');
-      else if(hasKey) showMessage('Couldn’t score that one','The AI didn’t return a read — check your connection and try again.');
+      else if(hasKey) showMessage('Couldn’t score that one', (lastAIError?('Error: '+lastAIError+'. '):'')+'The AI didn’t return a read — try again.');
       else showMessage('AI scoring isn’t set up','This needs an AI vision model. Add your own AI key in Settings → AI Setup for instant scoring, then scan again.');
       return;
     }

@@ -30,8 +30,9 @@
   // (sk-…) OR a free Groq key (gsk_…) — both speak the same chat-completions API.
   function providerFor(key) {
     if (/^gsk_/.test(key || '')) return {
+      // NOTE: llama-3.3-70b is text-only — vision MUST use a multimodal model.
       name: 'Groq', base: 'https://api.groq.com/openai/v1',
-      text: 'llama-3.3-70b-versatile', vision: 'llama-3.3-70b-versatile', plan: 'llama-3.3-70b-versatile'
+      text: 'llama-3.3-70b-versatile', vision: 'meta-llama/llama-4-scout-17b-16e-instruct', plan: 'llama-3.3-70b-versatile'
     };
     return { name: 'OpenAI', base: API_BASE, text: MODEL_TEXT, vision: MODEL_VISION, plan: MODEL_PLAN };
   }
