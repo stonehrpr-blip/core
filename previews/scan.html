@@ -610,7 +610,7 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
   function finishAnalyze(an){
     var t0=Date.now();
     (function chk(){
-      if(!aiPending || Date.now()-t0>6000){ an.classList.remove('on'); showResult(); return; }
+      if(!aiPending || Date.now()-t0>15000){ an.classList.remove('on'); showResult(); return; }
       $('#anLbl').textContent='Scoring with AI…';
       setTimeout(chk, 200);
     })();
@@ -743,25 +743,29 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
   var AI_PROMPT={
     physique:'You are CORE\'s physique-analysis vision model — an expert, fair fitness coach. Assess ONLY the person\'s PHYSIQUE: muscular development, body-fat level / leanness, proportions, shoulder-to-waist (V-taper), symmetry and posture. When several angles are given, weigh them together. '
       +'Do NOT judge their face, attractiveness, skin, hair, clothing style or general "looks" — those are irrelevant and must not affect the score. '
-      +'Detect whether the person is shirtless or clothed. If they are clothed or the body is loosely covered, score from what IS visible (frame, shoulder/waist ratio, posture, overall build), do NOT assume the worst, and note in the summary that a shirtless or fitted photo gives a more accurate read. '
-      +'Reply with STRICT JSON only, no markdown: {"isBody":true|false,"shirtless":true|false,"score":0-100,"tier":"Elite|Strong|Solid|Developing|Needs work","summary":"one honest, specific, respectful sentence","weakPoints":["chest"|"back"|"shoulders"|"arms"|"legs"|"core"],"breakdown":{"proportions":0-100,"symmetry":0-100,"muscularity":0-100,"definition":0-100}}. '
+      +'Judge from whatever the body actually shows. If clothing covers part of the body, quietly base the read on the visible structure (frame, shoulder/waist ratio, posture, overall build) and do NOT assume the worst — and do NOT mention clothing, what they are wearing, or whether they are covered, in your reply. '
+      +'Reply with STRICT JSON only, no markdown: {"isBody":true|false,"score":0-100,"tier":"Elite|Strong|Solid|Developing|Needs work","summary":"one honest, specific, respectful sentence about the physique only","weakPoints":["chest"|"back"|"shoulders"|"arms"|"legs"|"core"],"breakdown":{"proportions":0-100,"symmetry":0-100,"muscularity":0-100,"definition":0-100}}. '
       +'isBody=false ONLY if no human body is visible. '
       +'Scoring rubric — be accurate, do not inflate: 90-100 = competition-level conditioning, very lean with dense muscle; 80-89 = clearly athletic and muscular, advanced; 70-79 = fit, in good shape, some definition; 60-69 = average build, beginner muscularity or moderate body fat; below 60 = little visible muscle or high body fat. '
       +'Be honest and accurate — give a genuinely low score when it is deserved — but keep every word respectful and constructive. Never be insulting, mocking or demeaning; frame weak areas as things to build, not flaws to ridicule.',
     food:'You are CORE\'s nutrition vision model. Look at this meal photo. Reply with STRICT JSON only, no markdown: '
-      +'{"score":0-100,"tier":"Excellent|Good|Balanced|Heavy|Poor","summary":"one sentence with an estimated calorie + protein read","tips":["3 short specific tips to make the meal healthier"]}. score = how healthy the meal is.',
+      +'{"isMeal":true|false,"score":0-100,"tier":"Excellent|Good|Balanced|Heavy|Poor","summary":"one sentence with an estimated calorie + protein read","tips":["3 short specific tips to make the meal healthier"]}. '
+      +'isMeal=false if there is no food or meal clearly visible. score = how healthy the meal is.',
     posture:'You are CORE\'s posture vision model. Look at this full-body photo and assess head, shoulder and hip alignment. Reply with STRICT JSON only, no markdown: '
-      +'{"score":0-100,"tier":"Excellent|Good|Fair|Needs work","summary":"one sentence on the main alignment issue","tips":["3 short corrective tips"]}.',
+      +'{"isPerson":true|false,"score":0-100,"tier":"Excellent|Good|Fair|Needs work","summary":"one sentence on the main alignment issue","tips":["3 short corrective tips"]}. '
+      +'isPerson=false if no standing person is clearly visible.',
     outfit:'You are CORE\'s style vision model. Look at this outfit photo and assess fit, colour and occasion. Reply with STRICT JSON only, no markdown: '
-      +'{"score":0-100,"tier":"Sharp|Good|Decent|Off","summary":"one honest sentence","tips":["3 short style tips"]}.',
+      +'{"isPerson":true|false,"score":0-100,"tier":"Sharp|Good|Decent|Off","summary":"one honest sentence","tips":["3 short style tips"]}. '
+      +'isPerson=false if no person wearing an outfit is clearly visible.',
     looks:'You are CORE\'s grooming vision model. Look at this face selfie and assess skin, facial symmetry and grooming. Be kind and constructive. Reply with STRICT JSON only, no markdown: '
-      +'{"score":0-100,"tier":"Excellent|Good|Fair|Developing","summary":"one constructive sentence","tips":["3 short grooming/skin tips"]}.'
+      +'{"isPerson":true|false,"score":0-100,"tier":"Excellent|Good|Fair|Developing","summary":"one constructive sentence","tips":["3 short grooming/skin tips"]}. '
+      +'isPerson=false if no face is clearly visible.'
   };
   function normalizeAI(d){
     if(!d) return null;
     if(d.rank && typeof d.rank.score==='number'){ d.breakdown=d.breakdown||null; d.tips=d.tips||null; return d; }   // already in result shape
     var score=(typeof d.score==='number') ? d.score : null;
-    return { isBody:d.isBody, summary:d.summary||'', weakPoints:d.weakPoints||[], breakdown:d.breakdown||null, tips:(d.tips&&d.tips.length?d.tips:null),
+    return { isBody:d.isBody, isMeal:d.isMeal, isPerson:d.isPerson, summary:d.summary||'', weakPoints:d.weakPoints||[], breakdown:d.breakdown||null, tips:(d.tips&&d.tips.length?d.tips:null),
              rank: score==null ? null : { score:score, tier:d.tier||grade(Math.round(score)) } };
   }
   function supabasePhysique(img){
@@ -792,7 +796,7 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
             var s=txt.indexOf('{'), e=txt.lastIndexOf('}');
             if(s>=0 && e>s) txt=txt.slice(s,e+1);
             var j=JSON.parse(txt);
-            if(typeof j.isBody!=='boolean' && typeof j.score!=='number'){ reject(); return; }
+            if(typeof j.isBody!=='boolean' && typeof j.isMeal!=='boolean' && typeof j.isPerson!=='boolean' && typeof j.score!=='number'){ reject(); return; }
             resolve(normalizeAI(j));
           }catch(err){ reject(); }
         }, reject);
@@ -840,22 +844,43 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
       Definition:  clampb(score - (has('core')?8:4))
     };
   }
-  function showNotBody(){
+  function showMessage(title, sub){
     var res=$('#result');
     res.innerHTML='<button class="res-close" id="resClose" type="button" aria-label="Done">'+svg('<path d="M6 6l12 12M18 6L6 18"/>')+'</button>'
       +'<div class="nb-ic">'+svg('<circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/>')+'</div>'
-      +'<div class="res-title">Couldn’t read a body</div>'
-      +'<div class="res-sub">Stand back so your whole body is in frame, in good light, and scan again.</div>'
+      +'<div class="res-title">'+title+'</div>'
+      +'<div class="res-sub">'+sub+'</div>'
       +'<div class="res-actions"><button class="btn save" id="btnAgain2" type="button">'+svg('<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>')+'Scan again</button></div>';
     res.classList.add('on');
     $('#resClose').addEventListener('click', function(){ res.classList.remove('on'); });
     $('#btnAgain2').addEventListener('click', function(){ res.classList.remove('on'); openCam(); });
   }
+  function showNotBody(){ showMessage('Couldn’t read a body','Stand back so your whole body is in frame, in good light, and scan again.'); }
+  // True when the AI says the photo isn't the right subject for this scan type.
+  function aiInvalidSubject(ai){
+    if(!ai) return false;
+    if(isPhysique) return ai.isBody===false;
+    if(type==='food') return ai.isMeal===false;
+    return ai.isPerson===false;   // posture / outfit / looks
+  }
+  var INVALID_MSG={
+    physique:['Couldn’t read a body','Stand back so your whole body is in frame, in good light, and scan again.'],
+    food:['Couldn’t read a meal','Point the camera at your plate from above and scan again.'],
+    posture:['Couldn’t read a photo of you','Make sure your full body is in frame and scan again.'],
+    outfit:['Couldn’t read your outfit','Stand back for a full head-to-toe shot and scan again.'],
+    looks:['Couldn’t read your photo','Center your face with even lighting and scan again.']
+  };
   function showResult(){
     var ai = aiResult;
-    if(isPhysique && ai && ai.isBody===false){ showNotBody(); return; }
+    if(aiInvalidSubject(ai)){ var m=INVALID_MSG[type]||INVALID_MSG.physique; showMessage(m[0], m[1]); return; }
+    // Never fabricate a number — if the AI didn't return a real score, say so.
+    if(!(ai && ai.rank && typeof ai.rank.score==='number')){
+      if(cam._demo) showMessage('Camera needed for a real score','Allow camera access and scan again for an accurate AI read.');
+      else showMessage('Couldn’t score that one','The AI couldn’t read this clearly — check your connection and try again. We won’t show a guess.');
+      return;
+    }
     var score, tips, gradeTxt, subTxt;
-    if(ai && ai.rank && typeof ai.rank.score==='number'){
+    {
       score=Math.max(0,Math.min(100,Math.round(ai.rank.score)));
       gradeTxt=ai.rank.tier || grade(score);
       if(isPhysique){
@@ -868,11 +893,6 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
       }
       tips=tips.slice(0,4);
       subTxt='Scored by CORE vision AI from your '+(isPhysique?'photo':'scan')+'.';
-    } else {
-      score=62+Math.floor(Math.random()*33);
-      tips=pick(s.tips,3);
-      gradeTxt=grade(score);
-      subTxt=cam._demo?'Demo result — allow camera for a real scan.':'Based on your '+s.name.toLowerCase()+' scan just now.';
     }
     // Feed the scan score into CORE stats (physique→Strength, food/posture→Health, looks/outfit/voice→Social)
     try{

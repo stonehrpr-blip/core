@@ -800,9 +800,24 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     'Nutrition & energy':  ['Hit your protein target','Drink 2–3L of water','Eat whole foods, minimal processed','No mindless snacking','Plan tomorrow’s meals']
   };
   var GOAL_COLOR={'Fitness & strength':'#FF6B6B','Focus & productivity':'#0A84FF','Sleep & recovery':'#6F70FF','Discipline & habits':'#34D399','Nutrition & energy':'#FFCB3D'};
-  function saveRoutineToDashboard(a){
-    var src=ROUTINE_TASKS[a.goal]||ROUTINE_TASKS['Discipline & habits'];
-    var tasks=src.map(function(t,i){ return { id:'cr'+i, title:t.replace('{time}', a.time||'30 min') }; });
+  // Pull the actual routine items out of the generated plan so the dashboard
+  // checklist matches what the coach actually said (AI or local).
+  function routineTasksFromText(md){
+    var lines=String(md||'').split('\n'), nums=[], bullets=[];
+    function clean(s){ return s.replace(/\*\*([^*]+)\*\*/g,'$1').replace(/[*_`#]/g,'').replace(/^Day\s*\d+\s*[:\-–—]\s*/i,'').trim(); }
+    lines.forEach(function(l){
+      var n=l.match(/^\s*\d+[.)]\s+(.+)/); if(n){ nums.push(clean(n[1])); return; }
+      var bl=l.match(/^\s*[-*•]\s+(.+)/); if(bl){ bullets.push(clean(bl[1])); }
+    });
+    var src = bullets.length>=3 ? bullets : (nums.length>=3 ? nums : bullets.concat(nums));
+    src=src.filter(function(t){ return t && t.length<=80 && !/^rest of the week/i.test(t); });
+    return src.slice(0,6);
+  }
+  function saveRoutineToDashboard(a, md){
+    var parsed=routineTasksFromText(md);
+    var titles = parsed.length>=3 ? parsed
+      : (ROUTINE_TASKS[a.goal]||ROUTINE_TASKS['Discipline & habits']).map(function(t){ return t.replace('{time}', a.time||'30 min'); });
+    var tasks=titles.map(function(t,i){ return { id:'cr'+i, title:t }; });
     var rec={ goal:a.goal, when:a.when, days:a.days, color:(GOAL_COLOR[a.goal]||'#0A84FF'), created:Date.now(), tasks:tasks };
     try{ localStorage.setItem('coreCoachRoutine.v1', JSON.stringify(rec)); localStorage.removeItem('coreCoachRoutineDone.v1'); }catch(e){}
   }
@@ -830,8 +845,13 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     act.innerHTML='<button class="rt-cta-btn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Add to my dashboard</button>';
     msgs.appendChild(act); msgs.scrollTop=msgs.scrollHeight;
     act.querySelector('button').addEventListener('click', function(){
-      saveRoutineToDashboard(ans);
-      act.innerHTML='<div class="rt-cta-done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-11"/></svg>Added to your dashboard — open Home to check it off.</div>';
+      function doSave(){
+        saveRoutineToDashboard(ans, reply);
+        act.innerHTML='<div class="rt-cta-done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-11"/></svg>Added to your dashboard — open Home to check it off.</div>';
+      }
+      var existing=null; try{ existing=localStorage.getItem('coreCoachRoutine.v1'); }catch(e){}
+      if(existing) askConfirm('Replace your current dashboard routine?', 'Replace', doSave);
+      else doSave();
     });
     setBusy(false);
   }
