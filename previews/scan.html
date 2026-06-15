@@ -1456,6 +1456,14 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
     looks:{ get:[['Skin Read','Condition and tone'],['Facial Symmetry','Balance analysis'],['Grooming Tips','Hair and styling pointers']],
       tips:'Center your face with even lighting and no filters.' }
   };
+  // Per-type "best results" checklists (replaces a single tip line on every landing)
+  var TIPS_LIST={
+    physique:['Good, even lighting — avoid harsh shadows','Shirtless or fitted clothing reads your frame best','Stand 6–8 ft back so your whole body fits the ring','Plain background, phone at chest height'],
+    food:['Shoot the whole plate from directly above','Bright, even light so colours read true','Fit every item in the frame','One dish at a time scores most accurately'],
+    outfit:['Full head-to-toe shot in a mirror or by a friend','Stand against a plain background','Good light shows the true colours','Wear the actual outfit you’re scoring'],
+    posture:['Stand side-on to the camera','Get your whole body in the frame','Relax — stand how you normally do, don’t pose','Even lighting on a plain background'],
+    looks:['Face the camera in soft, even light','No filters or heavy editing','Pull hair back so your face is visible','A neutral expression reads most accurately']
+  };
   function buildPqIntro(){
     var st=pqStats();
     var cfg=INTRO[type] || { get:(s.checks||[]).slice(0,3).map(function(c){ return [c.split(/[\s—-]/).slice(0,3).join(' '), c]; }), tips:s.hint };
@@ -1477,13 +1485,16 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
       h+='<div class="pq-sec">How it works <span class="h">· 4 angles</span></div><div class="pq-steps">'
         +STEPS.map(function(p){ return '<div class="pq-step"><div class="num" style="background:'+p.c+'">'+p.n+'</div><div class="lb">'+p.l+'</div></div>'; }).join('')
         +'</div>';
+    } else {
+      var FLOW=[{n:1,l:'Capture'},{n:2,l:'Analyse'},{n:3,l:'Improve'}];
+      h+='<div class="pq-sec">How it works</div><div class="pq-steps">'
+        +FLOW.map(function(p){ return '<div class="pq-step"><div class="num" style="background:'+s.color+'">'+p.n+'</div><div class="lb">'+p.l+'</div></div>'; }).join('')
+        +'</div>';
     }
     h+='<div class="pq-sec">What you’ll get</div><div class="pq-get">'
       +GET.map(function(g){ return '<div class="pq-grow"><div class="pq-gic" style="color:'+g.c+';background:color-mix(in srgb,'+g.c+' 15%,transparent);border-color:color-mix(in srgb,'+g.c+' 30%,transparent)">'+svg(g.i)+'</div><div><div class="pq-gt">'+g.t+'</div><div class="pq-gd">'+g.d+'</div></div></div>'; }).join('')
       +'</div>';
-    var TIPS=isPhysique
-      ? ['Good, even lighting — avoid harsh shadows','Shirtless or fitted clothing reads your frame best','Stand 6–8 ft back so your whole body fits the ring','Plain background, phone at chest height']
-      : [cfg.tips];
+    var TIPS=TIPS_LIST[type] || [cfg.tips];
     h+='<div class="pq-sec">For best results</div><div class="pq-tips2">'
       +TIPS.map(function(t){ return '<div class="pq-tip"><div class="ck">'+svg('<path d="M20 6L9 17l-5-5"/>')+'</div><span>'+t+'</span></div>'; }).join('')
       +'</div>';
