@@ -741,9 +741,13 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
   }
   // Per-type vision prompts — every scan type now scores through real AI.
   var AI_PROMPT={
-    physique:'You are CORE\'s physique-analysis vision model. Look at the photo(s) of a person\'s body (front and side/back angles when given) and assess it. '
-      +'Reply with STRICT JSON only, no markdown: {"isBody":true|false,"score":0-100,"tier":"Elite|Strong|Solid|Developing|Needs work","summary":"one honest, specific sentence","weakPoints":["chest"|"back"|"shoulders"|"arms"|"legs"|"core"],"breakdown":{"proportions":0-100,"symmetry":0-100,"muscularity":0-100,"definition":0-100}}. '
-      +'isBody=false if not a clear photo of a human body. score = overall physique development. Be honest, not flattering.',
+    physique:'You are CORE\'s physique-analysis vision model — an expert, fair fitness coach. Assess ONLY the person\'s PHYSIQUE: muscular development, body-fat level / leanness, proportions, shoulder-to-waist (V-taper), symmetry and posture. When several angles are given, weigh them together. '
+      +'Do NOT judge their face, attractiveness, skin, hair, clothing style or general "looks" — those are irrelevant and must not affect the score. '
+      +'Detect whether the person is shirtless or clothed. If they are clothed or the body is loosely covered, score from what IS visible (frame, shoulder/waist ratio, posture, overall build), do NOT assume the worst, and note in the summary that a shirtless or fitted photo gives a more accurate read. '
+      +'Reply with STRICT JSON only, no markdown: {"isBody":true|false,"shirtless":true|false,"score":0-100,"tier":"Elite|Strong|Solid|Developing|Needs work","summary":"one honest, specific, respectful sentence","weakPoints":["chest"|"back"|"shoulders"|"arms"|"legs"|"core"],"breakdown":{"proportions":0-100,"symmetry":0-100,"muscularity":0-100,"definition":0-100}}. '
+      +'isBody=false ONLY if no human body is visible. '
+      +'Scoring rubric — be accurate, do not inflate: 90-100 = competition-level conditioning, very lean with dense muscle; 80-89 = clearly athletic and muscular, advanced; 70-79 = fit, in good shape, some definition; 60-69 = average build, beginner muscularity or moderate body fat; below 60 = little visible muscle or high body fat. '
+      +'Be honest and accurate — give a genuinely low score when it is deserved — but keep every word respectful and constructive. Never be insulting, mocking or demeaning; frame weak areas as things to build, not flaws to ridicule.',
     food:'You are CORE\'s nutrition vision model. Look at this meal photo. Reply with STRICT JSON only, no markdown: '
       +'{"score":0-100,"tier":"Excellent|Good|Balanced|Heavy|Poor","summary":"one sentence with an estimated calorie + protein read","tips":["3 short specific tips to make the meal healthier"]}. score = how healthy the meal is.',
     posture:'You are CORE\'s posture vision model. Look at this full-body photo and assess head, shoulder and hip alignment. Reply with STRICT JSON only, no markdown: '
