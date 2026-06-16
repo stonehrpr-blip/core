@@ -17,9 +17,13 @@ _Last updated by an overnight polish pass. Tick items as they're verified on a r
 - [x] Bottom nav consistent across main pages (Dashboard/Quests/More/Coach/Community)
 - [x] Inline JS on all 38 pages parses clean
 - [ ] Dashboard stats seed correctly from trial answers
-- [ ] Coach: every button/scanner box opens a page
+- [x] Coach: every button/scanner box opens a page (verified — all 7 scan cards navigate; Coach Chat + Mind open the chat surface)
 - [ ] Pillars (Strength/Focus/Health/Wealth/Social/Willpower) reviewed on device
-- [ ] `social.html` bottom nav — currently only links to More; give it the full tab bar
+- [x] `social.html` bottom nav — already has the full tab bar (stale item)
+- [x] No JS errors on load OR interaction across all pages (fuzz-tested)
+- [x] Fixed: dynamically-injected scripts (AI/tasks/moderation/tour/settings) 404'd via a bad path prefix in core-theme.js — now resolve on every host path
+- [x] Fixed: sound/mute toggle threw `sfxToast is not defined` on every page (core-sfx.js)
+- [x] Fixed: profile re-render crashed on null `#bgEl` (core-background.js removes it)
 
 ## 🎨 Consistency & Polish
 - [x] Apple-touch-icon + favicons on every page (home-screen install)
@@ -33,7 +37,7 @@ _Last updated by an overnight polish pass. Tick items as they're verified on a r
 ## 💳 Payment flow (single point)
 - [x] Payment collected once — at the final portal gate (paywall no longer opens a 2nd Apple Pay sheet)
 - [x] Stale `corePayPending` cleared when the card is captured (no downstream re-prompt)
-- [ ] ⚠️ Price mismatch: portal says **$4.99/mo**, paywall says **$7.99/mo / $44.99/yr** — pick one
+- [x] Price is consistent everywhere (**$7.99/mo · $44.99/yr**) — the old $4.99 was only a wallet shard-pack, not the subscription (stale item)
 - [ ] Wire to real billing (currently a mockup)
 
 ## 🔌 Data & Accounts
