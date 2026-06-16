@@ -2001,9 +2001,22 @@ body.edit-active .nav{display:none;}
     color:#fff; font-size:13px; font-weight:900; transition:.15s; }
   .cr-item.done{ color:#9AA1B7; }
   .cr-item.done .cr-tx{ text-decoration:line-through; }
-  .cr-item.done .cr-box{ background:var(--c); border-color:var(--c); }
-  .cr-bar{ height:6px; border-radius:99px; background:rgba(255,255,255,0.09); overflow:hidden; margin-top:12px; }
-  .cr-bar i{ display:block; height:100%; border-radius:99px; background:var(--c); width:0; transition:width .4s cubic-bezier(.22,1,.36,1); }
+  /* Feature 15: completion is GREEN (one colour = one meaning) with a satisfying pop */
+  .cr-box svg{ width:13px; height:13px; transform:scale(0); transition:transform .2s cubic-bezier(.22,1.6,.4,1); }
+  .cr-item.done .cr-box{ background:#34D399; border-color:#34D399; }
+  .cr-item.done .cr-box svg{ transform:scale(1); }
+  .cr-item.pop .cr-box{ animation:crPop .45s cubic-bezier(.22,1.6,.4,1); }
+  @keyframes crPop{ 0%{transform:scale(1)} 42%{transform:scale(1.32)} 100%{transform:scale(1)} }
+  /* gentle nudge on unfinished tasks in the evening */
+  .croutine.night .cr-item:not(.done){ animation:crNudge 2.6s ease-in-out infinite; }
+  @keyframes crNudge{ 0%,100%{box-shadow:0 0 0 0 rgba(255,203,61,0)} 50%{box-shadow:0 0 0 2px rgba(255,203,61,.16)} }
+  @media(prefers-reduced-motion:reduce){ .croutine.night .cr-item:not(.done){ animation:none; } }
+  /* Feature 13: header progress ring (fills green) */
+  .cr-ring{ position:relative; width:46px; height:46px; flex:none; margin-left:auto; }
+  .cr-ring svg{ width:46px; height:46px; transform:rotate(-90deg); }
+  .crr-bg{ fill:none; stroke:rgba(255,255,255,0.10); stroke-width:4; }
+  .crr-fg{ fill:none; stroke:#34D399; stroke-width:4; stroke-linecap:round; filter:drop-shadow(0 0 4px rgba(52,211,153,.5)); transition:stroke-dashoffset .55s cubic-bezier(.22,1,.36,1); }
+  .crr-txt{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; color:#fff; }
 </style>
 <script>
 (function(){
@@ -2015,20 +2028,25 @@ body.edit-active .nav{display:none;}
   if(!prog || prog.date!==today){ prog={ date:today, done:{} }; }
   function save(){ try{ localStorage.setItem('coreCoachRoutineDone.v1', JSON.stringify(prog)); }catch(e){} }
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-  function render(){
-    var doneCount=R.tasks.filter(function(t){ return prog.done[t.id]; }).length;
-    var pct=Math.round(doneCount/R.tasks.length*100);
-    var h='<div class="croutine" style="--c:'+(R.color||'#0A84FF')+'">'
-      +'<div class="cr-head"><div><div class="cr-title">My Routine</div><div class="cr-sub">'+esc(R.goal||'Daily plan')+(R.days?(' · '+esc(R.days)+'/week'):'')+'</div></div><div class="cr-count">'+doneCount+'/'+R.tasks.length+'</div></div>'
+  var CHECK='<svg viewBox="0 0 24 24" fill="none" stroke="#04130c" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+  function render(poppedId){
+    var total=R.tasks.length, doneCount=R.tasks.filter(function(t){ return prog.done[t.id]; }).length;
+    var r=19, C=2*Math.PI*r, off=(C*(1-doneCount/total)).toFixed(1);
+    var hr=new Date().getHours(), night=(hr>=19||hr<5);
+    var h='<div class="croutine'+(night?' night':'')+'" style="--c:'+(R.color||'#0A84FF')+'">'
+      +'<div class="cr-head"><div><div class="cr-title">My Routine</div><div class="cr-sub">'+esc(R.goal||'Daily plan')+(R.days?(' · '+esc(R.days)+'/week'):'')+'</div></div>'
+        +'<div class="cr-ring" role="img" aria-label="'+doneCount+' of '+total+' done"><svg viewBox="0 0 44 44"><circle class="crr-bg" cx="22" cy="22" r="'+r+'"/><circle class="crr-fg" cx="22" cy="22" r="'+r+'" style="stroke-dasharray:'+C.toFixed(1)+';stroke-dashoffset:'+off+'"/></svg><span class="crr-txt">'+doneCount+'/'+total+'</span></div>'
+      +'</div>'
       +'<div class="cr-list">'+R.tasks.map(function(t){ var d=!!prog.done[t.id];
-        return '<button class="cr-item'+(d?' done':'')+'" data-id="'+esc(t.id)+'" type="button"><span class="cr-box">'+(d?'✓':'')+'</span><span class="cr-tx">'+esc(t.title)+'</span></button>';
+        return '<button class="cr-item'+(d?' done':'')+(poppedId===t.id&&d?' pop':'')+'" data-id="'+esc(t.id)+'" type="button"><span class="cr-box">'+CHECK+'</span><span class="cr-tx">'+esc(t.title)+'</span></button>';
       }).join('')
-      +'</div><div class="cr-bar"><i style="width:'+pct+'%"></i></div></div>';
+      +'</div></div>';
     host.innerHTML=h;
     Array.prototype.forEach.call(host.querySelectorAll('.cr-item'), function(b){ b.addEventListener('click', function(){
       var id=b.getAttribute('data-id'); prog.done[id]=!prog.done[id]; save();
       try{ window.coreSfx && window.coreSfx(prog.done[id]?'confirm':'tick'); }catch(e){}
-      render();
+      if(prog.done[id]){ try{ if(navigator.vibrate) navigator.vibrate(20); }catch(e){} }
+      render(prog.done[id]?id:null);
     }); });
   }
   render();
