@@ -484,7 +484,10 @@ body.edit-active .nav{display:none;}
 .pk-delta{font-size:12px;font-weight:800;}
 .pk-delta.up{color:#34D399;} .pk-delta.dn{color:#FF6B6B;}
 .pk-host{height:38px;margin:8px 0 2px;}
-.pk-open{display:block;margin-top:12px;text-align:center;padding:11px;border-radius:12px;font-size:13.5px;font-weight:800;text-decoration:none;color:#fff;}
+.pk-log{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin-top:12px;padding:11px;border-radius:12px;font:inherit;font-size:13.5px;font-weight:800;cursor:pointer;-webkit-appearance:none;appearance:none;
+  border:1px solid color-mix(in srgb,var(--pkc,#0A84FF) 50%,transparent);background:color-mix(in srgb,var(--pkc,#0A84FF) 16%,transparent);color:#fff;}
+.pk-log:active{transform:scale(.98);}.pk-log svg{width:16px;height:16px;}
+.pk-open{display:block;margin-top:9px;text-align:center;padding:11px;border-radius:12px;font-size:13.5px;font-weight:800;text-decoration:none;color:#fff;}
 
 @media(prefers-reduced-motion:reduce){
   .widget-wrap{animation:none;}
@@ -1627,12 +1630,20 @@ body.edit-active .nav{display:none;}
   function showPeek(item){
     var w=$('peekWrap'), c=$('peekCard'); if(!w||!c||!item) return;
     var up=item.delta>=0;
+    c.style.setProperty('--pkc', item.s.color);
     c.innerHTML='<div class="pk-top"><span class="pk-ic" style="color:'+item.s.color+';background:color-mix(in srgb,'+item.s.color+' 18%,transparent)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'+item.s.icon+'</svg></span><div><b>'+item.s.name+'</b><span class="pk-sub">Life area</span></div></div>'
       +'<div class="pk-row"><div class="pk-big">'+item.now+'</div><div class="pk-delta '+(up?'up':'dn')+'">'+(up?'+':'')+item.delta+' · 7d</div></div>'
       +'<div class="pk-host" id="pkHost"></div>'
+      +'<button class="pk-log" id="pkLog" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Log a '+item.s.name+' win</button>'
       +'<a class="pk-open" href="'+item.s.page+'" style="background:'+item.s.color+'">Open '+item.s.name+'</a>';
     w.classList.add('on');
     try{ var DC=window.dashCharts; if(DC) DC.lineChart($('pkHost'),{values:item.ser,labels:[],color:item.s.color,height:38,animate:false}); }catch(e){}
+    var lb=$('pkLog'); if(lb) lb.addEventListener('click',function(){
+      try{ if(window.coreState && coreState.addStat){ coreState.addStat(item.s.key, 3, 'quicklog:'+item.s.key); if(coreState.addXp) coreState.addXp(10,'quicklog:'+item.s.key); } }catch(e){}
+      var t=$('toast'); if(t){ t.textContent='+3 '+item.s.name; t.className='toast show'; clearTimeout(t._rt); t._rt=setTimeout(function(){ t.className='toast'; },1800); }
+      try{ if(navigator.vibrate) navigator.vibrate(22); window.coreSfx && window.coreSfx('confirm'); }catch(e){}
+      w.classList.remove('on');
+    });
     try{ if(navigator.vibrate) navigator.vibrate(12); }catch(e){}
   }
   (function(){ var w=$('peekWrap'); if(!w) return; var sc=$('peekScrim'); if(sc) sc.addEventListener('click',function(){ w.classList.remove('on'); }); })();
