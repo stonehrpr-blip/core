@@ -447,6 +447,49 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
 /* ── colour-coded result + percentile ── */
 .res-pct{display:inline-flex;align-items:center;gap:6px;margin-top:9px;font-size:12px;font-weight:700;color:#aab2c5;}
 .res-pct svg{width:14px;height:14px;color:var(--sc);}.res-pct b{color:#fff;font-weight:900;}
+/* glass card surface */
+.glass{background:linear-gradient(180deg,rgba(255,255,255,0.07),rgba(255,255,255,0.02))!important;
+  border:1px solid rgba(255,255,255,0.09)!important;box-shadow:0 12px 34px rgba(0,0,0,0.32),inset 0 1px 0 rgba(255,255,255,0.06)!important;}
+/* bigger ring + glow */
+.res-ring{filter:drop-shadow(0 0 18px color-mix(in srgb,var(--sc) 40%,transparent));}
+/* letter grade + tier pill row */
+.res-letterrow{display:flex;align-items:center;gap:9px;margin-top:2px;}
+.res-letter{width:34px;height:34px;flex:none;border-radius:11px;display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:900;color:#06121f;background:linear-gradient(135deg,var(--sc),color-mix(in srgb,var(--sc) 55%,#fff));
+  box-shadow:0 6px 18px color-mix(in srgb,var(--sc) 38%,transparent);}
+/* percentile bar */
+.res-pctbar{width:210px;max-width:80%;margin-top:13px;}
+.res-pctbar-track{position:relative;height:7px;border-radius:99px;background:rgba(255,255,255,0.09);overflow:visible;}
+.res-pctbar-track i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,color-mix(in srgb,var(--sc) 50%,#0a2f63),var(--sc));box-shadow:0 0 10px color-mix(in srgb,var(--sc) 50%,transparent);transition:width 1s cubic-bezier(.22,1,.36,1);}
+.res-pctbar-dot{position:absolute;top:50%;width:13px;height:13px;border-radius:50%;background:#fff;transform:translate(-50%,-50%);box-shadow:0 0 0 3px color-mix(in srgb,var(--sc) 60%,transparent);}
+.res-pctbar-cap{margin-top:8px;font-size:11.5px;font-weight:700;color:#aab2c5;text-align:center;}.res-pctbar-cap b{color:#fff;font-weight:900;}
+/* radar chart */
+.bd-radar{border-radius:18px;padding:16px 14px 12px;}
+.radar-svg{width:100%;max-width:230px;height:auto;display:block;margin:0 auto;overflow:visible;}
+.radar-poly{filter:drop-shadow(0 0 8px color-mix(in srgb,var(--sc) 45%,transparent));animation:radarIn .7s cubic-bezier(.22,1,.36,1) both;transform-origin:100px 100px;}
+@keyframes radarIn{from{transform:scale(.2);opacity:0;}to{transform:scale(1);opacity:1;}}
+.radar-legend{display:grid;grid-template-columns:1fr 1fr;gap:7px 14px;margin-top:12px;padding:0 4px;}
+.rl{display:flex;align-items:center;gap:8px;}
+.rl-dot{width:8px;height:8px;border-radius:50%;flex:none;box-shadow:0 0 7px currentColor;}
+.rl-k{flex:1;font-size:12px;font-weight:600;color:#cfd6e6;}
+.rl-v{font-size:13px;font-weight:900;color:#fff;}
+/* hero photo gallery + lightbox */
+.snap-gallery{display:flex;gap:9px;margin-bottom:10px;}
+.snap-hero{flex:1.5;position:relative;aspect-ratio:.72;border-radius:16px;overflow:hidden;border:1px solid var(--border);background:#05050c;
+  cursor:pointer;-webkit-appearance:none;appearance:none;padding:0;box-shadow:0 10px 26px rgba(0,0,0,.4);}
+.snap-hero img{width:100%;height:100%;object-fit:cover;display:block;}
+.snap-hero-lbl{position:absolute;left:8px;bottom:8px;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#fff;
+  background:rgba(0,0,0,.5);padding:3px 8px;border-radius:99px;}
+.snap-side{flex:1;display:flex;flex-direction:column;gap:9px;}
+.snap-side .snap-cell{flex:1;position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--border);background:#05050c;cursor:pointer;-webkit-appearance:none;appearance:none;padding:0;}
+.snap-side .snap-cell img{width:100%;height:100%;object-fit:cover;display:block;}
+.snap-side .snap-cell span{position:absolute;left:6px;bottom:5px;font-size:8px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.7);}
+.snap-side .snap-ph{width:100%;height:100%;}
+.snap-lightbox{position:fixed;inset:0;z-index:340;display:flex;align-items:center;justify-content:center;padding:30px;
+  background:rgba(2,3,8,0.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:0;transition:opacity .25s;}
+.snap-lightbox.on{opacity:1;}
+.snap-lightbox img{max-width:100%;max-height:100%;border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.7);transform:scale(.92);transition:transform .3s cubic-bezier(.22,1,.36,1);}
+.snap-lightbox.on img{transform:scale(1);}
 .res-lead{margin:12px 2px 2px;font-size:14.5px;line-height:1.5;color:#e7ecf6;font-weight:600;text-align:center;}
 .bd-dot{width:9px;height:9px;border-radius:50%;flex:none;box-shadow:0 0 8px currentColor;}
 .res-sec .sec-hint{font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:.02em;text-transform:none;margin-left:6px;}
@@ -853,6 +896,21 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
   // colour-code by score: green / amber / red
   function scoreColor(n){ n=+n||0; return n>=75?'#34d399':n>=55?'#fbbf24':n>=40?'#fb923c':'#fb7185'; }
   function topPctile(n){ return Math.max(1, Math.min(99, Math.round(100 - (+n||0)*0.95))); }
+  function letterGrade(n){ n=+n||0; return n>=90?'S':n>=80?'A':n>=70?'B':n>=60?'C':n>=45?'D':'E'; }
+  // 4-axis radar for the physique breakdown (Proportions/Symmetry/Muscularity/Definition)
+  function radarHtml(BD, color){
+    var keys=Object.keys(BD), cx=100, cy=100, maxR=64, ang=[-90,0,90,180];
+    function pt(i,r){ var a=ang[i]*Math.PI/180; return [cx+Math.cos(a)*r, cy+Math.sin(a)*r]; }
+    var grid=[0.25,0.5,0.75,1].map(function(f){ var p=ang.map(function(_,i){ var q=pt(i,maxR*f); return q[0].toFixed(1)+','+q[1].toFixed(1); }).join(' '); return '<polygon points="'+p+'" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>'; }).join('');
+    var axes=ang.map(function(_,i){ var p=pt(i,maxR); return '<line x1="'+cx+'" y1="'+cy+'" x2="'+p[0].toFixed(1)+'" y2="'+p[1].toFixed(1)+'" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>'; }).join('');
+    var dpts=keys.map(function(k,i){ var p=pt(i, maxR*(BD[k]/100)); return p[0].toFixed(1)+','+p[1].toFixed(1); }).join(' ');
+    var dots=keys.map(function(k,i){ var p=pt(i, maxR*(BD[k]/100)); return '<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="3.4" fill="'+color+'"/>'; }).join('');
+    var legend='<div class="radar-legend">'+keys.map(function(k){ return '<div class="rl"><span class="rl-dot" style="background:'+color+'"></span><span class="rl-k">'+k+'</span><span class="rl-v">'+BD[k]+'</span></div>'; }).join('')+'</div>';
+    return '<div class="res-sec">Breakdown</div><div class="bd-radar glass"><svg viewBox="0 0 200 200" class="radar-svg">'
+      +grid+axes
+      +'<polygon class="radar-poly" points="'+dpts+'" fill="color-mix(in srgb,'+color+' 22%,transparent)" stroke="'+color+'" stroke-width="2" style="--full:'+dpts+'"/>'
+      +dots+'</svg>'+legend+'</div>';
+  }
   function setProg(n){ var el=$('#phyzProg'); if(el) el.style.strokeDashoffset=(590.6*(1-n/4)).toFixed(1); }
   function renderDots(done){ var d=$('#phyzDots'); if(!d) return; var h=''; for(var i=0;i<4;i++) h+='<span class="pd'+(i<done?' on':'')+'"></span>'; d.innerHTML=h; }
   function phyzFlash(){ var f=document.createElement('div'); f.className='phyz-flash'; cam.appendChild(f); setTimeout(function(){ f.remove(); },260); }
@@ -1207,6 +1265,13 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
     }).join('');
   }
   function wireFoc(el){ if(!el) return; Array.prototype.forEach.call(el.querySelectorAll('.foc'), function(b){ b.addEventListener('click', function(){ var go=b.getAttribute('data-go'); if(go){ try{window.coreSfx&&window.coreSfx('click');}catch(e){} location.href=go; } }); }); }
+  // Tap a captured photo → fullscreen zoom (lightbox)
+  function wireZoom(root){ if(!root) return; Array.prototype.forEach.call(root.querySelectorAll('[data-zoom]'), function(b){ b.addEventListener('click', function(e){ e.preventDefault(); var url=b.getAttribute('data-zoom'); if(!url) return;
+    var lb=document.createElement('div'); lb.className='snap-lightbox'; lb.innerHTML='<img src="'+url+'" alt="">'; document.body.appendChild(lb);
+    requestAnimationFrame(function(){ lb.classList.add('on'); });
+    lb.addEventListener('click', function(){ lb.classList.remove('on'); setTimeout(function(){ lb.remove(); }, 260); });
+    try{ if(navigator.vibrate) navigator.vibrate(10); }catch(_){}
+  }); }); }
   // ── Confirm dialog (used twice for the lock double-confirm) ──
   function confirmDialog(o){
     var d=document.createElement('div'); d.className='cdlg';
@@ -1314,11 +1379,16 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
     // physique → gallery of the 4 captured angles; others → single snapshot
     var gallery='';
     if(isPhysique){
-      gallery='<div class="snap-row">'+ANG.map(function(a){
-        var sh=null; for(var i=0;i<shots.length;i++){ if(shots[i].k===a.k){ sh=shots[i]; break; } }
-        var inner=(sh&&sh.url)?'<img src="'+sh.url+'" alt="'+a.k+'"/>':'<div class="snap-ph"></div>';
-        return '<div class="snap-cell">'+inner+'<span>'+a.k+'</span></div>';
-      }).join('')+'</div>';
+      function shotFor(k){ for(var i=0;i<shots.length;i++){ if(shots[i].k===k) return shots[i]; } return null; }
+      var front=shotFor('front');
+      var heroImg=(front&&front.url)?'<img src="'+front.url+'" alt="front"/>':'<div class="snap-ph"></div>';
+      var sides=['right','back','left'].map(function(k){ var sh=shotFor(k);
+        var inner=(sh&&sh.url)?'<img src="'+sh.url+'" alt="'+k+'"/>':'<div class="snap-ph"></div>';
+        return '<button class="snap-cell"'+((sh&&sh.url)?' data-zoom="'+sh.url+'"':'')+' type="button">'+inner+'<span>'+k+'</span></button>';
+      }).join('');
+      gallery='<div class="snap-gallery">'
+        +'<button class="snap-hero"'+((front&&front.url)?' data-zoom="'+front.url+'"':'')+' type="button">'+heroImg+'<span class="snap-hero-lbl">Front</span></button>'
+        +'<div class="snap-side">'+sides+'</div></div>';
     }
     var bdHtml='', BD=null;
     // Only show the breakdown if the AI actually returned one — never fabricate
@@ -1330,12 +1400,7 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
         Muscularity: clampb(ai.breakdown.muscularity),
         Definition:  clampb(ai.breakdown.definition)
       };
-      bdHtml='<div class="res-sec">Breakdown</div><div class="bd">'
-        + Object.keys(BD).map(function(k){ var v=BD[k], col=s.color;   // physique = single blue accent
-            return '<div class="bd-row"><span class="bd-dot" style="background:'+col+'"></span><span class="bd-k">'+k+'</span>'
-              +'<div class="bd-track"><i data-w="'+v+'" style="background:linear-gradient(90deg,color-mix(in srgb,'+col+' 55%,#0a2f63),'+col+');box-shadow:0 0 10px color-mix(in srgb,'+col+' 50%,transparent)"></i></div>'
-              +'<span class="bd-v" style="color:'+col+'">'+v+'</span></div>'; }).join('')
-        + '</div>';
+      bdHtml=radarHtml(BD, s.color);   // radar chart instead of flat bars
     }
     // colour-code the whole result card by the overall score (scoped to #result)
     var SC=(isPhysique?s.color:scoreColor(score)), topP=topPctile(score);
@@ -1351,8 +1416,9 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
         +'<text x="86" y="80" text-anchor="middle" class="res-num" id="resNum" fill="#fff" style="font:900 46px -apple-system,sans-serif;letter-spacing:-2px">0</text>'
         +'<text x="86" y="104" text-anchor="middle" fill="#9AA1B7" style="font:700 13px -apple-system,sans-serif" id="resOf">/ 100</text>'
       +'</svg>'
-      +'<div class="res-grade">'+gradeTxt+'</div>'
-      +'<div class="res-pct">'+svg('<path d="M3 17l6-6 4 4 7-8"/>')+'Top <b>'+topP+'%</b> · better than <b>'+(100-topP)+'%</b></div></div>'
+      +'<div class="res-letterrow"><span class="res-letter">'+letterGrade(score)+'</span><span class="res-grade">'+gradeTxt+'</span></div>'
+      +'<div class="res-pctbar"><div class="res-pctbar-track"><i style="width:'+(100-topP)+'%"></i><span class="res-pctbar-dot" style="left:'+(100-topP)+'%"></span></div>'
+        +'<div class="res-pctbar-cap">Top <b>'+topP+'%</b> · better than <b>'+(100-topP)+'%</b></div></div></div>'
       +'<div class="res-title">'+s.label+'</div>'
       +'<div class="res-sub">'+subTxt+'</div>'
       +(ai&&ai.summary?'<div class="res-lead">'+ai.summary+'</div>':'')
@@ -1369,6 +1435,7 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
     res.style.setProperty('--sc', SC);
     res.classList.add('on');
     wireFoc($('#resFoc'));
+    wireZoom(res);
     // animate the ring + number
     var fg=$('#resFg'); requestAnimationFrame(function(){ fg.setAttribute('stroke-dashoffset', C*(1-score/100)); });
     var numEl=$('#resNum'), n0=0, t0=performance.now();
