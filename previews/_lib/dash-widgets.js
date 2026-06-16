@@ -358,10 +358,13 @@
         var days = (s.streak && s.streak.days) || 0;
         var best = Math.max(s.bestStreak || 0, days);
         var next = [3, 7, 14, 30, 90].filter(function (n) { return n > days; })[0] || 90;
+        // Features 9 + 14: flame colour + size grows with streak length
+        var fc = days >= 30 ? '#FF4D4D' : days >= 14 ? '#FF6B3D' : days >= 7 ? '#FF8A3D' : days >= 3 ? '#FF9F59' : days >= 1 ? '#FFC83D' : '#6B7280';
+        var fsz = days >= 30 ? 30 : days >= 14 ? 28 : 26;
         host.innerHTML =
           '<div class="w-streak">' +
           '<a href="26-streak.html" class="w-streak-inner" style="text-decoration:none;color:inherit">' +
-            '<div class="w-streak-fire"><svg viewBox="0 0 24 24" fill="currentColor" style="width:26px;height:26px;color:#FF8A3D"><path d="M12 2c1 3-1 4-1 6 0 1 1 2 1 2s2-1 2-3c2 2 3 4 3 7a5 5 0 0 1-10 0c0-3 2-5 3-7 1 2 2 2 2 2s0-3 0-7Z"/></svg></div>' +
+            '<div class="w-streak-fire" style="background:color-mix(in srgb,' + fc + ' 16%,transparent)"><svg viewBox="0 0 24 24" fill="currentColor" style="width:' + fsz + 'px;height:' + fsz + 'px;color:' + fc + (days >= 7 ? ';filter:drop-shadow(0 0 5px ' + fc + ')' : '') + '"><path d="M12 2c1 3-1 4-1 6 0 1 1 2 1 2s2-1 2-3c2 2 3 4 3 7a5 5 0 0 1-10 0c0-3 2-5 3-7 1 2 2 2 2 2s0-3 0-7Z"/></svg></div>' +
             '<div class="w-streak-body"><span class="w-streak-days">' + days + '<small> day streak</small></span><span class="w-streak-next">Next milestone: ' + next + ' days</span></div>' +
             '<div class="w-streak-best"><div class="w-streak-best-n">' + best + '</div><div class="w-streak-best-l">Best</div></div>' +
           '</a></div>';
