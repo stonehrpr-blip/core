@@ -439,6 +439,13 @@ body.edit-active .nav{display:none;}
 .dc-mini-name{font-size:11px;font-weight:700;color:var(--muted);flex:1;min-width:0;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .dc-mini-chev{width:12px;height:12px;color:var(--dim);flex:none;}
+/* Feature 6: tier-tint pillars by score */
+.dc-mini.tier-mid{opacity:.86;}
+.dc-mini.tier-lo{opacity:.62;}
+/* Feature 7: current value + direction-coloured trend arrow */
+.dc-mini-val{font-size:12.5px;font-weight:800;color:#e7ecf6;flex:none;}
+.dc-mini-tr{display:inline-flex;flex:none;}.dc-mini-tr svg{width:13px;height:13px;}
+.dc-mini-tr.up{color:#34D399;}.dc-mini-tr.dn{color:#FF6B6B;}.dc-mini-tr.flat{color:var(--dim);}
 .dc-mini-host .dc-cap{margin-bottom:3px;}
 .dc-mini-host .dc-cap-val{font-size:16px;}
 .dc-mini-host .dc-cap-delta{font-size:9.5px;}
@@ -1542,16 +1549,27 @@ body.edit-active .nav{display:none;}
     var DC=window.dashCharts; if(!DC) return;
     var pts=DC.getHistory(trendWin);
     var reduced=!!(window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches);
+    var ARW={ up:'<path d="M12 19V5M5 12l7-7 7 7"/>', dn:'<path d="M12 5v14M19 12l-7 7-7-7"/>', flat:'<path d="M5 12h14"/>' };
+    function tierOf(v){ return v>=80?'hi':v>=50?'mid':'lo'; }
     box.innerHTML=STATS.map(function(s){
-      return '<a class="dc-mini" href="'+s.page+'" style="--sc:'+s.color+'" aria-label="'+s.name+' trend">'
-        +'<div class="dc-mini-head"><span class="dc-mini-dot" style="background:'+s.color+'"></span>'
+      var ser=DC.series(pts,s.model)||[];
+      var val=ser.length?Math.round(ser[ser.length-1]):0;
+      var ref=ser.length>1?ser[Math.max(0,ser.length-Math.min(ser.length,8))]:val;   // ~a week back
+      var dir=val>ref+0.5?'up':val<ref-0.5?'dn':'flat';
+      var tier=tierOf(val);                         // feature 6: tier-tint by score
+      var sc=tier==='lo'?'#6B7280':s.color;         // dim low areas toward grey
+      return '<a class="dc-mini tier-'+tier+'" href="'+s.page+'" style="--sc:'+sc+'" data-key="'+s.key+'" data-name="'+s.name+'" aria-label="'+s.name+' '+val+', trend '+dir+'">'
+        +'<div class="dc-mini-head"><span class="dc-mini-dot" style="background:'+sc+'"></span>'
         +'<span class="dc-mini-name">'+s.name+'</span>'
-        +'<svg class="dc-mini-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>'
+        +'<span class="dc-mini-val">'+val+'</span>'
+        +'<span class="dc-mini-tr '+dir+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">'+ARW[dir]+'</svg></span></div>'
         +'<div class="dc-mini-host" data-k="'+s.model+'"></div></a>';
     }).join('');
     STATS.forEach(function(s){
       var h=box.querySelector('.dc-mini-host[data-k="'+s.model+'"]');
-      if(h) DC.lineChart(h,{values:DC.series(pts,s.model),labels:[],color:s.color,height:38,reducedMotion:reduced,animate:true});
+      var ser2=DC.series(pts,s.model)||[]; var cv=ser2.length?Math.round(ser2[ser2.length-1]):0;
+      var cc=tierOf(cv)==='lo'?'#6B7280':s.color;
+      if(h) DC.lineChart(h,{values:DC.series(pts,s.model),labels:[],color:cc,height:38,reducedMotion:reduced,animate:true});
     });
     attachPeek(box);
     renderExtras();
