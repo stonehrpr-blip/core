@@ -341,6 +341,19 @@ body.edit-active .edit-hint{display:flex;}
   cursor:pointer;color:#fff;background:linear-gradient(135deg,var(--blue),var(--grad-b));
   box-shadow:0 8px 20px rgba(10,132,255,.34);}
 .dash-empty-btn:active{transform:scale(.97);}
+/* Feature 18: smart empty-state suggestion chips */
+.dash-sugg-list{display:flex;flex-direction:column;gap:8px;width:100%;margin-bottom:14px;}
+.dash-sugg{display:flex;align-items:center;gap:11px;width:100%;padding:11px 13px;border-radius:13px;border:1px solid var(--border);
+  background:rgba(255,255,255,0.04);color:#fff;font:inherit;cursor:pointer;-webkit-appearance:none;appearance:none;text-align:left;transition:transform .12s,background .15s;}
+.dash-sugg:active{transform:scale(.99);background:rgba(255,255,255,0.07);}
+.dash-sugg-ic{width:32px;height:32px;flex:none;border-radius:9px;display:flex;align-items:center;justify-content:center;
+  background:color-mix(in srgb,var(--wa,#0A84FF) 16%,transparent);color:var(--wa,#0A84FF);}
+.dash-sugg-ic svg{width:17px;height:17px;}
+.dash-sugg-n{flex:1;font-size:13.5px;font-weight:700;}
+.dash-sugg-plus{font-size:20px;font-weight:800;color:var(--wa,#0A84FF);line-height:1;}
+/* Feature 19: per-widget accent dot on the label */
+.widget-label::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--wa,#0A84FF);
+  box-shadow:0 0 7px var(--wa,#0A84FF);margin-right:7px;vertical-align:middle;}
 
 /* visually-hidden (screen-reader announcements) */
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
@@ -1114,12 +1127,20 @@ body.edit-active .nav{display:none;}
   var GRIP_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 7h.01M8 12h.01M8 17h.01M16 7h.01M16 12h.01M16 17h.01"/></svg>';
   var RM_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 
+  // Feature 19: each widget inherits a thematic accent colour (used on its label
+  // dot + the suggestion chips), so the dashboard reads as colour-coded.
+  function widgetAccent(id){
+    return ({ streak:'#FF8A3D', lifescore:'#0A84FF', tasks:'#34D399', quickactions:'#0A84FF',
+      quote:'#B388FF', corepower:'#FFCB3D', weather:'#5EC8FF', friends:'#B388FF',
+      recentactivity:'#5EEAD4', lifetrend:'#0A84FF' })[id] || '#0A84FF';
+  }
   function buildWidget(id){
     var def=WS.getWidget(id);
     if(!def) return null;
     var wrap=document.createElement('div');
     wrap.className='widget-wrap';
     wrap.dataset.wid=id;
+    wrap.style.setProperty('--wa', widgetAccent(id));
 
     var lbl=document.createElement('div');
     lbl.className='widget-label';
@@ -1164,14 +1185,30 @@ body.edit-active .nav{display:none;}
     wrap.className='widget-wrap';
     var body=document.createElement('div');
     body.className='widget-body';
+    // Smart suggestions: a curated handful of useful widgets not already added,
+    // each one-tap to add — instead of a single dead "Add a widget" button.
+    var layout=WS.readLayout();
+    var order=['streak','quickactions','lifescore','tasks','quote','lifetrend'];
+    var picks=order.map(function(id){ return WS.getWidget ? WS.getWidget(id) : null; })
+                   .filter(function(w){ return w && layout.indexOf(w.id)<0; }).slice(0,4);
+    if(!picks.length) picks=WS.getAll().filter(function(w){ return layout.indexOf(w.id)<0; }).slice(0,4);
+    var chips=picks.map(function(w){ var ac=(typeof widgetAccent==='function'?widgetAccent(w.id):'#0A84FF');
+      return '<button class="dash-sugg" data-id="'+w.id+'" type="button" style="--wa:'+ac+'">'
+        +'<span class="dash-sugg-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">'+w.icon+'</svg></span>'
+        +'<span class="dash-sugg-n">'+w.title+'</span><span class="dash-sugg-plus">+</span></button>'; }).join('');
     body.innerHTML=
       '<div class="dash-empty">'+
         '<div class="dash-empty-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M17.5 14.5v6M14.5 17.5h6"/></svg></div>'+
-        '<div class="dash-empty-title">Your dashboard is empty</div>'+
-        '<div class="dash-empty-sub">Add widgets to make this screen yours.</div>'+
-        '<button class="dash-empty-btn" id="emptyAddBtn">Add a widget</button>'+
+        '<div class="dash-empty-title">Make this screen yours</div>'+
+        '<div class="dash-empty-sub">Tap a suggestion to add it — or browse the full library.</div>'+
+        (chips?'<div class="dash-sugg-list">'+chips+'</div>':'')+
+        '<button class="dash-empty-btn" id="emptyAddBtn">Browse all widgets</button>'+
       '</div>';
     wrap.appendChild(body);
+    Array.prototype.forEach.call(body.querySelectorAll('.dash-sugg'),function(btn){ btn.addEventListener('click',function(){
+      var l=WS.readLayout(); l.push(btn.getAttribute('data-id')); WS.saveLayout(l); renderAll();
+      try{ window.coreSfx && window.coreSfx('xp'); }catch(e){}
+    }); });
     body.querySelector('#emptyAddBtn').addEventListener('click',function(){
       if(!document.body.classList.contains('edit-active')) openEdit();
       openAddSheet();
