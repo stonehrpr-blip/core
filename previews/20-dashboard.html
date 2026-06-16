@@ -199,22 +199,26 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .w-tasks-progress{font-size:13px;font-weight:700;color:var(--text);}
 .w-tasks-budget{font-size:11px;font-weight:600;color:var(--dim);flex:1;}
 .w-tasks-viewall{font-size:11px;font-weight:700;color:var(--blue);text-decoration:none;flex-shrink:0;letter-spacing:.01em;}
-.w-task-row{display:flex;align-items:center;gap:12px;padding:13px 16px;
-  border-bottom:1px solid rgba(255,255,255,0.04);
-  color:var(--text);text-decoration:none;
-  transition:background .12s;}
-.w-task-row:active{background:rgba(255,255,255,0.03);}
+/* whole row is the tap target (a button); circular checkbox; pop on complete */
+.w-task-row{display:flex;align-items:center;gap:12px;width:100%;padding:13px 16px;
+  border:none;border-bottom:1px solid rgba(255,255,255,0.04);
+  background:transparent;color:var(--text);font:inherit;text-align:left;cursor:pointer;
+  -webkit-appearance:none;appearance:none;transition:background .12s,transform .1s;}
+.w-task-row:active{background:rgba(255,255,255,0.05);transform:scale(.995);}
 .w-task-row:last-child{border-bottom:none;}
-.w-task-row.done{opacity:0.38;pointer-events:none;}
-.w-task-check{width:24px;height:24px;flex:none;border-radius:50%;
-  border:1.5px solid rgba(255,255,255,0.18);background:transparent;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.16s;padding:0;}
-.w-task-check svg{width:13px;height:13px;color:rgba(255,255,255,0.25);}
-.w-task-check.checked{background:var(--green);border-color:var(--green);}
-.w-task-check.checked svg{color:#02020A;}
+.w-task-row.done{cursor:default;}
+.w-task-check{width:26px;height:26px;flex:none;border-radius:50%;
+  border:2px solid rgba(255,255,255,0.22);background:transparent;
+  display:flex;align-items:center;justify-content:center;transition:background .18s,border-color .18s;}
+.w-task-check-svg{width:14px;height:14px;color:#04130c;transform:scale(0);transition:transform .22s cubic-bezier(.22,1.6,.4,1);}
+.w-task-check.checked{background:var(--green);border-color:var(--green);box-shadow:0 0 12px rgba(52,211,153,.45);}
+.w-task-check.checked .w-task-check-svg{transform:scale(1);}
+.w-task-row.just-done .w-task-check{animation:taskPop .5s cubic-bezier(.22,1.6,.4,1);}
+@keyframes taskPop{0%{transform:scale(1)}45%{transform:scale(1.35)}100%{transform:scale(1)}}
 .w-task-body{flex:1;min-width:0;}
-.w-task-title{display:block;font-size:13.5px;font-weight:600;line-height:1.3;color:var(--text);}
+.w-task-title{display:block;font-size:13.5px;font-weight:600;line-height:1.3;color:var(--text);transition:color .2s;}
 .w-task-row.done .w-task-title{text-decoration:line-through;color:var(--dim);}
+.w-task-row.done .w-task-chip,.w-task-row.done .w-task-xp-badge{opacity:.5;}
 .w-task-meta{display:flex;align-items:center;gap:6px;margin-top:4px;}
 .w-task-chip{font-size:10px;font-weight:600;color:var(--dim);letter-spacing:.01em;}
 .w-task-xp-badge{font-size:10px;font-weight:800;color:var(--blue);
@@ -259,10 +263,10 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .w-qa-btn svg{width:20px;height:20px;color:var(--blue);}
 
 /* ── Weather ── */
-.w-weather{display:flex;align-items:center;gap:12px;padding:14px 18px;}
-.w-weather-icon{font-size:28px;}
-.w-weather-icon svg{width:28px;height:28px;}
-.w-weather-label{font-size:14px;font-weight:700;flex:1;}
+.w-weather{display:flex;align-items:center;gap:10px;padding:10px 16px;}
+.w-weather-icon{font-size:22px;}
+.w-weather-icon svg{width:22px;height:22px;}
+.w-weather-label{font-size:13px;font-weight:700;flex:1;}
 .w-weather-time{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
   background:var(--bg-card);border:1px solid var(--border);padding:3px 8px;border-radius:999px;}
 
@@ -283,6 +287,9 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 
 /* ── Recent activity ── */
 .w-activity-list{display:flex;flex-direction:column;}
+.w-act-more{display:block;width:100%;padding:11px;border:none;border-top:1px solid var(--border);background:transparent;
+  font:inherit;font-size:12px;font-weight:800;color:var(--blue);cursor:pointer;-webkit-appearance:none;appearance:none;}
+.w-act-more:active{background:rgba(255,255,255,.04);}
 .w-activity-item{display:flex;align-items:center;gap:9px;padding:10px 16px;border-bottom:1px solid var(--border);font-size:12px;}
 .w-activity-item:last-child{border-bottom:none;}
 .w-activity-dot{width:6px;height:6px;border-radius:50%;background:var(--blue);flex:none;}
@@ -421,9 +428,9 @@ body.edit-active .nav{display:none;}
 
 /* ── Line charts ── */
 .dc-head{display:flex;justify-content:flex-end;padding:11px 14px 0;}
-.dc-seg{display:inline-flex;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:999px;padding:2px;gap:2px;}
-.dc-seg-btn{border:none;background:none;font:inherit;font-size:11px;font-weight:800;color:var(--muted);
-  padding:4px 11px;border-radius:999px;cursor:pointer;transition:.14s;}
+.dc-seg{display:inline-flex;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:999px;padding:1.5px;gap:1px;}
+.dc-seg-btn{border:none;background:none;font:inherit;font-size:10px;font-weight:800;color:var(--muted);
+  padding:2.5px 9px;border-radius:999px;cursor:pointer;transition:.14s;-webkit-appearance:none;appearance:none;}
 .dc-seg-btn.on{background:var(--blue);color:#fff;}
 .dc-host{padding:6px 14px 14px;}
 .dc-wrap{display:flex;flex-direction:column;}
@@ -1188,7 +1195,7 @@ body.edit-active .nav{display:none;}
     // Smart suggestions: a curated handful of useful widgets not already added,
     // each one-tap to add — instead of a single dead "Add a widget" button.
     var layout=WS.readLayout();
-    var order=['streak','quickactions','lifescore','tasks','quote','lifetrend'];
+    var order=['streak','tasks','lifetrend','quote','recentactivity'];
     var picks=order.map(function(id){ return WS.getWidget ? WS.getWidget(id) : null; })
                    .filter(function(w){ return w && layout.indexOf(w.id)<0; }).slice(0,4);
     if(!picks.length) picks=WS.getAll().filter(function(w){ return layout.indexOf(w.id)<0; }).slice(0,4);

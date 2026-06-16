@@ -145,94 +145,6 @@
     },
 
     // ── Life Score (DEFAULT) — slim hero: big number + progress bar only ──
-    lifescore: {
-      id: 'lifescore', title: 'Life Score',
-      icon: '<path d="M12 20.5s-7.2-4.6-7.2-9.8A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 7.2 3.7c0 5.2-7.2 9.8-7.2 9.8Z"/>',
-      render: function (host) {
-        var cs = S();
-        if (!cs) { host.innerHTML = '<div class="w-empty">Loading…</div>'; return; }
-
-        function xpForLevel(lvl) { return lvl * 300; }
-
-        function buildHTML() {
-          var s   = cs.read();
-          var xp  = s.xp || 0;
-          var lvl = cs.levelFor ? cs.levelFor(xp) : (Math.floor(xp / 300) + 1);
-          var r   = cs.rankFor ? cs.rankFor(xp) : { label: 'Lv ' + lvl, toNext: 0, idx: 0 };
-          return '' +
-            '<a href="24-ranks.html" class="w-ls-hero" style="text-decoration:none;color:inherit" aria-label="Life Score — view rank">' +
-              '<span class="w-ls-cta" aria-hidden="true">Rank<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>' +
-              '<div class="w-ls-score-wrap">' +
-                '<div class="w-ls-score-num" id="wLsNum">0</div>' +
-                '<span class="w-ls-delta flat" id="wLsDelta"></span>' +
-              '</div>' +
-              '<div class="w-ls-score-label">Life Score</div>' +
-              '<div class="w-ls-headline" id="wLsHeadline"></div>' +
-              '<div class="w-ls-xp">' +
-                '<div class="w-ls-xp-head">' +
-                  '<span class="w-ls-xp-rank" id="wLsRank">' + (r.label || ('Lv ' + lvl)) + '</span>' +
-                  '<span class="w-ls-xp-num" id="wLsXpNum">' + xp + ' XP</span>' +
-                '</div>' +
-                '<div class="w-ls-xp-bar"><div class="w-ls-xp-fill gold" id="wLsXpFill" style="width:0%"></div></div>' +
-              '</div>' +
-            '</a>';
-        }
-
-        host.innerHTML = buildHTML();
-
-        function weakest() {
-          var defs = cs.STAT_DEFS || [], lo = null;
-          defs.forEach(function (d) { var v = cs.statValue ? cs.statValue(d.key) : 0; if (lo === null || v < lo.val) lo = { name: d.name, color: d.color, val: v }; });
-          return lo;
-        }
-        function todayKey() { var d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
-        function dailyDelta(score) {
-          try { var raw = JSON.parse(localStorage.getItem('coreLifeScoreDaily.v1') || '{}'), k = todayKey();
-            if (raw.day !== k) { raw = { day: k, base: score }; localStorage.setItem('coreLifeScoreDaily.v1', JSON.stringify(raw)); }
-            return score - (raw.base || score);
-          } catch (e) { return 0; }
-        }
-        function headline(s, r, nextName, w, score) {
-          if (r && r.toNext && r.toNext <= 120 && nextName) return 'Just ' + r.toNext + ' XP from ' + nextName + ' — finish today’s quests to rank up.';
-          if (w && w.val < 55) return w.name + ' is holding your score back — a quick win there moves the needle most.';
-          var days = (s.streak && s.streak.days) || 0;
-          if (days >= 3) return days + '-day streak going strong — protect it and push one stat today.';
-          if (score >= 85) return 'Elite shape — keep every area ticking to hold the top.';
-          return 'Log one win in each area to lift your Life Score today.';
-        }
-
-        function animateIn() {
-          var s = cs.read(), xp = s.xp || 0, score = cs.lifeScore();
-          var lvl = cs.levelFor ? cs.levelFor(xp) : (Math.floor(xp / 300) + 1);
-          var r = cs.rankFor ? cs.rankFor(xp) : { label: 'Lv ' + lvl, toNext: 0, idx: 0 };
-          var ranks = cs.RANKS || [];
-          var cur = ranks[r.idx] || { min: 0 }, nx = ranks[(r.idx || 0) + 1];
-          var nextName = nx ? nx.name : null;
-          var pct = nx ? Math.min(100, Math.round((xp - cur.min) / ((nx.min - cur.min) || 1) * 100)) : 100;
-          var fill = host.querySelector('#wLsXpFill'); if (fill) requestAnimationFrame(function () { fill.style.width = pct + '%'; });
-          var rankEl = host.querySelector('#wLsRank'); if (rankEl) rankEl.textContent = r.label || ('Lv ' + lvl);
-          var xpEl = host.querySelector('#wLsXpNum'); if (xpEl) xpEl.textContent = nextName ? (r.toNext + ' XP to ' + nextName) : (xp + ' XP');
-          // Feature 1: weakest-pillar glow on the score
-          var w = weakest(), numEl = host.querySelector('#wLsNum');
-          if (numEl && w) numEl.style.textShadow = '0 0 34px ' + w.color + '55';
-          animCount(numEl, score);
-          // Feature 2: daily delta chip
-          var d = dailyDelta(score), de = host.querySelector('#wLsDelta');
-          if (de) {
-            if (d > 0) { de.textContent = '▲ +' + d + ' today'; de.className = 'w-ls-delta up'; }
-            else if (d < 0) { de.textContent = '▼ ' + d + ' today'; de.className = 'w-ls-delta dn'; }
-            else { de.textContent = 'even today'; de.className = 'w-ls-delta flat'; }
-          }
-          // Feature 4: AI-style headline
-          var he = host.querySelector('#wLsHeadline'); if (he) he.textContent = headline(s, r, nextName, w, score);
-        }
-        setTimeout(animateIn, 80);
-
-        function onUpdate() { animateIn(); }
-        window.addEventListener('coreStateChange', onUpdate);
-        host._cleanup = function () { window.removeEventListener('coreStateChange', onUpdate); };
-      }
-    },
 
     // Stat Breakdown removed — its per-stat page links now live on the
     // Stat Trends widget (strength→gym, focus→focus, wealth→wealth,
@@ -265,7 +177,7 @@
         }
 
         var wasAllDone = false;
-        function renderTasks() {
+        function renderTasks(justDoneId) {
           host.innerHTML = '';
           var tasks = getTasks();
           var done = tasks.filter(function (t) { return t.done; }).length;
@@ -305,21 +217,17 @@
           tasks.forEach(function (task) {
             var isDone = task.done;
             var timeDisplay = task.deadline ? countdownStr(task.deadline) : (task.time || '10 min');
-            var page = getTaskPage(task);
 
-            // Row is a link — tapping the row navigates; checking stops propagation
-            var row = document.createElement('a');
-            row.href = isDone ? '#' : page;
-            row.className = 'w-task-row' + (isDone ? ' done' : '');
-            row.style.textDecoration = 'none';
-            row.setAttribute('aria-label', task.title);
+            // The whole row is the tap target — click anywhere to complete.
+            var row = document.createElement('button');
+            row.type = 'button';
+            row.className = 'w-task-row' + (isDone ? ' done' : '') + (justDoneId === task.id ? ' just-done' : '');
+            row.setAttribute('aria-label', (isDone ? 'Completed: ' : 'Complete: ') + task.title);
 
             row.innerHTML =
-              '<button class="w-task-check' + (isDone ? ' checked' : '') + '" aria-label="' + (isDone ? 'Done' : 'Complete') + '">' +
-                (isDone
-                  ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l4 4 10-11"/></svg>'
-                  : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/></svg>') +
-              '</button>' +
+              '<span class="w-task-check' + (isDone ? ' checked' : '') + '">' +
+                '<svg class="w-task-check-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-11"/></svg>' +
+              '</span>' +
               '<div class="w-task-body">' +
                 '<span class="w-task-title">' + task.title + '</span>' +
                 '<div class="w-task-meta">' +
@@ -329,15 +237,12 @@
               '<span class="w-task-xp-badge">+' + task.xp + ' XP</span>';
 
             if (!isDone) {
-              var btn = row.querySelector('.w-task-check');
-              btn.addEventListener('click', function (e) {
-                e.preventDefault(); e.stopPropagation();
+              row.addEventListener('click', function () {
                 if (cs) cs.completeQuest(task.id);
                 try { window.coreSfx && window.coreSfx('xp'); } catch (err) {}
-                renderTasks();
+                try { if (navigator.vibrate) navigator.vibrate(22); } catch (err) {}
+                renderTasks(task.id);   // re-render with this row's check popping
               });
-            } else {
-              row.addEventListener('click', function (e) { e.preventDefault(); });
             }
 
             host.appendChild(row);
@@ -389,24 +294,6 @@
             '<span class="w-power-pill" style="color:' + (rank.color || '#aaa') + '">' + rank.name + '</span>' +
           '</div></div>';
         setTimeout(function () { animCount(host.querySelector('.w-power-val'), power); }, 60);
-      }
-    },
-
-    quickactions: {
-      id: 'quickactions', title: 'Quick Actions',
-      icon: '<path d="M4 6h16M4 12h16M4 18h7"/>',
-      render: function (host) {
-        var actions = [
-          { label: 'Quests',  href: '21-quests.html',  icon: '<path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/>' },
-          { label: 'Shop',    href: '27-shop.html',    icon: '<path d="M6 2L3 6v13a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"/>' },
-          { label: 'Streak',  href: '26-streak.html',  icon: '<path d="M12 2c1 3-1 4-1 6 0 1 1 2 1 2s2-1 2-3c2 2 3 4 3 7a5 5 0 0 1-10 0c0-3 2-5 3-7 1 2 2 2 2 2s0-3 0-7Z"/>' },
-          { label: 'Profile', href: '23-profile.html', icon: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>' },
-        ];
-        var html = '<div class="w-qa-grid">';
-        actions.forEach(function (a) {
-          html += '<a href="' + a.href + '" class="w-qa-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">' + a.icon + '</svg><span>' + a.label + '</span></a>';
-        });
-        host.innerHTML = html + '</div>';
       }
     },
 
@@ -470,22 +357,30 @@
       icon: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>',
       render: function (host) {
         var cs = S(), s = cs ? cs.read() : {};
-        var ledger = (s.xpLedger || []).filter(function (e) { return e.delta > 0; }).slice(0, 6);
-        if (!ledger.length) {
-          host.innerHTML = '<div class="w-empty">Complete quests to see activity here.</div>';
-          return;
-        }
-        var html = '<div class="w-activity-list">';
-        ledger.forEach(function (e) {
+        var all = (s.xpLedger || []).filter(function (e) { return e.delta > 0; }).slice(0, 20);
+        var expanded = false;
+        function row(e) {
           var ago = Math.round((Date.now() - e.ts) / 60000);
           var agoStr = ago < 2 ? 'just now' : ago < 60 ? ago + 'm ago' : Math.round(ago / 60) + 'h ago';
-          html += '<div class="w-activity-item">' +
+          return '<div class="w-activity-item">' +
             '<span class="w-activity-dot"></span>' +
-            '<span class="w-activity-label">' + (e.reason || 'XP').replace('quest:', 'Quest: ') + '</span>' +
+            '<span class="w-activity-label">' + (e.reason || 'XP').replace('quest:', 'Quest: ').replace('routine:', 'Routine: ').replace('quicklog:', 'Logged: ') + '</span>' +
             '<span class="w-activity-xp">+' + (e.delta || 0) + ' XP</span>' +
             '<span class="w-activity-time">' + agoStr + '</span></div>';
-        });
-        host.innerHTML = html + '</div>';
+        }
+        function draw() {
+          if (!all.length) { host.innerHTML = '<div class="w-empty">Complete quests to see activity here.</div>'; return; }
+          var show = expanded ? all : all.slice(0, 3);
+          var html = '<div class="w-activity-list">' + show.map(row).join('') + '</div>';
+          if (all.length > 3) html += '<button class="w-act-more" type="button">' + (expanded ? 'See less' : 'See more (' + (all.length - 3) + ')') + '</button>';
+          host.innerHTML = html;
+          var mb = host.querySelector('.w-act-more');
+          if (mb) mb.addEventListener('click', function () { expanded = !expanded; draw(); });
+        }
+        draw();
+        function onUpdate() { var ns = cs ? cs.read() : {}; all = (ns.xpLedger || []).filter(function (e) { return e.delta > 0; }).slice(0, 20); draw(); }
+        window.addEventListener('coreStateChange', onUpdate);
+        host._cleanup = function () { window.removeEventListener('coreStateChange', onUpdate); };
       }
     },
 
@@ -539,7 +434,9 @@
         // Honor an explicitly-saved array, INCLUDING empty — removing the last
         // widget should leave an empty dashboard (empty-state), not silently
         // restore defaults. Defaults are only for first run + Reset.
-        if (Array.isArray(s)) return s;
+        // Drop ids for widgets that no longer exist (e.g. removed lifescore /
+        // quickactions) so old saved layouts don't render blanks.
+        if (Array.isArray(s)) return s.filter(function (id) { return !!REGISTRY[id]; });
       }
     } catch (e) {}
     return DEFAULT_LAYOUT.slice();
