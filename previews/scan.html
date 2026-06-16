@@ -365,6 +365,17 @@ body.type-physique .tip .ti{background:color-mix(in srgb,var(--sc) 15%,transpare
 .pq-tip span{font-size:13px;color:#dfe6f2;font-weight:600;line-height:1.4;}
 .pq-help{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--muted);font-weight:600;margin-top:12px;}
 .pq-help svg{width:14px;height:14px;color:var(--sc);}
+/* Recipe Generator entry (food scanner only) */
+.pq-recipe{display:flex;align-items:center;gap:13px;margin-top:14px;padding:14px 15px;border-radius:16px;text-decoration:none;
+  border:1px solid color-mix(in srgb,var(--sc) 30%,transparent);background:color-mix(in srgb,var(--sc) 10%,transparent);color:#fff;transition:transform .12s,background .15s;}
+.pq-recipe:active{transform:scale(.99);background:color-mix(in srgb,var(--sc) 16%,transparent);}
+.pq-recipe-ic{width:40px;height:40px;flex:none;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  background:color-mix(in srgb,var(--sc) 20%,transparent);color:var(--sc);}
+.pq-recipe-ic svg{width:20px;height:20px;}
+.pq-recipe-tx{flex:1;min-width:0;}
+.pq-recipe-tx b{display:block;font-size:14.5px;font-weight:800;}
+.pq-recipe-tx span{display:block;font-size:12px;color:var(--muted);margin-top:1px;}
+.pq-recipe>svg:last-child{width:18px;height:18px;color:var(--muted);flex:none;}
 .pq-stat .n.col{color:var(--sc);}
 
 /* ── Physique history panel ───────────────────────── */
@@ -1515,6 +1526,12 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
       +'<button class="pq-take" id="pqTake" type="button">'+svg('<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>')+'Take Photo</button>'
       +'<button class="pq-upload" id="pqUpload" type="button">'+svg('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5-5 5 5"/><path d="M12 5v12"/>')+(isPhysique?'Upload photos':'Upload from Gallery')+'</button>'
       +'</div>';
+    if(type==='food'){
+      h+='<a class="pq-recipe" href="recipe.html">'
+        +'<div class="pq-recipe-ic">'+svg('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>')+'</div>'
+        +'<div class="pq-recipe-tx"><b>Recipe Generator</b><span>Get 3 tailored recipes, fast</span></div>'
+        +svg('<path d="M9 6l6 6-6 6"/>')+'</a>';
+    }
     h+='<div class="pq-help">'+svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>')+(isPhysique?'Upload 1–4 angles · AI sorts them for you':'Instant AI score, kept private')+'</div>';
     h+='<div class="pq-disc">'+((type==='physique'||type==='looks')?'This analysis is for educational purposes only and not medical advice.':'This analysis is for guidance only.')+'</div>';
     $('#pqIntro').innerHTML=h;
