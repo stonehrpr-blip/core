@@ -158,39 +158,73 @@
           var s   = cs.read();
           var xp  = s.xp || 0;
           var lvl = cs.levelFor ? cs.levelFor(xp) : (Math.floor(xp / 300) + 1);
-          // Task 1b: hero is just the score + the XP progress bar. No stacked
-          // rank/level badges, no stat grid, no day-dots — the page reads clean.
+          var r   = cs.rankFor ? cs.rankFor(xp) : { label: 'Lv ' + lvl, toNext: 0, idx: 0 };
           return '' +
             '<a href="24-ranks.html" class="w-ls-hero" style="text-decoration:none;color:inherit" aria-label="Life Score — view rank">' +
               '<span class="w-ls-cta" aria-hidden="true">Rank<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>' +
-              '<div class="w-ls-score-num" id="wLsNum">0</div>' +
+              '<div class="w-ls-score-wrap">' +
+                '<div class="w-ls-score-num" id="wLsNum">0</div>' +
+                '<span class="w-ls-delta flat" id="wLsDelta"></span>' +
+              '</div>' +
               '<div class="w-ls-score-label">Life Score</div>' +
+              '<div class="w-ls-headline" id="wLsHeadline"></div>' +
               '<div class="w-ls-xp">' +
                 '<div class="w-ls-xp-head">' +
-                  '<span class="w-ls-xp-rank" id="wLsLvl">Lv ' + lvl + '</span>' +
+                  '<span class="w-ls-xp-rank" id="wLsRank">' + (r.label || ('Lv ' + lvl)) + '</span>' +
                   '<span class="w-ls-xp-num" id="wLsXpNum">' + xp + ' XP</span>' +
                 '</div>' +
-                '<div class="w-ls-xp-bar"><div class="w-ls-xp-fill" id="wLsXpFill" style="width:0%"></div></div>' +
+                '<div class="w-ls-xp-bar"><div class="w-ls-xp-fill gold" id="wLsXpFill" style="width:0%"></div></div>' +
               '</div>' +
             '</a>';
         }
 
         host.innerHTML = buildHTML();
 
+        function weakest() {
+          var defs = cs.STAT_DEFS || [], lo = null;
+          defs.forEach(function (d) { var v = cs.statValue ? cs.statValue(d.key) : 0; if (lo === null || v < lo.val) lo = { name: d.name, color: d.color, val: v }; });
+          return lo;
+        }
+        function todayKey() { var d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
+        function dailyDelta(score) {
+          try { var raw = JSON.parse(localStorage.getItem('coreLifeScoreDaily.v1') || '{}'), k = todayKey();
+            if (raw.day !== k) { raw = { day: k, base: score }; localStorage.setItem('coreLifeScoreDaily.v1', JSON.stringify(raw)); }
+            return score - (raw.base || score);
+          } catch (e) { return 0; }
+        }
+        function headline(s, r, nextName, w, score) {
+          if (r && r.toNext && r.toNext <= 120 && nextName) return 'Just ' + r.toNext + ' XP from ' + nextName + ' — finish today’s quests to rank up.';
+          if (w && w.val < 55) return w.name + ' is holding your score back — a quick win there moves the needle most.';
+          var days = (s.streak && s.streak.days) || 0;
+          if (days >= 3) return days + '-day streak going strong — protect it and push one stat today.';
+          if (score >= 85) return 'Elite shape — keep every area ticking to hold the top.';
+          return 'Log one win in each area to lift your Life Score today.';
+        }
+
         function animateIn() {
-          var s   = cs.read();
-          var xp  = s.xp || 0;
+          var s = cs.read(), xp = s.xp || 0, score = cs.lifeScore();
           var lvl = cs.levelFor ? cs.levelFor(xp) : (Math.floor(xp / 300) + 1);
-          var xpPrev = lvl > 1 ? (lvl - 1) * 300 : 0;
-          var xpNext = lvl * 300;
-          var pct = xpNext > xpPrev ? Math.min(100, Math.round((xp - xpPrev) / (xpNext - xpPrev) * 100)) : 100;
-          var fill = host.querySelector('#wLsXpFill');
-          if (fill) requestAnimationFrame(function () { fill.style.width = pct + '%'; });
-          var lvlEl = host.querySelector('#wLsLvl');
-          if (lvlEl) lvlEl.textContent = 'Lv ' + lvl;
-          var xpEl = host.querySelector('#wLsXpNum');
-          if (xpEl) xpEl.textContent = xp + ' XP';
-          animCount(host.querySelector('#wLsNum'), cs.lifeScore());
+          var r = cs.rankFor ? cs.rankFor(xp) : { label: 'Lv ' + lvl, toNext: 0, idx: 0 };
+          var ranks = cs.RANKS || [];
+          var cur = ranks[r.idx] || { min: 0 }, nx = ranks[(r.idx || 0) + 1];
+          var nextName = nx ? nx.name : null;
+          var pct = nx ? Math.min(100, Math.round((xp - cur.min) / ((nx.min - cur.min) || 1) * 100)) : 100;
+          var fill = host.querySelector('#wLsXpFill'); if (fill) requestAnimationFrame(function () { fill.style.width = pct + '%'; });
+          var rankEl = host.querySelector('#wLsRank'); if (rankEl) rankEl.textContent = r.label || ('Lv ' + lvl);
+          var xpEl = host.querySelector('#wLsXpNum'); if (xpEl) xpEl.textContent = nextName ? (r.toNext + ' XP to ' + nextName) : (xp + ' XP');
+          // Feature 1: weakest-pillar glow on the score
+          var w = weakest(), numEl = host.querySelector('#wLsNum');
+          if (numEl && w) numEl.style.textShadow = '0 0 34px ' + w.color + '55';
+          animCount(numEl, score);
+          // Feature 2: daily delta chip
+          var d = dailyDelta(score), de = host.querySelector('#wLsDelta');
+          if (de) {
+            if (d > 0) { de.textContent = '▲ +' + d + ' today'; de.className = 'w-ls-delta up'; }
+            else if (d < 0) { de.textContent = '▼ ' + d + ' today'; de.className = 'w-ls-delta dn'; }
+            else { de.textContent = 'even today'; de.className = 'w-ls-delta flat'; }
+          }
+          // Feature 4: AI-style headline
+          var he = host.querySelector('#wLsHeadline'); if (he) he.textContent = headline(s, r, nextName, w, score);
         }
         setTimeout(animateIn, 80);
 

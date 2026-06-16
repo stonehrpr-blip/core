@@ -150,8 +150,16 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .w-ls-cta{position:absolute;top:13px;right:13px;display:inline-flex;align-items:center;gap:2px;
   font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);}
 .w-ls-cta svg{width:12px;height:12px;}
-.w-ls-score-num{font-size:54px;font-weight:800;letter-spacing:-0.04em;line-height:1;color:#fff;}
-.w-ls-score-label{font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--dim);margin-top:4px;}
+.w-ls-score-num{font-size:54px;font-weight:800;letter-spacing:-0.04em;line-height:1;color:#fff;transition:text-shadow .6s ease;}
+.w-ls-score-wrap{position:relative;display:flex;flex-direction:column;align-items:center;}
+/* daily delta chip (green up / red down) */
+.w-ls-delta{margin-top:7px;font-size:11px;font-weight:800;letter-spacing:.02em;padding:3px 11px;border-radius:999px;}
+.w-ls-delta.up{color:#34D399;background:color-mix(in srgb,#34D399 15%,transparent);}
+.w-ls-delta.dn{color:#FF6B6B;background:color-mix(in srgb,#FF6B6B 15%,transparent);}
+.w-ls-delta.flat{color:var(--muted);background:rgba(255,255,255,0.06);}
+.w-ls-score-label{font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--dim);margin-top:9px;}
+/* AI-style headline */
+.w-ls-headline{font-size:12.5px;line-height:1.45;color:#cfd6e6;text-align:center;margin-top:12px;max-width:285px;font-weight:600;}
 /* XP progress bar */
 .w-ls-xp{width:100%;margin-top:14px;}
 .w-ls-xp-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
@@ -160,6 +168,9 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .w-ls-xp-bar{height:5px;border-radius:999px;background:rgba(255,255,255,0.07);overflow:hidden;}
 .w-ls-xp-fill{height:100%;border-radius:999px;background:var(--blue);
   transition:width .9s cubic-bezier(.2,.85,.2,1);}
+/* Feature 3: rank progress is gold (XP to next rank) */
+.w-ls-xp-fill.gold{background:linear-gradient(90deg,#FFCB3D,#FF9F59);box-shadow:0 0 10px rgba(255,203,61,.45);}
+.w-ls-xp-num{color:#FFCB3D;}
 /* Stat grid */
 .w-ls-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:rgba(255,255,255,0.05);}
 .w-ls-card{
@@ -536,13 +547,22 @@ body.edit-active .nav{display:none;}
 @keyframes lsCardIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 .ls-rank-link{position:absolute;top:15px;right:15px;display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;z-index:2;}
 .ls-rank-link svg{width:13px;height:13px;transition:transform .2s;} .ls-rank-link:active svg{transform:translateX(2px);}
-.ls-big{font-size:64px;font-weight:900;letter-spacing:-2px;color:#fff;line-height:1;font-variant-numeric:tabular-nums;text-shadow:0 0 34px color-mix(in srgb,var(--lsc,#0A84FF) 55%,transparent);animation:lsPop .65s cubic-bezier(.2,1.5,.4,1) both;}
+.ls-big{font-size:64px;font-weight:900;letter-spacing:-2px;color:#fff;line-height:1;font-variant-numeric:tabular-nums;text-shadow:0 0 34px color-mix(in srgb,var(--wkc,var(--lsc,#0A84FF)) 60%,transparent);transition:text-shadow .6s ease;animation:lsPop .65s cubic-bezier(.2,1.5,.4,1) both;}
+/* daily delta chip (green up / red down) */
+.ls-delta{display:inline-block;margin-top:9px;font-size:11px;font-weight:800;letter-spacing:.02em;padding:3px 11px;border-radius:999px;}
+.ls-delta.up{color:#34D399;background:color-mix(in srgb,#34D399 16%,transparent);}
+.ls-delta.dn{color:#FF6B6B;background:color-mix(in srgb,#FF6B6B 16%,transparent);}
+.ls-delta.flat{color:var(--muted);background:rgba(255,255,255,.06);}
+/* AI-style headline */
+.ls-headline{font-size:12.5px;line-height:1.45;color:#cfd6e6;margin:12px auto 0;max-width:280px;font-weight:600;}
 @keyframes lsPop{0%{opacity:0;transform:scale(.82);}100%{opacity:1;transform:scale(1);}}
 .ls-cap{font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--dim,#4F5570);margin-top:5px;}
 .ls-xprow{display:flex;justify-content:space-between;align-items:baseline;margin:18px 2px 7px;font-size:12.5px;font-weight:700;color:var(--muted);}
 .ls-xprow b{color:#fff;font-weight:800;}
 .ls-xpbar{position:relative;height:7px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;}
 .ls-xpfill{position:relative;display:block;height:100%;border-radius:99px;overflow:hidden;background:linear-gradient(90deg,#0A84FF,#5EC8FF);box-shadow:0 0 10px rgba(10,132,255,.45);transition:width 1.1s cubic-bezier(.22,1,.36,1);}
+/* Feature 3: rank progress is gold (XP to next rank) */
+.ls-xpfill.gold{background:linear-gradient(90deg,#FFCB3D,#FF9F59);box-shadow:0 0 10px rgba(255,203,61,.5);}
 .ls-xpfill::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);transform:translateX(-120%);animation:lsShimmer 2.6s ease-in-out infinite;}
 @keyframes lsShimmer{0%{transform:translateX(-120%);}55%,100%{transform:translateX(260%);}}
 @media(prefers-reduced-motion:reduce){.lscore-card,.ls-big,.ls-xpfill::after{animation:none!important;}}
@@ -824,9 +844,11 @@ body.edit-active .nav{display:none;}
       <div class="lscore-card" id="lsHero">
         <a class="ls-rank-link" id="rankBar" href="24-ranks.html" aria-label="View your rank">Rank <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a>
         <div class="ls-big" id="lsNum">0</div>
+        <div class="ls-delta flat" id="lsDelta"></div>
         <div class="ls-cap">Life Score</div>
-        <div class="ls-xprow"><span id="lsLevel">Lv 1</span><span><b id="rankBarScore">0</b> XP</span></div>
-        <div class="ls-xpbar"><span class="ls-xpfill" id="lsXpFill"></span></div>
+        <div class="ls-headline" id="lsHeadline"></div>
+        <div class="ls-xprow"><span id="lsLevel">Rank</span><span><b id="rankBarScore">0</b> XP to <span id="lsNextRank">—</span></span></div>
+        <div class="ls-xpbar"><span class="ls-xpfill gold" id="lsXpFill"></span></div>
       </div>
 
       <!-- Stat trends -->
@@ -1443,10 +1465,13 @@ body.edit-active .nav{display:none;}
     var hero=$('lsHero'); if(hero) hero.style.setProperty('--rkc',r.color);
     var g=$('rankBarGem'); if(g) g.innerHTML='<img src="assets/ranks/'+r.key+'.png" alt="'+r.name+'">';
     if($('rankBarName')) $('rankBarName').textContent=r.name;
-    animCount($('rankBarScore'), xp, null, fromXp);
-    // flat level + XP-to-next-rank progress bar
-    var lv=$('lsLevel'); if(lv) lv.textContent='Lv '+(idx+1);
-    var next=(idx+1<RANKS.length)?RANKS[idx+1].xp:r.xp+1, cur=r.xp, pct=next>cur?Math.max(0,Math.min(1,(xp-cur)/(next-cur))):1;
+    // Feature 3: rank name + XP remaining to the NEXT rank, gold bar
+    var lv=$('lsLevel'); if(lv) lv.textContent=r.name;
+    var nextR=(idx+1<RANKS.length)?RANKS[idx+1]:null, cur=r.xp, nxXp=nextR?nextR.xp:r.xp+1;
+    var toNext=nextR?Math.max(0,nextR.xp-xp):0;
+    animCount($('rankBarScore'), toNext);
+    var nr=$('lsNextRank'); if(nr) nr.textContent=nextR?nextR.name:'Max rank';
+    var pct=nxXp>cur?Math.max(0,Math.min(1,(xp-cur)/(nxXp-cur))):1;
     var fill=$('lsXpFill'); if(fill) setTimeout(function(){ fill.style.width=(pct*100).toFixed(1)+'%'; },180);
     return idx;
   }
@@ -1811,6 +1836,22 @@ body.edit-active .nav{display:none;}
   }
 
   // life score
+  function lifeDelta(score){
+    try{ var raw=JSON.parse(ls('coreLifeScoreDaily.v1','{}')||'{}'); var k=new Date().toDateString();
+      if(raw.day!==k){ raw={day:k,base:score}; lsSet('coreLifeScoreDaily.v1',JSON.stringify(raw)); }
+      return score-(raw.base||score);
+    }catch(e){ return 0; }
+  }
+  function lifeHeadline(score, wk){
+    var xp=parseInt(ls('coreXP','0'),10)||0, idx=rankIdx(xp), next=(idx+1<RANKS.length)?RANKS[idx+1]:null;
+    var toNext=next?Math.max(0,next.xp-xp):0;
+    if(next && toNext>0 && toNext<=120) return 'Just '+toNext+' XP from '+next.name+' — finish today’s quests to rank up.';
+    if(wk && wk.v<55) return wk.n+' is holding your score back — a quick win there moves the needle most.';
+    var st=parseInt((($('cStreak')||{}).textContent||'0'),10)||0;
+    if(st>=3) return st+'-day streak going strong — protect it and push one stat today.';
+    if(score>=85) return 'Elite shape — keep every area ticking to hold the top.';
+    return 'Log one win in each area to lift your Life Score today.';
+  }
   function paintLifeScore(){
     var score=0;
     try{ if(window.coreState && coreState.lifeScore) score=Math.round(coreState.lifeScore())||0; }catch(e){}
@@ -1821,6 +1862,20 @@ body.edit-active .nav{display:none;}
     }
     var col = score>=70?'#30D158':score>=40?'#FFD60A':score>0?'#FF9F0A':'#5E6B8A';
     var hero=$('lsHero'); if(hero) hero.style.setProperty('--lsc',col);
+    // Feature 1: glow the score in the WEAKEST pillar's colour (what to fix)
+    var wk=null;
+    try{ if(window.coreState && coreState.STAT_DEFS && coreState.statValue){
+      coreState.STAT_DEFS.forEach(function(d){ var v=coreState.statValue(d.key); if(wk===null||v<wk.v) wk={c:d.color,n:d.name,v:v}; });
+      if(wk && hero) hero.style.setProperty('--wkc', wk.c);
+    } }catch(e){}
+    // Feature 2: daily delta chip
+    var de=$('lsDelta');
+    if(de){ var dlt=lifeDelta(score);
+      if(dlt>0){ de.textContent='▲ +'+dlt+' today'; de.className='ls-delta up'; }
+      else if(dlt<0){ de.textContent='▼ '+dlt+' today'; de.className='ls-delta dn'; }
+      else { de.textContent='even today'; de.className='ls-delta flat'; } }
+    // Feature 4: AI-style headline
+    var he=$('lsHeadline'); if(he) he.textContent=lifeHeadline(score, wk);
     animCount($('lsNum'), score, function(n){ return Math.round(n); });
     // fill the ring to the life score (out of 100)
     var ring=$('lsRingFg');
