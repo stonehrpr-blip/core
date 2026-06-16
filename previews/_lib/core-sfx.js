@@ -156,7 +156,7 @@
         play.mute(willMute);
         if (!willMute) play("tick"); // confirm tone when turning sound back on
         paint();
-        sfxToast(willMute ? "Sound off" : "Sound on");
+        if (window.coreToast) window.coreToast(willMute ? "Sound off" : "Sound on");
       });
     });
   }
