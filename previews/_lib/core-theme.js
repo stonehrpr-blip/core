@@ -15,6 +15,16 @@
 (function() {
   if (typeof window === 'undefined') return;
 
+  // Resolve sibling _lib/ and assets/ from THIS script's own URL, so dynamically
+  // injected scripts work no matter the host path (file://, /previews/, or the
+  // GitHub Pages /core/previews/ project path). The old depth/prefix math guessed
+  // wrong for this layout and 404'd the whole AI/tasks/moderation stack.
+  var __self = document.currentScript || document.querySelector('script[src*="core-theme.js"]');
+  var __libBase = (function(){ var s = (__self && __self.src) || '_lib/core-theme.js'; return s.replace(/[?#].*$/, '').replace(/core-theme\.js$/, ''); })(); // ".../_lib/"
+  var __rootBase = __libBase.replace(/_lib\/$/, '');                                                                                                  // ".../" (page dir)
+  function libU(file)   { return __libBase + file; }
+  function assetU(rel)  { return __rootBase + rel; }
+
   function applyAtmosphere() {
     document.querySelectorAll('.phone').forEach(phone => {
       // Only treat as phone-frame if it has a .notch — skip asset/marketing pages
@@ -110,7 +120,7 @@
     // Detect the right path prefix (some pages live in subdirs like /u/ /dev/)
     const depth = (location.pathname.match(/\/[^/]+\//g) || []).length - 1;
     const prefix = depth > 0 ? '../'.repeat(depth) : '';
-    const src = prefix + 'assets/logo.png';
+    const src = assetU('assets/logo.png');
 
     document.querySelectorAll('.brand .dot, .brand-mark .brand-dot, .topbrand .dot, .brand-dot').forEach(el => {
       if (el.dataset.coreLogo) return; // already replaced
@@ -140,7 +150,7 @@
     const depth = (location.pathname.match(/\/[^/]+\//g) || []).length - 1;
     const prefix = depth > 0 ? '../'.repeat(depth) : '';
     const s = document.createElement('script');
-    s.src = prefix + 'core-settings-menu.js';
+    s.src = libU('core-settings-menu.js');
     s.defer = true;
     document.head.appendChild(s);
   }
@@ -153,7 +163,7 @@
     const depth = (location.pathname.match(/\/[^/]+\//g) || []).length - 1;
     const prefix = depth > 0 ? '../'.repeat(depth) : '';
     const s = document.createElement('script');
-    s.src = prefix + 'core-edit-mode.js';
+    s.src = libU('core-edit-mode.js');
     s.defer = true;
     document.head.appendChild(s);
   }
@@ -174,7 +184,7 @@
       if (window[flag]) return;
       if (document.querySelector('script[src*="' + file + '"]')) return;
       const s = document.createElement('script');
-      s.src = prefix + file; s.defer = true;
+      s.src = libU(file); s.defer = true;
       document.head.appendChild(s);
     });
   }
@@ -187,7 +197,7 @@
     const depth = (location.pathname.match(/\/[^/]+\//g) || []).length - 1;
     const prefix = depth > 0 ? '../'.repeat(depth) : '';
     const s = document.createElement('script');
-    s.src = prefix + 'core-moderation.js';
+    s.src = libU('core-moderation.js');
     s.defer = true;
     document.head.appendChild(s);
   }
@@ -202,16 +212,16 @@
     const prefix = depth > 0 ? '../'.repeat(depth) : '';
     if (!document.querySelector('script[src*="core-pricing-ab.js"]')) {
       const eng = document.createElement('script');
-      eng.src = prefix + 'core-experiments.js';
+      eng.src = libU('core-experiments.js');
       document.head.appendChild(eng);
       const ab = document.createElement('script');
-      ab.src = prefix + 'core-pricing-ab.js';
+      ab.src = libU('core-pricing-ab.js');
       ab.defer = true;
       document.head.appendChild(ab);
     }
     if (!document.querySelector('script[src*="core-invite-discount.js"]')) {
       const d = document.createElement('script');
-      d.src = prefix + 'core-invite-discount.js';
+      d.src = libU('core-invite-discount.js');
       d.defer = true;
       document.head.appendChild(d);
     }
@@ -240,7 +250,7 @@
     const depth = (location.pathname.match(/\/[^/]+\//g) || []).length - 1;
     const prefix = depth > 0 ? '../'.repeat(depth) : '';
     const s = document.createElement('script');
-    s.src = prefix + 'core-tour.js';
+    s.src = libU('core-tour.js');
     s.defer = true;
     document.head.appendChild(s);
   }
