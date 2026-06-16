@@ -21,9 +21,17 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .home-indicator{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;background:rgba(245,247,251,0.55);border-radius:999px;z-index:60;}
 #ambBg{position:absolute;inset:0;z-index:0;
   background:
-    radial-gradient(60% 35% at 50% 22%, color-mix(in srgb, var(--sc,#0A84FF) 20%, transparent) 0%, transparent 55%),
-    radial-gradient(50% 30% at 50% 100%, rgba(255,255,255,0.04) 0%, transparent 65%),
-    linear-gradient(180deg,#070713 0%,#02020A 50%,#050510 100%);transition:background .4s ease;}
+    radial-gradient(60% 35% at 50% 30%, color-mix(in srgb, var(--sc,#2F8FFF) 20%, transparent) 0%, transparent 55%),
+    radial-gradient(50% 30% at 50% 100%, rgba(159,143,255,0.10) 0%, transparent 65%),
+    linear-gradient(180deg,#060B26 0%,#02020A 50%,#050510 100%);transition:background 2.4s ease;}
+/* Drifting aurora veil — matches the dashboard / strength pages */
+#ambAurora{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0.45;mix-blend-mode:screen;}
+#ambAurora::before,#ambAurora::after{content:"";position:absolute;border-radius:50%;filter:blur(40px);will-change:transform,opacity;transform:translateZ(0);}
+#ambAurora::before{width:80%;height:45%;left:-10%;top:8%;background:radial-gradient(circle, color-mix(in srgb, var(--sc,#2F8FFF) 55%, transparent), transparent 70%);animation:auroraDriftA 24s ease-in-out infinite;}
+#ambAurora::after{width:70%;height:40%;right:-10%;bottom:16%;background:radial-gradient(circle,rgba(159,143,255,0.50),transparent 70%);animation:auroraDriftB 30s ease-in-out -15s infinite;}
+@keyframes auroraDriftA{0%,100%{transform:translate(0,0) scale(1);opacity:0.45;}50%{transform:translate(40px,-22px) scale(1.12);opacity:0.75;}}
+@keyframes auroraDriftB{0%,100%{transform:translate(0,0) scale(1);opacity:0.40;}50%{transform:translate(-30px,18px) scale(1.10);opacity:0.70;}}
+@media (prefers-reduced-motion:reduce){#ambAurora::before,#ambAurora::after{animation:none!important;}}
 
 .frame{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;padding-top:54px;}
 .top{display:flex;align-items:center;gap:12px;padding:6px 18px 4px;flex-shrink:0;}
@@ -350,6 +358,9 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .pq-tip{display:flex;align-items:center;gap:11px;padding:9px 13px;}
 .pq-tip .ck{width:22px;height:22px;flex:none;border-radius:7px;display:flex;align-items:center;justify-content:center;
   background:color-mix(in srgb,#34D399 16%,transparent);color:#34D399;}
+/* Physique = restrained two-colour page: green checks become the blue accent */
+body.type-physique .pq-tip .ck{background:color-mix(in srgb,var(--sc) 16%,transparent);color:var(--sc);}
+body.type-physique .tip .ti{background:color-mix(in srgb,var(--sc) 15%,transparent);color:var(--sc);}
 .pq-tip .ck svg{width:13px;height:13px;}
 .pq-tip span{font-size:13px;color:#dfe6f2;font-weight:600;line-height:1.4;}
 .pq-help{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--muted);font-weight:600;margin-top:12px;}
@@ -440,19 +451,19 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
 .foc .ft b{display:block;font-size:14px;font-weight:800;}
 .foc .ft span{display:block;font-size:11.5px;color:var(--muted);margin-top:1px;}
 .foc .fa{color:var(--muted);flex:none;}.foc .fa svg{width:16px;height:16px;}
-.btn.lock{background:linear-gradient(135deg,#7c5cff,#4d2fd6);box-shadow:0 10px 26px rgba(124,92,255,.32);}
-.btn.lock.done{background:rgba(124,92,255,.16);border:1px solid rgba(124,92,255,.5);color:#c9bcff;box-shadow:none;}
+.btn.lock{background:linear-gradient(135deg,#3B9EFF,#1565c0);box-shadow:0 10px 26px rgba(59,158,255,.32);}
+.btn.lock.done{background:rgba(59,158,255,.16);border:1px solid rgba(59,158,255,.5);color:#bcd9ff;box-shadow:none;}
 /* history lock chips */
 .ph-lock{flex:none;width:44px;height:44px;min-height:0;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,0.05);
   color:#9aa1b7;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-appearance:none;appearance:none;padding:0;}
 .ph-lock svg{width:18px;height:18px;}.ph-lock:active{transform:scale(.94);}
-.ph-lk{flex:none;width:44px;height:44px;border-radius:12px;border:1px solid rgba(124,92,255,.5);background:rgba(124,92,255,.15);
-  color:#c9bcff;display:flex;align-items:center;justify-content:center;}.ph-lk svg{width:18px;height:18px;}
-.ph-item.locked{border-color:rgba(124,92,255,.32);background:rgba(124,92,255,.06);}
+.ph-lk{flex:none;width:44px;height:44px;border-radius:12px;border:1px solid rgba(59,158,255,.5);background:rgba(59,158,255,.15);
+  color:#bcd9ff;display:flex;align-items:center;justify-content:center;}.ph-lk svg{width:18px;height:18px;}
+.ph-item.locked{border-color:rgba(59,158,255,.32);background:rgba(59,158,255,.06);}
 .ph-thumb{position:relative;}
-.ph-thumb-lk{position:absolute;right:3px;bottom:3px;width:18px;height:18px;border-radius:6px;background:rgba(124,92,255,.92);
+.ph-thumb-lk{position:absolute;right:3px;bottom:3px;width:18px;height:18px;border-radius:6px;background:rgba(59,158,255,.92);
   display:flex;align-items:center;justify-content:center;}.ph-thumb-lk svg{width:11px;height:11px;color:#fff;}
-.locked-badge{display:inline-flex;align-items:center;gap:4px;color:#b9a8ff;font-size:10.5px;font-weight:800;vertical-align:middle;}
+.locked-badge{display:inline-flex;align-items:center;gap:4px;color:#9fc6ff;font-size:10.5px;font-weight:800;vertical-align:middle;}
 .locked-badge svg{width:11px;height:11px;}
 /* ── confirm dialog (double-confirm) ── */
 .cdlg{position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;padding:26px;
@@ -463,13 +474,13 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
   transform:translateY(14px) scale(.96);transition:transform .26s cubic-bezier(.22,1,.36,1);}
 .cdlg.on .cdlg-card{transform:none;}
 .cdlg-ic{width:60px;height:60px;border-radius:18px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;
-  background:radial-gradient(120% 120% at 30% 20%,rgba(124,92,255,.42),rgba(124,92,255,.12));border:1px solid rgba(124,92,255,.5);}
-.cdlg-ic svg{width:28px;height:28px;color:#c9bcff;}
+  background:radial-gradient(120% 120% at 30% 20%,rgba(59,158,255,.42),rgba(59,158,255,.12));border:1px solid rgba(59,158,255,.5);}
+.cdlg-ic svg{width:28px;height:28px;color:#bcd9ff;}
 .cdlg h3{font-size:19px;font-weight:900;letter-spacing:-.3px;}
 .cdlg p{font-size:13.5px;color:var(--muted);line-height:1.5;margin-top:8px;}
 .cdlg-row{display:flex;gap:10px;margin-top:18px;}.cdlg-row .btn{flex:1;}
 .btn.ghost{background:rgba(255,255,255,0.06);border:1px solid var(--border);color:#cfd6e6;}
-.btn.danger2{background:linear-gradient(135deg,#7c5cff,#4d2fd6);color:#fff;}
+.btn.danger2{background:linear-gradient(135deg,#3B9EFF,#1565c0);color:#fff;}
 /* ── lock ceremony ── */
 .lockc{position:fixed;inset:0;z-index:320;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;
   background:rgba(4,6,14,0);backdrop-filter:blur(0);-webkit-backdrop-filter:blur(0);transition:background .5s,backdrop-filter .5s;pointer-events:none;}
@@ -483,14 +494,14 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
 .lockc.shake.in .lockc-photo{animation:lockShake .5s cubic-bezier(.36,.07,.19,.97);}
 @keyframes lockShake{10%,90%{transform:translateX(-3px)}20%,80%{transform:translateX(5px)}30%,50%,70%{transform:translateX(-9px)}40%,60%{transform:translateX(9px)}}
 .lockc-lk{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(0);width:74px;height:74px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;background:rgba(124,92,255,.94);box-shadow:0 0 42px rgba(124,92,255,.85);}
+  display:flex;align-items:center;justify-content:center;background:rgba(59,158,255,.94);box-shadow:0 0 42px rgba(59,158,255,.85);}
 .lockc-lk svg{width:34px;height:34px;color:#fff;}
 .lockc.shake .lockc-lk{animation:lkPop .55s cubic-bezier(.22,1,.36,1) forwards;}
 @keyframes lkPop{0%{transform:translate(-50%,-50%) scale(0)}60%{transform:translate(-50%,-50%) scale(1.28)}100%{transform:translate(-50%,-50%) scale(1)}}
 .lockc-panel{width:100%;max-width:332px;margin-top:22px;opacity:0;transform:translateY(18px);transition:opacity .42s,transform .42s;}
 .lockc.up .lockc-panel{opacity:1;transform:none;}
 .lockc-panel .lh{display:flex;align-items:center;justify-content:center;gap:6px;text-align:center;font-size:12px;font-weight:900;
-  letter-spacing:.06em;color:#c9bcff;margin-bottom:13px;}.lockc-panel .lh svg{width:14px;height:14px;}
+  letter-spacing:.06em;color:#bcd9ff;margin-bottom:13px;}.lockc-panel .lh svg{width:14px;height:14px;}
 </style>
   <link rel="stylesheet" href="_lib/core-responsive.css">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
@@ -500,8 +511,9 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
 </head>
 <body>
 <div class="phone">
-    <div id="ambCelestial" style="position:absolute;inset:0;pointer-events:none;z-index:0;"></div>
+    <div id="ambCelestial" style="position:absolute;inset:0;pointer-events:none;z-index:2;"></div>
   <div id="ambBg"></div>
+  <div id="ambAurora"></div>
   <div class="notch"></div>
   <div class="home-indicator"></div>
 
@@ -1176,9 +1188,9 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
   function focHtml(weak){
     weak=(weak||[]).filter(function(k){ return IMPROVE[k]; });
     if(!weak.length) weak=['chest','legs','back'];
-    return weak.slice(0,4).map(function(k){ var m=IMPROVE[k];
+    return weak.slice(0,4).map(function(k){ var m=IMPROVE[k], mc=(isPhysique?s.color:m.c);   // physique = single blue accent
       return '<button class="foc" type="button" data-go="'+m.href+'">'
-        +'<div class="fi" style="background:color-mix(in srgb,'+m.c+' 16%,transparent);color:'+m.c+'">'+svg(m.ic)+'</div>'
+        +'<div class="fi" style="background:color-mix(in srgb,'+mc+' 16%,transparent);color:'+mc+'">'+svg(m.ic)+'</div>'
         +'<div class="ft"><b>'+m.t+'</b><span>'+m.s+'</span></div>'
         +'<div class="fa">'+svg('<path d="M9 6l6 6-6 6"/>')+'</div></button>';
     }).join('');
@@ -1308,14 +1320,14 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
         Definition:  clampb(ai.breakdown.definition)
       };
       bdHtml='<div class="res-sec">Breakdown</div><div class="bd">'
-        + Object.keys(BD).map(function(k){ var v=BD[k], col=scoreColor(v);
+        + Object.keys(BD).map(function(k){ var v=BD[k], col=s.color;   // physique = single blue accent
             return '<div class="bd-row"><span class="bd-dot" style="background:'+col+'"></span><span class="bd-k">'+k+'</span>'
               +'<div class="bd-track"><i data-w="'+v+'" style="background:linear-gradient(90deg,color-mix(in srgb,'+col+' 55%,#0a2f63),'+col+');box-shadow:0 0 10px color-mix(in srgb,'+col+' 50%,transparent)"></i></div>'
               +'<span class="bd-v" style="color:'+col+'">'+v+'</span></div>'; }).join('')
         + '</div>';
     }
     // colour-code the whole result card by the overall score (scoped to #result)
-    var SC=scoreColor(score), topP=topPctile(score);
+    var SC=(isPhysique?s.color:scoreColor(score)), topP=topPctile(score);
     var focSec = isPhysique ? ('<div class="res-sec">Focus areas <span class="sec-hint">tap to train</span></div><div class="res-foc" id="resFoc">'+focHtml(ai&&ai.weakPoints)+'</div>') : '';
     res.innerHTML=
       '<button class="res-close" id="resClose" type="button" aria-label="Done">'+svg('<path d="M6 6l12 12M18 6L6 18"/>')+'</button>'
@@ -1468,9 +1480,10 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
     var st=pqStats();
     var cfg=INTRO[type] || { get:(s.checks||[]).slice(0,3).map(function(c){ return [c.split(/[\s—-]/).slice(0,3).join(' '), c]; }), tips:s.hint };
     var GIC=['<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.7" fill="currentColor"/>','<path d="M3 17l6-6 4 4 7-8"/>','<path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="3.4"/>'];
-    var GCOL=['#3B9EFF','#34D399','#FFCB3D'];
+    // Physique is a restrained two-colour page (blue + white); other types keep their accents.
+    var GCOL=isPhysique?[s.color,s.color,s.color]:['#3B9EFF','#34D399','#FFCB3D'];
     var GET=cfg.get.map(function(g,i){ return { t:g[0], d:g[1], i:GIC[i%GIC.length], c:GCOL[i%GCOL.length] }; });
-    var bestCol=st.total?scoreColor(st.best):'';
+    var bestCol=st.total?(isPhysique?s.color:scoreColor(st.best)):'';
     var h='';
     h+='<div class="pq-card">'
       +'<div class="pq-prog-top"><span class="l">'+svg('<path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/>')+'Your Progress</span>'
@@ -1481,7 +1494,7 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
         +'<div class="pq-stat"><div class="n" id="pqCount">'+st.total+'</div><div class="k">Scans</div></div>'
       +'</div></div>';
     if(isPhysique){
-      var STEPS=[{n:1,l:'Front',c:'#3B9EFF'},{n:2,l:'Right',c:'#34D399'},{n:3,l:'Back',c:'#FFCB3D'},{n:4,l:'Left',c:'#FF6FB5'}];
+      var STEPS=[{n:1,l:'Front',c:s.color},{n:2,l:'Right',c:s.color},{n:3,l:'Back',c:s.color},{n:4,l:'Left',c:s.color}];
       h+='<div class="pq-sec">How it works <span class="h">· 4 angles</span></div><div class="pq-steps">'
         +STEPS.map(function(p){ return '<div class="pq-step"><div class="num" style="background:'+p.c+'">'+p.n+'</div><div class="lb">'+p.l+'</div></div>'; }).join('')
         +'</div>';
@@ -1769,6 +1782,7 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
 
   if(!isVoice){
     document.body.classList.add('pq');
+    document.body.classList.add('type-'+type);
     $('#title').textContent=s.name+' Scan';
     $('#name').textContent=s.name+' Analysis';
     $('#tag').textContent=s.tag;
