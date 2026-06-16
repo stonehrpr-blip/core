@@ -1554,7 +1554,7 @@ body.edit-active .nav{display:none;}
     var ARW={ up:'<path d="M12 19V5M5 12l7-7 7 7"/>', dn:'<path d="M12 5v14M19 12l-7 7-7-7"/>', flat:'<path d="M5 12h14"/>' };
     function tierOf(v){ return v>=80?'hi':v>=50?'mid':'lo'; }
     box.innerHTML=STATS.map(function(s){
-      var ser=DC.series(pts,s.model)||[];
+      var ser=DC.series(pts,s.key)||[];
       var val=ser.length?Math.round(ser[ser.length-1]):0;
       var ref=ser.length>1?ser[Math.max(0,ser.length-Math.min(ser.length,8))]:val;   // ~a week back
       var dir=val>ref+0.5?'up':val<ref-0.5?'dn':'flat';
@@ -1569,9 +1569,9 @@ body.edit-active .nav{display:none;}
     }).join('');
     STATS.forEach(function(s){
       var h=box.querySelector('.dc-mini-host[data-k="'+s.model+'"]');
-      var ser2=DC.series(pts,s.model)||[]; var cv=ser2.length?Math.round(ser2[ser2.length-1]):0;
+      var ser2=DC.series(pts,s.key)||[]; var cv=ser2.length?Math.round(ser2[ser2.length-1]):0;
       var cc=tierOf(cv)==='lo'?'#6B7280':s.color;
-      if(h) DC.lineChart(h,{values:DC.series(pts,s.model),labels:[],color:cc,height:38,reducedMotion:reduced,animate:true});
+      if(h) DC.lineChart(h,{values:DC.series(pts,s.key),labels:[],color:cc,height:38,reducedMotion:reduced,animate:true});
     });
     attachPeek(box);
     renderExtras();
@@ -1603,7 +1603,7 @@ body.edit-active .nav{display:none;}
     var pts; try{ pts=DC.getHistory(30); }catch(e){ return null; }
     if(!pts || !pts.length) return null;
     return STATS.map(function(s){
-      var ser=DC.series(pts,s.model)||[];
+      var ser=DC.series(pts,s.key)||[];
       var now=ser.length?ser[ser.length-1]:0;
       var prev=ser.length>7?ser[ser.length-8]:(ser.length?ser[0]:0);
       return { s:s, ser:ser, now:Math.round(now||0), delta:Math.round((now||0)-(prev||0)) };
@@ -2048,6 +2048,29 @@ body.edit-active .nav{display:none;}
   if(!prog || prog.date!==today){ prog={ date:today, done:{} }; }
   function save(){ try{ localStorage.setItem('coreCoachRoutineDone.v1', JSON.stringify(prog)); }catch(e){} }
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  // Map a routine task to its life area so completing it feeds that stat's graph.
+  // Coach tasks only carry a title, so infer from keywords (or an explicit stat field).
+  var AREA_NAME={strength:'Strength',focus:'Focus',wealth:'Wealth',health:'Health',social:'Social',purpose:'Purpose'};
+  var STAT_GAIN=3, STAT_XP=10;
+  function taskArea(t){
+    if(t && t.stat && AREA_NAME[t.stat]) return t.stat;
+    var s=((t&&t.title)||'').toLowerCase();
+    if(/workout|gym|lift|train|exercise|run|push|squat|muscle|strength|cardio/.test(s)) return 'strength';
+    if(/focus|study|deep work|read|learn|work session|write|code|concentrate/.test(s)) return 'focus';
+    if(/money|save|budget|income|invest|sell|earn|expense|side hustle|wealth|finance/.test(s)) return 'wealth';
+    if(/water|sleep|steps|walk|meal|protein|eat|hydrate|stretch|rest|health|nutrition/.test(s)) return 'health';
+    if(/call|text|friend|family|reach out|social|meet|connect|date|message/.test(s)) return 'social';
+    if(/meditat|journal|pray|reflect|gratitude|purpose|goal|plan|discipline|read scripture/.test(s)) return 'purpose';
+    return 'purpose';
+  }
+  function bumpArea(area, dir){
+    try{
+      if(!(window.coreState && coreState.addStat)) return;
+      coreState.addStat(area, dir*STAT_GAIN, 'routine:'+area);
+      if(dir>0 && coreState.addXp) coreState.addXp(STAT_XP, 'routine:'+area);
+      if(dir>0){ var t=document.getElementById('toast'); if(t){ t.textContent='+'+STAT_GAIN+' '+(AREA_NAME[area]||area); t.className='toast show'; clearTimeout(t._rt); t._rt=setTimeout(function(){ t.className='toast'; },1800); } }
+    }catch(e){}
+  }
   var CHECK='<svg viewBox="0 0 24 24" fill="none" stroke="#04130c" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
   function render(poppedId){
     var total=R.tasks.length, doneCount=R.tasks.filter(function(t){ return prog.done[t.id]; }).length;
@@ -2063,7 +2086,10 @@ body.edit-active .nav{display:none;}
       +'</div></div>';
     host.innerHTML=h;
     Array.prototype.forEach.call(host.querySelectorAll('.cr-item'), function(b){ b.addEventListener('click', function(){
-      var id=b.getAttribute('data-id'); prog.done[id]=!prog.done[id]; save();
+      var id=b.getAttribute('data-id'); var task=null; for(var i=0;i<R.tasks.length;i++){ if(String(R.tasks[i].id)===id){ task=R.tasks[i]; break; } }
+      prog.done[id]=!prog.done[id]; save();
+      // Feed the matching life-area stat so its trend graph updates (and reverse on un-check)
+      if(task) bumpArea(taskArea(task), prog.done[id]?1:-1);
       try{ window.coreSfx && window.coreSfx(prog.done[id]?'confirm':'tick'); }catch(e){}
       if(prog.done[id]){ try{ if(navigator.vibrate) navigator.vibrate(20); }catch(e){} }
       render(prog.done[id]?id:null);
