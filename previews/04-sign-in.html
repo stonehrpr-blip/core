@@ -317,6 +317,9 @@
     /* Google = glass */
     .auth-google { background: rgba(255,255,255,0.05); color: #fff; }
     .auth-google:hover { background: rgba(255,255,255,0.09); border-color: rgba(255,255,255,0.16); }
+    .auth-passkey { background: rgba(255,255,255,0.05); color: #fff; }
+    .auth-passkey:hover { background: rgba(255,255,255,0.09); border-color: rgba(120,160,255,0.42); box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 0 20px rgba(120,160,255,0.18); }
+    .auth-passkey svg { width:19px; height:19px; }
     .auth-btn svg { width:18px; height:18px; }
 
     /* Divider */
@@ -452,6 +455,10 @@
         <button class="auth-btn auth-google" onclick="signIn('google')">
           <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.56c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.56-2.77c-.99.66-2.26 1.06-3.72 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.84 14.1A6.6 6.6 0 0 1 5.5 12c0-.73.13-1.44.34-2.1V7.07H2.18A11 11 0 0 0 1 12c0 1.77.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15A11 11 0 0 0 12 1 11 11 0 0 0 2.18 7.07l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z"/></svg>
           Continue with Google
+        </button>
+        <button class="auth-btn auth-passkey" id="passkeyBtn" onclick="signIn('passkey')" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 11a6.5 6.5 0 0 1 13 0"/><path d="M7.5 13.5a4.5 4.5 0 0 1 9 0c0 2 .3 4 1 5.6"/><path d="M12 11.5a2 2 0 0 1 2 2c0 2.6.5 4.7 1.6 6.3"/><path d="M10.1 19.7c-1-1.6-1.6-3.7-1.6-6.2a3.5 3.5 0 0 1 .2-1.1"/></svg>
+          Continue with a passkey
         </button>
       </div>
 
@@ -625,6 +632,7 @@
   function signIn(method) {
     if (window.coreTrack) coreTrack('sign_in_method_chosen', { method, real: !!(window.coreAccounts && window.coreAccounts.isReal()) });
     if (method === 'email') { window.location.href = '05-sign-in-email.html'; return; }
+    if (method === 'passkey') { passkeySignIn(); return; }
     // REAL backend — kick off Supabase OAuth round-trip (redirects away).
     // The Face ID / picker sheets are LOCAL-mode demo UX only.
     if ((method === 'apple' || method === 'google') && window.coreAccounts && window.coreAccounts.isReal()) {
@@ -667,6 +675,68 @@
   //   New account     -> 07-trial.html  (full onboarding)
   //   Existing + done -> 20-dashboard.html  (welcome back)
   //   Existing mid-trial -> 07-trial.html  (their saved progress is restored)
+  // ── Passkeys (WebAuthn) ───────────────────────────────────────────────
+  // Real platform-authenticator (Touch ID / Face ID / Windows Hello) sign-in.
+  // Registers a passkey on first use, then authenticates with it thereafter.
+  // NOTE: production should verify the attestation/assertion server-side and
+  // bind it to the Supabase user; here a successful biometric gates the account.
+  function _rand(n){ var a=new Uint8Array(n); window.crypto.getRandomValues(a); return a; }
+  function _b64u(buf){ var b=new Uint8Array(buf), s=''; for(var i=0;i<b.length;i++) s+=String.fromCharCode(b[i]); return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
+  function _unb64u(str){ str=str.replace(/-/g,'+').replace(/_/g,'/'); var pad=str.length%4; if(pad) str+='='.repeat(4-pad); var bin=atob(str), a=new Uint8Array(bin.length); for(var i=0;i<bin.length;i++) a[i]=bin.charCodeAt(i); return a; }
+
+  async function passkeySignIn() {
+    if (!window.PublicKeyCredential || !navigator.credentials) {
+      alert('Passkeys aren’t supported on this device or browser.');
+      return;
+    }
+    var rpId = location.hostname || 'localhost';
+    var stored = '';
+    try { stored = localStorage.getItem('corePasskeyCred') || ''; } catch(e){}
+    try {
+      var cred;
+      if (stored) {
+        cred = await navigator.credentials.get({ publicKey: {
+          challenge: _rand(32), rpId: rpId, timeout: 60000,
+          userVerification: 'preferred',
+          allowCredentials: [{ id: _unb64u(stored), type: 'public-key' }]
+        }});
+      } else {
+        cred = await navigator.credentials.create({ publicKey: {
+          challenge: _rand(32),
+          rp: { name: 'CORE', id: rpId },
+          user: { id: _rand(16), name: 'core-' + Date.now().toString(36), displayName: 'CORE user' },
+          pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+          authenticatorSelection: { residentKey: 'preferred', userVerification: 'preferred' },
+          attestation: 'none', timeout: 60000
+        }});
+        if (cred) { try { localStorage.setItem('corePasskeyCred', _b64u(cred.rawId)); } catch(e){} }
+      }
+      if (!cred) throw new Error('No credential returned');
+      var idHint;
+      try { idHint = localStorage.getItem('corePasskeyCred') || _b64u(cred.rawId); } catch(e){ idHint = _b64u(cred.rawId); }
+      if (window.coreTrack) coreTrack('sign_in', { method: 'passkey', isNew: !stored });
+      completeSignIn('passkey', { identifier: 'passkey:' + idHint.slice(0, 28), name: 'Passkey user' });
+    } catch (err) {
+      if (err && (err.name === 'NotAllowedError' || err.name === 'AbortError')) return; // user cancelled
+      console.error('[passkey] failed', err);
+      alert('Passkey sign-in failed: ' + (err && err.message ? err.message : 'unknown error'));
+    }
+  }
+  window.passkeySignIn = passkeySignIn;
+
+  // Reveal the passkey button only when a platform authenticator is available.
+  (function revealPasskey(){
+    var btn = document.getElementById('passkeyBtn');
+    if (!btn || !window.PublicKeyCredential) return;
+    var show = function(){ btn.hidden = false; };
+    try {
+      if (PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable) {
+        PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+          .then(function(ok){ if (ok) show(); }).catch(function(){});
+      } else { show(); }
+    } catch(e){ show(); }
+  })();
+
   function completeSignIn(method, opts) {
     opts = opts || {};
     // Pick a stable identifier per provider so the same person mapping back
@@ -679,6 +749,8 @@
       identifier = opts.email || '';
     } else if (method === 'email') {
       identifier = opts.email || '';
+    } else if (method === 'passkey') {
+      identifier = opts.identifier || opts.email || '';
     }
     if (!identifier) {
       // Safety fallback — shouldn't happen but never break the flow
