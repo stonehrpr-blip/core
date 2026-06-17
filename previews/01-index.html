@@ -207,24 +207,22 @@
       0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
       50%      { opacity: 1;   transform: translate(-50%, -50%) scale(1.08); }
     }
-    /* App-icon tile — dark, premium, the new CORE growth-arrow mark in white */
+    /* App-icon tile — matte black with depth, the new CORE growth-arrow in 3D chrome */
     .logo-icon {
       width: 116px; height: 116px;
       border-radius: 27px;
-      background: linear-gradient(157deg, #161618 0%, #0a0a0b 100%);
+      background: linear-gradient(157deg, #202024 0%, #0c0c0e 100%);
       display: flex; align-items: center; justify-content: center;
       box-shadow:
-        0 16px 40px rgba(0,0,0,0.6),
-        0 0 0 1px rgba(255,255,255,0.07),
-        inset 0 1px 0 rgba(255,255,255,0.08),
-        0 0 30px rgba(120,160,255,0.10);
+        0 18px 44px rgba(0,0,0,0.7),
+        0 0 0 1px rgba(255,255,255,0.06),
+        inset 0 1.5px 0 rgba(255,255,255,0.10),
+        inset 0 -7px 18px rgba(0,0,0,0.5),
+        0 0 30px rgba(120,160,255,0.08);
       animation: logoFloat 6s ease-in-out infinite;
       will-change: transform;
     }
-    .logo-icon .logo-svg {
-      width: 74px; height: 74px;
-      filter: drop-shadow(0 0 6px rgba(120,160,255,0.28));
-    }
+    .logo-icon .logo-svg { width: 78px; height: 78px; }
     @keyframes logoFloat {
       0%, 100% { transform: translateY(0); }
       50%      { transform: translateY(-3px); }
@@ -387,10 +385,35 @@
 
       <div class="logo-mark" aria-hidden="true">
         <div class="logo-icon">
-          <svg class="logo-svg" viewBox="0 0 100 100" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M71 27 A34 34 0 1 0 71 73"/>
-            <path d="M30 52 L44 62 L54 50 L76 27"/>
-            <path d="M63 27 L77 27 L77 41"/>
+          <svg class="logo-svg" viewBox="0 0 100 100">
+            <defs>
+              <linearGradient id="coreChrome" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stop-color="#f6f8fb"/>
+                <stop offset="16%"  stop-color="#c4cad3"/>
+                <stop offset="40%"  stop-color="#ffffff"/>
+                <stop offset="50%"  stop-color="#a7adb7"/>
+                <stop offset="60%"  stop-color="#ffffff"/>
+                <stop offset="82%"  stop-color="#969ca7"/>
+                <stop offset="100%" stop-color="#dfe3e9"/>
+              </linearGradient>
+              <filter id="coreLift" x="-30%" y="-30%" width="160%" height="160%">
+                <feDropShadow dx="0" dy="2.2" stdDeviation="2.2" flood-color="#000" flood-opacity="0.55"/>
+              </filter>
+            </defs>
+            <g filter="url(#coreLift)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <!-- depth shadow under the tube -->
+              <g transform="translate(0,1.6)" stroke="#2a2d33" stroke-width="9" opacity="0.9">
+                <path d="M71 27 A34 34 0 1 0 71 73"/><path d="M30 52 L44 62 L54 50 L76 27"/><path d="M63 27 L77 27 L77 41"/>
+              </g>
+              <!-- chrome body -->
+              <g stroke="url(#coreChrome)" stroke-width="8">
+                <path d="M71 27 A34 34 0 1 0 71 73"/><path d="M30 52 L44 62 L54 50 L76 27"/><path d="M63 27 L77 27 L77 41"/>
+              </g>
+              <!-- top specular highlight -->
+              <g transform="translate(0,-1)" stroke="#ffffff" stroke-width="2.4" opacity="0.75">
+                <path d="M71 27 A34 34 0 1 0 71 73"/><path d="M30 52 L44 62 L54 50 L76 27"/><path d="M63 27 L77 27 L77 41"/>
+              </g>
+            </g>
           </svg>
         </div>
       </div>
