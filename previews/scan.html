@@ -490,6 +490,18 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
 .snap-lightbox.on{opacity:1;}
 .snap-lightbox img{max-width:100%;max-height:100%;border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.7);transform:scale(.92);transition:transform .3s cubic-bezier(.22,1,.36,1);}
 .snap-lightbox.on img{transform:scale(1);}
+/* food nutrition card */
+.res-snap.food-hero{width:100%;height:190px;border-radius:20px;object-fit:cover;margin-bottom:8px;box-shadow:0 14px 34px rgba(0,0,0,.45);}
+.food-nutri{border-radius:18px;padding:16px 16px 14px;}
+.food-cal{display:flex;align-items:baseline;justify-content:center;gap:6px;margin-bottom:15px;}
+.food-cal-n{font-size:40px;font-weight:900;letter-spacing:-1.5px;color:#fff;font-variant-numeric:tabular-nums;text-shadow:0 0 24px color-mix(in srgb,var(--sc) 45%,transparent);}
+.food-cal-u{font-size:14px;font-weight:800;color:var(--sc);}
+.food-macros{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.fm{text-align:center;}
+.fm-g{font-size:19px;font-weight:900;color:#fff;}.fm-g small{font-size:11px;font-weight:700;opacity:.65;margin-left:1px;}
+.fm-k{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:2px;}
+.fm-bar{height:5px;border-radius:99px;background:rgba(255,255,255,0.09);overflow:hidden;margin-top:9px;}
+.fm-bar i{display:block;height:100%;width:0;border-radius:99px;box-shadow:0 0 8px currentColor;transition:width .9s cubic-bezier(.22,1,.36,1);}
 .res-lead{margin:12px 2px 2px;font-size:14.5px;line-height:1.5;color:#e7ecf6;font-weight:600;text-align:center;}
 .bd-dot{width:9px;height:9px;border-radius:50%;flex:none;box-shadow:0 0 8px currentColor;}
 .res-sec .sec-hint{font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:.02em;text-transform:none;margin-left:6px;}
@@ -897,6 +909,20 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
   function scoreColor(n){ n=+n||0; return n>=75?'#34d399':n>=55?'#fbbf24':n>=40?'#fb923c':'#fb7185'; }
   function topPctile(n){ return Math.max(1, Math.min(99, Math.round(100 - (+n||0)*0.95))); }
   function letterGrade(n){ n=+n||0; return n>=90?'S':n>=80?'A':n>=70?'B':n>=60?'C':n>=45?'D':'E'; }
+  // Food nutrition card — calorie hero + protein/carbs/fat macro bars
+  function foodHtml(ai){
+    if(!ai) return '';
+    var cals=ai.calories, p=ai.protein, c=ai.carbs, f=ai.fat;
+    var hasMacros=(p!=null||c!=null||f!=null);
+    if(cals==null && !hasMacros) return '';
+    var macros=[{k:'Protein',g:p,col:'#FF6B6B',cal:(p||0)*4},{k:'Carbs',g:c,col:'#FFCB3D',cal:(c||0)*4},{k:'Fat',g:f,col:'#4A8FFF',cal:(f||0)*9}];
+    var tot=macros.reduce(function(a,m){return a+m.cal;},0)||1;
+    var cal=(cals!=null)?'<div class="food-cal"><span class="food-cal-n" id="foodCal" data-n="'+cals+'">0</span><span class="food-cal-u">kcal</span></div>':'';
+    var mac=hasMacros?('<div class="food-macros">'+macros.map(function(m){ var pct=Math.round(m.cal/tot*100);
+      return '<div class="fm"><div class="fm-g" style="color:'+m.col+'">'+(m.g!=null?m.g+'<small>g</small>':'—')+'</div><div class="fm-k">'+m.k+'</div>'
+        +'<div class="fm-bar"><i data-w="'+pct+'" style="background:'+m.col+'"></i></div></div>'; }).join('')+'</div>'):'';
+    return '<div class="res-sec">Nutrition <span class="sec-hint">AI estimate</span></div><div class="food-nutri glass">'+cal+mac+'</div>';
+  }
   // 4-axis radar for the physique breakdown (Proportions/Symmetry/Muscularity/Definition)
   function radarHtml(BD, color){
     var keys=Object.keys(BD), cx=100, cy=100, maxR=64, ang=[-90,0,90,180];
@@ -1029,9 +1055,9 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
       +'isBody=false ONLY if no human body is visible. '
       +'Scoring rubric — be accurate, do not inflate: 90-100 = competition-level conditioning, very lean with dense muscle; 80-89 = clearly athletic and muscular, advanced; 70-79 = fit, in good shape, some definition; 60-69 = average build, beginner muscularity or moderate body fat; below 60 = little visible muscle or high body fat. '
       +'Be honest and accurate — give a genuinely low score when it is deserved — but keep every word respectful and constructive. Never be insulting, mocking or demeaning; frame weak areas as things to build, not flaws to ridicule.',
-    food:'You are CORE\'s nutrition vision model. Look at this meal photo. Reply with STRICT JSON only, no markdown: '
-      +'{"isMeal":true|false,"score":0-100,"tier":"Excellent|Good|Balanced|Heavy|Poor","summary":"one sentence with an estimated calorie + protein read","tips":["3 short specific tips to make the meal healthier"]}. '
-      +'isMeal=false if there is no food or meal clearly visible. score = how healthy the meal is.',
+    food:'You are CORE\'s nutrition vision model — an expert dietitian. Identify the meal and estimate the nutrition of the visible portion. Reply with STRICT JSON only, no markdown: '
+      +'{"isMeal":true|false,"name":"short meal name (e.g. Grilled chicken & rice)","score":0-100,"tier":"Excellent|Good|Balanced|Heavy|Poor","calories":0,"protein":0,"carbs":0,"fat":0,"summary":"one honest sentence about the meal","tips":["3 short specific swaps to make it healthier"]}. '
+      +'calories = total kcal for the visible plate; protein/carbs/fat = grams. score = how healthy and balanced the meal is. isMeal=false ONLY if no food is clearly visible.',
     posture:'You are CORE\'s posture vision model. Look at this full-body photo and assess head, shoulder and hip alignment. Reply with STRICT JSON only, no markdown: '
       +'{"isPerson":true|false,"score":0-100,"tier":"Excellent|Good|Fair|Needs work","summary":"one sentence on the main alignment issue","tips":["3 short corrective tips"]}. '
       +'isPerson=false if no standing person is clearly visible.',
@@ -1047,6 +1073,7 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
     if(d.rank && typeof d.rank.score==='number'){ d.breakdown=d.breakdown||null; d.tips=d.tips||null; return d; }   // already in result shape
     var score=(typeof d.score==='number') ? d.score : null;
     return { isBody:d.isBody, isMeal:d.isMeal, isPerson:d.isPerson, summary:d.summary||'', weakPoints:d.weakPoints||[], breakdown:d.breakdown||null, tips:(d.tips&&d.tips.length?d.tips:null),
+             name:d.name||null, calories:(typeof d.calories==='number'?d.calories:null), protein:(typeof d.protein==='number'?d.protein:null), carbs:(typeof d.carbs==='number'?d.carbs:null), fat:(typeof d.fat==='number'?d.fat:null),
              rank: score==null ? null : { score:score, tier:d.tier||grade(Math.round(score)) } };
   }
   function supabasePhysique(img){
@@ -1408,7 +1435,7 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
     res.innerHTML=
       '<button class="res-close" id="resClose" type="button" aria-label="Done">'+svg('<path d="M6 6l12 12M18 6L6 18"/>')+'</button>'
       +gallery
-      +((!isPhysique&&snapDataUrl)?'<img class="res-snap" src="'+snapDataUrl+'" alt="scan"/>':'')
+      +((!isPhysique&&snapDataUrl)?'<img class="res-snap'+(type==='food'?' food-hero':'')+'" src="'+snapDataUrl+'" alt="scan"/>':'')
       +'<div class="res-score"><svg class="res-ring" viewBox="0 0 172 172">'
         +'<defs><linearGradient id="resGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--sc)" stop-opacity="1"/><stop offset="1" stop-color="var(--sc)" stop-opacity="0.5"/></linearGradient></defs>'
         +'<circle class="bg" cx="86" cy="86" r="'+R+'"></circle>'
@@ -1419,9 +1446,10 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
       +'<div class="res-letterrow"><span class="res-letter">'+letterGrade(score)+'</span><span class="res-grade">'+gradeTxt+'</span></div>'
       +'<div class="res-pctbar"><div class="res-pctbar-track"><i style="width:'+(100-topP)+'%"></i><span class="res-pctbar-dot" style="left:'+(100-topP)+'%"></span></div>'
         +'<div class="res-pctbar-cap">Top <b>'+topP+'%</b> · better than <b>'+(100-topP)+'%</b></div></div></div>'
-      +'<div class="res-title">'+s.label+'</div>'
-      +'<div class="res-sub">'+subTxt+'</div>'
+      +'<div class="res-title">'+((type==='food'&&ai&&ai.name)?ai.name:s.label)+'</div>'
+      +'<div class="res-sub">'+(type==='food'?'Health score · scored by CORE vision AI':subTxt)+'</div>'
       +(ai&&ai.summary?'<div class="res-lead">'+ai.summary+'</div>':'')
+      +(type==='food'?foodHtml(ai):'')
       +bdHtml
       +focSec
       +'<div class="res-sec">Coach notes</div>'
@@ -1440,7 +1468,10 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
     var fg=$('#resFg'); requestAnimationFrame(function(){ fg.setAttribute('stroke-dashoffset', C*(1-score/100)); });
     var numEl=$('#resNum'), n0=0, t0=performance.now();
     (function count(t){ var p=Math.min(1,(t-t0)/1000); numEl.textContent=Math.round(score*(1-Math.pow(1-p,3))); if(p<1) requestAnimationFrame(count); })(t0);
-    requestAnimationFrame(function(){ Array.prototype.forEach.call(res.querySelectorAll('.bd-track i'), function(el){ el.style.width=el.getAttribute('data-w')+'%'; }); });
+    requestAnimationFrame(function(){ Array.prototype.forEach.call(res.querySelectorAll('.bd-track i,.fm-bar i'), function(el){ el.style.width=el.getAttribute('data-w')+'%'; }); });
+    // food: count up calories
+    var fc=res.querySelector('#foodCal');
+    if(fc){ var cal=+fc.getAttribute('data-n')||0, ct=performance.now(); (function cc(t){ var pr=Math.min(1,(t-ct)/1000); fc.textContent=Math.round(cal*(1-Math.pow(1-pr,3))); if(pr<1) requestAnimationFrame(cc); })(ct); }
     try{ if(navigator.vibrate) navigator.vibrate([0,30,40,20]); }catch(e){}
 
     $('#resClose').addEventListener('click', function(){ res.classList.remove('on'); updateLast(); });
