@@ -207,15 +207,23 @@
       0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
       50%      { opacity: 1;   transform: translate(-50%, -50%) scale(1.08); }
     }
-    .logo-mark img {
-      width: 112px; height: 112px;
-      object-fit: contain;
-      /* white-on-black mark blends into the matte field; glow lifts it off */
-      filter:
-        drop-shadow(0 0 16px rgba(120,160,255,0.16))
-        drop-shadow(0 0 36px rgba(255,255,255,0.05));
+    /* App-icon tile — dark, premium, the new CORE growth-arrow mark in white */
+    .logo-icon {
+      width: 116px; height: 116px;
+      border-radius: 27px;
+      background: linear-gradient(157deg, #161618 0%, #0a0a0b 100%);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow:
+        0 16px 40px rgba(0,0,0,0.6),
+        0 0 0 1px rgba(255,255,255,0.07),
+        inset 0 1px 0 rgba(255,255,255,0.08),
+        0 0 30px rgba(120,160,255,0.10);
       animation: logoFloat 6s ease-in-out infinite;
       will-change: transform;
+    }
+    .logo-icon .logo-svg {
+      width: 74px; height: 74px;
+      filter: drop-shadow(0 0 6px rgba(120,160,255,0.28));
     }
     @keyframes logoFloat {
       0%, 100% { transform: translateY(0); }
@@ -331,19 +339,21 @@
     @media (max-width: 380px), (max-height: 720px) {
       .frame { padding: 52px 22px 28px; }
       .logo-mark { margin-top: 46px; }
-      .logo-mark img { width: 96px; height: 96px; }
+      .logo-icon { width: 100px; height: 100px; border-radius: 24px; }
+      .logo-icon .logo-svg { width: 64px; height: 64px; }
       .hero { margin-top: 24px; }
       .hero h1 { font-size: 46px; letter-spacing: -1.8px; }
       .sub { margin-top: 16px; font-size: 12px; letter-spacing: 0.18em; }
     }
     @media (max-width: 340px) {
       .hero h1 { font-size: 38px; letter-spacing: -1.5px; }
-      .logo-mark img { width: 84px; height: 84px; }
+      .logo-icon { width: 88px; height: 88px; border-radius: 21px; }
+      .logo-icon .logo-svg { width: 56px; height: 56px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
       .star, .brand .dot,
-      .topbar, .logo-mark, .logo-mark img, .hero, .sub, .cta-wrap, .sub .cursor, .legal {
+      .topbar, .logo-mark, .logo-icon, .hero, .sub, .cta-wrap, .sub .cursor, .legal {
         animation: none !important; opacity: 1 !important; transform: none !important;
       }
     }
@@ -376,7 +386,13 @@
       </div>
 
       <div class="logo-mark" aria-hidden="true">
-        <img src="assets/logo.png" alt="Core" />
+        <div class="logo-icon">
+          <svg class="logo-svg" viewBox="0 0 100 100" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M71 27 A34 34 0 1 0 71 73"/>
+            <path d="M30 52 L44 62 L54 50 L76 27"/>
+            <path d="M63 27 L77 27 L77 41"/>
+          </svg>
+        </div>
       </div>
 
       <div class="hero">
