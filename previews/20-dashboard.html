@@ -263,10 +263,14 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 .w-qa-btn svg{width:20px;height:20px;color:var(--blue);}
 
 /* ── Weather ── */
-.w-weather{display:flex;align-items:center;gap:10px;padding:10px 16px;}
+.w-weather{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;border-radius:12px;transition:background .15s;-webkit-tap-highlight-color:transparent;}
+.w-weather:hover{background:rgba(255,255,255,.03);}
+.w-weather:active{transform:scale(.99);}
 .w-weather-icon{font-size:22px;}
 .w-weather-icon svg{width:22px;height:22px;}
 .w-weather-label{font-size:13px;font-weight:700;flex:1;}
+.w-weather-temp{font-size:20px;font-weight:900;color:#fff;letter-spacing:-.5px;font-variant-numeric:tabular-nums;}
+.w-weather-temp:empty{display:none;}
 .w-weather-time{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
   background:var(--bg-card);border:1px solid var(--border);padding:3px 8px;border-radius:999px;}
 
@@ -600,6 +604,56 @@ body.edit-active .nav{display:none;}
 @media(prefers-reduced-motion:reduce){.lscore-card,.ls-big,.ls-xpfill::after{animation:none!important;}}
 .legacy-hidden{display:none!important;}
 #dayStrip,.edit-hint,#editHint{display:none!important;}
+
+/* ── Weakest-pillar callout inside Life Score (deep-links to that area) ── */
+.ls-weak{display:inline-flex;align-items:center;gap:8px;margin:13px auto 0;padding:7px 13px 7px 9px;border-radius:999px;text-decoration:none;
+  background:color-mix(in srgb,var(--wkc,#0A84FF) 14%,rgba(255,255,255,.03));border:1px solid color-mix(in srgb,var(--wkc,#0A84FF) 34%,transparent);transition:transform .12s,background .2s;}
+.ls-weak:active{transform:scale(.96);}
+.ls-weak .lw-dot{width:8px;height:8px;border-radius:50%;flex:none;background:var(--wkc,#0A84FF);box-shadow:0 0 8px var(--wkc,#0A84FF);}
+.ls-weak .lw-tx{font-size:12px;font-weight:700;color:#dfe5f2;}
+.ls-weak .lw-tx b{color:var(--wkc,#0A84FF);font-weight:900;}
+.ls-weak .lw-go{font-size:11px;font-weight:900;color:var(--wkc,#0A84FF);}
+.ls-weak:empty{display:none;}
+
+/* ── Today hero: smart brief + momentum ring + lock-in CTA ── */
+.th-brief{display:flex;align-items:center;gap:8px;margin:18px 2px 10px;font-size:13px;line-height:1.35;font-weight:600;color:#cfd6e6;}
+.th-brief svg{width:16px;height:16px;flex:none;color:#FFCB3D;}
+.th-brief:empty{display:none;}
+.th-card{position:relative;overflow:hidden;display:flex;align-items:center;gap:15px;padding:16px 16px;border-radius:18px;
+  background:radial-gradient(120% 120% at 0% 0%,rgba(10,132,255,.16),transparent 60%),linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.012));
+  border:1px solid rgba(10,132,255,.24);}
+.th-ring{position:relative;width:62px;height:62px;flex:none;}
+.th-ring svg{width:62px;height:62px;transform:rotate(-90deg);}
+.thr-bg{fill:none;stroke:rgba(255,255,255,.10);stroke-width:5;}
+.thr-fg{fill:none;stroke:#0A84FF;stroke-width:5;stroke-linecap:round;filter:drop-shadow(0 0 5px rgba(10,132,255,.55));transition:stroke-dashoffset .7s cubic-bezier(.22,1,.36,1),stroke .4s;}
+.th-ring.full .thr-fg{stroke:#34D399;filter:drop-shadow(0 0 6px rgba(52,211,153,.6));}
+.thr-mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;}
+.thr-mid b{font-size:15px;font-weight:900;color:#fff;font-variant-numeric:tabular-nums;}
+.thr-mid span{font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:2px;}
+.th-mid{flex:1;min-width:0;}
+.th-mid-t{font-size:14.5px;font-weight:800;color:#fff;}
+.th-mid-s{font-size:11.5px;font-weight:700;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.th-pill{display:inline-flex;align-items:center;gap:4px;}
+.th-pill svg{width:12px;height:12px;}
+.th-pill.xp{color:#FFCB3D;} .th-pill.fire{color:#FF8A3D;}
+.th-cta{flex:none;align-self:stretch;display:inline-flex;align-items:center;gap:5px;padding:0 15px;border:none;border-radius:13px;cursor:pointer;
+  font:inherit;font-size:13px;font-weight:900;color:#fff;background:linear-gradient(135deg,#0A84FF,#5E5CE6);box-shadow:0 7px 18px rgba(10,132,255,.34);transition:transform .12s,box-shadow .2s;-webkit-appearance:none;appearance:none;}
+.th-cta:active{transform:scale(.95);}
+.th-cta svg{width:15px;height:15px;}
+.th-card.done .th-cta{background:linear-gradient(135deg,#34D399,#10B981);box-shadow:0 7px 18px rgba(52,211,153,.32);}
+@media(prefers-reduced-motion:reduce){.thr-fg{transition:none!important;}}
+
+/* ── Permanent "+ Add widget" ghost tile (discoverable without edit mode) ── */
+.w-add-ghost{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin:2px 0 4px;padding:14px;border-radius:16px;cursor:pointer;
+  font:inherit;font-size:13px;font-weight:800;color:var(--muted);background:rgba(255,255,255,.02);border:1.5px dashed rgba(255,255,255,.14);transition:border-color .2s,color .2s,background .2s;-webkit-appearance:none;appearance:none;}
+.w-add-ghost:hover{border-color:rgba(10,132,255,.5);color:#9fc4ff;background:rgba(10,132,255,.05);}
+.w-add-ghost:active{transform:scale(.98);}
+.w-add-ghost svg{width:16px;height:16px;}
+body.edit-active .w-add-ghost{display:none;}
+
+/* ── Header temperature ── */
+.dh-temp{font-size:12px;font-weight:800;color:#cfd6e6;margin-left:2px;}
+.dh-temp:empty{display:none;}
 </style>
   <link rel="stylesheet" href="_lib/core-responsive.css">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
@@ -848,7 +902,7 @@ body.edit-active .nav{display:none;}
       <div class="dh-greet">
         <div class="dh-greet-l">
           <div class="dash-greeting" id="dashGreeting">Good morning</div>
-          <div class="dh-time"><span id="dashTime">—</span><span class="dh-wx" id="dashWeatherGlyph"></span></div>
+          <div class="dh-time"><span id="dashTime">—</span><span class="dh-wx" id="dashWeatherGlyph"></span><span class="dh-temp" id="dashTemp"></span></div>
         </div>
         <div class="dh-gactions">
           <button class="iconbtn" id="helpBtn" aria-label="Help">?</button>
@@ -867,9 +921,8 @@ body.edit-active .nav{display:none;}
 
     <!-- ===== Routine dashboard (rank + to-do + AI builder) ===== -->
     <div class="scroll" id="dashMain">
-      <!-- Daily quote -->
-      <div class="dash-sec">Daily quote</div>
-      <div class="dq-card"><svg class="dq-mark" viewBox="0 0 24 24" fill="currentColor"><path d="M7 7h4v4l-2 4H6l2-4V7zm7 0h4v4l-2 4h-3l2-4V7z"/></svg><p id="dashQuote">Small steps every day.</p></div>
+      <!-- Today: smart brief + momentum ring + lock-in CTA (built by JS) -->
+      <div id="todayHero"></div>
 
       <!-- Life Score -->
       <div class="dash-sec">Life Score</div>
@@ -879,9 +932,14 @@ body.edit-active .nav{display:none;}
         <div class="ls-delta flat" id="lsDelta"></div>
         <div class="ls-cap">Life Score</div>
         <div class="ls-headline" id="lsHeadline"></div>
+        <a class="ls-weak" id="lsWeak" href="#" aria-label="Weakest area"></a>
         <div class="ls-xprow"><span id="lsLevel">Rank</span><span><b id="rankBarScore">0</b> XP to <span id="lsNextRank">—</span></span></div>
         <div class="ls-xpbar"><span class="ls-xpfill gold" id="lsXpFill"></span></div>
       </div>
+
+      <!-- Daily quote (demoted below Life Score) -->
+      <div class="dash-sec">Daily quote</div>
+      <div class="dq-card"><svg class="dq-mark" viewBox="0 0 24 24" fill="currentColor"><path d="M7 7h4v4l-2 4H6l2-4V7zm7 0h4v4l-2 4h-3l2-4V7z"/></svg><p id="dashQuote">Small steps every day.</p></div>
 
       <!-- Stat trends -->
       <div class="dash-sec st-head"><span>Stat trends</span><div class="st-toggle" id="stToggle"><button data-d="7" type="button">7d</button><button class="on" data-d="30" type="button">30d</button></div></div>
@@ -2151,6 +2209,176 @@ body.edit-active .nav{display:none;}
     }); });
   }
   render();
+})();
+</script>
+
+<!-- ============================================================
+     Today hero (momentum ring + lock-in CTA + smart brief),
+     weakest-pillar callout, header temperature.
+     Self-contained: reads localStorage + coreState directly.
+     ============================================================ -->
+<script>
+(function(){
+  function $(id){ return document.getElementById(id); }
+  function lsGet(k,d){ try{ var v=localStorage.getItem(k); return v==null?d:v; }catch(e){ return d; } }
+  function jget(k,d){ try{ var v=JSON.parse(localStorage.getItem(k)); return v==null?d:v; }catch(e){ return d; } }
+
+  var PAGE={strength:'gym.html',focus:'focus.html',wealth:'wealth.html',health:'health.html',social:'social.html',purpose:'willpower.html'};
+
+  // ── today's task progress (prefer coach routine, fall back to legacy) ──
+  function taskState(){
+    var todayISO=new Date().toISOString().slice(0,10);
+    var R=jget('coreCoachRoutine.v1',null);
+    if(R && R.tasks && R.tasks.length){
+      var p=jget('coreCoachRoutineDone.v1',null); if(!p || p.date!==todayISO) p={date:todayISO,done:{}};
+      var done=R.tasks.filter(function(t){ return p.done[t.id]; }).length;
+      var first=null; for(var i=0;i<R.tasks.length;i++){ if(!p.done[R.tasks[i].id]){ first=R.tasks[i]; break; } }
+      return {has:true,source:'coach',total:R.tasks.length,done:done,first:first};
+    }
+    var L=jget('coreRoutine.v1',null);
+    if(L && L.length){
+      var d2=L.filter(function(t){ return t.done; }).length;
+      var f2=null; for(var j=0;j<L.length;j++){ if(!L[j].done){ f2=L[j]; break; } }
+      return {has:true,source:'legacy',total:L.length,done:d2,first:f2};
+    }
+    return {has:false,source:null,total:0,done:0,first:null};
+  }
+
+  function xpToday(){
+    var todayKey=new Date().toDateString();
+    var cur=parseInt(lsGet('coreXP','0'),10)||0;
+    var raw=jget('coreXpToday.v1',{});
+    if(raw.day!==todayKey){ raw={day:todayKey,base:cur}; try{ localStorage.setItem('coreXpToday.v1',JSON.stringify(raw)); }catch(e){} }
+    return Math.max(0, cur-(raw.base||cur));
+  }
+
+  function streakDays(){
+    try{ if(window.coreState){ var s=coreState.read(); return (s.streak&&s.streak.days)||0; } }catch(e){}
+    return parseInt(lsGet('coreStreakDays','0'),10)||0;
+  }
+
+  // ── smart morning/now brief ──
+  function brief(ts){
+    var h=new Date().getHours();
+    if(ts.has && ts.done===ts.total && ts.total>0) return "Everything's done — you've locked in today. 🔒";
+    var st=streakDays();
+    if(st>=1 && [2,4,6,9,13,29].indexOf(st)>=0) return "One more day to a "+(st+1)+"-day streak — don't break the chain.";
+    if(ts.has && ts.first){
+      var left=ts.total-ts.done;
+      if(h<12) return "Win the morning — start with "+ts.first.title+".";
+      return "You're "+left+" task"+(left===1?'':'s')+" from locking in. Knock out "+ts.first.title+" first.";
+    }
+    if(!ts.has) return "Build a quick routine and start stacking wins today.";
+    return "Keep the momentum — log one win in each area.";
+  }
+
+  var SPARK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.6 4.6L18 9l-4.4 1.4L12 15l-1.6-4.6L6 9l4.4-1.4z"/></svg>';
+  var FIRE='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3-1 4-1 6 0 1 1 2 1 2s2-1 2-3c2 2 3 4 3 7a5 5 0 0 1-10 0c0-3 2-5 3-7 1 2 2 2 2 2s0-3 0-7Z"/></svg>';
+  var BOLT='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>';
+  var ARROW='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+  var LOCK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+
+  function renderToday(){
+    var host=$('todayHero'); if(!host) return;
+    var ts=taskState();
+    var pct = ts.total? ts.done/ts.total : 0;
+    var r=26, C=2*Math.PI*r, off=(C*(1-pct)).toFixed(1);
+    var full = ts.total>0 && ts.done===ts.total;
+    var xp=xpToday(), st=streakDays();
+
+    var midTitle, ctaLabel, ctaIcon;
+    if(!ts.has){ midTitle='No routine yet'; ctaLabel='Build'; ctaIcon=ARROW; }
+    else if(full){ midTitle='Locked in for today'; ctaLabel='Done'; ctaIcon=LOCK; }
+    else { midTitle=(ts.total-ts.done)+' task'+((ts.total-ts.done)===1?'':'s')+' left today'; ctaLabel='Lock in'; ctaIcon=ARROW; }
+
+    var subPills='';
+    if(xp>0) subPills+='<span class="th-pill xp">'+BOLT+'+'+xp+' XP</span>';
+    if(st>0) subPills+='<span class="th-pill fire">'+FIRE+st+'d</span>';
+    if(!subPills) subPills='<span class="th-pill">Tap to begin</span>';
+
+    host.innerHTML=
+      '<div class="th-brief">'+SPARK+'<span>'+brief(ts)+'</span></div>'+
+      '<div class="th-card'+(full?' done':'')+'">'+
+        '<div class="th-ring'+(full?' full':'')+'"><svg viewBox="0 0 62 62"><circle class="thr-bg" cx="31" cy="31" r="'+r+'"/>'+
+          '<circle class="thr-fg" cx="31" cy="31" r="'+r+'" style="stroke-dasharray:'+C.toFixed(1)+';stroke-dashoffset:'+off+'"/></svg>'+
+          '<div class="thr-mid"><b>'+ts.done+'/'+ts.total+'</b><span>Today</span></div></div>'+
+        '<div class="th-mid"><div class="th-mid-t">'+midTitle+'</div><div class="th-mid-s">'+subPills+'</div></div>'+
+        '<button class="th-cta" id="lockInBtn" type="button">'+ctaLabel+ctaIcon+'</button>'+
+      '</div>';
+
+    $('lockInBtn').addEventListener('click',function(){
+      try{ window.coreSfx && window.coreSfx('tap'); }catch(e){}
+      if(!ts.has){ location.href='coach.html'; return; }
+      var card=document.querySelector('#coachRoutineCard .croutine') || document.getElementById('coachRoutineCard');
+      if(full){
+        var trends=document.getElementById('statTrends'); if(trends) trends.scrollIntoView({behavior:'smooth',block:'center'});
+        return;
+      }
+      if(card){
+        card.scrollIntoView({behavior:'smooth',block:'center'});
+        // pulse the first undone task
+        setTimeout(function(){
+          var items=card.querySelectorAll('.cr-item:not(.done)');
+          var el=items && items[0];
+          if(el){ var o=el.style.boxShadow; el.style.transition='box-shadow .25s'; el.style.boxShadow='0 0 0 2px rgba(10,132,255,.7), 0 0 18px rgba(10,132,255,.5)';
+            setTimeout(function(){ el.style.boxShadow=o||''; },1100); }
+        },420);
+      }
+    });
+  }
+
+  // ── weakest-pillar callout inside Life Score ──
+  function renderWeak(){
+    var el=$('lsWeak'); if(!el) return;
+    var wk=null;
+    try{
+      if(window.coreState && coreState.STAT_DEFS && coreState.statValue){
+        coreState.STAT_DEFS.forEach(function(d){ var v=coreState.statValue(d.key); if(wk===null||v<wk.v) wk={key:d.key,name:d.name,color:d.color,v:v}; });
+      }
+    }catch(e){}
+    if(!wk){ el.innerHTML=''; el.style.display='none'; return; }
+    el.style.display='';
+    el.href=PAGE[wk.key]||('stat.html?stat='+wk.key);
+    el.innerHTML='<span class="lw-dot"></span><span class="lw-tx"><b>'+wk.name+'</b> is dragging you ('+Math.round(wk.v)+')</span><span class="lw-go">Fix →</span>';
+  }
+
+  // ── header temperature (from ambient weather event / cached) ──
+  function renderTemp(){
+    var el=$('dashTemp'); if(!el) return;
+    var t=lsGet('coreWeatherTemp','');
+    el.textContent = t!=='' ? (Math.round(parseFloat(t))+'°') : '';
+  }
+  window.addEventListener('dashAmbientChange',function(e){
+    if(e.detail && typeof e.detail.temp==='number'){ try{ localStorage.setItem('coreWeatherTemp',String(e.detail.temp)); }catch(_){}}
+    renderTemp();
+  });
+
+  // ── permanent "+ Add widget" ghost tile (discoverable without edit mode) ──
+  function mountGhost(){
+    var scroll=$('widgetScroll'); if(!scroll) return;
+    if(scroll.querySelector('.w-add-ghost')) return;
+    if(!scroll.querySelector('.widget-wrap[data-wid]')) return;   // empty-state already shows an add path
+    var b=document.createElement('button');
+    b.type='button'; b.className='w-add-ghost';
+    b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add widget';
+    b.addEventListener('click',function(){
+      try{ window.coreSfx && window.coreSfx('tap'); }catch(e){}
+      var gear=$('gearBtn'); if(gear && !document.body.classList.contains('edit-active')) gear.click();
+      var add=$('addBtn'); if(add) setTimeout(function(){ add.click(); },120);
+    });
+    scroll.appendChild(b);
+  }
+  // re-mount the ghost whenever the widget list re-renders
+  var scrollEl=$('widgetScroll');
+  if(scrollEl){
+    var mo=new MutationObserver(function(){ mountGhost(); });
+    mo.observe(scrollEl,{childList:true});
+  }
+
+  function renderAllHero(){ renderToday(); renderWeak(); renderTemp(); mountGhost(); }
+  renderAllHero();
+  window.addEventListener('coreStateChange',renderAllHero);
+  document.addEventListener('visibilitychange',function(){ if(!document.hidden) renderAllHero(); });
 })();
 </script>
 </body>

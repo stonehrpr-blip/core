@@ -312,16 +312,38 @@
         var LABELS = { clear: 'Clear skies', cloudy: 'Overcast', rain: 'Raining', snow: 'Snowing', fog: 'Foggy' };
         var amb = window.dashAmbient;
         var w = amb ? amb.getWeather() : 'clear';
-        // Condition only — the header glyph already shows time of day.
+        function rawTemp() { try { var t = localStorage.getItem('coreWeatherTemp'); return (t == null || t === '') ? null : parseFloat(t); } catch (e) { return null; } }
+        function unit() { try { return localStorage.getItem('coreTempUnit') || 'C'; } catch (e) { return 'C'; } }
+        function fmtTemp() {
+          var t = rawTemp(); if (t == null) return '';
+          return unit() === 'F' ? Math.round(t * 9 / 5 + 32) + '°F' : Math.round(t) + '°C';
+        }
+        // Tap toggles °C/°F — a small, useful interaction in place of a forecast page.
         host.innerHTML =
-          '<div class="w-weather">' +
+          '<div class="w-weather" id="wWeatherRow" role="button" tabindex="0" title="Tap to switch °C / °F">' +
           '<span class="w-weather-icon" id="wWIcon">' + (ICONS[w] || ICONS.clear) + '</span>' +
           '<span class="w-weather-label" id="wWLabel">' + (LABELS[w] || 'Clear') + '</span>' +
+          '<span class="w-weather-temp" id="wWTemp">' + fmtTemp() + '</span>' +
           '</div>';
+        function paint() {
+          var ic = host.querySelector('#wWIcon'), lb = host.querySelector('#wWLabel'), tp = host.querySelector('#wWTemp');
+          if (ic) ic.innerHTML = ICONS[w] || ICONS.clear;
+          if (lb) lb.textContent = LABELS[w] || 'Clear';
+          if (tp) tp.textContent = fmtTemp();
+        }
         function onAmb(e) {
-          var ic = host.querySelector('#wWIcon'), lb = host.querySelector('#wWLabel');
-          if (ic) ic.innerHTML = ICONS[e.detail.weather] || ICONS.clear;
-          if (lb) lb.textContent = LABELS[e.detail.weather] || 'Clear';
+          if (e.detail && e.detail.weather) w = e.detail.weather;
+          if (e.detail && typeof e.detail.temp === 'number') { try { localStorage.setItem('coreWeatherTemp', String(Math.round(e.detail.temp))); } catch (x) {} }
+          paint();
+        }
+        var row = host.querySelector('#wWeatherRow');
+        function toggleUnit() {
+          try { localStorage.setItem('coreTempUnit', unit() === 'F' ? 'C' : 'F'); } catch (e) {}
+          paint(); try { window.coreSfx && window.coreSfx('tick'); } catch (e) {}
+        }
+        if (row) {
+          row.addEventListener('click', toggleUnit);
+          row.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleUnit(); } });
         }
         window.addEventListener('dashAmbientChange', onAmb);
         host._cleanup = function () { window.removeEventListener('dashAmbientChange', onAmb); };

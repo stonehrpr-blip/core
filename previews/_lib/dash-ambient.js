@@ -25,6 +25,8 @@
   }
 
   var currentWeather = getP('weather') || 'clear';
+  var currentTemp = null;
+  try { var ct = localStorage.getItem('coreWeatherTemp'); if (ct != null && ct !== '') currentTemp = parseFloat(ct); } catch (e) {}
   var bgEl, canvas, ctx, rafId, t = 0;
   var stars = [], shots = [], rain = [], snow = [], ripples = [];
   var lightningTTL = 0;
@@ -205,28 +207,63 @@
       };
       glyphEl.innerHTML = WEATHER_SVG[currentWeather] || WEATHER_SVG.clear;
     }
-    try { window.dispatchEvent(new CustomEvent('dashAmbientChange', { detail: { time: 'night', weather: currentWeather } })); } catch(e) {}
+    emitWeather('night');
+  }
+
+  // Broadcast current weather + temperature so the dashboard header/widget update.
+  function emitWeather(timePhase) {
+    try {
+      window.dispatchEvent(new CustomEvent('dashAmbientChange', {
+        detail: { time: timePhase || 'night', weather: currentWeather, temp: (currentTemp == null ? undefined : currentTemp) }
+      }));
+    } catch (e) {}
   }
 
   // ── Weather fetch ─────────────────────────────────────────────────────────
+  // Resolve coordinates → open-meteo current conditions + temperature.
+  function applyWeather(lat, lon) {
+    fetch('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon + '&current=temperature_2m,weather_code')
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        var cur = d.current || {};
+        currentWeather = WMO[cur.weather_code || 0] || 'clear';
+        if (typeof cur.temperature_2m === 'number') {
+          currentTemp = cur.temperature_2m;
+          try { localStorage.setItem('coreWeatherTemp', String(Math.round(currentTemp))); } catch (e) {}
+        }
+        initParticles(); applyCSS(); emitWeather();
+      }).catch(function () {});
+  }
+
+  // Permission-free fallback: approximate location from IP, then fetch weather.
+  function ipFallback() {
+    try {
+      fetch('https://ipwho.is/?fields=latitude,longitude')
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d && typeof d.latitude === 'number' && typeof d.longitude === 'number') {
+            applyWeather(d.latitude.toFixed(4), d.longitude.toFixed(4));
+          }
+        }).catch(function () {});
+    } catch (e) {}
+  }
+
   function fetchWeather() {
     if (getP('weather')) return;
-    if (!navigator.geolocation) return;
-    try {
-      navigator.permissions.query({ name: 'geolocation' }).then(function (r) {
-        if (r.state !== 'granted') return;
-        navigator.geolocation.getCurrentPosition(function (pos) {
-          var lat = pos.coords.latitude.toFixed(4), lon = pos.coords.longitude.toFixed(4);
-          fetch('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon + '&current=weather_code')
-            .then(function (r) { return r.json(); })
-            .then(function (d) {
-              var code = (d.current && d.current.weather_code) || 0;
-              currentWeather = WMO[code] || 'clear';
-              initParticles(); applyCSS();
-            }).catch(function () {});
-        }, function () {}, { timeout: 6000 });
-      }).catch(function () {});
-    } catch (e) {}
+    // Use precise GPS only if already granted (never trigger a prompt); otherwise IP.
+    if (navigator.geolocation && navigator.permissions) {
+      try {
+        navigator.permissions.query({ name: 'geolocation' }).then(function (r) {
+          if (r.state === 'granted') {
+            navigator.geolocation.getCurrentPosition(function (pos) {
+              applyWeather(pos.coords.latitude.toFixed(4), pos.coords.longitude.toFixed(4));
+            }, ipFallback, { timeout: 6000 });
+          } else { ipFallback(); }
+        }).catch(ipFallback);
+        return;
+      } catch (e) {}
+    }
+    ipFallback();
   }
 
   // ── Mount ─────────────────────────────────────────────────────────────────
