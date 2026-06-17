@@ -3,10 +3,13 @@
 <head>
   <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
   <script>
-    // Onboarding gate — the dashboard requires a completed onboarding. Anyone who
-    // hasn't finished the trial is sent back to the start so onboarding always runs.
+    // Onboarding + membership gate. Anyone who hasn't finished onboarding is sent
+    // to the start; anyone onboarded but not subscribed must activate membership.
     try{(function(){var h=location.hostname;window.__corePreview=(location.protocol==='file:'||h==='localhost'||h==='127.0.0.1'||/[?&]preview=1/.test(location.search));})();}catch(e){}
-    if(!window.__corePreview){ try { if (localStorage.getItem('coreOnboardComplete') !== '1') { location.replace('01-index.html'); } } catch(e){} }
+    if(!window.__corePreview){ try {
+      if (localStorage.getItem('coreOnboardComplete') !== '1') { location.replace('01-index.html'); }
+      else if (localStorage.getItem('coreSubscribed') !== '1') { location.replace('10-subscribe.html'); }
+    } catch(e){} }
   </script>
 <meta charset="utf-8" />
 <title>CORE — Dashboard</title>

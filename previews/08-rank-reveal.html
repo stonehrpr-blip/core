@@ -270,7 +270,10 @@
 
   document.getElementById('enterBtn').addEventListener('click', function(){
     lsSet('coreRankRevealComplete','1');
-    window.location.href='20-dashboard.html';
+    // Membership gate: subscribed members go straight in; everyone else must
+    // activate their membership before the dashboard unlocks.
+    var subbed=false; try{ subbed = localStorage.getItem('coreSubscribed')==='1'; }catch(e){}
+    window.location.href = subbed ? '20-dashboard.html' : '10-subscribe.html';
   });
 })();
 </script>

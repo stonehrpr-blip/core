@@ -656,6 +656,7 @@
     try {
       const account = await window.coreAccounts.current();
       if (!account) return; // no session — user is here normally
+      try { if (account.subscribed) localStorage.setItem('coreSubscribed', '1'); } catch (e) {}
       const goTrial = !account.onboarded;
       // Stamp signed-in metadata
       await window.coreAccounts.updateCurrent(acc => {
@@ -777,6 +778,8 @@
         if (opts.name && !acc.trialState.name) acc.trialState.name = opts.name;
       });
     } catch (e) {}
+    // Mirror membership so a returning subscribed member skips the paywall gate.
+    try { if (account && account.subscribed) localStorage.setItem('coreSubscribed', '1'); } catch (e) {}
     if (window.coreTrack) {
       coreTrack('sign_in', { method, isNew: !!isNew, onboarded: !!(account && account.onboarded) });
     }

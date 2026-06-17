@@ -363,6 +363,7 @@
         });
       } catch (e) {}
       cleanup();
+      try { if (account && account.subscribed) localStorage.setItem('coreSubscribed', '1'); } catch (e) {}
       if (window.coreTrack) coreTrack('sign_in', { method: 'email', mode: 'local', isNew, onboarded: !!(account && account.onboarded) });
       route(isNew || !(account && account.onboarded));
     }
@@ -377,6 +378,7 @@
           acc.signedInAt = Date.now();
         });
         cleanup();
+        try { if (account && account.subscribed) localStorage.setItem('coreSubscribed', '1'); } catch (e) {}
         if (window.coreTrack) coreTrack('sign_in', { method: 'email', mode: 'real', isNew, onboarded: !!(account && account.onboarded) });
         route(isNew || !(account && account.onboarded));
       } catch (err) {
