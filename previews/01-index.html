@@ -207,22 +207,17 @@
       0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
       50%      { opacity: 1;   transform: translate(-50%, -50%) scale(1.08); }
     }
-    /* App-icon tile — matte black with depth, the new CORE growth-arrow in 3D chrome */
-    .logo-icon {
-      width: 116px; height: 116px;
+    /* App icon — the real CORE artwork (already a 3D rounded-square mark) */
+    .logo-img {
+      width: 120px; height: 120px;
+      object-fit: contain;
       border-radius: 27px;
-      background: linear-gradient(157deg, #202024 0%, #0c0c0e 100%);
-      display: flex; align-items: center; justify-content: center;
-      box-shadow:
-        0 18px 44px rgba(0,0,0,0.7),
-        0 0 0 1px rgba(255,255,255,0.06),
-        inset 0 1.5px 0 rgba(255,255,255,0.10),
-        inset 0 -7px 18px rgba(0,0,0,0.5),
-        0 0 30px rgba(120,160,255,0.08);
+      filter:
+        drop-shadow(0 18px 40px rgba(0,0,0,0.6))
+        drop-shadow(0 0 26px rgba(120,160,255,0.12));
       animation: logoFloat 6s ease-in-out infinite;
       will-change: transform;
     }
-    .logo-icon .logo-svg { width: 78px; height: 78px; }
     @keyframes logoFloat {
       0%, 100% { transform: translateY(0); }
       50%      { transform: translateY(-3px); }
@@ -337,21 +332,19 @@
     @media (max-width: 380px), (max-height: 720px) {
       .frame { padding: 52px 22px 28px; }
       .logo-mark { margin-top: 46px; }
-      .logo-icon { width: 100px; height: 100px; border-radius: 24px; }
-      .logo-icon .logo-svg { width: 64px; height: 64px; }
+      .logo-img { width: 104px; height: 104px; border-radius: 24px; }
       .hero { margin-top: 24px; }
       .hero h1 { font-size: 46px; letter-spacing: -1.8px; }
       .sub { margin-top: 16px; font-size: 12px; letter-spacing: 0.18em; }
     }
     @media (max-width: 340px) {
       .hero h1 { font-size: 38px; letter-spacing: -1.5px; }
-      .logo-icon { width: 88px; height: 88px; border-radius: 21px; }
-      .logo-icon .logo-svg { width: 56px; height: 56px; }
+      .logo-img { width: 90px; height: 90px; border-radius: 21px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
       .star, .brand .dot,
-      .topbar, .logo-mark, .logo-icon, .hero, .sub, .cta-wrap, .sub .cursor, .legal {
+      .topbar, .logo-mark, .logo-img, .hero, .sub, .cta-wrap, .sub .cursor, .legal {
         animation: none !important; opacity: 1 !important; transform: none !important;
       }
     }
@@ -384,38 +377,7 @@
       </div>
 
       <div class="logo-mark" aria-hidden="true">
-        <div class="logo-icon">
-          <svg class="logo-svg" viewBox="0 0 100 100">
-            <defs>
-              <linearGradient id="coreChrome" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"   stop-color="#f6f8fb"/>
-                <stop offset="16%"  stop-color="#c4cad3"/>
-                <stop offset="40%"  stop-color="#ffffff"/>
-                <stop offset="50%"  stop-color="#a7adb7"/>
-                <stop offset="60%"  stop-color="#ffffff"/>
-                <stop offset="82%"  stop-color="#969ca7"/>
-                <stop offset="100%" stop-color="#dfe3e9"/>
-              </linearGradient>
-              <filter id="coreLift" x="-30%" y="-30%" width="160%" height="160%">
-                <feDropShadow dx="0" dy="2.2" stdDeviation="2.2" flood-color="#000" flood-opacity="0.55"/>
-              </filter>
-            </defs>
-            <g filter="url(#coreLift)" fill="none" stroke-linecap="round" stroke-linejoin="round">
-              <!-- depth shadow under the tube -->
-              <g transform="translate(0,1.6)" stroke="#2a2d33" stroke-width="9" opacity="0.9">
-                <path d="M71 27 A34 34 0 1 0 71 73"/><path d="M30 52 L44 62 L54 50 L76 27"/><path d="M63 27 L77 27 L77 41"/>
-              </g>
-              <!-- chrome body -->
-              <g stroke="url(#coreChrome)" stroke-width="8">
-                <path d="M71 27 A34 34 0 1 0 71 73"/><path d="M30 52 L44 62 L54 50 L76 27"/><path d="M63 27 L77 27 L77 41"/>
-              </g>
-              <!-- top specular highlight -->
-              <g transform="translate(0,-1)" stroke="#ffffff" stroke-width="2.4" opacity="0.75">
-                <path d="M71 27 A34 34 0 1 0 71 73"/><path d="M30 52 L44 62 L54 50 L76 27"/><path d="M63 27 L77 27 L77 41"/>
-              </g>
-            </g>
-          </svg>
-        </div>
+        <img class="logo-img" src="assets/logo.png?v=3" alt="CORE" />
       </div>
 
       <div class="hero">
