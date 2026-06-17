@@ -39,38 +39,34 @@
   <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
   <style>
     /* ===============================================================
-       CORE — 02-index v9 (Apple system font + cinematic flow)
-       Influences:
-         - The Lock In: cinematic onboarding, softened transitions,
-           typewriter animation, minimal cards
-         - Reload: "Reset & Lock In" verb framing, 60-day clarity
-         - Apple Health / Apple Music: SF Pro, generous whitespace,
-           single dominant CTA, type-driven hero
-       Apple system font stack — no web fonts, no Chakra Petch on
-       this page. The OS font wins.
+       CORE — index v10 · "Quiet System"
+       Premium matte-black launch screen.
+         - Deep matte black, near-zero gradient
+         - Sparse, low-opacity starfield (a quiet universe)
+         - White type, monochrome accents, only a whisper of blue glow
+         - Logo centered with a soft, restrained halo
+       No bright gradients. No galaxy wallpaper. Controlled and elite.
        =============================================================== */
     :root {
       --apple-font: -apple-system, BlinkMacSystemFont,
                     "SF Pro Display", "SF Pro Text",
                     "Helvetica Neue", "Helvetica", Arial,
                     "Segoe UI", Roboto, sans-serif;
-      /* Monochrome + single electric-blue accent override */
-      --accent: #0A84FF;
-      --accent-hi: #0A84FF;
-      --core-blue-500: #0A84FF;
-      --core-blue-300: #0A84FF;
-      --core-violet-500: #9AA1B7;
-      --core-amber-500: #9AA1B7;
-      --grad-cta: #0A84FF;
-      --grad-wordmark: none;
-      --glow-blue-md: none;
+      /* Monochrome system — white ink, a single restrained blue glow */
+      --ink:        #ffffff;
+      --ink-soft:   rgba(255,255,255,0.56);
+      --ink-faint:  rgba(255,255,255,0.34);
+      --hair:       rgba(255,255,255,0.08);
+      --hair-2:     rgba(255,255,255,0.14);
+      --glow:       rgba(120,160,255,0.55);   /* subtle blue, highlights only */
+      --glow-soft:  rgba(120,160,255,0.18);
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { height: 100%; }
-    body {
+    body, body[data-font="apple"] {
       min-height: 100vh;
-      background: #0A0A14;
-      color: var(--text-primary);
+      background: #000 !important;
+      color: var(--ink);
       font-family: var(--apple-font);
       font-feature-settings: "ss01", "cv11", "tnum";
       display: flex; align-items: center; justify-content: center;
@@ -81,182 +77,49 @@
     .phone {
       position: relative;
       width: 390px; height: 844px;
-      background: var(--bg-page);
+      background: #000;
       border-radius: 56px;
       overflow: hidden;
       box-shadow:
-        0 40px 100px rgba(0,0,0,0.7),
-        0 0 0 1px var(--border-subtle),
-        0 0 0 10px #0a0a12,
-        0 0 0 11px #2b2b38;
+        0 40px 120px rgba(0,0,0,0.85),
+        0 0 0 1px rgba(255,255,255,0.06),
+        0 0 0 10px #060608,
+        0 0 0 11px #1b1b22;
     }
     .notch {
       position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
-      width: 124px; height: 32px; background: var(--bg-page);
+      width: 124px; height: 32px; background: #000;
       border-radius: 20px; z-index: 30;
     }
     .home-indicator {
       position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
-      width: 134px; height: 5px; background: rgba(245,247,251,0.55);
+      width: 134px; height: 5px; background: rgba(255,255,255,0.40);
       border-radius: 999px; z-index: 30;
     }
 
     /* ── Atmosphere ──
-       Deep navy -> black vertical gradient base.
-       Soft blue halo where the hero sits.
-       Subtle violet at bottom.
-       Dense star field on top. */
-    .bg {
+       Matte black with a single, almost-invisible cool halo where the
+       logo sits, and a soft floor vignette. No nebula, no aurora. */
+    .phone[data-bg-skip] { background: #000 !important; }
+    .phone[data-bg-skip] .bg {
       position: absolute; inset: 0; z-index: 0;
       background:
-        radial-gradient(60% 35% at 50% 30%, rgba(10,132,255,0.16) 0%, transparent 55%),
-        radial-gradient(50% 30% at 50% 100%, rgba(255,255,255,0.05) 0%, transparent 65%),
-        linear-gradient(180deg, #060B26 0%, #02020A 50%, #050510 100%);
+        radial-gradient(60% 42% at 50% 36%, rgba(255,255,255,0.022) 0%, transparent 62%),
+        #000 !important;
     }
-    /* Nebula — slow rotating mesh gradient layer.
-       Adds dimensional motion behind the stars without competing for focus. */
-    .nebula {
-      position: absolute; inset: -25%; z-index: 1;
-      background:
-        radial-gradient(circle at 25% 30%, rgba(10,132,255,0.26) 0%, transparent 35%),
-        radial-gradient(circle at 75% 70%, rgba(255,255,255,0.10) 0%, transparent 38%),
-        radial-gradient(circle at 80% 25%, rgba(10,132,255,0.16) 0%, transparent 30%);
-      filter: blur(28px);
-      opacity: 0.65;
-      mix-blend-mode: screen;
-      animation: nebulaSpin 80s linear infinite;
-      will-change: transform;
-      transform: translateZ(0) rotate(0deg);
-      pointer-events: none;
-    }
-    @keyframes nebulaSpin {
-      to { transform: translateZ(0) rotate(360deg); }
-    }
-    /* Aurora ribbon — drifts across the upper field slowly */
-    .aurora {
-      position: absolute; inset: 0; z-index: 2; pointer-events: none;
-      opacity: 0.45;
-      mix-blend-mode: screen;
-    }
-    .aurora::before, .aurora::after {
-      content: ""; position: absolute; border-radius: 50%;
-      filter: blur(40px);
-      will-change: transform, opacity;
-      transform: translateZ(0);
-    }
-    .aurora::before {
-      width: 80%; height: 45%; left: -10%; top: 8%;
-      background: radial-gradient(circle, rgba(10,132,255,0.45), transparent 70%);
-      animation: auroraDriftA 24s ease-in-out infinite;
-    }
-    .aurora::after {
-      width: 70%; height: 40%; right: -10%; bottom: 16%;
-      background: radial-gradient(circle, rgba(255,255,255,0.20), transparent 70%);
-      animation: auroraDriftB 30s ease-in-out -15s infinite;
-    }
-    @keyframes auroraDriftA {
-      0%, 100% { transform: translate(0,0) scale(1); opacity: 0.45; }
-      50%      { transform: translate(40px,-22px) scale(1.12); opacity: 0.75; }
-    }
-    @keyframes auroraDriftB {
-      0%, 100% { transform: translate(0,0) scale(1); opacity: 0.40; }
-      50%      { transform: translate(-30px,18px) scale(1.10); opacity: 0.70; }
-    }
-    .stars {
-      position: absolute; inset: 0; z-index: 3; pointer-events: none;
-    }
-    /* Floating particles — large soft dots drifting upward slowly */
-    .particles {
-      position: absolute; inset: 0; z-index: 3; pointer-events: none;
-    }
-    .particles i {
-      position: absolute;
-      width: 3px; height: 3px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(255,255,255,0.75), transparent 70%);
-      bottom: -10px;
-      animation: floatUp var(--d, 14s) linear var(--del, 0s) infinite;
-      opacity: 0;
-      will-change: transform, opacity;
-    }
-    @keyframes floatUp {
-      0%   { transform: translateY(0)    scale(0.6); opacity: 0; }
-      15%  { opacity: 0.85; }
-      85%  { opacity: 0.85; }
-      100% { transform: translateY(-100vh) scale(1.1); opacity: 0; }
-    }
+    /* Sparse starfield — tiny, low-opacity, slow twinkle. Quiet universe. */
+    .stars { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
     .star {
       position: absolute; border-radius: 50%; background: #fff;
-      animation: twinkle var(--d, 4s) ease-in-out var(--del, 0s) infinite;
+      animation: twinkle var(--d, 5s) ease-in-out var(--del, 0s) infinite;
     }
-    .star.s1 { width: 1px;   height: 1px;   opacity: 0.40; }
-    .star.s2 { width: 1.5px; height: 1.5px; opacity: 0.55; }
-    .star.s3 { width: 2px;   height: 2px;   opacity: 0.75; box-shadow: 0 0 4px rgba(255,255,255,0.65); }
-    .star.s4 { width: 2.5px; height: 2.5px; opacity: 0.90; box-shadow: 0 0 8px rgba(255,255,255,0.80); }
+    .star.s1 { width: 1px;   height: 1px;   opacity: 0.22; }
+    .star.s2 { width: 1.5px; height: 1.5px; opacity: 0.30; }
+    .star.s3 { width: 1.5px; height: 1.5px; opacity: 0.45; box-shadow: 0 0 3px rgba(255,255,255,0.45); }
+    .star.s4 { width: 2px;   height: 2px;   opacity: 0.55; box-shadow: 0 0 5px rgba(255,255,255,0.5); }
     @keyframes twinkle {
-      0%, 100% { opacity: var(--min, 0.12); transform: scale(0.7); }
-      50%      { opacity: var(--max, 0.85); transform: scale(1.20); }
-    }
-    /* Two shooting stars (was 3 — dropped for perf) with angled trails.
-       filter: blur was nuked — replaced with soft box-shadow on the trail
-       and a glowing head dot. GPU-cheap. */
-    .shooting {
-      position: absolute;
-      width: 160px; height: 2px;
-      background: linear-gradient(90deg,
-        transparent 0%,
-        rgba(180,210,255,0.0) 8%,
-        rgba(180,210,255,0.25) 40%,
-        rgba(220,235,255,0.65) 75%,
-        rgba(255,255,255,0.95) 94%,
-        rgba(255,255,255,1) 100%);
-      border-radius: 999px;
-      box-shadow: 0 0 4px rgba(180,210,255,0.55);
-      opacity: 0;
-      z-index: 3;
-      pointer-events: none;
-      will-change: transform, opacity;
-      transform-origin: 100% 50%;
-    }
-    .shooting::after {
-      /* Glowing head — sits at the leading edge of the streak */
-      content: ""; position: absolute;
-      right: -2px; top: 50%;
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: radial-gradient(circle,
-        rgba(255,255,255,1) 0%,
-        rgba(225,232,240,0.9) 35%,
-        rgba(200,210,225,0.5) 65%,
-        transparent 80%);
-      transform: translate(0, -50%);
-      box-shadow:
-        0 0 8px rgba(255,255,255,0.95),
-        0 0 18px rgba(255,255,255,0.45);
-    }
-    .shooting.s1 { top: 10%; left: -18%; animation: shootA 18s cubic-bezier(0.22, 0.6, 0.36, 1) infinite; }
-    .shooting.s2 { top: 24%; left: -18%; animation: shootB 22s cubic-bezier(0.22, 0.6, 0.36, 1) -7s infinite; }
-    .shooting.s3 { top: 40%; left: -18%; animation: shootC 28s cubic-bezier(0.22, 0.6, 0.36, 1) -14s infinite; }
-    @keyframes shootA {
-      0%, 88%  { opacity: 0; transform: rotate(28deg) translate3d(0,0,0); }
-      90%      { opacity: 0.6; }
-      93%      { opacity: 1; }
-      98%      { opacity: 0.5; }
-      100%     { opacity: 0; transform: rotate(28deg) translate3d(620px,0,0); }
-    }
-    @keyframes shootB {
-      0%, 86% { opacity: 0; transform: rotate(33deg) translate3d(0,0,0); }
-      89%     { opacity: 0.55; }
-      92%     { opacity: 1; }
-      97%     { opacity: 0.45; }
-      100%    { opacity: 0; transform: rotate(33deg) translate3d(680px,0,0); }
-    }
-    @keyframes shootC {
-      0%, 84% { opacity: 0; transform: rotate(24deg) translate3d(0,0,0); }
-      87%     { opacity: 0.6; }
-      91%     { opacity: 1; }
-      97%     { opacity: 0.4; }
-      100%    { opacity: 0; transform: rotate(24deg) translate3d(560px,0,0); }
+      0%, 100% { opacity: var(--min, 0.06); transform: scale(0.7); }
+      50%      { opacity: var(--max, 0.42); transform: scale(1.08); }
     }
 
     /* ── Frame ── */
@@ -276,131 +139,121 @@
       user-select: none;
     }
     .brand .dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: var(--core-blue-500);
-      animation: dotPulse 2.5s ease-in-out infinite;
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 8px var(--glow);
+      animation: dotPulse 3s ease-in-out infinite;
     }
     @keyframes dotPulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50%      { transform: scale(1.25); opacity: 0.85; }
+      0%, 100% { opacity: 0.9; box-shadow: 0 0 7px var(--glow-soft); }
+      50%      { opacity: 1; box-shadow: 0 0 12px var(--glow); }
     }
     .brand .wm {
       font-family: var(--apple-font);
-      font-size: 13px; font-weight: 600; letter-spacing: 0.30em;
-      color: var(--text-primary);
+      font-size: 13px; font-weight: 600; letter-spacing: 0.34em;
+      color: var(--ink);
     }
+    /* Sign-in — minimal circle, subtle blue glow on hover */
     .signin {
-      width: 36px; height: 36px;
-      min-width: 36px; min-height: 36px;
-      max-width: 36px; max-height: 36px;
-      aspect-ratio: 1 / 1;            /* lock circle — defeats any stretch */
-      flex: 0 0 36px;
-      align-self: center;             /* defeat parent flex stretch */
+      width: 38px; height: 38px;
+      min-width: 38px; min-height: 38px;
+      max-width: 38px; max-height: 38px;
+      aspect-ratio: 1 / 1;
+      flex: 0 0 38px;
+      align-self: center;
       border-radius: 50%;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--border-subtle);
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--hair);
       display: flex; align-items: center; justify-content: center;
       cursor: pointer; padding: 0;
-      color: var(--text-primary);
+      color: var(--ink);
       font-family: inherit;
-      transition: background 200ms cubic-bezier(0.4, 0, 0.2, 1), transform 100ms cubic-bezier(0.4, 0, 0.2, 1);
+      transition: background 220ms cubic-bezier(0.4,0,0.2,1),
+                  border-color 220ms ease,
+                  box-shadow 260ms ease,
+                  transform 120ms cubic-bezier(0.4,0,0.2,1);
     }
-    .signin:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }
+    .signin:hover {
+      background: rgba(255,255,255,0.06);
+      border-color: var(--hair-2);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 0 20px var(--glow-soft);
+    }
     .signin:active { transform: scale(0.94); }
     .signin svg {
-      width: 16px; height: 16px;
-      stroke: var(--text-primary); fill: none;
-      stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+      width: 17px; height: 17px;
+      stroke: var(--ink); fill: none;
+      stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round;
     }
 
-    /* ── Logo mark — Apple About-screen style, above hero ── */
+    /* ── Logo mark — centered, clean, softly glowing ── */
     .logo-mark {
       display: flex; justify-content: center;
-      margin-top: 56px;
+      margin-top: 64px;
       opacity: 0;
-      animation: logoEnter 1000ms 220ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      animation: logoEnter 1100ms 220ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
       position: relative;
     }
     .logo-mark::before {
-      /* Halo glow behind logo — pulses */
+      /* Restrained halo — barely-there cool glow, slow breathing */
       content: ""; position: absolute;
-      width: 140px; height: 140px;
+      width: 190px; height: 190px;
       top: 50%; left: 50%; transform: translate(-50%, -50%);
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(10,132,255,0.22) 0%, transparent 65%);
-      animation: haloPulse 3.5s ease-in-out infinite;
+      background: radial-gradient(circle, rgba(120,160,255,0.12) 0%, rgba(255,255,255,0.03) 38%, transparent 66%);
+      animation: haloPulse 5s ease-in-out infinite;
       pointer-events: none; z-index: -1;
     }
     @keyframes haloPulse {
-      0%, 100% { opacity: 0.55; transform: translate(-50%, -50%) scale(1); }
-      50%      { opacity: 1.00; transform: translate(-50%, -50%) scale(1.18); }
+      0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+      50%      { opacity: 1;   transform: translate(-50%, -50%) scale(1.08); }
     }
     .logo-mark img {
-      width: 76px; height: 76px;
-      border-radius: 20px;
-      object-fit: cover;
-      box-shadow:
-        0 0 0 1px rgba(255,255,255,0.10) inset,
-        0 8px 24px rgba(0,0,0,0.45);
-      animation: logoFloat 4s ease-in-out infinite;
+      width: 112px; height: 112px;
+      object-fit: contain;
+      /* white-on-black mark blends into the matte field; glow lifts it off */
+      filter:
+        drop-shadow(0 0 16px rgba(120,160,255,0.16))
+        drop-shadow(0 0 36px rgba(255,255,255,0.05));
+      animation: logoFloat 6s ease-in-out infinite;
       will-change: transform;
     }
     @keyframes logoFloat {
-      0%, 100% { transform: translateY(0) rotate(0deg); }
-      50%      { transform: translateY(-4px) rotate(1deg); }
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-3px); }
     }
     @keyframes logoEnter {
-      0%   { opacity: 0; transform: translateY(14px) scale(0.92); }
-      60%  { opacity: 1; transform: translateY(-2px) scale(1.04); }
+      0%   { opacity: 0; transform: translateY(12px) scale(0.94); }
       100% { opacity: 1; transform: translateY(0) scale(1); }
     }
 
-    /* ── Hero — Apple About-screen typography ──
-       Display weight, ultra-tight tracking, generous line-height.
-       Two lines, gradient on second line. */
+    /* ── Hero — clean white display type ── */
     .hero {
-      margin-top: 28px;
+      margin-top: 30px;
       text-align: center;
       opacity: 0;
       animation: fadeUp 900ms 450ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    }
-    .hero .prop {
-      font-size: 11px; font-weight: 600;
-      letter-spacing: 0.22em; text-transform: uppercase;
-      color: var(--core-blue-300);
-      margin-bottom: 14px;
-      display: inline-flex; align-items: center; gap: 8px;
-    }
-    .hero .prop .pill-dot {
-      width: 5px; height: 5px; border-radius: 50%;
-      background: var(--core-blue-300);
     }
     .hero h1 {
       font-family: var(--apple-font);
       font-size: 60px; font-weight: 700;
       letter-spacing: -2.6px; line-height: 0.96;
-      color: var(--text-primary);
+      color: var(--ink);
     }
     .hero h1 .g {
       color: #fff;
       -webkit-text-fill-color: #fff;
-    }
-    @keyframes gradShift {
-      0%, 100% { background-position: 0% 50%; }
-      50%      { background-position: 100% 50%; }
+      text-shadow: 0 0 26px rgba(120,160,255,0.14);
     }
 
-    /* ── Cinematic typewriter sub-line (Lock In influence) ──
-       Types in character by character after hero settles.
-       Block-shaped cursor blinks at the end. */
+    /* ── Typewriter sub-line ── */
     .sub {
       margin-top: 22px;
       display: flex; justify-content: center; align-items: baseline;
       gap: 2px;
       font-family: var(--apple-font);
-      font-size: 13px; font-weight: 500;
-      letter-spacing: 0.18em; text-transform: uppercase;
-      color: var(--text-secondary);
+      font-size: 12.5px; font-weight: 500;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--ink-soft);
       opacity: 0;
       animation: fadeUp 500ms 1000ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
       min-height: 18px;
@@ -409,7 +262,8 @@
     .sub .cursor {
       display: inline-block;
       width: 6px; height: 12px;
-      background: var(--core-blue-300);
+      background: #fff;
+      box-shadow: 0 0 8px var(--glow);
       margin-left: 2px;
       animation: blink 0.9s steps(1) infinite;
       transform: translateY(1px);
@@ -419,113 +273,51 @@
       51%, 100% { opacity: 0; }
     }
 
-    /* ── CTA — Apple Music-style large pill ──
-       Solid gradient, prominent shadow, generous padding.
-       Bottom of screen with safe-area cushion. */
+    /* ── CTA region — "tap anywhere", refined ── */
     .cta-wrap {
       margin-top: auto;
       opacity: 0;
       animation: fadeUp 900ms 1000ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
     }
-    /* "Tap anywhere to continue" — text-only cue; whole screen is the CTA */
     .tap-hint {
       display: flex; justify-content: center;
-      padding: 10px 0 4px; user-select: none; -webkit-user-select: none; cursor: pointer;
+      padding: 14px 0 6px; user-select: none; -webkit-user-select: none; cursor: pointer;
       transition: transform .25s cubic-bezier(0.22,1,0.36,1), opacity .25s;
     }
-    /* Premium text — small, refined; slow shine sweep + soft breathing glow */
+    /* Premium text — small, refined; slow white shine + a breath of blue glow */
     .tap-text {
       position: relative;
-      font-family: var(--apple-font); font-size: 11.5px; font-weight: 700; letter-spacing: 0.22em;
-      text-transform: uppercase; padding-left: 0.22em;
-      background: linear-gradient(100deg, rgba(255,255,255,0.38) 0%, #ffffff 47%, rgba(255,255,255,0.38) 60%, rgba(255,255,255,0.38) 100%);
+      font-family: var(--apple-font); font-size: 11.5px; font-weight: 700; letter-spacing: 0.24em;
+      text-transform: uppercase; padding-left: 0.24em;
+      background: linear-gradient(100deg, rgba(255,255,255,0.34) 0%, #ffffff 47%, rgba(255,255,255,0.34) 60%, rgba(255,255,255,0.34) 100%);
       background-size: 240% 100%;
       -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent;
-      animation: tapShine 4.6s ease-in-out infinite, tapGlow 3.4s ease-in-out infinite;
+      animation: tapShine 5s ease-in-out infinite, tapGlow 3.6s ease-in-out infinite;
     }
     @keyframes tapShine { 0% { background-position: 120% 0; } 55%,100% { background-position: -25% 0; } }
     @keyframes tapGlow {
-      0%,100% { filter: drop-shadow(0 0 5px rgba(122,160,255,0.22)); opacity: 0.82; }
-      50%     { filter: drop-shadow(0 0 11px rgba(140,170,255,0.5)); opacity: 1; }
+      0%,100% { filter: drop-shadow(0 0 4px rgba(120,160,255,0.16)); opacity: 0.78; }
+      50%     { filter: drop-shadow(0 0 10px rgba(120,160,255,0.4)); opacity: 1; }
     }
+    .tap-hint:hover .tap-text { opacity: 1; }
     .tap-hint:active { transform: scale(0.97); }
     .tap-hint.going { opacity: 0; transform: translateY(-6px); }
     @media (prefers-reduced-motion: reduce) {
       .tap-text { animation: none; -webkit-text-fill-color: rgba(255,255,255,0.92); color: rgba(255,255,255,0.92); filter: none; }
     }
-    /* ── CTA v10: Brand wordmark gradient ──
-       Same 135° cyan->violet->pink gradient as the "your core." text in
-       the hero. Visually links hero copy to action. Animated shift so
-       the gradient slowly slides — same gradShift used on the wordmark. */
-    .cta-shell {
-      position: relative;
-      width: 100%;
-      isolation: isolate;
-    }
-    /* Breathing aurora halo — sits behind the button, pulses 3s in/out.
-       Wider than the pill so glow bleeds beyond the edges and feels
-       atmospheric, not just a drop-shadow. */
-    .cta-shell::before {
-      content: none;
-    }
-    @keyframes ctaBreath {
-      0%, 100% { opacity: 0.55; transform: scale(0.96); }
-      50%      { opacity: 1.00; transform: scale(1.06); }
-    }
-    /* CTA v13 — Apple system blue solid with breathing aurora halo */
-    .cta {
-      width: 100%;
-      padding: 19px 26px;
-      border-radius: var(--radius-pill);
-      border: none;
-      color: #FFFFFF;
-      font-family: var(--apple-font);
-      font-size: 18px; font-weight: 600;
-      letter-spacing: -0.32px;
-      background: #0A84FF;
-      display: flex; align-items: center; justify-content: center; gap: 9px;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      transition: transform 140ms cubic-bezier(0.22, 1, 0.36, 1),
-                  filter 200ms ease;
-    }
-    .cta:hover {
-      filter: brightness(1.08);
-    }
-    .cta:active { transform: scale(0.975); filter: brightness(0.95); }
-    .cta::before { content: none; }
-    .cta::after { content: none; }
-    .cta-label, .cta-spinner { position: relative; z-index: 1; }
-    .cta-arrow {
-      position: relative; z-index: 1; font-size: 18px; line-height: 1;
-      transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
-    }
-    .cta:hover .cta-arrow { transform: translateX(5px); }
-    .cta.loading .cta-arrow { display: none; }
-    /* Loading state — spinner replaces label, button disabled */
-    .cta-spinner { display: none; }
-    .cta.loading { cursor: progress; pointer-events: none; }
-    .cta.loading .cta-label { display: none; }
-    .cta.loading .cta-spinner {
-      display: inline-flex; align-items: center; justify-content: center;
-      animation: spin 700ms linear infinite;
-    }
-    .cta-spinner svg { width: 20px; height: 20px; stroke: #FFFFFF; fill: none; }
-    @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
 
     /* Legal line — tiny, below CTA */
     .legal {
       margin: 14px 12px 0;
       font-size: 11px; line-height: 16px;
-      color: var(--text-soft);
+      color: var(--ink-faint);
       text-align: center;
       letter-spacing: 0.01em;
       opacity: 0;
       animation: fadeUp 700ms 1100ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
     }
-    .legal a { color: var(--core-blue-300); text-decoration: none; }
-    .legal a:hover { text-decoration: underline; }
+    .legal a { color: var(--ink-soft); text-decoration: none; border-bottom: 1px solid var(--hair); }
+    .legal a:hover { color: #fff; border-bottom-color: var(--hair-2); }
 
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(12px); }
@@ -538,29 +330,22 @@
     }
     @media (max-width: 380px), (max-height: 720px) {
       .frame { padding: 52px 22px 28px; }
-      .logo-mark { margin-top: 40px; }
-      .logo-mark img { width: 64px; height: 64px; border-radius: 17px; }
-      .hero { margin-top: 22px; }
+      .logo-mark { margin-top: 46px; }
+      .logo-mark img { width: 96px; height: 96px; }
+      .hero { margin-top: 24px; }
       .hero h1 { font-size: 46px; letter-spacing: -1.8px; }
-      .sub { margin-top: 16px; font-size: 12px; letter-spacing: 0.16em; }
-      .cta { padding: 16px 20px; font-size: 15px; }
+      .sub { margin-top: 16px; font-size: 12px; letter-spacing: 0.18em; }
     }
     @media (max-width: 340px) {
       .hero h1 { font-size: 38px; letter-spacing: -1.5px; }
-      .logo-mark img { width: 56px; height: 56px; border-radius: 15px; }
+      .logo-mark img { width: 84px; height: 84px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .star, .shooting, .shooting::after, .brand .dot, .cta, .cta-shell, .cta::after,
-      .cta-shell::before, .hero h1 .g,
-      .topbar, .logo-mark, .logo-mark img, .hero, .sub, .cta-wrap, .sub .cursor,
-      .nebula, .aurora::before, .aurora::after, .particles i, .legal {
+      .star, .brand .dot,
+      .topbar, .logo-mark, .logo-mark img, .hero, .sub, .cta-wrap, .sub .cursor, .legal {
         animation: none !important; opacity: 1 !important; transform: none !important;
       }
-      .cta::after { display: none !important; }
-      /* Hide layers that exist purely as motion */
-      .particles, .shooting { display: none !important; }
-      .nebula, .aurora { opacity: 0.35 !important; }
     }
   </style>
   <link rel="stylesheet" href="_lib/core-background.css">
@@ -568,14 +353,11 @@
   <link rel="stylesheet" href="_lib/core-ui.css">
 </head>
 <body data-font="apple" style='font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, "Segoe UI", Roboto, sans-serif !important;'>
-  <div class="phone">
+  <!-- data-bg-skip: opt out of the shared blue atmosphere; this page owns its
+       own controlled matte-black + sparse starfield. -->
+  <div class="phone" data-bg-skip>
     <div class="bg"></div>
-    <div class="nebula" aria-hidden="true"></div>
-    <div class="aurora" aria-hidden="true"></div>
     <div class="stars" id="stars"></div>
-    <div class="particles" id="particles" aria-hidden="true"></div>
-    <div class="shooting s1" aria-hidden="true"></div>
-    <div class="shooting s2" aria-hidden="true"></div>
     <div class="notch"></div>
     <div class="home-indicator"></div>
 
@@ -614,39 +396,22 @@
   </div>
 
 <script>
-  // ── Dense star field — 120 stars, 4 brightness tiers ──
+  // ── Sparse star field — ~22 stars, low opacity, gentle twinkle ──
   (function spawnStars() {
     const wrap = document.getElementById('stars');
     if (!wrap) return;
-    for (let i = 0; i < 18; i++) {
+    for (let i = 0; i < 22; i++) {
       const r = Math.random();
-      const tier = r < 0.55 ? 's1' : r < 0.82 ? 's2' : r < 0.96 ? 's3' : 's4';
+      const tier = r < 0.58 ? 's1' : r < 0.84 ? 's2' : r < 0.96 ? 's3' : 's4';
       const s = document.createElement('div');
       s.className = 'star ' + tier;
       s.style.left = (Math.random() * 100) + '%';
       s.style.top  = (Math.random() * 100) + '%';
-      s.style.setProperty('--d',   (2.5 + Math.random() * 5) + 's');
-      s.style.setProperty('--del', (Math.random() * 5) + 's');
-      s.style.setProperty('--min', (0.10 + Math.random() * 0.20).toFixed(2));
-      s.style.setProperty('--max', (0.55 + Math.random() * 0.40).toFixed(2));
+      s.style.setProperty('--d',   (4 + Math.random() * 6) + 's');
+      s.style.setProperty('--del', (Math.random() * 6) + 's');
+      s.style.setProperty('--min', (0.04 + Math.random() * 0.10).toFixed(2));
+      s.style.setProperty('--max', (0.30 + Math.random() * 0.25).toFixed(2));
       wrap.appendChild(s);
-    }
-  })();
-
-  // ── Floating particles — 14 soft dots drift upward continuously ──
-  (function spawnParticles() {
-    const wrap = document.getElementById('particles');
-    if (!wrap) return;
-    for (let i = 0; i < 10; i++) {
-      const p = document.createElement('i');
-      p.style.left = (Math.random() * 100) + '%';
-      p.style.setProperty('--d',   (12 + Math.random() * 10) + 's');
-      p.style.setProperty('--del', (Math.random() * 14) + 's');
-      // Random small size variation
-      const size = 2 + Math.random() * 3;
-      p.style.width = size + 'px';
-      p.style.height = size + 'px';
-      wrap.appendChild(p);
     }
   })();
 
