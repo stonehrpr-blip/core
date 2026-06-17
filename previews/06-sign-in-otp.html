@@ -394,10 +394,15 @@
       } catch (e) {}
     }
     function route(goTrial) {
-      setMsg(goTrial ? 'Account ready. Let\'s set you up…' : 'Welcome back. Taking you to your dashboard…', 'ok');
-      setTimeout(() => {
-        window.location.href = goTrial ? '07-trial.html' : '20-dashboard.html';
-      }, 600);
+      // Honour a ?next= handoff (e.g. end-of-trial email verification → rank reveal).
+      var nextDest = '';
+      try {
+        var np = new URLSearchParams(location.search).get('next') || '';
+        if (/^[A-Za-z0-9_-]+\.html$/.test(np)) nextDest = np;
+      } catch (e) {}
+      var dest = nextDest || (goTrial ? '07-trial.html' : '20-dashboard.html');
+      setMsg(nextDest ? 'Email verified. Continuing…' : (goTrial ? 'Account ready. Let\'s set you up…' : 'Welcome back. Taking you to your dashboard…'), 'ok');
+      setTimeout(() => { window.location.href = dest; }, 600);
     }
 
     if (window.coreAccounts && window.coreAccounts.isReal()) {
