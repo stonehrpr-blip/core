@@ -502,6 +502,18 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
 .fm-k{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:2px;}
 .fm-bar{height:5px;border-radius:99px;background:rgba(255,255,255,0.09);overflow:hidden;margin-top:9px;}
 .fm-bar i{display:block;height:100%;width:0;border-radius:99px;box-shadow:0 0 8px currentColor;transition:width .9s cubic-bezier(.22,1,.36,1);}
+/* Food landing — Today's Nutrition card */
+.food-today{margin-top:20px;border-radius:20px;padding:16px 16px 14px;}
+.ft-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.ft-h{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:800;color:#dfe6f2;}
+.ft-h svg{width:15px;height:15px;color:#34D399;}
+.ft-all{display:inline-flex;align-items:center;gap:3px;font:inherit;font-size:12.5px;font-weight:700;color:#34D399;background:none;border:none;cursor:pointer;-webkit-appearance:none;appearance:none;}
+.ft-all svg{width:13px;height:13px;}
+.ft-stats{display:flex;align-items:center;}
+.ft-stat{flex:1;text-align:center;}
+.ft-stat .n{font-size:26px;font-weight:900;letter-spacing:-1px;color:#fff;}.ft-stat .n small{font-size:13px;font-weight:700;opacity:.7;margin-left:1px;}
+.ft-stat .k{font-size:10.5px;font-weight:700;color:var(--muted);margin-top:3px;letter-spacing:.02em;}
+.ft-div{width:1px;height:34px;background:rgba(255,255,255,0.08);flex:none;}
 .res-lead{margin:12px 2px 2px;font-size:14.5px;line-height:1.5;color:#e7ecf6;font-weight:600;text-align:center;}
 .bd-dot{width:9px;height:9px;border-radius:50%;flex:none;box-shadow:0 0 8px currentColor;}
 .res-sec .sec-hint{font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:.02em;text-transform:none;margin-left:6px;}
@@ -1479,6 +1491,7 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
     var saved=false, savedTs=null;
     function persist(){
       if(saved) return; saved=true;
+      if(type==='food' && ai && (ai.calories!=null || ai.protein!=null)) addFoodDaily(ai.calories, ai.protein);   // feed Today's Nutrition
       var all=readScans();
       var rec={ type:type, name:s.name, score:score, label:s.label, tips:tips, ts:Date.now(),
                 thumb:(isPhysique?frontThumb():snapDataUrl)||null, breakdown:(isPhysique?BD:null), grade:gradeTxt,
@@ -1585,7 +1598,53 @@ body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);
     posture:['Stand side-on to the camera','Get your whole body in the frame','Relax — stand how you normally do, don’t pose','Even lighting on a plain background'],
     looks:['Face the camera in soft, even light','No filters or heavy editing','Pull hair back so your face is visible','A neutral expression reads most accurately']
   };
+  // ── Food: daily nutrition tracker (fed by each food scan) ──
+  function getFoodDaily(){
+    try{ var raw=JSON.parse(ls('coreFoodDaily.v1','{}')||'{}'); var k=new Date().toDateString();
+      if(raw.day!==k) return { day:k, calories:0, protein:0, scans:0 };
+      return { day:k, calories:raw.calories||0, protein:raw.protein||0, scans:raw.scans||0 };
+    }catch(e){ return { day:new Date().toDateString(), calories:0, protein:0, scans:0 }; }
+  }
+  function addFoodDaily(cal, protein){ var fd=getFoodDaily(); fd.calories+=(+cal||0); fd.protein+=(+protein||0); fd.scans+=1; try{ lsSet('coreFoodDaily.v1', JSON.stringify(fd)); }catch(e){} }
+  function buildFoodIntro(){
+    var fd=getFoodDaily(), G='#34D399';
+    var I_FLAME='<path d="M12 2s4 4 4 8a4 4 0 0 1-8 0c0-1.5 1-3 1-3"/>',
+        I_HEART='<path d="M12 20.5s-7.2-4.6-7.2-9.8A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 7.2 3.7c0 5.2-7.2 9.8-7.2 9.8Z"/>',
+        I_SPARK='<path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6z"/>',
+        I_CHEV='<path d="M9 6l6 6-6 6"/>';
+    var GET=[{t:'Calorie & Macro Read',d:'Protein, carbs and fat per plate',c:'#FF6B6B',i:I_FLAME},
+             {t:'Health Score',d:'How balanced the meal is',c:'#34D399',i:I_HEART},
+             {t:'Smarter Swaps',d:'Specific upgrades for next time',c:'#4A8FFF',i:I_SPARK}];
+    var FLOW=[{n:1,l:'Snap'},{n:2,l:'Analyse'},{n:3,l:'Track'}];
+    var h='';
+    h+='<div class="food-today glass">'
+      +'<div class="ft-head"><span class="ft-h">'+svg(I_FLAME)+'Today’s Nutrition</span><button class="ft-all" id="pqVH" type="button">History '+svg(I_CHEV)+'</button></div>'
+      +'<div class="ft-stats">'
+        +'<div class="ft-stat"><div class="n" style="color:'+G+'">'+fd.calories+'</div><div class="k">Calories</div></div>'
+        +'<div class="ft-div"></div>'
+        +'<div class="ft-stat"><div class="n">'+fd.protein+'<small>g</small></div><div class="k">Protein</div></div>'
+        +'<div class="ft-div"></div>'
+        +'<div class="ft-stat"><div class="n">'+fd.scans+'</div><div class="k">Scans</div></div>'
+      +'</div></div>';
+    h+='<div class="pq-sec">How it works</div><div class="pq-steps">'
+      +FLOW.map(function(p){ return '<div class="pq-step"><div class="num" style="background:'+G+'">'+p.n+'</div><div class="lb">'+p.l+'</div></div>'; }).join('')+'</div>';
+    h+='<div class="pq-sec">What you’ll get</div><div class="pq-get">'
+      +GET.map(function(g){ return '<div class="pq-grow"><div class="pq-gic" style="color:'+g.c+';background:color-mix(in srgb,'+g.c+' 15%,transparent);border-color:color-mix(in srgb,'+g.c+' 30%,transparent)">'+svg(g.i)+'</div><div><div class="pq-gt">'+g.t+'</div><div class="pq-gd">'+g.d+'</div></div></div>'; }).join('')+'</div>';
+    h+='<div class="pq-sec">For best results</div><div class="pq-tips2">'
+      +TIPS_LIST.food.map(function(t){ return '<div class="pq-tip"><div class="ck">'+svg('<path d="M20 6L9 17l-5-5"/>')+'</div><span>'+t+'</span></div>'; }).join('')+'</div>';
+    h+='<div class="pq-btns">'
+      +'<button class="pq-take" id="pqTake" type="button">'+svg('<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>')+'Scan Food</button>'
+      +'<button class="pq-upload" id="pqUpload" type="button">'+svg('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5-5 5 5"/><path d="M12 5v12"/>')+'Upload from Gallery</button></div>';
+    h+='<a class="pq-recipe" href="recipe.html"><div class="pq-recipe-ic">'+svg('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>')+'</div><div class="pq-recipe-tx"><b>Recipe Generator</b><span>Get 3 tailored recipes, fast</span></div>'+svg(I_CHEV)+'</a>';
+    h+='<div class="pq-help">'+svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>')+'Instant AI nutrition read, kept private</div>';
+    h+='<div class="pq-disc">This analysis is for guidance only.</div>';
+    $('#pqIntro').innerHTML=h;
+    $('#pqTake').addEventListener('click', openCam);
+    $('#pqUpload').addEventListener('click', function(){ $('#pqFile').click(); });
+    $('#pqVH').addEventListener('click', openHistory);
+  }
   function buildPqIntro(){
+    if(type==='food'){ buildFoodIntro(); return; }
     var st=pqStats();
     var cfg=INTRO[type] || { get:(s.checks||[]).slice(0,3).map(function(c){ return [c.split(/[\s—-]/).slice(0,3).join(' '), c]; }), tips:s.hint };
     var GIC=['<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.7" fill="currentColor"/>','<path d="M3 17l6-6 4 4 7-8"/>','<path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="3.4"/>'];
