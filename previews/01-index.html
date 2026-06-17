@@ -325,6 +325,24 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
+    /* ── Tap-to-enter transition — premium "warp into" the trial ── */
+    .leave-veil {
+      position: absolute; inset: 0; z-index: 40; pointer-events: none;
+      opacity: 0; transform: scale(1.04);
+      background: radial-gradient(circle at 50% 42%, rgba(120,160,255,0.14) 0%, rgba(0,0,0,0) 36%, #000 70%);
+      transition: opacity .46s ease, transform .46s cubic-bezier(0.4,0,0.2,1);
+    }
+    .frame { transition: opacity .42s ease, transform .46s cubic-bezier(0.4,0,0.2,1); }
+    body.leaving .frame { opacity: 0; transform: scale(1.07); }
+    body.leaving .leave-veil { opacity: 1; transform: scale(1); }
+    body.leaving .logo-img { transform: scale(1.14); filter: drop-shadow(0 0 40px rgba(120,160,255,0.5)) brightness(1.15); transition: transform .46s cubic-bezier(0.34,1.56,0.4,1), filter .46s ease; }
+    body.leaving #stars .star { animation: none; opacity: 0.9 !important; transition: opacity .4s; }
+    @media (prefers-reduced-motion: reduce) {
+      .leave-veil, .frame, body.leaving .logo-img { transition: opacity .2s ease !important; }
+      body.leaving .frame { transform: none; }
+      body.leaving .logo-img { transform: none; filter: none; }
+    }
+
     /* Responsive */
     @media (max-width: 460px) {
       .notch, .home-indicator { display: none; }
@@ -361,6 +379,7 @@
   <div class="phone" data-bg-skip>
     <div class="bg"></div>
     <div class="stars" id="stars"></div>
+    <div class="leave-veil" id="leaveVeil" aria-hidden="true"></div>
     <div class="notch"></div>
     <div class="home-indicator"></div>
 
@@ -482,7 +501,10 @@
     try { localStorage.setItem('coreOnboardStartedAt', String(Date.now())); } catch (e) {}
     var hint = document.getElementById('tapHint');
     if (hint) hint.classList.add('going');
-    setTimeout(function () { window.location.href = '07-trial.html'; }, 340);
+    document.body.classList.add('leaving');
+    try { if (navigator.vibrate) navigator.vibrate(12); } catch (e) {}
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    setTimeout(function () { window.location.href = '07-trial.html'; }, reduce ? 200 : 460);
   }
   document.addEventListener('click', function (e) {
     if (e.target.closest('#signinBtn')) return;  // avatar still goes to sign-in
