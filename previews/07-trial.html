@@ -3915,8 +3915,10 @@
       setCTA('Sign', !state.promised,
         state.promised ? 'Signed. Tap to seal it.' : 'Type PROMISE to continue');
     } else if (s === 1) {
-      setCTA('Next', state.name.trim().length < 2,
-        state.name.trim().length < 2 ? 'Enter a name to continue' : 'Looks good — tap next');
+      var nameOk = state.name.trim().length >= 2;
+      var ageOk = (typeof state.age === 'number' && state.age >= 13 && state.age <= 100);
+      setCTA('Next', !(nameOk && ageOk),
+        !nameOk ? 'Enter a name to continue' : (!ageOk ? 'Enter your age to continue' : 'Looks good — tap next'));
     } else if (s === 2) {
       setCTA('Next', !state.profile,
         !state.profile ? 'Pick a profile to continue' : '');
@@ -5471,11 +5473,11 @@
   (function () {
     const inp = document.getElementById('ageInput'); if (!inp) return;
     const MIN = 13, MAX = 100;
-    state.age = 24; // sensible default so downstream seeders always have a value
+    state.age = null; // required — user must enter it before Next unlocks
     function apply() {
       const raw = parseInt(inp.value, 10);
-      if (isNaN(raw)) { state.age = null; refreshCTA(); return; }
-      state.age = Math.max(MIN, Math.min(MAX, raw));
+      if (isNaN(raw) || raw < MIN || raw > MAX) { state.age = null; refreshCTA(); return; }
+      state.age = raw;
       refreshCTA();
     }
     inp.addEventListener('input', apply);

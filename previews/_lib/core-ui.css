@@ -31,7 +31,19 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
 
 /* ---- Controls: consistent feel for the common button classes ---- */
 .cta, .btn { letter-spacing: -0.2px; -webkit-tap-highlight-color: transparent; }
-.cta:active, .btn:active, button:active { transform: scale(0.99); }
+.cta, .btn, button, a, .opt, .tab, .chip, .pill, .pill-chip, .row, .item,
+.action, .action-btn, .card, [role="button"], [data-go], [onclick] {
+  -webkit-tap-highlight-color: transparent;
+}
+/* Global tap feedback — a subtle press for every interactive element that
+   doesn't already define its own :active animation. */
+.cta:active, .btn:active, button:not(:disabled):active { transform: scale(0.98); transition: transform .12s cubic-bezier(.22,1,.36,1); }
+.opt:active, .tab:active, .chip:active, .pill:active, .pill-chip:active,
+.row:active, .item:active, .action:active, .action-btn:active,
+.card:active, [role="button"]:active, [data-go]:active, [onclick]:active {
+  transform: scale(0.975);
+  transition: transform .12s cubic-bezier(.22,1,.36,1);
+}
 
 /* ---- Focus + selection accents (unified blue) ---- */
 ::selection { background: rgba(10,132,255,0.30); }

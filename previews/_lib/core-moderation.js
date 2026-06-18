@@ -37,28 +37,68 @@
   const BAD_RE = new RegExp('\\b(' + BAD.map(w => w.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')).join('|') + ')\\b', 'i');
   const BAD_LONG = BAD.filter(w => w.length >= 6);
 
-  // Normalize: lowercase, strip non-alphanumerics, swap common leet
+  // Homoglyph fold — letters that LOOK like a-z but are other Unicode scripts
+  // (Cyrillic / Greek / fullwidth / small-caps). Mapped to their Latin twin so
+  // "ѕһіт", "nіggеr", "fυck" can't sneak past the word lists.
+  const HOMO = {
+    'а':'a','ɑ':'a','α':'a','б':'b','ь':'b','ß':'b','с':'c','ϲ':'c','Ϲ':'c','ԁ':'d','ɗ':'d','е':'e','ё':'e','ε':'e','є':'e',
+    'ƒ':'f','ɡ':'g','ɢ':'g','һ':'h','н':'h','ι':'i','і':'i','ї':'i','ӏ':'i','ɩ':'i','ј':'j','ʝ':'j','к':'k','κ':'k',
+    'ӏ':'l','ⅼ':'l','ɭ':'l','м':'m','ṃ':'m','п':'n','ɴ':'n','ո':'n','о':'o','ο':'o','σ':'o','ө':'o','р':'p','ρ':'p',
+    'ԛ':'q','г':'r','ʀ':'r','ѕ':'s','ş':'s','т':'t','τ':'t','υ':'u','ц':'u','ս':'u','ѵ':'v','ν':'v','ѡ':'w','ա':'w',
+    'х':'x','χ':'x','у':'y','ɣ':'y','γ':'y','з':'z','ʐ':'z'
+  };
+  // Leet / symbol substitutions
+  const LEET = { '0':'o','1':'i','2':'z','3':'e','4':'a','5':'s','6':'g','7':'t','8':'b','9':'g','@':'a','$':'s','!':'i','|':'i','+':'t','(':'c','<':'c','€':'e','£':'l' };
+
+  // Normalize: NFKD (folds accents é→e, ü→u, fullwidth→ascii), homoglyph-fold,
+  // leet-decode, letters-only, collapse triples. Catches lookalike spellings.
   function normalize(text) {
     if (!text) return '';
-    let t = String(text).toLowerCase();
-    const map = { '0':'o','1':'i','3':'e','4':'a','5':'s','7':'t','8':'b','@':'a','$':'s','!':'i' };
-    t = t.replace(/[0134578@$!]/g, ch => map[ch] || ch);
-    t = t.replace(/[^a-z]/g, '');
-    t = t.replace(/(.)\1{2,}/g, '$1$1');
+    let t = String(text);
+    try { t = t.normalize('NFKD').replace(/[\u0300-\u036f]/g, ''); } catch (e) {}
+    t = t.toLowerCase();
+    t = t.replace(/[^\x00-\x7f]/g, ch => HOMO[ch] || ch);          // fold lookalikes
+    t = t.replace(/[0-9@$!|+(<€£]/g, ch => LEET[ch] || ch);        // leet decode
+    t = t.replace(/[^a-z]/g, '');                                  // letters only
+    t = t.replace(/(.)\1{2,}/g, '$1$1');                           // collapse 3+ repeats
     return t;
   }
+
+  // Tight form — collapse ALL repeats to one + phonetic folds (ph→f, ck→k, vv→w),
+  // for substring-matching common bypass spellings ("phuck", "fuuuk", "vvhore").
+  function normalizeTight(text) {
+    let t = normalize(text);
+    t = t.replace(/ph/g, 'f').replace(/vv/g, 'w').replace(/(.)\1+/g, '$1');
+    return t;
+  }
+
+  // Common creative bypass spellings that the dictionary roots miss but which
+  // are unambiguously slurs/obscenities (negligible first-name false-positives).
+  const BYPASS = ['fuk','fuq','fux','fck','fcuk','fkk','fvck','fwck','phuk','phuck','fuc','biatch','beatch','azzhole','azhole','dikhed','dikhead','kunt','niga','nibba','nibber','fagg','fgt','retard','retrd','molestr','rapeist'];
 
   function isBlocked(text) {
     if (!text) return false;
     // Layer 1: word-boundary on lowercased original — safe against
     // "Cassidy" false-positiving on "ass".
     if (BAD_RE.test(String(text).toLowerCase())) return true;
-    // Layer 2: long-only substring on leet-normalized text — catches
-    // bypasses like "n!gg3r", "f@ckin", "p0rn0graphy".
     const n = normalize(text);
     if (!n) return false;
+    // Layer 2: run the full word list (word-boundary) against the NORMALIZED,
+    // lookalike-folded token — catches "fück", "ѕhіt", "n!gg3r", "wh0re".
+    if (BAD_RE.test(n)) return true;
+    // Layer 3: long-term substring on the normalized text.
     for (let i = 0; i < BAD_LONG.length; i++) {
       if (n.indexOf(BAD_LONG[i]) !== -1) return true;
+    }
+    // Layer 4: tight form (ph→f, vv→w, all repeats collapsed) — run the word
+    // list again ("phuck"→"fuck") plus curated bypass spellings.
+    const nt = normalizeTight(text);
+    if (nt && nt !== n && BAD_RE.test(nt)) return true;
+    for (let i = 0; i < BAD_LONG.length; i++) {
+      if (nt.indexOf(BAD_LONG[i]) !== -1) return true;
+    }
+    for (let i = 0; i < BYPASS.length; i++) {
+      if (n.indexOf(BYPASS[i]) !== -1 || nt.indexOf(BYPASS[i]) !== -1) return true;
     }
     return false;
   }
