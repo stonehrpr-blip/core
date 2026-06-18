@@ -76,6 +76,11 @@
   // are unambiguously slurs/obscenities (negligible first-name false-positives).
   const BYPASS = ['fuk','fuq','fux','fck','fcuk','fkk','fvck','fwck','phuk','phuck','fuc','biatch','beatch','azzhole','azhole','dikhed','dikhead','kunt','niga','nibba','nibber','fagg','fgt','retard','retrd','molestr','rapeist'];
 
+  // Severe terms substring-matched ANYWHERE (any length) — catches embedded
+  // obscenities the word-boundary/≥6-char layers miss, e.g. "bigpenis",
+  // "xxcockxx", "lilpussy". Curated so legit first names don't false-positive.
+  const SEVERE = ['penis','vagina','pussy','pussi','cunt','fuck','shit','dick','cock','whore','slut','rape','molest','pedo','nigger','nigga','faggot','retard','scrotum','testicle','ejacul','masturbat','penetrat','cumshot','blowjob','handjob','dildo','smegma','clitoris','jizz','bollock','wank','queef','coochie','choad','boner','horny','orgasm','rectum','feltch','felch','rimjob'];
+
   function isBlocked(text) {
     if (!text) return false;
     // Layer 1: word-boundary on lowercased original — safe against
@@ -86,6 +91,10 @@
     // Layer 2: run the full word list (word-boundary) against the NORMALIZED,
     // lookalike-folded token — catches "fück", "ѕhіt", "n!gg3r", "wh0re".
     if (BAD_RE.test(n)) return true;
+    // Layer 2b: severe terms substring-matched anywhere — "bigpenis", "lilcock".
+    for (let i = 0; i < SEVERE.length; i++) {
+      if (n.indexOf(SEVERE[i]) !== -1) return true;
+    }
     // Layer 3: long-term substring on the normalized text.
     for (let i = 0; i < BAD_LONG.length; i++) {
       if (n.indexOf(BAD_LONG[i]) !== -1) return true;
@@ -94,6 +103,9 @@
     // list again ("phuck"→"fuck") plus curated bypass spellings.
     const nt = normalizeTight(text);
     if (nt && nt !== n && BAD_RE.test(nt)) return true;
+    for (let i = 0; i < SEVERE.length; i++) {
+      if (nt.indexOf(SEVERE[i]) !== -1) return true;
+    }
     for (let i = 0; i < BAD_LONG.length; i++) {
       if (nt.indexOf(BAD_LONG[i]) !== -1) return true;
     }

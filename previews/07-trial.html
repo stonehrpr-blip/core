@@ -443,22 +443,31 @@
      burst of 8 spark particles. */
   .xp-chip {
     position: relative;
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 5px 10px; border-radius: 999px;
-    background: color-mix(in srgb, var(--accent) 8%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
-    color: var(--accent-hi); font-size: 10.5px; font-weight: 700; letter-spacing: 0.16em;
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 5px 11px 5px 9px; border-radius: 999px;
+    background: rgba(255,203,61,0.10); border: 1px solid rgba(255,203,61,0.34);
+    color: #FFE9A8; font-size: 11px; font-weight: 800; letter-spacing: 0.02em;
     font-family: inherit;
+    box-shadow: 0 0 14px rgba(255,203,61,0.10);
     transition: background .3s, border-color .3s, box-shadow .3s;
   }
-  .xp-chip svg { width: 11px; height: 11px; stroke: var(--accent-hi); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform .3s; }
+  .xp-chip svg { width: 12px; height: 12px; color:#FFD60A; fill: currentColor; stroke:none; transition: transform .3s; filter: drop-shadow(0 0 4px rgba(255,203,61,0.6)); }
+  .xp-chip #xpChipNum { color:#FFE9A8; font-variant-numeric:tabular-nums; }
+  /* the golden XP bar */
+  .xp-bar { position:relative; width: 60px; height: 5px; border-radius: 999px; background: rgba(255,255,255,0.12); overflow: hidden; flex:none; }
+  .xp-bar-fill { position:absolute; left:0; top:0; bottom:0; width:0%; border-radius:999px;
+    background: linear-gradient(90deg,#FFB23D,#FFE34D); box-shadow: 0 0 8px rgba(255,203,61,0.6);
+    transition: width .55s cubic-bezier(.22,1,.36,1); }
+  .xp-bar-fill::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,.6),transparent); transform:translateX(-120%); }
+  .xp-chip.bumped .xp-bar-fill::after { animation: xpShine .7s ease; }
+  @keyframes xpShine { to { transform: translateX(220%); } }
   .xp-chip.bumped {
     animation: xpBump 0.55s cubic-bezier(0.22, 1.5, 0.36, 1);
-    background: color-mix(in srgb, var(--accent) 20%, transparent);
-    border-color: color-mix(in srgb, var(--accent) 70%, transparent);
-    box-shadow:
-      0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent);
+    background: rgba(255,203,61,0.22);
+    border-color: rgba(255,203,61,0.72);
+    box-shadow: 0 0 0 4px rgba(255,203,61,0.16), 0 0 18px rgba(255,203,61,0.42);
   }
-  .xp-chip.bumped svg { transform: rotate(-12deg) scale(1.18); }
+  .xp-chip.bumped svg { transform: rotate(-12deg) scale(1.2); }
   @keyframes xpBump {
     0%   { transform: scale(1); }
     35%  { transform: scale(1.22); }
@@ -469,7 +478,7 @@
   .xp-ghost {
     position: absolute; right: 4px; top: -4px;
     font-size: 11px; font-weight: 800;
-    color: var(--accent-hi); letter-spacing: 0;
+    color: #FFD60A; letter-spacing: 0; text-shadow: 0 0 8px rgba(255,203,61,0.6);
     pointer-events: none;
     opacity: 0;
     animation: xpGhost 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
@@ -483,7 +492,7 @@
   .xp-spark {
     position: absolute; left: 50%; top: 50%;
     width: 4px; height: 4px; border-radius: 50%;
-    background: radial-gradient(circle, #fff 0%, var(--accent) 55%, transparent 72%);
+    background: radial-gradient(circle, #fff 0%, #FFCB3D 55%, transparent 72%);
     margin-left: -2px; margin-top: -2px;
     pointer-events: none;
     opacity: 0;
@@ -494,6 +503,9 @@
     20%  { opacity: 1; }
     100% { opacity: 0; transform: translate(var(--sx,0), var(--sy,0)) scale(0.6); }
   }
+  /* Tap feedback for every selectable in the trial */
+  .pick-card, .profile-card, .tone-row, .qd-quest, .opt, .seg-opt, .jug, .cm-bar { -webkit-tap-highlight-color: transparent; }
+  .pick-card:active, .profile-card:active, .tone-row:active, .qd-quest:active, .opt:active, .seg-opt:active { transform: scale(0.98); }
 
   /* Profile (gender) step cards with the male/female art */
   .profile-grid {
@@ -1258,10 +1270,6 @@
         <button class="back" type="button" onclick="back()" aria-label="Back">
           <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
-        <div class="xp-chip" id="xpChip" aria-label="XP earned">
-          <svg viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>
-          <span id="xpChipNum">0 XP</span>
-        </div>
         <div class="skip" onclick="exitConfirm()" aria-label="Exit">
           <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </div>
@@ -1282,6 +1290,11 @@
           <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
         <div class="mini-prog"><div class="mini-prog-fill" id="miniProgFill"></div></div>
+        <div class="xp-chip" id="xpChip" aria-label="XP earned">
+          <svg viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>
+          <span class="xp-bar"><span class="xp-bar-fill" id="xpBarFill"></span></span>
+          <span id="xpChipNum">0 XP</span>
+        </div>
       </div>
 
       <div class="stepwrap" id="stepwrap">
@@ -3765,6 +3778,8 @@
   }
   // XP chip — ticks +5 each time the user lands on a NEW step
   const XP_PER_STEP = 5;
+  const XP_TARGET = Math.max(1, (ORDER.length - 1)) * XP_PER_STEP; // bar fills as the trial completes
+  let trialXpEarned = 0;                                           // carried to the dashboard at the end
   const seenSteps = new Set();
   function bumpXP() {
     if (seenSteps.has(state.step)) return;
@@ -3776,6 +3791,9 @@
     // Tick the visible number up over ~480ms instead of snapping
     const prev = parseInt((num.textContent || '0').replace(/\D/g, ''), 10) || 0;
     const next = prev + XP_PER_STEP;
+    trialXpEarned = next;
+    const fill = document.getElementById('xpBarFill');
+    if (fill) fill.style.width = Math.min(100, (next / XP_TARGET) * 100) + '%';
     const start = performance.now();
     const dur = 480;
     function tick(now) {
@@ -4309,9 +4327,12 @@
       saved.stats = stats;
       saved.baselineSet = true;
       saved.baselineSetAt = Date.now();
-      // Initial XP from the promise + onboarding
-      saved.xp = (saved.xp || 0) + 50;
+      // Carry the XP they watched fill the golden bar through onboarding so the
+      // dashboard opens already showing it (+ a small base for the promise step).
+      const carried = (trialXpEarned > 0 ? trialXpEarned : 45) + 10;
+      saved.xp = (saved.xp || 0) + carried;
       localStorage.setItem('coreState.v1', JSON.stringify(saved));
+      try { var cx = parseInt(localStorage.getItem('coreXP') || '0', 10) || 0; localStorage.setItem('coreXP', String(cx + carried)); } catch(e){}
     } catch(e){}
     track('stat_baselines_seeded', stats);
   }
@@ -4877,6 +4898,16 @@
       nameStatus.textContent = 'A bit longer — at least 3 characters.';
       nameStatus.style.color = 'var(--muted)';
       nameField.style.borderColor = 'var(--border)';
+      nameSugWrap.style.display = 'none';
+      state.name = '';
+      refreshCTA();
+      return;
+    }
+    // Names are letters only — no numbers or symbols.
+    if (/[^A-Za-z' -]/.test(v)) {
+      nameStatus.innerHTML = '<span style="color:#F87171;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:13px;height:13px;vertical-align:-2px;display:inline-block;"><path d="M6 6l12 12M18 6L6 18"/></svg> Letters only — no numbers or symbols.</span>';
+      nameField.style.borderColor = 'rgba(248,113,113,0.55)';
+      nameField.style.background = 'rgba(248,113,113,0.05)';
       nameSugWrap.style.display = 'none';
       state.name = '';
       refreshCTA();
