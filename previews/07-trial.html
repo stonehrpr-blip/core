@@ -3763,6 +3763,10 @@
   //        name  gender  D:dash  habit  tone  D:30day  paywall  promise  connect
   const ORDER = [1, 2, 4, 23, 12, 8, 19, 22, 0, 21];
   function curPos() { const i = ORDER.indexOf(state.step); return i < 0 ? 0 : i; }
+  // Count of *numbered* question screens (everything except the commitment
+  // screen and the paywall portal) — drives the "Step X of N" counter so the
+  // user can see how close they are to the finish line.
+  const NUM_QUESTIONS = ORDER.filter(function (id) { return id !== 0 && id !== 21; }).length;
   // Chapter map — drives the 5-pill progress bar + label (by ORDER position)
   const CHAPTERS = [
     { ch: 'you',    label: 'You',    maxPos: 1  },  // name, gender
@@ -3899,7 +3903,8 @@
     const kEl = tgt && tgt.querySelector('.kicker');
     if (kEl) kEl.textContent = (n === 0) ? 'One last thing'
       : (isDemoStep(n) ? 'Quick demo'
-      : ('Step ' + (curPos() + 1) + ' · ' + CHAPTERS[chapterIndexFor()].label));
+      : ('Step ' + Math.min(curPos() + 1, NUM_QUESTIONS) + ' of ' + NUM_QUESTIONS
+         + ' · ' + CHAPTERS[chapterIndexFor()].label));
     // Step-4 (duration) + step-5 (amount) get the premium CTA treatment
     document.body.setAttribute('data-habit', state.habit || '');
     document.body.classList.toggle('on-vape-duration', n === 5 && state.habit === 'vape');

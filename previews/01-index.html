@@ -335,12 +335,22 @@
     .frame { transition: opacity .42s ease, transform .46s cubic-bezier(0.4,0,0.2,1); }
     body.leaving .frame { opacity: 0; transform: scale(1.07); }
     body.leaving .leave-veil { opacity: 1; transform: scale(1); }
-    body.leaving .logo-img { transform: scale(1.14); filter: drop-shadow(0 0 40px rgba(120,160,255,0.5)) brightness(1.15); transition: transform .46s cubic-bezier(0.34,1.56,0.4,1), filter .46s ease; }
+    body.leaving .logo-img { transform: scale(1.16); filter: drop-shadow(0 0 44px rgba(120,160,255,0.55)) brightness(1.18); transition: transform .46s cubic-bezier(0.34,1.56,0.4,1), filter .46s ease; }
+    /* Layered exit — the words lift away a beat faster than the frame so the
+       logo appears to pull the eye "into" the app. */
+    body.leaving .topbar,
+    body.leaving .hero,
+    body.leaving .sub,
+    body.leaving .cta-wrap { opacity: 0; transform: translateY(-9px); transition: opacity .28s ease, transform .42s cubic-bezier(0.4,0,0.2,1); }
     body.leaving #stars .star { animation: none; opacity: 0.9 !important; transition: opacity .4s; }
     @media (prefers-reduced-motion: reduce) {
       .leave-veil, .frame, body.leaving .logo-img { transition: opacity .2s ease !important; }
       body.leaving .frame { transform: none; }
       body.leaving .logo-img { transform: none; filter: none; }
+      body.leaving .topbar,
+      body.leaving .hero,
+      body.leaving .sub,
+      body.leaving .cta-wrap { transform: none; transition: opacity .2s ease; }
     }
 
     /* Responsive */
@@ -367,10 +377,12 @@
       }
     }
   </style>
-  <link rel="stylesheet" href="_lib/core-background.css">
-  <script src="_lib/core-background.js"></script>
-  <link rel="stylesheet" href="_lib/core-starfield.css">
-  <script src="_lib/core-starfield.js"></script>
+  <!-- This launch screen owns its own controlled matte-black + sparse
+       starfield (see .bg / #stars below). It deliberately does NOT load
+       core-background.js (skipped via data-bg-skip anyway) or
+       core-starfield.js — that library ignores data-bg-skip, injects a
+       second 94-star field + shooting stars over ours, and hides our tuned
+       .bg. One field, one source of truth. -->
   <link rel="stylesheet" href="_lib/core-ui.css">
 </head>
 <body data-font="apple" style='font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, "Segoe UI", Roboto, sans-serif !important;'>
