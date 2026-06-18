@@ -156,10 +156,14 @@
 
   /* step container */
   .stepwrap { flex:1; overflow:hidden; position:relative; }
-  .step { position:absolute; inset:0; padding: 20px 26px 16px; display:flex; flex-direction:column; gap:12px; opacity:0; transform: translateX(28px); pointer-events:none; transition: opacity .35s ease, transform .35s ease; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+  .step { position:absolute; inset:0; padding: 20px 26px 16px; display:flex; flex-direction:column; gap:12px; opacity:0; transform: translateX(34px) scale(.984); pointer-events:none; transition: opacity .34s ease, transform .44s cubic-bezier(.22,1,.36,1); overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
   .step::-webkit-scrollbar { display:none; }
-  .step.on { opacity:1; transform: translateX(0); pointer-events:auto; }
-  .step.out { opacity:0; transform: translateX(-28px); }
+  .step.on { opacity:1; transform: translateX(0) scale(1); pointer-events:auto; }
+  .step.out { opacity:0; transform: translateX(-34px) scale(.984); }
+  /* Next button "ready" pulse — fires the moment the step is satisfied */
+  @keyframes ctaReady { 0%{transform:scale(1);} 38%{transform:scale(1.04);} 100%{transform:scale(1);} }
+  .cta.ready { animation: ctaReady .5s cubic-bezier(.22,1.7,.36,1); }
+  .cta:not(:disabled) { box-shadow: 0 12px 28px rgba(0,0,0,.45), 0 0 24px rgba(120,160,255,.2), 0 1px 0 rgba(255,255,255,.6) inset; }
   /* Small phones — compress so contract card fits without clipping */
   @media (max-width: 360px) {
     .step { padding: 14px 20px 28px; gap: 10px; }
@@ -3906,8 +3910,16 @@
     sv.setAttribute('viewBox','0 0 24 24');
     sv.innerHTML = '<path d="M5 12h14M13 5l7 7-7 7"/>';
     cta.appendChild(sv);
+    var wasDisabled = cta.disabled;
     cta.disabled = disabled;
     note.textContent = helper;
+    // Celebrate the moment a step becomes answerable — pulse + light haptic.
+    if (wasDisabled && !disabled) {
+      cta.classList.remove('ready'); void cta.offsetWidth; cta.classList.add('ready');
+      try { if (navigator.vibrate) navigator.vibrate(10); } catch (e) {}
+    } else if (disabled) {
+      cta.classList.remove('ready');
+    }
   }
   function refreshCTA() {
     const s = state.step;

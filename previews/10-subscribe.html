@@ -3,13 +3,11 @@
 <head>
   <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
   <script>
-    // This is an onboarding gate. If the member is already subscribed, skip straight
-    // to the dashboard. (Preview/localhost bypasses so it's always viewable.)
     try{(function(){var h=location.hostname;window.__corePreview=(location.protocol==='file:'||h==='localhost'||h==='127.0.0.1'||/[?&]preview=1/.test(location.search));})();}catch(e){}
     if(!window.__corePreview){ try { if (localStorage.getItem('coreSubscribed') === '1') { location.replace('20-dashboard.html'); } } catch(e){} }
   </script>
   <meta charset="utf-8" />
-  <title>CORE — Membership</title>
+  <title>CORE — Start your 7 days free</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#000000" />
   <link rel="stylesheet" href="_lib/core-responsive.css" />
@@ -17,7 +15,7 @@
     :root{
       --ink:#ffffff; --ink-soft:rgba(255,255,255,0.58); --ink-faint:rgba(255,255,255,0.34);
       --hair:rgba(255,255,255,0.08); --hair-2:rgba(255,255,255,0.14);
-      --glow:rgba(120,160,255,0.6); --glow-soft:rgba(120,160,255,0.18); --blue:#4AA3FF;
+      --glow:rgba(120,160,255,0.6); --glow-soft:rgba(120,160,255,0.18); --blue:#5AA3FF; --gold:#FFCB3D; --green:#34D399;
       --apple-font:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Helvetica,Arial,"Segoe UI",Roboto,sans-serif;
     }
     *{margin:0;padding:0;box-sizing:border-box;}
@@ -29,59 +27,87 @@
     .notch{position:absolute;top:14px;left:50%;transform:translateX(-50%);width:124px;height:32px;background:#000;border-radius:20px;z-index:60;}
     .home-indicator{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;background:rgba(255,255,255,0.4);border-radius:999px;z-index:60;}
 
-    .frame{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;padding:58px 0 0;}
-    .scroll{flex:1;overflow-y:auto;padding:6px 24px 26px;-webkit-overflow-scrolling:touch;}
+    .frame{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;padding:54px 0 0;}
+    .scroll{flex:1;overflow-y:auto;padding:6px 22px 150px;-webkit-overflow-scrolling:touch;}
     .scroll::-webkit-scrollbar{display:none;}
 
     /* hero */
-    .crest{width:84px;height:84px;margin:6px auto 0;display:flex;align-items:center;justify-content:center;
-      filter:drop-shadow(0 12px 26px rgba(0,0,0,.55)) drop-shadow(0 0 22px rgba(120,160,255,.16));
-      animation:bob 4s ease-in-out infinite;}
-    .crest img{width:84px;height:84px;border-radius:22px;object-fit:contain;}
+    .crest{width:72px;height:72px;margin:4px auto 0;display:flex;align-items:center;justify-content:center;
+      filter:drop-shadow(0 10px 22px rgba(0,0,0,.55)) drop-shadow(0 0 20px rgba(120,160,255,.18));animation:bob 4s ease-in-out infinite;}
+    .crest img{width:72px;height:72px;border-radius:19px;object-fit:contain;}
     @keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
-    .htag{text-align:center;margin-top:16px;font-size:10.5px;font-weight:800;letter-spacing:.26em;text-transform:uppercase;color:var(--ink-soft);}
-    .h1{text-align:center;margin:9px 0 0;font-size:30px;font-weight:800;letter-spacing:-0.8px;line-height:1.08;}
-    .h1 .g{color:#fff;text-shadow:0 0 26px rgba(120,160,255,.18);}
-    .sub{text-align:center;margin:11px auto 0;max-width:290px;font-size:13.5px;color:var(--ink-soft);line-height:1.5;}
+    .htag{text-align:center;margin-top:15px;font-size:10.5px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:var(--blue);}
+    .h1{text-align:center;margin:8px 4px 0;font-size:30px;font-weight:800;letter-spacing:-0.9px;line-height:1.06;}
+    .h1 .g{color:#fff;text-shadow:0 0 26px rgba(120,160,255,.2);}
+    .sub{text-align:center;margin:11px auto 0;max-width:300px;font-size:13.5px;color:var(--ink-soft);line-height:1.5;}
 
-    /* value props */
-    .feats{margin-top:22px;display:flex;flex-direction:column;gap:4px;}
-    .f{display:flex;align-items:center;gap:13px;padding:11px 4px;}
-    .f .fk{width:38px;height:38px;flex:none;border-radius:11px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.05);border:1px solid var(--hair);}
-    .f .fk svg{width:20px;height:20px;color:#cfe0ff;}
-    .f .ft{font-size:14px;font-weight:800;color:#fff;}
-    .f .fd{font-size:12px;color:var(--ink-soft);margin-top:2px;line-height:1.35;}
+    /* social proof */
+    .proof{display:flex;align-items:center;justify-content:center;gap:10px;margin:16px auto 0;}
+    .stars{display:inline-flex;gap:2px;}
+    .stars svg{width:15px;height:15px;color:var(--gold);}
+    .proof-tx{font-size:12px;font-weight:700;color:var(--ink-soft);}
+    .proof-tx b{color:#fff;}
+
+    /* trial timeline */
+    .tl{margin:22px 0 0;padding:18px 16px 8px;border-radius:18px;background:rgba(255,255,255,0.03);border:1px solid var(--hair);position:relative;}
+    .tl-h{font-size:12px;font-weight:800;letter-spacing:.04em;color:#fff;margin:0 2px 14px;}
+    .tl-row{display:flex;gap:14px;position:relative;padding-bottom:18px;}
+    .tl-rail{position:absolute;left:13px;top:6px;bottom:0;width:2px;background:linear-gradient(180deg,var(--blue),rgba(120,160,255,0.15));}
+    .tl-row:last-child{padding-bottom:6px;}
+    .tl-dot{width:28px;height:28px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:1;
+      background:#0d1322;border:1.5px solid var(--blue);box-shadow:0 0 12px rgba(120,160,255,.3);}
+    .tl-dot svg{width:15px;height:15px;color:var(--blue);}
+    .tl-dot.lock{border-color:var(--ink-faint);box-shadow:none;background:#101216;} .tl-dot.lock svg{color:var(--ink-soft);}
+    .tl-bd .tl-d{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);}
+    .tl-bd .tl-t{font-size:14px;font-weight:800;color:#fff;margin-top:2px;}
+    .tl-bd .tl-s{font-size:12px;color:var(--ink-soft);margin-top:2px;line-height:1.4;}
+
+    /* feature checklist */
+    .feats{margin-top:20px;display:flex;flex-direction:column;gap:11px;}
+    .f{display:flex;align-items:center;gap:11px;}
+    .f .fk{width:22px;height:22px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(52,211,153,0.14);border:1px solid rgba(52,211,153,0.3);}
+    .f .fk svg{width:13px;height:13px;color:var(--green);}
+    .f .ft{font-size:13.5px;font-weight:600;color:#eef2f9;}
+
+    /* testimonial */
+    .quote{margin-top:20px;padding:15px 16px;border-radius:16px;background:rgba(120,160,255,0.06);border:1px solid rgba(120,160,255,0.18);}
+    .quote .qt{font-size:13.5px;line-height:1.5;color:#eaf0fb;font-weight:600;}
+    .quote .qa{font-size:11.5px;color:var(--ink-soft);margin-top:8px;font-weight:700;}
+    .quote .qa b{color:#fff;}
 
     /* plans */
-    .plans{margin-top:22px;display:flex;gap:10px;}
-    .plan{flex:1;position:relative;border-radius:18px;padding:15px 14px;background:rgba(255,255,255,0.03);border:1.5px solid var(--hair);cursor:pointer;text-align:left;transition:.18s;}
-    .plan.on{border-color:rgba(120,160,255,0.6);background:rgba(120,160,255,0.08);box-shadow:0 0 0 1px rgba(120,160,255,.25),0 0 22px rgba(120,160,255,.12);}
-    .plan .pname{font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);}
-    .plan.on .pname{color:#9fc4ff;}
-    .plan .pprice{font-size:23px;font-weight:900;margin-top:7px;letter-spacing:-0.02em;color:#fff;}
-    .plan .pper{font-size:12px;color:var(--ink-soft);font-weight:600;}
-    .plan .psave{position:absolute;top:-9px;right:12px;font-size:9px;font-weight:900;letter-spacing:.04em;color:#06070c;background:#fff;padding:3px 8px;border-radius:999px;}
-    .plan .pradio{position:absolute;top:14px;right:14px;width:18px;height:18px;border-radius:50%;border:2px solid var(--ink-faint);}
-    .plan.on .pradio{border-color:#9fc4ff;background:radial-gradient(circle at 50% 50%,#9fc4ff 0 5px,transparent 6px);}
+    .plans{margin-top:22px;display:flex;flex-direction:column;gap:10px;}
+    .plan{position:relative;border-radius:16px;padding:15px 16px;background:rgba(255,255,255,0.03);border:1.5px solid var(--hair);cursor:pointer;display:flex;align-items:center;gap:13px;transition:.16s;}
+    .plan.on{border-color:rgba(120,160,255,0.6);background:rgba(120,160,255,0.08);box-shadow:0 0 0 1px rgba(120,160,255,.25),0 0 24px rgba(120,160,255,.12);}
+    .plan .pradio{width:20px;height:20px;flex:none;border-radius:50%;border:2px solid var(--ink-faint);transition:.16s;}
+    .plan.on .pradio{border-color:var(--blue);background:radial-gradient(circle at 50% 50%,var(--blue) 0 6px,transparent 7px);}
+    .plan .pbd{flex:1;}
+    .plan .pname{font-size:14.5px;font-weight:800;color:#fff;}
+    .plan .pdesc{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+    .plan .pright{text-align:right;}
+    .plan .pprice{font-size:16px;font-weight:900;color:#fff;}
+    .plan .pper{font-size:10.5px;color:var(--ink-soft);}
+    .plan .psave{position:absolute;top:-10px;left:14px;font-size:9px;font-weight:900;letter-spacing:.06em;color:#06070c;background:linear-gradient(90deg,#fff,#cfe0ff);padding:3px 9px;border-radius:999px;}
 
-    /* CTA — premium white */
-    .cta{width:100%;margin-top:22px;padding:18px;border:none;border-radius:16px;font:inherit;font-size:16.5px;font-weight:800;letter-spacing:-0.2px;color:#07070c;cursor:pointer;
-      background:#fff;box-shadow:0 12px 28px rgba(0,0,0,.45),0 0 22px rgba(120,160,255,.14),0 1px 0 rgba(255,255,255,.6) inset;
-      display:flex;align-items:center;justify-content:center;gap:9px;transition:transform .12s,box-shadow .22s;}
-    .cta:hover{box-shadow:0 12px 32px rgba(0,0,0,.5),0 0 30px rgba(120,160,255,.24),0 1px 0 rgba(255,255,255,.7) inset;}
+    /* sticky CTA dock */
+    .dock{position:absolute;left:0;right:0;bottom:0;z-index:30;padding:14px 22px calc(20px + env(safe-area-inset-bottom));
+      background:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,0.82) 26%,#000 64%);}
+    .reassure{display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:10px;font-size:12px;font-weight:700;color:#cfe0ff;}
+    .reassure svg{width:14px;height:14px;color:var(--green);}
+    .cta{width:100%;padding:18px;border:none;border-radius:16px;font:inherit;font-size:17px;font-weight:800;letter-spacing:-0.2px;color:#07070c;cursor:pointer;
+      background:#fff;box-shadow:0 12px 30px rgba(0,0,0,.5),0 0 26px rgba(120,160,255,.18),0 1px 0 rgba(255,255,255,.6) inset;
+      display:flex;align-items:center;justify-content:center;gap:9px;transition:transform .12s,box-shadow .22s;animation:ctaPulse 2.6s ease-in-out infinite;}
+    @keyframes ctaPulse{0%,100%{box-shadow:0 12px 30px rgba(0,0,0,.5),0 0 22px rgba(120,160,255,.16),0 1px 0 rgba(255,255,255,.6) inset;}50%{box-shadow:0 12px 34px rgba(0,0,0,.55),0 0 40px rgba(120,160,255,.34),0 1px 0 rgba(255,255,255,.7) inset;}}
     .cta:active{transform:scale(.985);}
-    .cta:disabled{cursor:progress;}
     .cta .spin{width:19px;height:19px;border-radius:50%;border:2.4px solid rgba(7,7,12,.25);border-top-color:#07070c;animation:spin .7s linear infinite;display:none;}
-    .cta.busy .spin{display:inline-block;} .cta.busy .lbl{opacity:.7;}
+    .cta.busy{animation:none;} .cta.busy .spin{display:inline-block;} .cta.busy .lbl{opacity:.7;}
     @keyframes spin{to{transform:rotate(360deg);}}
-    .finesub{text-align:center;margin-top:12px;font-size:11.5px;color:var(--ink-faint);line-height:1.5;}
-    .restore-row{text-align:center;margin-top:16px;font-size:13px;color:var(--ink-soft);}
-    .restore-row a{color:#9fc4ff;font-weight:700;text-decoration:none;cursor:pointer;}
-    .restore-row a:hover{text-decoration:underline;}
-    .legal{text-align:center;margin-top:14px;font-size:10.5px;color:var(--ink-faint);}
-    .legal a{color:var(--ink-soft);text-decoration:none;}
+    .finesub{text-align:center;margin-top:9px;font-size:11px;color:var(--ink-faint);line-height:1.45;}
+    .finesub a{color:var(--ink-soft);}
+    .restore{display:block;width:100%;text-align:center;margin-top:9px;font-size:12.5px;color:var(--ink-soft);background:none;border:none;font:inherit;cursor:pointer;}
+    .restore b{color:#9fc4ff;font-weight:700;}
 
-    /* ===== Multi-step unlock loader (ported from MultiStepLoader) ===== */
+    /* ===== Multi-step unlock loader ===== */
     .ul-wrap{position:absolute;inset:0;z-index:90;display:none;align-items:center;justify-content:center;
       background:radial-gradient(circle at 50% 42%,rgba(20,28,60,0.6) 0%,rgba(0,0,0,0.92) 55%,#000 100%);
       -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);opacity:0;transition:opacity .4s ease;}
@@ -89,30 +115,22 @@
     .ul-mask{position:relative;height:340px;width:100%;max-width:320px;overflow:hidden;
       -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 26%,#000 74%,transparent 100%);
       mask-image:linear-gradient(to bottom,transparent 0%,#000 26%,#000 74%,transparent 100%);}
-    .ul-list{position:absolute;left:0;right:0;top:50%;display:flex;flex-direction:column;gap:20px;
-      transition:transform .5s cubic-bezier(.4,0,.2,1);padding:0 8px;}
+    .ul-list{position:absolute;left:0;right:0;top:50%;display:flex;flex-direction:column;gap:20px;transition:transform .5s cubic-bezier(.4,0,.2,1);padding:0 8px;}
     .ul-step{display:flex;align-items:center;gap:13px;opacity:0.28;transition:opacity .5s ease,transform .5s ease;}
     .ul-step .uic{width:24px;height:24px;flex:none;display:flex;align-items:center;justify-content:center;}
     .ul-step .uic svg{width:24px;height:24px;}
     .ul-step .utx{font-size:16px;font-weight:600;color:#fff;letter-spacing:-0.2px;}
-    .ul-step.done{opacity:0.5;}
-    .ul-step.current{opacity:1;transform:scale(1.04);}
-    .ul-step.current .utx{font-weight:800;}
-    /* check (done) */
-    .uic .chk{stroke:#4ADE80;}
-    /* spinner (current) */
-    .uic .cspin{width:22px;height:22px;border-radius:50%;border:2.4px solid rgba(120,160,255,.25);border-top-color:#7aa0ff;animation:spin .7s linear infinite;}
-    /* pending dot */
+    .ul-step.done{opacity:0.5;} .ul-step.current{opacity:1;transform:scale(1.04);} .ul-step.current .utx{font-weight:800;}
+    .uic .chk{stroke:#4ADE80;} .uic .cspin{width:22px;height:22px;border-radius:50%;border:2.4px solid rgba(120,160,255,.25);border-top-color:#7aa0ff;animation:spin .7s linear infinite;}
     .uic .pdot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.3);}
 
-    @media (prefers-reduced-motion: reduce){ .crest,.cta .spin,.uic .cspin{animation:none!important;} }
+    @media (prefers-reduced-motion: reduce){ .crest,.cta,.uic .cspin{animation:none!important;} }
   </style>
   <link rel="stylesheet" href="_lib/core-background.css" />
   <script src="_lib/core-background.js"></script>
   <link rel="stylesheet" href="_lib/core-starfield.css" />
   <script src="_lib/core-starfield.js"></script>
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
-  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
   <link rel="stylesheet" href="_lib/core-ui.css" />
 </head>
@@ -123,18 +141,52 @@
     <div class="frame">
       <div class="scroll">
         <div class="crest"><img src="assets/logo.png?v=3" alt="CORE" /></div>
-        <div class="htag">CORE Membership</div>
-        <h1 class="h1">Unlock <span class="g">everything.</span></h1>
-        <p class="sub">Your plan is built. Activate your membership to open your dashboard, quests, AI coach and rewards.</p>
+        <div class="htag">7 days free</div>
+        <h1 class="h1" id="heroH1">Your plan is ready.<br/><span class="g">Start free.</span></h1>
+        <p class="sub">Full access to everything for 7 days. We'll remind you before it ends — cancel anytime, no charge today.</p>
 
+        <div class="proof">
+          <span class="stars" id="stars"></span>
+          <span class="proof-tx"><b>4.9</b> · loved by <b>12,000+</b> members</span>
+        </div>
+
+        <!-- trial timeline -->
+        <div class="tl">
+          <div class="tl-h">How your free trial works</div>
+          <div class="tl-rail"></div>
+          <div class="tl-row">
+            <span class="tl-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 11-12"/></svg></span>
+            <div class="tl-bd"><div class="tl-d">Today</div><div class="tl-t">Everything unlocks</div><div class="tl-s">Dashboard, AI coach, scans, quests &amp; rewards — instantly.</div></div>
+          </div>
+          <div class="tl-row">
+            <span class="tl-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></span>
+            <div class="tl-bd"><div class="tl-d">Day 5</div><div class="tl-t">We'll remind you</div><div class="tl-s">A heads-up that your trial ends in 2 days. No surprises.</div></div>
+          </div>
+          <div class="tl-row">
+            <span class="tl-dot lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c1 3-1 4-1 6 0 1 1 2 1 2s2-1 2-3c2 2 3 4 3 7a5 5 0 0 1-10 0c0-3 2-5 3-7Z"/></svg></span>
+            <div class="tl-bd"><div class="tl-d">Day 7</div><div class="tl-t">Trial ends</div><div class="tl-s">Your membership begins — only if you keep it. Cancel in a tap.</div></div>
+          </div>
+        </div>
+
+        <!-- features -->
         <div class="feats" id="feats"></div>
+
+        <!-- testimonial -->
+        <div class="quote">
+          <div class="qt">“First app that actually made me show up every day. 40-day streak and I feel like a different person.”</div>
+          <div class="qa">— <b>Jordan M.</b> · CORE member</div>
+        </div>
+
+        <!-- plans -->
         <div class="plans" id="plans"></div>
+      </div>
 
-        <button class="cta" id="ctaBtn" type="button"><span class="lbl">Subscribe &amp; unlock</span><span class="spin" aria-hidden="true"></span></button>
-        <div class="finesub" id="fineSub">7-day free trial, then $44.99/year. Cancel anytime.</div>
-
-        <div class="restore-row">Already a member? <a id="restoreBtn">Log in to restore</a></div>
-        <div class="legal">Secured checkout · <a href="82-legal.html#terms">Terms</a> · <a href="refund-policy.html">Refunds</a></div>
+      <!-- sticky CTA -->
+      <div class="dock">
+        <div class="reassure"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>No payment due now · cancel anytime</div>
+        <button class="cta" id="ctaBtn" type="button"><span class="lbl">Start my 7 days free</span><span class="spin" aria-hidden="true"></span></button>
+        <div class="finesub" id="fineSub">7-day free trial, then $44.99/year. Cancel anytime in Settings.</div>
+        <button class="restore" id="restoreBtn" type="button">Already a member? <b>Log in to restore</b></button>
       </div>
       <div class="home-indicator"></div>
     </div>
@@ -153,119 +205,77 @@
     var qs=function(s){return document.querySelector(s);};
     function SFX(n){ try{ if(typeof window.coreSfx==='function') window.coreSfx(n); }catch(e){} }
 
-    // ── value props ──
-    var FEATS=[
-      {t:'Your full dashboard', d:'Life Score, trends, widgets and your daily plan.', ic:'<rect x="3" y="3" width="7" height="7" rx="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.6"/><rect x="3" y="14" width="7" height="7" rx="1.6"/><rect x="14" y="14" width="7" height="7" rx="1.6"/>'},
-      {t:'AI coach & scans', d:'Physique, food and voice analysis, plus your coach.', ic:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>'},
-      {t:'Quests, streaks & rewards', d:'Daily quests, streak protection and chests.', ic:'<path d="M12 2c1 3-1 4-1 6 0 1 1 2 1 2s2-1 2-3c2 2 3 4 3 7a5 5 0 0 1-10 0c0-3 2-5 3-7 1 2 2 2 2 2s0-3 0-7Z"/>'},
-      {t:'Everything, unlimited', d:'No caps. New seasons and features first.', ic:'<circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/>'}
-    ];
-    qs('#feats').innerHTML=FEATS.map(function(f){
-      return '<div class="f"><div class="fk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+f.ic+'</svg></div>'+
-             '<div><div class="ft">'+f.t+'</div><div class="fd">'+f.d+'</div></div></div>';
-    }).join('');
+    // personalise from the trial name
+    try{ var t=JSON.parse(localStorage.getItem('coreOnboardTrial')||'{}'); var nm=(t&&t.name||'').trim().split(' ')[0];
+      if(nm) qs('#heroH1').innerHTML = nm.replace(/[<>&]/g,'')+", your plan<br/><span class=\"g\">is ready.</span>"; }catch(e){}
 
-    // ── plans ──
+    // stars
+    qs('#stars').innerHTML = Array(5).fill('<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.8.6-5.1 4.5 1.5 6.7L12 17.3 5.9 20.6l1.5-6.7L2.3 8.9l6.8-.6z"/></svg>').join('');
+
+    // feature checklist
+    var FEATS=['Full dashboard — Life Score, trends & daily plan','AI coach + physique / food / voice scans','Daily quests, streak protection & chests','Personalised plan from your answers','Unlimited everything — new seasons first'];
+    var CK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 11-12"/></svg>';
+    qs('#feats').innerHTML=FEATS.map(function(f){ return '<div class="f"><span class="fk">'+CK+'</span><span class="ft">'+f+'</span></div>'; }).join('');
+
+    // plans
     var PLANS={
-      annual:{ name:'Annual', price:'$44.99', per:'/year', save:'SAVE 53%', fine:'7-day free trial, then $44.99/year (≈$3.75/mo). Cancel anytime.' },
-      monthly:{ name:'Monthly', price:'$7.99', per:'/month', save:'', fine:'7-day free trial, then $7.99/month. Cancel anytime.' }
+      annual:{ name:'Annual', desc:'Best value · billed yearly after trial', price:'$44.99', per:'/yr (≈$3.75/mo)', save:'SAVE 53%', fine:'7-day free trial, then $44.99/year (≈$3.75/mo). Cancel anytime in Settings.' },
+      monthly:{ name:'Monthly', desc:'Flexible · billed monthly after trial', price:'$7.99', per:'/mo', save:'', fine:'7-day free trial, then $7.99/month. Cancel anytime in Settings.' }
     };
     var sel='annual';
     function renderPlans(){
       qs('#plans').innerHTML=['annual','monthly'].map(function(k){ var p=PLANS[k];
         return '<button class="plan'+(k===sel?' on':'')+'" data-plan="'+k+'" type="button">'+
-          (p.save?'<span class="psave">'+p.save+'</span>':'')+'<span class="pradio"></span>'+
-          '<div class="pname">'+p.name+'</div><div class="pprice">'+p.price+'</div><div class="pper">'+p.per+'</div></button>';
+          (p.save?'<span class="psave">'+p.save+' · most popular</span>':'')+
+          '<span class="pradio"></span>'+
+          '<span class="pbd"><span class="pname">'+p.name+'</span><span class="pdesc">'+p.desc+'</span></span>'+
+          '<span class="pright"><span class="pprice">'+p.price+'</span><br/><span class="pper">'+p.per+'</span></span>'+
+          '</button>';
       }).join('');
       qs('#fineSub').textContent=PLANS[sel].fine;
-      document.querySelectorAll('.plan').forEach(function(b){ b.addEventListener('click', function(){ sel=b.dataset.plan; SFX('tick'); renderPlans(); }); });
+      document.querySelectorAll('.plan').forEach(function(b){ b.addEventListener('click', function(){ sel=b.dataset.plan; SFX('tick'); try{if(navigator.vibrate)navigator.vibrate(8);}catch(e){} renderPlans(); }); });
     }
     renderPlans();
 
-    // ── unlock loader (ported from MultiStepLoader) ──
-    var UNLOCKS=[
-      'Confirming your membership',
-      'Unlocking your dashboard',
-      'Activating daily quests',
-      'Calibrating your 6 life stats',
-      'Waking your AI coach',
-      'Unlocking streaks & rewards',
-      'Forging your first chest',
-      'Welcome to CORE'
-    ];
+    // ── unlock loader ──
+    var UNLOCKS=['Confirming your membership','Unlocking your dashboard','Activating daily quests','Calibrating your 6 life stats','Waking your AI coach','Unlocking streaks & rewards','Forging your first chest','Welcome to CORE'];
     var CHK='<svg class="chk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 11-12"/></svg>';
-    var ROW=44; // step height + gap for centering math (gap 20 + ~24 icon)
-    function buildLoader(){
-      qs('#ulList').innerHTML=UNLOCKS.map(function(t,i){
-        return '<div class="ul-step" data-i="'+i+'"><span class="uic"><span class="pdot"></span></span><span class="utx">'+t+'</span></div>';
-      }).join('');
-    }
+    function buildLoader(){ qs('#ulList').innerHTML=UNLOCKS.map(function(t,i){ return '<div class="ul-step" data-i="'+i+'"><span class="uic"><span class="pdot"></span></span><span class="utx">'+t+'</span></div>'; }).join(''); }
     function paintStep(i){
       var steps=document.querySelectorAll('.ul-step');
-      steps.forEach(function(el,idx){
-        var ic=el.querySelector('.uic');
-        el.classList.remove('done','current');
+      steps.forEach(function(el,idx){ var ic=el.querySelector('.uic'); el.classList.remove('done','current');
         if(idx<i){ el.classList.add('done'); ic.innerHTML=CHK; }
-        else if(idx===i){ el.classList.add('current'); ic.innerHTML = (idx===UNLOCKS.length-1) ? CHK : '<span class="cspin"></span>'; }
-        else { ic.innerHTML='<span class="pdot"></span>'; }
-      });
-      // keep current step vertically centered within the mask
-      var list=qs('#ulList');
-      var cur=steps[i];
-      if(list && cur){ var off = cur.offsetTop + cur.offsetHeight/2; list.style.transform='translateY(-'+off+'px)'; }
+        else if(idx===i){ el.classList.add('current'); ic.innerHTML=(idx===UNLOCKS.length-1)?CHK:'<span class="cspin"></span>'; }
+        else { ic.innerHTML='<span class="pdot"></span>'; } });
+      var list=qs('#ulList'), cur=steps[i]; if(list&&cur){ list.style.transform='translateY(-'+(cur.offsetTop+cur.offsetHeight/2)+'px)'; }
     }
     function runLoader(done){
-      var wrap=qs('#ulWrap'); buildLoader();
-      wrap.classList.add('on');
-      var i=0; paintStep(0);
+      var wrap=qs('#ulWrap'); buildLoader(); wrap.classList.add('on'); var i=0; paintStep(0);
       try{ if(navigator.vibrate) navigator.vibrate(12); }catch(e){}
-      var step=function(){
-        SFX(i===UNLOCKS.length-1?'reward':'tick');
-        paintStep(i);
-        i++;
-        if(i<UNLOCKS.length){ setTimeout(step, 1100); }
-        else { setTimeout(function(){ paintStep(UNLOCKS.length-1); setTimeout(done, 1200); }, 200); }
-      };
-      setTimeout(step, 350);
+      var step=function(){ SFX(i===UNLOCKS.length-1?'reward':'tick'); paintStep(i); i++;
+        if(i<UNLOCKS.length){ setTimeout(step,1050); } else { setTimeout(function(){ paintStep(UNLOCKS.length-1); setTimeout(done,1200); },200); } };
+      setTimeout(step,350);
     }
 
-    // ── mark subscribed + persist to the account ──
     function activateMembership(){
-      try{ localStorage.setItem('coreSubscribed','1'); localStorage.setItem('coreSubscribedPlan', sel); localStorage.setItem('coreSubscribedAt', String(Date.now())); }catch(e){}
-      try{
-        if(window.coreAccounts && window.coreAccounts.updateCurrent){
-          window.coreAccounts.updateCurrent(function(acc){ acc.subscribed=true; acc.subscriptionPlan=sel; acc.subscribedAt=Date.now(); });
-        }
-      }catch(e){}
-      try{ if(window.coreState && window.coreState.setCorePlus) window.coreState.setCorePlus(true); }catch(e){}
-      try{ if(window.coreTrack) coreTrack('subscription_started', { plan: sel }); }catch(e){}
+      try{ localStorage.setItem('coreSubscribed','1'); localStorage.setItem('coreSubscribedPlan',sel); localStorage.setItem('coreSubscribedAt',String(Date.now())); }catch(e){}
+      try{ if(window.coreAccounts&&window.coreAccounts.updateCurrent){ window.coreAccounts.updateCurrent(function(acc){ acc.subscribed=true; acc.subscriptionPlan=sel; acc.subscribedAt=Date.now(); }); } }catch(e){}
+      try{ if(window.coreState&&window.coreState.setCorePlus) window.coreState.setCorePlus(true); }catch(e){}
+      try{ if(window.coreTrack) coreTrack('subscription_started',{plan:sel,trial:true}); }catch(e){}
     }
 
-    // ── subscribe → simulate confirmed payment → unlock loader → dashboard ──
     var paying=false;
     qs('#ctaBtn').addEventListener('click', function(){
       if(paying) return; paying=true;
-      var btn=qs('#ctaBtn'); btn.classList.add('busy'); btn.disabled=true;
-      btn.querySelector('.lbl').textContent='Confirming payment…';
-      SFX('confirm');
-      // (Preview: simulated confirmation. Production wires Apple Pay / Stripe here.)
-      setTimeout(function(){
-        activateMembership();
-        btn.classList.remove('busy');
-        runLoader(function(){ window.location.href='20-dashboard.html'; });
-      }, 1500);
+      var btn=qs('#ctaBtn'); btn.classList.add('busy'); btn.querySelector('.lbl').textContent='Confirming…';
+      SFX('confirm'); try{if(navigator.vibrate)navigator.vibrate(18);}catch(e){}
+      setTimeout(function(){ activateMembership(); runLoader(function(){ window.location.href='20-dashboard.html'; }); }, 1400);
     });
 
-    // ── restore / log in to an existing subscribed account ──
     qs('#restoreBtn').addEventListener('click', function(){
-      SFX('tick');
-      // If this account is already subscribed (e.g. returning member), unlock now.
-      var subbed=false;
-      try{
-        if(window.coreAccounts && window.coreAccounts.currentSync){ var a=window.coreAccounts.currentSync(); subbed=!!(a&&a.subscribed); }
-      }catch(e){}
+      SFX('tick'); var subbed=false;
+      try{ if(window.coreAccounts&&window.coreAccounts.currentSync){ var a=window.coreAccounts.currentSync(); subbed=!!(a&&a.subscribed); } }catch(e){}
       if(subbed){ try{ localStorage.setItem('coreSubscribed','1'); }catch(e){} window.location.href='20-dashboard.html'; return; }
-      // Otherwise send them to sign-in; coming back subscribed will pass the gate.
       window.location.href='04-sign-in.html?return=10-subscribe.html';
     });
   })();
