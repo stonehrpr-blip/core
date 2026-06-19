@@ -24,10 +24,10 @@
       s.className = 'core-bg-star ' + tier;
       s.style.left = (Math.random() * 100) + '%';
       s.style.top  = (Math.random() * 100) + '%';
-      s.style.setProperty('--d',   (2.5 + Math.random() * 5) + 's');
-      s.style.setProperty('--del', (Math.random() * 5) + 's');
-      s.style.setProperty('--min', (0.10 + Math.random() * 0.20).toFixed(2));
-      s.style.setProperty('--max', (0.55 + Math.random() * 0.40).toFixed(2));
+      s.style.setProperty('--d',   (4 + Math.random() * 6) + 's');
+      s.style.setProperty('--del', (Math.random() * 6) + 's');
+      s.style.setProperty('--min', (0.04 + Math.random() * 0.10).toFixed(2));
+      s.style.setProperty('--max', (0.30 + Math.random() * 0.25).toFixed(2));
       wrap.appendChild(s);
     }
   }
