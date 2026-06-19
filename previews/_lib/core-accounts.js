@@ -47,6 +47,16 @@
       if (account && account.trialState) {
         localStorage.setItem('coreOnboardTrial', JSON.stringify(account.trialState));
       }
+      // Membership travels WITH the account — sign back in on any device and
+      // your paid status (and everything else) comes back. A non-subscribed
+      // account clears the flag so it can't carry a stale unlock.
+      if (account && account.subscribed) {
+        localStorage.setItem('coreSubscribed', '1');
+        if (account.subscriptionPlan) localStorage.setItem('coreSubscribedPlan', account.subscriptionPlan);
+        if (account.subscribedAt) localStorage.setItem('coreSubscribedAt', String(account.subscribedAt));
+      } else if (account) {
+        localStorage.removeItem('coreSubscribed');
+      }
       if (account) {
         localStorage.setItem('coreLastSeen', String(Date.now()));
       }
@@ -56,6 +66,9 @@
     try {
       localStorage.removeItem('coreOnboardComplete');
       localStorage.removeItem('coreOnboardTrial');
+      localStorage.removeItem('coreSubscribed');
+      localStorage.removeItem('coreSubscribedPlan');
+      localStorage.removeItem('coreSubscribedAt');
     } catch (e) {}
   }
 
