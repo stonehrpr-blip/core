@@ -3776,7 +3776,21 @@
   //   pos: 0       1         2       3       4     5       6        7     8        9        10       11
   //   id : 0       1         2       19      4     6       8        12    13       16       17       21
   //        name  gender  D:dash  habit  tone  D:30day  paywall  promise  connect
-  const ORDER = [1, 2, 4, 23, 12, 8, 19, 22, 0, 21];
+  // Personal-first flow: every screen earns its place. We ask who you are,
+  // what you're quitting, what pushed you, who you want to become, and the
+  // real 11pm reason — then pay it back with a plan that quotes your own
+  // words. No generic settings or filler graphs that make people bounce.
+  //   1  name + age          (you)
+  //   2  profile / avatar    (you)
+  //   4  what are you quitting
+  //   9  what pushed you to quit now   ← personal
+  //   23 who do you want to become     ← personal
+  //   14 when it hurts, why are you doing this (your own words) ← personal
+  //   22 how committed are you
+  //   16 your 30-day plan — quotes your "why" back (earned payoff)
+  //   0  sign the contract
+  //   21 portal / paywall
+  const ORDER = [1, 2, 4, 9, 23, 14, 22, 16, 0, 21];
   function curPos() { const i = ORDER.indexOf(state.step); return i < 0 ? 0 : i; }
   // Count of *numbered* question screens (everything except the commitment
   // screen and the paywall portal) — drives the "Step X of N" counter so the
@@ -3784,11 +3798,11 @@
   const NUM_QUESTIONS = ORDER.filter(function (id) { return id !== 0 && id !== 21; }).length;
   // Chapter map — drives the 5-pill progress bar + label (by ORDER position)
   const CHAPTERS = [
-    { ch: 'you',    label: 'You',    maxPos: 1  },  // name, gender
-    { ch: 'habit',  label: 'Habit',  maxPos: 3  },  // habit, identity
-    { ch: 'coach',  label: 'Coach',  maxPos: 5  },  // coach tone, journey graph
-    { ch: 'plan',   label: 'Plan',   maxPos: 7  },  // 30-day, commitment
-    { ch: 'trial',  label: 'Trial',  maxPos: 9  },  // promise, transformation
+    { ch: 'you',    label: 'You',        maxPos: 1  },  // name+age, profile
+    { ch: 'habit',  label: 'Your habit', maxPos: 3  },  // what you're quitting, what pushed you
+    { ch: 'why',    label: 'Your why',   maxPos: 5  },  // who you'll become, the real why
+    { ch: 'plan',   label: 'Your plan',  maxPos: 7  },  // commitment, 30-day payoff
+    { ch: 'commit', label: 'Commit',     maxPos: 9  },  // contract, portal
   ];
   function chapterIndexFor() {                 // reads state.step via curPos(); any arg ignored
     const p = curPos();
