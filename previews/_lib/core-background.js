@@ -69,7 +69,8 @@
       '<div class="core-bg-shooting s2"></div>';
     target.insertBefore(stack, target.firstChild);
 
-    spawnStars(stack.querySelector('.core-bg-stars'), 80);
+    var small = Math.min(window.innerWidth || 390, window.innerHeight || 800) <= 480;
+    spawnStars(stack.querySelector('.core-bg-stars'), small ? 40 : 80);
     spawnParticles(stack.querySelector('.core-bg-particles'), 10);
   }
 

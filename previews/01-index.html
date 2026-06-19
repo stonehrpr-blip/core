@@ -126,7 +126,10 @@
     .frame {
       position: absolute; inset: 0; z-index: 10;
       display: flex; flex-direction: column;
-      padding: 60px 28px 36px;
+      padding: max(60px, calc(env(safe-area-inset-top, 0px) + 26px))
+               max(28px, env(safe-area-inset-right, 0px))
+               max(34px, calc(env(safe-area-inset-bottom, 0px) + 18px))
+               max(28px, env(safe-area-inset-left, 0px));
     }
 
     /* Top bar — brand left, sign-in right */
@@ -434,7 +437,9 @@
   (function spawnStars() {
     const wrap = document.getElementById('stars');
     if (!wrap) return;
-    for (let i = 0; i < 64; i++) {
+    const small = Math.min(window.innerWidth || 390, window.innerHeight || 800) <= 480;
+    const count = small ? 40 : 64;
+    for (let i = 0; i < count; i++) {
       const r = Math.random();
       const tier = r < 0.58 ? 's1' : r < 0.84 ? 's2' : r < 0.96 ? 's3' : 's4';
       const s = document.createElement('div');

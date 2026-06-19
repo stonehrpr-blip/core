@@ -8,6 +8,8 @@
   window.__coreStarfield = true;
 
   var reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches);
+  // On real phones, run a much lighter field so mobile GPUs stay smooth.
+  var small = Math.min(window.innerWidth || 390, window.innerHeight || 800) <= 480;
 
   function build(phone) {
     if (!phone || phone.__sf) return;
@@ -18,7 +20,7 @@
     var drift = document.createElement('div'); drift.className = 'sf-drift';
     var layer = document.createElement('div'); layer.className = 'sf-layer';
 
-    var n = reduce ? 46 : 94, html = '';
+    var n = reduce ? 28 : (small ? 42 : 94), html = '';
     for (var i = 0; i < n; i++) {
       var r = Math.random();
       var t = r < 0.58 ? 's1' : r < 0.84 ? 's2' : r < 0.96 ? 's3' : 's4';
@@ -33,7 +35,8 @@
     layer.innerHTML = html;
 
     if (!reduce) {
-      ['a', 'b', 'c'].forEach(function (c) {
+      // Fewer shooting stars on phones — each is an animated, glowing layer.
+      (small ? ['a'] : ['a', 'b', 'c']).forEach(function (c) {
         var s = document.createElement('div');
         s.className = 'sf-shoot ' + c;
         layer.appendChild(s);
