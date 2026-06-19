@@ -1573,9 +1573,10 @@
               position: relative;
               padding: 12px 13px 11px;
               border-radius: 18px;
-              border: 1px solid rgba(255,255,255,0.07);
-              /* gender-page card recipe — opaque dark backing, colour via icon tile */
-              background: rgba(13,17,27,0.66);
+              border: 1px solid color-mix(in srgb, var(--hc) 24%, rgba(255,255,255,0.06));
+              /* richer: each card carries its colour — dark glass + tinted edge + soft glow */
+              background: rgba(12,15,24,0.72);
+              box-shadow: 0 4px 18px color-mix(in srgb, var(--hc) 13%, transparent);
               cursor: pointer;
               overflow: hidden;
               -webkit-tap-highlight-color: transparent;
@@ -1590,8 +1591,8 @@
             /* Colored radial backdrop unique to each habit */
             .habit-card::before {
               content: ""; position: absolute; inset: 0;
-              background: radial-gradient(70% 80% at 50% 0%, var(--hc), transparent 65%);
-              opacity: 0.10; pointer-events: none;
+              background: radial-gradient(75% 85% at 50% 0%, var(--hc), transparent 65%);
+              opacity: 0.20; pointer-events: none;
               transition: opacity .25s;
             }
             .habit-card:hover {
@@ -1650,14 +1651,12 @@
             /* Icon tile — colored tinted bg w/ glow that scales on interaction */
             .habit-ico {
               width: 48px; height: 48px; border-radius: 13px;
-              /* Apple-style frosted tint — translucent color, not a solid neon block */
-              background: color-mix(in srgb, var(--hc) 20%, rgba(255,255,255,0.05));
-              -webkit-backdrop-filter: blur(8px);
-              backdrop-filter: blur(8px);
-              border: 1px solid color-mix(in srgb, var(--hc) 32%, rgba(255,255,255,0.10));
+              /* vivid saturated chip with its own glow */
+              background: linear-gradient(155deg, color-mix(in srgb, var(--hc) 58%, transparent), color-mix(in srgb, var(--hc) 26%, transparent));
+              border: 1px solid color-mix(in srgb, var(--hc) 52%, transparent);
               box-shadow:
-                0 4px 12px rgba(0,0,0,0.20),
-                0 0 0 0.5px rgba(255,255,255,0.06) inset;
+                0 3px 14px color-mix(in srgb, var(--hc) 30%, transparent),
+                inset 0 1px 0 rgba(255,255,255,0.16);
               display: flex; align-items: center; justify-content: center;
               transition: transform .25s cubic-bezier(.22,1.4,.36,1), box-shadow .25s;
             }
@@ -1820,11 +1819,11 @@
           <h1 class="title">What pushed you<br/><span class="g">to quit now?</span></h1>
           <p class="copy">The coach will throw this back at you on hard days.</p>
           <div class="tone-list" id="vapeReason">
-            <button class="tone-row" data-reason="health"><div class="tone-body"><div class="tone-name">Health scare</div><div class="tone-desc">Lungs, heart, scan, doctor</div></div><div class="tone-check"></div></button>
-            <button class="tone-row" data-reason="money"><div class="tone-body"><div class="tone-name">Money</div><div class="tone-desc">Tired of the bleed</div></div><div class="tone-check"></div></button>
-            <button class="tone-row" data-reason="control"><div class="tone-body"><div class="tone-name">Want control back</div><div class="tone-desc">Sick of being owned</div></div><div class="tone-check"></div></button>
-            <button class="tone-row" data-reason="someone"><div class="tone-body"><div class="tone-name">Someone I love</div><div class="tone-desc">Partner, kid, family</div></div><div class="tone-check"></div></button>
-            <button class="tone-row" data-reason="done"><div class="tone-body"><div class="tone-name">Just done</div><div class="tone-desc">Over it, no specific reason</div></div><div class="tone-check"></div></button>
+            <button class="tone-row" data-reason="health" style="--tc:#30D158;"><div class="tone-ico"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C1 9 2.5 5 6 5c2 0 3 1.2 4 2.5C11 6.2 12 5 14 5c3.5 0 5 4 3.5 7-2.5 4.5-9.5 9-9.5 9z"/></svg></div><div class="tone-body"><div class="tone-name">Health scare</div><div class="tone-desc">Lungs, heart, scan, doctor</div></div><div class="tone-check"></div></button>
+            <button class="tone-row" data-reason="money" style="--tc:#FFD60A;"><div class="tone-ico"><svg viewBox="0 0 24 24"><path d="M12 3v18M8 7h6a2.5 2.5 0 0 1 0 5H9a2.5 2.5 0 0 0 0 5h7"/></svg></div><div class="tone-body"><div class="tone-name">Money</div><div class="tone-desc">Tired of the bleed</div></div><div class="tone-check"></div></button>
+            <button class="tone-row" data-reason="control" style="--tc:#0A84FF;"><div class="tone-ico"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div><div class="tone-body"><div class="tone-name">Want control back</div><div class="tone-desc">Sick of being owned</div></div><div class="tone-check"></div></button>
+            <button class="tone-row" data-reason="someone" style="--tc:#FF6482;"><div class="tone-ico"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-5 6-5s6 1.7 6 5"/><path d="M17 11l2 2 3-3.5"/></svg></div><div class="tone-body"><div class="tone-name">Someone I love</div><div class="tone-desc">Partner, kid, family</div></div><div class="tone-check"></div></button>
+            <button class="tone-row" data-reason="done" style="--tc:#BF5AF2;"><div class="tone-ico"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div><div class="tone-body"><div class="tone-name">Just done</div><div class="tone-desc">Over it, no specific reason</div></div><div class="tone-check"></div></button>
           </div>
         </div>
 
@@ -2791,44 +2790,55 @@
               display: flex; align-items: center; gap: 13px;
               padding: 15px 15px;
               border-radius: 18px;
-              /* gender-page card recipe — opaque dark backing + hairline border */
-              background: rgba(13,17,27,0.66);
-              border: 1px solid rgba(255,255,255,0.07);
+              position: relative;
+              /* RICHER: each card carries its own colour — a wash bleeding from
+                 the icon side over dark glass, a tinted hairline, and a soft
+                 coloured glow so the list feels alive on matte black. */
+              background:
+                radial-gradient(135% 130% at 0% 50%, color-mix(in srgb, var(--tc, var(--accent)) 22%, transparent) 0%, transparent 58%),
+                rgba(12,15,24,0.72);
+              border: 1px solid color-mix(in srgb, var(--tc, var(--accent)) 26%, rgba(255,255,255,0.06));
+              box-shadow: 0 4px 18px color-mix(in srgb, var(--tc, var(--accent)) 13%, transparent);
               cursor: pointer;
               box-sizing: border-box;
               transition: transform .16s var(--ease), border-color .18s, background .18s, box-shadow .18s;
               -webkit-tap-highlight-color: transparent;
             }
             .tone-row:active { transform: scale(0.985); }
-            /* frosted icon tile (Apple-style, not a glowing block) */
+            /* vivid icon tile — saturated gradient chip with its own glow */
             .tone-ico {
               width: 40px; height: 40px; border-radius: 11px;
-              background: color-mix(in srgb, var(--tc, var(--accent)) 22%, rgba(255,255,255,0.05));
-              border: 1px solid color-mix(in srgb, var(--tc, var(--accent)) 34%, rgba(255,255,255,0.10));
+              background: linear-gradient(155deg, color-mix(in srgb, var(--tc, var(--accent)) 62%, transparent), color-mix(in srgb, var(--tc, var(--accent)) 28%, transparent));
+              border: 1px solid color-mix(in srgb, var(--tc, var(--accent)) 55%, transparent);
+              box-shadow: 0 3px 14px color-mix(in srgb, var(--tc, var(--accent)) 32%, transparent), inset 0 1px 0 rgba(255,255,255,0.16);
               display: flex; align-items: center; justify-content: center;
               flex-shrink: 0;
-              transition: transform .2s var(--ease), background .2s;
+              transition: transform .2s var(--ease), background .2s, box-shadow .2s;
             }
-            .tone-ico svg { width: 20px; height: 20px; stroke: #cfe0ff; fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+            .tone-ico svg { width: 20px; height: 20px; stroke: #fff; fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
             .tone-body { flex: 1; min-width: 0; text-align: left; }
             .tone-name { font-size: 15.5px; font-weight: 700; color: #fff; letter-spacing: -0.2px; }
             .tone-desc { font-size: 12.5px; color: rgba(235,235,245,0.56); margin-top: 2px; }
             .tone-check {
               width: 22px; height: 22px; border-radius: 50%;
-              border: 1.5px solid rgba(255,255,255,0.22);
+              border: 1.5px solid color-mix(in srgb, var(--tc, var(--accent)) 40%, rgba(255,255,255,0.22));
               flex-shrink: 0;
               position: relative;
               transition: all 0.18s var(--ease);
             }
-            /* selected — same recipe as the gender card (tint over dark + ring) */
+            /* selected — the colour fully blooms: deeper wash, bright ring, big glow */
             .tone-row.sel {
-              border-color: color-mix(in srgb, var(--tc, var(--accent)) 50%, transparent);
-              background: linear-gradient(0deg, color-mix(in srgb, var(--tc, var(--accent)) 15%, transparent), color-mix(in srgb, var(--tc, var(--accent)) 15%, transparent)), rgba(13,17,27,0.66);
-              box-shadow: 0 0 0 1px color-mix(in srgb, var(--tc, var(--accent)) 42%, transparent) inset, 0 6px 20px color-mix(in srgb, var(--tc, var(--accent)) 16%, transparent);
+              border-color: color-mix(in srgb, var(--tc, var(--accent)) 72%, transparent);
+              background:
+                radial-gradient(135% 130% at 0% 50%, color-mix(in srgb, var(--tc, var(--accent)) 34%, transparent) 0%, transparent 60%),
+                color-mix(in srgb, var(--tc, var(--accent)) 13%, rgba(12,15,24,0.72));
+              box-shadow: 0 0 0 1px color-mix(in srgb, var(--tc, var(--accent)) 58%, transparent) inset,
+                          0 10px 32px color-mix(in srgb, var(--tc, var(--accent)) 34%, transparent);
             }
             .tone-row.sel .tone-ico {
-              background: color-mix(in srgb, var(--tc, var(--accent)) 32%, rgba(255,255,255,0.06));
-              border-color: color-mix(in srgb, var(--tc, var(--accent)) 50%, transparent);
+              background: linear-gradient(155deg, var(--tc, var(--accent)), color-mix(in srgb, var(--tc, var(--accent)) 60%, #000));
+              border-color: color-mix(in srgb, var(--tc, var(--accent)) 78%, transparent);
+              box-shadow: 0 3px 18px color-mix(in srgb, var(--tc, var(--accent)) 55%, transparent), inset 0 1px 0 rgba(255,255,255,0.25);
             }
             .tone-row.sel .tone-ico svg { stroke: #fff; }
             .tone-row.sel .tone-check {
