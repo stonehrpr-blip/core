@@ -3285,11 +3285,12 @@
               <span class="p-core"></span>
             </div>
 
-            <h1 class="pg-headline">Your transformation<br/>starts here</h1>
-            <p class="pg-sub" id="pgSub">Everything you need to begin. Let's go.</p>
+            <h1 class="pg-headline">Your transformation<br/><span class="pg-grad">starts here.</span></h1>
+            <p class="pg-sub" id="pgSub">Your plan is built. Your coach is ready. Step through.</p>
 
             <button type="button" class="pg-cta" id="portalCta">
               <span>Enter CORE</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
             </button>
           </div>
           <div class="pg-flash" id="pgFlash" aria-hidden="true"></div>
@@ -3306,14 +3307,17 @@
             .step[data-step="21"] { padding:0; overflow:hidden; }
             .portal-gate {
               position:absolute; inset:0;
-              background:radial-gradient(120% 80% at 50% 38%, #11132a 0%, #0a0a0f 60%, #07070b 100%);
-              display:flex; flex-direction:column; align-items:center;
-              padding:64px 26px 26px; box-sizing:border-box;
-              text-align:center; overflow:hidden;
+              background:
+                radial-gradient(130% 78% at 50% 32%, rgba(120,160,255,0.13) 0%, rgba(60,40,140,0.10) 26%, transparent 58%),
+                #000;
+              display:flex; flex-direction:column; align-items:center; justify-content:center;
+              padding: max(56px, calc(env(safe-area-inset-top,0px) + 38px)) 26px
+                       max(28px, calc(env(safe-area-inset-bottom,0px) + 20px));
+              box-sizing:border-box; text-align:center; overflow:hidden;
             }
             .pg-logo {
-              font-size:13px; font-weight:800; letter-spacing:0.5em; color:#cfe4ff;
-              text-indent:0.5em; opacity:0.9; margin-bottom:6px;
+              font-size:12px; font-weight:800; letter-spacing:0.52em; color:#cfe4ff;
+              text-indent:0.52em; opacity:0.85; margin-bottom:30px;
             }
             /* ---- portal centerpiece ---- */
             .portal {
@@ -3375,14 +3379,27 @@
 
             .pg-headline {
               position:relative; z-index:2;
-              font-size:27px; font-weight:800; line-height:1.08; letter-spacing:-0.6px;
-              color:#fff; margin:8px 0 0;
-              text-shadow:0 2px 24px rgba(122,166,255,0.35);
+              font-size:32px; font-weight:800; line-height:1.05; letter-spacing:-1px;
+              color:#fff; margin:26px 0 0;
+              text-shadow:0 2px 30px rgba(122,166,255,0.3);
+            }
+            .pg-headline .pg-grad {
+              background:linear-gradient(180deg, #ffffff 0%, #cfe0ff 60%, #9db8ff 100%);
+              -webkit-background-clip:text; background-clip:text;
+              -webkit-text-fill-color:transparent; color:transparent;
             }
             .pg-sub {
               position:relative; z-index:2;
-              font-size:13px; color:rgba(207,228,255,0.72); margin:9px 0 0; letter-spacing:-0.1px;
+              font-size:13.5px; color:rgba(207,228,255,0.7); margin:11px 0 0; letter-spacing:-0.1px;
+              max-width:30ch;
             }
+            /* ---- cinematic staggered entrance (body.on-portal so the launch
+               zoom/fade rules below still override at equal specificity) ---- */
+            @keyframes pgEnter { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+            body.on-portal .pg-logo     { animation: pgEnter .6s ease both .05s; }
+            body.on-portal .pg-headline { animation: pgEnter .65s cubic-bezier(.22,1,.36,1) both .24s; }
+            body.on-portal .pg-sub      { animation: pgEnter .6s ease both .36s; }
+            body.on-portal .pg-cta      { animation: pgEnter .6s ease both .48s, pgCtaPulse 2.2s ease-in-out 1.3s infinite; }
             /* trust pills — reassure before asking for a card */
             .pg-trust { position:relative; z-index:2; display:flex; flex-wrap:wrap; justify-content:center; gap:6px; margin-top:12px; }
             .pg-trust-pill {
