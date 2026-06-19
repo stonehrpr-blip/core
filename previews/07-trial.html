@@ -1573,10 +1573,9 @@
               position: relative;
               padding: 12px 13px 11px;
               border-radius: 18px;
-              border: 1px solid color-mix(in srgb, var(--hc) 24%, rgba(255,255,255,0.06));
-              /* richer: each card carries its colour — dark glass + tinted edge + soft glow */
-              background: rgba(12,15,24,0.72);
-              box-shadow: 0 4px 18px color-mix(in srgb, var(--hc) 13%, transparent);
+              border: 1px solid color-mix(in srgb, var(--hc) 16%, rgba(255,255,255,0.06));
+              /* simple: dark glass + a soft tinted edge, colour via the icon + glow on top */
+              background: rgba(12,15,24,0.74);
               cursor: pointer;
               overflow: hidden;
               -webkit-tap-highlight-color: transparent;
@@ -1591,8 +1590,8 @@
             /* Colored radial backdrop unique to each habit */
             .habit-card::before {
               content: ""; position: absolute; inset: 0;
-              background: radial-gradient(75% 85% at 50% 0%, var(--hc), transparent 65%);
-              opacity: 0.20; pointer-events: none;
+              background: radial-gradient(70% 80% at 50% 0%, var(--hc), transparent 65%);
+              opacity: 0.11; pointer-events: none;
               transition: opacity .25s;
             }
             .habit-card:hover {
@@ -1651,12 +1650,12 @@
             /* Icon tile — colored tinted bg w/ glow that scales on interaction */
             .habit-ico {
               width: 48px; height: 48px; border-radius: 13px;
-              /* vivid saturated chip with its own glow */
-              background: linear-gradient(155deg, color-mix(in srgb, var(--hc) 58%, transparent), color-mix(in srgb, var(--hc) 26%, transparent));
-              border: 1px solid color-mix(in srgb, var(--hc) 52%, transparent);
+              /* simple frosted colour chip */
+              background: color-mix(in srgb, var(--hc) 22%, rgba(255,255,255,0.05));
+              border: 1px solid color-mix(in srgb, var(--hc) 34%, rgba(255,255,255,0.10));
               box-shadow:
-                0 3px 14px color-mix(in srgb, var(--hc) 30%, transparent),
-                inset 0 1px 0 rgba(255,255,255,0.16);
+                0 4px 12px rgba(0,0,0,0.20),
+                0 0 0 0.5px rgba(255,255,255,0.06) inset;
               display: flex; align-items: center; justify-content: center;
               transition: transform .25s cubic-bezier(.22,1.4,.36,1), box-shadow .25s;
             }
@@ -2791,26 +2790,24 @@
               padding: 15px 15px;
               border-radius: 18px;
               position: relative;
-              /* RICHER: each card carries its own colour — a wash bleeding from
-                 the icon side over dark glass, a tinted hairline, and a soft
-                 coloured glow so the list feels alive on matte black. */
+              /* Each card carries a hint of its own colour over dark glass —
+                 kept subtle/simple: a faint wash, a soft tinted edge, no loud
+                 glow until it's selected. */
               background:
-                radial-gradient(135% 130% at 0% 50%, color-mix(in srgb, var(--tc, var(--accent)) 22%, transparent) 0%, transparent 58%),
-                rgba(12,15,24,0.72);
-              border: 1px solid color-mix(in srgb, var(--tc, var(--accent)) 26%, rgba(255,255,255,0.06));
-              box-shadow: 0 4px 18px color-mix(in srgb, var(--tc, var(--accent)) 13%, transparent);
+                radial-gradient(130% 130% at 0% 50%, color-mix(in srgb, var(--tc, var(--accent)) 10%, transparent) 0%, transparent 60%),
+                rgba(12,15,24,0.74);
+              border: 1px solid color-mix(in srgb, var(--tc, var(--accent)) 16%, rgba(255,255,255,0.06));
               cursor: pointer;
               box-sizing: border-box;
               transition: transform .16s var(--ease), border-color .18s, background .18s, box-shadow .18s;
               -webkit-tap-highlight-color: transparent;
             }
             .tone-row:active { transform: scale(0.985); }
-            /* vivid icon tile — saturated gradient chip with its own glow */
+            /* simple colour chip — soft tint, no heavy glow */
             .tone-ico {
               width: 40px; height: 40px; border-radius: 11px;
-              background: linear-gradient(155deg, color-mix(in srgb, var(--tc, var(--accent)) 62%, transparent), color-mix(in srgb, var(--tc, var(--accent)) 28%, transparent));
-              border: 1px solid color-mix(in srgb, var(--tc, var(--accent)) 55%, transparent);
-              box-shadow: 0 3px 14px color-mix(in srgb, var(--tc, var(--accent)) 32%, transparent), inset 0 1px 0 rgba(255,255,255,0.16);
+              background: color-mix(in srgb, var(--tc, var(--accent)) 24%, rgba(255,255,255,0.05));
+              border: 1px solid color-mix(in srgb, var(--tc, var(--accent)) 34%, rgba(255,255,255,0.10));
               display: flex; align-items: center; justify-content: center;
               flex-shrink: 0;
               transition: transform .2s var(--ease), background .2s, box-shadow .2s;
@@ -2826,19 +2823,18 @@
               position: relative;
               transition: all 0.18s var(--ease);
             }
-            /* selected — the colour fully blooms: deeper wash, bright ring, big glow */
+            /* selected — colour comes up cleanly: gentle wash + ring, soft glow */
             .tone-row.sel {
-              border-color: color-mix(in srgb, var(--tc, var(--accent)) 72%, transparent);
+              border-color: color-mix(in srgb, var(--tc, var(--accent)) 52%, transparent);
               background:
-                radial-gradient(135% 130% at 0% 50%, color-mix(in srgb, var(--tc, var(--accent)) 34%, transparent) 0%, transparent 60%),
-                color-mix(in srgb, var(--tc, var(--accent)) 13%, rgba(12,15,24,0.72));
-              box-shadow: 0 0 0 1px color-mix(in srgb, var(--tc, var(--accent)) 58%, transparent) inset,
-                          0 10px 32px color-mix(in srgb, var(--tc, var(--accent)) 34%, transparent);
+                radial-gradient(130% 130% at 0% 50%, color-mix(in srgb, var(--tc, var(--accent)) 18%, transparent) 0%, transparent 62%),
+                color-mix(in srgb, var(--tc, var(--accent)) 9%, rgba(12,15,24,0.74));
+              box-shadow: 0 0 0 1px color-mix(in srgb, var(--tc, var(--accent)) 42%, transparent) inset,
+                          0 6px 20px color-mix(in srgb, var(--tc, var(--accent)) 16%, transparent);
             }
             .tone-row.sel .tone-ico {
-              background: linear-gradient(155deg, var(--tc, var(--accent)), color-mix(in srgb, var(--tc, var(--accent)) 60%, #000));
-              border-color: color-mix(in srgb, var(--tc, var(--accent)) 78%, transparent);
-              box-shadow: 0 3px 18px color-mix(in srgb, var(--tc, var(--accent)) 55%, transparent), inset 0 1px 0 rgba(255,255,255,0.25);
+              background: color-mix(in srgb, var(--tc, var(--accent)) 34%, rgba(255,255,255,0.06));
+              border-color: color-mix(in srgb, var(--tc, var(--accent)) 52%, transparent);
             }
             .tone-row.sel .tone-ico svg { stroke: #fff; }
             .tone-row.sel .tone-check {
@@ -4264,9 +4260,9 @@
       finishOnboarding(true);
     }
   }
-  // Single-pick card screens that auto-fly to the next question on tap, so a
-  // low-motivation user clears them in one tap each (no separate "Next").
-  const AUTO_ADVANCE = new Set([2, 4, 9, 23]);
+  // Auto-advance is OFF — the user always confirms with the Next button.
+  // (The card still flicks away when they tap Next; see next().)
+  const AUTO_ADVANCE = new Set();
   function swipeNext() { _swipeDir = 1; advance(); }
   window.swipeNext = swipeNext;
   function maybeAutoAdvance() {
@@ -4287,6 +4283,8 @@
       playSignAnimation(function () { _signing = false; _signed = true; advance(); });
       return;
     }
+    // On the card-deck question screens, tapping Next flicks the card away.
+    if (DECK_STEPS.indexOf(state.step) >= 0) _swipeDir = 1;
     advance();
   }
 
