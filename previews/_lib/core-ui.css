@@ -45,9 +45,22 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
   transition: transform .12s cubic-bezier(.22,1,.36,1);
 }
 
-/* ---- Focus + selection accents (unified blue) ---- */
-::selection { background: rgba(10,132,255,0.30); }
+/* ---- Focus + selection accents (unified) ---- */
+::selection { background: rgba(120,160,255,0.32); color: #fff; }
 input:focus, textarea:focus, select:focus { outline: none; }
+/* Keyboard focus ring — accessible + consistent, never shown on touch tap. */
+.cta:focus-visible, .btn:focus-visible, button:focus-visible, a:focus-visible,
+[role="button"]:focus-visible, .opt:focus-visible, .tab:focus-visible,
+input:focus-visible, textarea:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.6), 0 0 0 4px rgba(120,160,255,0.7);
+  border-radius: var(--ui-radius, 12px);
+}
+/* Consistent disabled affordance across the app. */
+button:disabled, .cta:disabled, .btn:disabled, [aria-disabled="true"] {
+  opacity: 0.45; cursor: not-allowed;
+}
+button:disabled:active, .cta:disabled:active { transform: none !important; }
 
 /* Crisp, consistent imagery (rank gems etc.) */
 img { -webkit-user-drag: none; user-select: none; }
