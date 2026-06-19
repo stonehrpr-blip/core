@@ -160,6 +160,40 @@
   .step::-webkit-scrollbar { display:none; }
   .step.on { opacity:1; transform: translate3d(0,0,0); pointer-events:auto; }
   .step.out { opacity:0; transform: translate3d(-26px,0,0); }
+
+  /* ── Swipe-card deck ──────────────────────────────────────────────────
+     On the quick Q&A screens the whole thing reads like a flickable card
+     stack: two ghost cards peek behind, the live card flies off with a
+     little rotation when you answer, and the next one springs up from
+     underneath. Makes a low-motivation user feel like they're playing,
+     not filling a form. Scoped to body.deck so the portal/contract are
+     untouched. */
+  body.deck .stepwrap::before,
+  body.deck .stepwrap::after {
+    content:""; position:absolute; left:50%; top:20px; transform:translateX(-50%);
+    height:74%; border-radius:28px; pointer-events:none; z-index:0;
+    border:1px solid rgba(255,255,255,0.05); background:rgba(255,255,255,0.018);
+  }
+  body.deck .stepwrap::after  { width:calc(100% - 30px); top:14px; opacity:.9; }
+  body.deck .stepwrap::before { width:calc(100% - 56px); top:7px;  opacity:.55; }
+  body.deck .step.on { z-index:2; }
+  /* live card surface */
+  body.deck .step.on::after {
+    content:""; position:absolute; inset:10px 12px; z-index:-1; border-radius:30px;
+    background:linear-gradient(180deg, rgba(20,22,32,0.62), rgba(10,11,17,0.62));
+    border:1px solid rgba(255,255,255,0.07);
+    box-shadow:0 24px 60px rgba(0,0,0,0.55);
+  }
+  /* the flick-off when an answer is picked */
+  .step.flick { transition: opacity .36s ease, transform .46s cubic-bezier(.4,0,.25,1) !important; }
+  .step.flick-right { opacity:0 !important; transform: translate3d(118%,2%,0) rotate(8deg) !important; }
+  .step.flick-left  { opacity:0 !important; transform: translate3d(-118%,2%,0) rotate(-8deg) !important; }
+  /* next card springs up from the deck */
+  body.deck .step.on.cardin { animation: cardIn .46s cubic-bezier(.22,1,.36,1) both; }
+  @keyframes cardIn { from { transform: translate3d(0,18px,0) scale(.93); opacity:.25; } to { transform:none; opacity:1; } }
+  @media (prefers-reduced-motion: reduce) {
+    .step.flick, body.deck .step.on.cardin { animation:none !important; transition:opacity .2s !important; }
+  }
   /* Next button "ready" pulse — fires the moment the step is satisfied */
   @keyframes ctaReady { 0%{transform:scale(1);} 38%{transform:scale(1.04);} 100%{transform:scale(1);} }
   .cta.ready { animation: ctaReady .5s cubic-bezier(.22,1.7,.36,1); }
@@ -2853,12 +2887,50 @@
         <!-- STEP 17: Real why (textarea) -->
         <div class="step" data-step="14">
           <div class="kicker">Step 17 · Why</div>
-          <h1 class="title">When it hurts,<br/><span class="g">why are you doing this?</span></h1>
-          <p class="copy">Type it the way you'd say it to yourself at 11pm. Coach will quote it back.</p>
-          <div class="field-wrap">
-            <textarea id="realWhy" class="field" rows="4" maxlength="280" placeholder="Because…" style="resize:none; min-height:120px; line-height:1.5;"></textarea>
-            <div id="realWhyStatus" style="font-size:11.5px; margin-top:8px; padding-left:4px; color:var(--muted); letter-spacing:-0.05px;">Min 10 characters.</div>
+          <h1 class="title">When it hurts,<br/><span class="g">what's it for?</span></h1>
+          <p class="copy">Tap what's true. Coach holds these up when you want to quit.</p>
+          <!-- Live sentence the chips build — their own "why" in their words. -->
+          <div class="why-quote" id="whyQuote"><span class="wq-lead">I'm doing this</span> <span class="wq-rest" id="whyQuoteRest">for…</span></div>
+          <div class="why-chips" id="whyChips">
+            <button type="button" class="why-chip" data-why="for my health">for my health</button>
+            <button type="button" class="why-chip" data-why="for the people I love">for the people I love</button>
+            <button type="button" class="why-chip" data-why="for my future self">for my future self</button>
+            <button type="button" class="why-chip" data-why="for my self-respect">for my self-respect</button>
+            <button type="button" class="why-chip" data-why="to feel in control again">to feel in control again</button>
+            <button type="button" class="why-chip" data-why="to prove I can">to prove I can</button>
+            <button type="button" class="why-chip" data-why="to stop hiding it">to stop hiding it</button>
+            <button type="button" class="why-chip" data-why="to save my money">to save my money</button>
+            <button type="button" class="why-chip" data-why="to finally breathe easy">to finally breathe easy</button>
           </div>
+          <style>
+            .step[data-step="14"] .why-quote {
+              margin-top:6px; padding:15px 17px; border-radius:18px;
+              background:rgba(13,17,27,0.66); border:1px solid rgba(255,255,255,0.08);
+              font-size:17px; line-height:1.5; letter-spacing:-0.2px; color:#fff;
+              min-height:58px; box-sizing:border-box; transition:border-color .2s;
+            }
+            .step[data-step="14"] .why-quote.has { border-color:rgba(120,160,255,0.4); }
+            .why-quote .wq-lead { color:rgba(235,235,245,0.55); }
+            .why-quote .wq-rest { font-weight:700; }
+            .why-quote .wq-rest.empty { color:rgba(235,235,245,0.4); font-weight:500; }
+            .step[data-step="14"] .why-chips {
+              display:flex; flex-wrap:wrap; gap:9px; margin-top:14px;
+            }
+            .why-chip {
+              all:unset; box-sizing:border-box; cursor:pointer;
+              padding:11px 15px; border-radius:999px; font-size:14px; font-weight:600;
+              letter-spacing:-0.2px; color:rgba(235,235,245,0.82);
+              background:rgba(255,255,255,0.045); border:1px solid rgba(255,255,255,0.10);
+              transition:transform .14s var(--ease), background .18s, border-color .18s, color .18s;
+              -webkit-tap-highlight-color:transparent;
+            }
+            .why-chip:active { transform:scale(0.95); }
+            .why-chip.sel {
+              color:#fff; background:linear-gradient(180deg, rgba(120,160,255,0.30), rgba(120,160,255,0.18));
+              border-color:rgba(120,160,255,0.6);
+              box-shadow:0 4px 16px rgba(120,160,255,0.18), 0 0 0 1px rgba(120,160,255,0.35) inset;
+            }
+          </style>
         </div>
 
 
@@ -3753,7 +3825,7 @@
                   // step; water no longer asked -> default to a mid bucket.
                   sleepHrs:null, exerciseDays:null, waterCups:'5-6', screenTime:null,
                   // The Why — pastAttempts no longer asked -> default mid bucket.
-                  pastAttempts:'1-2', triggers:[], realWhy:'',
+                  pastAttempts:'1-2', triggers:[], realWhy:'', whyChips:[],
                   whoKnows:null, successVision:null,
                   // New lean-flow questions
                   identity:null, commitment:null,
@@ -3864,6 +3936,7 @@
     el.classList.add('sel');
     state.profile = el.dataset.profile;
     refreshCTA();
+    maybeAutoAdvance();
   }
   const cta = document.getElementById('cta');
   const note = document.getElementById('footerNote');
@@ -3914,6 +3987,11 @@
     if (!reduce) _demoTimer = setInterval(play, 6000);
   }
 
+  // Direction of the next transition: +1 flick the card off to the right
+  // (answered / moving forward), -1 to the left (going back), 0 = default.
+  let _swipeDir = 0;
+  // The quick Q&A screens that render as a flickable card deck.
+  const DECK_STEPS = [1, 2, 4, 9, 23, 14, 22, 16];
   function setStep(n) {
     // Allow demo ids (18-20) beyond TOTAL; bail only if there's no body for n.
     if (n < 0) return;
@@ -3922,11 +4000,22 @@
     if (!tgt) return;
     const prev = state.step;
     track('step_complete', { from: prev, to: n });
-    if (cur) { cur.classList.remove('on'); cur.classList.add('out'); }
+    const dir = _swipeDir; _swipeDir = 0;
+    if (cur) {
+      cur.classList.remove('on');
+      if (dir > 0)      cur.classList.add('flick', 'flick-right');
+      else if (dir < 0) cur.classList.add('flick', 'flick-left');
+      else              cur.classList.add('out');
+    }
+    const deck = DECK_STEPS.indexOf(n) >= 0;
+    document.body.classList.toggle('deck', deck);
     setTimeout(() => {
-      if (cur) cur.classList.remove('out');
-      if (tgt) tgt.classList.add('on');
-    }, 150);
+      if (cur) cur.classList.remove('out', 'flick', 'flick-right', 'flick-left');
+      if (tgt) {
+        tgt.classList.add('on');
+        if (deck) { tgt.classList.add('cardin'); setTimeout(() => tgt.classList.remove('cardin'), 480); }
+      }
+    }, dir ? 170 : 150);
     state.step = n;
     // Dynamic step label — position-based so reordered/inserted steps stay correct
     const kEl = tgt && tgt.querySelector('.kicker');
@@ -4017,8 +4106,8 @@
       const n = state.triggers.length;
       setCTA('Next', n < 1, n < 1 ? 'Pick at least one' : n + ' trigger' + (n === 1 ? '' : 's') + ' tagged');
     } else if (s === 14) {
-      const len = (state.realWhy || '').trim().length;
-      setCTA('Next', len < 10, len < 10 ? (10 - len) + ' more characters' : 'Coach will quote this back');
+      const c = (state.whyChips || []).length;
+      setCTA('Next', c < 1, c < 1 ? 'Tap what\'s true for you' : 'Coach will hold this up for you');
     } else if (s === 15) {
       setCTA('Next', !state.successVision, !state.successVision ? 'Pick a win shape' : '');
     } else if (s === 16) {
@@ -4161,6 +4250,18 @@
       finishOnboarding(true);
     }
   }
+  // Single-pick card screens that auto-fly to the next question on tap, so a
+  // low-motivation user clears them in one tap each (no separate "Next").
+  const AUTO_ADVANCE = new Set([2, 4, 9, 23]);
+  function swipeNext() { _swipeDir = 1; advance(); }
+  window.swipeNext = swipeNext;
+  function maybeAutoAdvance() {
+    if (!AUTO_ADVANCE.has(state.step) || cta.disabled) return;
+    const at = state.step;
+    // brief beat so the selection highlight registers before the card flicks
+    setTimeout(function () { if (state.step === at && !cta.disabled) swipeNext(); }, 300);
+  }
+  window.maybeAutoAdvance = maybeAutoAdvance;
   function next() {
     if (cta.disabled) return;
     // Payment is collected once, at the final portal gate (step 21) — the paywall
@@ -4795,6 +4896,7 @@
       window.location.href = '01-index.html';
       return;
     }
+    _swipeDir = -1;   // flick the card back off to the left
     setStep(ORDER[i - 1]);
   }
   window.back = back;
@@ -5027,6 +5129,7 @@
     } catch (e) {}
     paintHabitPreview(card);
     refreshCTA();
+    maybeAutoAdvance();
   }
   document.querySelectorAll('.habit-card[data-habit]').forEach(card => {
     card.addEventListener('click', () => pickHabit(card));
@@ -5507,6 +5610,7 @@
         row.classList.add('sel');
         state[stateKey] = row.dataset[dataAttr];
         refreshCTA();
+        maybeAutoAdvance();
       });
     });
   }
@@ -5860,22 +5964,38 @@
     if (row) row.classList.add('sel');
   }
 
-  // ── Real why textarea (step 17) ───────────────────────────────────────
-  const realWhyEl = document.getElementById('realWhy');
-  if (realWhyEl) {
-    realWhyEl.addEventListener('input', () => {
-      state.realWhy = realWhyEl.value;
-      const len = state.realWhy.trim().length;
-      const status = document.getElementById('realWhyStatus');
-      if (status) {
-        status.textContent = len < 10
-          ? (10 - len) + ' more characters'
-          : len + ' / 280 characters';
-        status.style.color = len < 10 ? 'var(--muted)' : 'var(--accent)';
-      }
+  // ── "Why" tap-chips (step 14) — zero typing ───────────────────────────
+  // Tapping chips builds the user's own "why" sentence into state.realWhy,
+  // which the coach (and the plan payoff screen) quote back verbatim.
+  function joinWhy(parts) {
+    if (!parts.length) return '';
+    if (parts.length === 1) return parts[0];
+    if (parts.length === 2) return parts[0] + ' and ' + parts[1];
+    return parts.slice(0, -1).join(', ') + ', and ' + parts[parts.length - 1];
+  }
+  function renderWhyQuote() {
+    const rest = document.getElementById('whyQuoteRest');
+    const box = document.getElementById('whyQuote');
+    const parts = state.whyChips || [];
+    const phrase = joinWhy(parts);
+    state.realWhy = phrase ? ('I\'m doing this ' + phrase + '.') : '';
+    if (rest) {
+      rest.textContent = phrase || 'for…';
+      rest.classList.toggle('empty', !phrase);
+    }
+    if (box) box.classList.toggle('has', !!phrase);
+  }
+  document.querySelectorAll('#whyChips .why-chip').forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      const v = chip.dataset.why;
+      state.whyChips = state.whyChips || [];
+      const i = state.whyChips.indexOf(v);
+      if (i >= 0) { state.whyChips.splice(i, 1); chip.classList.remove('sel'); }
+      else { state.whyChips.push(v); chip.classList.add('sel'); }
+      renderWhyQuote();
       refreshCTA();
     });
-  }
+  });
   // ── Daily-rhythm time picker (iOS-style bottom sheet) ─────────────────
   // Tap any routine row -> sheet pops up with scroll-snap hour/minute/AM-PM wheels.
   // Done commits back to the row + state.routine. Cancel discards.
