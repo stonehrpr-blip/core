@@ -6733,6 +6733,26 @@ body.on-autoadvance .stepwrap::after {
 /* XP bar — a touch larger + crisper sheen */
 .xp-bar { width: 42px !important; height: 6px !important; box-shadow: 0 1px 1px rgba(0,0,0,0.5) inset !important; }
 .xp-bar-fill { box-shadow: 0 0 10px rgba(201,162,75,0.6), 0 1px 0 rgba(255,236,190,0.55) inset !important; }
+
+/* ── Gender cards: outlines + per-card coloured glow on tap (like the age
+   buttons) — coloured outline, not a fill. Figures keep their own colour. ── */
+.profile-card[data-profile="male"]{ --ac:#4DA3FF; }
+.profile-card[data-profile="female"]{ --ac:#FF7A9C; }
+.profile-card[data-profile="unspecified"], .profile-card[data-profile="nonbinary"], .profile-card[data-profile="transgender"]{ --ac:#C4C9D2; }
+.profile-card{ border:1.5px solid rgba(255,255,255,0.14) !important; transition:transform .14s cubic-bezier(.22,1,.36,1), box-shadow .2s, border-color .2s !important; }
+.profile-card.sel{
+  background:rgba(255,255,255,0.04) !important;
+  border-color:var(--ac,#C4C9D2) !important;
+  box-shadow:0 0 0 1px var(--ac,#C4C9D2) inset, 0 0 22px color-mix(in srgb, var(--ac,#C4C9D2) 48%, transparent), 0 0 5px color-mix(in srgb, var(--ac,#C4C9D2) 40%, transparent) !important;
+  animation:genderPop .42s cubic-bezier(.22,1.7,.36,1);
+}
+.profile-card.sel .pc-label{ color:var(--ac,#fff) !important; }
+@keyframes genderPop{ 0%{transform:scale(1);} 35%{transform:scale(1.045);} 70%{transform:scale(.99);} 100%{transform:scale(1);} }
+/* keep the figures in their own colour so the outline matches the figure */
+.profile-card img{ filter:saturate(1) brightness(1.04) !important; }
+.profile-card[data-profile="female"] img{ filter:saturate(1) brightness(1.04) !important; }
+.profile-card.sel img{ filter:saturate(1.12) brightness(1.16) !important; }
+@media (prefers-reduced-motion: reduce){ .profile-card.sel{ animation:none; } }
 </style>
 </body>
 </html>
