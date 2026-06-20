@@ -160,6 +160,16 @@
   <script src="_lib/core-ranks.js"></script>
 <script>
 (function(){
+  // Reload/resume guard: only valid mid-chain. Already-subscribed members skip
+  // straight to the dashboard; anyone who hasn't finished onboarding is sent to
+  // the start — so reloading this page always lands somewhere sensible.
+  try {
+    var prev = (location.protocol==='file:'||location.hostname==='localhost'||location.hostname==='127.0.0.1'||/[?&]preview=1/.test(location.search));
+    if (!prev) {
+      if (localStorage.getItem('coreSubscribed')==='1') { location.replace('20-dashboard.html'); return; }
+      if (localStorage.getItem('coreOnboardComplete')!=='1') { location.replace('01-index.html'); return; }
+    }
+  } catch(e){}
   // 21 ranks across 7 tiers — shared ladder so reveal mirrors the rest of the app.
   var RANKS = window.CORE_RANKS || [];
   // Detailed brilliant-cut gem — balanced octagon, gradient body, full facet pattern + sparkle.
