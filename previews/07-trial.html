@@ -598,13 +598,30 @@
     color:#E5484D; padding:5px 15px; border:3px solid #E5484D; border-radius:7px;
     box-shadow:0 0 0 1px rgba(229,72,77,0.22); text-shadow:0 0 1px rgba(229,72,77,0.35);
   }
-  .promise-stamp.on { animation: stampDown .5s cubic-bezier(.3,1.5,.5,1) forwards; }
+  .promise-stamp.on { animation: stampDown .58s cubic-bezier(.3,1.7,.5,1) forwards; }
   @keyframes stampDown {
-    0%   { opacity:0; transform:translate(-50%,-50%) rotate(-13deg) scale(2.4); }
-    55%  { opacity:1; transform:translate(-50%,-50%) rotate(-13deg) scale(0.9); }
-    78%  { transform:translate(-50%,-50%) rotate(-13deg) scale(1.05); }
-    100% { opacity:1; transform:translate(-50%,-50%) rotate(-13deg) scale(1); }
+    0%   { opacity:0; transform:translate(-50%,-50%) rotate(-13deg) scale(2.7); filter:blur(2px); }
+    46%  { opacity:1; transform:translate(-50%,-53%) rotate(-13deg) scale(0.82); filter:blur(0);
+           box-shadow:0 0 0 1px rgba(229,72,77,0.5), 0 0 26px rgba(229,72,77,0.7); }
+    60%  { transform:translate(-50%,-47%) rotate(-10.5deg) scale(1.1); }
+    72%  { transform:translate(-50%,-51%) rotate(-15deg) scale(0.96); }
+    84%  { transform:translate(-50%,-50%) rotate(-12deg) scale(1.04); }
+    100% { opacity:1; transform:translate(-50%,-50%) rotate(-13deg) scale(1);
+           box-shadow:0 0 0 1px rgba(229,72,77,0.22); }
   }
+  /* the whole contract card jolts when the stamp lands */
+  .promise-card.shake { animation: signShake .5s cubic-bezier(.36,.07,.19,.97) both; }
+  @keyframes signShake {
+    0%,100% { transform: translate3d(0,0,0) rotate(0); }
+    8%  { transform: translate3d(-6px,3px,0) rotate(-0.5deg); }
+    20% { transform: translate3d(7px,-3px,0) rotate(0.6deg); }
+    33% { transform: translate3d(-6px,2px,0) rotate(-0.4deg); }
+    46% { transform: translate3d(5px,-2px,0) rotate(0.4deg); }
+    60% { transform: translate3d(-4px,1px,0) rotate(-0.25deg); }
+    74% { transform: translate3d(3px,-1px,0); }
+    88% { transform: translate3d(-1px,0,0); }
+  }
+  @media (prefers-reduced-motion: reduce) { .promise-card.shake { animation:none; } }
   @media (prefers-reduced-motion: reduce) {
     .promise-sign { transition: opacity .2s ease; }
     #promiseSigPath, #promiseSigUnder { transition: none !important; stroke-dashoffset: 0 !important; }
@@ -4365,12 +4382,15 @@
       if (pen && path.getPointAtLength) {
         pen.classList.add('live');
         const t0 = performance.now();
+        let lastBuzz = t0;
         (function ride(now) {
           let p = Math.min(1, (now - t0) / DRAW);
           // ease to match the dash cubic-bezier feel
           const e = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
           const pt = path.getPointAtLength(e * len);
           pen.setAttribute('cx', pt.x); pen.setAttribute('cy', pt.y);
+          // light "scratch" pulses as the pen writes the signature
+          if (p < 1 && now - lastBuzz > 85) { lastBuzz = now; try { if (typeof haptic === 'function') haptic(5); } catch (_) {} }
           if (p < 1) requestAnimationFrame(ride);
           else pen.classList.remove('live');
         })(t0);
@@ -4392,17 +4412,26 @@
         meta.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:-1px;display:inline-block;"><path d="M5 12l4 4 10-11"/></svg> signed · ' + new Date().toLocaleString('en-AU', { hour:'numeric', minute:'2-digit', day:'numeric', month:'short' }).toLowerCase();
         meta.style.color = GREEN;
       }
-      try { if (typeof haptic === 'function') haptic(14); } catch (e) {}
-      // …then a red SEAL stamp slams down over it, and we advance.
+      try { if (typeof haptic === 'function') haptic([0, 18, 45, 22]); } catch (e) {}
+      // …then a red SEAL stamp slams down over it — heavy thud + card jolt.
       setTimeout(function () {
         const stamp = document.getElementById('promiseStamp');
         if (wrap) wrap.classList.add('signed');
-        if (card) { card.style.borderColor = 'rgba(229,72,77,0.5)'; card.style.boxShadow = '0 0 0 1px rgba(229,72,77,0.22), 0 10px 44px rgba(229,72,77,0.20)'; }
         if (stamp) stamp.classList.add('on');
-        try { if (typeof haptic === 'function') haptic([12, 40, 28]); } catch (e) {}
-        try { if (window.coreSfx) coreSfx('confirm'); } catch (e) {}
+        try { if (typeof haptic === 'function') haptic(10); } catch (e) {}   // pre-buzz as it drops
+        // sync the THUD + shake + red flash to the moment of impact
+        setTimeout(function () {
+          if (card) {
+            card.classList.add('shake');
+            card.style.borderColor = 'rgba(229,72,77,0.6)';
+            card.style.boxShadow = '0 0 0 1px rgba(229,72,77,0.4), 0 0 52px rgba(229,72,77,0.38)';
+            setTimeout(function () { if (card) { card.classList.remove('shake'); card.style.boxShadow = '0 0 0 1px rgba(229,72,77,0.22), 0 10px 44px rgba(229,72,77,0.20)'; } }, 520);
+          }
+          try { if (typeof haptic === 'function') haptic([0, 60, 28, 100]); } catch (e) {}   // THUD
+          try { if (window.coreSfx) coreSfx('confirm'); } catch (e) {}
+        }, 265);
         track('promise_sign_completed', {});
-        setTimeout(function () { if (done) done(); }, 760);
+        setTimeout(function () { if (done) done(); }, 950);
       }, 420);
     }, 220 + DRAW + 60);
   }
