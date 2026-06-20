@@ -4047,6 +4047,7 @@
     // Step-21 — cinematic portal subscription gate hides all chrome
     document.body.classList.toggle('on-portal', n === 21);
     document.body.classList.toggle('on-promise', n === 0);   // hold-to-commit replaces the footer CTA
+    document.body.classList.toggle('on-autoadvance', n === 2 || n === 4 || n === 9); // tap advances — no Next button
     // Demo playback (start the one visible demo, stop any others)
     if (isDemoStep(n)) startDemo(n); else stopAllDemos();
     // Step-enter hooks (keyed by body id — unchanged by the reorder)
@@ -6616,6 +6617,34 @@ html body[data-font="apple"] #planTitle .g {
 
 /* contract page: the hold-to-commit button is the CTA, so hide the footer one */
 body.on-promise .footer { display:none !important; }
+/* auto-advance pages (gender, habit, what-pushed): tapping an option advances,
+   so the Next button is redundant — hide it. A hint replaces it. */
+body.on-autoadvance .footer { display:none !important; }
+body.on-autoadvance .stepwrap::after {
+  content:"Tap an option to continue"; position:absolute; left:0; right:0; bottom:18px;
+  text-align:center; font-family:'Space Mono',ui-monospace,monospace; font-size:10.5px;
+  letter-spacing:0.1em; text-transform:uppercase; color:rgba(235,235,245,0.34); pointer-events:none; z-index:5;
+}
+
+/* ── Clearer BUTTON OUTLINES + soft glow on every tappable card/button ── */
+.tone-row, .habit-card, .profile-card, .age-chip, .why-chip, .pick-card {
+  border-color: rgba(255,255,255,0.16) !important;
+}
+.tone-row, .habit-card, .profile-card, .pick-card {
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 1px 0 rgba(255,255,255,0.07) inset, 0 8px 22px rgba(0,0,0,0.32) !important;
+}
+.tone-row:hover, .habit-card:hover, .profile-card:hover, .pick-card:hover {
+  border-color: rgba(255,255,255,0.28) !important;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 0 18px rgba(206,212,222,0.12), 0 10px 24px rgba(0,0,0,0.4) !important;
+}
+/* coloured option chips' cards glow in their colour on select (outline pop) */
+.habit-card[data-habit].sel, .tone-row[data-reason].sel, .tone-row[data-identity].sel {
+  box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--col) 55%, transparent), 0 0 22px color-mix(in srgb, var(--col) 30%, transparent), 0 12px 28px rgba(0,0,0,0.42) !important;
+}
+/* Next CTA: a crisp outline + soft white glow ring */
+.cta:not(:disabled) { box-shadow: 0 0 0 1px rgba(255,255,255,0.5), 0 12px 28px rgba(0,0,0,0.45), 0 0 22px rgba(232,240,255,0.14), 0 1px 0 rgba(255,255,255,0.6) inset !important; }
+/* hold-to-commit: bronze outline glow */
+.hold-commit { box-shadow: 0 0 0 1px rgba(232,200,120,0.18), 0 0 16px rgba(201,162,75,0.1) !important; }
 
 /* XP bar — a touch larger + crisper sheen */
 .xp-bar { width: 42px !important; height: 6px !important; box-shadow: 0 1px 1px rgba(0,0,0,0.5) inset !important; }
