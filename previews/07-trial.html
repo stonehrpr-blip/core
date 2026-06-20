@@ -49,11 +49,12 @@
   /* Atmospheric bg — same family as welcome */
   .bg {
     position:absolute; inset:0; z-index:0;
-    /* Simpler, calmer: near-pure black with only a whisper of cool glow up top
-       — no bright blue wash, no heavy gradients. */
+    /* Rich black with real depth — a soft crown glow up top and a gentle
+       lift from below, so screens feel lit rather than flat matte. */
     background:
-      radial-gradient(70% 50% at 50% 0%, rgba(90,120,200,0.05) 0%, transparent 60%),
-      linear-gradient(180deg, #060608 0%, #030305 60%, #030304 100%);
+      radial-gradient(115% 65% at 50% -8%, rgba(174,182,196,0.10) 0%, rgba(174,182,196,0.03) 26%, transparent 56%),
+      radial-gradient(120% 55% at 50% 112%, rgba(140,150,165,0.05) 0%, transparent 52%),
+      linear-gradient(180deg, #070709 0%, #040405 58%, #030304 100%);
   }
   /* Aurora removed — the animated 70px-blur layers were the main source of
      lag on phones and added the bright-blue cast. Kept as a no-op so any
@@ -234,7 +235,9 @@
   .commit-bars { display:flex; align-items:flex-end; gap:9px; height:150px; }
   .cm-bar { all:unset; flex:1; height:100%; display:flex; align-items:flex-end; cursor:pointer; -webkit-tap-highlight-color:transparent; }
   .cm-bar > span { display:block; width:100%; border-radius:12px;
-    background:rgba(255,255,255,0.035); border:1px solid rgba(255,255,255,0.06);
+    background:linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.035));
+    border:1px solid rgba(255,255,255,0.12);
+    box-shadow:0 1px 0 rgba(255,255,255,0.06) inset, 0 6px 16px rgba(0,0,0,0.30);
     transition:background .2s var(--ease), border-color .2s var(--ease), box-shadow .2s var(--ease), transform .12s var(--ease); }
   .cm-bar:active > span { transform:scaleY(0.98); }
   .cm-bar[data-lvl="1"] > span { height:42%; }
@@ -324,7 +327,8 @@
   }
   .cta:hover { box-shadow: 0 12px 32px rgba(0,0,0,0.5), 0 0 30px rgba(214,219,226,0.26), 0 1px 0 rgba(255,255,255,0.7) inset; }
   .cta:active { transform: scale(0.985); }
-  .cta:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; filter: none; animation: none; }
+  .cta:disabled { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.42); cursor: not-allowed; box-shadow: 0 0 0 1px rgba(255,255,255,0.08) inset; filter: none; animation: none; opacity: 1; }
+  .cta:disabled svg { stroke: rgba(255,255,255,0.42); }
   .cta svg { width: 18px; height: 18px; stroke: #07070C; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   @keyframes gradShift { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
   .footer-note { text-align:center; font-size:11px; color:var(--muted); margin-top:10px; letter-spacing:-0.05px; }
@@ -1579,14 +1583,14 @@
             }
             /* "Most picked" badge — only on Vape card */
             .habit-badge {
-              position: absolute; top: 10px; right: 10px;
-              padding: 3px 8px;
+              position: absolute; top: 7px; left: 7px; right: auto;
+              padding: 2px 6px;
               border-radius: 999px;
-              background: rgba(255,255,255,0.06);
-              border: 1px solid rgba(255,255,255,0.12);
-              color: var(--muted);
-              font-size: 9px; font-weight: 700;
-              letter-spacing: 0.10em; text-transform: uppercase;
+              background: rgba(255,255,255,0.08);
+              border: 1px solid rgba(255,255,255,0.14);
+              color: rgba(235,235,245,0.7);
+              font-size: 7.5px; font-weight: 800;
+              letter-spacing: 0.08em; text-transform: uppercase;
               white-space: nowrap;
               z-index: 3;
               transition: opacity .2s;
@@ -6273,6 +6277,22 @@
    cohesive, not flat. (Layered last so it wins the cascade.)
    ================================================================ */
 :root, .phone { --steel:#C4C9D2; --steel-rim:rgba(196,201,210,0.30); }
+
+/* Premium material — every surface gets a top-down gradient, a hairline of
+   top light, and a soft drop shadow, so it reads as a physical tile (like the
+   logo) instead of a flat grey rectangle. This is the main "feels cheap" fix. */
+.tone-row, .habit-card, .profile-card, .field, .plan, .why-quote, #promiseCard, .pick-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.062), rgba(255,255,255,0.022)) !important;
+  border: 1px solid rgba(255,255,255,0.09) !important;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset, 0 10px 24px rgba(0,0,0,0.34) !important;
+}
+.tone-row:active, .habit-card:active, .profile-card:active, .pick-card:active { box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset, 0 4px 12px rgba(0,0,0,0.3) !important; }
+/* selected surfaces keep their brighter "lit" look but with the same depth */
+.tone-row.sel, .habit-card.sel, .profile-card.sel, .pick-card.sel {
+  background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.045)) !important;
+  border-color: rgba(214,219,226,0.5) !important;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.10) inset, 0 0 0 1px rgba(214,219,226,0.30) inset, 0 12px 28px rgba(0,0,0,0.4) !important;
+}
 
 /* Icon chips — a faintly-lit dark tile with a thin silver rim and a
    light glyph, echoing the silver mark on the black logo. */
