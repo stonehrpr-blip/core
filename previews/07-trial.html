@@ -1245,19 +1245,43 @@
   <link rel="stylesheet" href="_lib/core-responsive.css?v=20260619d">
   <link rel="stylesheet" href="_lib/core-theme.css?v=20260619d">
   <script src="_lib/core-theme.js" defer></script>
-  <!-- HARD font override — SF Pro wins over Chakra Petch -->
+  <!-- Type system — system sans for body, Space Grotesk for headings,
+       Space Mono for eyebrow labels. (Headings/labels are excluded from the
+       body lock so their own faces win.) -->
   <style id="sf-override">
+    @font-face{font-family:'Space Grotesk';font-style:normal;font-weight:400 700;font-display:swap;src:url(assets/fonts/grotesk-var.woff2) format('woff2');}
+    @font-face{font-family:'Space Mono';font-style:normal;font-weight:400;font-display:swap;src:url(assets/fonts/mono-400.woff2) format('woff2');}
+    @font-face{font-family:'Space Mono';font-style:normal;font-weight:700;font-display:swap;src:url(assets/fonts/mono-700.woff2) format('woff2');}
+    /* Body text — system sans (everything except headings + labels) */
     html body[data-font="apple"],
-    html body[data-font="apple"] *:not(code):not(pre):not(kbd):not(samp):not([class*="mono"]),
-    html body[data-font="apple"] h1, html body[data-font="apple"] h2,
-    html body[data-font="apple"] p, html body[data-font="apple"] span,
-    html body[data-font="apple"] div, html body[data-font="apple"] button,
-    html body[data-font="apple"] input, html body[data-font="apple"] textarea {
+    html body[data-font="apple"] *:not(code):not(pre):not(kbd):not(samp):not([class*="mono"]):not(.title):not(.pg-headline):not(.kicker):not(.commit-label):not(.vape-title):not(.sac-big):not(.age-big):not(.pg-logo):not(.step-meter-label):not(h1):not(h2) {
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
                    "SF Pro Text", "Helvetica Neue", Helvetica, Arial,
                    "Segoe UI", Roboto, sans-serif !important;
       -webkit-font-smoothing: antialiased !important;
       -moz-osx-font-smoothing: grayscale !important;
+    }
+    /* Display headings — Space Grotesk */
+    html body[data-font="apple"] h1,
+    html body[data-font="apple"] h2,
+    html body[data-font="apple"] .title,
+    html body[data-font="apple"] #planTitle,
+    html body[data-font="apple"] #payTitle,
+    html body[data-font="apple"] .pg-headline,
+    html body[data-font="apple"] .vape-title,
+    html body[data-font="apple"] .sac-big,
+    html body[data-font="apple"] .age-big,
+    html body[data-font="apple"] .commit-label {
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif !important;
+      letter-spacing: -0.5px !important;
+      -webkit-font-smoothing: antialiased !important;
+    }
+    /* Eyebrow labels — Space Mono */
+    html body[data-font="apple"] .kicker,
+    html body[data-font="apple"] .step-meter-label,
+    html body[data-font="apple"] .pg-logo {
+      font-family: 'Space Mono', ui-monospace, 'SF Mono', Menlo, monospace !important;
+      text-transform: uppercase !important;
     }
   </style>
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
@@ -1271,7 +1295,7 @@
   <meta name="theme-color" content="#000000">
   <link rel="stylesheet" href="_lib/core-ui.css?v=20260619d">
 </head>
-<body data-font="apple" style='font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, "Segoe UI", Roboto, sans-serif !important;'>
+<body data-font="apple" style='font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, "Segoe UI", Roboto, sans-serif;'>
   <div class="phone" data-bg-skip>
     <div class="bg"></div>
     <div class="aurora"></div>
@@ -6376,6 +6400,7 @@
    slow drift stays, the constant opacity flicker on every star goes. */
 .step:not(.on), .step:not(.on) * { animation-play-state: paused !important; }
 .star, .sf-star { animation: none !important; }
+.commit-label.hint { font-family:'Space Mono', ui-monospace, monospace !important; letter-spacing:0.04em !important; text-transform:none !important; }
 </style>
 </body>
 </html>
