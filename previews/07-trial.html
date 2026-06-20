@@ -593,7 +593,7 @@
     position:absolute; left:50%; top:50%;
     transform:translate(-50%,-50%) rotate(-13deg) scale(2.4);
     opacity:0; pointer-events:none; z-index:6; white-space:nowrap;
-    font-family:'Space Mono', ui-monospace, "SF Mono", monospace; font-weight:700;
+    font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif; font-weight:700;
     font-size:23px; letter-spacing:0.14em; text-transform:uppercase;
     color:#E5484D; padding:5px 15px; border:3px solid #E5484D; border-radius:7px;
     box-shadow:0 0 0 1px rgba(229,72,77,0.22); text-shadow:0 0 1px rgba(229,72,77,0.35);
@@ -1280,43 +1280,24 @@
   <link rel="stylesheet" href="_lib/core-responsive.css?v=20260619d">
   <link rel="stylesheet" href="_lib/core-theme.css?v=20260619d">
   <script src="_lib/core-theme.js" defer></script>
-  <!-- Type system — system sans for body, Space Grotesk for headings,
-       Space Mono for eyebrow labels. (Headings/labels are excluded from the
-       body lock so their own faces win.) -->
+  <!-- Whole trial uses the system (Apple) font — headings, labels and body all.
+       High specificity so it beats the global Grotesk/Mono in core-theme.css;
+       scoped to the trial, so other pages keep their own type. -->
   <style id="sf-override">
-    @font-face{font-family:'Space Grotesk';font-style:normal;font-weight:400 700;font-display:swap;src:url(assets/fonts/grotesk-var.woff2) format('woff2');}
-    @font-face{font-family:'Space Mono';font-style:normal;font-weight:400;font-display:swap;src:url(assets/fonts/mono-400.woff2) format('woff2');}
-    @font-face{font-family:'Space Mono';font-style:normal;font-weight:700;font-display:swap;src:url(assets/fonts/mono-700.woff2) format('woff2');}
-    /* Body text — system sans (everything except headings + labels) */
     html body[data-font="apple"],
-    html body[data-font="apple"] *:not(code):not(pre):not(kbd):not(samp):not([class*="mono"]):not(.title):not(.pg-headline):not(.kicker):not(.commit-label):not(.vape-title):not(.sac-big):not(.age-big):not(.pg-logo):not(.step-meter-label):not(h1):not(h2) {
+    html body[data-font="apple"] *:not(code):not(pre):not(kbd):not(samp):not([class*="mono"]),
+    html body[data-font="apple"] h1, html body[data-font="apple"] h2,
+    html body[data-font="apple"] .title, html body[data-font="apple"] #planTitle,
+    html body[data-font="apple"] #payTitle, html body[data-font="apple"] .pg-headline,
+    html body[data-font="apple"] .vape-title, html body[data-font="apple"] .sac-big,
+    html body[data-font="apple"] .age-big, html body[data-font="apple"] .commit-label,
+    html body[data-font="apple"] .kicker, html body[data-font="apple"] .step-meter-label,
+    html body[data-font="apple"] .pg-logo {
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
                    "SF Pro Text", "Helvetica Neue", Helvetica, Arial,
                    "Segoe UI", Roboto, sans-serif !important;
       -webkit-font-smoothing: antialiased !important;
       -moz-osx-font-smoothing: grayscale !important;
-    }
-    /* Display headings — Space Grotesk */
-    html body[data-font="apple"] h1,
-    html body[data-font="apple"] h2,
-    html body[data-font="apple"] .title,
-    html body[data-font="apple"] #planTitle,
-    html body[data-font="apple"] #payTitle,
-    html body[data-font="apple"] .pg-headline,
-    html body[data-font="apple"] .vape-title,
-    html body[data-font="apple"] .sac-big,
-    html body[data-font="apple"] .age-big,
-    html body[data-font="apple"] .commit-label {
-      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif !important;
-      letter-spacing: -0.5px !important;
-      -webkit-font-smoothing: antialiased !important;
-    }
-    /* Eyebrow labels — Space Mono */
-    html body[data-font="apple"] .kicker,
-    html body[data-font="apple"] .step-meter-label,
-    html body[data-font="apple"] .pg-logo {
-      font-family: 'Space Mono', ui-monospace, 'SF Mono', Menlo, monospace !important;
-      text-transform: uppercase !important;
     }
   </style>
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
@@ -6487,7 +6468,7 @@
 .stars.far, .stars.near { display: none !important; }
 .ap-faceid-anim svg { animation-play-state: paused !important; }
 .ap-sheet.on .ap-faceid-anim svg { animation-play-state: running !important; }
-.commit-label.hint { font-family:'Space Mono', ui-monospace, monospace !important; letter-spacing:0.04em !important; text-transform:none !important; }
+.commit-label.hint { font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif !important; letter-spacing:0.04em !important; text-transform:none !important; }
 
 /* ── Gender figures → brushed silver (were bright blue / pink) ── */
 .profile-card img { filter: grayscale(1) brightness(1.32) contrast(1.02) !important; transition: filter .2s; }
@@ -6688,7 +6669,7 @@ html body[data-font="apple"] #planTitle .g {
 .slide-commit .sc-fill { position:absolute; left:0; top:0; bottom:0; width:54px; z-index:0;
   background:linear-gradient(90deg, rgba(110,79,31,0.55), rgba(201,162,75,0.5)); }
 .slide-commit .sc-label { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-  z-index:1; pointer-events:none; font-family:'Space Mono',ui-monospace,"SF Mono",monospace; font-weight:700;
+  z-index:1; pointer-events:none; font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif; font-weight:700;
   font-size:13px; letter-spacing:0.16em; text-transform:uppercase; color:#E8C878; padding-left:40px; }
 .slide-commit .sc-handle { position:absolute; left:4px; top:4px; bottom:4px; width:50px; z-index:2;
   display:flex; align-items:center; justify-content:center; border-radius:12px; transform:translateX(0);
@@ -6712,7 +6693,7 @@ body.on-promise .footer { display:none !important; }
 body.on-autoadvance .footer { display:none !important; }
 body.on-autoadvance .stepwrap::after {
   content:"Tap an option to continue"; position:absolute; left:0; right:0; bottom:18px;
-  text-align:center; font-family:'Space Mono',ui-monospace,monospace; font-size:10.5px;
+  text-align:center; font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif; font-size:10.5px;
   letter-spacing:0.1em; text-transform:uppercase; color:rgba(235,235,245,0.34); pointer-events:none; z-index:5;
 }
 
