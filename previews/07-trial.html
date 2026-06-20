@@ -4037,6 +4037,7 @@
     // Dynamic step label — position-based so reordered/inserted steps stay correct
     const kEl = tgt && tgt.querySelector('.kicker');
     if (kEl) kEl.textContent = (n === 0) ? 'One last thing'
+      : (n === 16) ? 'Your 30-day plan'            // payoff beat — not a numbered question
       : (isDemoStep(n) ? 'Quick demo'
       : ('Step ' + Math.min(curPos() + 1, NUM_QUESTIONS) + ' of ' + NUM_QUESTIONS
          + ' · ' + CHAPTERS[chapterIndexFor()].label));
@@ -4217,8 +4218,17 @@
         });
       }, 80);
     }
-    // Their own words, quoted back
-    const why = (state.realWhy || '').trim();
+    // Their reason, quoted back. Prefer their own words; else build a line from
+    // the "what pushed you" pick so the payoff still lands personally.
+    const REASON_QUOTE = {
+      health:  'Because I want my health back.',
+      money:   "Because I'm done bleeding money on it.",
+      control: 'Because I want control back.',
+      someone: 'Because someone I love is worth it.',
+      done:    "Because I'm just done with it."
+    };
+    let why = (state.realWhy || '').trim();
+    if (!why && state.vapeReason && REASON_QUOTE[state.vapeReason]) why = REASON_QUOTE[state.vapeReason];
     const whyCard = document.getElementById('planWhyCard');
     if (whyCard) {
       if (why) {
