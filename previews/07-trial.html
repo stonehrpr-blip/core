@@ -11,7 +11,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <style>
   :root {
-    --bg-base:#02020A;
+    --bg-base:#0A0B0F;
     --bg-card:rgba(255,255,255,0.022);
     --border:rgba(255,255,255,0.07);
     --text:#F8FAFE;
@@ -52,9 +52,9 @@
     /* Rich black with real depth — a soft crown glow up top and a gentle
        lift from below, so screens feel lit rather than flat matte. */
     background:
-      radial-gradient(115% 65% at 50% -8%, rgba(174,182,196,0.10) 0%, rgba(174,182,196,0.03) 26%, transparent 56%),
-      radial-gradient(120% 55% at 50% 112%, rgba(140,150,165,0.05) 0%, transparent 52%),
-      linear-gradient(180deg, #070709 0%, #040405 58%, #030304 100%);
+      radial-gradient(115% 65% at 50% -8%, rgba(174,182,196,0.12) 0%, rgba(174,182,196,0.04) 26%, transparent 56%),
+      radial-gradient(120% 55% at 50% 112%, rgba(140,150,165,0.06) 0%, transparent 52%),
+      linear-gradient(180deg, #111218 0%, #0C0D12 58%, #0A0B0E 100%);
   }
   /* Aurora removed — the animated 70px-blur layers were the main source of
      lag on phones and added the bright-blue cast. Kept as a no-op so any
@@ -6276,7 +6276,13 @@
    light/shadow and bright selection states, never from hue. Premium,
    cohesive, not flat. (Layered last so it wins the cascade.)
    ================================================================ */
-:root, .phone { --steel:#C4C9D2; --steel-rim:rgba(196,201,210,0.30); }
+:root, .phone {
+  --steel:#C4C9D2; --steel-rim:rgba(196,201,210,0.30);
+  /* re-point the accent itself to steel so any leftover var(--accent) element
+     (plan bars, %, focus, etc.) is silver, not blue. */
+  --accent:#AEB6C4; --accent-hi:#D2D7E0;
+  --grad-a:#AEB6C4; --grad-b:#C4C9D2; --grad-c:#AEB6C4;
+}
 
 /* Premium material — every surface gets a top-down gradient, a hairline of
    top light, and a soft drop shadow, so it reads as a physical tile (like the
@@ -6362,6 +6368,14 @@
   box-shadow:0 6px 22px rgba(220,225,233,0.30), 0 0 20px rgba(230,234,240,0.34), 0 1px 0 rgba(255,255,255,0.65) inset !important; }
 .cm-bar[data-lvl="5"].on > span { background:linear-gradient(180deg,#FFFFFF,#C4C9D2) !important;
   box-shadow:0 8px 28px rgba(235,238,243,0.45), 0 0 26px rgba(235,238,243,0.5), 0 1px 0 rgba(255,255,255,0.8) inset !important; }
+
+/* ── Performance — stop background work on screens you can't see ──────────
+   Every inactive step (the water jug, vape stages, shimmer, caustic, device
+   float…) was still running its infinite animations off-screen. Pause them so
+   only the visible step animates. Also drop the per-star twinkle churn — the
+   slow drift stays, the constant opacity flicker on every star goes. */
+.step:not(.on), .step:not(.on) * { animation-play-state: paused !important; }
+.star, .sf-star { animation: none !important; }
 </style>
 </body>
 </html>
