@@ -142,10 +142,10 @@
 
   /* step container */
   .stepwrap { flex:1; overflow:hidden; position:relative; }
-  .step { position:absolute; inset:0; padding: 28px 26px 16px; display:flex; flex-direction:column; justify-content:flex-start; gap:12px; opacity:0; transform: translate3d(26px,0,0); pointer-events:none; transition: opacity .26s ease, transform .36s cubic-bezier(.22,1,.36,1); will-change: opacity, transform; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+  .step { position:absolute; inset:0; padding: 28px 26px 16px; display:flex; flex-direction:column; justify-content:flex-start; gap:12px; opacity:0; transform: translate3d(0,14px,0); pointer-events:none; transition: opacity .32s ease, transform .44s cubic-bezier(.22,1,.36,1); will-change: opacity, transform; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
   .step::-webkit-scrollbar { display:none; }
   .step.on { opacity:1; transform: translate3d(0,0,0); pointer-events:auto; }
-  .step.out { opacity:0; transform: translate3d(-26px,0,0); }
+  .step.out { opacity:0; transform: translate3d(0,-10px,0); }
 
   /* ── Swipe-card flick ─────────────────────────────────────────────────
      Kept simple: no nested card surfaces or ghost-card stack (those added
@@ -156,12 +156,15 @@
   /* Questions read top-down — start at the top, not floating in the middle. */
   body.deck .step { justify-content:flex-start; padding-top:30px; }
   /* the flick-off when Next is tapped */
-  .step.flick { transition: opacity .36s ease, transform .46s cubic-bezier(.4,0,.25,1) !important; }
-  .step.flick-right { opacity:0 !important; transform: translate3d(118%,2%,0) rotate(8deg) !important; }
-  .step.flick-left  { opacity:0 !important; transform: translate3d(-118%,2%,0) rotate(-8deg) !important; }
-  /* next screen springs gently up */
-  body.deck .step.on.cardin { animation: cardIn .42s cubic-bezier(.22,1,.36,1) both; }
-  @keyframes cardIn { from { transform: translate3d(0,16px,0); opacity:.3; } to { transform:none; opacity:1; } }
+  /* Smooth, single-motion switch: the old screen softly fades + slides a
+     short distance, the new one rises in as one unit. No rotation, no big
+     throw, no competing spring — just a clean cross-dissolve. */
+  .step.flick { transition: opacity .28s ease, transform .4s cubic-bezier(.22,1,.36,1) !important; }
+  .step.flick-right { opacity:0 !important; transform: translate3d(-6%,0,0) !important; }
+  .step.flick-left  { opacity:0 !important; transform: translate3d(6%,0,0) !important; }
+  /* next screen rises in gently as one cohesive unit */
+  body.deck .step.on.cardin { animation: cardIn .46s cubic-bezier(.22,1,.36,1) both; }
+  @keyframes cardIn { from { transform: translate3d(0,12px,0); opacity:0; } to { transform:none; opacity:1; } }
   @media (prefers-reduced-motion: reduce) {
     .step.flick, body.deck .step.on.cardin { animation:none !important; transition:opacity .2s !important; }
   }
@@ -791,7 +794,7 @@
   .step[data-step="6"].on .title { animation: s5In .5s ease both .04s; }
   .step[data-step="6"].on .copy  { animation: s5In .5s ease both .10s; }
   .step[data-step="6"].on .vape-stage { animation: s5In .55s ease both .16s; }
-  @keyframes s5In { 0%{opacity:0; transform:translateY(10px);} 100%{opacity:1; transform:translateY(0);} }
+  @keyframes s5In { 0%{opacity:0;} 100%{opacity:1;} }
 
   /* Next button — premium activation, scoped to this screen via body flag */
   body.on-vape-amount .cta:not(:disabled) {
@@ -848,7 +851,7 @@
   .step[data-step="5"] .vape-title { font-size:31px; line-height:1.08; letter-spacing:-0.7px;
     text-shadow:0 2px 18px color-mix(in srgb, var(--accent) 16%, transparent); }
   .step[data-step="5"].on .vape-title { animation: vFadeUp .6s cubic-bezier(.22,1,.36,1) both; }
-  @keyframes vFadeUp { 0%{opacity:0; transform:translateY(12px);} 100%{opacity:1; transform:translateY(0);} }
+  @keyframes vFadeUp { 0%{opacity:0;} 100%{opacity:1;} }
   /* Recovery insight + Core AI glass cards */
   .insight-card { position:relative; margin-top:4px; padding:13px 15px; border-radius:15px; overflow:hidden;
     background:linear-gradient(0deg, color-mix(in srgb, var(--accent) 8%, transparent), color-mix(in srgb, var(--accent) 8%, transparent)), rgba(14,18,29,0.74);
@@ -1048,7 +1051,8 @@
   .step.on .title { animation: gItemIn .5s cubic-bezier(.22,1,.36,1) both; }
   .step.on .copy  { animation: gItemIn .5s cubic-bezier(.22,1,.36,1) .06s both; }
   .step.on .tone-list { animation: gItemIn .52s cubic-bezier(.22,1,.36,1) .12s both; }
-  @keyframes gItemIn { from { opacity:0; transform:translateY(11px); } to { opacity:1; transform:translateY(0); } }
+  /* fade-only so it layers cleanly over the container's rise (no double motion) */
+  @keyframes gItemIn { from { opacity:0; } to { opacity:1; } }
   @media (prefers-reduced-motion: reduce) {
     .step.on .title, .step.on .copy, .step.on .tone-list { animation:none; }
   }
@@ -1456,14 +1460,13 @@
             <button class="habit-card" data-habit="doomscroll" data-preview="3 quick questions about your screen time" style="--hc:#9CA2AD;">
               <div class="habit-ico">
                 <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <!-- phone -->
-                  <rect x="6.5" y="2.5" width="9.5" height="19" rx="2.5"/>
+                  <!-- phone (centered) -->
+                  <rect x="7" y="2.5" width="10" height="19" rx="2.5"/>
                   <!-- playing reel -->
-                  <path d="M10.6 9.2 14 11.2 10.6 13.2Z" fill="white"/>
-                  <path d="M10.4 18.4h2.2"/>
-                  <!-- endless scroll -->
-                  <path d="M18.5 8.2 20 9.7 21.5 8.2"/>
-                  <path d="M18.5 12 20 13.5 21.5 12"/>
+                  <path d="M10.8 6.8 13.8 8.5 10.8 10.2Z" fill="white"/>
+                  <!-- scrolling feed -->
+                  <path d="M9.6 13 12 15 14.4 13"/>
+                  <path d="M9.6 16.4 12 18.4 14.4 16.4"/>
                 </svg>
               </div>
               <div class="habit-name">Doom-scroll</div>
@@ -1523,7 +1526,7 @@
               cursor: pointer;
               overflow: hidden;
               -webkit-tap-highlight-color: transparent;
-              display: flex; flex-direction: column; gap: 7px;
+              display: flex; flex-direction: column; align-items: center; text-align: center; gap: 7px;
               min-height: 92px;
               transition:
                 transform .22s cubic-bezier(.22,1.05,.36,1),
