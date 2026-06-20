@@ -53,7 +53,6 @@
        lift from below, so screens feel lit rather than flat matte. */
     background:
       radial-gradient(115% 65% at 50% -8%, rgba(174,182,196,0.12) 0%, rgba(174,182,196,0.04) 26%, transparent 56%),
-      radial-gradient(72% 46% at 50% 70%, rgba(196,205,222,0.075) 0%, transparent 66%),
       radial-gradient(120% 55% at 50% 114%, rgba(140,150,165,0.07) 0%, transparent 52%),
       linear-gradient(180deg, #111218 0%, #0C0D12 58%, #0A0B0E 100%);
   }
@@ -6416,6 +6415,12 @@
    slow drift stays, the constant opacity flicker on every star goes. */
 .step:not(.on), .step:not(.on) * { animation-play-state: paused !important; }
 .star, .sf-star { animation: none !important; }
+/* kill the full-screen scan-line sweep + the duplicate inline starfield (the
+   sf-* field already provides stars), and stop the Face-ID pulse off-screen */
+.core-scan-line { display: none !important; }
+.stars.far, .stars.near { display: none !important; }
+.ap-faceid-anim svg { animation-play-state: paused !important; }
+.ap-sheet.on .ap-faceid-anim svg { animation-play-state: running !important; }
 .commit-label.hint { font-family:'Space Mono', ui-monospace, monospace !important; letter-spacing:0.04em !important; text-transform:none !important; }
 
 /* ── Gender figures → brushed silver (were bright blue / pink) ── */
@@ -6451,8 +6456,53 @@ body.on-portal .deck-orb, body:not(.deck) .deck-orb { opacity:0; }
   width:7px; height:7px; border-radius:50%;
   background:radial-gradient(circle, rgba(236,240,248,0.55), rgba(200,208,222,0.15) 60%, transparent);
   box-shadow:0 0 16px rgba(214,221,235,0.3); }
-@keyframes orbBreathe { 0%,100%{ transform:translate(-50%,-50%) scale(1); opacity:0.72; } 50%{ transform:translate(-50%,-50%) scale(1.12); opacity:1; } }
+/* opacity-only (no scale) so it composites cheaply — no per-frame repaint */
+@keyframes orbBreathe { 0%,100%{ opacity:0.6; } 50%{ opacity:1; } }
 @media (prefers-reduced-motion: reduce){ body.deck .deck-orb { animation:none; } }
+
+/* ════ COLOUR — real category colour on the icon chips, selections and the
+   commitment meter, while cards / text / background stay premium dark. ════ */
+.habit-card[data-habit="vape"]{--col:#5AC8FA;} .habit-card[data-habit="alcohol"]{--col:#FF6B6B;}
+.habit-card[data-habit="porn"]{--col:#C07AF0;} .habit-card[data-habit="doomscroll"]{--col:#4DA3FF;}
+.habit-card[data-habit="spend"]{--col:#FFCC4D;} .habit-card[data-habit="build"]{--col:#34D17E;}
+.tone-row[data-reason="health"]{--col:#34D17E;} .tone-row[data-reason="money"]{--col:#FFCC4D;}
+.tone-row[data-reason="control"]{--col:#4DA3FF;} .tone-row[data-reason="someone"]{--col:#FF7A9C;}
+.tone-row[data-reason="done"]{--col:#C07AF0;}
+.tone-row[data-identity="disciplined"]{--col:#4DA3FF;} .tone-row[data-identity="calm"]{--col:#34D17E;}
+.tone-row[data-identity="sharp"]{--col:#C07AF0;} .tone-row[data-identity="free"]{--col:#FF9F4D;}
+
+/* coloured frosted icon chip */
+.habit-card[data-habit] .habit-ico, .tone-row[data-reason] .tone-ico, .tone-row[data-identity] .tone-ico {
+  background: linear-gradient(155deg, color-mix(in srgb, var(--col) 30%, rgba(255,255,255,0.04)), color-mix(in srgb, var(--col) 13%, rgba(255,255,255,0.02))) !important;
+  border: 1px solid color-mix(in srgb, var(--col) 42%, rgba(255,255,255,0.10)) !important;
+  box-shadow: 0 2px 9px color-mix(in srgb, var(--col) 24%, transparent), 0 1px 0 rgba(255,255,255,0.14) inset !important;
+}
+.tone-row[data-reason] .tone-ico svg, .tone-row[data-identity] .tone-ico svg { stroke:#fff !important; }
+/* radial backdrop on habit cards picks up the colour again */
+.habit-card[data-habit]::before { background: radial-gradient(70% 80% at 50% 0%, color-mix(in srgb, var(--col) 30%, transparent), transparent 65%) !important; opacity:0.13 !important; }
+
+/* selected — chip saturates, card gets a colour ring + glow */
+.habit-card[data-habit].sel .habit-ico, .tone-row[data-reason].sel .tone-ico, .tone-row[data-identity].sel .tone-ico {
+  background: linear-gradient(155deg, color-mix(in srgb, var(--col) 62%, transparent), color-mix(in srgb, var(--col) 38%, transparent)) !important;
+  border-color: color-mix(in srgb, var(--col) 72%, transparent) !important;
+  box-shadow: 0 0 18px color-mix(in srgb, var(--col) 42%, transparent), 0 1px 0 rgba(255,255,255,0.22) inset !important;
+}
+.habit-card[data-habit].sel, .tone-row[data-reason].sel, .tone-row[data-identity].sel {
+  border-color: color-mix(in srgb, var(--col) 52%, transparent) !important;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--col) 10%, rgba(255,255,255,0.05)), rgba(255,255,255,0.02)) !important;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--col) 40%, transparent) inset, 0 12px 28px rgba(0,0,0,0.4) !important;
+}
+.habit-card[data-habit].sel::before { opacity:0.3 !important; }
+.habit-card[data-habit].sel::after { background: var(--col) !important; }
+.tone-row[data-reason].sel .tone-check, .tone-row[data-identity].sel .tone-check { background: var(--col) !important; border-color: var(--col) !important; }
+.tone-row[data-reason].sel .tone-check::after, .tone-row[data-identity].sel .tone-check::after { border-left-color:#0c0d12 !important; border-bottom-color:#0c0d12 !important; }
+
+/* Commitment meter → vivid rainbow (red → orange → gold → green → blue) */
+.cm-bar[data-lvl="1"].on > span { background:linear-gradient(180deg,#FF7A6E,#D23A2E) !important; box-shadow:0 6px 18px rgba(255,90,77,0.38), 0 1px 0 rgba(255,255,255,0.25) inset !important; }
+.cm-bar[data-lvl="2"].on > span { background:linear-gradient(180deg,#FFB454,#E07A18) !important; box-shadow:0 6px 18px rgba(255,159,40,0.40), 0 1px 0 rgba(255,255,255,0.25) inset !important; }
+.cm-bar[data-lvl="3"].on > span { background:linear-gradient(180deg,#FFE04A,#E0AC10) !important; box-shadow:0 6px 20px rgba(255,214,40,0.42), 0 1px 0 rgba(255,255,255,0.28) inset !important; }
+.cm-bar[data-lvl="4"].on > span { background:linear-gradient(180deg,#52E57E,#1F9E45) !important; box-shadow:0 6px 22px rgba(52,209,94,0.46), 0 1px 0 rgba(255,255,255,0.28) inset !important; }
+.cm-bar[data-lvl="5"].on > span { background:linear-gradient(180deg,#5AB8FF,#0A6BD8) !important; box-shadow:0 8px 26px rgba(47,143,255,0.5), 0 0 18px rgba(90,170,255,0.4), 0 1px 0 rgba(255,255,255,0.3) inset !important; }
 </style>
 </body>
 </html>
