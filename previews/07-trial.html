@@ -1380,7 +1380,7 @@
         <div class="step" data-step="0">
           <div class="kicker">Before we start</div>
           <h1 class="title">This only<br/><span class="g">works if you mean it.</span></h1>
-          <p class="copy">CORE isn't a tracker — it's a witness. Sign the contract: press &amp; hold to commit.</p>
+          <p class="copy">CORE isn't a tracker — it's a witness. Sign the contract: slide to commit.</p>
           <div id="habitChip" style="display:none; align-items:center; gap:6px; padding: 3px 9px 3px 7px; border-radius: 999px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); align-self: flex-start; font-size: 10px; color: var(--muted); letter-spacing:-0.05px; margin-top: 2px;">
             <span id="habitChipDot" style="width:6px; height:6px; border-radius:50%; box-shadow: 0 0 5px currentColor;"></span>
             <span>Quitting <strong id="habitChipName" style="color:#fff; font-weight:700; text-transform:capitalize;">vape</strong></span>
@@ -1391,13 +1391,13 @@
             <div style="font-size:11px; letter-spacing:0.22em; text-transform:uppercase; color:var(--muted); font-weight:700; font-family:ui-monospace,'SF Mono',Menlo,monospace;">// Contract with myself</div>
             <div style="font-size:14px; color:rgba(255,255,255,0.86); line-height:21px; margin-top:10px; letter-spacing:-0.1px;">I'm doing this for me. Not for a partner, parent, or doctor — for me. I'll be honest when I slip. I'll come back when I drift.</div>
             <div style="margin-top:18px;">
-              <button type="button" id="holdCommit" class="hold-commit">
-                <span class="hc-fill"></span>
-                <span class="hc-label">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
-                  <span id="holdLabel">Press &amp; hold to commit</span>
+              <div id="slideCommit" class="slide-commit" role="slider" aria-label="Slide to commit" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                <span class="sc-fill" id="scFill"></span>
+                <span class="sc-label" id="scLabel">Slide to commit</span>
+                <span class="sc-handle" id="scHandle">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
                 </span>
-              </button>
+              </div>
             </div>
             <div id="promiseSign" class="promise-sign" aria-hidden="true">
               <svg class="promise-sign-svg" viewBox="0 0 280 64" fill="none" preserveAspectRatio="xMidYMid meet">
@@ -5013,48 +5013,72 @@
   // wire skip-X to exit-intent
   document.querySelector('.skip').onclick = exitConfirm;
 
-  // Press-and-hold to commit (no keyboard). Holding fills the bar, locks the
-  // promise, then plays the sign → green → red-stamp sequence and advances.
+  // Slide-to-commit (no keyboard). Drag the gold handle to the end to lock the
+  // promise, then it plays the sign → green → red-stamp sequence and advances.
   (function () {
-    const btn = document.getElementById('holdCommit');
-    if (!btn) return;
-    const label = document.getElementById('holdLabel');
-    const meta = document.getElementById('promiseMeta');
-    const HOLD = 1150;
-    let timer = null, fired = false;
-    function start(e) {
+    const slider = document.getElementById('slideCommit');
+    if (!slider) return;
+    const handle = document.getElementById('scHandle');
+    const fill   = document.getElementById('scFill');
+    const label  = document.getElementById('scLabel');
+    const meta   = document.getElementById('promiseMeta');
+    let dragging = false, fired = false, startX = 0, x = 0, lastBuzz = 0;
+    const HW = 50, PAD = 4;
+    function maxX() { return Math.max(0, slider.clientWidth - HW - PAD * 2); }
+    function setX(px) {
+      x = Math.max(0, Math.min(maxX(), px));
+      handle.style.transform = 'translateX(' + x + 'px)';
+      fill.style.width = (x + HW) + 'px';
+      const frac = maxX() ? x / maxX() : 0;
+      if (label) label.style.opacity = String(Math.max(0, 1 - frac * 1.25));
+      slider.setAttribute('aria-valuenow', Math.round(frac * 100));
+    }
+    function down(e) {
       if (fired || _signing) return;
       e.preventDefault();
-      btn.classList.add('holding');
-      if (label) label.textContent = 'Keep holding…';
+      dragging = true; slider.classList.add('dragging');
+      startX = e.clientX - x;
+      handle.style.transition = 'none'; fill.style.transition = 'none';
       if (meta) { meta.textContent = '// committing…'; meta.style.color = '#E8C878'; }
+      try { handle.setPointerCapture && handle.setPointerCapture(e.pointerId); } catch (_) {}
       try { if (typeof haptic === 'function') haptic(8); } catch (_) {}
-      timer = setTimeout(complete, HOLD);
     }
-    function cancel() {
-      if (fired) return;
-      clearTimeout(timer);
-      btn.classList.remove('holding');
-      if (label) label.textContent = 'Press & hold to commit';
-      if (meta) { meta.textContent = '// unsigned'; meta.style.color = ''; }
+    function move(e) {
+      if (!dragging || fired) return;
+      e.preventDefault();
+      setX(e.clientX - startX);
+      const now = performance.now();
+      if (now - lastBuzz > 55) { lastBuzz = now; try { if (typeof haptic === 'function') haptic(3); } catch (_) {} }
+      if (x >= maxX() - 2) complete();
+    }
+    function up() {
+      if (fired) { dragging = false; return; }
+      dragging = false; slider.classList.remove('dragging');
+      handle.style.transition = 'transform .28s cubic-bezier(.22,1,.36,1)';
+      fill.style.transition = 'width .28s cubic-bezier(.22,1,.36,1)';
+      if (x < maxX() - 2) { setX(0); if (label) label.style.opacity = '1'; if (meta) { meta.textContent = '// unsigned'; meta.style.color = ''; } }
     }
     function complete() {
       if (fired) return;
-      fired = true;
+      fired = true; dragging = false;
+      slider.classList.remove('dragging'); slider.classList.add('done');
+      handle.style.transition = 'transform .18s cubic-bezier(.22,1,.36,1)';
+      setX(maxX());
+      if (label) { label.textContent = 'Committed'; label.style.opacity = '1'; }
       state.promised = true;
-      btn.classList.add('done');
-      if (label) label.textContent = 'Committed';
-      track('promise_signed', { method: 'hold' });
+      try { track('promise_signed', { method: 'slide' }); } catch (_) {}
       try { if (typeof haptic === 'function') haptic([10, 40, 20]); } catch (_) {}
       refreshCTA();
       if (_signing) return;
       _signing = true;
       playSignAnimation(function () { _signing = false; _signed = true; advance(); });
     }
-    btn.addEventListener('pointerdown', start);
-    btn.addEventListener('pointerup', cancel);
-    btn.addEventListener('pointerleave', cancel);
-    btn.addEventListener('pointercancel', cancel);
+    handle.addEventListener('pointerdown', down);
+    window.addEventListener('pointermove', move, { passive: false });
+    window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', up);
+    // recompute the rest position if the layout changes
+    window.addEventListener('resize', function () { if (!fired) setX(x); });
   })();
 
   // ── Live username availability ────────────────────────────────────────
@@ -6637,22 +6661,30 @@ html body[data-font="apple"] #planTitle .g {
 .age-chip:active { transform:scale(.94); }
 .age-chip.sel { color:#0c0d12; background:linear-gradient(180deg,#ECEFF4,#C4C9D2); border-color:#ECEFF4; box-shadow:0 4px 14px rgba(0,0,0,0.4); }
 
-/* Press-and-hold to commit (replaces the type-PROMISE keyboard step) */
-.hold-commit { all:unset; box-sizing:border-box; position:relative; overflow:hidden; cursor:pointer;
-  display:flex; align-items:center; justify-content:center; gap:9px; width:100%;
-  padding:17px 18px; border-radius:16px; margin-top:4px;
-  background:rgba(255,255,255,0.05); border:1px solid rgba(232,200,120,0.34);
-  color:#E8C878; font-family:'Space Mono',ui-monospace,monospace; font-weight:700;
-  font-size:14px; letter-spacing:0.12em; text-transform:uppercase;
-  -webkit-tap-highlight-color:transparent; transition:transform .12s, border-color .2s; }
-.hold-commit:active { transform:scale(.99); }
-.hold-commit .hc-fill { position:absolute; left:0; top:0; bottom:0; width:0%;
-  background:linear-gradient(90deg, rgba(110,79,31,0.55), rgba(201,162,75,0.5)); z-index:0;
-  transition:width .05s linear; }
-.hold-commit.holding .hc-fill { transition:width 1.15s linear; width:100%; }
-.hold-commit.done { border-color:rgba(52,209,126,0.6); color:#34D17E; }
-.hold-commit .hc-label { position:relative; z-index:1; display:flex; align-items:center; gap:8px; }
-.hold-commit svg { width:15px; height:15px; }
+/* Slide-to-commit (replaces the type-PROMISE keyboard step) */
+.slide-commit { position:relative; width:100%; height:58px; margin-top:4px; border-radius:16px;
+  overflow:hidden; background:rgba(255,255,255,0.05); border:1px solid rgba(232,200,120,0.34);
+  box-shadow:0 0 0 1px rgba(232,200,120,0.12), 0 0 16px rgba(201,162,75,0.08);
+  -webkit-user-select:none; user-select:none; touch-action:none; -webkit-tap-highlight-color:transparent; }
+.slide-commit .sc-fill { position:absolute; left:0; top:0; bottom:0; width:54px; z-index:0;
+  background:linear-gradient(90deg, rgba(110,79,31,0.55), rgba(201,162,75,0.5)); }
+.slide-commit .sc-label { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  z-index:1; pointer-events:none; font-family:'Space Mono',ui-monospace,"SF Mono",monospace; font-weight:700;
+  font-size:13px; letter-spacing:0.16em; text-transform:uppercase; color:#E8C878; padding-left:40px; }
+.slide-commit .sc-handle { position:absolute; left:4px; top:4px; bottom:4px; width:50px; z-index:2;
+  display:flex; align-items:center; justify-content:center; border-radius:12px; transform:translateX(0);
+  background:linear-gradient(180deg,#E8C878,#B8893A); color:#1A1206; cursor:grab;
+  box-shadow:0 2px 9px rgba(0,0,0,0.45), 0 1px 0 rgba(255,236,190,0.55) inset; touch-action:none; }
+.slide-commit .sc-handle:active { cursor:grabbing; }
+.slide-commit .sc-handle svg { width:21px; height:21px; }
+.slide-commit.done { border-color:rgba(52,209,126,0.6); }
+.slide-commit.done .sc-handle { background:linear-gradient(180deg,#52E57E,#1F9E45); color:#06140B; }
+.slide-commit.done .sc-label { color:#34D17E; }
+@keyframes scHint { 0%,100%{ opacity:0.55; } 50%{ opacity:1; } }
+.slide-commit:not(.dragging):not(.done) .sc-label { animation:scHint 1.9s ease-in-out infinite; }
+@keyframes scNudge { 0%,100%{ transform:translateX(0);} 60%{ transform:translateX(5px);} }
+.slide-commit:not(.dragging):not(.done) .sc-handle { animation:scNudge 1.9s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce){ .slide-commit .sc-label, .slide-commit .sc-handle { animation:none !important; } }
 
 /* contract page: the hold-to-commit button is the CTA, so hide the footer one */
 body.on-promise .footer { display:none !important; }
@@ -6682,8 +6714,8 @@ body.on-autoadvance .stepwrap::after {
 }
 /* Next CTA: a crisp outline + soft white glow ring */
 .cta:not(:disabled) { box-shadow: 0 0 0 1px rgba(255,255,255,0.5), 0 12px 28px rgba(0,0,0,0.45), 0 0 22px rgba(232,240,255,0.14), 0 1px 0 rgba(255,255,255,0.6) inset !important; }
-/* hold-to-commit: bronze outline glow */
-.hold-commit { box-shadow: 0 0 0 1px rgba(232,200,120,0.18), 0 0 16px rgba(201,162,75,0.1) !important; }
+/* slide-to-commit: bronze outline glow */
+.slide-commit { box-shadow: 0 0 0 1px rgba(232,200,120,0.18), 0 0 16px rgba(201,162,75,0.1) !important; }
 
 /* XP bar — a touch larger + crisper sheen */
 .xp-bar { width: 42px !important; height: 6px !important; box-shadow: 0 1px 1px rgba(0,0,0,0.5) inset !important; }
