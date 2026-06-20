@@ -53,7 +53,7 @@
        lift from below, so screens feel lit rather than flat matte. */
     background:
       radial-gradient(115% 65% at 50% -8%, rgba(174,182,196,0.12) 0%, rgba(174,182,196,0.04) 26%, transparent 56%),
-      radial-gradient(95% 42% at 50% 88%, rgba(170,182,200,0.07) 0%, transparent 60%),
+      radial-gradient(72% 46% at 50% 70%, rgba(196,205,222,0.075) 0%, transparent 66%),
       radial-gradient(120% 55% at 50% 114%, rgba(140,150,165,0.07) 0%, transparent 52%),
       linear-gradient(180deg, #111218 0%, #0C0D12 58%, #0A0B0E 100%);
   }
@@ -1337,6 +1337,9 @@
         </div>
       </div>
 
+      <!-- Ambient core glow — fills the lower space on sparse question screens
+           with a soft, slowly-breathing light (a quiet echo of the portal). -->
+      <div class="deck-orb" aria-hidden="true"></div>
       <div class="stepwrap" id="stepwrap">
 
         <!-- STEP 0: Commitment (type PROMISE) -->
@@ -3849,7 +3852,7 @@
   //   16 your 30-day plan — quotes your "why" back (earned payoff)
   //   0  sign the contract
   //   21 portal / paywall
-  const ORDER = [1, 2, 4, 9, 23, 14, 22, 16, 0, 21];
+  const ORDER = [1, 2, 4, 9, 23, 14, 16, 22, 0, 21];
   function curPos() { const i = ORDER.indexOf(state.step); return i < 0 ? 0 : i; }
   // Count of *numbered* question screens (everything except the commitment
   // screen and the paywall portal) — drives the "Step X of N" counter so the
@@ -4417,7 +4420,7 @@
       } catch (e) { console.warn('[trial] account persist failed', e); }
       // Endgame -> existing rank-reveal -> first-chest -> dashboard chain.
       // (Was ./16-projection-90.html, which does not exist.)
-      window.location.href = '05-sign-in-email.html?next=08-rank-reveal.html';
+      window.location.href = '08-rank-reveal.html';
     };
     persistThenContinue();
   }
@@ -4693,7 +4696,7 @@
     document.body.appendChild(wrap);
     wrap.querySelector('#wcEnter').addEventListener('click', () => {
       track('welcome_confirm_enter', {});
-      window.location.href = '05-sign-in-email.html?next=08-rank-reveal.html';
+      window.location.href = '08-rank-reveal.html';
     });
   }
 
@@ -6436,6 +6439,20 @@
 /* ── "Just build" reads as the alternative path (not a quit) ── */
 .habit-card[data-habit="build"] { box-shadow: inset 0 1.5px 0 rgba(214,219,226,0.22), 0 10px 24px rgba(0,0,0,0.34) !important; }
 .habit-card[data-habit="build"] .habit-desc { color: rgba(214,219,226,0.7) !important; }
+
+/* ── Ambient core glow — gives sparse screens a calm focal point ── */
+.deck-orb { position:absolute; left:50%; top:68%; transform:translate(-50%,-50%);
+  width:240px; height:240px; border-radius:50%; pointer-events:none; z-index:0;
+  opacity:0; transition:opacity .5s ease;
+  background:radial-gradient(circle, rgba(214,221,235,0.11) 0%, rgba(160,170,190,0.045) 36%, transparent 66%); }
+body.deck .deck-orb { opacity:1; animation:orbBreathe 6.5s ease-in-out infinite; }
+body.on-portal .deck-orb, body:not(.deck) .deck-orb { opacity:0; }
+.deck-orb::after { content:""; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  width:7px; height:7px; border-radius:50%;
+  background:radial-gradient(circle, rgba(236,240,248,0.55), rgba(200,208,222,0.15) 60%, transparent);
+  box-shadow:0 0 16px rgba(214,221,235,0.3); }
+@keyframes orbBreathe { 0%,100%{ transform:translate(-50%,-50%) scale(1); opacity:0.72; } 50%{ transform:translate(-50%,-50%) scale(1.12); opacity:1; } }
+@media (prefers-reduced-motion: reduce){ body.deck .deck-orb { animation:none; } }
 </style>
 </body>
 </html>
