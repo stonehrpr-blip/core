@@ -554,6 +554,7 @@
         <div class="spblurb" id="spBlurb"></div>
         <div class="sptip" id="spTip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.6.6 1 1.3 1 2.1V16h6v-.4c0-.8.4-1.5 1-2.1A6 6 0 0 0 12 3Z"/></svg><span id="spTipText"></span></div>
         <div class="splog" id="spLog"></div>
+        <a class="spopen" id="spOpen" href="#"><span id="spOpenLabel">Open</span><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         <button class="spclose" id="spClose" type="button">Got it</button>
       </div>
     </div>
@@ -915,6 +916,9 @@
         ? log.map(function(e){ var d=e.delta||0, down=d<0; return '<div class="lgrow"><div class="lgd'+(down?' down':'')+'">'+(d>0?'+':'')+d+'</div><div class="lgt">'+prettyReason(e.reason)+'</div><div class="lgw">'+relTime(e.ts)+'</div></div>'; }).join('')
         : '<div class="lgempty">No activity yet — complete '+cs.name+' quests to raise this stat.</div>';
       qs('#spLog').innerHTML='<div class="lgh">Recent activity</div>'+rows;
+      // route to the stat's real tracking page (fallback to the generic stat page)
+      var STAT_PAGE={ strength:'gym.html', focus:'focus.html', wealth:'wealth.html', health:'health.html', social:'social.html', purpose:'willpower.html' };
+      var op=qs('#spOpen'); if(op){ op.href=STAT_PAGE[cs.key]||('stat.html?s='+cs.key); qs('#spOpenLabel').textContent='Train '+cs.name; }
       sp.classList.add('open'); var f=qs('#spFill'); f.style.width='0%'; requestAnimationFrame(function(){ requestAnimationFrame(function(){ f.style.width=v+'%'; }); }); }
     function prettyReason(r){ if(!r) return 'Stat boost'; if(r.indexOf('quest:')===0){ return r.slice(6).replace(/[-_]/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}); } if(r.indexOf('streak:')===0) return 'Streak bonus'; return r.charAt(0).toUpperCase()+r.slice(1); }
     function relTime(ts){ var d=Date.now()-(ts||0); var m=Math.round(d/60000); if(m<1) return 'just now'; if(m<60) return m+'m ago'; var h=Math.round(m/60); if(h<24) return h+'h ago'; return Math.round(h/24)+'d ago'; }
@@ -1072,6 +1076,12 @@
     .tot-name{font-size:14px;color:#fff;font-weight:600;letter-spacing:-0.2px;}
     .tot-val{font-family:'Space Grotesk',-apple-system,sans-serif;font-size:18px;font-weight:700;color:#fff;letter-spacing:-0.4px;font-variant-numeric:tabular-nums;}
     .tot-val .u{font-size:12px;color:rgba(235,235,245,0.55);font-weight:500;margin-left:3px;}
+    /* "Train [stat]" CTA in the stat overlay — routes to the real tracking page */
+    .spopen{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:14px;padding:15px;border-radius:14px;text-decoration:none;
+      background:#fff;color:#0a0a12;font-family:'Space Grotesk',-apple-system,sans-serif;font-weight:700;font-size:15px;letter-spacing:-0.2px;
+      box-shadow:0 10px 24px rgba(0,0,0,0.45),0 0 0 1px rgba(255,255,255,0.5),0 0 20px rgba(232,240,255,0.12);transition:transform .12s;}
+    .spopen:active{transform:scale(.985);}
+    .spopen svg{stroke:#0a0a12;}
   </style>
   <script>
   (function(){
