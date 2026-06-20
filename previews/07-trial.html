@@ -1363,7 +1363,7 @@
         <div class="step" data-step="0">
           <div class="kicker">Before we start</div>
           <h1 class="title">This only<br/><span class="g">works if you mean it.</span></h1>
-          <p class="copy">CORE isn't a tracker — it's a witness. Sign the contract: type the word below.</p>
+          <p class="copy">CORE isn't a tracker — it's a witness. Sign the contract: press &amp; hold to commit.</p>
           <div id="habitChip" style="display:none; align-items:center; gap:6px; padding: 3px 9px 3px 7px; border-radius: 999px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); align-self: flex-start; font-size: 10px; color: var(--muted); letter-spacing:-0.05px; margin-top: 2px;">
             <span id="habitChipDot" style="width:6px; height:6px; border-radius:50%; box-shadow: 0 0 5px currentColor;"></span>
             <span>Quitting <strong id="habitChipName" style="color:#fff; font-weight:700; text-transform:capitalize;">vape</strong></span>
@@ -1374,10 +1374,13 @@
             <div style="font-size:11px; letter-spacing:0.22em; text-transform:uppercase; color:var(--muted); font-weight:700; font-family:ui-monospace,'SF Mono',Menlo,monospace;">// Contract with myself</div>
             <div style="font-size:14px; color:rgba(255,255,255,0.86); line-height:21px; margin-top:10px; letter-spacing:-0.1px;">I'm doing this for me. Not for a partner, parent, or doctor — for me. I'll be honest when I slip. I'll come back when I drift.</div>
             <div style="margin-top:18px;">
-              <div style="font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); font-weight:600; margin-bottom:8px;">Type <span style="color:#fff; font-family:ui-monospace,'SF Mono',Menlo,monospace; background:color-mix(in srgb, var(--accent) 10%, transparent); padding:1px 6px; border-radius:4px; letter-spacing:0.12em;">PROMISE</span> to continue</div>
-              <div style="position:relative;">
-                <input id="promiseInput" class="field" type="text" placeholder="PROMISE" maxlength="10" autocapitalize="characters" autocorrect="off" spellcheck="false" style="text-transform:uppercase; letter-spacing:0.3em; font-family:ui-monospace,'SF Mono',Menlo,monospace; text-align:center; font-weight:700;" />
-              </div>
+              <button type="button" id="holdCommit" class="hold-commit">
+                <span class="hc-fill"></span>
+                <span class="hc-label">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+                  <span id="holdLabel">Press &amp; hold to commit</span>
+                </span>
+              </button>
             </div>
             <div id="promiseSign" class="promise-sign" aria-hidden="true">
               <svg class="promise-sign-svg" viewBox="0 0 280 64" fill="none" preserveAspectRatio="xMidYMid meet">
@@ -1413,8 +1416,15 @@
             <div id="nameSuggestions" class="name-suggestions" style="display:none; margin-top:10px; flex-wrap:wrap; gap:6px;"></div>
           </div>
           <div class="field-wrap" style="margin-top:18px;">
-            <input id="ageInput" class="field" type="number" inputmode="numeric" placeholder="Your age" min="13" max="100" autocomplete="off" />
-            <div id="ageStatus" style="font-size:11.5px; margin-top:8px; padding-left:4px; min-height:16px; color:var(--muted); letter-spacing:-0.05px;">You must be 13 or older to use CORE.</div>
+            <div style="font-size:11.5px; color:var(--muted); margin:0 0 9px 4px; letter-spacing:-0.05px;">Your age</div>
+            <div id="ageChips" class="age-chips">
+              <button type="button" class="age-chip" data-age="15">13–17</button>
+              <button type="button" class="age-chip" data-age="21">18–24</button>
+              <button type="button" class="age-chip" data-age="29">25–34</button>
+              <button type="button" class="age-chip" data-age="39">35–44</button>
+              <button type="button" class="age-chip" data-age="49">45–54</button>
+              <button type="button" class="age-chip" data-age="60">55+</button>
+            </div>
           </div>
         </div>
 
@@ -3870,19 +3880,18 @@
   //   16 your 30-day plan — quotes your "why" back (earned payoff)
   //   0  sign the contract
   //   21 portal / paywall
-  const ORDER = [1, 2, 4, 9, 23, 14, 16, 22, 0, 21];
+  // Lean ≤60s flow — 5 quick questions, a payoff, then the contract + portal.
+  const ORDER = [1, 2, 4, 9, 16, 22, 0, 21];
   function curPos() { const i = ORDER.indexOf(state.step); return i < 0 ? 0 : i; }
-  // Count of *numbered* question screens (everything except the commitment
-  // screen and the paywall portal) — drives the "Step X of N" counter so the
-  // user can see how close they are to the finish line.
-  const NUM_QUESTIONS = ORDER.filter(function (id) { return id !== 0 && id !== 21; }).length;
-  // Chapter map — drives the 5-pill progress bar + label (by ORDER position)
+  // Numbered questions = everything except the 30-day payoff (16), contract (0)
+  // and portal (21). Drives the "Step X of 5" counter.
+  const NUM_QUESTIONS = ORDER.filter(function (id) { return id !== 0 && id !== 21 && id !== 16; }).length;
+  // Chapter map — drives the progress pills + label (by ORDER position)
   const CHAPTERS = [
     { ch: 'you',    label: 'You',        maxPos: 1  },  // name+age, profile
     { ch: 'habit',  label: 'Your habit', maxPos: 3  },  // what you're quitting, what pushed you
-    { ch: 'why',    label: 'Your why',   maxPos: 5  },  // who you'll become, the real why
-    { ch: 'plan',   label: 'Your plan',  maxPos: 7  },  // commitment, 30-day payoff
-    { ch: 'commit', label: 'Commit',     maxPos: 9  },  // contract, portal
+    { ch: 'plan',   label: 'Your plan',  maxPos: 5  },  // 30-day payoff, commitment
+    { ch: 'commit', label: 'Commit',     maxPos: 7  },  // contract, portal
   ];
   function chapterIndexFor() {                 // reads state.step via curPos(); any arg ignored
     const p = curPos();
@@ -4037,6 +4046,7 @@
     document.body.classList.toggle('on-vape-amount', n === 6);
     // Step-21 — cinematic portal subscription gate hides all chrome
     document.body.classList.toggle('on-portal', n === 21);
+    document.body.classList.toggle('on-promise', n === 0);   // hold-to-commit replaces the footer CTA
     // Demo playback (start the one visible demo, stop any others)
     if (isDemoStep(n)) startDemo(n); else stopAllDemos();
     // Step-enter hooks (keyed by body id — unchanged by the reorder)
@@ -4272,7 +4282,8 @@
   }
   // Auto-advance is OFF — the user always confirms with the Next button.
   // (The card still flicks away when they tap Next; see next().)
-  const AUTO_ADVANCE = new Set();
+  // Single-select screens glide straight to the next one on tap (no Next tap).
+  const AUTO_ADVANCE = new Set([2, 4, 9]);
   function swipeNext() { _swipeDir = 1; advance(); }
   window.swipeNext = swipeNext;
   function maybeAutoAdvance() {
@@ -4962,56 +4973,49 @@
   // wire skip-X to exit-intent
   document.querySelector('.skip').onclick = exitConfirm;
 
-  // PROMISE typed-input contract
-  const promiseInput = document.getElementById('promiseInput');
-  const promiseMeta = document.getElementById('promiseMeta');
-  const promiseCard = document.getElementById('promiseCard');
-  // On small screens the input lives below the fold of the .step container —
-  // scroll it into view so users don't have to hunt for the field.
-  if (window.innerHeight < 700) {
-    setTimeout(() => {
-      if (promiseInput) {
-        promiseInput.scrollIntoView({ block: 'center', behavior: 'smooth' });
-      }
-    }, 400);
-  }
-  // Paste-reject: typing is part of the contract. Pasting "PROMISE" doesn't count.
-  promiseInput.addEventListener('paste', e => {
-    e.preventDefault();
-    track('promise_paste_attempted', {});
-    const original = promiseMeta.textContent;
-    const originalColor = promiseMeta.style.color;
-    promiseMeta.textContent = '// type it. don\'t paste.';
-    promiseMeta.style.color = '#9AA1B7';
-    setTimeout(() => {
-      if (!state.promised) {
-        promiseMeta.textContent = original;
-        promiseMeta.style.color = originalColor;
-      }
-    }, 2200);
-  });
-  promiseInput.addEventListener('input', e => {
-    const v = e.target.value.toUpperCase();
-    e.target.value = v;
-    state.promised = v === 'PROMISE';
-    if (state.promised) {
-      promiseMeta.innerHTML = '// signed · ' + new Date().toLocaleString('en-AU', { hour:'numeric', minute:'2-digit', day:'numeric', month:'short' }).toLowerCase();
-      promiseMeta.style.color = '#AEB6C4';
-      promiseCard.style.borderColor = 'color-mix(in srgb, var(--accent) 40%, transparent)';
-      promiseCard.style.background = 'color-mix(in srgb, var(--accent) 6%, transparent)';
-      promiseInput.style.borderColor = '#AEB6C4';
-      promiseInput.style.background = 'color-mix(in srgb, var(--accent) 10%, transparent)';
-      track('promise_signed', {});
-    } else {
-      promiseMeta.textContent = '// unsigned';
-      promiseMeta.style.color = '';
-      promiseCard.style.borderColor = '';
-      promiseCard.style.background = '';
-      promiseInput.style.borderColor = '';
-      promiseInput.style.background = '';
+  // Press-and-hold to commit (no keyboard). Holding fills the bar, locks the
+  // promise, then plays the sign → green → red-stamp sequence and advances.
+  (function () {
+    const btn = document.getElementById('holdCommit');
+    if (!btn) return;
+    const label = document.getElementById('holdLabel');
+    const meta = document.getElementById('promiseMeta');
+    const HOLD = 1150;
+    let timer = null, fired = false;
+    function start(e) {
+      if (fired || _signing) return;
+      e.preventDefault();
+      btn.classList.add('holding');
+      if (label) label.textContent = 'Keep holding…';
+      if (meta) { meta.textContent = '// committing…'; meta.style.color = '#E8C878'; }
+      try { if (typeof haptic === 'function') haptic(8); } catch (_) {}
+      timer = setTimeout(complete, HOLD);
     }
-    refreshCTA();
-  });
+    function cancel() {
+      if (fired) return;
+      clearTimeout(timer);
+      btn.classList.remove('holding');
+      if (label) label.textContent = 'Press & hold to commit';
+      if (meta) { meta.textContent = '// unsigned'; meta.style.color = ''; }
+    }
+    function complete() {
+      if (fired) return;
+      fired = true;
+      state.promised = true;
+      btn.classList.add('done');
+      if (label) label.textContent = 'Committed';
+      track('promise_signed', { method: 'hold' });
+      try { if (typeof haptic === 'function') haptic([10, 40, 20]); } catch (_) {}
+      refreshCTA();
+      if (_signing) return;
+      _signing = true;
+      playSignAnimation(function () { _signing = false; _signed = true; advance(); });
+    }
+    btn.addEventListener('pointerdown', start);
+    btn.addEventListener('pointerup', cancel);
+    btn.addEventListener('pointerleave', cancel);
+    btn.addEventListener('pointercancel', cancel);
+  })();
 
   // ── Live username availability ────────────────────────────────────────
   // No backend yet, so we check against:
@@ -5678,51 +5682,21 @@
   // Age — typed number box (13–100). We never silently change what they typed:
   // if they enter under 13 we hold them with a red "you're too young" line and
   // keep Next locked until they raise it to 13+.
+  // Age is one tap now — pick a range, no keyboard. (13+ only, so every chip
+  // is valid; the representative midpoint is stored for the plan maths.)
   (function () {
-    const inp = document.getElementById('ageInput'); if (!inp) return;
-    const status = document.getElementById('ageStatus');
-    const MIN = 13, MAX = 100;
-    state.age = null; // required — user must enter it before Next unlocks
-    function setMsg(text, color) {
-      if (!status) return;
-      status.textContent = text;
-      status.style.color = color;
-    }
-    function apply() {
-      const txt = (inp.value || '').trim();
-      const raw = parseInt(txt, 10);
-      if (txt === '' || isNaN(raw)) {
-        state.age = null;
-        inp.style.borderColor = 'var(--border)'; inp.style.background = '';
-        setMsg('You must be 13 or older to use CORE.', 'var(--muted)');
+    const grid = document.getElementById('ageChips'); if (!grid) return;
+    state.age = null;
+    grid.querySelectorAll('.age-chip').forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        grid.querySelectorAll('.age-chip').forEach(function (c) { c.classList.remove('sel'); });
+        chip.classList.add('sel');
+        state.age = parseInt(chip.getAttribute('data-age'), 10);
+        try { if (typeof haptic === 'function') haptic(10); } catch (e) {}
+        try { if (window.coreSfx) coreSfx('tick'); } catch (e) {}
         refreshCTA();
-        return;
-      }
-      if (raw < MIN) {
-        // Don't auto-correct — tell them they're too young and wait.
-        state.age = null;
-        inp.style.borderColor = 'rgba(248,113,113,0.55)';
-        inp.style.background = 'rgba(248,113,113,0.05)';
-        setMsg("You're too young — you must be 13 or older to use CORE.", '#F87171');
-        refreshCTA();
-        return;
-      }
-      if (raw > MAX) {
-        state.age = null;
-        inp.style.borderColor = 'rgba(248,113,113,0.55)';
-        inp.style.background = 'rgba(248,113,113,0.05)';
-        setMsg('Please enter an age of 100 or under.', '#F87171');
-        refreshCTA();
-        return;
-      }
-      state.age = raw;
-      inp.style.borderColor = 'rgba(10,132,255,0.45)';
-      inp.style.background = 'rgba(10,132,255,0.06)';
-      setMsg('Got it.', '#4FA3FF');
-      refreshCTA();
-    }
-    inp.addEventListener('input', apply);
-    inp.addEventListener('blur', apply);
+      });
+    });
   })();
 
   // ── Water jug interactive (step 9) ────────────────────────────────────
@@ -6613,6 +6587,35 @@ html body[data-font="apple"] #planTitle .g {
 /* Step 6 (why): simpler — drop the sentence-builder box, keep clean chips */
 .step[data-step="14"] .why-quote { display:none !important; }
 .step[data-step="14"] .why-chips { margin-top: 16px !important; }
+
+/* Age tap-chips (no keyboard) */
+.age-chips { display:flex; flex-wrap:wrap; gap:9px; }
+.age-chip { all:unset; box-sizing:border-box; cursor:pointer; padding:11px 16px; border-radius:999px;
+  font-size:14.5px; font-weight:700; color:rgba(235,235,245,0.85); font-variant-numeric:tabular-nums;
+  background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12);
+  transition:transform .14s, background .18s, border-color .18s, color .18s; -webkit-tap-highlight-color:transparent; }
+.age-chip:active { transform:scale(.94); }
+.age-chip.sel { color:#0c0d12; background:linear-gradient(180deg,#ECEFF4,#C4C9D2); border-color:#ECEFF4; box-shadow:0 4px 14px rgba(0,0,0,0.4); }
+
+/* Press-and-hold to commit (replaces the type-PROMISE keyboard step) */
+.hold-commit { all:unset; box-sizing:border-box; position:relative; overflow:hidden; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:9px; width:100%;
+  padding:17px 18px; border-radius:16px; margin-top:4px;
+  background:rgba(255,255,255,0.05); border:1px solid rgba(232,200,120,0.34);
+  color:#E8C878; font-family:'Space Mono',ui-monospace,monospace; font-weight:700;
+  font-size:14px; letter-spacing:0.12em; text-transform:uppercase;
+  -webkit-tap-highlight-color:transparent; transition:transform .12s, border-color .2s; }
+.hold-commit:active { transform:scale(.99); }
+.hold-commit .hc-fill { position:absolute; left:0; top:0; bottom:0; width:0%;
+  background:linear-gradient(90deg, rgba(110,79,31,0.55), rgba(201,162,75,0.5)); z-index:0;
+  transition:width .05s linear; }
+.hold-commit.holding .hc-fill { transition:width 1.15s linear; width:100%; }
+.hold-commit.done { border-color:rgba(52,209,126,0.6); color:#34D17E; }
+.hold-commit .hc-label { position:relative; z-index:1; display:flex; align-items:center; gap:8px; }
+.hold-commit svg { width:15px; height:15px; }
+
+/* contract page: the hold-to-commit button is the CTA, so hide the footer one */
+body.on-promise .footer { display:none !important; }
 
 /* XP bar — a touch larger + crisper sheen */
 .xp-bar { width: 42px !important; height: 6px !important; box-shadow: 0 1px 1px rgba(0,0,0,0.5) inset !important; }
