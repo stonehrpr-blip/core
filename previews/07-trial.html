@@ -580,34 +580,45 @@
   /* glowing nib that rides the stroke as it's written */
   #promiseSigPen { opacity: 0; }
   #promiseSigPen.live { opacity: 1; }
+  /* refined signature baseline — a tapered line that grows from the centre */
   .promise-sign-line {
-    position: absolute; left: 6px; right: 6px; bottom: 5px; height: 1px;
-    background: rgba(255,255,255,0.16);
-    transform: scaleX(0); transform-origin: left center;
+    position: absolute; left: 8%; right: 8%; bottom: 6px; height: 1.5px; border-radius:2px;
+    background: linear-gradient(90deg, transparent, rgba(206,212,222,0.55) 22%, rgba(206,212,222,0.55) 78%, transparent);
+    transform: scaleX(0); transform-origin: center;
     transition: transform .7s cubic-bezier(.22,1,.36,1) .12s;
   }
   .promise-sign.on .promise-sign-line { transform: scaleX(1); }
-  /* red "SEALED" stamp that slams over the signed signature */
+  /* circular wax-style "SEALED" seal that slams over the signed signature */
   .promise-sign.signed { overflow: visible; }
   .promise-stamp {
     position:absolute; left:50%; top:50%;
+    width:96px; height:96px; border-radius:50%;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none; z-index:6; color:#FF4D52;
+    background:radial-gradient(circle at 50% 34%, rgba(255,77,82,0.18), rgba(255,77,82,0.05));
+    border:2.5px solid #FF4D52;
+    box-shadow:0 0 0 1px rgba(255,77,82,0.4), 0 8px 26px rgba(0,0,0,0.45);
+    text-shadow:0 0 9px rgba(255,77,82,0.45);
     transform:translate(-50%,-50%) rotate(-13deg) scale(2.4);
-    opacity:0; pointer-events:none; z-index:6; white-space:nowrap;
-    font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif; font-weight:700;
-    font-size:23px; letter-spacing:0.14em; text-transform:uppercase;
-    color:#E5484D; padding:5px 15px; border:3px solid #E5484D; border-radius:7px;
-    box-shadow:0 0 0 1px rgba(229,72,77,0.22); text-shadow:0 0 1px rgba(229,72,77,0.35);
   }
-  .promise-stamp.on { animation: stampDown .58s cubic-bezier(.3,1.7,.5,1) forwards; }
+  .promise-stamp::before { content:''; position:absolute; inset:5px; border-radius:50%;
+    border:1.5px solid rgba(255,77,82,0.5); pointer-events:none; }
+  .promise-stamp .ps-check svg { width:20px; height:20px; display:block; fill:none; stroke:currentColor;
+    stroke-width:2.8; stroke-linecap:round; stroke-linejoin:round; filter:drop-shadow(0 0 6px rgba(255,77,82,0.5)); }
+  .promise-stamp .ps-word { font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    font-weight:800; font-size:16.5px; letter-spacing:0.16em; line-height:1; margin-top:4px; }
+  .promise-stamp .ps-sub { font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    font-weight:700; font-size:6px; letter-spacing:0.14em; margin-top:3px; opacity:0.85; }
+  .promise-stamp.on { animation: stampDown .6s cubic-bezier(.3,1.7,.5,1) forwards; }
   @keyframes stampDown {
     0%   { opacity:0; transform:translate(-50%,-50%) rotate(-13deg) scale(2.7); filter:blur(2px); }
-    46%  { opacity:1; transform:translate(-50%,-53%) rotate(-13deg) scale(0.82); filter:blur(0);
-           box-shadow:0 0 0 1px rgba(229,72,77,0.5), 0 0 26px rgba(229,72,77,0.7); }
-    60%  { transform:translate(-50%,-47%) rotate(-10.5deg) scale(1.1); }
+    46%  { opacity:1; transform:translate(-50%,-53%) rotate(-13deg) scale(0.84); filter:blur(0);
+           box-shadow:0 0 0 1px rgba(255,77,82,0.6), 0 0 30px rgba(255,77,82,0.7), 0 8px 26px rgba(0,0,0,0.45); }
+    60%  { transform:translate(-50%,-47%) rotate(-10.5deg) scale(1.12); }
     72%  { transform:translate(-50%,-51%) rotate(-15deg) scale(0.96); }
     84%  { transform:translate(-50%,-50%) rotate(-12deg) scale(1.04); }
     100% { opacity:1; transform:translate(-50%,-50%) rotate(-13deg) scale(1);
-           box-shadow:0 0 0 1px rgba(229,72,77,0.22); }
+           box-shadow:0 0 0 1px rgba(255,77,82,0.4), 0 8px 26px rgba(0,0,0,0.45); }
   }
   /* the whole contract card jolts when the stamp lands */
   .promise-card.shake { animation: signShake .5s cubic-bezier(.36,.07,.19,.97) both; }
@@ -1390,14 +1401,19 @@
                     <stop offset="0" stop-color="#ffffff"/><stop offset="0.5" stop-color="#bfe0ff"/><stop offset="1" stop-color="#AEB6C4" stop-opacity="0"/>
                   </radialGradient>
                 </defs>
-                <path id="promiseSigUnder" d="M22 44 C 36 16, 60 16, 59 39 C 58 53, 44 52, 43 40 C 42 27, 70 25, 94 39 C 120 54, 152 27, 182 37 C 208 46, 234 32, 260 41"
-                  stroke="#AEB6C4" stroke-opacity="0.15" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-                <path id="promiseSigPath" d="M22 44 C 36 16, 60 16, 59 39 C 58 53, 44 52, 43 40 C 42 27, 70 25, 94 39 C 120 54, 152 27, 182 37 C 208 46, 234 32, 260 41"
-                  stroke="url(#promiseSigGrad)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                <path id="promiseSigUnder" d="M14 42 C 16 22, 34 17, 39 30 C 43 41, 31 47, 30 37 C 29 24, 51 25, 69 39 C 83 49, 96 30, 112 37 C 127 43, 138 31, 155 37 C 180 45, 208 30, 236 41 C 250 47, 261 43, 270 31"
+                  stroke="#AEB6C4" stroke-opacity="0.14" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path id="promiseSigPath" d="M14 42 C 16 22, 34 17, 39 30 C 43 41, 31 47, 30 37 C 29 24, 51 25, 69 39 C 83 49, 96 30, 112 37 C 127 43, 138 31, 155 37 C 180 45, 208 30, 236 41 C 250 47, 261 43, 270 31"
+                  stroke="url(#promiseSigGrad)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                <path id="promiseSigFlourish" d="M150 52 C 180 58, 220 58, 252 50" stroke="url(#promiseSigGrad)" stroke-opacity="0.6" stroke-width="2" stroke-linecap="round" fill="none"/>
                 <circle id="promiseSigPen" r="4.2" fill="url(#promiseSigNib)"/>
               </svg>
               <div class="promise-sign-line"></div>
-              <div id="promiseStamp" class="promise-stamp" aria-hidden="true"><span>SEALED</span></div>
+              <div id="promiseStamp" class="promise-stamp" aria-hidden="true">
+                <span class="ps-check"><svg viewBox="0 0 24 24"><path d="M5 12.6l4.4 4.4L19 7.2"/></svg></span>
+                <span class="ps-word">SEALED</span>
+                <span class="ps-sub">· CONTRACT BOUND ·</span>
+              </div>
             </div>
             <div id="promiseMeta" style="font-size:11px; color:var(--dim); letter-spacing:0.04em; font-family:ui-monospace,'SF Mono',Menlo,monospace; margin-top:12px; line-height:16px;">// unsigned</div>
           </div>
@@ -1821,23 +1837,23 @@
           <h1 class="title">When it gets hard,<br/><span class="g">what's this really for?</span></h1>
           <p class="copy">Tap what's driving you — your coach brings it back on the brutal days.</p>
           <div class="reason-cloud" id="vapeReason">
-            <button class="reason-orb r-lg" data-reason="health" style="--col:#34D17E">
+            <button class="reason-orb" data-reason="health" style="--col:#34D17E">
               <span class="ro-ico"><svg viewBox="0 0 24 24"><path d="M12 20.3C6.4 16.5 3.5 13.1 3.5 9.2A3.8 3.8 0 0 1 12 7.3 3.8 3.8 0 0 1 20.5 9.2C20.5 13.1 17.6 16.5 12 20.3Z"/><path d="M6.9 11.8h2.1l1.1-2.2 1.8 3.9 1-1.7h2.2"/></svg></span>
               <span class="ro-name">My health</span>
             </button>
-            <button class="reason-orb r-md" data-reason="control" style="--col:#4DA3FF">
+            <button class="reason-orb" data-reason="control" style="--col:#4DA3FF">
               <span class="ro-ico"><svg viewBox="0 0 24 24"><path d="M10.4 13.6 8 16a3.2 3.2 0 0 1-4.5-4.5l2.4-2.4"/><path d="M13.6 10.4 16 8a3.2 3.2 0 0 1 4.5 4.5l-2.4 2.4"/><path d="M9 8.5l1.4 1.4M13.6 13.6 15 15"/></svg></span>
               <span class="ro-name">Control</span>
             </button>
-            <button class="reason-orb r-md" data-reason="someone" style="--col:#FF7A9C">
+            <button class="reason-orb" data-reason="someone" style="--col:#FF7A9C">
               <span class="ro-ico"><svg viewBox="0 0 24 24"><circle cx="8.5" cy="8.5" r="2.6"/><path d="M3.8 19c0-2.9 2-4.6 4.7-4.6S13.2 16.1 13.2 19"/><circle cx="16.4" cy="10" r="2"/><path d="M14 19c0-2.2 1.3-3.6 3-3.7 1.9-.1 3.4 1.4 3.4 3.7"/></svg></span>
               <span class="ro-name">Someone</span>
             </button>
-            <button class="reason-orb r-sm" data-reason="money" style="--col:#FFCC4D">
+            <button class="reason-orb" data-reason="money" style="--col:#FFCC4D">
               <span class="ro-ico"><svg viewBox="0 0 24 24"><rect x="2.5" y="6.5" width="19" height="11" rx="2"/><path d="M12 8.8v6.4"/><path d="M13.7 10.1a1.8 1.8 0 0 0-1.7-1c-1 0-1.9.6-1.9 1.5 0 1.9 3.7 1 3.7 2.9 0 .9-.9 1.5-1.9 1.5a1.9 1.9 0 0 1-1.8-1"/></svg></span>
               <span class="ro-name">Money</span>
             </button>
-            <button class="reason-orb r-sm" data-reason="done" style="--col:#C07AF0">
+            <button class="reason-orb" data-reason="done" style="--col:#C07AF0">
               <span class="ro-ico"><svg viewBox="0 0 24 24"><g transform="translate(0 0.73)"><path d="M12 3.8v7"/><path d="M8.3 6.9a6.5 6.5 0 1 0 7.4 0"/></g></svg></span>
               <span class="ro-name">Just done</span>
             </button>
@@ -2983,12 +2999,30 @@
         <div class="step" data-step="16">
           <div class="kicker">Your plan</div>
           <h1 class="title" id="planTitle">Here's your<br/><span class="g">30-day comeback.</span></h1>
-          <p class="copy" id="planLede">Thirty days on CORE — here's what starts to change.</p>
+          <p class="copy" id="planLede">Thirty days on CORE — here's where you're headed.</p>
 
-          <!-- 30-day recovery trajectory -->
+          <!-- projection hero: today → day-30 life score -->
+          <div class="plan-proj">
+            <div class="pp-ring">
+              <svg viewBox="0 0 120 120" aria-hidden="true">
+                <defs><linearGradient id="planGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#34D17E"/><stop offset="1" stop-color="#86ECB6"/>
+                </linearGradient></defs>
+                <circle class="pp-trk" cx="60" cy="60" r="52"/>
+                <circle class="pp-arc" id="planArc" cx="60" cy="60" r="52"/>
+              </svg>
+              <div class="pp-core"><div class="pp-num" id="planScore">0</div><div class="pp-of">/ 100</div></div>
+            </div>
+            <div class="pp-side">
+              <div class="pp-tag">Projected <b>day-30</b><br/>life score</div>
+              <div class="pp-delta" id="planDelta">↑ on track</div>
+            </div>
+          </div>
+
+          <!-- what starts to change -->
           <div class="plan-card" id="planCurveCard">
             <div class="plan-curve-head">
-              <span>Your day-30 outlook</span><span style="color:var(--accent-hi)">target</span>
+              <span>What starts to change</span><span style="color:#86ECB6">day 30</span>
             </div>
             <div class="plan-bars" id="planBars"><!-- filled by renderPlanScreen --></div>
           </div>
@@ -2998,8 +3032,6 @@
             <div class="plan-why-label">Your reason — your coach holds you to this</div>
             <div class="plan-why-quote" id="planWhyQuote">“”</div>
           </div>
-
-          <div class="plan-cred">Built for people who've tried to quit before — and are done starting over.</div>
         </div>
 
         <!-- STEP 21: Trial pitch + plan choice + Apple Pay connect (final) -->
@@ -4205,6 +4237,29 @@
       { name: 'Energy', from: 32, to: 78 }, { name: 'Focus', from: 28, to: 70 },
       { name: 'Mood',   from: 35, to: 66 }, { name: 'Sleep', from: 40, to: 72 },
     ];
+    // projection ring — today's avg → day-30 avg life score
+    (function () {
+      const avg = function (k) { return Math.round(bars.reduce(function (s, b) { return s + b[k]; }, 0) / bars.length); };
+      const today = avg('from'), day30 = avg('to');
+      const arc = document.getElementById('planArc'), numEl = document.getElementById('planScore'),
+            delta = document.getElementById('planDelta');
+      if (delta) delta.innerHTML = '↑ <b>+' + (day30 - today) + '</b> from ' + today + ' today';
+      const C = 2 * Math.PI * 52;
+      if (arc) { arc.style.strokeDasharray = C; arc.style.strokeDashoffset = C; }
+      setTimeout(function () {
+        if (arc) arc.style.strokeDashoffset = C * (1 - day30 / 100);
+        if (numEl) {
+          var t0 = null;
+          var tick = function (ts) {
+            if (t0 === null) t0 = ts;
+            var k = Math.min(1, (ts - t0) / 1100), e = 1 - Math.pow(1 - k, 3);
+            numEl.textContent = Math.round(day30 * e);
+            if (k < 1) requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        }
+      }, 120);
+    })();
     const wrap = document.getElementById('planBars');
     if (wrap) {
       wrap.innerHTML = bars.map(function (b) {
@@ -4341,6 +4396,7 @@
     const wrap = document.getElementById('promiseSign');
     const path = document.getElementById('promiseSigPath');
     const under = document.getElementById('promiseSigUnder');
+    const flourish = document.getElementById('promiseSigFlourish');
     const pen  = document.getElementById('promiseSigPen');
     const card = document.getElementById('promiseCard');
     const meta = document.getElementById('promiseMeta');
@@ -4359,11 +4415,12 @@
 
     const DRAW = 1000;  // ms for the ink to fully draw
     const len = path.getTotalLength();
-    [path, under].forEach(function (p) {
+    [path, under, flourish].forEach(function (p) {
       if (!p) return;
+      const l = p.getTotalLength ? p.getTotalLength() : len;
       p.style.transition = 'none';
-      p.style.strokeDasharray = len;
-      p.style.strokeDashoffset = len;
+      p.style.strokeDasharray = l;
+      p.style.strokeDashoffset = l;
     });
 
     setTimeout(function () {
@@ -4374,6 +4431,11 @@
       if (under) {
         under.style.transition = 'stroke-dashoffset ' + (DRAW + 120) + 'ms cubic-bezier(.55,.06,.22,1) 40ms';
         under.style.strokeDashoffset = '0';
+      }
+      if (flourish) {
+        // the swash flicks in right after the name finishes
+        flourish.style.transition = 'stroke-dashoffset 420ms cubic-bezier(.5,.05,.2,1) ' + (DRAW * 0.62) + 'ms';
+        flourish.style.strokeDashoffset = '0';
       }
       // Ride the glowing nib along the path, synced to the draw
       if (pen && path.getPointAtLength) {
@@ -4400,6 +4462,7 @@
       path.style.transition = 'stroke .35s ease';
       path.style.stroke = GREEN;
       if (under) under.style.stroke = GREEN;
+      if (flourish) flourish.style.stroke = GREEN;
       if (svg) svg.style.filter = 'drop-shadow(0 1px 9px rgba(52,209,126,0.6))';
       if (card) {
         card.style.borderColor = 'rgba(52,209,126,0.5)';
@@ -5076,7 +5139,7 @@
       handle.style.transition = 'transform .22s cubic-bezier(.22,1.4,.36,1)';
       fill.style.transition = 'width .22s cubic-bezier(.22,1.4,.36,1)';
       setX(maxX());
-      if (label) { label.textContent = 'Committed'; label.style.opacity = '1'; }
+      if (label) { label.textContent = '✓ Committed'; label.style.opacity = '1'; }
       state.promised = true;
       try { track('promise_signed', { method: 'slide' }); } catch (_) {}
       try { if (typeof haptic === 'function') haptic([10, 40, 20]); } catch (_) {}
@@ -6798,26 +6861,47 @@ body.on-autoadvance .stepwrap::after {
    contained signature · snappier press + step-enter motion
    ============================================================ */
 
+/* ── Step 6 · 30-day plan — projected life-score hero ── */
+.plan-proj { display:flex; align-items:center; gap:16px; margin:8px 0 2px; padding:15px 18px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.02));
+  border:1px solid rgba(255,255,255,0.09); border-radius:20px;
+  box-shadow:0 1px 0 rgba(255,255,255,0.06) inset, 0 12px 28px rgba(0,0,0,0.34); }
+.pp-ring { position:relative; width:100px; height:100px; flex:0 0 100px; }
+.pp-ring svg { width:100%; height:100%; transform:rotate(-90deg); display:block; }
+.pp-trk { fill:none; stroke:rgba(255,255,255,0.08); stroke-width:9; }
+.pp-arc { fill:none; stroke:url(#planGrad); stroke-width:9; stroke-linecap:round;
+  filter:drop-shadow(0 0 6px rgba(52,209,126,0.5));
+  transition:stroke-dashoffset 1.1s cubic-bezier(.22,1,.36,1); }
+.pp-core { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.pp-num { font-size:33px; font-weight:850; letter-spacing:-.03em; line-height:1;
+  background:linear-gradient(180deg,#fff,#86ECB6); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+.pp-of { font-size:10px; font-weight:700; color:rgba(235,235,245,0.4); margin-top:2px; }
+.pp-side { flex:1; min-width:0; }
+.pp-tag { font-size:14px; font-weight:650; color:rgba(255,255,255,0.92); line-height:1.25; letter-spacing:-.01em; }
+.pp-tag b { font-weight:800; color:#fff; }
+.pp-delta { margin-top:9px; display:inline-block; font-size:12px; font-weight:750; color:#34D17E;
+  padding:4px 10px; border-radius:9px; background:rgba(52,209,126,0.12); border:1px solid rgba(52,209,126,0.28); }
+.pp-delta b { font-weight:850; }
+.step.on .plan-proj { animation: gItemIn .5s cubic-bezier(.22,1,.36,1) .08s both; }
+
 /* ── Step 4 · "what's this for" — tappable reason bubble-cloud ── */
-.reason-cloud { display:flex; flex-wrap:wrap; justify-content:center; align-content:center; align-items:center; gap:13px 14px; margin-top:18px; flex:1 1 auto; }
+.reason-cloud { display:flex; flex-wrap:wrap; justify-content:center; align-content:center; align-items:center;
+  gap:16px 14px; margin:22px auto 8px; flex:1 1 auto; width:100%; max-width:336px; }
 .reason-orb {
+  /* exactly three to a row → then a centred row of two; always uniform */
+  flex:0 0 calc((100% - 28px) / 3); aspect-ratio:1 / 1; max-width:104px;
   position:relative; border-radius:50%; cursor:pointer; padding:0;
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:7px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
   background:radial-gradient(125% 125% at 50% 26%, rgba(255,255,255,0.085), rgba(255,255,255,0.02));
   border:1px solid rgba(255,255,255,0.11);
   box-shadow:0 1px 0 rgba(255,255,255,0.07) inset, 0 10px 24px rgba(0,0,0,0.34);
   -webkit-tap-highlight-color:transparent;
   transition:transform .26s cubic-bezier(.34,1.56,.64,1), border-color .25s, box-shadow .25s, background .25s;
 }
-.reason-orb.r-lg { width:120px; height:120px; }
-.reason-orb.r-md { width:106px; height:106px; }
-.reason-orb.r-sm { width:96px; height:96px; }
-.reason-orb .ro-ico { width:34px; height:34px; color:var(--col); display:grid; place-items:center; }
-.reason-orb.r-sm .ro-ico { width:30px; height:30px; }
+.reason-orb .ro-ico { width:30px; height:30px; color:var(--col); display:grid; place-items:center; }
 .reason-orb .ro-ico svg { width:100%; height:100%; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
-.reason-orb .ro-name { font-size:13px; font-weight:750; letter-spacing:-.01em; color:#fff;
+.reason-orb .ro-name { font-size:12px; font-weight:750; letter-spacing:-.01em; color:#fff; text-align:center; line-height:1.1;
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif; }
-.reason-orb.r-sm .ro-name { font-size:12px; }
 .reason-orb:active { transform:scale(.93); }
 .reason-orb.sel {
   background:radial-gradient(125% 125% at 50% 26%, color-mix(in srgb, var(--col) 32%, transparent), color-mix(in srgb, var(--col) 8%, transparent));
@@ -6838,12 +6922,17 @@ body.on-autoadvance .stepwrap::after {
   box-shadow:0 0 0 1px rgba(210,215,224,0.12), 0 6px 16px rgba(0,0,0,0.3) !important; height:60px !important; }
 .slide-commit .sc-fill { background:linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0.13)) !important; }
 .slide-commit .sc-handle { background:linear-gradient(180deg,#EEF1F6,#C4C9D2) !important; color:#14161B !important;
-  box-shadow:0 2px 10px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.7) inset !important; }
-.slide-commit .sc-label { color:#D6DBE3 !important; }
-.slide-commit.done { border-color:rgba(52,209,126,0.6) !important;
-  box-shadow:0 0 0 1px rgba(52,209,126,0.3), 0 0 18px rgba(52,209,126,0.18) !important; }
-.slide-commit.done .sc-handle { background:linear-gradient(180deg,#52E57E,#1F9E45) !important; color:#06140B !important; }
-.slide-commit.done .sc-label { color:#34D17E !important; }
+  box-shadow:0 2px 10px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.7) inset !important;
+  transition:transform .22s cubic-bezier(.22,1.4,.36,1), opacity .25s ease, background .2s !important; }
+/* label is truly centred in the track (handle slides over it, fading it out) */
+.slide-commit .sc-label { color:#D6DBE3 !important; padding-left:0 !important; }
+/* committed: fill the whole bar green, fade the handle out, centre "Committed" */
+.slide-commit.done { border-color:rgba(52,209,126,0.55) !important;
+  background:linear-gradient(90deg, rgba(52,209,126,0.16), rgba(52,209,126,0.26)) !important;
+  box-shadow:0 0 0 1px rgba(52,209,126,0.4), 0 0 22px rgba(52,209,126,0.22) !important; }
+.slide-commit.done .sc-fill { opacity:0 !important; }
+.slide-commit.done .sc-handle { opacity:0 !important; transform:translateX(0) scale(.6) !important; }
+.slide-commit.done .sc-label { color:#7CF0AE !important; opacity:1 !important; font-weight:800 !important; }
 
 /* ── Signature: reserve its row so committing never shifts the page ── */
 .promise-sign { height:60px !important; margin-top:16px !important; opacity:0; overflow:hidden;
