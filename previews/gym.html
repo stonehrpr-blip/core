@@ -1244,6 +1244,17 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     s.history.unshift({id:id,ts:Date.now(),muscle:curMuscle,exercises:entries,totalSets:totalSets,xp:xpGain,str:strGain});
     if(s.history.length>60) s.history.length=60;
     save(s);
+    // Bridge into the shared workout log so the Profile → Totals shows real
+    // per-exercise counts (sets × reps), filterable by 1M/6M/1Y.
+    try {
+      var wl = JSON.parse(localStorage.getItem('coreWorkoutLog')||'[]'); if(!Array.isArray(wl)) wl=[];
+      entries.forEach(function(e){
+        var c=(e.sets||0)*(e.reps||0);
+        if(c>0) wl.push({ ts:Date.now(), ex:String(e.name).toLowerCase().replace(/[^a-z]/g,''), name:e.name, count:c, unit:'reps', cat:'Fitness' });
+      });
+      if(wl.length>2000) wl=wl.slice(-2000);
+      localStorage.setItem('coreWorkoutLog', JSON.stringify(wl));
+    } catch(e){}
     addBody(strGain,'workout:'+id); addXp(xpGain,'workout:'+id);
     sfx('xp');
     closeSheet();
