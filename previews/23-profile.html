@@ -1085,16 +1085,15 @@
   </style>
   <script>
   (function(){
-    // Per-category lifetime totals — each item is [name, per-day average, unit].
-    // Real logged workouts (coreWorkoutLog) override the averages when present.
+    // Sample baselines (per-day averages) — shown until real workouts exist.
     var DATA = {
       'Fitness': { col:'#FF7A6E', items:[['Push-ups',42],['Squats',38],['Sit-ups',31],['Pull-ups',9]] },
       'Cardio':  { col:'#34D17E', items:[['Running',1.4,'km'],['Steps',7800],['Cycling',2.6,'km']] },
       'Mind':    { col:'#C08AF5', items:[['Focus sessions',2.1],['Meditation',11,'min']] }
     };
     var RANGE = { '1M':30, '6M':182, '1Y':365 };
-    var log = {};
-    try { log = JSON.parse(localStorage.getItem('coreWorkoutLog')||'{}') || {}; } catch(e){}
+    // Real log: array of { ts, ex, name, count, unit, cat } written by gym.html etc.
+    function realLog(){ try{ var l=JSON.parse(localStorage.getItem('coreWorkoutLog')||'[]'); return Array.isArray(l)?l:[]; }catch(e){ return []; } }
     function fmt(n,unit){
       if(unit==='km'||unit==='min') return (Math.round(n*10)/10).toLocaleString();
       return Math.round(n).toLocaleString();
@@ -1102,16 +1101,37 @@
     function render(range){
       var days = RANGE[range]||30;
       var wrap = document.getElementById('totals'); if(!wrap) return;
-      wrap.innerHTML = Object.keys(DATA).map(function(cat){
-        var g = DATA[cat];
-        var rows = g.items.map(function(it){
-          var name=it[0], perDay=it[1], unit=it[2]||'';
-          // prefer a real logged total scaled to the window, else the average
-          var key = name.toLowerCase().replace(/[^a-z]/g,'');
-          var total = (log[key] && typeof log[key].perDay==='number') ? log[key].perDay*days : perDay*days;
-          return '<div class="tot-row"><span class="tot-name">'+name+'</span><span class="tot-val">'+fmt(total,unit)+(unit?'<span class="u">'+unit+'</span>':'')+'</span></div>';
-        }).join('');
-        return '<div class="tot-group" style="--col:'+g.col+'"><div class="tot-group-head"><span class="dot"></span>'+cat+'</div>'+rows+'</div>';
+      var cutoff = Date.now() - days*86400000;
+      // Sum real logged entries within the window, grouped by category → exercise.
+      var live = {}; realLog().forEach(function(e){
+        if(!e || e.ts < cutoff) return;
+        var cat = e.cat || 'Fitness';
+        (live[cat] = live[cat] || {});
+        var k = e.name || e.ex || 'Workout';
+        live[cat][k] = (live[cat][k] || {count:0, unit:e.unit||''});
+        live[cat][k].count += (e.count||0);
+      });
+      var COLS = { Fitness:'#FF7A6E', Cardio:'#34D17E', Mind:'#C08AF5' };
+      // Build the list of categories: real ones (with logged data) + sample fallbacks.
+      var cats = Object.keys(DATA);
+      Object.keys(live).forEach(function(c){ if(cats.indexOf(c)<0) cats.push(c); });
+      wrap.innerHTML = cats.map(function(cat){
+        var col = COLS[cat] || (DATA[cat]&&DATA[cat].col) || '#9AA1B7';
+        var rows = '';
+        if(live[cat]){
+          // real logged exercises, biggest first
+          rows = Object.keys(live[cat]).sort(function(a,b){return live[cat][b].count-live[cat][a].count;}).map(function(name){
+            var it=live[cat][name];
+            return '<div class="tot-row"><span class="tot-name">'+name+'</span><span class="tot-val">'+fmt(it.count,it.unit)+(it.unit?'<span class="u">'+it.unit+'</span>':'')+'</span></div>';
+          }).join('');
+        } else if(DATA[cat]) {
+          rows = DATA[cat].items.map(function(it){
+            var name=it[0], perDay=it[1], unit=it[2]||'';
+            return '<div class="tot-row"><span class="tot-name">'+name+'</span><span class="tot-val">'+fmt(perDay*days,unit)+(unit?'<span class="u">'+unit+'</span>':'')+'</span></div>';
+          }).join('');
+        }
+        if(!rows) return '';
+        return '<div class="tot-group" style="--col:'+col+'"><div class="tot-group-head"><span class="dot"></span>'+cat+'</div>'+rows+'</div>';
       }).join('');
     }
     var btns = document.querySelectorAll('#totRange button');
