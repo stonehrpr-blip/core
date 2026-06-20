@@ -467,6 +467,15 @@
         <div class="sec"><h2>Core Stats</h2><span class="meta" id="cstatMeta"></span></div>
         <div class="corestats" id="corestats"></div>
 
+        <div class="sec"><h2>Totals</h2>
+          <div class="tot-range" id="totRange" role="tablist" aria-label="Time range">
+            <button type="button" data-r="1M" class="on">1M</button>
+            <button type="button" data-r="6M">6M</button>
+            <button type="button" data-r="1Y">1Y</button>
+          </div>
+        </div>
+        <div class="totals" id="totals"></div>
+
         <div class="sec"><h2>Scans</h2><a class="meta" id="phqMore" href="coach.html">New scan <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><path d="M9 6l6 6-6 6"/></svg></a></div>
         <div id="phqCard"></div>
 
@@ -1048,5 +1057,64 @@
   <script src="_lib/core-pagefx.js"></script>
   <script src="_lib/core-help.js"></script>
   <script>if(window.coreHelp)window.coreHelp.attach("helpBtn",{"title":"Profile","bullets":["Your profile shows your rank, CORE Power and overall progress.","Track your stats, items and milestones in one place.","Share your profile to show friends your journey."]});</script>
+  <style id="totals-style">
+    @font-face{font-family:'Space Grotesk';font-style:normal;font-weight:400 700;font-display:swap;src:url(assets/fonts/grotesk-var.woff2) format('woff2');}
+    @font-face{font-family:'Space Mono';font-style:normal;font-weight:700;font-display:swap;src:url(assets/fonts/mono-700.woff2) format('woff2');}
+    .tot-range{display:inline-flex;gap:2px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:999px;padding:2px;}
+    .tot-range button{all:unset;cursor:pointer;padding:4px 12px;border-radius:999px;font-family:'Space Mono',ui-monospace,monospace;font-size:11px;font-weight:700;letter-spacing:0.06em;color:rgba(235,235,245,0.5);transition:.15s;-webkit-tap-highlight-color:transparent;}
+    .tot-range button.on{background:rgba(232,200,120,0.16);color:#E8C878;box-shadow:0 0 0 1px rgba(232,200,120,0.25) inset;}
+    .totals{display:flex;flex-direction:column;gap:13px;margin-top:2px;}
+    .tot-group{background:linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.018));border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:13px 16px 4px;box-shadow:0 1px 0 rgba(255,255,255,0.05) inset,0 8px 22px rgba(0,0,0,0.3);}
+    .tot-group-head{display:flex;align-items:center;gap:8px;font-family:'Space Mono',ui-monospace,monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;font-weight:700;color:var(--col,#9AA1B7);margin-bottom:4px;}
+    .tot-group-head .dot{width:7px;height:7px;border-radius:50%;background:var(--col,#9AA1B7);box-shadow:0 0 8px var(--col,#9AA1B7);}
+    .tot-row{display:flex;align-items:baseline;justify-content:space-between;padding:9px 0;}
+    .tot-row + .tot-row{border-top:1px solid rgba(255,255,255,0.055);}
+    .tot-name{font-size:14px;color:#fff;font-weight:600;letter-spacing:-0.2px;}
+    .tot-val{font-family:'Space Grotesk',-apple-system,sans-serif;font-size:18px;font-weight:700;color:#fff;letter-spacing:-0.4px;font-variant-numeric:tabular-nums;}
+    .tot-val .u{font-size:12px;color:rgba(235,235,245,0.55);font-weight:500;margin-left:3px;}
+  </style>
+  <script>
+  (function(){
+    // Per-category lifetime totals — each item is [name, per-day average, unit].
+    // Real logged workouts (coreWorkoutLog) override the averages when present.
+    var DATA = {
+      'Fitness': { col:'#FF7A6E', items:[['Push-ups',42],['Squats',38],['Sit-ups',31],['Pull-ups',9]] },
+      'Cardio':  { col:'#34D17E', items:[['Running',1.4,'km'],['Steps',7800],['Cycling',2.6,'km']] },
+      'Mind':    { col:'#C08AF5', items:[['Focus sessions',2.1],['Meditation',11,'min']] }
+    };
+    var RANGE = { '1M':30, '6M':182, '1Y':365 };
+    var log = {};
+    try { log = JSON.parse(localStorage.getItem('coreWorkoutLog')||'{}') || {}; } catch(e){}
+    function fmt(n,unit){
+      if(unit==='km'||unit==='min') return (Math.round(n*10)/10).toLocaleString();
+      return Math.round(n).toLocaleString();
+    }
+    function render(range){
+      var days = RANGE[range]||30;
+      var wrap = document.getElementById('totals'); if(!wrap) return;
+      wrap.innerHTML = Object.keys(DATA).map(function(cat){
+        var g = DATA[cat];
+        var rows = g.items.map(function(it){
+          var name=it[0], perDay=it[1], unit=it[2]||'';
+          // prefer a real logged total scaled to the window, else the average
+          var key = name.toLowerCase().replace(/[^a-z]/g,'');
+          var total = (log[key] && typeof log[key].perDay==='number') ? log[key].perDay*days : perDay*days;
+          return '<div class="tot-row"><span class="tot-name">'+name+'</span><span class="tot-val">'+fmt(total,unit)+(unit?'<span class="u">'+unit+'</span>':'')+'</span></div>';
+        }).join('');
+        return '<div class="tot-group" style="--col:'+g.col+'"><div class="tot-group-head"><span class="dot"></span>'+cat+'</div>'+rows+'</div>';
+      }).join('');
+    }
+    var btns = document.querySelectorAll('#totRange button');
+    btns.forEach(function(b){
+      b.addEventListener('click', function(){
+        btns.forEach(function(x){ x.classList.remove('on'); });
+        b.classList.add('on');
+        try{ if(navigator.vibrate) navigator.vibrate(8); }catch(e){}
+        render(b.getAttribute('data-r'));
+      });
+    });
+    render('1M');
+  })();
+  </script>
 </body>
 </html>
