@@ -271,7 +271,9 @@
     try { return localStorage.getItem('corePendingEmail') || ''; } catch(e) { return ''; }
   })();
   if (!pending) {
-    window.location.replace('05-sign-in-email.html');
+    // Preserve the ?next= handoff (e.g. ?next=10-subscribe.html) so reloading
+    // this page mid-flow still lands the user where they were headed.
+    window.location.replace('05-sign-in-email.html' + (location.search || ''));
   } else {
     document.getElementById('targetEmail').textContent = pending;
   }
