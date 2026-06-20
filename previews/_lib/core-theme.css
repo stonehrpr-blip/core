@@ -147,13 +147,30 @@ code, pre, kbd, samp,
   font-family: ui-monospace, "SF Mono", Menlo, Monaco, monospace !important;
 }
 
-/* Apple system font opt-out — pages add <body data-font="apple"> to use
-   the OS font stack (SF Pro on Apple devices) instead of Chakra Petch.
-   Higher specificity than the global rule above, so it wins. */
+/* ── Type system ─────────────────────────────────────────────────────────
+   Body text → OS system sans. Headings → Space Grotesk (display). Eyebrow
+   labels → Space Mono. Self-hosted so it loads everywhere with no FOUT. */
+@font-face{font-family:'Space Grotesk';font-style:normal;font-weight:400 700;font-display:swap;src:url(../assets/fonts/grotesk-var.woff2) format('woff2');}
+@font-face{font-family:'Space Mono';font-style:normal;font-weight:400;font-display:swap;src:url(../assets/fonts/mono-400.woff2) format('woff2');}
+@font-face{font-family:'Space Mono';font-style:normal;font-weight:700;font-display:swap;src:url(../assets/fonts/mono-700.woff2) format('woff2');}
+
+/* Apple system font opt-out — pages add <body data-font="apple"> to use the OS
+   font stack for BODY text. Headings + eyebrow labels are excluded so their
+   display/mono faces win. */
 body[data-font="apple"],
-body[data-font="apple"] :not(code):not(pre):not(kbd):not(samp):not([class*="mono"]) {
+body[data-font="apple"] :not(code):not(pre):not(kbd):not(samp):not([class*="mono"]):not(h1):not(h2):not(h3):not(.title):not(.pg-headline):not(.h1):not(.kicker):not(.htag):not(.eyebrow):not(.commit-label) {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
                "Helvetica Neue", Helvetica, Arial, "Segoe UI", Roboto, sans-serif !important;
+}
+/* Display headings */
+body[data-font="apple"] h1, body[data-font="apple"] h2, body[data-font="apple"] h3,
+body[data-font="apple"] .title, body[data-font="apple"] .pg-headline, body[data-font="apple"] .h1 {
+  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif !important;
+  letter-spacing: -0.5px !important;
+}
+/* Eyebrow / label text */
+body[data-font="apple"] .kicker, body[data-font="apple"] .htag, body[data-font="apple"] .eyebrow {
+  font-family: 'Space Mono', ui-monospace, "SF Mono", Menlo, monospace !important;
 }
 
 /* ── Global .back button base — guarantees every back button across
