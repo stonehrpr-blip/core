@@ -1338,9 +1338,9 @@
         <button class="back" type="button" onclick="back()" aria-label="Back">
           <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
-        <div class="skip" onclick="exitConfirm()" aria-label="Exit">
+        <button type="button" class="skip" onclick="exitConfirm()" aria-label="Exit onboarding">
           <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
-        </div>
+        </button>
       </div>
 
       <div class="progress" id="progress" aria-label="Progress">
@@ -1385,7 +1385,7 @@
             <div style="font-size:11px; letter-spacing:0.22em; text-transform:uppercase; color:var(--muted); font-weight:700; font-family:ui-monospace,'SF Mono',Menlo,monospace;">// Contract with myself</div>
             <div style="font-size:14px; color:rgba(255,255,255,0.86); line-height:21px; margin-top:10px; letter-spacing:-0.1px;">I'm doing this for me. I'll be honest when I slip, and come back when I drift.</div>
             <div style="margin-top:18px;">
-              <div id="slideCommit" class="slide-commit" role="slider" aria-label="Slide to commit" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <div id="slideCommit" class="slide-commit" role="slider" tabindex="0" aria-label="Slide to commit, or press Enter to commit" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                 <span class="sc-fill" id="scFill"></span>
                 <span class="sc-label" id="scLabel">Slide to commit</span>
                 <span class="sc-handle" id="scHandle">
@@ -3723,11 +3723,11 @@
     <div class="sheet-back" id="exitBack" onclick="exitDismiss()"></div>
     <div class="sheet" id="exitSheet" role="dialog">
       <div class="sheet-grab"></div>
-      <h2 class="sheet-title">Are you sure?</h2>
-      <p class="sheet-copy">If you go now, you'll lose your progress. But before you leave — we put together <strong style="color:#fff;">a gift</strong> for you on the next page.</p>
+      <h2 class="sheet-title">Leave already?</h2>
+      <p class="sheet-copy">You're seconds from your plan. Leave now and you'll <strong style="color:#fff;">lose your progress</strong>.</p>
       <div class="sheet-btns">
-        <button class="sheet-stay" onclick="exitDismiss()">Keep going · my 7 days free</button>
-        <button class="sheet-leave" onclick="exitNow()">Show me the gift <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px;display:inline-block;"><path d="M9 6l6 6-6 6"/></svg></button>
+        <button class="sheet-stay" onclick="exitDismiss()">Keep going</button>
+        <button class="sheet-leave" onclick="exitNow()">Leave anyway</button>
       </div>
     </div>
 
@@ -3866,7 +3866,8 @@
   function track(event, props) {
     try {
       const payload = Object.assign({ ts: Date.now(), surface: 'trial' }, props || {});
-      console.log('[analytics]', event, payload);
+      // dev-only console breadcrumb — keep production consoles clean
+      if (location.protocol === 'file:' || /localhost|127\.0\.0\.1/.test(location.hostname)) console.log('[analytics]', event, payload);
       if (typeof window.coreTrack === 'function') window.coreTrack(event, payload);
     } catch(e){}
   }
@@ -4173,8 +4174,9 @@
     } else if (s === 15) {
       setCTA('Next', !state.successVision, !state.successVision ? 'Pick a win shape' : '');
     } else if (s === 16) {
-      // Personalized payoff screen — passive, always advanceable
-      setCTA('See your offer', false, 'No charge yet — this is your free-trial plan');
+      // Personalized payoff screen — passive, always advanceable. Next is the
+      // contract, so the CTA leads into committing (not an "offer").
+      setCTA('Continue', false, 'One last step.');
     } else if (s === 17) {
       // Plan-select only — payment is collected once, at the final portal gate.
       setCTA('Continue', false, '$0 today · you\'ll confirm payment on the last step');
@@ -5031,10 +5033,11 @@
   window.connectAccount = connectAccount;
   function back() {
     const i = ORDER.indexOf(state.step);
-    // At the first position (PROMISE) "back" returns to the launch index.
+    // At the first step, "back" would leave onboarding — confirm first so a
+    // mis-tap doesn't throw away their progress (shows the exit sheet).
     if (i <= 0) {
       if (window.coreTrack) coreTrack('trial_back_to_launch', { step: 0 });
-      window.location.href = '01-index.html';
+      exitConfirm();
       return;
     }
     _swipeDir = -1;   // flick the card back off to the left
@@ -5045,11 +5048,13 @@
   window.exitDismiss = exitDismiss;
   window.exitNow = exitNow;
   function exitConfirm() {
-    // X on every trial page -> the special-offer page (retention). Remember the
-    // step so "claim" can drop them right back where they left off.
+    // X on every trial page -> a confirm sheet so progress isn't lost on a
+    // mis-tap. Remember the step so they can resume where they left off.
     track('exit_intent_shown', { step: state.step });
     try { localStorage.setItem('coreTrialStep', String(state.step)); } catch (e) {}
-    window.location.href = '01-index.html';
+    var sheet = document.getElementById('exitSheet'), back = document.getElementById('exitBack');
+    if (sheet && back) { back.classList.add('on'); sheet.classList.add('on'); }
+    else window.location.href = '01-index.html';
   }
   function exitDismiss() {
     track('exit_intent_dismissed', { step: state.step });
@@ -5162,6 +5167,13 @@
       document.addEventListener('touchmove', move, { passive: false });
       document.addEventListener('touchend', up);
     }
+    // Keyboard fallback so the contract is signable without a drag (a11y):
+    // Enter/Space/→/End commits; ← resets.
+    slider.addEventListener('keydown', function (e) {
+      if (fired || _signing) return;
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowRight' || e.key === 'End') { e.preventDefault(); complete(); }
+      else if (e.key === 'ArrowLeft' || e.key === 'Home') { e.preventDefault(); setX(0); }
+    });
     // recompute the rest position if the layout changes
     window.addEventListener('resize', function () { if (!fired) setX(x); });
   })();
@@ -5257,9 +5269,9 @@
       });
       state.name = '';
     } else {
-      nameStatus.innerHTML = '<span style="color:#4FA3FF;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;vertical-align:-2px;display:inline-block;"><path d="M5 12l4 4 10-11"/></svg> Available — looks good.</span>';
-      nameField.style.borderColor = 'rgba(10,132,255,0.45)';
-      nameField.style.background = 'rgba(10,132,255,0.06)';
+      nameStatus.innerHTML = '<span style="color:#34D17E;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;vertical-align:-2px;display:inline-block;"><path d="M5 12l4 4 10-11"/></svg> Available — looks good.</span>';
+      nameField.style.borderColor = 'rgba(52,209,126,0.45)';
+      nameField.style.background = 'rgba(52,209,126,0.06)';
       nameSugWrap.style.display = 'none';
       state.name = v;
     }
@@ -6083,8 +6095,7 @@
     minusBtn.addEventListener('click', (e) => { e.stopPropagation(); sub(); });
     render(false);
   })();
-  wireSingleSelect('#pastAttempts',  'attempts', 'pastAttempts');
-  wireSingleSelect('#whoKnows',      'knows',    'whoKnows');
+  // (#pastAttempts / #whoKnows pickers were removed from the lean flow — no markup, so no wiring.)
   wireSingleSelect('#successVision', 'vision',   'successVision');
   wireSingleSelect('#identityGrid',  'identity', 'identity');
 
@@ -6119,6 +6130,15 @@
     window.addEventListener('pointermove', (e) => { if (dragging) setLevel(levelFromX(e.clientX)); });
     window.addEventListener('pointerup', () => { dragging = false; });
     window.addEventListener('pointercancel', () => { dragging = false; });
+    // Per-bar click + keyboard so the meter is operable without a drag (a11y).
+    bars.forEach(function (bar) {
+      bar.addEventListener('click', function () { setLevel(+bar.dataset.lvl); });
+      bar.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setLevel(+bar.dataset.lvl); }
+        else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { e.preventDefault(); setLevel(Math.min(5, (state.commitment || 0) + 1)); }
+        else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { e.preventDefault(); setLevel(Math.max(1, (state.commitment || 1) - 1)); }
+      });
+    });
   })();
 
   // ── Multi-select for triggers (step 16) ───────────────────────────────
@@ -6555,19 +6575,6 @@
   box-shadow: 0 0 0 4px rgba(214,219,226,0.12) !important;
 }
 
-/* Commitment meter — a bright monochrome gauge that climbs from luminous
-   silver to brilliant chrome, each level glowing a touch more. */
-.cm-bar[data-lvl="1"].on > span { background:linear-gradient(180deg,#B6BBC4,#7E828C) !important;
-  box-shadow:0 6px 16px rgba(0,0,0,0.30), 0 0 12px rgba(214,219,226,0.18), 0 1px 0 rgba(255,255,255,0.45) inset !important; }
-.cm-bar[data-lvl="2"].on > span { background:linear-gradient(180deg,#C8CCD3,#8C909A) !important;
-  box-shadow:0 6px 16px rgba(0,0,0,0.30), 0 0 14px rgba(214,219,226,0.22), 0 1px 0 rgba(255,255,255,0.5) inset !important; }
-.cm-bar[data-lvl="3"].on > span { background:linear-gradient(180deg,#D8DCE2,#9CA0AA) !important;
-  box-shadow:0 6px 18px rgba(0,0,0,0.26), 0 0 16px rgba(220,225,233,0.28), 0 1px 0 rgba(255,255,255,0.55) inset !important; }
-.cm-bar[data-lvl="4"].on > span { background:linear-gradient(180deg,#ECEEF2,#AEB3BD) !important;
-  box-shadow:0 6px 22px rgba(220,225,233,0.30), 0 0 20px rgba(230,234,240,0.34), 0 1px 0 rgba(255,255,255,0.65) inset !important; }
-.cm-bar[data-lvl="5"].on > span { background:linear-gradient(180deg,#FFFFFF,#C4C9D2) !important;
-  box-shadow:0 8px 28px rgba(235,238,243,0.45), 0 0 26px rgba(235,238,243,0.5), 0 1px 0 rgba(255,255,255,0.8) inset !important; }
-
 /* ── Performance — stop background work on screens you can't see ──────────
    Every inactive step (the water jug, vape stages, shimmer, caustic, device
    float…) was still running its infinite animations off-screen. Pause them so
@@ -6669,7 +6676,7 @@ body.on-portal .deck-orb, body:not(.deck) .deck-orb { opacity:0; }
 .cm-bar[data-lvl="2"].on > span { background:linear-gradient(180deg,#FFB454,#E07A18) !important; box-shadow:0 6px 18px rgba(255,159,40,0.40), 0 1px 0 rgba(255,255,255,0.25) inset !important; }
 .cm-bar[data-lvl="3"].on > span { background:linear-gradient(180deg,#FFE04A,#E0AC10) !important; box-shadow:0 6px 20px rgba(255,214,40,0.42), 0 1px 0 rgba(255,255,255,0.28) inset !important; }
 .cm-bar[data-lvl="4"].on > span { background:linear-gradient(180deg,#52E57E,#1F9E45) !important; box-shadow:0 6px 22px rgba(52,209,94,0.46), 0 1px 0 rgba(255,255,255,0.28) inset !important; }
-.cm-bar[data-lvl="5"].on > span { background:linear-gradient(180deg,#5AB8FF,#0A6BD8) !important; box-shadow:0 8px 26px rgba(47,143,255,0.5), 0 0 18px rgba(90,170,255,0.4), 0 1px 0 rgba(255,255,255,0.3) inset !important; }
+.cm-bar[data-lvl="5"].on > span { background:linear-gradient(180deg,#34E1C0,#11A488) !important; box-shadow:0 8px 26px rgba(34,211,180,0.5), 0 0 18px rgba(52,225,192,0.42), 0 1px 0 rgba(255,255,255,0.32) inset !important; }
 
 /* ═══════════ XP SYSTEM — dark, premium antique bronze / gold ═══════════
    Deep obsidian-bronze pill, molten-gold bar, champagne counter. Reads
