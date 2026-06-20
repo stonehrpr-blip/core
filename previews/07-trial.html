@@ -2995,7 +2995,7 @@
         <div class="step" data-step="16">
           <div class="kicker">Your plan</div>
           <h1 class="title" id="planTitle">Here's your<br/><span class="g">30-day comeback.</span></h1>
-          <p class="copy" id="planLede">Thirty days on CORE — here's where you're headed.</p>
+          <p class="copy" id="planLede">Here's where you're headed.</p>
 
           <!-- projection hero: today → day-30 life score -->
           <div class="plan-proj">
@@ -3018,7 +3018,7 @@
           <!-- what starts to change -->
           <div class="plan-card" id="planCurveCard">
             <div class="plan-curve-head">
-              <span>What starts to change</span><span style="color:#86ECB6">day 30</span>
+              <span>What starts to change</span><span style="color:#3CFF9E">day 30</span>
             </div>
             <div class="plan-bars" id="planBars"><!-- filled by renderPlanScreen --></div>
           </div>
@@ -6698,10 +6698,16 @@ body.on-portal .deck-orb, body:not(.deck) .deck-orb { opacity:0; }
 .mini-prog-fill { background: linear-gradient(90deg, #8A6A2F, #E8C878) !important; box-shadow: 0 0 8px rgba(201,162,75,0.5) !important; }
 
 /* ═══════════ ANIMATION UPGRADES ═══════════ */
-/* cinematic page transition — gentle rise + micro-scale, easeOutExpo */
-@keyframes cardIn { from { opacity:0; transform: translate3d(0,16px,0) scale(.985); } to { opacity:1; transform:none; } }
-body.deck .step.on.cardin { animation: cardIn .52s cubic-bezier(.16,1,.3,1) both !important; }
-.step.flick { transition: opacity .3s ease, transform .44s cubic-bezier(.16,1,.3,1) !important; }
+/* cinematic page transition — springy rise + micro-scale, with a soft blur clear */
+@keyframes cardIn {
+  0%   { opacity:0; transform: translate3d(0,22px,0) scale(.972); filter:blur(2px); }
+  55%  { opacity:1; filter:blur(0); }
+  100% { opacity:1; transform:none; filter:blur(0); }
+}
+body.deck .step.on.cardin { animation: cardIn .56s cubic-bezier(.16,1,.3,1) both !important; }
+.step.flick { transition: opacity .3s ease, transform .46s cubic-bezier(.16,1,.3,1) !important; }
+.step.flick-right { transform: translate3d(-9%,0,0) !important; }
+.step.flick-left  { transform: translate3d(9%,0,0) !important; }
 
 /* micro-interactions — sleek press scale + soft dark glow on cards & buttons */
 .cta, .tone-row, .habit-card, .profile-card, .pick-card, .why-chip, .cm-bar, .mini-back, .skip {
@@ -6950,9 +6956,18 @@ body.on-autoadvance .stepwrap::after {
 
 /* ── Snappier, tactile press feedback on every option ── */
 .cta:active, .tone-row:active, .habit-card:active, .profile-card:active,
-.pick-card:active, .age-chip:active, .why-chip:active, .range-btn:active, .skip:active {
+.pick-card:active, .age-chip:active, .why-chip:active, .range-btn:active, .skip:active,
+.cm-bar:active, .plan-opt:active, .back:active, .mini-back:active {
   transform:scale(.955) !important;
-  transition:transform .08s cubic-bezier(.3,.7,.4,1) !important;
+  filter:brightness(1.07);
+  transition:transform .09s cubic-bezier(.3,.7,.4,1), filter .09s !important;
+}
+.back:active, .mini-back:active { transform:scale(.9) !important; }
+/* reason orbs can't scale (their transform places them on the wheel), so they
+   press with a colour glow instead */
+.reason-orb:active {
+  border-color:var(--col) !important;
+  box-shadow:0 0 0 1px var(--col) inset, 0 0 22px color-mix(in srgb, var(--col) 50%, transparent), 0 10px 24px rgba(0,0,0,0.34) !important;
 }
 
 /* ── Richer step-enter: stagger the body content in (NOT the reason cloud —
