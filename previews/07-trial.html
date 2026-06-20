@@ -5010,8 +5010,10 @@
   // wire skip-X to exit-intent
   document.querySelector('.skip').onclick = exitConfirm;
 
-  // Slide-to-commit (no keyboard). Drag the gold handle to the end to lock the
+  // Slide-to-commit (no keyboard). Drag the handle toward the end to lock the
   // promise, then it plays the sign → green → red-stamp sequence and advances.
+  // Forgiving: commits once you're ~85% across (mid-drag) or release past ~55%,
+  // and you can grab anywhere on the track — so it never feels "stuck".
   (function () {
     const slider = document.getElementById('slideCommit');
     if (!slider) return;
@@ -5019,47 +5021,60 @@
     const fill   = document.getElementById('scFill');
     const label  = document.getElementById('scLabel');
     const meta   = document.getElementById('promiseMeta');
-    let dragging = false, fired = false, startX = 0, x = 0, lastBuzz = 0;
+    let dragging = false, fired = false, grabOffset = 0, x = 0, lastBuzz = 0;
     const HW = 50, PAD = 4;
-    function maxX() { return Math.max(0, slider.clientWidth - HW - PAD * 2); }
+    function maxX() { return Math.max(1, slider.clientWidth - HW - PAD * 2); }
+    function frac() { return x / maxX(); }
+    function pointX(e) {
+      if (e.touches && e.touches[0]) return e.touches[0].clientX;
+      if (e.changedTouches && e.changedTouches[0]) return e.changedTouches[0].clientX;
+      return e.clientX;
+    }
     function setX(px) {
       x = Math.max(0, Math.min(maxX(), px));
       handle.style.transform = 'translateX(' + x + 'px)';
       fill.style.width = (x + HW) + 'px';
-      const frac = maxX() ? x / maxX() : 0;
-      if (label) label.style.opacity = String(Math.max(0, 1 - frac * 1.25));
-      slider.setAttribute('aria-valuenow', Math.round(frac * 100));
+      if (label) label.style.opacity = String(Math.max(0, 1 - frac() * 1.25));
+      slider.setAttribute('aria-valuenow', Math.round(frac() * 100));
     }
     function down(e) {
       if (fired || _signing) return;
-      e.preventDefault();
+      const px = pointX(e);
+      const rect = slider.getBoundingClientRect();
+      const handleLeft = rect.left + PAD + x;
+      // grab the handle if you're on it; otherwise jump the handle under the finger
+      grabOffset = (px >= handleLeft && px <= handleLeft + HW) ? (px - handleLeft) : (HW / 2);
       dragging = true; slider.classList.add('dragging');
-      startX = e.clientX - x;
       handle.style.transition = 'none'; fill.style.transition = 'none';
-      if (meta) { meta.textContent = '// committing…'; meta.style.color = '#E8C878'; }
-      try { handle.setPointerCapture && handle.setPointerCapture(e.pointerId); } catch (_) {}
+      if (meta) { meta.textContent = '// committing…'; meta.style.color = '#D6DBE3'; }
+      setX(px - rect.left - PAD - grabOffset);
       try { if (typeof haptic === 'function') haptic(8); } catch (_) {}
+      if (e.cancelable) e.preventDefault();
     }
     function move(e) {
       if (!dragging || fired) return;
-      e.preventDefault();
-      setX(e.clientX - startX);
+      const rect = slider.getBoundingClientRect();
+      setX(pointX(e) - rect.left - PAD - grabOffset);
       const now = performance.now();
       if (now - lastBuzz > 55) { lastBuzz = now; try { if (typeof haptic === 'function') haptic(3); } catch (_) {} }
-      if (x >= maxX() - 2) complete();
+      if (frac() >= 0.85) complete();      // forgiving: don't need the exact end
+      if (e.cancelable) e.preventDefault();
     }
     function up() {
       if (fired) { dragging = false; return; }
+      if (!dragging) return;
       dragging = false; slider.classList.remove('dragging');
       handle.style.transition = 'transform .28s cubic-bezier(.22,1,.36,1)';
       fill.style.transition = 'width .28s cubic-bezier(.22,1,.36,1)';
-      if (x < maxX() - 2) { setX(0); if (label) label.style.opacity = '1'; if (meta) { meta.textContent = '// unsigned'; meta.style.color = ''; } }
+      if (frac() >= 0.55) { complete(); return; }   // let go past halfway → still commits
+      setX(0); if (label) label.style.opacity = '1'; if (meta) { meta.textContent = '// unsigned'; meta.style.color = ''; }
     }
     function complete() {
       if (fired) return;
       fired = true; dragging = false;
       slider.classList.remove('dragging'); slider.classList.add('done');
-      handle.style.transition = 'transform .18s cubic-bezier(.22,1,.36,1)';
+      handle.style.transition = 'transform .22s cubic-bezier(.22,1.4,.36,1)';
+      fill.style.transition = 'width .22s cubic-bezier(.22,1.4,.36,1)';
       setX(maxX());
       if (label) { label.textContent = 'Committed'; label.style.opacity = '1'; }
       state.promised = true;
@@ -5070,10 +5085,22 @@
       _signing = true;
       playSignAnimation(function () { _signing = false; _signed = true; advance(); });
     }
-    handle.addEventListener('pointerdown', down);
-    window.addEventListener('pointermove', move, { passive: false });
-    window.addEventListener('pointerup', up);
-    window.addEventListener('pointercancel', up);
+    // Robust input: pointer events when available, else mouse + touch. Bind the
+    // whole slider for the press, and the document for move/up (no pointer-
+    // capture, which was the flaky bit) so the drag can never be dropped.
+    if (window.PointerEvent) {
+      slider.addEventListener('pointerdown', down);
+      document.addEventListener('pointermove', move, { passive: false });
+      document.addEventListener('pointerup', up);
+      document.addEventListener('pointercancel', up);
+    } else {
+      slider.addEventListener('mousedown', down);
+      document.addEventListener('mousemove', move);
+      document.addEventListener('mouseup', up);
+      slider.addEventListener('touchstart', down, { passive: false });
+      document.addEventListener('touchmove', move, { passive: false });
+      document.addEventListener('touchend', up);
+    }
     // recompute the rest position if the layout changes
     window.addEventListener('resize', function () { if (!fired) setX(x); });
   })();
@@ -6199,6 +6226,14 @@
 
   renderProgress();
   refreshCTA();
+  // setStep isn't called for the first on-screen step, so give it the same
+  // dynamic "Step X of N · chapter" kicker the rest of the flow uses.
+  (function () {
+    const first = document.querySelector('.step.on');
+    const k = first && first.querySelector('.kicker');
+    if (k) k.textContent = 'Step ' + Math.min(curPos() + 1, NUM_QUESTIONS)
+      + ' of ' + NUM_QUESTIONS + ' · ' + CHAPTERS[chapterIndexFor()].label;
+  })();
   track('step_view', { step: 0, entry: true });
 
   // Deep-link: ?step=N jumps straight to that step.
