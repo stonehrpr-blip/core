@@ -573,7 +573,7 @@
   }
   .promise-sign.on { height: 66px; opacity: 1; margin-top: 14px; }
   .promise-sign-svg { width: 100%; height: 60px; display: block;
-    filter: drop-shadow(0 1px 7px rgba(91,177,255,0.55)); }
+    filter: drop-shadow(0 1px 7px rgba(206,212,222,0.4)); }
   /* faint ink "bleed" under the live stroke */
   #promiseSigUnder { stroke-dasharray: 1; stroke-dashoffset: 1; }
   #promiseSigPath { stroke-dasharray: 1; stroke-dashoffset: 1; }
@@ -587,6 +587,24 @@
     transition: transform .7s cubic-bezier(.22,1,.36,1) .12s;
   }
   .promise-sign.on .promise-sign-line { transform: scaleX(1); }
+  /* red "SEALED" stamp that slams over the signed signature */
+  .promise-sign.signed { overflow: visible; }
+  .promise-stamp {
+    position:absolute; left:50%; top:50%;
+    transform:translate(-50%,-50%) rotate(-13deg) scale(2.4);
+    opacity:0; pointer-events:none; z-index:6; white-space:nowrap;
+    font-family:'Space Mono', ui-monospace, "SF Mono", monospace; font-weight:700;
+    font-size:23px; letter-spacing:0.14em; text-transform:uppercase;
+    color:#E5484D; padding:5px 15px; border:3px solid #E5484D; border-radius:7px;
+    box-shadow:0 0 0 1px rgba(229,72,77,0.22); text-shadow:0 0 1px rgba(229,72,77,0.35);
+  }
+  .promise-stamp.on { animation: stampDown .5s cubic-bezier(.3,1.5,.5,1) forwards; }
+  @keyframes stampDown {
+    0%   { opacity:0; transform:translate(-50%,-50%) rotate(-13deg) scale(2.4); }
+    55%  { opacity:1; transform:translate(-50%,-50%) rotate(-13deg) scale(0.9); }
+    78%  { transform:translate(-50%,-50%) rotate(-13deg) scale(1.05); }
+    100% { opacity:1; transform:translate(-50%,-50%) rotate(-13deg) scale(1); }
+  }
   @media (prefers-reduced-motion: reduce) {
     .promise-sign { transition: opacity .2s ease; }
     #promiseSigPath, #promiseSigUnder { transition: none !important; stroke-dashoffset: 0 !important; }
@@ -1371,13 +1389,14 @@
                     <stop offset="0" stop-color="#ffffff"/><stop offset="0.5" stop-color="#bfe0ff"/><stop offset="1" stop-color="#AEB6C4" stop-opacity="0"/>
                   </radialGradient>
                 </defs>
-                <path id="promiseSigUnder" d="M16 46 C 8 22, 30 4, 39 19 C 45 29, 33 45, 27 38 C 23 33, 31 30, 41 33 C 55 37, 51 22, 63 26 C 71 29, 65 43, 59 39 C 54 36, 64 33, 78 36 C 94 40, 98 25, 112 31 C 128 38, 152 38, 178 30 C 202 23, 216 27, 238 37 C 251 43, 264 35, 256 23"
+                <path id="promiseSigUnder" d="M22 44 C 36 16, 60 16, 59 39 C 58 53, 44 52, 43 40 C 42 27, 70 25, 94 39 C 120 54, 152 27, 182 37 C 208 46, 234 32, 260 41"
                   stroke="#AEB6C4" stroke-opacity="0.15" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-                <path id="promiseSigPath" d="M16 46 C 8 22, 30 4, 39 19 C 45 29, 33 45, 27 38 C 23 33, 31 30, 41 33 C 55 37, 51 22, 63 26 C 71 29, 65 43, 59 39 C 54 36, 64 33, 78 36 C 94 40, 98 25, 112 31 C 128 38, 152 38, 178 30 C 202 23, 216 27, 238 37 C 251 43, 264 35, 256 23"
+                <path id="promiseSigPath" d="M22 44 C 36 16, 60 16, 59 39 C 58 53, 44 52, 43 40 C 42 27, 70 25, 94 39 C 120 54, 152 27, 182 37 C 208 46, 234 32, 260 41"
                   stroke="url(#promiseSigGrad)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
                 <circle id="promiseSigPen" r="4.2" fill="url(#promiseSigNib)"/>
               </svg>
               <div class="promise-sign-line"></div>
+              <div id="promiseStamp" class="promise-stamp" aria-hidden="true"><span>SEALED</span></div>
             </div>
             <div id="promiseMeta" style="font-size:11px; color:var(--dim); letter-spacing:0.04em; font-family:ui-monospace,'SF Mono',Menlo,monospace; margin-top:12px; line-height:16px;">// unsigned</div>
           </div>
@@ -4336,23 +4355,33 @@
       }
     }, 220);
 
-    // Once it's drawn, flip the ink to a "signed" accent seal
+    // Once it's drawn, the ink flushes GREEN (committed)…
     setTimeout(function () {
-      const GREEN = '#AEB6C4';
+      const GREEN = '#34D17E';
+      path.style.transition = 'stroke .35s ease';
       path.style.stroke = GREEN;
       if (under) under.style.stroke = GREEN;
-      if (svg) svg.style.filter = 'drop-shadow(0 1px 8px rgba(10,132,255,0.6))';
+      if (svg) svg.style.filter = 'drop-shadow(0 1px 9px rgba(52,209,126,0.6))';
       if (card) {
-        card.style.borderColor = 'rgba(10,132,255,0.55)';
-        card.style.boxShadow = '0 0 0 1px rgba(10,132,255,0.25), 0 10px 44px rgba(10,132,255,0.22)';
+        card.style.borderColor = 'rgba(52,209,126,0.5)';
+        card.style.boxShadow = '0 0 0 1px rgba(52,209,126,0.22), 0 10px 44px rgba(52,209,126,0.20)';
       }
       if (meta) {
         meta.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:-1px;display:inline-block;"><path d="M5 12l4 4 10-11"/></svg> signed · ' + new Date().toLocaleString('en-AU', { hour:'numeric', minute:'2-digit', day:'numeric', month:'short' }).toLowerCase();
         meta.style.color = GREEN;
       }
-      try { if (typeof haptic === 'function') haptic([10, 50, 20]); } catch (e) {}
-      track('promise_sign_completed', {});
-      setTimeout(function () { if (done) done(); }, 340);
+      try { if (typeof haptic === 'function') haptic(14); } catch (e) {}
+      // …then a red SEAL stamp slams down over it, and we advance.
+      setTimeout(function () {
+        const stamp = document.getElementById('promiseStamp');
+        if (wrap) wrap.classList.add('signed');
+        if (card) { card.style.borderColor = 'rgba(229,72,77,0.5)'; card.style.boxShadow = '0 0 0 1px rgba(229,72,77,0.22), 0 10px 44px rgba(229,72,77,0.20)'; }
+        if (stamp) stamp.classList.add('on');
+        try { if (typeof haptic === 'function') haptic([12, 40, 28]); } catch (e) {}
+        try { if (window.coreSfx) coreSfx('confirm'); } catch (e) {}
+        track('promise_sign_completed', {});
+        setTimeout(function () { if (done) done(); }, 760);
+      }, 420);
     }, 220 + DRAW + 60);
   }
 
@@ -6551,6 +6580,43 @@ body.deck .step.on.cardin { animation: cardIn .52s cubic-bezier(.16,1,.3,1) both
   .why-chip:hover { border-color: rgba(255,255,255,0.2); }
   .cta:hover { box-shadow: 0 14px 34px rgba(0,0,0,0.5), 0 0 26px rgba(232,200,120,0.12), 0 1px 0 rgba(255,255,255,0.7) inset; }
 }
+
+/* ════ ROUND-2 TWEAKS ════ */
+/* "Next 30 days" title back to the system (Apple) font — Grotesk read off here */
+html body[data-font="apple"] #planTitle,
+html body[data-font="apple"] #planTitle .g {
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",sans-serif !important;
+  letter-spacing:-0.6px !important;
+}
+
+/* Profile figures — colour back (refined, not harsh) + a click pop */
+.profile-card img { filter: saturate(0.92) brightness(1.05) contrast(1.02) !important; }
+.profile-card[data-profile="female"] img { filter: saturate(0.92) brightness(1.05) contrast(1.02) !important; }
+.profile-card.sel img { filter: saturate(1.08) brightness(1.14) !important; }
+.profile-card[data-profile="female"].sel img { filter: saturate(1.08) brightness(1.14) !important; }
+.profile-card.sel { animation: pickPop .4s cubic-bezier(.22,1.6,.36,1); }
+@keyframes pickPop { 0%{transform:scale(1);} 40%{transform:scale(1.04);} 100%{transform:scale(1);} }
+
+/* Step 5 (identity) + option chips: BRIGHTER colour, no dark→neon jump */
+.tone-row[data-identity="disciplined"]{--col:#5AA8FF;} .tone-row[data-identity="calm"]{--col:#3DD17E;}
+.tone-row[data-identity="sharp"]{--col:#C98AF5;} .tone-row[data-identity="free"]{--col:#FFB04D;}
+.tone-row[data-reason] .tone-ico, .tone-row[data-identity] .tone-ico {
+  background: linear-gradient(155deg, color-mix(in srgb, var(--col) 52%, rgba(255,255,255,0.06)), color-mix(in srgb, var(--col) 32%, rgba(255,255,255,0.02))) !important;
+  border-color: color-mix(in srgb, var(--col) 60%, rgba(255,255,255,0.12)) !important;
+}
+.tone-row[data-reason].sel .tone-ico, .tone-row[data-identity].sel .tone-ico {
+  background: linear-gradient(155deg, color-mix(in srgb, var(--col) 84%, white), color-mix(in srgb, var(--col) 62%, transparent)) !important;
+  border-color: color-mix(in srgb, var(--col) 80%, transparent) !important;
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--col) 26%, transparent), 0 1px 0 rgba(255,255,255,0.28) inset !important;
+}
+
+/* Step 6 (why): simpler — drop the sentence-builder box, keep clean chips */
+.step[data-step="14"] .why-quote { display:none !important; }
+.step[data-step="14"] .why-chips { margin-top: 16px !important; }
+
+/* XP bar — a touch larger + crisper sheen */
+.xp-bar { width: 42px !important; height: 6px !important; box-shadow: 0 1px 1px rgba(0,0,0,0.5) inset !important; }
+.xp-bar-fill { box-shadow: 0 0 10px rgba(201,162,75,0.6), 0 1px 0 rgba(255,236,190,0.55) inset !important; }
 </style>
 </body>
 </html>
