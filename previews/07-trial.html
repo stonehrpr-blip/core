@@ -6656,10 +6656,23 @@ html body[data-font="apple"] #planTitle .g {
 .age-chips { display:flex; flex-wrap:wrap; gap:9px; }
 .age-chip { all:unset; box-sizing:border-box; cursor:pointer; padding:11px 16px; border-radius:999px;
   font-size:14.5px; font-weight:700; color:rgba(235,235,245,0.85); font-variant-numeric:tabular-nums;
-  background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12);
-  transition:transform .14s, background .18s, border-color .18s, color .18s; -webkit-tap-highlight-color:transparent; }
+  background:rgba(255,255,255,0.05); border:1.5px solid rgba(255,255,255,0.14);
+  transition:transform .14s, box-shadow .2s, border-color .2s, color .2s; -webkit-tap-highlight-color:transparent; }
 .age-chip:active { transform:scale(.94); }
-.age-chip.sel { color:#0c0d12; background:linear-gradient(180deg,#ECEFF4,#C4C9D2); border-color:#ECEFF4; box-shadow:0 4px 14px rgba(0,0,0,0.4); }
+/* a distinct accent colour per button */
+.age-chip:nth-child(1){ --ac:#5AC8FA; }
+.age-chip:nth-child(2){ --ac:#34D17E; }
+.age-chip:nth-child(3){ --ac:#4DA3FF; }
+.age-chip:nth-child(4){ --ac:#FFCC4D; }
+.age-chip:nth-child(5){ --ac:#C07AF0; }
+.age-chip:nth-child(6){ --ac:#FF7A9C; }
+/* selected = coloured outline + glow (NOT a colour fill) */
+.age-chip.sel {
+  color:var(--ac) !important;
+  background:rgba(255,255,255,0.04) !important;
+  border-color:var(--ac) !important;
+  box-shadow:0 0 0 1px var(--ac) inset, 0 0 16px color-mix(in srgb, var(--ac) 55%, transparent), 0 0 4px color-mix(in srgb, var(--ac) 40%, transparent) !important;
+}
 
 /* Slide-to-commit (replaces the type-PROMISE keyboard step) */
 .slide-commit { position:relative; width:100%; height:58px; margin-top:4px; border-radius:16px;
