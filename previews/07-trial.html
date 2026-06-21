@@ -5848,8 +5848,8 @@
         ov.style.left = (r.left - hr.left + r.width / 2) + 'px';
         ov.style.top = (r.top - hr.top + r.height / 2) + 'px';
         host.appendChild(ov);
-        // once it's covered the screen (opaque), swap to the next step with no transition
-        setTimeout(function () { _instantStep = true; _swipeDir = 0; advance(); }, 340);
+        // once it's fully covered (opaque), swap to the next step with no transition
+        setTimeout(function () { _instantStep = true; _swipeDir = 0; advance(); }, 560);
         ov.addEventListener('animationend', function () { ov.remove(); picking = false; });
         // safety net in case animationend doesn't fire
         setTimeout(function () { if (ov.parentNode) ov.remove(); picking = false; }, 1000);
@@ -6969,20 +6969,25 @@ body.on-autoadvance .stepwrap::after {
 /* on pick: the orbs vanish instantly — a full-screen colour disc (.reason-zoom-ov,
    built in JS) does the zoom-cover-fade over the whole page instead. */
 .reason-cloud.zooming { pointer-events:none; }
-.reason-cloud.zooming .reason-orb { opacity:0 !important; transition:none !important; }
-/* full-screen zoom cover — blows up from the tapped orb to cover the page, then
-   fades, revealing step 5 (which is swapped in instantly behind it). ~0.8s. */
+/* orbs cross-fade out (no hard pop) as the disc fades in over the same spot */
+.reason-cloud.zooming .reason-orb { opacity:0 !important; transition:opacity .18s ease !important; }
+/* full-screen zoom cover — fades in from the tapped orb, blows up to cover the
+   page, then fades, revealing step 5 (swapped in instantly behind it). ~0.8s.
+   NO box-shadow (a blurred shadow scaled ~20x repaints every frame = jank);
+   transform+opacity only so it's fully GPU-composited = smooth. */
 .reason-zoom-ov {
   position:absolute; width:108px; height:108px; border-radius:50%; z-index:500; pointer-events:none;
-  background:radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--zc) 90%, #fff), var(--zc) 46%, color-mix(in srgb, var(--zc) 62%, #000) 100%);
-  box-shadow:0 0 60px var(--zc);
-  transform:translate(-50%,-50%) scale(1);
-  animation:reasonZoom .8s cubic-bezier(.45,0,.25,1) forwards;
+  background:radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--zc) 82%, #fff), var(--zc) 52%, color-mix(in srgb, var(--zc) 66%, #000) 100%);
+  transform:translate(-50%,-50%) scale(.85);
+  will-change:transform, opacity; backface-visibility:hidden;
+  animation:reasonZoom .8s cubic-bezier(.6,0,.4,1) forwards;
 }
 @keyframes reasonZoom {
-  0%   { transform:translate(-50%,-50%) scale(1);  opacity:1; }
-  40%  { transform:translate(-50%,-50%) scale(15); opacity:1; }
-  100% { transform:translate(-50%,-50%) scale(19); opacity:0; }
+  0%   { transform:translate(-50%,-50%) scale(.85); opacity:0; }
+  8%   { opacity:1; }                                   /* gentle fade-in — seamless with the orb */
+  62%  { transform:translate(-50%,-50%) scale(15); opacity:1; }   /* steady, VISIBLE zoom to full cover */
+  74%  { opacity:1; }                                   /* hold opaque through the step swap */
+  100% { transform:translate(-50%,-50%) scale(19); opacity:0; }   /* ease out, reveal step 5 */
 }
 @media (prefers-reduced-motion: reduce){ .reason-zoom-ov { animation-duration:.4s; } }
 .reason-orb {
