@@ -89,27 +89,25 @@
   .live.on{ display:flex; }
   .cam{ position:absolute; inset:0; z-index:0; background:#06060d; overflow:hidden; }
   .cam{ --zoom:1; --fit:cover; }   /* default = fill the screen fully (cover) */
-  .cam video{ width:100%; height:100%; object-fit:var(--fit); transform:scaleX(-1) scale(var(--zoom)); transform-origin:center center; opacity:0.55; transition:opacity .3s, transform .25s ease; }
+  .cam video{ width:100%; height:100%; object-fit:var(--fit); transform:scaleX(-1) scale(var(--zoom)); transform-origin:center center; opacity:0.42; transition:opacity .3s, transform .25s ease; }
   /* Skeleton overlay — sized to the video's intrinsic resolution and given the
      SAME object-fit/mirror/zoom as the video so landmarks line up exactly. */
   #pose{ position:absolute; inset:0; width:100%; height:100%; object-fit:var(--fit); transform:scaleX(-1) scale(var(--zoom)); transform-origin:center center; z-index:1; pointer-events:none; transition:transform .25s ease; }
-  .cam.tracking video{ opacity:0.95; }
+  .cam.tracking video{ opacity:0.8; }
   /* zoom meter (iPhone-style 0.5× / 1×) */
   .zoom{ position:absolute; left:50%; transform:translateX(-50%); bottom:118px; z-index:6; display:flex; gap:5px; padding:5px; border-radius:999px;
     background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.12); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
   .zoom button{ border:none; background:none; color:var(--muted); font:inherit; font-size:12px; font-weight:800; width:44px; height:30px; border-radius:999px; cursor:pointer; transition:background .15s,color .15s; }
   .zoom button.on{ background:rgba(255,255,255,0.18); color:#fff; }
   /* big guide text */
-  .guide{ position:absolute; left:0; right:0; top:30%; z-index:6; text-align:center; pointer-events:none;
-    font-size:25px; font-weight:900; letter-spacing:0.4px; text-transform:uppercase; color:rgba(255,255,255,0.92);
-    text-shadow:0 2px 26px rgba(0,0,0,0.65); opacity:0; transform:translateY(8px) scale(.96);
+  .guide{ position:absolute; left:0; right:0; top:16%; z-index:6; text-align:center; pointer-events:none;
+    font-size:20px; font-weight:800; letter-spacing:1.4px; text-transform:uppercase; color:rgba(255,255,255,0.96);
+    text-shadow:0 2px 20px rgba(0,0,0,0.6); opacity:0; transform:translateY(8px) scale(.96);
     transition:opacity .2s ease, transform .26s cubic-bezier(.16,1,.3,1); }
   .guide.show{ opacity:1; transform:translateY(0) scale(1); }
   .guide.warn{ color:#FF8A3D; }
   .cam .silho{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
-  .cam .scan{ position:absolute; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--accent),transparent); box-shadow:0 0 14px color-mix(in srgb,var(--accent) 70%,transparent); animation:scan 3s ease-in-out infinite; }
-  @keyframes scan{ 0%,100%{top:14%;} 50%{top:80%;} }
-  .camgrad{ position:absolute; inset:0; background:linear-gradient(180deg, rgba(2,2,10,0.5) 0%, transparent 25%, transparent 55%, rgba(2,2,10,0.85) 100%); }
+  .camgrad{ position:absolute; inset:0; background:radial-gradient(120% 78% at 50% 40%, transparent 46%, rgba(2,2,10,0.5) 100%), linear-gradient(180deg, rgba(2,2,10,0.62) 0%, transparent 20%, transparent 50%, rgba(2,2,10,0.94) 100%); }
   .livetop{ position:relative; z-index:5; display:flex; align-items:center; justify-content:space-between; padding:56px 20px 0; }
   .holo-dot{ width:6px; height:6px; border-radius:50%; background:#34D399; box-shadow:0 0 8px #34D399; animation:holoBlink 1.6s ease-in-out infinite; }
   @keyframes holoBlink{ 0%,100%{opacity:1;} 50%{opacity:.4;} }
@@ -117,23 +115,43 @@
     display:flex; align-items:center; justify-content:center; padding:0 2px; }
   .holo-say.say-warn{ color:#FFC24B; }
   @media (prefers-reduced-motion:reduce){ .holo-dot{ animation:none; } }
-  /* Per-arm effort bars — bottom */
-  /* Per-arm strength — clean frosted card, bottom-left */
-  .armhud{ position:absolute; left:14px; bottom:120px; z-index:6; width:120px; padding:9px 12px 10px; border-radius:14px; pointer-events:none;
-    background:rgba(8,12,22,0.42); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border:1px solid rgba(255,255,255,0.09); box-shadow:0 6px 20px rgba(0,0,0,0.3); }
-  .ah-t{ font-size:7.5px; font-weight:900; letter-spacing:.18em; color:rgba(255,255,255,0.46); margin-bottom:5px; }
-  .ah-row{ display:flex; align-items:center; gap:7px; margin-top:6px; }
-  .ah-k{ font-size:10px; font-weight:900; width:8px; }
-  .ah-tr{ flex:1; height:5px; border-radius:999px; background:rgba(255,255,255,0.14); overflow:hidden; }
-  .ah-tr i{ display:block; height:100%; width:0%; border-radius:999px; box-shadow:0 0 8px currentColor; transition:width .5s cubic-bezier(.2,.9,.2,1); }
-  .ah-n{ font-size:12px; font-weight:900; min-width:13px; text-align:right; font-variant-numeric:tabular-nums; }
-  .armhud.pulse .ah-tr i{ animation:ahPulse .5s ease; }
+  /* ── Live HUD — bottom stats panel + 3D hologram (≈25% of the screen) ── */
+  .livehud{ position:relative; z-index:6; height:25%; flex:none; display:flex; gap:11px;
+    padding:14px 16px calc(env(safe-area-inset-bottom,0px) + 16px);
+    background:linear-gradient(180deg, rgba(2,2,10,0) 0%, rgba(2,2,10,0.45) 18%, rgba(6,7,14,0.97) 58%);
+    backdrop-filter:blur(24px) saturate(1.3); -webkit-backdrop-filter:blur(24px) saturate(1.3);
+    border-top:1px solid rgba(255,255,255,0.1); border-radius:24px 24px 0 0; box-shadow:inset 0 1px 0 rgba(255,255,255,0.06); }
+  .lh-stats{ flex:1; min-width:0; display:flex; flex-direction:column; justify-content:center; gap:11px; }
+  .lh-row{ display:flex; gap:9px; }
+  .lh-stat{ flex:1; text-align:center; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:9px 3px; box-shadow:inset 0 1px 0 rgba(255,255,255,0.07); }
+  .lh-stat b{ display:block; font-size:21px; font-weight:800; letter-spacing:-0.6px; line-height:1; font-variant-numeric:tabular-nums; }
+  .lh-stat span{ font-size:8px; font-weight:700; letter-spacing:.12em; color:var(--muted); margin-top:5px; display:block; }
+  #hudTimer.low{ color:#FF6B6B; }
+  .lh-meta{ display:flex; justify-content:space-between; align-items:baseline; font-size:8.5px; font-weight:700; letter-spacing:.12em; color:var(--muted); }
+  .lh-meta b{ font-size:13px; color:#fff; letter-spacing:0; font-weight:800; font-variant-numeric:tabular-nums; }
+  .lh-track{ height:8px; border-radius:999px; background:rgba(255,255,255,0.1); overflow:hidden; margin-top:6px; }
+  .lh-track i{ display:block; height:100%; width:0%; border-radius:999px;
+    background:linear-gradient(90deg, var(--str,#0A84FF), color-mix(in srgb, var(--str,#0A84FF) 45%, #ffffff)); transition:width .25s cubic-bezier(.2,.9,.2,1); }
+  .abeam{ display:flex; align-items:center; gap:6px; margin-top:7px; }
+  .ah-k{ font-size:10px; font-weight:800; opacity:.9; }
+  .anum{ font-size:11px; font-weight:800; min-width:13px; text-align:center; font-variant-numeric:tabular-nums; }
+  .ahalf{ flex:1; height:8px; background:rgba(255,255,255,0.1); overflow:hidden; display:flex; }
+  .ahalf.l{ justify-content:flex-end; border-radius:999px 0 0 999px; }
+  .ahalf.r{ justify-content:flex-start; border-radius:0 999px 999px 0; }
+  .ahalf i{ display:block; height:100%; width:0%; box-shadow:0 0 8px currentColor; transition:width .5s cubic-bezier(.2,.9,.2,1); }
+  .amid{ width:2px; height:13px; border-radius:2px; background:rgba(255,255,255,0.6); flex:none; }
+  #armBars.pulse .ahalf i{ animation:ahPulse .5s ease; }
   @keyframes ahPulse{ 0%{filter:brightness(1.9);} 100%{filter:brightness(1);} }
+  .lh-holo{ width:38%; flex:none; display:flex; flex-direction:column; border-radius:16px; overflow:hidden; position:relative;
+    background:radial-gradient(72% 60% at 50% 42%, rgba(60,140,230,0.12), rgba(6,9,18,0.6)); border:1px solid rgba(255,255,255,0.1);
+    box-shadow:inset 0 0 26px rgba(60,140,230,0.14), inset 0 1px 0 rgba(255,255,255,0.06); }
+  .lh-holo-h{ display:flex; align-items:center; justify-content:center; gap:5px; font-size:7.5px; font-weight:700; letter-spacing:.14em; color:rgba(159,214,255,0.85); padding:6px 0 2px; }
+  .lh-holo canvas{ flex:1; width:100%; min-height:0; display:block; }
   .lt-right{ display:flex; align-items:center; gap:7px; }
   .pmute{ width:30px; height:30px; padding:0; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; -webkit-appearance:none; appearance:none; border:none; }
   .pmute svg{ width:15px; height:15px; }
-  .livetop .pill{ font-size:10px; font-weight:700; padding:5px 10px; border-radius:999px; background:rgba(0,0,0,0.5); border:1px solid var(--border); }
-  .livetop .pill .d{ display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--accent); margin-right:6px; animation:pulse 1.2s infinite; vertical-align:1px; } @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.3;} }
+  .livetop .pill{ font-size:11px; font-weight:600; padding:7px 13px; border-radius:999px; background:rgba(12,14,22,0.5); border:1px solid rgba(255,255,255,0.12); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); letter-spacing:0.2px; }
+  .livetop .pill .d{ display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--str,#0A84FF); margin-right:6px; animation:pulse 1.2s infinite; vertical-align:1px; } @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.3;} }
 
   .counter{ position:relative; z-index:5; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; }
   .counter .clbl{ font-size:9.5px; color:var(--muted); text-transform:uppercase; letter-spacing:1.5px; font-weight:700; }
@@ -150,17 +168,16 @@
   /* #3 Depth ring around the rep number — bigger, fills as you lower */
   .depthring{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:176px; height:176px; pointer-events:none; }
   .depthring circle{ fill:none; stroke-linecap:round; }
-  .depthring .dr-bg{ stroke:rgba(255,255,255,0.12); stroke-width:7.5; }
-  .depthring .dr-fg{ stroke:var(--str,#0A84FF); stroke-width:7.5; stroke-dasharray:339.3; stroke-dashoffset:339.3; transform:rotate(-90deg); transform-origin:60px 60px; transition:stroke-dashoffset .08s linear, stroke .15s; filter:drop-shadow(0 0 8px color-mix(in srgb,var(--str,#0A84FF) 75%,transparent)); }
+  .depthring .dr-bg{ stroke:rgba(255,255,255,0.08); stroke-width:6.5; }
+  .depthring .dr-fg{ stroke:var(--str,#0A84FF); stroke-width:6.5; stroke-dasharray:339.3; stroke-dashoffset:339.3; transform:rotate(-90deg); transform-origin:60px 60px; transition:stroke-dashoffset .08s linear, stroke .15s; filter:drop-shadow(0 0 6px color-mix(in srgb,var(--str,#0A84FF) 60%,transparent)); }
   /* multiplier badge (clean, only shows when active) */
   .multbadge{ position:absolute; top:8px; right:-4px; transform:translateX(100%); font-size:15px; font-weight:900; color:#FFCB3D; text-shadow:0 0 14px rgba(255,203,61,.55); opacity:0; transition:opacity .2s; white-space:nowrap; }
   .multbadge.on{ opacity:1; } .multbadge.bump{ animation:mbBump .4s ease; } @keyframes mbBump{ 0%{transform:translateX(100%) scale(1.6);} 100%{transform:translateX(100%) scale(1);} }
   /* #6 rep goal bar */
-  .goalwrap{ display:flex; flex-direction:column; align-items:center; gap:5px; margin-top:6px; }
-  .goalbar{ width:128px; height:5px; border-radius:999px; background:rgba(255,255,255,0.14); overflow:hidden; }
+  .goalwrap{ display:flex; flex-direction:column; align-items:center; gap:6px; margin-top:12px; }
+  .goalbar{ width:140px; height:6px; border-radius:999px; background:rgba(255,255,255,0.12); overflow:hidden; }
   .goalbar i{ display:block; height:100%; width:0%; border-radius:999px; background:var(--str,#0A84FF); box-shadow:0 0 10px var(--str,#0A84FF); transition:width .4s cubic-bezier(.2,.9,.2,1); }
   .goaltxt{ font-size:9px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
-  .ah-t b{ color:#fff; }
   /* #11 mode toggle on the picker */
   .modetog{ display:flex; gap:4px; padding:4px; border-radius:14px; background:rgba(255,255,255,0.05); border:1px solid var(--border); margin:0 0 16px; }
   .mt-opt{ flex:1; padding:10px; border-radius:11px; border:none; background:none; color:var(--muted); font:inherit; font-size:12.5px; font-weight:800; cursor:pointer; -webkit-appearance:none; appearance:none; transition:.16s; }
@@ -183,7 +200,7 @@
   /* Get-ready countdown */
   .countdown{ position:absolute; inset:0; z-index:8; display:none; align-items:center; justify-content:center; pointer-events:none; }
   .countdown.on{ display:flex; }
-  .countdown b{ font-size:130px; font-weight:900; color:#fff; letter-spacing:-4px; text-shadow:0 0 50px rgba(10,132,255,0.6); animation:cdPop .8s ease both; }
+  .countdown b{ font-size:128px; font-weight:800; color:#fff; letter-spacing:-4px; text-shadow:0 0 50px color-mix(in srgb, var(--str,#0A84FF) 55%, transparent); animation:cdPop .8s ease both; }
   .countdown b.go{ font-size:88px; color:#34D399; text-shadow:0 0 50px rgba(52,211,153,0.6); }
   @keyframes cdPop{ 0%{transform:scale(1.7);opacity:0;} 25%{opacity:1;} 100%{transform:scale(1);opacity:1;} }
   @media (prefers-reduced-motion:reduce){ .countdown b{ animation:none; } }
@@ -193,22 +210,22 @@
   .ec-num{ width:66px; height:66px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:900; color:#fff;
     background:rgba(8,12,22,0.55); border:2.5px solid #FF6B6B; box-shadow:0 0 26px rgba(255,107,107,0.5); }
   .ec-lbl{ font-size:11.5px; font-weight:800; color:rgba(255,255,255,0.88); text-shadow:0 1px 6px rgba(0,0,0,.6); }
-  .counter .cnum{ font-size:92px; font-weight:800; letter-spacing:-3px; line-height:0.9; font-variant-numeric:tabular-nums; text-shadow:0 0 32px color-mix(in srgb, var(--str,#0A84FF) 50%, transparent); }
+  .counter .cnum{ font-size:94px; font-weight:800; letter-spacing:-3.5px; line-height:0.9; font-variant-numeric:tabular-nums; text-shadow:0 0 26px color-mix(in srgb, var(--str,#0A84FF) 34%, transparent); }
   .counter .cnum.bump{ animation:bump .28s cubic-bezier(.2,1.5,.4,1); } @keyframes bump{ 0%{transform:scale(1);} 40%{transform:scale(1.22);} 100%{transform:scale(1);} }
-  .counter .pts{ font-size:14.5px; font-weight:800; color:#fff; margin-top:2px; font-variant-numeric:tabular-nums; letter-spacing:-0.2px; }
-  .counter .pts b{ color:var(--accent); } .counter .pts .u{ color:var(--muted); font-size:11px; font-weight:700; }
+  .counter .pts{ font-size:12.5px; font-weight:700; color:var(--muted); margin-top:7px; font-variant-numeric:tabular-nums; letter-spacing:0; }
+  .counter .pts b{ color:var(--str,#0A84FF); } .counter .pts .u{ color:var(--dim); font-size:10.5px; font-weight:700; }
   .counter .cgain{ font-size:11.5px; color:var(--accent); font-weight:700; margin-top:4px; opacity:.9; }
   /* cleaner HUD — hide the busy secondary meters (XP / multiplier / gain line) */
   .xpwrap{ display:none !important; }
   .counter .multi{ display:none !important; }
   .counter .cgain{ display:none !important; }
-  .counter{ gap:2px; }
-  .counter .clbl{ font-size:9px; letter-spacing:2px; opacity:.8; }
+  .counter{ gap:4px; }
+  .counter .clbl{ font-size:10px; letter-spacing:2.6px; opacity:.7; color:var(--muted); font-weight:700; }
 
   /* particle + floating "+N" layer, centred on the number */
   .poplayer{ position:absolute; inset:0; pointer-events:none; z-index:9; }
-  .floatN{ position:absolute; left:0; top:0; transform:translate(-50%,-50%); font-size:34px; font-weight:900; letter-spacing:-1px;
-    color:#FFCB3D; text-shadow:0 2px 18px rgba(255,203,61,0.55); white-space:nowrap; animation:floatN 1s cubic-bezier(.2,.9,.3,1) forwards; }
+  .floatN{ position:absolute; left:0; top:0; transform:translate(-50%,-50%); font-size:30px; font-weight:800; letter-spacing:-1px;
+    color:#FFCB3D; text-shadow:0 2px 14px rgba(0,0,0,0.45); white-space:nowrap; animation:floatN 1s cubic-bezier(.2,.9,.3,1) forwards; }
   @keyframes floatN{ 0%{ opacity:0; transform:translate(-50%,-30%) scale(.5);} 18%{ opacity:1; transform:translate(-50%,-90%) scale(1.1);} 100%{ opacity:0; transform:translate(-50%,-200%) scale(.95);} }
   .pcl{ position:absolute; left:0; top:0; width:9px; height:9px; border-radius:50%; will-change:transform,opacity;
     transform:translate(-50%,-50%); animation:pcl .72s ease-out forwards; }
@@ -216,9 +233,9 @@
 
   /* clean popup cue — a single slot that cross-fades (no stacking) */
   .cuewrap{ position:absolute; left:0; right:0; top:63%; z-index:8; display:flex; justify-content:center; pointer-events:none; }
-  .cue{ display:inline-flex; align-items:center; gap:7px; padding:8px 15px; border-radius:16px; font-size:12.5px; font-weight:800; letter-spacing:-0.2px;
-    background:rgba(8,10,18,0.62); border:1px solid rgba(255,255,255,0.10); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
-    color:#fff; box-shadow:0 10px 30px rgba(0,0,0,0.4); white-space:nowrap;
+  .cue{ display:inline-flex; align-items:center; gap:7px; padding:9px 16px; border-radius:999px; font-size:12.5px; font-weight:700; letter-spacing:0;
+    background:rgba(12,14,22,0.6); border:1px solid rgba(255,255,255,0.12); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+    color:#fff; box-shadow:0 12px 30px rgba(0,0,0,0.35); white-space:nowrap;
     opacity:0; transform:translateY(9px) scale(.96); transition:opacity .24s ease, transform .3s cubic-bezier(.16,1,.3,1); }
   .cue.show{ opacity:1; transform:translateY(0) scale(1); }
   .cue.good{ color:#46E0A8; border-color:rgba(52,211,153,0.4); }
@@ -235,9 +252,9 @@
   .xpboost{ font-size:9px; font-weight:900; letter-spacing:1px; color:#FFCB3D; opacity:0; transition:opacity .25s; white-space:nowrap; }
   .xpwrap.boost .xpboost{ opacity:1; animation:xpb .85s ease infinite; } @keyframes xpb{ 0%,100%{opacity:1;} 50%{opacity:.45;} }
 
-  .livebtns{ position:relative; z-index:5; padding:0 20px 36px; display:flex; flex-direction:column; gap:11px; }
-  .row2{ display:flex; gap:11px; } .row2 .gb{ flex:1; border:1px solid var(--border); background:rgba(255,255,255,0.05); color:var(--text); border-radius:16px; padding:15px; font-size:14px; font-weight:700; cursor:pointer; transition:transform .12s; } .row2 .gb:active{ transform:scale(0.96); }
-  .row2 .gb.fin{ background:var(--accent); border-color:transparent; color:#fff; }
+  .livebtns{ position:relative; z-index:7; padding:0 16px 9px; display:flex; flex-direction:column; gap:11px; }
+  .row2{ display:flex; gap:11px; } .row2 .gb{ flex:1; border:1px solid rgba(255,255,255,0.14); background:rgba(12,14,22,0.55); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); color:var(--text); border-radius:999px; padding:14px; font-size:14px; font-weight:700; cursor:pointer; transition:transform .12s; } .row2 .gb:active{ transform:scale(0.96); }
+  .row2 .gb.fin{ background:var(--str,#0A84FF); border-color:transparent; color:#fff; box-shadow:0 6px 18px color-mix(in srgb, var(--str,#0A84FF) 30%, transparent); }
   @media (prefers-reduced-motion:reduce){ .floatN,.pcl,.cue,.cnum.bump,.multilbl.hot{ animation-duration:.01ms!important; } }
 
   /* summary */
@@ -276,7 +293,6 @@
   .bigbtn{ width:100%; border:none; border-radius:18px; padding:16px; font-size:15px; font-weight:800; cursor:pointer; color:#fff; background:var(--accent); transition:transform .12s; } .bigbtn:active{ transform:scale(0.97); }
   .againbtn{ width:100%; margin-top:9px; border:1px solid var(--border); background:rgba(255,255,255,0.05); color:var(--text); border-radius:16px; padding:13px; font-size:13px; font-weight:700; cursor:pointer; }
   .sumbtns2{ display:flex; gap:9px; } .sumbtns2 .againbtn{ flex:1; }
-  @media (prefers-reduced-motion:reduce){ .scan{ animation:none!important; } }
 </style>
   <link rel="stylesheet" href="_lib/core-responsive.css?v=20260619d">
   
@@ -320,7 +336,6 @@
           <video id="vid" autoplay playsinline muted></video>
           <canvas id="pose"></canvas>
           <div class="silho" id="silho"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:64px;height:64px"><circle cx="12" cy="5" r="2.5"/><path d="M12 8v7M12 15l-3 6M12 15l3 6M7 11h10"/></svg></div>
-          <div class="scan"></div>
         </div>
         <div class="camgrad"></div>
         <div class="poplayer" id="popLayer"></div>
@@ -351,14 +366,39 @@
         </div>
         <div class="cuewrap"><div class="cue" id="cueEl"></div></div>
 
-        <!-- Per-arm strength — clean frosted card, bottom-left -->
-        <div class="armhud" id="armBars">
-          <div class="ah-t">ARM BALANCE <b id="ahBal">100%</b></div>
-          <div class="ah-row"><span class="ah-k" style="color:#FF9F0A">L</span><div class="ah-tr"><i id="abL" style="background:#FF9F0A;color:#FF9F0A"></i></div><b class="ah-n" id="abLn" style="color:#FF9F0A">0</b></div>
-          <div class="ah-row"><span class="ah-k" style="color:#34D399">R</span><div class="ah-tr"><i id="abR" style="background:#34D399;color:#34D399"></i></div><b class="ah-n" id="abRn" style="color:#34D399">0</b></div>
-        </div>
         <div class="livebtns">
           <div class="row2"><button class="gb" id="camToggle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px"><path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg> Camera</button><button class="gb fin" id="finBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px"><path d="M5 12l4 4 10-11"/></svg> Finish</button></div>
+        </div>
+
+        <!-- Bottom HUD: all live stats on the left, 3D body hologram on the right -->
+        <div class="livehud" id="liveHud">
+          <div class="lh-stats">
+            <div class="lh-row">
+              <div class="lh-stat"><b id="hudReps">0</b><span>REPS</span></div>
+              <div class="lh-stat"><b id="hudSet">1</b><span>SET</span></div>
+              <div class="lh-stat"><b id="hudTimer">0:00</b><span>TIME</span></div>
+            </div>
+            <div class="lh-power">
+              <div class="lh-meta"><span>POWER</span><b id="powerLbl">0</b></div>
+              <div class="lh-track"><i id="powerFill"></i></div>
+            </div>
+            <div class="lh-arm" id="armBars">
+              <div class="lh-meta"><span>ARM BALANCE</span><b id="ahBal">100%</b></div>
+              <div class="abeam">
+                <span class="ah-k" style="color:#FF9F0A">L</span>
+                <b class="anum" id="abLn" style="color:#FF9F0A">0</b>
+                <div class="ahalf l"><i id="abL" style="background:#FF9F0A;color:#FF9F0A;margin-left:auto"></i></div>
+                <div class="amid"></div>
+                <div class="ahalf r"><i id="abR" style="background:#34D399;color:#34D399"></i></div>
+                <b class="anum" id="abRn" style="color:#34D399">0</b>
+                <span class="ah-k" style="color:#34D399">R</span>
+              </div>
+            </div>
+          </div>
+          <div class="lh-holo">
+            <div class="lh-holo-h"><span class="holo-dot"></span>LIVE HOLOGRAM</div>
+            <canvas id="holoCv" width="200" height="240"></canvas>
+          </div>
         </div>
       </div>
 
@@ -466,9 +506,9 @@
       squatsumo:  fdSvg('0 0 48 50',SGND,'10;20;10','M24 27 L19 35 L17 42 M24 27 L29 35 L31 42 M24 14 L24 27 M24 14 L19 23 M24 14 L29 23','M24 36 L15 40 L17 42 M24 36 L33 40 L31 42 M24 24 L24 36 M24 24 L18 21 M24 24 L30 21','2.1s'),
       squatjump:  fdSvg('0 0 48 50',SGND,'16;6;16','M24 34 L16 38 L18 43 M24 34 L32 38 L30 43 M24 20 L24 34 M24 20 L16 24 M24 20 L32 24','M24 24 L21 30 L20 36 M24 24 L27 30 L28 36 M24 10 L24 24 M24 10 L19 4 M24 10 L29 4','1.5s'),
       // Pull-ups (front view) — hands grip the bar, body rises. Grip width / under-hand varies.
-      pullups:    fdSvg('0 0 48 48',BAR,'17;10;17','M19 6 L19 13 L21 20 M29 6 L29 13 L27 20 M21 20 L27 20 M24 20 L24 32 M24 32 L21 43 M24 32 L27 43','M19 6 L15 14 L21 13 M29 6 L33 14 L27 13 M21 13 L27 13 M24 13 L24 25 M24 25 L21 35 M24 25 L27 35','2.2s'),
-      chinups:    fdSvg('0 0 48 48',BAR,'17;10;17','M22 6 L22 13 L22 20 M26 6 L26 13 L26 20 M22 20 L26 20 M24 20 L24 32 M24 32 L21 43 M24 32 L27 43','M22 6 L21 14 L22 13 M26 6 L27 14 L26 13 M22 13 L26 13 M24 13 L24 25 M24 25 L21 35 M24 25 L27 35','2.2s'),
-      pullwide:   fdSvg('0 0 48 48',BAR,'17;9;17','M15 6 L16 13 L21 20 M33 6 L32 13 L27 20 M21 20 L27 20 M24 20 L24 32 M24 32 L21 43 M24 32 L27 43','M15 6 L13 13 L21 12 M33 6 L35 13 L27 12 M21 12 L27 12 M24 12 L24 24 M24 24 L21 34 M24 24 L27 34','2.4s')
+      pullups:    fdSvg('0 0 48 48',BAR,'18;11;18','M18 6 L18 14 L20 22 M30 6 L30 14 L28 22 M20 22 L28 22 M24 22 L24 34 M24 34 L20 44 M24 34 L28 44','M18 6 L15 12 L20 15 M30 6 L33 12 L28 15 M20 15 L28 15 M24 15 L24 27 M24 27 L20 37 M24 27 L28 37','2.2s'),
+      chinups:    fdSvg('0 0 48 48',BAR,'18;11;18','M21 6 L21 14 L22 22 M27 6 L27 14 L26 22 M22 22 L26 22 M24 22 L24 34 M24 34 L20 44 M24 34 L28 44','M21 6 L19 12 L22 15 M27 6 L29 12 L26 15 M22 15 L26 15 M24 15 L24 27 M24 27 L20 37 M24 27 L28 37','2.2s'),
+      pullwide:   fdSvg('0 0 48 48',BAR,'18;12;18','M14 6 L15 14 L20 22 M34 6 L33 14 L28 22 M20 22 L28 22 M24 22 L24 34 M24 34 L20 44 M24 34 L28 44','M14 6 L14 12 L20 16 M34 6 L34 12 L28 16 M20 16 L28 16 M24 16 L24 27 M24 27 L20 37 M24 27 L28 37','2.4s')
     };
     var FORM={ push:FORM_EX.pushups, squat:FORM_EX.squats, pull:FORM_EX.pullups };
     var FORMTIP={
@@ -543,14 +583,16 @@
     var repBest=0, repTarget=10;  // #6 goal + #8 personal-best
     var setNum=1, sessionLog=[];           // #10 multiple sets per workout
     var timedMode=false, timedDur=60, timedStart=0, timedInt=null;   // #11 60-second AMRAP
+    var setStartAt=0;                 // when the live set began (drives the TIME stat)
+    var power=0, _pw=-1;              // "how powerful" meter — climbs with tempo + multiplier
     var planMode=false, plan=null, lastRt=null;   // #16 AI workout plan + last summary rating
     var armed=false, cdActive=false, cdStartAt=0, lastMoveAt=0, prevAng=null, restInt=null, lastCd='';
     var RINGC=339.3;  // 2π·54
     function framingCheck(L){
-      // lenient: just need shoulders + hips roughly in view so the count-in can start
+      // lenient: shoulders in view is enough to start the count-in (works for
+      // upper-body framing on a laptop/desk cam, not just a full-body shot)
       var sh = (L[11].visibility>0.4)||(L[12].visibility>0.4);
-      var hp = (L[23].visibility>0.35)||(L[24].visibility>0.35);
-      if(!(sh && hp)) return {ok:false, msg:'SHOW YOUR WHOLE BODY', short:'Show your whole body'};
+      if(!sh) return {ok:false, msg:'STEP INTO FRAME', short:'Step into frame'};
       return {ok:true};
     }
     function showCountdown(t, go){ var el=$('#countdown'); if(!el) return;
@@ -607,6 +649,12 @@
       var hc=$('#holoCv'); if(!hc) return;
       if(!holoCtx) holoCtx=hc.getContext('2d');
       var W=hc.width, H=hc.height; holoCtx.clearRect(0,0,W,H);
+      // holographic turntable floor (two stacked ellipses → 3D pedestal feel)
+      holoCtx.save();
+      holoCtx.strokeStyle='rgba(120,210,255,0.32)'; holoCtx.lineWidth=1.4;
+      holoCtx.beginPath(); holoCtx.ellipse(W/2, H-12, W*0.34, 7, 0, 0, 6.283); holoCtx.stroke();
+      holoCtx.globalAlpha=0.5; holoCtx.beginPath(); holoCtx.ellipse(W/2, H-12, W*0.20, 4, 0, 0, 6.283); holoCtx.stroke();
+      holoCtx.restore();
       var vis=JOINTS.map(function(i){return L[i];}).filter(function(p){return p.visibility>0.4;});
       if(vis.length<4) return;
       var minX=1,minY=1,maxX=0,maxY=0;
@@ -779,13 +827,22 @@
       var xpT=Math.max(0,Math.min(100, xpInto/xpNeed*100));
       if(Math.abs(xpT-xpShown)>0.3){ xpShown += (xpT-xpShown)*0.2; $('#xpFill').style.width=xpShown.toFixed(1)+'%'; }
       $('#xpWrap').classList.toggle('boost', mult>=1.5);
-      // #11 timed-mode clock — counts down, ends the set at 0
-      if(timedMode && armed && timedStart){
+      // TIME stat — counts DOWN in 60s mode, counts UP (elapsed) otherwise
+      var tEl=$('#hudTimer'), tp=$('#setTimer');
+      if(timedMode && timedStart){
         var rem=Math.max(0, timedDur-(performance.now()-timedStart)/1000);
-        var ss=Math.floor(rem%60), tp=$('#setTimer');
-        if(tp){ tp.textContent=Math.floor(rem/60)+':'+(ss<10?'0':'')+ss; tp.classList.toggle('low', rem<=10); }
-        if(rem<=0){ timedStart=0; autoEnd(); }
+        var ss=Math.floor(rem%60), txt=Math.floor(rem/60)+':'+(ss<10?'0':'')+ss;
+        if(tEl){ tEl.textContent=txt; tEl.classList.toggle('low', rem<=10); }
+        if(tp){ tp.textContent=txt; tp.classList.toggle('low', rem<=10); }
+        if(rem<=0){ timedStart=0; sfx('levelup'); finish(); }
+      } else if(setStartAt){
+        var es=Math.floor((performance.now()-setStartAt)/1000), em=Math.floor(es/60), esc=es%60;
+        if(tEl){ tEl.textContent=em+':'+(esc<10?'0':'')+esc; tEl.classList.remove('low'); }
       }
+      // POWER meter — decays each frame, repaints only when the integer changes
+      if(power>0) power=Math.max(0, power-0.2);
+      var pw=Math.round(power);
+      if(pw!==_pw){ _pw=pw; var pf=$('#powerFill'); if(pf) pf.style.width=pw+'%'; var pl=$('#powerLbl'); if(pl) pl.textContent=pw; }
       requestAnimationFrame(uiLoop);
     }
 
@@ -837,7 +894,8 @@
             if(planMode && cur){ repTarget=plan[Math.min(setNum-1,plan.length-1)]; var gt=$('#goalTxt'); if(gt) gt.textContent=reps+' / '+repTarget; updateSetBadge(); } } }
       }catch(e){}
     }
-    function updateSetBadge(){ var sb=$('#setBadge'); if(sb) sb.textContent = (planMode&&plan) ? ('Set '+setNum+'/'+plan.length) : ('Set '+setNum); }
+    function updateSetBadge(){ var sb=$('#setBadge'); if(sb) sb.textContent = (planMode&&plan) ? ('Set '+setNum+'/'+plan.length) : ('Set '+setNum);
+      var hs=$('#hudSet'); if(hs) hs.textContent = (planMode&&plan) ? (setNum+'/'+plan.length) : setNum; }
     function beginWorkout(id){ setNum=1; sessionLog=[]; plan = planMode ? rulePlan(id) : null; startSession(id); if(planMode) aiPlan(id); }
     function nextSet(){ setNum++; stopRest(); $('#sumScrim').classList.remove('show'); $('#sumSheet').classList.remove('show'); startSession(cur.id); }
     // Each finished set lights up the Strength muscle map (gym diagram, store coreGym.v1).
@@ -917,9 +975,13 @@
       repBest=(readMax()[cur.id]||0); repTarget=repBest>0?repBest:10;   // #6 goal = beat your best (or 10 to start)
       if(planMode && plan) repTarget=plan[Math.min(setNum-1, plan.length-1)];   // #16 plan target for this set
       var _gf=$('#goalFill'), _gt=$('#goalTxt'), _mb=$('#multBadge'); if(_gf)_gf.style.width='0%'; if(_gt)_gt.textContent='0 / '+repTarget; if(_mb)_mb.classList.remove('on');
-      timedStart=0;
+      timedStart=0; setStartAt=0; power=0; _pw=-1;
       updateSetBadge();
-      var _tp=$('#setTimer'); if(_tp){ _tp.style.display=timedMode?'inline-flex':'none'; _tp.classList.remove('low'); _tp.textContent='1:00'; }
+      var _tp=$('#setTimer'); if(_tp){ _tp.style.display='none'; _tp.classList.remove('low'); }
+      var _hr=$('#hudReps'), _ht=$('#hudTimer'), _pf=$('#powerFill'), _pl=$('#powerLbl');
+      if(_hr) _hr.textContent='0';
+      if(_ht){ _ht.textContent=timedMode?'1:00':'0:00'; _ht.classList.remove('low'); }
+      if(_pf) _pf.style.width='0%'; if(_pl) _pl.textContent='0';
       try{ hideCountdown(); hideEndCd(); setRing(0); stopRest(); }catch(e){}
       sfx('confirm'); haptic();
       document.documentElement.style.setProperty('--str', cur.c);
@@ -927,7 +989,7 @@
       // coach face + per-arm bars (arm movements only)
       var hs=$('#holoSay'); if(hs){ hs.className='holo-say'; hs.textContent=formTip(cur.id)||'Get into position…'; }
       setFace('neutral');
-      var ab=$('#armBars'); if(ab) ab.style.display=isArmFam()?'flex':'none';
+      var ab=$('#armBars'); if(ab) ab.style.display=isArmFam()?'':'none';
       paintArmBars();
       $('#cnum').textContent='0'; $('#pts').textContent='0'; $('#cgain').textContent='+0.00 Strength';
       $('#multiFill').style.width='0%'; $('#multiLbl').textContent='×1.0';
@@ -947,12 +1009,16 @@
       reps += 1; combo += 1; lastRepTime=now;   // one exercise = +1, always
       var nm=Math.min(MAXMULT, +(1+Math.floor(combo/MILESTONE)*0.1).toFixed(1));
       if(nm>mult){ mult=nm; milestoneHit(); }
+      // POWER — quicker reps and a higher multiplier push it up; it decays in uiLoop
+      var tempoBoost = interval<600?24 : interval<900?17 : interval<1400?11 : 6;
+      power=Math.min(100, power + tempoBoost + (mult-1)*8);
       // Score (XP) only climbs while a multiplier is active, and only by 1 at a time.
       var gain = (mult>1) ? 1 : 0;
       points += gain; xpInto += gain;
       while(xpInto>=xpNeed){ xpInto-=xpNeed; xpLevel++; xpNeed=150+xpLevel*40; levelUp(); }
       sfx('coin'); haptic();
       var num=$('#cnum'); num.textContent=reps; num.classList.remove('bump'); void num.offsetWidth; num.classList.add('bump');
+      var hr=$('#hudReps'); if(hr) hr.textContent=reps;
       // #6 goal progress
       var gf=$('#goalFill'), gt=$('#goalTxt');
       if(gf) gf.style.width=Math.min(100, reps/repTarget*100).toFixed(0)+'%';
@@ -982,6 +1048,8 @@
         stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:'user', width:{ ideal:640 }, height:{ ideal:480 }, frameRate:{ ideal:24 } }, audio:false });
         $('#vid').srcObject=stream; $('#silho').style.display='none';
         lastTrack=''; setTrack(GI.dot+' Live'); $('#camToggle').innerHTML=GI.camera+' Camera on';
+        setStartAt=performance.now();
+        if(timedMode && !timedStart) timedStart=performance.now();   // 60s clock runs as soon as the camera is live
         startPose();
       }catch(e){
         setTrack('Camera blocked'); cue('Allow camera access to auto-track', 'warn', true); sfx('warn');
@@ -1104,6 +1172,7 @@
       var cam=$('#cam'); camW=cam.clientWidth; camH=cam.clientHeight;
       if(!L){ setTrack('Step into frame'); setGuide('STEP INTO FRAME'); angEMA=null; lastL=null; return; }
       lastL=L;
+      try{ drawSkeleton(L,W,H); drawHolo(L); }catch(e){}   // live skeleton overlay + 3D hologram
       var cfg=POSE_CFG[cur&&cur.id]; if(!cfg){ setTrack('● Live'); return; }
       var fam=famOf(cur.id);
       // ── #1 Framing + get-ready countdown (before counting starts) ──
