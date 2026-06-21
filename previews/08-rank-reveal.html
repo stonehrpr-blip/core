@@ -26,7 +26,29 @@
     /* ===== Stage 1 — blank screen, tap to reveal ===== */
     #stage1{justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;}
     .pre-eyebrow{font-size:11px;font-weight:800;letter-spacing:0.32em;text-transform:uppercase;color:rgba(214,219,226,0.55);}
-    .pre-title{margin-top:12px;font-size:30px;font-weight:800;letter-spacing:-0.6px;color:#fff;line-height:1.1;}
+    /* mystery emblem — a sealed gem socket teasing the reveal */
+    .mystery{position:relative;width:172px;height:172px;margin:26px auto 30px;display:flex;align-items:center;justify-content:center;}
+    .myst-ring{position:absolute;border-radius:50%;pointer-events:none;}
+    .myst-ring.r-a{width:172px;height:172px;border:1.5px dashed rgba(206,212,222,0.28);animation:mSpin 16s linear infinite;}
+    .myst-ring.r-b{width:138px;height:138px;border:1px solid rgba(206,212,222,0.16);
+      box-shadow:0 0 30px rgba(206,212,222,0.14) inset;animation:mSpinRev 9s linear infinite;}
+    .myst-socket{position:relative;width:104px;height:104px;display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(135deg, rgba(214,219,226,0.5), rgba(174,182,196,0.14));
+      clip-path:polygon(26% 0,74% 0,100% 26%,100% 74%,74% 100%,26% 100%,0 74%,0 26%);
+      box-shadow:0 0 34px rgba(206,212,222,0.3);animation:mPulse 2.8s ease-in-out infinite;}
+    .myst-socket::before{content:'';position:absolute;inset:2px;
+      background:radial-gradient(circle, rgba(206,212,222,0.2), #04040a 72%);
+      clip-path:polygon(26% 0,74% 0,100% 26%,100% 74%,74% 100%,26% 100%,0 74%,0 26%);}
+    .myst-core{position:absolute;width:54px;height:54px;border-radius:50%;
+      background:radial-gradient(circle,#fff,rgba(206,212,222,0.45) 48%,transparent 72%);
+      filter:blur(2px);animation:mPulse 2.8s ease-in-out infinite;}
+    .myst-q{position:relative;z-index:2;font-size:42px;font-weight:900;color:rgba(255,255,255,0.9);
+      text-shadow:0 0 22px rgba(206,212,222,0.7);}
+    @keyframes mPulse{0%,100%{opacity:0.72;transform:scale(1);}50%{opacity:1;transform:scale(1.05);}}
+    @keyframes mSpin{to{transform:rotate(360deg);}}
+    @keyframes mSpinRev{to{transform:rotate(-360deg);}}
+    .pre-title{margin-top:2px;font-size:30px;font-weight:800;letter-spacing:-0.6px;color:#fff;line-height:1.1;}
+    .pre-sub{margin-top:9px;font-size:13.5px;color:rgba(255,255,255,0.5);letter-spacing:-0.1px;}
     .tap-hint{position:absolute;bottom:74px;left:0;right:0;text-align:center;font-size:14px;font-weight:600;
       color:rgba(255,255,255,0.5);animation:tapPulse 1.8s ease-in-out infinite;}
     @keyframes tapPulse{0%,100%{opacity:0.4;}50%{opacity:0.95;}}
@@ -127,7 +149,13 @@
     <!-- Stage 1: blank tap screen -->
     <div class="stage" id="stage1" role="button" tabindex="0" aria-label="Tap to reveal your rank">
       <div class="pre-eyebrow">Your journey begins</div>
+      <div class="mystery" aria-hidden="true">
+        <span class="myst-ring r-a"></span>
+        <span class="myst-ring r-b"></span>
+        <span class="myst-socket"><span class="myst-core"></span><span class="myst-q">?</span></span>
+      </div>
       <div class="pre-title">Reveal your rank</div>
+      <div class="pre-sub">Your standing has been calculated.</div>
       <div class="tap-hint">Tap anywhere</div>
     </div>
 
