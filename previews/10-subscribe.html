@@ -39,17 +39,31 @@
     .h1 .g{color:#fff;text-shadow:0 0 26px rgba(206,212,222,.2);}
 
     /* price hero — the headline offer */
-    .offer{margin:18px auto 0;display:flex;align-items:flex-end;justify-content:center;gap:8px;}
+    .offer{margin:10px auto 0;display:flex;align-items:flex-end;justify-content:center;gap:8px;}
     .offer .big{font-size:54px;font-weight:900;letter-spacing:-2.6px;line-height:0.84;color:#fff;
       text-shadow:0 0 34px rgba(206,212,222,.28);}
     .offer .meta{display:flex;flex-direction:column;align-items:flex-start;padding-bottom:5px;}
     .offer .meta .m1{font-size:13px;font-weight:800;color:#fff;letter-spacing:-0.2px;}
     .offer .meta .m2{font-size:11.5px;color:var(--ink-soft);margin-top:1px;}
-    .offer-then{text-align:center;margin-top:8px;font-size:12.5px;color:var(--ink-soft);}
+    .offer-then{text-align:center;margin-top:7px;font-size:12.5px;color:var(--ink-soft);}
     .offer-then b{color:#eef2f9;font-weight:700;}
 
+    /* soft premium glow behind the hero */
+    .hero-glow{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:340px;height:300px;pointer-events:none;z-index:-1;
+      background:radial-gradient(50% 50% at 50% 42%,rgba(206,212,222,0.16),transparent 70%);}
+    /* value pill above the price */
+    .offer-pill{align-self:center;margin-top:14px;padding:5px 13px 5px 12px;border-radius:999px;
+      font-size:10.5px;font-weight:800;letter-spacing:.02em;color:#0a0b0e;white-space:nowrap;
+      background:linear-gradient(90deg,#E6EAF0,#ffffff);box-shadow:0 5px 16px rgba(206,212,222,.3),0 0 0 1px rgba(255,255,255,.4) inset;}
+    /* social proof */
+    .social{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:11px;}
+    .social .stars{display:inline-flex;gap:1.5px;color:#E9ECF2;filter:drop-shadow(0 0 6px rgba(206,212,222,.4));}
+    .social .stars svg{width:12px;height:12px;}
+    .social .soc-tx{font-size:11.5px;color:var(--ink-soft);letter-spacing:-.1px;}
+    .social .soc-tx b{color:#fff;font-weight:800;}
+
     /* value bullets */
-    .bullets{margin:18px auto 0;max-width:300px;display:flex;flex-direction:column;gap:11px;}
+    .bullets{margin:15px auto 0;max-width:300px;display:flex;flex-direction:column;gap:10px;}
     .b{display:flex;align-items:center;gap:11px;}
     .b .bk{width:22px;height:22px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(206,212,222,0.14);border:1px solid rgba(206,212,222,0.3);}
     .b .bk svg{width:13px;height:13px;color:var(--green);}
@@ -57,9 +71,9 @@
     .b .bt b{color:#fff;font-weight:800;}
 
     /* plans */
-    .plans{margin-top:20px;display:flex;flex-direction:column;gap:10px;}
-    .plan{position:relative;border-radius:16px;padding:14px 16px;background:rgba(255,255,255,0.03);border:1.5px solid var(--hair);cursor:pointer;display:flex;align-items:center;gap:13px;transition:.16s;}
-    .plan.on{border-color:rgba(206,212,222,0.6);background:rgba(206,212,222,0.08);box-shadow:0 0 0 1px rgba(206,212,222,.25),0 0 24px rgba(206,212,222,.12);}
+    .plans{margin-top:15px;display:flex;flex-direction:column;gap:10px;}
+    .plan{position:relative;border-radius:16px;padding:14px 16px;background:linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.015));border:1.5px solid var(--hair);cursor:pointer;display:flex;align-items:center;gap:13px;transition:.16s;box-shadow:0 6px 16px rgba(0,0,0,0.25);}
+    .plan.on{border-color:rgba(206,212,222,0.65);background:linear-gradient(180deg,rgba(206,212,222,0.12),rgba(206,212,222,0.04));box-shadow:0 0 0 1px rgba(206,212,222,.3),0 0 26px rgba(206,212,222,.16),0 6px 16px rgba(0,0,0,0.3);}
     .plan .pradio{width:20px;height:20px;flex:none;border-radius:50%;border:2px solid var(--ink-faint);transition:.16s;}
     .plan.on .pradio{border-color:var(--blue);background:radial-gradient(circle at 50% 50%,var(--blue) 0 6px,transparent 7px);}
     .plan .pbd{flex:1;}
@@ -153,11 +167,13 @@
     <div class="notch"></div>
 
     <div class="frame">
+      <span class="hero-glow" aria-hidden="true"></span>
       <div class="crest"><img src="assets/logo.png?v=3" alt="CORE" /></div>
       <div class="htag">CORE Membership</div>
       <h1 class="h1" id="heroH1">Unlock the<br/><span class="g">full CORE.</span></h1>
 
       <!-- the headline offer -->
+      <div class="offer-pill" id="offerPill">80% off your first month</div>
       <div class="offer">
         <span class="big" id="offerBig">$0.99</span>
         <span class="meta">
@@ -167,10 +183,22 @@
       </div>
       <div class="offer-then" id="offerThen">then <b>$4.99/month</b> · cancel anytime</div>
 
+      <!-- social proof -->
+      <div class="social">
+        <span class="stars" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 6 20.2l1.4-6.8L2.3 9l6.9-.7z"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 6 20.2l1.4-6.8L2.3 9l6.9-.7z"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 6 20.2l1.4-6.8L2.3 9l6.9-.7z"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 6 20.2l1.4-6.8L2.3 9l6.9-.7z"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 6 20.2l1.4-6.8L2.3 9l6.9-.7z"/></svg>
+        </span>
+        <span class="soc-tx"><b>4.8</b> · loved by <b>12,000+</b> members</span>
+      </div>
+
       <div class="bullets">
-        <div class="b"><span class="bk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 11-12"/></svg></span><span class="bt">Everything unlocked — <b>quests, AI coach, all 6 stats</b></span></div>
-        <div class="b"><span class="bk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 11-12"/></svg></span><span class="bt">Your first month is just <b>$0.99</b></span></div>
-        <div class="b"><span class="bk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 11-12"/></svg></span><span class="bt">Cancel anytime — <b>we remind you before renewal</b></span></div>
+        <div class="b"><span class="bk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0"/></svg></span><span class="bt">Everything unlocked — <b>quests, AI coach, all 6 stats</b></span></div>
+        <div class="b"><span class="bk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.3 5.2L20 9l-4 4 1 6-5-2.8L7 19l1-6-4-4 5.7-.8z"/></svg></span><span class="bt">Your first month is just <b>$0.99</b></span></div>
+        <div class="b"><span class="bk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.6-3 7.8-7 9-4-1.2-7-4.4-7-9V6z"/><path d="M9.3 12l2 2 3.4-4"/></svg></span><span class="bt">Cancel anytime — <b>we remind you before renewal</b></span></div>
       </div>
 
       <div class="plans" id="plans"></div>
@@ -232,16 +260,17 @@
 
     // Plans — $0.99 first month then $4.99/mo (monthly); annual = best value.
     var PLANS={
-      monthly:{ name:'Monthly', desc:'$0.99 first month, then $4.99/mo', price:'$0.99', per:'first month', save:'INTRO OFFER',
+      monthly:{ name:'Monthly', desc:'$0.99 first month, then $4.99/mo', price:'$0.99', per:'first month', save:'INTRO OFFER', pill:'80% off your first month',
                 today:'$0.99', renew:'$4.99 / month', offerM1:'first month', offerM2:'intro offer', offerThen:'then <b>$4.99/month</b> · cancel anytime',
                 fine:'$0.99 for your first month, then $4.99/month. Cancel anytime.' },
-      annual:{ name:'Annual', desc:'Billed yearly · best value', price:'$39.99', per:'/yr · save 33%', save:'SAVE 33%',
+      annual:{ name:'Annual', desc:'Billed yearly · best value', price:'$39.99', per:'/yr · save 33%', save:'SAVE 33%', pill:'Save 33% · best value',
                today:'$39.99', renew:'$39.99 / year', offerM1:'per year', offerM2:'≈ $3.33/mo', offerThen:'<b>$39.99/year</b> · cancel anytime',
                fine:'$39.99/year (≈$3.33/mo). Cancel anytime.' }
     };
     var sel='monthly';
     function syncOffer(){
       var p=PLANS[sel];
+      var pill=qs('#offerPill'); if(pill) pill.textContent=p.pill;
       qs('#offerBig').textContent=p.price;
       qs('#offerM1').textContent=p.offerM1;
       qs('#offerM2').textContent=p.offerM2;
