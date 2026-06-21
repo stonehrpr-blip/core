@@ -4056,6 +4056,7 @@
   // Direction of the next transition: +1 flick the card off to the right
   // (answered / moving forward), -1 to the left (going back), 0 = default.
   let _swipeDir = 0;
+  let _instantStep = false;   // skip the step transition (set just before advance())
   // The quick Q&A screens that render as a flickable card deck.
   const DECK_STEPS = [1, 2, 4, 9, 23, 14, 22, 16];
   function setStep(n) {
@@ -4067,21 +4068,28 @@
     const prev = state.step;
     track('step_complete', { from: prev, to: n });
     const dir = _swipeDir; _swipeDir = 0;
-    if (cur) {
-      cur.classList.remove('on');
-      if (dir > 0)      cur.classList.add('flick', 'flick-right');
-      else if (dir < 0) cur.classList.add('flick', 'flick-left');
-      else              cur.classList.add('out');
-    }
+    const instant = _instantStep; _instantStep = false;
     const deck = DECK_STEPS.indexOf(n) >= 0;
     document.body.classList.toggle('deck', deck);
-    setTimeout(() => {
-      if (cur) cur.classList.remove('out', 'flick', 'flick-right', 'flick-left');
-      if (tgt) {
-        tgt.classList.add('on');
-        if (deck) { tgt.classList.add('cardin'); setTimeout(() => tgt.classList.remove('cardin'), 480); }
+    if (instant) {
+      // No transition — swap immediately (used behind the full-screen zoom cover).
+      if (cur) cur.classList.remove('on', 'out', 'flick', 'flick-right', 'flick-left');
+      tgt.classList.add('on');
+    } else {
+      if (cur) {
+        cur.classList.remove('on');
+        if (dir > 0)      cur.classList.add('flick', 'flick-right');
+        else if (dir < 0) cur.classList.add('flick', 'flick-left');
+        else              cur.classList.add('out');
       }
-    }, dir ? 170 : 150);
+      setTimeout(() => {
+        if (cur) cur.classList.remove('out', 'flick', 'flick-right', 'flick-left');
+        if (tgt) {
+          tgt.classList.add('on');
+          if (deck) { tgt.classList.add('cardin'); setTimeout(() => tgt.classList.remove('cardin'), 480); }
+        }
+      }, dir ? 170 : 150);
+    }
     state.step = n;
     // Dynamic step label — position-based so reordered/inserted steps stay correct
     const kEl = tgt && tgt.querySelector('.kicker');
@@ -5820,18 +5828,31 @@
     const cloud = document.getElementById('vapeReason');
     if (!cloud) return;
     const orbs = Array.prototype.slice.call(cloud.querySelectorAll('.reason-orb'));
+    const host = cloud.closest('.phone') || cloud.closest('.frame') || document.body;
     let picking = false;
     orbs.forEach(function (orb) {
       orb.addEventListener('click', function () {
         if (picking) return; picking = true;
-        orbs.forEach(function (o) { o.classList.remove('sel'); });
-        orb.classList.add('sel');
         state.vapeReason = orb.dataset.reason;
-        cloud.classList.add('frozen');                 // stop the spin instantly (no twist)
-        requestAnimationFrame(function () { cloud.classList.add('zooming'); });
-        try { if (typeof haptic === 'function') haptic(14); } catch (_) {}
+        cloud.classList.add('frozen', 'zooming');      // stop the wheel + hide the orbs
         refreshCTA();
-        setTimeout(function () { picking = false; _swipeDir = 0; advance(); }, 560);
+        try { if (typeof haptic === 'function') haptic(14); } catch (_) {}
+        // Full-screen zoom: a disc of the orb's colour blows up to cover the page
+        // and fades — independent of the steps, so we can swap to step 5 instantly
+        // behind it. ~0.8s total.
+        const col = (orb.style.getPropertyValue('--col') || '#cfd5e0').trim();
+        const r = orb.getBoundingClientRect(), hr = host.getBoundingClientRect();
+        const ov = document.createElement('div');
+        ov.className = 'reason-zoom-ov';
+        ov.style.setProperty('--zc', col);
+        ov.style.left = (r.left - hr.left + r.width / 2) + 'px';
+        ov.style.top = (r.top - hr.top + r.height / 2) + 'px';
+        host.appendChild(ov);
+        // once it's covered the screen (opaque), swap to the next step with no transition
+        setTimeout(function () { _instantStep = true; _swipeDir = 0; advance(); }, 340);
+        ov.addEventListener('animationend', function () { ov.remove(); picking = false; });
+        // safety net in case animationend doesn't fire
+        setTimeout(function () { if (ov.parentNode) ov.remove(); picking = false; }, 1000);
       });
     });
     // Reset to a fresh, spinning wheel whenever we (re)enter the step — e.g. on Back.
@@ -5839,6 +5860,7 @@
       picking = false;
       cloud.classList.remove('frozen', 'zooming');
       orbs.forEach(function (o) { o.classList.remove('sel'); });
+      var old = host.querySelector('.reason-zoom-ov'); if (old) old.remove();
     };
   })();
   // waterCups is the interactive jug (separate handler below)
@@ -6944,19 +6966,25 @@ body.on-autoadvance .stepwrap::after {
 .reason-cloud.frozen, .reason-cloud.frozen .ro-inner { animation-play-state:paused !important; }
 /* zoom-into-selection: the picked orb glides to centre and blooms huge while the
    rest fall away, then the step hands off to the next one. */
+/* on pick: the orbs vanish instantly — a full-screen colour disc (.reason-zoom-ov,
+   built in JS) does the zoom-cover-fade over the whole page instead. */
 .reason-cloud.zooming { pointer-events:none; }
-/* the others fall away; the picked orb glides to centre + blooms huge. NOTE the
-   transform function lists must MATCH the base (translate·translate·scale) or the
-   browser jumps instead of animating. The step's own cross-fade hides them. */
-.reason-cloud.zooming .reason-orb:not(.sel) {
-  opacity:0; transform:translate(-50%,-50%) translate(var(--x),var(--y)) scale(.4);
-  transition:opacity .32s ease, transform .55s cubic-bezier(.5,0,.75,0);
+.reason-cloud.zooming .reason-orb { opacity:0 !important; transition:none !important; }
+/* full-screen zoom cover — blows up from the tapped orb to cover the page, then
+   fades, revealing step 5 (which is swapped in instantly behind it). ~0.8s. */
+.reason-zoom-ov {
+  position:absolute; width:108px; height:108px; border-radius:50%; z-index:500; pointer-events:none;
+  background:radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--zc) 90%, #fff), var(--zc) 46%, color-mix(in srgb, var(--zc) 62%, #000) 100%);
+  box-shadow:0 0 60px var(--zc);
+  transform:translate(-50%,-50%) scale(1);
+  animation:reasonZoom .8s cubic-bezier(.45,0,.25,1) forwards;
 }
-.reason-cloud.zooming .reason-orb.sel {
-  z-index:5; transform:translate(-50%,-50%) translate(0px,0px) scale(3.2);
-  transition:transform .62s cubic-bezier(.45,0,.7,1);
+@keyframes reasonZoom {
+  0%   { transform:translate(-50%,-50%) scale(1);  opacity:1; }
+  40%  { transform:translate(-50%,-50%) scale(15); opacity:1; }
+  100% { transform:translate(-50%,-50%) scale(19); opacity:0; }
 }
-.reason-cloud.zooming .reason-orb.sel::before { opacity:1; }
+@media (prefers-reduced-motion: reduce){ .reason-zoom-ov { animation-duration:.4s; } }
 .reason-orb {
   position:absolute; top:50%; left:50%; width:100px; height:100px; isolation:isolate;
   /* 3-function transform (translate·translate·scale) so the zoom can interpolate */
