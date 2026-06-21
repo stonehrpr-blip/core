@@ -593,36 +593,26 @@
     transition: transform .7s cubic-bezier(.22,1,.36,1) .12s;
   }
   .promise-sign.on .promise-sign-line { transform: scaleX(1); }
-  /* embossed bronze wax seal that presses down over the signed signature */
+  /* refined gold certification seal that presses down over the signed signature */
   .promise-sign.signed { overflow: visible; }
   .promise-stamp {
     position:absolute; left:50%; top:50%;
-    width:92px; height:92px; border-radius:50%;
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+    width:94px; height:94px;
     opacity:0; pointer-events:none; z-index:6;
-    background:
-      radial-gradient(circle at 34% 26%, rgba(255,255,255,0.9), transparent 24%),
-      radial-gradient(circle at 38% 30%, #FFF1C6 0%, #F1CD72 28%, #CA9636 60%, #8A5C16 90%, #5C3B0A 100%);
-    box-shadow:
-      inset 0 2px 3px rgba(255,250,228,0.85),
-      inset 0 -9px 15px rgba(46,27,4,0.55),
-      inset 0 0 0 3px rgba(122,84,22,0.4),
-      0 14px 30px rgba(0,0,0,0.62);
-    transform:translate(-50%,-50%) rotate(-12deg) scale(2.4);
+    transform:translate(-50%,-50%) rotate(-11deg) scale(2.4);
   }
-  /* beaded coin edge — a subtle premium rim, not a sunburst */
-  .promise-stamp::before { content:''; position:absolute; inset:3.5px; border-radius:50%;
-    border:1px dotted rgba(86,55,11,0.45); opacity:0.75; pointer-events:none; }
-  /* inner ring groove */
-  .promise-stamp::after { content:''; position:absolute; inset:8.5px; border-radius:50%;
-    border:1.5px solid rgba(90,58,12,0.55);
-    box-shadow:inset 0 1px 0 rgba(255,248,220,0.5), 0 1px 0 rgba(255,248,220,0.32); pointer-events:none; }
-  .promise-stamp .ps-emblem { width:33px; height:33px; display:block; margin-bottom:1px; }
-  .promise-stamp .ps-emblem svg { width:100%; height:100%; fill:#583809;
-    filter:drop-shadow(0 -1px 0 rgba(255,250,224,0.85)) drop-shadow(0 1.5px 1.2px rgba(38,22,2,0.6)); }
-  .promise-stamp .ps-word { font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
-    font-weight:800; font-size:8px; letter-spacing:0.26em; color:#583809; line-height:1;
-    text-shadow:0 1px 0 rgba(255,248,220,0.6); }
+  /* the gold lives on the SVG, with the shadow on the SVG too so the stamp-down
+     filter on .promise-stamp doesn't wipe it out. */
+  .promise-stamp .ps-seal { width:100%; height:100%; display:block; overflow:visible;
+    filter:drop-shadow(0 6px 14px rgba(0,0,0,0.55)); }
+  .ps-bg     { fill:rgba(24,16,4,0.62); }
+  .ps-ring-o { fill:none; stroke:url(#psGold); stroke-width:2.2; }
+  .ps-ring-i { fill:none; stroke:url(#psGold); stroke-width:1; opacity:0.85; }
+  .ps-ticks  { fill:none; stroke:url(#psGold); stroke-width:3.4; stroke-dasharray:0.5 5.05; stroke-linecap:round; opacity:0.9; }
+  .ps-txt { fill:url(#psGold); text-anchor:middle; dominant-baseline:middle;
+    font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    font-weight:800; font-size:9.5px; letter-spacing:1.7px; }
+  .ps-check { fill:none; stroke:url(#psGold); stroke-width:3.6; stroke-linecap:round; stroke-linejoin:round; }
   .promise-stamp.on { animation: stampDown .6s cubic-bezier(.3,1.7,.5,1) forwards; }
   @keyframes stampDown {
     0%   { opacity:0; transform:translate(-50%,-50%) rotate(-12deg) scale(2.7); filter:blur(2px) brightness(1.6); }
@@ -1422,8 +1412,18 @@
               </svg>
               <div class="promise-sign-line"></div>
               <div id="promiseStamp" class="promise-stamp" aria-hidden="true">
-                <span class="ps-emblem"><svg viewBox="0 0 24 24"><path d="M12 2.4l2.7 6.1 6.7.5-5.1 4.3 1.6 6.5L12 16.7 6.1 19.8l1.6-6.5L2.6 9l6.7-.5z"/></svg></span>
-                <span class="ps-word">SEALED</span>
+                <svg class="ps-seal" viewBox="0 0 100 100">
+                  <defs><linearGradient id="psGold" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#FBE7A8"/><stop offset="0.5" stop-color="#D2A340"/><stop offset="1" stop-color="#9A6B1E"/>
+                  </linearGradient></defs>
+                  <circle class="ps-bg" cx="50" cy="50" r="46.5"/>
+                  <circle class="ps-ring-o" cx="50" cy="50" r="45"/>
+                  <circle class="ps-ticks" cx="50" cy="50" r="40.5"/>
+                  <circle class="ps-ring-i" cx="50" cy="50" r="35.5"/>
+                  <text class="ps-txt ps-top" x="50" y="29.5">PROMISE</text>
+                  <path class="ps-check" d="M37 51 l8.6 9 17.4-20"/>
+                  <text class="ps-txt ps-bot" x="50" y="79">SEALED</text>
+                </svg>
               </div>
             </div>
             <div id="promiseMeta" style="font-size:11px; color:var(--dim); letter-spacing:0.04em; font-family:ui-monospace,'SF Mono',Menlo,monospace; margin-top:12px; line-height:16px;">// unsigned</div>
@@ -3030,13 +3030,9 @@
             </div>
           </div>
 
-          <!-- what starts to change -->
-          <div class="plan-card" id="planCurveCard">
-            <div class="plan-curve-head">
-              <span>What starts to change</span><span style="color:#2BFF9A">day 30</span>
-            </div>
-            <div class="plan-bars" id="planBars"><!-- filled by renderPlanScreen --></div>
-          </div>
+          <!-- what starts to change — a grid of stat cards -->
+          <div class="plan-section-head"><span>What starts to change</span><span class="psh-day">by day 30</span></div>
+          <div class="plan-stats" id="planStats"><!-- filled by renderPlanScreen --></div>
 
           <!-- Their own words, quoted back -->
           <div class="plan-card plan-why" id="planWhyCard" style="display:none;">
@@ -3268,10 +3264,31 @@
               box-shadow:0 0 10px color-mix(in srgb, var(--accent) 45%, transparent);
               width:0; transition:width 1s cubic-bezier(.22,1,.36,1); }
             .plan-bar-val { font-size:13px; font-weight:800; color:var(--accent-hi); width:38px; text-align:right; font-variant-numeric:tabular-nums; }
-            .plan-why { background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.08); }
+            .plan-why { background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.08); margin-top:10px; padding:12px 14px; }
             .plan-why-label { font-size:10px; letter-spacing:0.12em; text-transform:uppercase; font-weight:700; color:var(--muted); }
-            .plan-why-quote { margin-top:8px; font-size:15px; line-height:21px; color:#fff; font-style:italic; letter-spacing:-0.1px; }
+            .plan-why-quote { margin-top:6px; font-size:14px; line-height:19px; color:#fff; font-style:italic; letter-spacing:-0.1px; }
             .plan-cred { margin-top:16px; text-align:center; font-size:11.5px; line-height:16px; color:var(--muted); letter-spacing:-0.05px; }
+            /* ── 30-day plan reformatted as a card grid ── */
+            .step[data-step="16"] { gap:6px; }
+            .plan-section-head { display:flex; align-items:baseline; justify-content:space-between;
+              margin:13px 2px 8px; font-size:11px; letter-spacing:0.13em; text-transform:uppercase; font-weight:800; color:var(--muted); }
+            .plan-section-head .psh-day { color:rgba(255,255,255,0.5); letter-spacing:0.08em; }
+            .plan-stats { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+            .pstat { position:relative; padding:11px 13px 12px; border-radius:15px;
+              background:linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.018));
+              border:1px solid rgba(255,255,255,0.09);
+              box-shadow:0 1px 0 rgba(255,255,255,0.05) inset, 0 8px 18px rgba(0,0,0,0.28); }
+            .pstat-name { font-size:12px; line-height:1.2; font-weight:700; color:rgba(235,235,245,0.72);
+              letter-spacing:-0.01em; min-height:2.4em; }
+            .pstat-val { font-size:24px; font-weight:850; letter-spacing:-0.03em; line-height:1; margin-top:3px; color:var(--c); }
+            .pstat-val span { font-size:13px; font-weight:800; opacity:0.75; margin-left:1px; }
+            .pstat-bar { height:5px; border-radius:3px; background:rgba(255,255,255,0.08); margin-top:9px; overflow:hidden; }
+            .pstat-bar i { display:block; height:100%; width:0; border-radius:3px; background:var(--c);
+              box-shadow:0 0 8px color-mix(in srgb, var(--c) 55%, transparent); transition:width 1s cubic-bezier(.22,1,.36,1); }
+            .step.on .pstat { animation:gItemIn .5s cubic-bezier(.22,1,.36,1) both; }
+            .step.on .pstat:nth-child(2){ animation-delay:.06s; }
+            .step.on .pstat:nth-child(3){ animation-delay:.12s; }
+            .step.on .pstat:nth-child(4){ animation-delay:.18s; }
           </style>
         </div>
 
@@ -3423,20 +3440,28 @@
 
             <div class="pg-logo">CORE</div>
 
-            <div class="portal" id="portalCore" aria-hidden="true">
-              <span class="p-rays"></span>
-              <span class="p-ring r1"></span>
-              <span class="p-ring r2"></span>
-              <span class="p-ring r3"></span>
-              <span class="p-glow"></span>
-              <span class="p-core"></span>
+            <div class="pg-stage">
+              <div class="portal" id="portalCore" aria-hidden="true">
+                <span class="p-rays"></span>
+                <span class="p-ring r1"></span>
+                <span class="p-ring r2"></span>
+                <span class="p-ring r3"></span>
+                <span class="p-glow"></span>
+                <span class="p-core"></span>
+                <!-- a figure about to step through -->
+                <svg class="p-figure" viewBox="0 0 44 72" aria-hidden="true">
+                  <circle cx="22" cy="13" r="8"/>
+                  <path d="M7 72 V41 a15 15 0 0 1 30 0 V72 Z"/>
+                </svg>
+                <span class="p-floor"></span>
+              </div>
+
+              <h1 class="pg-headline">Your transformation<br/><span class="pg-grad">starts here.</span></h1>
+              <p class="pg-sub" id="pgSub">One step through — your plan and coach are waiting.</p>
             </div>
 
-            <h1 class="pg-headline">Your transformation<br/><span class="pg-grad">starts here.</span></h1>
-            <p class="pg-sub" id="pgSub">Your plan is built. Your coach is ready. Step through.</p>
-
             <button type="button" class="pg-cta" id="portalCta">
-              <span>Enter CORE</span>
+              <span>Step through</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
             </button>
           </div>
@@ -3457,15 +3482,18 @@
               background:
                 radial-gradient(130% 78% at 50% 32%, rgba(200,208,222,0.12) 0%, rgba(120,128,140,0.07) 26%, transparent 58%),
                 #000;
-              display:flex; flex-direction:column; align-items:center; justify-content:center;
+              display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
               padding: max(56px, calc(env(safe-area-inset-top,0px) + 38px)) 26px
                        max(28px, calc(env(safe-area-inset-bottom,0px) + 20px));
               box-sizing:border-box; text-align:center; overflow:hidden;
             }
             .pg-logo {
               font-size:12px; font-weight:800; letter-spacing:0.52em; color:#D2D7E0;
-              text-indent:0.52em; opacity:0.85; margin-bottom:30px;
+              text-indent:0.52em; opacity:0.85; margin-bottom:18px;
             }
+            /* the portal + copy sit centred in the space; the CTA falls to the bottom */
+            .pg-stage { flex:1 1 auto; width:100%; display:flex; flex-direction:column;
+              align-items:center; justify-content:center; min-height:0; }
             /* ---- portal centerpiece ---- */
             .portal {
               position:relative; width:158px; height:158px; margin:10px auto 4px;
@@ -3501,12 +3529,32 @@
               background:radial-gradient(circle, rgba(220,226,235,0.55), rgba(150,158,172,0.24) 55%, transparent 72%);
               filter:blur(4px); animation:pgPulse 2.8s ease-in-out infinite;
             }
+            /* a tunnel of concentric light = depth, like an opening you step into */
             .p-core {
-              width:52px; height:52px;
-              background:radial-gradient(circle at 50% 42%, #ffffff, #E6EAF0 40%, #AEB6C4 78%);
-              box-shadow:0 0 30px rgba(234,237,242,0.9), 0 0 60px rgba(206,212,222,0.55);
-              animation:pgPulse 2.8s ease-in-out infinite;
+              width:98px; height:98px;
+              background:radial-gradient(circle at 50% 47%,
+                #ffffff 0%, #ffffff 6%, rgba(230,234,240,0) 9%,
+                rgba(230,234,240,0.92) 15%, rgba(230,234,240,0) 19.5%,
+                rgba(206,212,222,0.7) 28%, rgba(206,212,222,0) 35%,
+                rgba(174,182,196,0.5) 46%, rgba(174,182,196,0) 56%,
+                rgba(150,158,172,0.32) 66%, transparent 76%);
+              box-shadow:0 0 40px rgba(234,237,242,0.65), 0 0 80px rgba(206,212,222,0.4);
+              animation:pgPulse 3.4s ease-in-out infinite;
             }
+            /* a glowing threshold + a backlit figure standing before the portal */
+            .p-floor {
+              width:124px; height:30px; left:50%; bottom:-2px; transform:translateX(-50%);
+              border-radius:50%;
+              background:radial-gradient(ellipse at 50% 50%, rgba(222,228,236,0.55), rgba(206,212,222,0) 70%);
+              filter:blur(2px); z-index:2; animation:pgPulse 3.4s ease-in-out infinite;
+            }
+            .p-figure {
+              position:absolute; left:50%; bottom:15px; width:40px; height:auto;
+              transform:translateX(-50%); z-index:3; fill:#08080e;
+              filter:drop-shadow(0 0 6px rgba(222,228,236,0.92)) drop-shadow(0 0 16px rgba(206,212,222,0.55));
+              animation:pgStep 3.6s ease-in-out infinite;
+            }
+            @keyframes pgStep { 0%,100%{ transform:translateX(-50%) translateY(0); } 50%{ transform:translateX(-50%) translateY(-2.5px); } }
             @keyframes pgSpin { to { transform:rotate(360deg); } }
             @keyframes pgSpinRev { to { transform:rotate(-360deg); } }
             @keyframes pgPulse { 0%,100%{ transform:scale(1); opacity:0.92; } 50%{ transform:scale(1.12); opacity:1; } }
@@ -4337,29 +4385,26 @@
         }
       }, 120);
     })();
-    const wrap = document.getElementById('planBars');
+    const wrap = document.getElementById('planStats');
     if (wrap) {
       wrap.innerHTML = bars.map(function (b) {
-        return '<div class="plan-bar-row"><div class="plan-bar-name">' + b.name + '</div>' +
-          '<div class="plan-bar-track"><div class="plan-bar-fill" data-to="' + b.to + '" ' +
-          'style="background:linear-gradient(90deg, color-mix(in srgb, ' + b.c + ' 55%, transparent), ' + b.c + ');' +
-          'box-shadow:0 0 10px color-mix(in srgb, ' + b.c + ' 50%, transparent)"></div></div>' +
-          '<div class="plan-bar-val" data-to="' + b.to + '" style="color:' + b.c + '">0%</div></div>';
+        return '<div class="pstat" style="--c:' + b.c + '">'
+          + '<div class="pstat-name">' + b.name + '</div>'
+          + '<div class="pstat-val" data-to="' + b.to + '">0<span>%</span></div>'
+          + '<div class="pstat-bar"><i data-to="' + b.to + '"></i></div></div>';
       }).join('');
-      // setTimeout (not rAF) so the fill lands reliably even if the step
-      // isn't painted/visible yet; the CSS transition still animates it in.
       setTimeout(function () {
-        wrap.querySelectorAll('.plan-bar-fill').forEach(function (f) {
+        wrap.querySelectorAll('.pstat-bar i').forEach(function (f) {
           f.style.width = f.getAttribute('data-to') + '%';
         });
-        // count the % values up in sync with the bars filling
-        wrap.querySelectorAll('.plan-bar-val').forEach(function (el) {
+        wrap.querySelectorAll('.pstat-val').forEach(function (el) {
           var to = parseInt(el.getAttribute('data-to'), 10) || 0, t0 = null;
+          var num = el.firstChild;  // the "0" text node, before the <span>%</span>
           function tick(ts) {
             if (t0 === null) t0 = ts;
             var k = Math.min(1, (ts - t0) / 1000);
-            var e = 1 - Math.pow(1 - k, 3);          // easeOutCubic, matches the bar
-            el.textContent = Math.round(to * e) + '%';
+            var e = 1 - Math.pow(1 - k, 3);
+            num.textContent = Math.round(to * e);
             if (k < 1) requestAnimationFrame(tick);
           }
           requestAnimationFrame(tick);
@@ -6985,7 +7030,7 @@ body.on-autoadvance .stepwrap::after {
    ============================================================ */
 
 /* ── Step 6 · 30-day plan — projected life-score hero ── */
-.plan-proj { display:flex; align-items:center; gap:16px; margin:8px 0 2px; padding:15px 18px;
+.plan-proj { display:flex; align-items:center; gap:16px; margin:6px 0 0; padding:12px 16px;
   background:linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.02));
   border:1px solid rgba(255,255,255,0.09); border-radius:20px;
   box-shadow:0 1px 0 rgba(255,255,255,0.06) inset, 0 12px 28px rgba(0,0,0,0.34); }
