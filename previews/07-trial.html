@@ -4102,6 +4102,7 @@
     if (isDemoStep(n)) startDemo(n); else stopAllDemos();
     // Step-enter hooks (keyed by body id — unchanged by the reorder)
     if (n === 5 || n === 6 || n === 9) paintHabitStep(n);   // duration / amount / reason
+    if (n === 9 && window.__resetReasonCloud) window.__resetReasonCloud();  // fresh spinning wheel on (re)entry
     if (n === 7) renderSacrifice();                          // life sacrificed
     if (n === 8) renderGraph(n);                             // combined with/without-Core graph
     if (n === 13) seedTriggersFromBlocker();
@@ -5812,7 +5813,34 @@
   }
   // vapeYears + vapeAmount are now populated dynamically by paintHabitStep()
   // so we DON'T pre-wire them here (no static rows to attach to).
-  wireSingleSelect('#vapeReason',    'reason',   'vapeReason', '.reason-orb');
+  // Reason "star" (step 9): pick an orb -> freeze the wheel cleanly, then zoom
+  // into the chosen orb and hand off to the next step. Custom (not
+  // wireSingleSelect) so we control the transition.
+  (function reasonCloud() {
+    const cloud = document.getElementById('vapeReason');
+    if (!cloud) return;
+    const orbs = Array.prototype.slice.call(cloud.querySelectorAll('.reason-orb'));
+    let picking = false;
+    orbs.forEach(function (orb) {
+      orb.addEventListener('click', function () {
+        if (picking) return; picking = true;
+        orbs.forEach(function (o) { o.classList.remove('sel'); });
+        orb.classList.add('sel');
+        state.vapeReason = orb.dataset.reason;
+        cloud.classList.add('frozen');                 // stop the spin instantly (no twist)
+        requestAnimationFrame(function () { cloud.classList.add('zooming'); });
+        try { if (typeof haptic === 'function') haptic(14); } catch (_) {}
+        refreshCTA();
+        setTimeout(function () { picking = false; _swipeDir = 0; advance(); }, 560);
+      });
+    });
+    // Reset to a fresh, spinning wheel whenever we (re)enter the step — e.g. on Back.
+    window.__resetReasonCloud = function () {
+      picking = false;
+      cloud.classList.remove('frozen', 'zooming');
+      orbs.forEach(function (o) { o.classList.remove('sel'); });
+    };
+  })();
   // waterCups is the interactive jug (separate handler below)
 
   // ── Draggable baseline sliders (sleep / exercise / screen) ────────────
@@ -6909,10 +6937,30 @@ body.on-autoadvance .stepwrap::after {
   animation:roSpin 50s linear infinite; will-change:transform; }
 /* hold the wheel still while a finger is down (or once a choice is made) so it's
    effortless to tap a precise orb */
-.reason-cloud:active, .reason-cloud:has(.reason-orb.sel) { animation-play-state:paused; }
+/* Freeze the wheel AND the counter-rotation together (pausing only one made the
+   labels keep turning = "twisted"). :active holds it still under a finger;
+   .frozen holds it for the zoom-out. */
+.reason-cloud:active, .reason-cloud:active .ro-inner,
+.reason-cloud.frozen, .reason-cloud.frozen .ro-inner { animation-play-state:paused !important; }
+/* zoom-into-selection: the picked orb glides to centre and blooms huge while the
+   rest fall away, then the step hands off to the next one. */
+.reason-cloud.zooming { pointer-events:none; }
+/* the others fall away; the picked orb glides to centre + blooms huge. NOTE the
+   transform function lists must MATCH the base (translate·translate·scale) or the
+   browser jumps instead of animating. The step's own cross-fade hides them. */
+.reason-cloud.zooming .reason-orb:not(.sel) {
+  opacity:0; transform:translate(-50%,-50%) translate(var(--x),var(--y)) scale(.4);
+  transition:opacity .32s ease, transform .55s cubic-bezier(.5,0,.75,0);
+}
+.reason-cloud.zooming .reason-orb.sel {
+  z-index:5; transform:translate(-50%,-50%) translate(0px,0px) scale(3.2);
+  transition:transform .62s cubic-bezier(.45,0,.7,1);
+}
+.reason-cloud.zooming .reason-orb.sel::before { opacity:1; }
 .reason-orb {
   position:absolute; top:50%; left:50%; width:100px; height:100px; isolation:isolate;
-  transform:translate(-50%,-50%) translate(var(--x), var(--y));
+  /* 3-function transform (translate·translate·scale) so the zoom can interpolate */
+  transform:translate(-50%,-50%) translate(var(--x), var(--y)) scale(1);
   border-radius:50%; cursor:pointer; padding:0; border:1.5px solid rgba(255,255,255,0.14);
   background:radial-gradient(130% 130% at 50% 22%, color-mix(in srgb, var(--col) 17%, rgba(255,255,255,0.05)), rgba(255,255,255,0.012) 70%);
   box-shadow:0 1px 0 rgba(255,255,255,0.10) inset, 0 12px 26px rgba(0,0,0,0.42);
@@ -6946,13 +6994,6 @@ body.on-autoadvance .stepwrap::after {
 .reason-orb.sel {
   background:radial-gradient(130% 130% at 50% 22%, color-mix(in srgb, var(--col) 38%, transparent), color-mix(in srgb, var(--col) 9%, transparent) 72%);
 }
-.step.on .reason-orb { animation:orbPop .5s cubic-bezier(.34,1.56,.64,1) both; }
-.step.on .reason-orb:nth-child(1){ animation-delay:.05s; }
-.step.on .reason-orb:nth-child(2){ animation-delay:.11s; }
-.step.on .reason-orb:nth-child(3){ animation-delay:.17s; }
-.step.on .reason-orb:nth-child(4){ animation-delay:.23s; }
-.step.on .reason-orb:nth-child(5){ animation-delay:.29s; }
-@keyframes orbPop { 0%{opacity:0;} 100%{opacity:1;} }
 @keyframes roSpin { to { transform:rotate(360deg); } }
 @keyframes roSpinRev { to { transform:rotate(-360deg); } }
 @media (prefers-reduced-motion: reduce){ .reason-cloud, .reason-orb .ro-inner { animation:none !important; } }
