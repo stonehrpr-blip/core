@@ -601,23 +601,17 @@
     opacity:0; pointer-events:none; z-index:6;
     transform:translate(-50%,-50%) rotate(-11deg) scale(2.4);
   }
-  /* the gold lives on the SVG, with the shadow on the SVG too so the stamp-down
-     filter on .promise-stamp doesn't wipe it out. */
+  /* a rubber-stamp impression — single green ink, broken edges, soft shadow */
   .promise-stamp .ps-seal { width:100%; height:100%; display:block; overflow:visible;
-    filter:drop-shadow(0 5px 12px rgba(0,0,0,0.6)) drop-shadow(0 0 10px rgba(212,163,64,0.35)); }
-  .ps-bg     { fill:#1b1305; }
-  .ps-shine  { fill:url(#psShine); }
-  .ps-ring-o { fill:none; stroke:url(#psGold); stroke-width:2.4; }
-  .ps-ring-i { fill:none; stroke:url(#psGold); stroke-width:1; opacity:0.9; }
-  .ps-ticks  { fill:none; stroke:url(#psGold); stroke-width:3.2; stroke-dasharray:0.5 4.7; stroke-linecap:round; opacity:0.92; }
-  .ps-arc { fill:url(#psGold);
+    filter:drop-shadow(0 2px 6px rgba(0,0,0,0.55)); }
+  .ps-ink   { --ink:#E8BD55; opacity:0.95; }
+  .ps-ring-o { fill:none; stroke:var(--ink); stroke-width:3.4; }
+  .ps-ring-i { fill:none; stroke:var(--ink); stroke-width:1.3; opacity:0.85; }
+  .ps-arc { fill:var(--ink);
     font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
-    font-weight:800; font-size:8.6px; letter-spacing:1.5px; }
-  .ps-emb   { fill:none; stroke:url(#psGold); stroke-width:1.1; opacity:0.85; }
-  .ps-check { fill:none; stroke:url(#psGold); stroke-width:3.4; stroke-linecap:round; stroke-linejoin:round; }
-  .ps-core { fill:url(#psGold); text-anchor:middle;
-    font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
-    font-weight:800; font-size:7px; letter-spacing:1.4px; }
+    font-weight:800; font-size:7.6px; letter-spacing:1px; }
+  .ps-arc-b { font-size:7.2px; letter-spacing:3px; }
+  .ps-check { fill:none; stroke:var(--ink); stroke-width:4.2; stroke-linecap:round; stroke-linejoin:round; }
   .promise-stamp.on { animation: stampDown .6s cubic-bezier(.3,1.7,.5,1) forwards; }
   @keyframes stampDown {
     0%   { opacity:0; transform:translate(-50%,-50%) rotate(-12deg) scale(2.7); filter:blur(2px) brightness(1.6); }
@@ -1412,24 +1406,21 @@
               <div id="promiseStamp" class="promise-stamp" aria-hidden="true">
                 <svg class="ps-seal" viewBox="0 0 100 100">
                   <defs>
-                    <linearGradient id="psGold" x1="0.1" y1="0" x2="0.9" y2="1">
-                      <stop offset="0" stop-color="#FFF1C2"/><stop offset="0.42" stop-color="#E7BE5E"/>
-                      <stop offset="0.72" stop-color="#C0922F"/><stop offset="1" stop-color="#8A5E18"/>
-                    </linearGradient>
-                    <radialGradient id="psShine" cx="0.38" cy="0.3" r="0.75">
-                      <stop offset="0" stop-color="#fff" stop-opacity="0.35"/><stop offset="0.4" stop-color="#fff" stop-opacity="0"/>
-                    </radialGradient>
-                    <path id="psTop" d="M50 50 m-32 0 a32 32 0 0 1 64 0"/>
+                    <!-- rough, broken edges so the ink reads as a real rubber stamp -->
+                    <filter id="psRough" x="-25%" y="-25%" width="150%" height="150%">
+                      <feTurbulence type="fractalNoise" baseFrequency="0.052" numOctaves="2" seed="7" result="n"/>
+                      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/>
+                    </filter>
+                    <path id="psTop" d="M50 50 m-34 0 a34 34 0 0 1 68 0"/>
+                    <path id="psBot" d="M50 50 m-31 0 a31 31 0 0 0 62 0"/>
                   </defs>
-                  <circle class="ps-bg" cx="50" cy="50" r="47"/>
-                  <circle class="ps-shine" cx="50" cy="50" r="47"/>
-                  <circle class="ps-ring-o" cx="50" cy="50" r="45.5"/>
-                  <circle class="ps-ticks" cx="50" cy="50" r="41"/>
-                  <circle class="ps-ring-i" cx="50" cy="50" r="36"/>
-                  <text class="ps-arc"><textPath href="#psTop" startOffset="50%">PROMISE&#160;&#160;·&#160;&#160;SEALED</textPath></text>
-                  <circle class="ps-emb" cx="50" cy="52.5" r="15.5"/>
-                  <path class="ps-check" d="M43 52.5 l5.2 5.4 9.6-11.4"/>
-                  <text class="ps-core" x="50" y="80.5">· CORE ·</text>
+                  <g class="ps-ink" filter="url(#psRough)">
+                    <circle class="ps-ring-o" cx="50" cy="50" r="46"/>
+                    <circle class="ps-ring-i" cx="50" cy="50" r="38.5"/>
+                    <text class="ps-arc"><textPath href="#psTop" startOffset="50%">PROMISE&#160;·&#160;SEALED</textPath></text>
+                    <text class="ps-arc ps-arc-b"><textPath href="#psBot" startOffset="50%">·&#160;CORE&#160;·</textPath></text>
+                    <path class="ps-check" d="M40 50.5 l6.4 6.6 13-15.6"/>
+                  </g>
                 </svg>
               </div>
             </div>
@@ -3024,7 +3015,7 @@
             <div class="pp-ring">
               <svg viewBox="0 0 120 120" aria-hidden="true">
                 <defs><linearGradient id="planGrad" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0" stop-color="#00F23C"/><stop offset="0.55" stop-color="#34FF66"/><stop offset="1" stop-color="#8CFF9E"/>
+                  <stop offset="0" stop-color="#00D936"/><stop offset="0.55" stop-color="#08F23E"/><stop offset="1" stop-color="#2BFF57"/>
                 </linearGradient></defs>
                 <circle class="pp-trk" cx="60" cy="60" r="52"/>
                 <circle class="pp-arc" id="planArc" cx="60" cy="60" r="52"/>
@@ -3451,10 +3442,33 @@
                 <span class="p-ring r3"></span>
                 <span class="p-glow"></span>
                 <span class="p-core"></span>
-                <!-- a figure about to step through -->
-                <svg class="p-figure" viewBox="0 0 44 72" aria-hidden="true">
-                  <circle cx="22" cy="13" r="8"/>
-                  <path d="M7 72 V41 a15 15 0 0 1 30 0 V72 Z"/>
+                <!-- a real backlit person, standing on the threshold about to step through -->
+                <svg class="p-figure" viewBox="0 0 60 140" aria-hidden="true">
+                  <ellipse cx="30" cy="13" rx="8.4" ry="9.4"/>
+                  <path d="M30 22.5
+                    C 23 22.5 18.8 25.5 17.8 31.5
+                    C 16.9 36.5 16 43.5 15.4 51.5
+                    C 15.2 54.6 18 54.8 18.4 51.8
+                    C 19 45.5 19.9 39 20.9 33.8
+                    L 20.9 67
+                    C 20.9 71 20.8 75 20.3 80.5
+                    L 18.6 127.5
+                    C 18.5 130.6 18.8 132 21.5 132
+                    L 26 132
+                    C 27.6 132 28.1 131 28.3 127.8
+                    L 29.4 91
+                    C 29.6 88 30.4 88 30.6 91
+                    L 31.7 127.8
+                    C 31.9 131 32.4 132 34 132
+                    L 38.5 132
+                    C 41.2 132 41.5 130.6 41.4 127.5
+                    L 39.7 80.5
+                    C 39.2 75 39.1 71 39.1 67
+                    L 39.1 33.8
+                    C 40.1 39 41 45.5 41.6 51.8
+                    C 42 54.8 44.8 54.6 44.6 51.5
+                    C 44 43.5 43.1 36.5 42.2 31.5
+                    C 41.2 25.5 37 22.5 30 22.5 Z"/>
                 </svg>
                 <span class="p-floor"></span>
               </div>
@@ -5978,13 +5992,11 @@
       orb.addEventListener('click', function () {
         if (picking) return; picking = true;
         state.vapeReason = orb.dataset.reason;
-        cloud.classList.add('frozen', 'shattering');   // stop the wheel, then dissolve in place
+        cloud.classList.add('frozen', 'shattering');   // stop the wheel, then fade away in place
         refreshCTA();
-        try { if (typeof haptic === 'function') haptic([0, 14, 26, 36]); } catch (_) {}
-        burst();
-        // let the disintegration breathe, then fade to the next step (the dust
-        // lingers over the top since it lives on the phone, not the step).
-        setTimeout(function () { picking = false; _swipeDir = 0; advance(); }, 640);
+        try { if (typeof haptic === 'function') haptic(18); } catch (_) {}
+        // No particles, no movement — the orbs simply vanish, then we advance.
+        setTimeout(function () { picking = false; _swipeDir = 0; advance(); }, 360);
       });
     });
     // Reset to a fresh, spinning wheel whenever we (re)enter the step — e.g. on Back.
@@ -7098,7 +7110,7 @@ body.on-autoadvance .stepwrap::after {
   transition:stroke-dashoffset 1.1s cubic-bezier(.22,1,.36,1); }
 .pp-core { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
 .pp-num { font-size:33px; font-weight:850; letter-spacing:-.03em; line-height:1;
-  background:linear-gradient(180deg,#fff,#34FF5E); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+  background:linear-gradient(180deg,#4BFF73,#00E03A); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
 .pp-of { font-size:10px; font-weight:700; color:rgba(235,235,245,0.4); margin-top:2px; }
 .pp-side { flex:1; min-width:0; }
 .pp-tag { font-size:14px; font-weight:650; color:rgba(255,255,255,0.92); line-height:1.25; letter-spacing:-.01em; }
@@ -7123,10 +7135,10 @@ body.on-autoadvance .stepwrap::after {
 .reason-cloud.frozen, .reason-cloud.frozen .ro-inner { animation-play-state:paused !important; }
 /* zoom-into-selection: the picked orb glides to centre and blooms huge while the
    rest fall away, then the step hands off to the next one. */
-/* on pick: each orb fades out IN PLACE (no shrink, no move) while its dust drifts */
+/* on pick: every orb simply fades out IN PLACE — no shrink, no move, no particles */
 .reason-cloud.shattering { pointer-events:none; }
-.reason-cloud.shattering .reason-orb { opacity:0; transition:opacity .5s ease; }
-.reason-cloud.shattering .reason-orb::before { opacity:0; transition:opacity .4s ease; }
+.reason-cloud.shattering .reason-orb { opacity:0; transition:opacity .28s ease; }
+.reason-cloud.shattering .reason-orb::before { opacity:0; transition:opacity .24s ease; }
 /* a single shard of an orb, flung out by JS then left to fall */
 .ro-particle { position:absolute; border-radius:50%; pointer-events:none; z-index:400;
   box-shadow:0 0 7px currentColor; }
