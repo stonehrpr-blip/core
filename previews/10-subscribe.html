@@ -265,7 +265,7 @@
 
       <div class="bullets stage d4">
         <div class="b"><span class="bk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 11-12"/></svg></span><span class="bt">Everything unlocked — <b>quests, AI coach, all 6 stats</b></span></div>
-        <div class="b"><span class="bk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 11-12"/></svg></span><span class="bt">First month <b>80% off</b> — just $0.99 to start</span></div>
+        <div class="b"><span class="bk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 11-12"/></svg></span><span class="bt" id="bullOffer">First month <b>80% off</b> — just $0.99 to start</span></div>
         <div class="b"><span class="bk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 11-12"/></svg></span><span class="bt">Cancel anytime — <b>we remind you before renewal</b></span></div>
       </div>
 
@@ -333,9 +333,11 @@
     var PLANS={
       monthly:{ name:'Monthly', desc:'$0.99 first month, then $4.99/mo', price:'$0.99', per:'first month', save:'INTRO OFFER', pill:'80% off your first month',
                 today:'$0.99', renew:'$4.99 / month', offerM1:'first month', offerM2:'intro offer', offerThen:'then <b>$4.99/month</b> · cancel anytime',
+                bullet:'First month <b>80% off</b> — just $0.99 to start',
                 fine:'$0.99 for your first month, then $4.99/month. Cancel anytime.' },
       annual:{ name:'Annual', desc:'Billed yearly · best value', price:'$39.99', per:'/yr · save 33%', save:'SAVE 33%', pill:'Save 33% · best value',
                today:'$39.99', renew:'$39.99 / year', offerM1:'per year', offerM2:'just $3.33/mo', offerThen:'<b>$39.99/year</b> · cancel anytime',
+               bullet:'<b>Save 33%</b> — best value, billed yearly',
                fine:'$39.99/year (about $3.33/mo). Cancel anytime.' }
     };
     var sel='monthly';
@@ -349,6 +351,7 @@
       qs('#offerThen').innerHTML=p.offerThen;
       qs('#fineSub').textContent=p.fine;
       qs('#ctaBtn').querySelector('.lbl').textContent='Start for '+p.today;
+      var bo=qs('#bullOffer'); if(bo && p.bullet) bo.innerHTML=p.bullet;
       var a=qs('#offerAnchor'); if(a){ if(ANCHOR[sel]){ a.textContent=ANCHOR[sel]; a.style.display=''; } else { a.style.display='none'; } }
     }
     function renderPlans(){

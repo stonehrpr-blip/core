@@ -4227,6 +4227,7 @@
     if (n === 7) renderSacrifice();                          // life sacrificed
     if (n === 8) renderGraph(n);                             // combined with/without-Core graph
     if (n === 13) seedTriggersFromBlocker();
+    if (n === 22 && window.__paintCommit) window.__paintCommit();   // reflect stored level
     if (n === 16) renderPlanScreen();
     if (n === 17) renderPaywall();
     renderProgress();
@@ -6367,6 +6368,20 @@
         else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { e.preventDefault(); setLevel(Math.max(1, (state.commitment || 1) - 1)); }
       });
     });
+    // Repaint the meter from stored state whenever the step is (re)entered, so
+    // returning to it (or a mid-trial restore) always shows the chosen level
+    // instead of an empty meter with an enabled Next button.
+    window.__paintCommit = function () {
+      const lvl = state.commitment;
+      bars.forEach(x => x.classList.toggle('on', !!lvl && +x.dataset.lvl <= lvl));
+      if (lvl) {
+        if (label) { label.textContent = WORDS[lvl]; label.classList.remove('hint'); }
+        if (note)  { note.textContent = NOTES[lvl]; note.classList.add('show'); }
+      } else {
+        if (label) { label.textContent = 'tap or drag to set'; label.classList.add('hint'); }
+        if (note)  { note.textContent = ''; note.classList.remove('show'); }
+      }
+    };
   })();
 
   // ── Multi-select for triggers (step 16) ───────────────────────────────
