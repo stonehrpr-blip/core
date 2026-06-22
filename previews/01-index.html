@@ -104,8 +104,20 @@
     .phone[data-bg-skip] .bg {
       position: absolute; inset: 0; z-index: 0;
       background:
-        radial-gradient(60% 42% at 50% 36%, rgba(255,255,255,0.022) 0%, transparent 62%),
+        /* cool halo behind the mark */
+        radial-gradient(56% 40% at 50% 33%, rgba(206,212,222,0.055) 0%, rgba(255,255,255,0.018) 30%, transparent 62%),
+        /* a soft horizon of light rising from the floor — depth */
+        radial-gradient(135% 46% at 50% 118%, rgba(206,212,222,0.085) 0%, rgba(206,212,222,0.02) 38%, transparent 64%),
+        /* cinematic edge vignette */
+        radial-gradient(108% 108% at 50% 46%, transparent 56%, rgba(0,0,0,0.5) 100%),
         #000 !important;
+    }
+    /* fine film grain — premium matte texture, self-contained SVG noise */
+    .phone[data-bg-skip] .bg::after {
+      content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+      opacity: 0.045; mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='150' height='150'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='150' height='150' filter='url(%23n)'/></svg>");
+      background-size: 150px 150px;
     }
     /* Sparse starfield — tiny, low-opacity, slow twinkle. Quiet universe. */
     .stars { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
@@ -283,10 +295,23 @@
       letter-spacing: -2.6px; line-height: 0.96;
       color: var(--ink);
     }
+    /* brushed-steel display word with a slow metallic sheen sweeping across */
     .hero h1 .g {
-      color: #fff;
-      -webkit-text-fill-color: #fff;
-      text-shadow: 0 0 26px rgba(206,212,222,0.14);
+      background: linear-gradient(104deg,
+        #c4c9d2 0%, #ffffff 19%, #eaedf2 32%, #c8cdd6 50%,
+        #ffffff 70%, #d2d7e0 86%, #c4c9d2 100%);
+      background-size: 220% 100%;
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; color: transparent;
+      filter: drop-shadow(0 1px 1px rgba(0,0,0,0.35)) drop-shadow(0 0 26px rgba(206,212,222,0.22));
+      animation: coreSheen 7.5s ease-in-out infinite;
+    }
+    @keyframes coreSheen {
+      0%, 100% { background-position: 118% 0; }
+      50%      { background-position: -18% 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .hero h1 .g { animation: none; background-position: 50% 0; }
     }
 
     /* ── Typewriter sub-line ── */
