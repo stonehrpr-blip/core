@@ -501,6 +501,57 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   .scroll .act-card{align-items:center;text-align:center;}
   /* perfect-circle top buttons — override shared min-height:44px that leaves width at 38px */
   .topbar .back,.topbar .help-btn{width:44px;height:44px;min-width:44px;min-height:44px;padding:0;aspect-ratio:1/1;border-radius:50%;}
+  /* keep action-card icons centered */
+  .scroll .act-card .act-ic{margin-left:auto;margin-right:auto;}
+  /* full-width "Build a Program" card */
+  .act-card.act-wide{grid-column:1 / -1;flex-direction:row;align-items:center;justify-content:center;gap:14px;text-align:left;}
+  .act-card.act-wide .act-ic{margin:0;}
+  .act-card.act-wide .act-wt b{font-size:15.5px;font-weight:800;display:block;}
+  .act-card.act-wide .act-wt span{font-size:11.5px;color:var(--muted);}
+
+  /* ── Stepped question flow (setup + program) — trial-style sliding cards ── */
+  .quiz{position:absolute;inset:0;z-index:88;background:linear-gradient(180deg,#0b0c1a 0%,#06060f 60%,#050510 100%);
+    display:flex;flex-direction:column;transform:translateY(100%);transition:transform .42s cubic-bezier(.2,.8,.2,1);visibility:hidden;text-align:left;}
+  .quiz.on{transform:translateY(0);visibility:visible;}
+  .quiz-hd{display:flex;align-items:center;gap:12px;padding:54px 20px 10px;flex:none;}
+  .quiz-close{width:36px;height:36px;flex:none;border-radius:50%;border:1px solid var(--border);background:rgba(255,255,255,0.05);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-appearance:none;appearance:none;}
+  .quiz-close svg{width:18px;height:18px;}
+  .quiz-prog{flex:1;display:flex;gap:6px;}
+  .quiz-prog i{flex:1;height:4px;border-radius:99px;background:rgba(255,255,255,0.12);overflow:hidden;transition:background .3s;}
+  .quiz-prog i.done{background:var(--mc,#B388FF);}
+  .quiz-body{flex:1;overflow:hidden;position:relative;}
+  .quiz-track{display:flex;height:100%;transition:transform .42s cubic-bezier(.2,.8,.2,1);}
+  .quiz-step{flex:0 0 100%;width:100%;height:100%;padding:14px 24px 0;display:flex;flex-direction:column;overflow-y:auto;}
+  .quiz-step::-webkit-scrollbar{display:none;}
+  .quiz-eyebrow{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--mc,#B388FF);margin-bottom:10px;}
+  .quiz-q{font-size:27px;font-weight:800;letter-spacing:-0.6px;line-height:1.12;margin:0 0 8px;}
+  .quiz-sub{font-size:14px;color:var(--muted);line-height:1.45;margin:0 0 24px;}
+  .quiz-opts{display:flex;flex-direction:column;gap:11px;}
+  .quiz-opt{display:flex;align-items:center;gap:14px;padding:17px 16px;border-radius:18px;background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--text);font:inherit;cursor:pointer;text-align:left;-webkit-appearance:none;appearance:none;transition:border-color .16s,background .16s,transform .12s;}
+  .quiz-opt:active{transform:scale(.985);}
+  .quiz-opt.on{border-color:var(--mc,#B388FF);background:color-mix(in srgb,var(--mc,#B388FF) 14%,transparent);box-shadow:inset 0 0 0 1px var(--mc,#B388FF);}
+  .quiz-opt .qo-ic{width:44px;height:44px;flex:none;border-radius:13px;display:flex;align-items:center;justify-content:center;color:var(--mc,#B388FF);background:color-mix(in srgb,var(--mc,#B388FF) 15%,transparent);border:1px solid color-mix(in srgb,var(--mc,#B388FF) 30%,transparent);}
+  .quiz-opt .qo-ic svg{width:22px;height:22px;}
+  .quiz-opt .qo-t{flex:1;min-width:0;}
+  .quiz-opt .qo-t b{display:block;font-size:16px;font-weight:800;letter-spacing:-0.2px;}
+  .quiz-opt .qo-t span{font-size:12.5px;color:var(--muted);}
+  .quiz-opt .qo-chk{width:22px;height:22px;flex:none;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;color:transparent;transition:.16s;}
+  .quiz-opt.on .qo-chk{background:var(--mc,#B388FF);border-color:var(--mc,#B388FF);color:#fff;}
+  .quiz-opt .qo-chk svg{width:13px;height:13px;}
+  .quiz-review{display:flex;flex-direction:column;gap:10px;}
+  .quiz-day{border-radius:16px;background:rgba(255,255,255,0.04);border:1px solid var(--border);padding:13px 15px;}
+  .quiz-day-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+  .quiz-day-h b{font-size:15px;font-weight:900;}
+  .quiz-day-h span{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--mc,#B388FF);}
+  .quiz-ex{display:flex;align-items:center;gap:9px;padding:5px 0;font-size:13.5px;color:#D7DCEA;text-align:left;}
+  .quiz-ex i{width:6px;height:6px;border-radius:50%;flex:none;background:var(--ec,#B388FF);}
+  .quiz-ex span{color:var(--dim);font-size:11.5px;margin-left:auto;}
+  .quiz-foot{flex:none;padding:14px 24px calc(env(safe-area-inset-bottom,0px) + 22px);display:flex;gap:11px;}
+  .quiz-next{flex:1;padding:16px;border-radius:16px;border:none;font:inherit;font-size:16px;font-weight:800;color:#fff;background:var(--mc,#B388FF);cursor:pointer;transition:opacity .2s,transform .12s;box-shadow:0 8px 22px color-mix(in srgb,var(--mc,#B388FF) 28%,transparent);-webkit-appearance:none;appearance:none;}
+  .quiz-next:active{transform:scale(.98);}
+  .quiz-next[disabled]{opacity:.35;box-shadow:none;cursor:default;}
+  .quiz-back-b{flex:0 0 32%;padding:16px;border-radius:16px;border:1px solid var(--border);background:rgba(255,255,255,0.04);color:var(--text);font:inherit;font-size:15px;font-weight:800;cursor:pointer;-webkit-appearance:none;appearance:none;}
+  @media(prefers-reduced-motion:reduce){.quiz,.quiz-track{transition:none;}}
 </style>
   <link rel="stylesheet" href="_lib/core-responsive.css?v=20260619d">
   
@@ -573,13 +624,9 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
           <div class="act-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3.2"/></svg></div>
           <b>Physique Scan</b><span>Rate &amp; track your body</span>
         </a>
-        <button class="act-card" id="actQuick" type="button" style="--ac:#34D399">
-          <div class="act-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 3.5h6V6H9zM12 10v6M9 13h6"/></svg></div>
-          <b>Log a Workout</b><span>Add your sets &amp; reps</span>
-        </button>
-        <button class="act-card" id="actProgram" type="button" style="--ac:#B388FF">
+        <button class="act-card act-wide" id="actProgram" type="button" style="--ac:#B388FF">
           <div class="act-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></div>
-          <b>Build a Program</b><span>Your custom plan</span>
+          <div class="act-wt"><b>Build a Program</b><span>A custom plan, built around you</span></div>
         </button>
       </div>
 
@@ -590,21 +637,6 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
         <button class="ex-row" data-detail="overview" type="button" style="--ec:#0A84FF"><span class="ex-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span><span class="ex-t"><b>Training Overview</b><span>Calendar, streaks &amp; volume</span></span><span class="ex-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span></button>
         <button class="ex-row" data-detail="records" type="button" style="--ec:#FFCB3D"><span class="ex-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v3a5 5 0 0 1-10 0z"/><path d="M7 5H4v1a3 3 0 0 0 3 3M17 5h3v1a3 3 0 0 1-3 3M9 13h6l-1 4h-4z"/></svg></span><span class="ex-t"><b>Personal Records</b><span>Your best lifts &amp; 1RMs</span></span><span class="ex-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span></button>
         <button class="ex-row" data-detail="physique" type="button" style="--ec:#B388FF"><span class="ex-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3.2"/></svg></span><span class="ex-t"><b>Physique</b><span>Scan score &amp; progress photos</span></span><span class="ex-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span></button>
-      </div>
-
-      <!-- Quick wins -->
-      <div class="sec"><h2>Quick wins</h2><span class="meta">easy +Strength</span></div>
-      <div class="qw-note">Tap a movement — CORE opens the camera and counts your reps automatically. Every rep adds Strength.</div>
-      <div class="qw-grid" id="quickWins"></div>
-
-      <!-- Tools -->
-      <div class="sec"><h2>Tools</h2><span class="meta">handy during a workout</span></div>
-      <div class="qw-note">Little helpers for while you train — tap one to open it.</div>
-      <div class="tools-grid">
-        <button class="tool-card" data-tool="rest" type="button" style="--tc:#34D399"><span class="tc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg></span><span><b>Rest Timer</b><span>Counts down your break between sets</span></span></button>
-        <button class="tool-card" data-tool="plate" type="button" style="--tc:#0A84FF"><span class="tc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6M7 7v10M17 7v10M20 9v6M7 12h10"/></svg></span><span><b>Plate Calc</b><span>Which plates to load on the bar</span></span></button>
-        <button class="tool-card" data-tool="warmup" type="button" style="--tc:#FF9F0A"><span class="tc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1.6 3.6 4 4.6 4 8a4 4 0 0 1-8 0c0-1.3.5-2.1 1-2.7C9 11 12 8 12 3z"/></svg></span><span><b>Warm-up</b><span>Ramp-up sets before you go heavy</span></span></button>
-        <button class="tool-card" data-tool="orm" type="button" style="--tc:#FF6B6B"><span class="tc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v3a5 5 0 0 1-10 0z"/><path d="M7 5H4v1a3 3 0 0 0 3 3M17 5h3v1a3 3 0 0 1-3 3M9 13h6l-1 4h-4z"/></svg></span><span><b>1RM Calc</b><span>Estimate your max from any lift</span></span></button>
       </div>
 
       <!-- 3. Workout section (setup OR active) -->
@@ -660,21 +692,8 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
 
   <div class="toast" id="toast"></div>
 
-  <!-- Tool sheet (rest timer / plate calc / warm-up / 1RM) -->
-  <div class="scrim" id="toolScrim"></div>
-  <div class="sheet" id="toolSheet">
-    <div class="grip"></div>
-    <div class="sheet-hd"><span class="se" id="toolIc"></span><b id="toolTtl">Tool</b></div>
-    <div class="tool-body" id="toolBody"></div>
-  </div>
-
-  <!-- AI Program builder -->
-  <div class="scrim" id="progScrim"></div>
-  <div class="sheet" id="progSheet">
-    <div class="grip"></div>
-    <div class="sheet-hd"><b>Build a Program</b><span class="lvlpill" id="progStep" style="--mc:#B388FF">Set up</span></div>
-    <div class="prog-scroll" id="progBody"></div>
-  </div>
+  <!-- Stepped question flow (first-run setup + program builder) — trial-style sliding cards -->
+  <div class="quiz" id="quizOverlay"></div>
 </div>
 
 <script src="_lib/core-sfx.js"></script>
@@ -859,7 +878,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   function setGender(g){ var s=store(); s.gender=(g==='female'?'female':'male'); save(s); }
   // heat scale (training intensity) — also drives the legend
   // 8-step refined rainbow ramp: untrained (slate) → violet → blue → cyan → green → gold → orange → red (maxed)
-  var HEAT=[ {c:'#3B4150',label:'Untrained'},{c:'#8A6CF0',label:'Activated'},{c:'#4F8DFF',label:'Warming'},{c:'#1FB6D6',label:'Building'},{c:'#2FCB6E',label:'Worked'},{c:'#EFC024',label:'Strong'},{c:'#FF7A2E',label:'Hard'},{c:'#FF3B47',label:'Maxed'} ];
+  var HEAT=[ {c:'#2B3142',label:'Untrained'},{c:'#3E6DE8',label:'Activated'},{c:'#2E9BE6',label:'Warming'},{c:'#1FC0C8',label:'Building'},{c:'#36CF7A',label:'Worked'},{c:'#E7B53C',label:'Strong'},{c:'#F2823A',label:'Hard'},{c:'#F0524B',label:'Maxed'} ];
   function heatFor(lvl){ return HEAT[lvl]||HEAT[0]; }
   var MGROUPS=['chest','back','shoulders','arms','legs','core']; // trainable groups drawn over the base silhouette
   function renderDiagram(){
@@ -1067,39 +1086,10 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     }
   }
 
-  /* ───────── Workout section: setup OR active ───────── */
-  var pendingSetup={place:null,equipment:null,goal:null};
+  /* ───────── Workout section (active view; first-run setup is a popup quiz) ───────── */
   function renderWorkout(){
     var s=store(), w=qs('#workout');
-    if(!s.setup.done){ renderSetup(w); } else { renderActive(w,s); }
-  }
-  function renderSetup(w){
-    pendingSetup={place:null,equipment:null,goal:null};
-    w.innerHTML=
-      '<div class="sec"><h2>Set Up Your Training</h2></div>'+
-      '<div class="card fade">'+
-        grp('Where do you train?','place',[['gym','Gym'],['home','Home']])+
-        grp('Equipment','equipment',[['full','Full gym'],['dumbbells','Dumbbells'],['bodyweight','Bodyweight']])+
-        grp('Your goal','goal',[['muscle','Build muscle'],['fat','Lose fat'],['fitness','General fitness']])+
-        '<div class="setup-foot"><button class="btn" id="setupGo" disabled>Start Training</button></div>'+
-      '</div>';
-    w.querySelectorAll('.opt').forEach(function(o){
-      o.addEventListener('click',function(){
-        var k=this.getAttribute('data-k'), v=this.getAttribute('data-v');
-        pendingSetup[k]=v; sfx('tick');
-        w.querySelectorAll('.opt[data-k="'+k+'"]').forEach(function(x){x.classList.remove('on');});
-        this.classList.add('on');
-        qs('#setupGo').disabled=!(pendingSetup.place&&pendingSetup.equipment&&pendingSetup.goal);
-      });
-    });
-    qs('#setupGo').addEventListener('click',function(){
-      var s=store(); s.setup={done:true,place:pendingSetup.place,equipment:pendingSetup.equipment,goal:pendingSetup.goal,ts:Date.now()};
-      save(s); sfx('confirm'); toast('Setup complete — let’s train'); renderWorkout(); renderDiagram();
-    });
-  }
-  function grp(label,key,opts){
-    return '<div class="setup-q"><div class="ql">'+label+'</div><div class="opts">'+
-      opts.map(function(o){return '<button class="opt" data-k="'+key+'" data-v="'+o[0]+'">'+o[1]+'</button>';}).join('')+'</div></div>';
+    renderActive(w,s);
   }
   function renderActive(w,s){
     var inten=allIntensity();
@@ -1122,7 +1112,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
             '<span class="ht"><b>'+mInfo(h.muscle).name+'</b><span>'+sub+' · '+ago(h.ts)+'</span></span>'+
             '<span class="hv">+'+h.str+' STR</span></div>';
         }).join('')+'</div>'
-      : '<div class="card"><div class="empty">No workouts logged yet.<br>Tap a suggestion or Log a Workout to start.</div></div>';
+      : '<div class="card"><div class="empty">No workouts logged yet.<br>Tap a suggestion or a muscle to start.</div></div>';
     // saved-program adherence — surface the next day to do
     var prog=(s.routines||[]).filter(function(r){return r.program;});
     prog.sort(function(a,b){ return (((a.name.match(/Day (\d+)/)||[])[1]||0)) - (((b.name.match(/Day (\d+)/)||[])[1]||0)); });
@@ -1136,10 +1126,8 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
       progBanner+
       '<div class="sec"><h2>Suggested Today</h2><span class="meta">'+goalTip+'</span></div>'+
       '<div class="sugg fade">'+sug+'</div>'+
-      '<div style="margin-top:12px"><button class="btn str" id="logBtn">+ Log a Workout</button></div>'+
       '<div class="sec"><h2>Recent Workouts</h2></div>'+hist;
     w.querySelectorAll('.sug').forEach(function(b){ b.addEventListener('click',function(){ sfx('tick'); openSheet(this.getAttribute('data-m')); }); });
-    qs('#logBtn').addEventListener('click',function(){ sfx('tick'); openSheet(ranked[0].id); });
     var pn=qs('#progNext'); if(pn) pn.addEventListener('click',function(){
       var s2=store(); s2.programDay=(s2.programDay||0)+1; save(s2); sfx('tick'); startRoutine(this.getAttribute('data-id'));
     });
@@ -1235,36 +1223,6 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
   function renderChip(){ var e=qs('#strVal'); if(e) e.textContent=Math.round(strengthVal()); }
   var toastT; function toast(m){ var t=qs('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(function(){t.classList.remove('show');},1800); }
 
-  /* ───────── Quick wins — open the camera, it counts that movement ───────── */
-  var QUICK=[
-    {id:'pushups',     name:'Push-ups',     muscle:'chest',     type:'push',  c:'#FF6B6B'},
-    {id:'pushwide',    name:'Wide Push-ups',muscle:'chest',     type:'push',  c:'#FF9F0A'},
-    {id:'pushdiamond', name:'Diamond',      muscle:'arms',      type:'arms',  c:'#FF5BA8'},
-    {id:'squats',      name:'Squats',       muscle:'legs',      type:'squat', c:'#34D399'},
-    {id:'squatsumo',   name:'Sumo Squats',  muscle:'legs',      type:'squat', c:'#FFD60A'},
-    {id:'squatjump',   name:'Jump Squats',  muscle:'legs',      type:'squat', c:'#5AC8FA'},
-    {id:'pullups',     name:'Pull-ups',     muscle:'back',      type:'pull',  c:'#0A84FF'},
-    {id:'chinups',     name:'Chin-ups',     muscle:'back',      type:'pull',  c:'#8A6BFF'}
-  ];
-  // simple, distinct movement glyphs (press up / squat down / pull up / flex)
-  var QW_ICONS={
-    push:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19h14"/><path d="M12 15V5M8 9l4-4 4 4"/></svg>',
-    squat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19h14"/><path d="M12 5v10M8 11l4 4 4-4"/></svg>',
-    pull:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M9 6v2M15 6v2"/><path d="M12 21v-7M8 18l4-4 4 4"/></svg>',
-    arms:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9v6M9 7v10M15 7v10M18 9v6M9 12h6"/></svg>'
-  };
-  function renderQuickWins(){
-    var host=qs('#quickWins'); if(!host) return;
-    host.innerHTML=QUICK.map(function(q){ return '<a class="qw-card" href="strength-camera.html?ex='+q.id+'" style="--qc:'+q.c+'"><span class="qw-ic">'+(QW_ICONS[q.type]||QW_ICONS.push)+'</span><b>'+q.name+'</b></a>'; }).join('');
-  }
-  // open the log sheet directly on the muscle that needs work most
-  function openLogSheet(){
-    try{ var inten=allIntensity();
-      var lt=MUSCLES.map(function(m){return {id:m.id,t:inten[m.id].t};}).sort(function(a,b){return a.t-b.t;})[0];
-      openSheet(lt?lt.id:MUSCLES[0].id);
-    }catch(e){}
-  }
-  window.__openLogSheet=openLogSheet;
 
   /* ───────── Explore — dedicated detail pages ───────── */
   function openDetail(id){
@@ -1425,81 +1383,12 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     if(meta) meta.textContent=total+' sets · '+low.name+' lagging';
   }
 
-  // ── Tools: rest timer · plate calc · warm-up · 1RM ──
-  function round2_5(x){ return Math.round(x/2.5)*2.5; }
-  var toolScrim=qs('#toolScrim'), toolSheet=qs('#toolSheet');
-  function closeTool(){ if(toolScrim)toolScrim.classList.remove('show'); if(toolSheet)toolSheet.classList.remove('show'); stopRest(); }
-  if(toolScrim) toolScrim.addEventListener('click',closeTool);
-  var TOOL_IC={
-    rest:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg>',
-    plate:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6M7 7v10M17 7v10M20 9v6M7 12h10"/></svg>',
-    warmup:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1.6 3.6 4 4.6 4 8a4 4 0 0 1-8 0c0-1.3.5-2.1 1-2.7C9 11 12 8 12 3z"/></svg>',
-    orm:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v3a5 5 0 0 1-10 0z"/><path d="M7 5H4v1a3 3 0 0 0 3 3M17 5h3v1a3 3 0 0 1-3 3M9 13h6l-1 4h-4z"/></svg>'
-  };
-  var TOOL_TTL={rest:'Rest Timer',plate:'Plate Calculator',warmup:'Warm-up Sets',orm:'1RM Calculator'};
-  function openTool(which){
-    if(!toolSheet) return;
-    qs('#toolIc').innerHTML=TOOL_IC[which]||''; qs('#toolTtl').textContent=TOOL_TTL[which]||'Tool';
-    var body=qs('#toolBody');
-    if(which==='rest'){ body.innerHTML=restHTML(); wireRest(); }
-    else if(which==='plate'){ body.innerHTML=plateHTML(); wirePlate(); }
-    else if(which==='warmup'){ body.innerHTML=warmHTML(); wireWarm(); }
-    else if(which==='orm'){ body.innerHTML=ormHTML(); wireOrm(); }
-    toolScrim.classList.add('show'); toolSheet.classList.add('show'); sfx('tick');
-  }
-  Array.prototype.forEach.call(document.querySelectorAll('.tool-card'),function(b){ b.addEventListener('click',function(){ openTool(b.getAttribute('data-tool')); }); });
-
-  // rest timer
-  var restTimer=null, restLeft=0, restTotal=90;
-  function stopRest(){ if(restTimer){ clearInterval(restTimer); restTimer=null; } }
-  function paintRest(){ var t=qs('#restTime'); if(!t) return; var m=Math.floor(restLeft/60), s=restLeft%60; t.textContent=m+':'+(s<10?'0':'')+s; var fg=qs('#restFg'); if(fg){ var p=restTotal?restLeft/restTotal:0; fg.style.strokeDashoffset=(440*(1-p)).toFixed(0); } }
-  function startRest(sec){ restTotal=sec; restLeft=sec; paintRest(); stopRest(); restTimer=setInterval(function(){ restLeft--; if(restLeft<=0){ restLeft=0; paintRest(); stopRest(); sfx('levelup'); try{ if(navigator.vibrate) navigator.vibrate([0,120,80,120]); }catch(e){} return; } paintRest(); },1000); sfx('tick'); }
-  function restHTML(){ return '<div class="rest-ring"><svg viewBox="0 0 160 160"><circle class="rest-bg" cx="80" cy="80" r="70"/><circle class="rest-fg" id="restFg" cx="80" cy="80" r="70" style="stroke-dashoffset:0"/></svg><div class="rest-c" id="restTime">1:30</div></div>'
-    +'<div class="rest-presets"><button data-sec="60" type="button">1:00</button><button data-sec="90" type="button">1:30</button><button data-sec="120" type="button">2:00</button><button data-sec="180" type="button">3:00</button></div>'
-    +'<div class="rest-presets" style="margin-top:8px"><button class="stop" id="restStop" type="button" style="flex:1">Stop</button></div>'; }
-  function wireRest(){ restLeft=90; restTotal=90; paintRest(); Array.prototype.forEach.call(qs('#toolBody').querySelectorAll('.rest-presets [data-sec]'),function(b){ b.addEventListener('click',function(){ startRest(parseInt(b.getAttribute('data-sec'),10)); }); }); var st=qs('#restStop'); if(st) st.addEventListener('click',function(){ stopRest(); restLeft=0; paintRest(); sfx('tap'); }); }
-
-  // plate calculator
-  var PLATES=[25,20,15,10,5,2.5,1.25];
-  var PLATE_COL={25:'#FF4D4D',20:'#3A6BFF',15:'#FFC83D',10:'#34D399',5:'#C9CCD6','2.5':'#8E93A6','1.25':'#5A5E70'};
-  function plateHTML(){ return '<div class="tl-label">Target weight (kg)</div><input class="tl-input" id="plTarget" type="number" inputmode="decimal" placeholder="e.g. 100" value="60" />'
-    +'<div class="tl-label">Bar weight</div><div class="tl-seg" id="plBar"><button data-b="20" class="on" type="button">20 kg</button><button data-b="15" type="button">15 kg</button><button data-b="10" type="button">10 kg</button><button data-b="0" type="button">None</button></div>'
-    +'<div id="plOut"></div>'; }
-  function plateCalc(){ var t=parseFloat(qs('#plTarget').value)||0;
-    var barEl=qs('#plBar .on'); var bar=barEl?parseFloat(barEl.getAttribute('data-b')):20;
-    var out=qs('#plOut'); if(!out) return;
-    if(t<=bar){ out.innerHTML='<div class="tl-out"><div class="tl-sub">Just the '+bar+' kg bar — no plates needed.</div></div>'; return; }
-    var per=(t-bar)/2, rem=per, chips='';
-    PLATES.forEach(function(p){ var n=Math.floor(rem/p+1e-9); if(n>0){ rem=Math.round((rem-n*p)*100)/100; for(var i=0;i<n;i++) chips+='<span class="tl-plate" style="background:'+(PLATE_COL[p]||'#555')+'">'+p+'</span>'; } });
-    var loaded=t-bar-rem*2;
-    out.innerHTML='<div class="tl-out"><div class="tl-big">'+(Math.round(per*100)/100)+' kg</div><div class="tl-sub">per side · '+(rem>0?('closest: '+Math.round((bar+loaded)*100)/100+' kg'):'exact')+'</div><div class="tl-plates" style="margin-top:12px">'+(chips||'<span class="tl-sub">—</span>')+'</div></div>'; }
-  function wirePlate(){ qs('#plTarget').addEventListener('input',plateCalc); Array.prototype.forEach.call(qs('#plBar').querySelectorAll('button'),function(b){ b.addEventListener('click',function(){ Array.prototype.forEach.call(qs('#plBar').querySelectorAll('button'),function(x){x.classList.toggle('on',x===b);}); plateCalc(); }); }); plateCalc(); }
-
-  // warm-up generator
-  function warmHTML(){ return '<div class="tl-label">Working weight (kg)</div><input class="tl-input" id="wuW" type="number" inputmode="decimal" placeholder="e.g. 100" value="100" /><div id="wuOut"></div>'; }
-  function warmCalc(){ var w=parseFloat(qs('#wuW').value)||0, out=qs('#wuOut'); if(!out) return; if(w<=0){ out.innerHTML=''; return; }
-    var sets=[['Bar / empty',0,8],['40%',0.4,5],['60%',0.6,3],['80%',0.8,2],['Working set',1,'reps']];
-    out.innerHTML='<div class="tl-rows">'+sets.map(function(s){ var kg=s[1]===0?'—':round2_5(w*s[1]); return '<div class="tl-row"><span>'+s[0]+'</span><b>'+(kg==='—'?'Bar':kg+' kg')+' × '+s[2]+'</b></div>'; }).join('')+'</div>'; }
-  function wireWarm(){ qs('#wuW').addEventListener('input',warmCalc); warmCalc(); }
-
-  // 1RM calculator
-  function ormHTML(){ return '<div class="tl-label">Weight (kg)</div><input class="tl-input" id="ormW" type="number" inputmode="decimal" placeholder="e.g. 80" value="80" /><div class="tl-label">Reps</div><input class="tl-input" id="ormR" type="number" inputmode="numeric" placeholder="e.g. 5" value="5" /><div id="ormOut"></div>'; }
-  function ormCalc(){ var w=parseFloat(qs('#ormW').value)||0, r=parseInt(qs('#ormR').value,10)||0, out=qs('#ormOut'); if(!out) return; if(w<=0||r<=0){ out.innerHTML=''; return; }
-    var orm=w*(1+r/30);
-    var pcts=[[100,1],[95,2],[90,4],[85,6],[80,8],[70,12]];
-    out.innerHTML='<div class="tl-out"><div class="tl-big">'+Math.round(orm)+' kg</div><div class="tl-sub">estimated 1-rep max (Epley)</div></div>'
-      +'<div class="tl-label">Training percentages</div><div class="tl-rows">'+pcts.map(function(p){ return '<div class="tl-row"><span>'+p[0]+'% · ~'+p[1]+' reps</span><b>'+round2_5(orm*p[0]/100)+' kg</b></div>'; }).join('')+'</div>'; }
-  function wireOrm(){ qs('#ormW').addEventListener('input',ormCalc); qs('#ormR').addEventListener('input',ormCalc); ormCalc(); }
-
-  /* ───────── init ───────── */
-
   /* ───────── init ───────── */
   Array.prototype.forEach.call(document.querySelectorAll('#gymtabs .gtab'),function(b){ b.addEventListener('click',function(){ showTab(this.getAttribute('data-tab')); }); });
   Array.prototype.forEach.call(document.querySelectorAll('#genderToggle .gt-opt'),function(b){
     b.addEventListener('click',function(){ setGender(this.getAttribute('data-g')); sfx('tick'); renderDiagram(); });
   });
-  /* ───────── AI Program builder ───────── */
-  var PROG={ goal:null, days:null, eq:null, plan:null };
+  /* ───────── Program plan helpers ───────── */
   var SPLITS={
     3:[{n:'Push',m:['chest','shoulders','arms']},{n:'Pull',m:['back','arms']},{n:'Legs',m:['legs','core']}],
     4:[{n:'Upper A',m:['chest','back','shoulders']},{n:'Lower A',m:['legs','core']},{n:'Upper B',m:['shoulders','arms','chest']},{n:'Lower B',m:['legs','core']}],
@@ -1517,62 +1406,134 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     });
     return out.slice(0,6);
   }
-  function generatePlan(){
-    var split=SPLITS[PROG.days]||SPLITS[3];
-    PROG.plan=split.map(function(day,i){ return { name:'Day '+(i+1)+' · '+day.n, exercises:pickEx(day.m, PROG.eq) }; });
+  function generatePlan(goal, days, eq){
+    var split=SPLITS[days]||SPLITS[3];
+    return split.map(function(day,i){ return { name:'Day '+(i+1)+' · '+day.n, exercises:pickEx(day.m, eq) }; });
   }
-  var progScrim=qs('#progScrim'), progSheet=qs('#progSheet');
-  function openProgram(){
-    var s=store();
-    PROG={ goal:s.setup.goal||'muscle', days:4, eq:s.setup.equipment||'full', plan:null };
-    renderProgSetup();
-    progScrim.classList.add('show'); progSheet.classList.add('show');
-  }
-  function closeProgram(){ progScrim.classList.remove('show'); progSheet.classList.remove('show'); }
-  function opts(key, list){
-    return '<div class="prog-opts">'+list.map(function(o){
-      return '<button class="prog-opt'+(PROG[key]===o[0]?' on':'')+'" data-k="'+key+'" data-v="'+o[0]+'">'+o[1]+'</button>';
-    }).join('')+'</div>';
-  }
-  function renderProgSetup(){
-    qs('#progStep').textContent='Set up';
-    qs('#progBody').innerHTML=
-      '<div class="prog-q">Your goal</div>'+opts('goal',[['muscle','Build muscle'],['strength','Get stronger'],['fat','Lose fat'],['fitness','General fitness']])
-      +'<div class="prog-q">Days per week</div>'+opts('days',[[3,'3 days'],[4,'4 days'],[5,'5 days']])
-      +'<div class="prog-q">Equipment</div>'+opts('eq',[['full','Full gym'],['dumbbells','Dumbbells'],['bodyweight','Bodyweight']])
-      +'<div class="prog-foot"><button class="btn prog" id="progGen">Generate program</button></div>';
-    Array.prototype.forEach.call(document.querySelectorAll('#progBody .prog-opt'),function(b){
-      b.addEventListener('click',function(){ var k=b.getAttribute('data-k'), v=b.getAttribute('data-v'); PROG[k]=(k==='days')?+v:v; sfx('tick'); renderProgSetup(); });
-    });
-    qs('#progGen').addEventListener('click',function(){ sfx('confirm'); generatePlan(); renderProgPreview(); });
-  }
-  function renderProgPreview(){
-    qs('#progStep').textContent=PROG.days+'-day plan';
-    var goalLbl={muscle:'Build muscle',strength:'Get stronger',fat:'Lose fat',fitness:'General fitness'}[PROG.goal]||'';
-    var html='<div class="prog-q">'+goalLbl+' · '+GOAL_REPS[PROG.goal]+'</div>';
-    html+=PROG.plan.map(function(day){
-      return '<div class="prog-day"><div class="prog-day-h"><b>'+day.name+'</b><span>'+day.exercises.length+' moves</span></div>'
-        +day.exercises.map(function(e){ return '<div class="prog-ex" style="--mc:'+mColor(e.muscle)+'"><i></i><b>'+e.name+'</b><span>'+mInfo(e.muscle).name+'</span></div>'; }).join('')
-        +'</div>';
-    }).join('');
-    html+='<div class="prog-foot"><button class="btn ghost" id="progBack" style="flex:0 0 34%">Back</button><button class="btn prog" id="progSave" style="flex:1">Save program</button></div>';
-    qs('#progBody').innerHTML=html;
-    qs('#progBack').addEventListener('click',function(){ sfx('tick'); renderProgSetup(); });
-    qs('#progSave').addEventListener('click',saveProgram);
-  }
-  function saveProgram(){
-    var s=store(); s.routines=s.routines||[];
-    PROG.plan.slice().reverse().forEach(function(day){
-      s.routines.unshift({ id:'pr'+Date.now()+Math.floor(Math.random()*999), name:day.name, exercises:day.exercises, ts:Date.now(), program:true });
-    });
-    save(s); sfx('reward'); closeProgram();
-    toast(PROG.plan.length+'-day program saved');
-    showTab('exercises');
-  }
-  var apBtn=qs('#actProgram'); if(apBtn) apBtn.addEventListener('click',function(){ sfx('tick'); openProgram(); });
-  progScrim.addEventListener('click',closeProgram);
 
-  renderChip(); renderDiagram(); renderWorkout(); renderOverview(); renderPRs(); renderRecovery(); renderPhysique(); renderHeaderInsight(); renderQuickWins();
+  /* ───────── Trial-style stepped question flow (setup + program) ───────── */
+  function svgI(d){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>'; }
+  var IC_X='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+  var IC_CHK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-11"/></svg>';
+  var IC_HOME=svgI('<path d="M3 11l9-7 9 7M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/>'),
+      IC_BAR=svgI('<path d="M4 9v6M7 7v10M17 7v10M20 9v6M7 12h10"/>'),
+      IC_DB=svgI('<path d="M6 8v8M9 6v12M15 6v12M18 8v8"/>'),
+      IC_BODY=svgI('<circle cx="12" cy="5" r="2.5"/><path d="M12 8v7M12 15l-3 6M12 15l3 6M7 11h10"/>'),
+      IC_MUS=svgI('<path d="M5 13c2-1 3-3 3-5a3 3 0 0 1 6 0c0 1.2 2 2 4 2v6a3 3 0 0 1-3 3H9a4 4 0 0 1-4-4z"/>'),
+      IC_FLM=svgI('<path d="M12 3c1.6 3.6 4 4.6 4 8a4 4 0 0 1-8 0c0-1.3.5-2.1 1-2.7C9 11 12 8 12 3z"/>'),
+      IC_HRT=svgI('<path d="M12 21s-7-4.3-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.7-7 10-7 10z"/>'),
+      IC_CAL=svgI('<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/>');
+  var quizEl=qs('#quizOverlay'), quizState=null;
+  function closeQuiz(){ if(quizEl) quizEl.classList.remove('on'); }
+  function runQuiz(cfg){
+    quizState={ cfg:cfg, i:0, ans:{}, plan:null };
+    quizEl.style.setProperty('--mc', cfg.accent||'#B388FF');
+    var nSteps=cfg.steps.length + (cfg.review?1:0);
+    var steps=cfg.steps.map(function(step,si){
+      var o=step.options.map(function(op){
+        return '<button class="quiz-opt" type="button" data-si="'+si+'" data-v="'+op.v+'">'+
+          (op.icon?'<span class="qo-ic">'+op.icon+'</span>':'')+
+          '<span class="qo-t"><b>'+op.label+'</b>'+(op.sub?'<span>'+op.sub+'</span>':'')+'</span>'+
+          '<span class="qo-chk">'+IC_CHK+'</span></button>';
+      }).join('');
+      return '<div class="quiz-step">'+(step.eyebrow?'<div class="quiz-eyebrow">'+step.eyebrow+'</div>':'')+
+        '<div class="quiz-q">'+step.q+'</div>'+(step.sub?'<div class="quiz-sub">'+step.sub+'</div>':'')+
+        '<div class="quiz-opts">'+o+'</div></div>';
+    });
+    if(cfg.review) steps.push('<div class="quiz-step"><div class="quiz-eyebrow">Your plan</div><div class="quiz-q">Here’s your program</div><div class="quiz-review" id="quizReview"></div></div>');
+    var prog=''; for(var k=0;k<nSteps;k++) prog+='<i></i>';
+    quizEl.innerHTML='<div class="quiz-hd"><button class="quiz-close" id="quizClose" type="button">'+IC_X+'</button><div class="quiz-prog">'+prog+'</div></div>'+
+      '<div class="quiz-body"><div class="quiz-track" id="quizTrack">'+steps.join('')+'</div></div>'+
+      '<div class="quiz-foot"><button class="quiz-back-b" id="quizBack" type="button" style="display:none">Back</button><button class="quiz-next" id="quizNext" type="button" disabled>Continue</button></div>';
+    qs('#quizClose').addEventListener('click',function(){ sfx('tap'); closeQuiz(); });
+    qs('#quizBack').addEventListener('click',quizPrev);
+    qs('#quizNext').addEventListener('click',quizNext);
+    Array.prototype.forEach.call(quizEl.querySelectorAll('.quiz-opt'),function(b){
+      b.addEventListener('click',function(){
+        var si=+b.getAttribute('data-si'), v=b.getAttribute('data-v'), step=cfg.steps[si];
+        quizState.ans[step.key]= step.numeric? +v : v;
+        Array.prototype.forEach.call(quizEl.querySelectorAll('.quiz-opt[data-si="'+si+'"]'),function(x){ x.classList.toggle('on', x===b); });
+        sfx('tick'); quizSync();
+      });
+    });
+    quizGo(0); quizEl.classList.add('on');
+  }
+  function quizSync(){
+    var st=quizState, cfg=st.cfg, atReview=(cfg.review && st.i===cfg.steps.length);
+    var ok = atReview ? true : (st.ans[cfg.steps[st.i].key]!=null);
+    var nx=qs('#quizNext'); if(nx){ nx.disabled=!ok;
+      nx.textContent = atReview ? (cfg.confirmLabel||'Save')
+        : (st.i===cfg.steps.length-1 ? (cfg.review?'Build my plan':(cfg.confirmLabel||'Done')) : 'Continue'); }
+    var bk=qs('#quizBack'); if(bk) bk.style.display = st.i>0 ? '' : 'none';
+    Array.prototype.forEach.call(quizEl.querySelectorAll('.quiz-prog i'),function(d,k){ d.classList.toggle('done', k<=st.i); });
+  }
+  function quizGo(i){ quizState.i=i; var t=qs('#quizTrack'); if(t) t.style.transform='translateX(-'+(i*100)+'%)'; quizSync(); }
+  function quizNext(){
+    var st=quizState, cfg=st.cfg;
+    if(st.i<cfg.steps.length-1){ quizGo(st.i+1); return; }
+    if(st.i===cfg.steps.length-1 && cfg.review){ var rv=qs('#quizReview'); if(rv) rv.innerHTML=cfg.review(st.ans); quizGo(cfg.steps.length); sfx('confirm'); return; }
+    cfg.onConfirm(st.ans);
+  }
+  function quizPrev(){ if(quizState.i>0) quizGo(quizState.i-1); }
+
+  function openSetupQuiz(){
+    runQuiz({ accent:'#FF6B6B', confirmLabel:'Start training',
+      steps:[
+        { key:'place', eyebrow:'Setup · 1 of 3', q:'Where do you train?', sub:'We’ll tailor every workout to your setup.', options:[
+          {v:'gym',label:'Gym',sub:'Full equipment access',icon:IC_BAR},
+          {v:'home',label:'Home',sub:'Minimal or no equipment',icon:IC_HOME} ]},
+        { key:'equipment', eyebrow:'Setup · 2 of 3', q:'What can you train with?', sub:'Pick what you’ve got on hand.', options:[
+          {v:'full',label:'Full gym',sub:'Barbells, machines, the lot',icon:IC_BAR},
+          {v:'dumbbells',label:'Dumbbells',sub:'Just a pair of dumbbells',icon:IC_DB},
+          {v:'bodyweight',label:'Bodyweight',sub:'No equipment — just you',icon:IC_BODY} ]},
+        { key:'goal', eyebrow:'Setup · 3 of 3', q:'What’s your goal?', sub:'This shapes your sets, reps and rest.', options:[
+          {v:'muscle',label:'Build muscle',sub:'Size & strength',icon:IC_MUS},
+          {v:'fat',label:'Lose fat',sub:'Lean out, stay strong',icon:IC_FLM},
+          {v:'fitness',label:'General fitness',sub:'Feel good, move well',icon:IC_HRT} ]}
+      ],
+      onConfirm:function(a){
+        var s2=store(); s2.setup={done:true,place:a.place,equipment:a.equipment,goal:a.goal,ts:Date.now()};
+        save(s2); sfx('confirm'); closeQuiz(); toast('You’re all set — let’s train');
+        renderWorkout(); renderDiagram(); renderHeaderInsight();
+      } });
+  }
+  function openProgramQuiz(){
+    runQuiz({ accent:'#B388FF', confirmLabel:'Save program',
+      steps:[
+        { key:'goal', eyebrow:'Program · 1 of 3', q:'What are you training for?', sub:'Your goal sets the rep ranges.', options:[
+          {v:'muscle',label:'Build muscle',sub:'Hypertrophy · 8–12 reps',icon:IC_MUS},
+          {v:'strength',label:'Get stronger',sub:'Heavy · 4–6 reps',icon:IC_BAR},
+          {v:'fat',label:'Lose fat',sub:'Higher reps · short rest',icon:IC_FLM},
+          {v:'fitness',label:'General fitness',sub:'Balanced · 10–15 reps',icon:IC_HRT} ]},
+        { key:'days', numeric:true, eyebrow:'Program · 2 of 3', q:'How many days a week?', sub:'We’ll build the split around this.', options:[
+          {v:'3',label:'3 days',sub:'Push · Pull · Legs',icon:IC_CAL},
+          {v:'4',label:'4 days',sub:'Upper / Lower split',icon:IC_CAL},
+          {v:'5',label:'5 days',sub:'More volume, faster gains',icon:IC_CAL} ]},
+        { key:'eq', eyebrow:'Program · 3 of 3', q:'What equipment?', sub:'So every move actually fits your gym.', options:[
+          {v:'full',label:'Full gym',sub:'Barbells & machines',icon:IC_BAR},
+          {v:'dumbbells',label:'Dumbbells',sub:'A pair of dumbbells',icon:IC_DB},
+          {v:'bodyweight',label:'Bodyweight',sub:'No equipment needed',icon:IC_BODY} ]}
+      ],
+      review:function(a){
+        var plan=generatePlan(a.goal, a.days, a.eq); quizState.plan=plan;
+        var goalLbl={muscle:'Build muscle',strength:'Get stronger',fat:'Lose fat',fitness:'General fitness'}[a.goal]||'';
+        return '<div class="quiz-sub" style="margin:-4px 0 6px">'+goalLbl+' · '+(GOAL_REPS[a.goal]||'')+'</div>'+plan.map(function(day){
+          return '<div class="quiz-day"><div class="quiz-day-h"><b>'+day.name+'</b><span>'+day.exercises.length+' moves</span></div>'+
+            day.exercises.map(function(e){ return '<div class="quiz-ex" style="--ec:'+mColor(e.muscle)+'"><i></i>'+e.name+'<span>'+mInfo(e.muscle).name+'</span></div>'; }).join('')+'</div>';
+        }).join('');
+      },
+      onConfirm:function(a){
+        var plan=quizState.plan||generatePlan(a.goal,a.days,a.eq);
+        var s2=store(); s2.routines=s2.routines||[];
+        plan.slice().reverse().forEach(function(day){ s2.routines.unshift({ id:'pr'+Date.now()+Math.floor(Math.random()*999), name:day.name, exercises:day.exercises, ts:Date.now(), program:true }); });
+        save(s2); sfx('reward'); closeQuiz(); toast(plan.length+'-day program saved'); showTab('exercises');
+      } });
+  }
+  var apBtn=qs('#actProgram'); if(apBtn) apBtn.addEventListener('click',function(){ sfx('tick'); openProgramQuiz(); });
+  var fcard=qs('#featCard'); if(fcard) fcard.addEventListener('click',function(e){ e.preventDefault(); sfx('tick'); openSheet(recommendMuscle()); });
+  try{ if(!store().setup.done) setTimeout(openSetupQuiz, 400); }catch(e){}
+
+  renderChip(); renderDiagram(); renderWorkout(); renderOverview(); renderPRs(); renderRecovery(); renderPhysique(); renderHeaderInsight();
   window.addEventListener('coreStateChange',renderChip);
   window.addEventListener('focus',function(){ renderDiagram(); renderPhysique(); });
   document.addEventListener('visibilitychange',function(){ if(!document.hidden) renderPhysique(); });
@@ -1598,9 +1559,7 @@ body{min-height:100vh;background:#0A0A14;display:flex;align-items:center;justify
     t.textContent=m; requestAnimationFrame(function(){ t.style.opacity='1'; t.style.transform='translateX(-50%) translateY(0)'; });
     clearTimeout(t._t); t._t=setTimeout(function(){ t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(10px)'; }, 1900);
   }
-  var qw=q('#actQuick'); if(qw) qw.addEventListener('click', function(){ sfx('tick'); if(window.__openLogSheet) window.__openLogSheet(); else scrollTo('#figs'); });
-  /* actProgram is wired in the main script (it needs the exercise library). */
-  var fc=q('#featCard'); if(fc) fc.addEventListener('click', function(e){ e.preventDefault(); sfx('tick'); scrollTo('#quickWins'); });
+  /* actProgram + featCard are wired in the main script (they need the exercise library). */
 })();
 </script>
 </body>
