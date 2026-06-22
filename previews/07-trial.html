@@ -3051,6 +3051,15 @@
             </div>
           </div>
 
+          <!-- money you stop spending (estimate, from the daily amount you gave) -->
+          <div class="plan-save" id="planSaveCard" style="display:none;">
+            <span class="ps-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.6"/><path d="M12 7v10"/><path d="M14.4 9.1c-.5-.7-1.4-1.1-2.4-1.1-1.3 0-2.3.7-2.3 1.8 0 2.5 4.9 1.3 4.9 3.7 0 1.1-1 1.8-2.4 1.8-1 0-2-.4-2.5-1.2"/></svg></span>
+            <span class="ps-bd">
+              <span class="ps-big"><b id="planSave30">$0</b> back in your first 30 days</span>
+              <span class="ps-sub" id="planSaveYr"></span>
+            </span>
+          </div>
+
           <!-- what starts to change — a grid of stat cards -->
           <div class="plan-section-head"><span>What starts to change</span><span class="psh-day">by day 30</span></div>
           <div class="plan-stats" id="planStats"><!-- filled by renderPlanScreen --></div>
@@ -7167,6 +7176,20 @@ body.on-autoadvance .stepwrap::after {
   padding:4px 10px; border-radius:9px; background:rgba(0,242,60,0.16); border:1px solid rgba(0,242,60,0.42); }
 .pp-delta b { font-weight:850; }
 .step.on .plan-proj { animation: gItemIn .5s cubic-bezier(.22,1,.36,1) .08s both; }
+/* money-saved estimate — default flex so renderPlanScreen's style.display=''
+   reveals it; the markup starts inline display:none until it's computed */
+.plan-save { display:flex; align-items:center; gap:12px; margin:9px 0 0; padding:11px 14px; border-radius:16px;
+  background:linear-gradient(180deg, rgba(0,242,60,0.11), rgba(0,242,60,0.035));
+  border:1px solid rgba(0,242,60,0.30);
+  box-shadow:0 1px 0 rgba(255,255,255,0.05) inset, 0 10px 24px rgba(0,0,0,0.3); }
+.plan-save .ps-ico { width:34px; height:34px; flex:none; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  color:#2BFF5A; background:rgba(0,242,60,0.13); border:1px solid rgba(0,242,60,0.32); }
+.plan-save .ps-ico svg { width:19px; height:19px; }
+.plan-save .ps-bd { display:flex; flex-direction:column; min-width:0; }
+.plan-save .ps-big { font-size:13.5px; font-weight:650; color:rgba(255,255,255,0.92); line-height:1.25; letter-spacing:-.1px; }
+.plan-save .ps-big b { font-weight:850; color:#3DFF66; }
+.plan-save .ps-sub { font-size:11px; color:var(--muted); margin-top:1px; letter-spacing:-.05px; }
+.step.on .plan-save { animation: gItemIn .5s cubic-bezier(.22,1,.36,1) .14s both; }
 
 /* ── Step 4 · "what's this for" — tappable reason bubble-cloud ── */
 /* a 5-point star constellation that turns slowly, like a wheel being cranked.
