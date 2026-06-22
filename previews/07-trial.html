@@ -1388,9 +1388,12 @@
             <button onclick="clearHabit()" style="margin-left:2px; background:none; border:none; color: var(--dim); cursor:pointer; padding:0 1px; font-size:11px;" aria-label="Change habit">×</button>
           </div>
 
-          <div id="promiseCard" style="margin-top:4px; padding:20px; border-radius:24px; background: rgba(255,255,255,0.03); border:1px solid var(--border); transition: border-color .2s, background .2s;">
-            <div style="font-size:11px; letter-spacing:0.22em; text-transform:uppercase; color:var(--muted); font-weight:700; font-family:ui-monospace,'SF Mono',Menlo,monospace;">// Contract with myself</div>
-            <div id="contractText" style="font-size:14px; color:rgba(255,255,255,0.86); line-height:21px; margin-top:10px; letter-spacing:-0.1px;">I'm doing this for me. I'll be honest when I slip, and come back when I drift.</div>
+          <div id="promiseCard" style="margin-top:6px; padding:18px 20px; border-radius:22px; background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.022)); border:1px solid rgba(255,255,255,0.12); box-shadow: 0 1px 0 rgba(255,255,255,0.07) inset, 0 16px 34px rgba(0,0,0,0.38); transition: border-color .2s, background .2s;">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <div style="font-size:11px; letter-spacing:0.22em; text-transform:uppercase; color:var(--muted); font-weight:700; font-family:ui-monospace,'SF Mono',Menlo,monospace;">// Contract with myself</div>
+              <div style="font-size:9px; letter-spacing:0.18em; color:var(--dim); font-family:ui-monospace,'SF Mono',Menlo,monospace;">№ CORE</div>
+            </div>
+            <div id="contractText" style="font-size:14px; color:rgba(255,255,255,0.88); line-height:21px; margin-top:11px; letter-spacing:-0.1px;">I'm doing this for me. I'll be honest when I slip, and come back when I drift.</div>
           </div>
           <div class="commit-dock">
             <div id="promiseSign" class="promise-sign" aria-hidden="true">
@@ -4382,7 +4385,9 @@
     const name = (state.name || '').trim();
     const hb = HABIT_INFO[state.habit] || HABIT_INFO.vape;
     const isBuild = state.habit === 'build';
-    const commit = state.commitment || 3;
+    // commitment is a 1–5 level from the meter; clamp defensively so a stray
+    // value can never blow up the gain factor (which would peg every stat at 96%).
+    const commit = Math.max(1, Math.min(5, state.commitment || 3));
     const titleEl = document.getElementById('planTitle');
     if (titleEl) {
       titleEl.innerHTML = name
@@ -7054,8 +7059,16 @@ body.on-promise .footer { display:none !important; }
 .step[data-step="0"] #promiseCard { text-align:left; padding:16px 18px !important; margin-top:14px !important; }
 .step[data-step="0"] #contractText { font-size:15px !important; line-height:1.5 !important; }
 /* shorter reserved signature row so the box isn't so tall */
-.step[data-step="0"] .promise-sign { height:44px !important; margin-top:12px !important; }
+.step[data-step="0"] .promise-sign { height:44px !important; margin-top:12px !important; opacity:1 !important; }
 .step[data-step="0"] .promise-sign-svg { height:44px !important; }
+/* unsigned: show a real "sign here" baseline with an ✗ so the row reads as a
+   line you put your name on (the signature draws over it once committed) */
+.step[data-step="0"] .promise-sign-line { transform:scaleX(1) !important; opacity:0.4; }
+.step[data-step="0"] .promise-sign::before {
+  content:"✗"; position:absolute; left:6%; bottom:1px; z-index:1;
+  font-size:13px; color:var(--dim); opacity:0.55; transition:opacity .3s ease;
+}
+.step[data-step="0"] .promise-sign.signed::before { opacity:0; }
 .step[data-step="0"] #promiseMeta { margin-top:8px !important; }
 /* push the signature + slide-to-commit block to the bottom so the slider
    lands at the same height as the Next button on every other step */
