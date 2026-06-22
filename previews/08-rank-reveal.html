@@ -174,6 +174,22 @@
     .rank-row+.rank-row{border-left:1px solid rgba(255,255,255,0.08);}
     .rr-v{font-size:21px;font-weight:800;color:#fff;letter-spacing:-0.3px;}
     .rr-k{margin-top:5px;font-size:9.5px;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.42);}
+    /* progress toward the next rank — makes the starting rank feel like the
+       bottom of a climb instead of a dead end */
+    .rank-next{margin:18px 4px 2px;}
+    .rn-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px;
+      font-size:10px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;
+      font-family:'Space Mono',ui-monospace,"SF Mono",Menlo,monospace;}
+    .rn-head #rnLabel{color:color-mix(in srgb,var(--rc) 78%, #fff);}
+    .rn-head #rnXp{color:rgba(255,255,255,0.5);letter-spacing:0.04em;}
+    .rn-track{height:7px;border-radius:999px;background:rgba(255,255,255,0.08);
+      box-shadow:0 1px 1px rgba(0,0,0,0.45) inset;overflow:hidden;}
+    .rn-fill{height:100%;width:0;border-radius:999px;
+      background:linear-gradient(90deg,color-mix(in srgb,var(--rc) 80%, #000) 0%,var(--rc) 70%,#fff 130%);
+      box-shadow:0 0 10px color-mix(in srgb,var(--rc) 70%, transparent);
+      transition:width 1.15s cubic-bezier(.22,1,.36,1) .85s;}
+    body.revealed .rn-fill{width:var(--rn-pct,0%);}
+    @media (prefers-reduced-motion: reduce){ .rn-fill{transition:none;} }
 
     /* unlock list — premium rows on hairline cards, green Apple ticks, slides in one by one */
     .unlocks{width:300px;margin:20px auto 150px;display:flex;flex-direction:column;align-items:stretch;gap:9px;}
@@ -257,6 +273,10 @@
           <div class="rank-row"><div class="rr-v" id="rPlayer">Player</div><div class="rr-k">Name</div></div>
           <div class="rank-row"><div class="rr-v" id="rScore">0</div><div class="rr-k">Score</div></div>
         </div>
+        <div class="rank-next" id="rankNext">
+          <div class="rn-head"><span id="rnLabel">Next rank</span><span id="rnXp">0 XP</span></div>
+          <div class="rn-track"><div class="rn-fill" id="rnFill"></div></div>
+        </div>
       </div>
 
       <div class="unlocks" id="unlocks">
@@ -324,6 +344,20 @@
   document.getElementById('rankTier').textContent = 'Rank '+pad2(idx+1)+' of '+RANKS.length;
   document.getElementById('rPlayer').textContent = name;
   document.getElementById('rScore').textContent = xp.toLocaleString();
+
+  // Progress toward the next rank — fills on reveal so the starting rank reads
+  // as the bottom of a climb, with a concrete next goal.
+  (function(){
+    var nx = document.getElementById('rankNext');
+    var next = RANKS[idx+1];
+    if(!nx) return;
+    if(!next){ nx.style.display='none'; return; }   // already at the top rank
+    var lo = rank.xp, hi = next.xp;
+    var pct = hi>lo ? Math.max(0, Math.min(100, Math.round((xp-lo)/(hi-lo)*100))) : 100;
+    document.getElementById('rnLabel').textContent = 'Next · '+next.name;
+    document.getElementById('rnXp').textContent = xp.toLocaleString()+' / '+hi.toLocaleString()+' XP';
+    document.getElementById('rnFill').style.setProperty('--rn-pct', Math.max(3,pct)+'%');
+  })();
 
   var ul = document.getElementById('unlocks');
   rank.perks.forEach(function(p, i){
