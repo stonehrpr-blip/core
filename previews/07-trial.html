@@ -4408,8 +4408,11 @@
         ? 'Here\'s what 30 days of showing up does.'
         : 'Here\'s what dropping ' + hb.noun + ' gives back.';
     }
-    // Savings — only when we captured a daily amount (vape-style quit habits)
-    const perDay = SPEND_PER_DAY[state.vapeAmount];
+    // Savings — only for habits that actually cost money (vapeAmount defaults to
+    // 'half', so without this gate the card would wrongly show for porn /
+    // doomscroll / build, where there's nothing being saved).
+    const SPEND_HABITS = { vape: 1, alcohol: 1, spend: 1 };
+    const perDay = SPEND_HABITS[state.habit] ? SPEND_PER_DAY[state.vapeAmount] : 0;
     const saveCard = document.getElementById('planSaveCard');
     if (saveCard) {
       if (perDay) {
