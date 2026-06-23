@@ -54,6 +54,9 @@
   /* ---- HERO ---- */
   .hero{min-height:100vh;display:flex;flex-direction:column;justify-content:flex-end;position:relative;color:#fff;padding-bottom:56px}
   .hero .ph{position:absolute;inset:0}
+  .hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;background:#1a1610}
+  .hero-video[data-empty="1"]{display:none}
+  .hero .pre{display:block}
   .hero::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,16,12,.15) 0%,rgba(20,16,12,.55) 100%)}
   .hero .wrap{position:relative;z-index:3}
   .hero .topline{display:flex;justify-content:space-between;font-size:.7rem;letter-spacing:.28em;text-transform:uppercase;
@@ -156,16 +159,20 @@
   <div class="meta">Bali &nbsp;•&nbsp; Indonesia &nbsp;•&nbsp; Edition 2026</div>
 </div>
 
-<!-- ======= HERO ======= -->
+<!-- ======= HERO (video-led intro: "always on" on open) ======= -->
 <header class="hero">
-  <div class="ph" data-label="hero.jpg — sharp, bright daytime villa+pool"></div>
+  <!-- Auto-playing, muted, looping film of the 2 clips back-to-back -->
+  <video class="hero-video" id="heroVideo" autoplay muted playsinline preload="auto"
+         poster="../assets/photos/hero.jpg"></video>
+  <!-- Fallback shown until the real video files are added -->
+  <div class="ph hero-fallback" data-label="video-1.mp4 + video-2.mp4 — auto-play, muted, loop on open"></div>
   <div class="topline wrap" style="max-width:none;padding:0 28px">
     <span>MMG Construction</span><span>Bali &nbsp;•&nbsp; Indonesia</span><span>Edition 2026</span>
   </div>
   <div class="wrap">
-    <div class="pre">Puncak</div>
-    <h1>ASMARA</h1>
-    <p class="lead">Ultra-luxury hilltop residences above Bali. A private release of 15 four-bedroom villas with private pools, generous indoor–outdoor living, and elevated privacy above the southern shoreline.</p>
+    <div class="pre">Puncak ASMARA</div>
+    <h1>A view<br>from the top.</h1>
+    <p class="lead">Ultra-luxury hilltop residences above Bali — a private release of 15 four-bedroom villas above the southern shoreline.</p>
     <div class="tags">
       <span class="tag">15 Residences</span>
       <span class="tag">Four-Bedroom Villas</span>
@@ -341,9 +348,9 @@
 <section style="background:var(--cream)">
   <div class="wrap">
     <div class="sec-head">
-      <span class="eyebrow">The Film</span>
-      <h2>See it in motion.</h2>
-      <p>Two short films of the estate, its residences and the outlook across the coast.</p>
+      <span class="eyebrow">The Film · With Sound</span>
+      <h2>Watch the full films.</h2>
+      <p>The opening view plays silently above — here are both films in full, with sound.</p>
     </div>
     <div class="gallery">
       <div class="ph video wide" style="height:360px" data-label="video-1.mp4 (0:22)"></div>
@@ -377,5 +384,23 @@
   <span style="opacity:.7">Indicative information, subject to availability and final sales documentation.</span>
 </footer>
 
+<script>
+/* Hero film — "always on": play the two clips back-to-back on a muted loop.
+   Falls back to the labeled placeholder until the real video files exist. */
+(function(){
+  var v = document.getElementById('heroVideo');
+  var fallback = document.querySelector('.hero-fallback');
+  if(!v) return;
+  var clips = ['../assets/videos/video-1.mp4','../assets/videos/video-2.mp4'];
+  var i = 0;
+  function showFallback(){ v.setAttribute('data-empty','1'); if(fallback) fallback.style.display='flex'; }
+  function load(n){ v.src = clips[n]; v.load(); v.play().catch(function(){}); }
+  v.addEventListener('ended', function(){ i = (i+1) % clips.length; load(i); });
+  v.addEventListener('error', showFallback);
+  // If the first clip can't be found quickly, reveal the placeholder.
+  load(0);
+  setTimeout(function(){ if(v.readyState === 0) showFallback(); }, 2500);
+})();
+</script>
 </body>
 </html>
