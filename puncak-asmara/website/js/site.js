@@ -1,13 +1,16 @@
 /* Puncak Asmara — site interactions (lightweight, no dependencies) */
 (function(){
   var nav = document.querySelector('.nav');
-  var transparentHero = document.body.classList.contains('has-hero');
+  var hero = document.querySelector('.hero');
+  var transparentHero = document.body.classList.contains('has-hero') && hero;
   function onScroll(){
     if(!nav) return;
     if(!transparentHero){ nav.classList.add('solid'); return; }
-    nav.classList.toggle('solid', window.scrollY > window.innerHeight*0.7);
+    var threshold = Math.max(hero.offsetHeight - 110, 120);
+    nav.classList.toggle('solid', window.scrollY > threshold);
   }
   onScroll(); window.addEventListener('scroll', onScroll, {passive:true});
+  window.addEventListener('resize', onScroll, {passive:true});
 
   // mobile menu
   var burger = document.querySelector('.burger');
@@ -74,9 +77,8 @@
   });
   document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeOverlays(); });
 
-  // ---- Enquiry form -> stateful -> WhatsApp pre-filled ----
-  var ef = document.getElementById('enquireForm');
-  if(ef){
+  // ---- Enquiry forms -> stateful -> WhatsApp pre-filled (any .enquire-form) ----
+  document.querySelectorAll('.enquire-form').forEach(function(ef){
     ef.addEventListener('submit', function(e){
       e.preventDefault();
       var btn = ef.querySelector('.btn-stateful'); if(!btn || btn.dataset.state) return;
@@ -94,7 +96,7 @@
         setTimeout(function(){ btn.removeAttribute('data-state'); ef.reset(); closeOverlays(); }, 2400);
       }, 1000);
     });
-  }
+  });
 
   // ---- Lightbox ----
   var lb = document.getElementById('lightbox');
