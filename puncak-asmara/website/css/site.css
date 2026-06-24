@@ -81,6 +81,9 @@ section{padding:clamp(70px,9vw,134px) 0}
 .hero{position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:flex-end;color:#fff;overflow:hidden;padding-bottom:10vh}
 .hero .media{position:absolute;inset:0;z-index:0}
 .hero .media img,.hero .media video{width:100%;height:100%;object-fit:cover}
+.hero .media img{animation:kenburns 28s ease-in-out infinite alternate}
+@keyframes kenburns{from{transform:scale(1)}to{transform:scale(1.08)}}
+@media(prefers-reduced-motion:reduce){.hero .media img{animation:none}}
 .hero::after{content:'';position:absolute;inset:0;z-index:1;
   background:
     linear-gradient(180deg,rgba(10,16,12,.5) 0%,rgba(10,16,12,.18) 32%,rgba(8,14,10,.62) 66%,rgba(6,11,8,.94) 100%),
@@ -157,6 +160,22 @@ footer h4{color:var(--gold-light);font-size:.74rem;letter-spacing:.24em;text-tra
 footer a{display:block;color:var(--cream-dim);padding:6px 0;transition:.3s}
 footer a:hover{color:#fff;padding-left:5px}
 footer .copy{border-top:1px solid rgba(230,200,134,.16);padding-top:26px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:.8rem;letter-spacing:.07em;color:rgba(248,243,233,.6)}
+
+/* ---- Facts grid (real specs) ---- */
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);
+  border-radius:12px;overflow:hidden;box-shadow:var(--shadow-s)}
+.fact{background:var(--ivory);padding:38px 24px;text-align:center;transition:background .4s}
+.fact:hover{background:#fff}
+.fact .fv{font-family:'Cormorant Garamond',serif;font-size:clamp(1.6rem,2.4vw,2.15rem);color:var(--ink);line-height:1.05}
+.fact .fl{font-size:.71rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-top:10px}
+
+/* ---- Floating WhatsApp ---- */
+.wa-float{position:fixed;right:20px;bottom:20px;z-index:90;display:inline-flex;align-items:center;gap:10px;
+  background:#25D366;color:#fff;padding:13px 21px;border-radius:999px;font-size:.74rem;letter-spacing:.14em;
+  text-transform:uppercase;font-weight:600;box-shadow:0 14px 32px -10px rgba(0,0,0,.45);transition:.35s var(--ease)}
+.wa-float:hover{transform:translateY(-3px);box-shadow:0 20px 40px -12px rgba(0,0,0,.5)}
+.wa-float svg{width:20px;height:20px;fill:#fff;flex:none}
+@media(max-width:520px){.wa-float .t{display:none}.wa-float{padding:15px;right:16px;bottom:16px}}
 
 /* ---- Reveal ---- */
 .reveal{opacity:0;transform:translateY(34px);transition:opacity 1s var(--ease),transform 1s var(--ease)}
