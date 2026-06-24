@@ -40,4 +40,26 @@
     },{threshold:.5});
     nums.forEach(function(n){ nio.observe(n); });
   }
+
+  // stagger reveals within the same parent (cheap, transform/opacity only)
+  els.forEach(function(el){
+    var sibs = [].slice.call(el.parentNode.children).filter(function(c){ return c.classList.contains('reveal'); });
+    var idx = sibs.indexOf(el);
+    if(idx > 0) el.style.transitionDelay = Math.min(idx,7)*0.08 + 's';
+  });
+
+  // stateful button: idle -> loading -> success -> open link
+  document.querySelectorAll('.btn-stateful').forEach(function(btn){
+    btn.addEventListener('click', function(e){
+      e.preventDefault();
+      if(btn.dataset.state) return;
+      btn.dataset.state = 'loading';
+      setTimeout(function(){
+        btn.dataset.state = 'done';
+        var href = btn.getAttribute('data-href');
+        setTimeout(function(){ if(href){ window.open(href, btn.getAttribute('data-target')||'_self'); } }, 650);
+        setTimeout(function(){ btn.removeAttribute('data-state'); }, 2200);
+      }, 1000);
+    });
+  });
 })();

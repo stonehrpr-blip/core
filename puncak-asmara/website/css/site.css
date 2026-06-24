@@ -177,9 +177,41 @@ footer .copy{border-top:1px solid rgba(230,200,134,.16);padding-top:26px;display
 .wa-float svg{width:20px;height:20px;fill:#fff;flex:none}
 @media(max-width:520px){.wa-float .t{display:none}.wa-float{padding:15px;right:16px;bottom:16px}}
 
-/* ---- Reveal ---- */
-.reveal{opacity:0;transform:translateY(34px);transition:opacity 1s var(--ease),transform 1s var(--ease)}
+/* ---- Stateful button (idle -> loading -> success) ---- */
+.btn-stateful{position:relative;overflow:hidden;min-width:220px;justify-content:center}
+.btn-stateful .bs-label{transition:opacity .25s,transform .25s var(--ease)}
+.btn-stateful .bs-spinner,.btn-stateful .bs-check{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transform:scale(.6);transition:opacity .3s,transform .35s var(--ease)}
+.btn-stateful .bs-spinner i{width:19px;height:19px;border:2.5px solid rgba(0,0,0,.22);border-top-color:#1a1409;border-radius:50%;animation:spin .7s linear infinite}
+.btn-stateful .bs-check svg{width:22px;height:22px;stroke:#fff;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;
+  stroke-dasharray:26;stroke-dashoffset:26}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes draw{to{stroke-dashoffset:0}}
+.btn-stateful[data-state="loading"] .bs-label{opacity:0;transform:scale(.9)}
+.btn-stateful[data-state="loading"] .bs-spinner{opacity:1;transform:scale(1)}
+.btn-stateful[data-state="done"]{background:#2e8b57!important;color:#fff;box-shadow:0 14px 30px -14px rgba(46,139,87,.8)}
+.btn-stateful[data-state="done"] .bs-label{opacity:0}
+.btn-stateful[data-state="done"] .bs-check{opacity:1;transform:scale(1)}
+.btn-stateful[data-state="done"] .bs-check svg{animation:draw .5s .1s var(--ease) forwards}
+
+/* ---- Extra micro-interactions (light) ---- */
+.pill{transition:.35s var(--ease)}
+.pill:hover{border-color:var(--gold);color:var(--gold-deep);transform:translateY(-2px);background:#fff}
+.fact{transition:transform .4s var(--ease),background .4s}
+.fact:hover{transform:translateY(-4px)}
+.feature .inner{transition:transform .5s var(--ease)}
+.feature:hover .inner{transform:translateY(-6px)}
+.nav .brand{transition:opacity .3s}
+.nav .brand:hover{opacity:.75}
+.btn-line:hover,.btn-gold:hover{letter-spacing:.22em}
+
+/* ---- Reveal (with stagger via JS) ---- */
+.reveal{opacity:0;transform:translateY(34px);transition:opacity .95s var(--ease),transform .95s var(--ease)}
 .reveal.in{opacity:1;transform:none}
+.reveal.fade{transform:none;transition:opacity 1.1s var(--ease)}
+@media(prefers-reduced-motion:reduce){
+  .reveal{opacity:1!important;transform:none!important;transition:none}
+  .btn-stateful .bs-spinner i{animation:none}
+}
 
 /* ---- Responsive ---- */
 @media(max-width:900px){
