@@ -4421,8 +4421,12 @@
         document.getElementById('planSave30').textContent = '$' + m30.toLocaleString();
         document.getElementById('planSaveYr').textContent = 'about $' + yr.toLocaleString() + ' over a year';
         saveCard.style.display = '';
+        // hand the yearly estimate to the paywall so it can frame the price
+        // against what they're about to save.
+        try { localStorage.setItem('coreSaveYr', String(yr)); localStorage.setItem('coreSaveHabit', hb.noun); } catch (e) {}
       } else {
         saveCard.style.display = 'none';
+        try { localStorage.removeItem('coreSaveYr'); localStorage.removeItem('coreSaveHabit'); } catch (e) {}
       }
     }
     // Day-1 -> day-30 targets. The STAT NAMES come from the chosen habit, and the
