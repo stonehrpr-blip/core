@@ -48,8 +48,9 @@
     if(idx > 0) el.style.transitionDelay = Math.min(idx,7)*0.08 + 's';
   });
 
-  // stateful button: idle -> loading -> success -> open link
+  // standalone stateful buttons with data-href (not inside a form)
   document.querySelectorAll('.btn-stateful').forEach(function(btn){
+    if(btn.closest('form')) return;
     btn.addEventListener('click', function(e){
       e.preventDefault();
       if(btn.dataset.state) return;
@@ -62,4 +63,46 @@
       }, 1000);
     });
   });
+
+  // ---- Modal (enquiry) ----
+  function closeOverlays(){ document.querySelectorAll('.modal.open,.lightbox.open').forEach(function(x){ x.classList.remove('open'); }); document.body.style.overflow=''; }
+  document.querySelectorAll('[data-modal]').forEach(function(t){
+    t.addEventListener('click', function(e){ e.preventDefault(); var m=document.getElementById(t.getAttribute('data-modal')); if(m){ m.classList.add('open'); document.body.style.overflow='hidden'; } });
+  });
+  document.querySelectorAll('.modal').forEach(function(m){
+    m.addEventListener('click', function(e){ if(e.target===m || e.target.classList.contains('modal-close')) closeOverlays(); });
+  });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeOverlays(); });
+
+  // ---- Enquiry form -> stateful -> WhatsApp pre-filled ----
+  var ef = document.getElementById('enquireForm');
+  if(ef){
+    ef.addEventListener('submit', function(e){
+      e.preventDefault();
+      var btn = ef.querySelector('.btn-stateful'); if(!btn || btn.dataset.state) return;
+      var d = new FormData(ef);
+      var msg = (d.get('msg')||'').trim();
+      var text = "Hi, I'd like to enquire about Puncak Asmara." +
+                 "\nName: " + (d.get('name')||'') +
+                 "\nContact: " + (d.get('contact')||'') +
+                 (msg ? ("\nMessage: " + msg) : '');
+      var url = 'https://wa.me/6281585136414?text=' + encodeURIComponent(text);
+      btn.dataset.state = 'loading';
+      setTimeout(function(){
+        btn.dataset.state = 'done';
+        setTimeout(function(){ window.open(url, '_blank'); }, 650);
+        setTimeout(function(){ btn.removeAttribute('data-state'); ef.reset(); closeOverlays(); }, 2400);
+      }, 1000);
+    });
+  }
+
+  // ---- Lightbox ----
+  var lb = document.getElementById('lightbox');
+  if(lb){
+    var lbImg = lb.querySelector('img'), lbCap = lb.querySelector('.lb-cap');
+    document.querySelectorAll('.lb-trigger').forEach(function(t){
+      t.addEventListener('click', function(){ lbImg.src = t.getAttribute('data-src'); lbCap.textContent = t.getAttribute('data-cap')||''; lb.classList.add('open'); document.body.style.overflow='hidden'; });
+    });
+    lb.addEventListener('click', function(e){ if(e.target !== lbImg) closeOverlays(); });
+  }
 })();

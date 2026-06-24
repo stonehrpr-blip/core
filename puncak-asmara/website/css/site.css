@@ -86,8 +86,9 @@ section{padding:clamp(70px,9vw,134px) 0}
 @media(prefers-reduced-motion:reduce){.hero .media img{animation:none}}
 .hero::after{content:'';position:absolute;inset:0;z-index:1;
   background:
-    linear-gradient(180deg,rgba(10,16,12,.5) 0%,rgba(10,16,12,.18) 32%,rgba(8,14,10,.62) 66%,rgba(6,11,8,.94) 100%),
-    linear-gradient(75deg,rgba(8,14,10,.7) 0%,rgba(8,14,10,.32) 42%,rgba(8,14,10,0) 70%)}
+    linear-gradient(180deg,rgba(9,15,11,.34) 0%,rgba(9,15,11,.04) 30%,rgba(7,13,9,.5) 64%,rgba(5,10,7,.95) 100%),
+    linear-gradient(70deg,rgba(7,13,9,.82) 0%,rgba(7,13,9,.36) 38%,rgba(7,13,9,0) 64%),
+    radial-gradient(130% 120% at 50% 0%,rgba(230,200,134,.1),transparent 55%)}
 .hero .wrap{position:relative;z-index:2}
 .hero .pre{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(1.3rem,2.7vw,1.85rem);color:var(--gold-light);text-shadow:0 2px 18px rgba(0,0,0,.6)}
 .hero h1{font-size:clamp(3.1rem,8.8vw,7rem);font-weight:400;letter-spacing:.005em;margin:.08em 0 .26em;
@@ -130,11 +131,15 @@ section{padding:clamp(70px,9vw,134px) 0}
 
 /* ---- Strip ---- */
 .strip{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-.strip a{position:relative;height:320px;border-radius:6px;overflow:hidden;box-shadow:var(--shadow-s)}
+.strip a,.strip .lb-trigger{position:relative;height:320px;border-radius:6px;overflow:hidden;box-shadow:var(--shadow-s);cursor:zoom-in;display:block;width:100%;border:0;padding:0;background:none}
 .strip img{width:100%;height:100%;object-fit:cover;transition:transform 1.2s var(--ease)}
-.strip a::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(20,37,29,.45));opacity:0;transition:.4s}
-.strip a:hover img{transform:scale(1.08)}
-.strip a:hover::after{opacity:1}
+.strip a::after,.strip .lb-trigger::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(20,37,29,.45));opacity:0;transition:.4s}
+.strip a:hover img,.strip .lb-trigger:hover img{transform:scale(1.08)}
+.strip a:hover::after,.strip .lb-trigger:hover::after{opacity:1}
+.strip .lb-trigger .zoom{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(.8);z-index:2;width:50px;height:50px;border-radius:50%;
+  background:rgba(250,246,236,.92);display:flex;align-items:center;justify-content:center;opacity:0;transition:.4s var(--ease)}
+.strip .lb-trigger .zoom::before{content:'+';font-family:'Jost',sans-serif;font-size:1.6rem;color:var(--ink);line-height:1}
+.strip .lb-trigger:hover .zoom{opacity:1;transform:translate(-50%,-50%) scale(1)}
 
 /* ---- Feature cards ---- */
 .feature{position:relative;border-radius:14px;overflow:hidden;min-height:470px;display:flex;align-items:flex-end;color:#fff;box-shadow:var(--shadow-l)}
@@ -212,6 +217,36 @@ footer .copy{border-top:1px solid rgba(230,200,134,.16);padding-top:26px;display
   .reveal{opacity:1!important;transform:none!important;transition:none}
   .btn-stateful .bs-spinner i{animation:none}
 }
+
+/* ---- Enquiry modal ---- */
+.modal{position:fixed;inset:0;z-index:130;display:flex;align-items:center;justify-content:center;padding:24px;
+  background:rgba(10,16,12,.74);backdrop-filter:blur(7px);opacity:0;pointer-events:none;transition:.4s var(--ease)}
+.modal.open{opacity:1;pointer-events:auto}
+.modal-card{background:var(--ivory);border-radius:16px;max-width:480px;width:100%;padding:clamp(30px,5vw,46px);position:relative;
+  box-shadow:var(--shadow-l);transform:translateY(26px) scale(.97);transition:.45s var(--ease)}
+.modal.open .modal-card{transform:none}
+.modal-card h3{font-size:1.95rem;margin:14px 0 8px}
+.modal-card>p{color:var(--muted);font-size:.98rem}
+.modal-card form{display:flex;flex-direction:column;gap:13px;margin-top:24px}
+.modal-card input,.modal-card textarea{font-family:'Jost',sans-serif;font-weight:330;font-size:1rem;padding:14px 16px;
+  border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);transition:.3s}
+.modal-card input::placeholder,.modal-card textarea::placeholder{color:#9a9081}
+.modal-card input:focus,.modal-card textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(192,151,78,.16)}
+.modal-card textarea{min-height:92px;resize:vertical}
+.modal-card .btn{width:100%;margin-top:6px}
+.modal-close{position:absolute;top:14px;right:18px;background:none;border:0;font-size:1.9rem;line-height:1;color:var(--muted);cursor:pointer;transition:.3s}
+.modal-close:hover{color:var(--ink);transform:rotate(90deg)}
+
+/* ---- Lightbox ---- */
+.lightbox{position:fixed;inset:0;z-index:140;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+  background:rgba(9,14,10,.95);opacity:0;pointer-events:none;transition:.4s var(--ease);padding:30px}
+.lightbox.open{opacity:1;pointer-events:auto}
+.lightbox img{max-width:min(92vw,1120px);max-height:82vh;border-radius:7px;box-shadow:0 40px 90px rgba(0,0,0,.6);
+  transform:scale(.93);transition:.5s var(--ease)}
+.lightbox.open img{transform:scale(1)}
+.lightbox .lb-cap{color:rgba(255,255,255,.82);font-size:.78rem;letter-spacing:.18em;text-transform:uppercase}
+.lightbox .lb-close{position:absolute;top:22px;right:28px;background:none;border:0;color:#fff;font-size:2.1rem;line-height:1;cursor:pointer;opacity:.8;transition:.3s}
+.lightbox .lb-close:hover{opacity:1;transform:rotate(90deg)}
 
 /* ---- Responsive ---- */
 @media(max-width:900px){
