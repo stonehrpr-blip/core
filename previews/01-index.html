@@ -210,7 +210,7 @@
       display: flex; justify-content: center;
       margin-top: 64px;
       opacity: 0;
-      animation: logoEnter 1100ms 220ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      animation: logoEnter .7s .15s cubic-bezier(0.34,1.56,0.64,1) forwards;
       position: relative;
     }
     .logo-mark::before {
@@ -239,7 +239,8 @@
       50%      { transform: translateY(-3px); }
     }
     @keyframes logoEnter {
-      0%   { opacity: 0; transform: translateY(12px) scale(0.94); }
+      0%   { opacity: 0; transform: translateY(18px) scale(0.88); }
+      60%  { opacity: 1; transform: translateY(-4px) scale(1.04); }
       100% { opacity: 1; transform: translateY(0) scale(1); }
     }
     /* ── cinematic "power-on": two rings ripple out from the mark on load ── */
@@ -288,7 +289,7 @@
       margin-top: 30px;
       text-align: center;
       opacity: 0;
-      animation: fadeUp 900ms 450ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      animation: fadeUp .6s .35s cubic-bezier(0.22,1,0.36,1) forwards;
     }
     .hero h1 {
       font-family: var(--apple-font);
@@ -354,25 +355,27 @@
       padding: 14px 0 6px; user-select: none; -webkit-user-select: none; cursor: pointer;
       transition: transform .25s cubic-bezier(0.22,1,0.36,1), opacity .25s;
     }
-    /* Premium text — small, refined; slow white shine + a breath of blue glow */
+    .tap-hint { position:relative; }
+    .tap-hint::before,.tap-hint::after{content:'';position:absolute;left:50%;top:50%;width:100px;height:100px;
+      margin:-50px 0 0 -50px;border-radius:50%;border:1px solid rgba(206,212,222,0.18);opacity:0;
+      animation:tapRipple 2.4s ease-out infinite;pointer-events:none;}
+    .tap-hint::after{animation-delay:1.2s;}
+    @keyframes tapRipple{0%{opacity:0.6;transform:scale(0.4);}100%{opacity:0;transform:scale(1.8);}}
     .tap-text {
-      position: relative;
+      position: relative; z-index:1;
       font-family: var(--apple-font); font-size: 11.5px; font-weight: 700; letter-spacing: 0.24em;
       text-transform: uppercase; padding-left: 0.24em;
       background: linear-gradient(100deg, rgba(255,255,255,0.34) 0%, #ffffff 47%, rgba(255,255,255,0.34) 60%, rgba(255,255,255,0.34) 100%);
       background-size: 240% 100%;
       -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent;
-      animation: tapShine 5s ease-in-out infinite, tapGlow 3.6s ease-in-out infinite;
+      animation: tapShine 3s ease-in-out infinite;
     }
     @keyframes tapShine { 0% { background-position: 120% 0; } 55%,100% { background-position: -25% 0; } }
-    @keyframes tapGlow {
-      0%,100% { filter: drop-shadow(0 0 4px rgba(206,212,222,0.16)); opacity: 0.78; }
-      50%     { filter: drop-shadow(0 0 10px rgba(206,212,222,0.4)); opacity: 1; }
-    }
     .tap-hint:hover .tap-text { opacity: 1; }
     .tap-hint:active { transform: scale(0.97); }
     .tap-hint.going { opacity: 0; transform: translateY(-6px); }
     @media (prefers-reduced-motion: reduce) {
+      .tap-hint::before,.tap-hint::after{animation:none;display:none;}
       .tap-text { animation: none; -webkit-text-fill-color: rgba(255,255,255,0.92); color: rgba(255,255,255,0.92); filter: none; }
     }
 
@@ -393,6 +396,7 @@
       from { opacity: 0; transform: translateY(12px); }
       to   { opacity: 1; transform: translateY(0); }
     }
+    @keyframes exitBurst { 0%{opacity:1;transform:translate(0,0) scale(1.2);} 100%{opacity:0;transform:translate(var(--sx),var(--sy)) scale(0);} }
 
     /* ── Tap-to-enter transition — premium "warp into" the trial ── */
     .leave-veil {
@@ -612,6 +616,18 @@
     try { localStorage.setItem('coreOnboardStartedAt', String(Date.now())); } catch (e) {}
     var hint = document.getElementById('tapHint');
     if (hint) hint.classList.add('going');
+    // Particle burst on exit
+    var phone = document.querySelector('.phone'), n=14;
+    for(var i=0;i<n;i++){
+      var p=document.createElement('span');
+      var a=(i/n)*Math.PI*2, d=50+Math.random()*70;
+      p.style.cssText='position:absolute;z-index:99;pointer-events:none;width:3px;height:3px;border-radius:50%;'
+        +'background:#fff;left:50%;top:42%;'
+        +'--sx:'+(Math.cos(a)*d)+'px;--sy:'+(Math.sin(a)*d)+'px;'
+        +'animation:exitBurst .7s cubic-bezier(.22,1,.36,1) forwards;'
+        +'animation-delay:'+(i*0.02)+'s;';
+      phone.appendChild(p);setTimeout(function(){p.remove();},800);
+    }
     document.body.classList.add('leaving');
     try { if (navigator.vibrate) navigator.vibrate(12); } catch (e) {}
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
