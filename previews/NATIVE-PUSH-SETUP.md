@@ -12,7 +12,7 @@ This is the runbook to turn on real notifications (reminders + offers) for CORE.
 These need a Mac with Xcode, an Apple Developer account, a Firebase project, and real keys — they can't be done in a headless CLI, so they're listed as steps.
 
 ### 1. Supabase — add the columns
-Run `supabase/migrations/0001_push_tokens.sql` against project `tqjpgknkbfaayrjuwoet` (SQL editor or `supabase db push`).
+Run `supabase/migrations/0001_push_tokens.sql` against your project (SQL editor or `supabase db push`).
 
 ### 2. Capacitor — create the native shells
 ```bash

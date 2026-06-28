@@ -1,6 +1,6 @@
 # Applying migrations to the live CORE database
 
-Live project ref: **`tqjpgknkbfaayrjuwoet`** (config.toml local alias is `core`).
+Live project ref: **`YOUR_PROJECT_REF`** (config.toml local alias is `core`).
 
 These steps are **for Stone to run** — they mutate production. Claude does not run them.
 
@@ -20,7 +20,7 @@ These steps are **for Stone to run** — they mutate production. Claude does not
 cd ~/Desktop/lifeos
 
 # 1. Link the CLI to the live project (one-time; will prompt for the DB password)
-supabase link --project-ref tqjpgknkbfaayrjuwoet
+supabase link --project-ref YOUR_PROJECT_REF
 
 # 2. SAFETY — pull live schema and confirm none of the new columns/types pre-exist
 #    with a different shape. Review the diff before continuing.

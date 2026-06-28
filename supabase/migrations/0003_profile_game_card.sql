@@ -8,7 +8,7 @@
 -- SECURITY DEFINER functions that expose ONLY public card columns.
 --
 -- Every statement is guarded (IF NOT EXISTS / CREATE OR REPLACE) so this migration
--- is a no-op when re-applied and safe against the live DB (project tqjpgknkbfaayrjuwoet).
+-- is a no-op when re-applied and safe against the live DB (project YOUR_PROJECT_REF).
 -- Run `supabase db pull` first to confirm none of these columns pre-exist with a
 -- different type.
 

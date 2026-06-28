@@ -26,16 +26,26 @@ import {
   analyzePhysique,
 } from "./helpers.ts";
 
-const CORS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+const ALLOWED_ORIGINS = [
+  "https://stonehrpr-blip.github.io",
+  "http://localhost:8000",
+  "null",  // file:// previews
+];
 
-function json(obj: unknown, status = 200): Response {
+function corsHeaders(origin: string | null): Record<string, string> {
+  const allowed = ALLOWED_ORIGINS.some((o) => origin && origin.startsWith(o)) ? origin! : "";
+  return {
+    "Access-Control-Allow-Origin": allowed,
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Vary": "Origin",
+  };
+}
+
+function json(obj: unknown, origin: string | null, status = 200): Response {
   return new Response(JSON.stringify(obj), {
     status,
-    headers: { "content-type": "application/json", ...CORS },
+    headers: { "content-type": "application/json", ...corsHeaders(origin) },
   });
 }
 
@@ -56,28 +66,29 @@ const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // ~5MB decoded
 const underRateLimit = createRateLimiter({ windowMs: RATE_WINDOW_MS, max: RATE_MAX });
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
-  if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
+  const origin = req.headers.get("Origin");
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders(origin) });
+  if (req.method !== "POST") return json({ error: "method_not_allowed" }, origin, 405);
 
   if (!underRateLimit(callerKey(req), Date.now())) {
-    return json({ error: "rate_limited" }, 429);
+    return json({ error: "rate_limited" }, origin, 429);
   }
 
   let body: { image?: unknown; mediaType?: unknown; context?: unknown };
   try {
     body = await req.json();
   } catch {
-    return json({ error: "bad_json" }, 400);
+    return json({ error: "bad_json" }, origin, 400);
   }
 
   const img = validateImage(body.image, body.mediaType, MAX_IMAGE_BYTES);
   if (!img.ok) {
     const status = img.error === "image_too_large" ? 413 : 400;
-    return json({ error: img.error }, status);
+    return json({ error: img.error }, origin, status);
   }
 
   const apiKey = PROVIDER === "openai" ? OPENAI_KEY : ANTHROPIC_KEY;
-  if (!apiKey) return json({ error: "model_unavailable" }, 503);
+  if (!apiKey) return json({ error: "model_unavailable" }, origin, 503);
   const model = PROVIDER === "openai" ? OPENAI_MODEL : ANTHROPIC_MODEL;
 
   try {
@@ -85,14 +96,14 @@ Deno.serve(async (req) => {
     if (!out.ok) {
       // Log status ONLY — never the image or any body that could echo it.
       console.error("anthropic_error", out.status ?? "");
-      return json({ error: out.error, status: out.status }, 502);
+      return json({ error: out.error, status: out.status }, origin, 502);
     }
     // If the model flagged a non-body, surface that plainly (defense in depth).
-    if (!out.result.isBody) return json({ isBody: false });
-    return json(out.result);
+    if (!out.result.isBody) return json({ isBody: false }, origin);
+    return json(out.result, origin);
   } catch (e) {
     console.error("physique_exception", String(e));
-    return json({ error: "exception" }, 500);
+    return json({ error: "exception" }, origin, 500);
   }
   // NOTE: `img.data` (the photo bytes) goes out of scope here and is GC'd.
   // It was never stored, written, or logged. Nothing about it persists.

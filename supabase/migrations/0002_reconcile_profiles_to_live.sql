@@ -3,7 +3,7 @@
 -- Reconciles public.profiles with the schema the app (previews/_lib/core-accounts.js)
 -- actually reads and writes, which had drifted from 0001_initial_schema.sql.
 --
--- Verified 2026-06-01 against the live project (tqjpgknkbfaayrjuwoet) by probing
+-- Verified 2026-06-01 against the live project (YOUR_PROJECT_REF) by probing
 -- which columns exist via the REST API. The LIVE table already matches the app;
 -- 0001 did NOT (it declared onboarded_at / avatar_url / timezone / body-metric
 -- columns the app never uses, and lacked onboarded / trial_state / signed_in_* ).

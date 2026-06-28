@@ -25,7 +25,7 @@ actually classifies + rates a photo correctly. (Or paste me a key and I'll run i
 brew install supabase/tap/supabase            # macOS
 
 supabase login                                # opens browser
-supabase link --project-ref tqjpgknkbfaayrjuwoet   # CORE project (from memory)
+supabase link --project-ref YOUR_PROJECT_REF   # your Supabase project ref
 
 supabase secrets set OPENAI_API_KEY=sk-...        # OpenAI does the photo understanding
 # or Anthropic instead:

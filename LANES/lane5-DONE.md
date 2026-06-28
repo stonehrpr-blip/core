@@ -1,7 +1,7 @@
 # Lane5 — Supabase Persistence — DONE
 
 **Goal:** make local progress survive an app reinstall by syncing to Supabase
-(project `tqjpgknkbfaayrjuwoet`).
+(project `YOUR_PROJECT_REF`).
 
 ## Audit finding (premise correction)
 lane5 assumed `quests` / `chests` / `inventory` tables + RN models existed. They
@@ -56,7 +56,7 @@ so a reinstall could overwrite real server progress with DEFAULTS.
 ## NOT verified here — manual steps required
 The RN bundler can't run locally and there's no `supabase` CLI / `psql` here, so:
 1. **Apply** `supabase/migrations/0007_game_persistence.sql` to project
-   `tqjpgknkbfaayrjuwoet`.
+   `YOUR_PROJECT_REF`.
 2. **Device test (lane5 VERIFY):** log a slip → reinstall → re-sign-in → confirm
    the ledger restores and `slip_logs` has the row (with `client_slip_key`).
    Also confirm core xp/streak restores (clobber fix).

@@ -96,7 +96,7 @@ core.app
 > Less than for someone on day 1, honestly. Core is most powerful in the first 30 days when slip-risk is highest. If you're past that, the value is the visual healing progress + community + AI coach for pattern detection. You don't need it the way day-1 people need it.
 
 **"Are you the founder? Why should we trust you?"**
-> Yeah, I'm Stone. I'm one person who built this after quitting myself. I'm not VC-backed, I'm not pretending to be a company. If the app sucks or you spot something off, reply here and I'll see it. Account: u/coreapp_stone. Email: stone@core.app.
+> Yeah, I'm Stone. I'm one person who built this after quitting myself. I'm not VC-backed, I'm not pretending to be a company. If the app sucks or you spot something off, reply here and I'll see it. Account: u/coreapp_stone. Email: corestudiosupport@gmail.com.
 
 **"What about Apple Health integration?"**
 > Honest: not yet. v1 is iOS-only with no Apple Health hooks. It's on the roadmap for v1.2 (~Q4 2026). For now, manually log slips.
