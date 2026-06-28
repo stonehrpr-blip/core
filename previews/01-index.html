@@ -573,20 +573,37 @@
     try { localStorage.setItem('coreOnboardStartedAt', String(Date.now())); } catch (e) {}
     var hint = document.getElementById('tapHint');
     if (hint) hint.classList.add('going');
-    // Particle burst on exit
-    var phone = document.querySelector('.phone'), n=14;
+    // Particle burst on exit — outer ring + inner sparkles
+    var phone = document.querySelector('.phone'), n=20;
     for(var i=0;i<n;i++){
       var p=document.createElement('span');
-      var a=(i/n)*Math.PI*2, d=50+Math.random()*70;
-      p.style.cssText='position:absolute;z-index:99;pointer-events:none;width:3px;height:3px;border-radius:50%;'
-        +'background:#fff;left:50%;top:42%;'
+      var a=(i/n)*Math.PI*2, d=60+Math.random()*90;
+      var sz=i<12?3:2, clr=i<12?'#fff':'#C4C9D2';
+      p.style.cssText='position:absolute;z-index:99;pointer-events:none;width:'+sz+'px;height:'+sz+'px;border-radius:50%;'
+        +'background:'+clr+';left:50%;top:42%;'
         +'--sx:'+(Math.cos(a)*d)+'px;--sy:'+(Math.sin(a)*d)+'px;'
-        +'animation:exitBurst .7s cubic-bezier(.22,1,.36,1) forwards;'
-        +'animation-delay:'+(i*0.02)+'s;';
-      phone.appendChild(p);setTimeout(function(){p.remove();},800);
+        +'animation:exitBurst .8s cubic-bezier(.22,1,.36,1) forwards;'
+        +'animation-delay:'+(i*0.015)+'s;';
+      phone.appendChild(p);setTimeout(function(){p.remove();},900);
     }
+    // Stars intensify + rapid shooting stars on exit
+    var stars=document.querySelectorAll('#stars .star');
+    for(var j=0;j<stars.length;j++){stars[j].style.opacity='0.9';stars[j].style.transition='opacity .4s';}
+    for(var k=0;k<3;k++){(function(delay){
+      setTimeout(function(){
+        var s=document.createElement('div');s.className='shoot';
+        s.style.left=(20+Math.random()*50)+'%';s.style.top=(10+Math.random()*30)+'%';
+        var dx=-(80+Math.random()*100),dy=80+Math.random()*100;
+        var ang=Math.atan2(dy,dx)*180/Math.PI;
+        s.style.setProperty('--sx',dx+'px');s.style.setProperty('--sy',dy+'px');
+        s.style.setProperty('--ang',ang+'deg');
+        s.style.animation='shootFly '+(0.4+Math.random()*0.3).toFixed(2)+'s cubic-bezier(.3,.5,.3,1) forwards';
+        document.getElementById('stars').appendChild(s);
+        setTimeout(function(){s.remove();},800);
+      },delay);
+    })(k*80);}
     document.body.classList.add('leaving');
-    try { if (navigator.vibrate) navigator.vibrate(12); } catch (e) {}
+    try { if (navigator.vibrate) navigator.vibrate([8,30,15]); } catch (e) {}
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     setTimeout(function () { window.location.href = '07-trial.html'; }, reduce ? 150 : 600);
   }
