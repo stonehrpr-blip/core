@@ -7,15 +7,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <style>
   :root {
-    --bg-base:#02020A; --bg-card:rgba(255,255,255,0.022); --bg-card-2:rgba(255,255,255,0.06);
-    --border:rgba(255,255,255,0.07); --text:#F8FAFE; --muted:#9AA1B7; --dim:#4F5570;
-    --accent:#0A84FF; --grad-a:#0A84FF; --grad-b:#0A84FF; --grad-c:#0A84FF; --good:#0A84FF;
-    --coin:#9AA1B7; --coin2:#C7CDDC; --shard:#9AA1B7;
-    --common:#9AA1B7; --rare:#0A84FF; --epic:#9AA1B7; --legendary:#9AA1B7; --mythic:#9AA1B7;
+    --bg-base:#040408; --bg-card:rgba(255,255,255,0.022); --bg-card-2:rgba(255,255,255,0.06);
+    --border:rgba(255,255,255,0.07); --text:#ffffff; --muted:rgba(255,255,255,0.56); --dim:rgba(255,255,255,0.30);
+    --accent:#AEB6C4; --grad-a:#AEB6C4; --grad-b:#AEB6C4; --grad-c:#AEB6C4; --good:#AEB6C4;
+    --coin:rgba(255,255,255,0.56); --coin2:#C7CDDC; --shard:rgba(255,255,255,0.56);
+    --common:rgba(255,255,255,0.56); --rare:#AEB6C4; --epic:rgba(255,255,255,0.56); --legendary:rgba(255,255,255,0.56); --mythic:rgba(255,255,255,0.56);
   }
   * { box-sizing:border-box; }
   html, body { margin:0; padding:0; height:100%; }
-  body { min-height:100vh; background:#0A0A14; display:flex; align-items:center; justify-content:center;
+  body { min-height:100vh; background:#000; display:flex; align-items:center; justify-content:center;
     font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif;
     color:var(--text); -webkit-font-smoothing:antialiased; padding:24px; overflow:hidden; }
   .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden;
@@ -26,7 +26,7 @@
   .bg { position:absolute; inset:0; z-index:0; background:
       radial-gradient(60% 35% at 50% 8%, rgba(10,132,255,0.12) 0%, transparent 62%),
       radial-gradient(60% 35% at 50% 94%, rgba(10,132,255,0.06) 0%, transparent 65%),
-      linear-gradient(180deg, #060a18 0%, #02020A 55%, #050510 100%); }
+      linear-gradient(180deg, #060a18 0%, #040408 55%, #050510 100%); }
   .aurora { position:absolute; inset:0; z-index:1; pointer-events:none; opacity:0.22; mix-blend-mode:screen; }
   .aurora::before, .aurora::after { content:""; position:absolute; border-radius:50%; filter:blur(72px); animation:auroraDrift 22s ease-in-out infinite; will-change:transform; }
   .aurora::before { width:70%; height:40%; left:-10%; top:3%; background:radial-gradient(circle, rgba(10,132,255,0.20), transparent 65%); }
@@ -83,7 +83,7 @@
   .slots{ position:relative; z-index:2; display:grid; grid-template-columns:repeat(4,1fr); gap:7px; margin-top:15px; }
   .slot{ border:none; font:inherit; cursor:pointer; text-align:center; padding:9px 4px; border-radius:12px; background:rgba(0,0,0,0.28); border:1px solid var(--border); transition:.18s; }
   .slot:active{ transform:scale(.96); }
-  .slot.filled{ border-color:color-mix(in srgb,var(--sc,#0A84FF) 45%,transparent); background:color-mix(in srgb,var(--sc,#0A84FF) 10%,transparent); }
+  .slot.filled{ border-color:color-mix(in srgb,var(--sc,#AEB6C4) 45%,transparent); background:color-mix(in srgb,var(--sc,#AEB6C4) 10%,transparent); }
   .slot .sk{ font-size:8px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--dim); }
   .slot .sv{ font-size:10px; font-weight:800; margin-top:4px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .slot.empty .sv{ color:var(--dim); }
@@ -218,12 +218,12 @@
   .sheet-bd{ position:absolute; inset:0; z-index:78; background:rgba(2,2,10,0.62); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); opacity:0; pointer-events:none; transition:opacity .28s ease; }
   .sheet-bd.show{ opacity:1; pointer-events:auto; }
   .sheet{ position:absolute; left:0; right:0; bottom:0; z-index:79; transform:translateY(102%); transition:transform .34s cubic-bezier(.2,.9,.25,1.05); border-radius:28px 28px 0 0; padding:10px 18px calc(20px + env(safe-area-inset-bottom)); overflow:hidden;
-    background:linear-gradient(180deg, rgba(20,22,34,0.98), rgba(8,9,16,0.99)); border-top:1.5px solid color-mix(in srgb,var(--shc,#0A84FF) 50%,transparent);
-    box-shadow:0 -24px 60px rgba(0,0,0,0.6), 0 0 30px -6px color-mix(in srgb,var(--shc,#0A84FF) 36%,transparent); }
+    background:linear-gradient(180deg, rgba(20,22,34,0.98), rgba(8,9,16,0.99)); border-top:1.5px solid color-mix(in srgb,var(--shc,#AEB6C4) 50%,transparent);
+    box-shadow:0 -24px 60px rgba(0,0,0,0.6), 0 0 30px -6px color-mix(in srgb,var(--shc,#AEB6C4) 36%,transparent); }
   .sheet.show{ transform:translateY(0); }
   .sheet .grab{ width:38px; height:5px; border-radius:999px; background:rgba(255,255,255,0.22); margin:0 auto 14px; }
   .sheet .shead{ display:flex; align-items:flex-start; gap:14px; }
-  .sheet .spv{ position:relative; flex:none; width:96px; height:96px; border-radius:20px; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at 50% 30%, color-mix(in srgb,var(--shc,#0A84FF) 14%,transparent), rgba(0,0,0,0.34)); border:1.5px solid color-mix(in srgb,var(--shc,#0A84FF) 40%,transparent); }
+  .sheet .spv{ position:relative; flex:none; width:96px; height:96px; border-radius:20px; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at 50% 30%, color-mix(in srgb,var(--shc,#AEB6C4) 14%,transparent), rgba(0,0,0,0.34)); border:1.5px solid color-mix(in srgb,var(--shc,#AEB6C4) 40%,transparent); }
   .sheet .spv .pv{ height:auto; margin:0; transform:scale(1.16); }
   .sheet .sid{ flex:1; min-width:0; padding-top:3px; }
   .sheet .sname{ font-size:20px; font-weight:900; letter-spacing:-0.01em; line-height:1.1; }
@@ -261,7 +261,7 @@
   <link rel="stylesheet" href="_lib/core-background.css?v=20260619d">
   <style>
     .bg,.aurora,.stars{display:none !important;}
-    .phone{background:#02020A !important;}
+    .phone{background:#040408 !important;}
     .nav{justify-content:space-evenly !important;}
     .nav .item{flex:1 1 0;}
   </style>
@@ -280,7 +280,7 @@
       <div class="topbar">
         <a class="back" href="20-dashboard.html" aria-label="Back to dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></a>
         <span class="ttl">Inventory</span>
-      <button id="helpBtn" aria-label="Help" style="margin-left:auto;width:34px;height:34px;flex:none;border-radius:50%;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:#9AA1B7;font:800 14px -apple-system,sans-serif;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;-webkit-appearance:none;appearance:none;">?</button>
+      <button id="helpBtn" aria-label="Help" style="margin-left:auto;width:34px;height:34px;flex:none;border-radius:50%;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.56);font:800 14px -apple-system,sans-serif;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;-webkit-appearance:none;appearance:none;">?</button>
         <span class="coinchip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/></svg><span id="coinTop">0</span></span>
       </div>
 
@@ -383,16 +383,16 @@
       el._raf=requestAnimationFrame(step); }); }
 
     // ── colours + previews (mirrors shop) ──
-    var RARHEX={ Common:'#9AA1B7', Rare:'#0A84FF', Epic:'#9AA1B7', Legendary:'#9AA1B7' };
+    var RARHEX={ Common:'rgba(255,255,255,0.56)', Rare:'#AEB6C4', Epic:'rgba(255,255,255,0.56)', Legendary:'rgba(255,255,255,0.56)' };
     var RAR={ Common:'var(--common)', Rare:'var(--rare)', Epic:'var(--epic)', Legendary:'var(--legendary)' };
-    var FRAME_C={ Default:'#8a90a0', Blue:'#0A84FF', Gold:'#9AA1B7', Crystal:'#9AA1B7', Aurora:'#9AA1B7', CORE:'#E6F0FF' };
-    var AURA_C={ aura_blue:'#0A84FF', aura_ember:'#9AA1B7', aura_wind:'#9AA1B7', aura_core:'#0A84FF' };
+    var FRAME_C={ Default:'#8a90a0', Blue:'#AEB6C4', Gold:'rgba(255,255,255,0.56)', Crystal:'rgba(255,255,255,0.56)', Aurora:'rgba(255,255,255,0.56)', CORE:'#E6F0FF' };
+    var AURA_C={ aura_blue:'#AEB6C4', aura_ember:'rgba(255,255,255,0.56)', aura_wind:'rgba(255,255,255,0.56)', aura_core:'#AEB6C4' };
     var AV='<svg class="av" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="3.3"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/></svg>';
     var SHIELD='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4-3 7-7 9-4-2-7-5-7-9V6l7-3Z"/><path d="M9 11.5l2 2 4-4.5"/></svg>';
     var CHEST_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 9l2-4h14l2 4M3 9v9a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V9M3 9h18M12 9v3"/></svg>';
     function previewHTML(it){
       if(it.kind==='frame'){ return '<div class="pv"><div class="pv-frame" style="--fc:'+(FRAME_C[it.frameKey]||'#8a90a0')+'">'+AV+'</div></div>'; }
-      if(it.kind==='aura'){  return '<div class="pv"><div class="pv-aura" style="--ac:'+(AURA_C[it.id]||'#0A84FF')+'"><span class="glow"></span>'+AV+'</div></div>'; }
+      if(it.kind==='aura'){  return '<div class="pv"><div class="pv-aura" style="--ac:'+(AURA_C[it.id]||'#AEB6C4')+'"><span class="glow"></span>'+AV+'</div></div>'; }
       if(it.kind==='badge'){ return '<div class="pv"><div class="pv-badge" style="--bc:'+(RARHEX[it.rar]||RARHEX.Common)+'">'+SHIELD+'</div></div>'; }
       if(it.kind==='title'){ return '<div class="pv"><div class="pv-title"><div class="nm">'+playerName()+'</div><div class="tt">'+it.titleName+'</div></div></div>'; }
       if(it.kind==='chest'){ return '<div class="pv"><div class="pv-chest" style="--cc:'+(RARHEX[it.rar]||RARHEX.Common)+'">'+CHEST_SVG+'</div></div>'; }
@@ -413,7 +413,7 @@
     }
     function burstFromEl(el, color, n){ if(!el) return; var r=el.getBoundingClientRect(); burstAt(r.left+r.width/2, r.top+r.height/2, color, n); }
     // rarity colour (chests now open on 28-chest.html; only this helper is still used locally)
-    function rarColor(r){ var m={common:'#9AA1B7',rare:'#0A84FF',epic:'#9AA1B7',legendary:'#9AA1B7',mythic:'#9AA1B7'}; return m[r]||'#9AA1B7'; }
+    function rarColor(r){ var m={common:'rgba(255,255,255,0.56)',rare:'#AEB6C4',epic:'rgba(255,255,255,0.56)',legendary:'rgba(255,255,255,0.56)',mythic:'rgba(255,255,255,0.56)'}; return m[r]||'rgba(255,255,255,0.56)'; }
 
     // ── catalog (same ids as Shop so ownership + equips stay in sync) ──
     var CATS=['Rewards','Frames','Badges','Auras','Titles','Boosts','Chests'];
@@ -524,7 +524,7 @@
         '<div class="mb">+'+due.coins+'</div>';
       el.onclick=function(){ var c=jget('coreInvMilestones',[]); if(c.indexOf(due.pct)>=0) return; c.push(due.pct); jset('coreInvMilestones',c);
         try{ if(S.earnCoins) S.earnCoins(due.coins,'collection_milestone:'+due.pct); }catch(e){} lset('coreCoins',String(coins()));
-        SFX('chest_collect'); burstFromEl(el,'#0A84FF',16); S.syncProgress(); dispatch(); toast('+'+due.coins+' coins claimed','good'); render(); };
+        SFX('chest_collect'); burstFromEl(el,'#AEB6C4',16); S.syncProgress(); dispatch(); toast('+'+due.coins+' coins claimed','good'); render(); };
       wrap.appendChild(el);
     }
 
@@ -534,7 +534,7 @@
       markSeen(it.id);
       var s=qs('#sheet'), b=qs('#sheetBd'); if(!s) return;
       var owned=ownedNow(it), equ=isEquipped(it), qty=it.cat==='Chests'?ownedChestCount(it.id):0;
-      var rc=RARHEX[it.rar]||'#0A84FF'; s.style.setProperty('--shc', rc);
+      var rc=RARHEX[it.rar]||'#AEB6C4'; s.style.setProperty('--shc', rc);
       var typeLabel = it.cat==='Chests'?'Reward Chest': it.cat.replace(/s$/,'');
       var chips='';
       if(equ) chips+='<span class="schip eq">Equipped</span>';
@@ -572,7 +572,7 @@
     function renderLoadout(){
       var fk=lget('coreProfileTheme','Default'), fc=FRAME_C[fk]||'#8a90a0';
       var auraId=lget('coreEquippedAura',''), ac=AURA_C[auraId]||null;
-      var badgeId=lget('coreEquippedBadge',''), badgeIt=byId(badgeId), bc=badgeIt?(RARHEX[badgeIt.rar]||'#9AA1B7'):null;
+      var badgeId=lget('coreEquippedBadge',''), badgeIt=byId(badgeId), bc=badgeIt?(RARHEX[badgeIt.rar]||'rgba(255,255,255,0.56)'):null;
       var titleNm=lget('coreProfileTitle','');
       var frameName=(byId('frame_'+fk.toLowerCase())||{}).name || (fk==='Default'?'Default':fk+' Frame');
       var auraName=auraId?(byId(auraId)||{}).name:null;
@@ -586,7 +586,7 @@
       if(_rf) fc = rarColor(_rf.rarity);
       var auraNameFinal = _ra ? _ra.name : auraName;
       if(_ra) ac = rarColor(_ra.rarity);
-      var slot=function(key,kind,val){ var filled=!!val; return '<button class="slot '+(filled?'filled':'empty')+'" data-jump="'+kind+'" '+(filled?'style="--sc:'+ (kind==='Auras'&&ac?ac:kind==='Badges'&&bc?bc:kind==='Frames'?fc:'#0A84FF') +'"':'')+'><div class="sk">'+key+'</div><div class="sv">'+(filled?val:'Empty')+'</div></button>'; };
+      var slot=function(key,kind,val){ var filled=!!val; return '<button class="slot '+(filled?'filled':'empty')+'" data-jump="'+kind+'" '+(filled?'style="--sc:'+ (kind==='Auras'&&ac?ac:kind==='Badges'&&bc?bc:kind==='Frames'?fc:'#AEB6C4') +'"':'')+'><div class="sk">'+key+'</div><div class="sv">'+(filled?val:'Empty')+'</div></button>'; };
       qs('#lo').style.setProperty('--fc',fc); qs('#lo').style.setProperty('--ac',ac||'transparent'); qs('#lo').style.setProperty('--bc',bc||'#9aa1b7');
       qs('#lo').innerHTML=
         '<span class="lotag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 3v5c0 4-3 7-7 9-4-2-7-5-7-9V6z"/></svg>Your Loadout</span>'+

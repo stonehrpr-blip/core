@@ -7,23 +7,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <style>
   :root {
-    --bg-base:#02020A;
+    --bg-base:#040408;
     --bg-card:rgba(255,255,255,0.022);
     --border:rgba(255,255,255,0.07);
-    --text:#F8FAFE;
-    --muted:#9AA1B7;
-    --dim:#4F5570;
-    --accent:#0A84FF;
-    --good:#0A84FF;
-    --gold:#0A84FF;
+    --text:#ffffff;
+    --muted:rgba(255,255,255,0.56);
+    --dim:rgba(255,255,255,0.30);
+    --accent:#AEB6C4;
+    --good:#AEB6C4;
+    --gold:#AEB6C4;
     /* rarity of THIS chest — overwritten by JS once the pull is rolled */
-    --rar:#0A84FF;
+    --rar:#AEB6C4;
     --rarA:rgba(10,132,255,0.5);
   }
   * { box-sizing:border-box; }
   html, body { margin:0; padding:0; height:100%; }
   body {
-    min-height:100vh; background:#0A0A14;
+    min-height:100vh; background:#000;
     display:flex; align-items:center; justify-content:center;
     font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif;
     color:var(--text); -webkit-font-smoothing:antialiased; padding:24px; overflow:hidden;
@@ -42,7 +42,7 @@
     background:
       radial-gradient(58% 40% at 50% 40%, color-mix(in srgb, var(--rar) 18%, transparent) 0%, transparent 66%),
       radial-gradient(70% 50% at 50% 100%, rgba(10,12,24,0) 0%, #04040c 70%),
-      linear-gradient(180deg, #06061a 0%, #02020A 52%, #050510 100%);
+      linear-gradient(180deg, #06061a 0%, #040408 52%, #050510 100%);
     transition:background .6s ease;
   }
   /* spotlight cone behind the chest */
@@ -395,9 +395,9 @@
 
     // Each chest tier wears its own rarity colour (shared ladder with the rest of
     // the app) so a Legendary chest reads gold, a Mythic one rose, etc.
-    var RARCOL = { common:'#9AA1B7', rare:'#0A84FF', epic:'#9F8FFF', legendary:'#FFC857', mythic:'#FF6B7E' };
+    var RARCOL = { common:'rgba(255,255,255,0.56)', rare:'#AEB6C4', epic:'#9F8FFF', legendary:'#FFC857', mythic:'#FF6B7E' };
     function paintRarity(rar){
-      var c = RARCOL[String(rar||'').toLowerCase()] || '#0A84FF';
+      var c = RARCOL[String(rar||'').toLowerCase()] || '#AEB6C4';
       body.style.setProperty('--rar', c);
       body.style.setProperty('--rarA', hexA(c, 0.5));
       return c;
@@ -427,7 +427,7 @@
       phone.appendChild(fl);
       if(REDUCED){ setTimeout(function(){ fl.remove(); },500); return; }
       fl.animate([{opacity:0},{opacity:1,offset:.15},{opacity:0}],{duration:950,easing:'ease-out'}).onfinish=function(){ fl.remove(); };
-      var cols=['#FF6B7E','#FFC857','#F8FAFE','#9F8FFF','#FF6B7E'];
+      var cols=['#FF6B7E','#FFC857','#ffffff','#9F8FFF','#FF6B7E'];
       for(var i=0;i<30;i++){ (function(){ var c=document.createElement('span'),col=cols[i%cols.length];
         c.style.cssText='position:absolute;left:50%;top:40%;width:8px;height:8px;border-radius:2px;z-index:96;pointer-events:none;background:'+col+';box-shadow:0 0 8px '+col;
         phone.appendChild(c);
@@ -439,7 +439,7 @@
       if(roll && roll.rar==='mythic') mythicFlash();
       var host = qs('#reveals'); host.innerHTML='';
       var nodes = roll.reveals.map(function(r){
-        var rc = RARCOL[String(r.r||'').toLowerCase()] || (r.hi ? '#0A84FF' : '#9AA1B7');
+        var rc = RARCOL[String(r.r||'').toLowerCase()] || (r.hi ? '#AEB6C4' : 'rgba(255,255,255,0.56)');
         var el = document.createElement('div');
         el.className = 'rv'+(r.hi?' hi':'');
         el.style.setProperty('--rc', rc);
