@@ -7,7 +7,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#000000" />
   <link rel="stylesheet" href="_lib/core-responsive.css?v=20260619d" />
-  <link rel="stylesheet" href="_lib/core-background.css?v=20260619d" />
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
@@ -23,19 +22,15 @@
 
     .stage{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center;}
 
-    /* film grain over the whole phone for cinematic texture */
-    .grain{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:0.5;mix-blend-mode:overlay;
-      background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.42'/></svg>");
-      background-size:200px 200px;}
+    .grain{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:.04;mix-blend-mode:overlay;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='150' height='150' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size:150px 150px;}
 
     /* ===== Stage 1 — blank screen, tap to reveal ===== */
     #stage1{justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;}
-    /* a soft spotlight pooling behind the emblem so it reads as "lit on a stage" */
-    #stage1::before{content:'';position:absolute;left:50%;top:42%;width:520px;height:520px;
+    #stage1::before{content:'';position:absolute;left:50%;top:42%;width:300px;height:300px;
       transform:translate(-50%,-50%);pointer-events:none;
-      background:radial-gradient(closest-side, rgba(214,219,226,0.10), rgba(214,219,226,0.04) 45%, transparent 72%);
-      animation:spotBreathe 6s ease-in-out infinite;}
-    @keyframes spotBreathe{0%,100%{opacity:0.7;transform:translate(-50%,-50%) scale(1);}50%{opacity:1;transform:translate(-50%,-50%) scale(1.08);}}
+      background:radial-gradient(closest-side, rgba(214,219,226,0.08), rgba(214,219,226,0.03) 40%, transparent 65%);}
     .pre-eyebrow{position:relative;font-size:11px;font-weight:800;letter-spacing:0.34em;text-transform:uppercase;color:rgba(214,219,226,0.5);
       animation:s1In .8s ease both;}
     /* mystery emblem — a sealed gem socket teasing the reveal */
@@ -64,7 +59,7 @@
       mix-blend-mode:screen;opacity:0.55;animation:mSheen 4.2s ease-in-out infinite;}
     .myst-core{position:absolute;width:58px;height:58px;border-radius:50%;z-index:1;
       background:radial-gradient(circle,#fff,rgba(206,212,222,0.5) 46%,transparent 72%);
-      filter:blur(2px);animation:mPulse 3s ease-in-out infinite;}
+      animation:mPulse 3s ease-in-out infinite;}
     .myst-q{position:relative;z-index:2;font-size:46px;font-weight:900;color:rgba(255,255,255,0.92);
       text-shadow:0 0 26px rgba(206,212,222,0.8), 0 2px 4px rgba(0,0,0,0.4);}
     @keyframes mPulse{0%,100%{opacity:0.74;}50%{opacity:1;}}
@@ -119,7 +114,6 @@
     .rank-card{width:304px;padding:32px 24px 24px;position:relative;flex-shrink:0;text-align:center;overflow:hidden;
       background:
         linear-gradient(165deg, color-mix(in srgb, var(--rc) 24%, rgba(10,11,18,0.62)), color-mix(in srgb, var(--rc) 5%, rgba(5,6,11,0.5)));
-      -webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);
       border:1px solid color-mix(in srgb, var(--rc) 55%, transparent);
       clip-path:polygon(0 0, calc(100% - 28px) 0, 100% 28px, 100% 100%, 28px 100%, 0 calc(100% - 28px));
       box-shadow:0 30px 70px rgba(0,0,0,0.55), 0 0 0 1px color-mix(in srgb, var(--rc) 22%, transparent) inset, 0 0 64px color-mix(in srgb, var(--rc) 28%, transparent);
