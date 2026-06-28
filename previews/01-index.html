@@ -331,23 +331,17 @@
       opacity: 0;
       animation: fadeUp .5s .36s cubic-bezier(0.22,1,0.36,1) forwards;
     }
-    .bottom-card{
-      margin:0 12px 12px;padding:18px 20px 14px;border-radius:20px;
-      background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.08);
-      cursor:pointer;text-align:center;transition:background .2s,border-color .2s,transform .15s;
-      -webkit-tap-highlight-color:transparent;}
-    .bottom-card:active{transform:scale(0.98);background:rgba(255,255,255,0.06);}
-    .bottom-card.going{opacity:0;transform:translateY(8px);transition:opacity .25s,transform .3s cubic-bezier(.4,0,.2,1);}
-    .bc-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:14px;
-      background:linear-gradient(180deg,rgba(255,255,255,0.10),rgba(255,255,255,0.04));
-      border:1px solid rgba(255,255,255,0.14);font-size:15px;font-weight:600;color:#fff;
-      letter-spacing:-0.1px;transition:background .2s,border-color .2s,box-shadow .2s;}
-    .bottom-card:hover .bc-btn{border-color:rgba(200,210,225,0.3);box-shadow:0 0 20px rgba(180,190,210,0.10);}
-    .bc-btn svg{width:16px;height:16px;}
-    .bc-legal{margin-top:10px;font-size:10.5px;color:rgba(255,255,255,0.35);letter-spacing:-0.05px;line-height:1.4;}
-    .bc-legal a{color:rgba(255,255,255,0.50);text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.10);transition:color .2s,border-color .2s;}
-    .bc-legal a:hover{color:#fff;border-bottom-color:rgba(255,255,255,0.25);}
-    @media(prefers-reduced-motion:reduce){.bottom-card{transition:none;}}
+    .tap-hint{display:flex;justify-content:center;padding:14px 0 6px;cursor:pointer;user-select:none;
+      transition:transform .25s cubic-bezier(.22,1,.36,1),opacity .25s;}
+    .tap-hint:active{transform:scale(0.97);}
+    .tap-hint.going{opacity:0;transform:translateY(-6px);}
+    .tap-text{font-size:11.5px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;
+      color:rgba(255,255,255,0.65);transition:color .2s;}
+    .tap-hint:hover .tap-text{color:#fff;}
+    .legal{margin:14px 12px 0;font-size:11px;line-height:16px;color:var(--ink-faint);text-align:center;
+      opacity:0;animation:fadeUp .4s .42s cubic-bezier(.22,1,.36,1) forwards;}
+    .legal a{color:var(--ink-soft);text-decoration:none;border-bottom:1px solid var(--hair);}
+    .legal a:hover{color:#fff;border-bottom-color:var(--hair-2);}
 
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(12px); }
@@ -452,10 +446,10 @@
       </div>
 
       <div class="cta-wrap">
-        <div class="bottom-card" id="tapHint" role="button" tabindex="0">
-          <div class="bc-btn">Continue <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
-          <p class="bc-legal">By continuing, you agree to our <a href="82-legal.html#terms">Terms</a> and <a href="82-legal.html#privacy">Privacy Policy</a>.</p>
+        <div class="tap-hint" id="tapHint" role="button" tabindex="0" aria-label="Tap anywhere to continue">
+          <span class="tap-text">Tap anywhere to continue</span>
         </div>
+        <p class="legal">By continuing, you agree to our <a href="82-legal.html#terms">Terms</a> and <a href="82-legal.html#privacy">Privacy Policy</a>.</p>
       </div>
     </div>
   </div>
@@ -520,10 +514,11 @@
     if (!target) return;
     const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const QUOTES = [
-      'Day one.',
-      'Become.',
-      'Your move.',
-      'Begin again.'
+      'Start here.',
+      'One decision.',
+      'No more waiting.',
+      'You\'re ready.',
+      'This is it.'
     ];
     let qIdx = 0;
     if (reduce) { target.textContent = QUOTES[0]; return; }
@@ -534,7 +529,7 @@
         if (i > text.length) { done && done(); return; }
         target.textContent = text.slice(0, i);
         i++;
-        setTimeout(tick, 32);  // was 65 — snappier
+        setTimeout(tick, 24);
       })();
     }
     function deleteOut(done) {
@@ -543,7 +538,7 @@
         if (len < 0) { done && done(); return; }
         target.textContent = target.textContent.slice(0, len);
         len--;
-        setTimeout(tick, 20);  // was 38 — snappier
+        setTimeout(tick, 15);
       })();
     }
     function loop() {
@@ -552,12 +547,12 @@
         setTimeout(() => {
           deleteOut(() => {
             qIdx = (qIdx + 1) % QUOTES.length;
-            setTimeout(loop, 180);  // was 250
+            setTimeout(loop, 120);
           });
-        }, 1400);  // hold 1.4s, was 2.2s
+        }, 1100);
       });
     }
-    setTimeout(loop, 1200);  // was 1700 — start earlier
+    setTimeout(loop, 600);
   })();
 
   // ── Analytics ──
