@@ -6,7 +6,7 @@
 <title>CORE — Friends</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <style>
-  :root { --bg-base:#040408; --bg-card:rgba(255,255,255,0.022); --bg-card-2:rgba(255,255,255,0.05); --border:rgba(255,255,255,0.07); --text:#ffffff; --muted:rgba(255,255,255,0.56); --dim:rgba(255,255,255,0.30); --accent:#AEB6C4; --grad-a:#AEB6C4; --grad-b:#AEB6C4; --good:rgba(255,255,255,0.56); --danger:#FF6B6B; }
+  :root { --bg-base:#040408; --bg-card:rgba(255,255,255,0.022); --bg-card-2:rgba(255,255,255,0.05); --border:rgba(255,255,255,0.07); --text:#ffffff; --muted:rgba(255,255,255,0.72); --dim:rgba(255,255,255,0.45); --accent:#AEB6C4; --grad-a:#AEB6C4; --grad-b:#AEB6C4; --good:rgba(255,255,255,0.72); --danger:#FF6B6B; }
   * { box-sizing:border-box; } html,body{ margin:0; padding:0; height:100%; }
   body { min-height:100vh; background:#000; display:flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text); -webkit-font-smoothing:antialiased; padding:24px; overflow:hidden; }
   .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
@@ -67,7 +67,7 @@
   .cmp .fcard .frk{ font-size:22px; font-weight:900; color:var(--text); letter-spacing:.01em; } .cmp .fcard .fid{ font-size:11px; font-weight:800; color:var(--muted); letter-spacing:.04em; margin-top:3px; font-variant-numeric:tabular-nums; }
   .cmp .fcard .fpw{ display:inline-block; margin-top:9px; font-size:11.5px; font-weight:900; padding:5px 13px; border-radius:999px; background:rgba(0,0,0,.32); border:1px solid var(--border); color:var(--text); letter-spacing:.03em; }
   .cmp .fcard .fstats{ display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin-top:13px; }
-  .cmp .fcard .fs2{ background:rgba(0,0,0,.3); border:1px solid var(--border); border-radius:10px; padding:7px 6px; } .cmp .fcard .fs2 .v{ font-size:14px; font-weight:900; color:var(--mc,rgba(255,255,255,0.56)); line-height:1; font-variant-numeric:tabular-nums; } .cmp .fcard .fs2 .k{ font-size:7px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; color:var(--dim); margin-top:4px; }
+  .cmp .fcard .fs2{ background:rgba(0,0,0,.3); border:1px solid var(--border); border-radius:10px; padding:7px 6px; } .cmp .fcard .fs2 .v{ font-size:14px; font-weight:900; color:var(--mc,rgba(255,255,255,0.72)); line-height:1; font-variant-numeric:tabular-nums; } .cmp .fcard .fs2 .k{ font-size:7px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; color:var(--dim); margin-top:4px; }
 
   /* ── leaderboard ── */
   .lbrow{ display:flex; align-items:center; gap:11px; padding:11px 13px; border-radius:14px; background:var(--bg-card); border:1px solid var(--border); margin-bottom:8px; }
@@ -209,7 +209,7 @@
       rows.sort(function(a,b){ return b.power-a.power; });
       // monochrome medal icons (gold/silver/bronze) for the top 3 \u2014 no emoji
       function medalSvg(col){ return '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="'+col+'" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 3l3.5 6 3.5-6"/><circle cx="12" cy="15.5" r="5.5"/><path d="M12 13l.9 1.8 2 .3-1.45 1.4.35 2-1.8-.95-1.8.95.35-2L9.1 15.1l2-.3z"/></svg>'; }
-      var medals=[medalSvg('#ffffff'),medalSvg('rgba(255,255,255,0.56)'),medalSvg('#6B7186')];
+      var medals=[medalSvg('#ffffff'),medalSvg('rgba(255,255,255,0.72)'),medalSvg('#6B7186')];
       host.innerHTML=rows.map(function(r,i){ var c=r.you?['#AEB6C4','#AEB6C4']:COL[(i+1)%COL.length]; var pos=medals[i]?'<span class="medal">'+medals[i]+'</span>':(i+1);
         return '<div class="lbrow'+(r.you?' you':'')+'"><div class="pos">'+pos+'</div><div class="lav" style="--c1:'+c[0]+';--c2:'+c[1]+'">'+r.ini+'</div><div class="lbb"><div class="lbn">'+(r.you?'You':r.id)+'</div><div class="lbr">'+r.rank+'</div></div><div class="lbp">'+r.power+'<small>POWER</small></div></div>'; }).join('');
     }
@@ -240,14 +240,14 @@
         fc.innerHTML='<div class="gem">'+(function(){var G=window.coreGems;if(!G)return '';var f=G.img||G.svg;return f?f.call(G,fp.rank||'Sand',{tier:3}):'';})()+'</div>'+
           '<div class="frk">'+fp.rank+'</div><div class="fid">'+id+'</div>'+
           '<div class="fpw">'+fp.power+' CORE POWER</div>'+
-          '<div class="fstats">'+STAT_DEFS.map(function(d){ return '<div class="fs2" style="--mc:rgba(255,255,255,0.56)"><div class="v">'+(fp.stats[d.key]||0)+'</div><div class="k">'+d.name+'</div></div>'; }).join('')+'</div>'; }
+          '<div class="fstats">'+STAT_DEFS.map(function(d){ return '<div class="fs2" style="--mc:rgba(255,255,255,0.72)"><div class="v">'+(fp.stats[d.key]||0)+'</div><div class="k">'+d.name+'</div></div>'; }).join('')+'</div>'; }
       var rows=STAT_DEFS.map(function(d){
         var you=Math.round((S.statValue&&S.statValue(d.key))||0), them=fp.stats[d.key]||0; myAvg+=you; thAvg+=them;
         var win = you>them?'you':(them>you?'them':'tie'); if(win==='you') myWins++;
         var sum=(you+them)||1, yw=Math.round(you/sum*100), tw=100-yw;
         var ico=statSvg(d.icon||STAT_ICON[d.key]||'',14);
         var lbl= win==='you'?'<span class="cwin you">YOU</span>':(win==='them'?'<span class="cwin them">THEM</span>':'<span class="cwin tie">TIE</span>');
-        return '<div class="cmprow" style="--tc:rgba(255,255,255,0.56)"><div class="ch"><span class="cemo">'+ico+'</span><span class="cnm">'+d.name+'</span>'+lbl+'</div>'+
+        return '<div class="cmprow" style="--tc:rgba(255,255,255,0.72)"><div class="ch"><span class="cemo">'+ico+'</span><span class="cnm">'+d.name+'</span>'+lbl+'</div>'+
           '<div class="cbar"><div class="cyou" data-w="'+yw+'"></div><div class="cthem" data-w="'+tw+'"></div></div>'+
           '<div class="cnums"><b class="ny">You '+you+'</b><b class="nt">'+them+' Them</b></div></div>'; }).join('');
       myAvg=Math.round(myAvg/total); thAvg=Math.round(thAvg/total);
