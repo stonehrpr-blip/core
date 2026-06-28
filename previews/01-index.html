@@ -261,13 +261,12 @@
       12%  { opacity: 0.8; }
       100% { opacity: 0;    transform: scale(3.8); border-color: rgba(206,212,222,0); }
     }
-    /* orbital glow — slow, continuous ring rotation */
-    .orbit-ring{position:absolute;top:50%;left:50%;width:180px;height:180px;margin:-90px 0 0 -90px;border-radius:50%;
-      border:1px solid rgba(206,212,222,0.10);pointer-events:none;z-index:-1;
-      animation:orbitSpin 12s linear infinite;}
-    .orbit-ring::after{content:'';position:absolute;top:-2px;left:50%;width:4px;height:4px;margin-left:-2px;border-radius:50%;
-      background:#fff;box-shadow:0 0 8px rgba(214,219,226,0.9);}
-    @keyframes orbitSpin{to{transform:rotate(360deg);}}
+    /* floating ambient particles */
+    .float-particles{position:absolute;inset:-20%;pointer-events:none;z-index:0;}
+    .fp-dot{position:absolute;width:2px;height:2px;border-radius:50%;background:#cfe4ff;opacity:0;
+      animation:fpFloat linear infinite;}
+    @keyframes fpFloat{0%{opacity:0;transform:translateY(0) translateX(0) scale(0);}
+      15%{opacity:0.7;}85%{opacity:0.4;}100%{opacity:0;transform:translateY(-120px) translateX(var(--dx,20px)) scale(1);}}
     /* ── light sweep across the mark, once, just after it lands ── */
     .logo-shine {
       position: absolute; top: 50%; left: 50%;
@@ -496,9 +495,9 @@
         <span class="power-ring pr1"></span>
         <span class="power-ring pr2"></span>
         <span class="power-ring pr3"></span>
-        <span class="orbit-ring"></span>
         <img class="logo-img" src="assets/logo.png?v=3" alt="CORE" />
         <span class="logo-shine"></span>
+        <div class="float-particles" id="floatParticles"></div>
       </div>
 
       <div class="hero">
@@ -518,6 +517,13 @@
   </div>
 
 <script>
+  // ── Floating particles around the logo ──
+  (function(){var h=document.getElementById('floatParticles');if(!h)return;
+    for(var i=0;i<20;i++){var d=document.createElement('span');d.className='fp-dot';
+    d.style.left=(30+Math.random()*40)+'%';d.style.bottom=(20+Math.random()*40)+'%';
+    d.style.setProperty('--dx',((Math.random()-.5)*80)+'px');
+    d.style.animationDuration=(4+Math.random()*5)+'s';d.style.animationDelay=(Math.random()*6)+'s';
+    h.appendChild(d);}})();
   // ── Star field — denser but still low-opacity, gentle twinkle ──
   (function spawnStars() {
     const wrap = document.getElementById('stars');
