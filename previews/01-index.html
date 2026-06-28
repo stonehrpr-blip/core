@@ -326,53 +326,28 @@
       51%, 100% { opacity: 0; }
     }
 
-    /* ── CTA region — "tap anywhere", refined ── */
     .cta-wrap {
       margin-top: auto;
       opacity: 0;
       animation: fadeUp .5s .36s cubic-bezier(0.22,1,0.36,1) forwards;
     }
-    .tap-hint {
-      display: flex; justify-content: center;
-      padding: 14px 0 6px; user-select: none; -webkit-user-select: none; cursor: pointer;
-      transition: transform .25s cubic-bezier(0.22,1,0.36,1), opacity .25s;
-    }
-    .tap-hint { position:relative; }
-    .tap-hint::before,.tap-hint::after{content:'';position:absolute;left:50%;top:50%;width:100px;height:100px;
-      margin:-50px 0 0 -50px;border-radius:50%;border:1px solid rgba(206,212,222,0.18);opacity:0;
-      animation:tapRipple 2.4s ease-out infinite;pointer-events:none;}
-    .tap-hint::after{animation-delay:1.2s;}
-    @keyframes tapRipple{0%{opacity:0.6;transform:scale(0.4);}100%{opacity:0;transform:scale(1.8);}}
-    .tap-text {
-      position: relative; z-index:1;
-      font-family: var(--apple-font); font-size: 11.5px; font-weight: 700; letter-spacing: 0.24em;
-      text-transform: uppercase; padding-left: 0.24em;
-      background: linear-gradient(100deg, rgba(255,255,255,0.34) 0%, #ffffff 47%, rgba(255,255,255,0.34) 60%, rgba(255,255,255,0.34) 100%);
-      background-size: 240% 100%;
-      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent;
-      animation: tapShine 3s ease-in-out infinite;
-    }
-    @keyframes tapShine { 0% { background-position: 120% 0; } 55%,100% { background-position: -25% 0; } }
-    .tap-hint:hover .tap-text { opacity: 1; }
-    .tap-hint:active { transform: scale(0.97); }
-    .tap-hint.going { opacity: 0; transform: translateY(-6px); }
-    @media (prefers-reduced-motion: reduce) {
-      .tap-hint::before,.tap-hint::after{animation:none;display:none;}
-      .tap-text { animation: none; -webkit-text-fill-color: rgba(255,255,255,0.92); color: rgba(255,255,255,0.92); filter: none; }
-    }
-
-    /* Legal line — tiny, below CTA */
-    .legal {
-      margin: 14px 12px 0;
-      font-size: 11px; line-height: 16px;
-      color: var(--ink-faint);
-      text-align: center;
-      letter-spacing: 0.01em;
-      opacity: 0;
-      animation: fadeUp .4s .42s cubic-bezier(0.22,1,0.36,1) forwards;
-    }
-    .legal a { color: var(--ink-soft); text-decoration: none; border-bottom: 1px solid var(--hair); }
-    .legal a:hover { color: #fff; border-bottom-color: var(--hair-2); }
+    .bottom-card{
+      margin:0 12px 12px;padding:18px 20px 14px;border-radius:20px;
+      background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.08);
+      cursor:pointer;text-align:center;transition:background .2s,border-color .2s,transform .15s;
+      -webkit-tap-highlight-color:transparent;}
+    .bottom-card:active{transform:scale(0.98);background:rgba(255,255,255,0.06);}
+    .bottom-card.going{opacity:0;transform:translateY(8px);transition:opacity .25s,transform .3s cubic-bezier(.4,0,.2,1);}
+    .bc-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:14px;
+      background:linear-gradient(180deg,rgba(255,255,255,0.10),rgba(255,255,255,0.04));
+      border:1px solid rgba(255,255,255,0.14);font-size:15px;font-weight:600;color:#fff;
+      letter-spacing:-0.1px;transition:background .2s,border-color .2s,box-shadow .2s;}
+    .bottom-card:hover .bc-btn{border-color:rgba(200,210,225,0.3);box-shadow:0 0 20px rgba(180,190,210,0.10);}
+    .bc-btn svg{width:16px;height:16px;}
+    .bc-legal{margin-top:10px;font-size:10.5px;color:rgba(255,255,255,0.35);letter-spacing:-0.05px;line-height:1.4;}
+    .bc-legal a{color:rgba(255,255,255,0.50);text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.10);transition:color .2s,border-color .2s;}
+    .bc-legal a:hover{color:#fff;border-bottom-color:rgba(255,255,255,0.25);}
+    @media(prefers-reduced-motion:reduce){.bottom-card{transition:none;}}
 
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(12px); }
@@ -477,10 +452,10 @@
       </div>
 
       <div class="cta-wrap">
-        <div class="tap-hint" id="tapHint" role="button" tabindex="0" aria-label="Tap anywhere to continue">
-          <span class="tap-text">Tap anywhere to continue</span>
+        <div class="bottom-card" id="tapHint" role="button" tabindex="0">
+          <div class="bc-btn">Continue <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+          <p class="bc-legal">By continuing, you agree to our <a href="82-legal.html#terms">Terms</a> and <a href="82-legal.html#privacy">Privacy Policy</a>.</p>
         </div>
-        <p class="legal">By continuing, you agree to our <a href="82-legal.html#terms">Terms</a> and <a href="82-legal.html#privacy">Privacy Policy</a>.</p>
       </div>
     </div>
   </div>
