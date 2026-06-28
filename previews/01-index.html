@@ -101,11 +101,12 @@
        Matte black with a single, almost-invisible cool halo where the
        logo sits, and a soft floor vignette. No nebula, no aurora. */
     .phone[data-bg-skip] { background: #000 !important; }
-    /* This splash is a controlled matte-black "Quiet System" — kill the shared
-       electric-blue HUD rim + horizon line (core-theme.css .phone::before /
-       ::after) that otherwise bleeds a blue outline around the edges. */
     .phone[data-bg-skip]::before,
     .phone[data-bg-skip]::after { display: none !important; }
+    /* subtle grain overlay — premium matte texture */
+    .phone[data-bg-skip]::after{content:'';display:block!important;position:absolute;inset:0;z-index:5;pointer-events:none;opacity:.04;mix-blend-mode:overlay;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='150' height='150' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size:150px 150px;}
     .phone[data-bg-skip] .bg {
       position: absolute; inset: 0; z-index: 0;
       background:
@@ -259,7 +260,7 @@
     /* ── light sweep across the mark, once, just after it lands ── */
     .logo-shine {
       position: absolute; top: 50%; left: 50%;
-      width: 120px; height: 120px; margin: -60px 0 0 -60px; 
+      width: 120px; height: 120px; margin: -60px 0 0 -60px; border-radius:26px;
       pointer-events: none; overflow: hidden; opacity: 0;
       background: linear-gradient(115deg, transparent 38%, rgba(255,255,255,0.55) 50%, transparent 62%);
       background-size: 260% 100%; mix-blend-mode: screen;
