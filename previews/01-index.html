@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="_lib/core-theme.css?v=20260619d" />
   <link rel="stylesheet" href="_lib/core-responsive.css?v=20260619d" />
   <script src="_lib/analytics.js" defer></script>
+  <script src="_lib/core-i18n.js"></script>
   <!-- HARD font override — runs after core-theme.css. Highest specificity
        possible, !important, hits every selector that core-theme.css forced. -->
   <style id="sf-override">
@@ -424,12 +425,20 @@
           <span class="dot" aria-hidden="true"></span>
           <span class="wm">CORE</span>
         </div>
-        <button class="signin" id="signinBtn" aria-label="Sign in">
-          <svg viewBox="0 0 24 24">
-            <circle cx="12" cy="8" r="4"/>
-            <path d="M4 21c0-4 4-7 8-7s8 3 8 7"/>
-          </svg>
-        </button>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button class="signin" id="langBtn" aria-label="Change language">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="9"/>
+              <path d="M3 12h18M12 3c2.6 2.4 4 5.6 4 9s-1.4 6.6-4 9c-2.6-2.4-4-5.6-4-9s1.4-6.6 4-9z"/>
+            </svg>
+          </button>
+          <button class="signin" id="signinBtn" aria-label="Sign in">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="8" r="4"/>
+              <path d="M4 21c0-4 4-7 8-7s8 3 8 7"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
       <div class="logo-mark" aria-hidden="true">
@@ -439,7 +448,7 @@
       </div>
 
       <div class="hero">
-        <h1>Become<br/><span class="g">your core.</span></h1>
+        <h1 data-i18n-html="index.hero">Become<br/><span class="g">your core.</span></h1>
         <div class="sub" id="sub">
           <span class="typed" id="subTyped"></span><span class="cursor" id="subCursor" aria-hidden="true"></span>
         </div>
@@ -447,11 +456,54 @@
 
       <div class="cta-wrap">
         <div class="tap-hint" id="tapHint" role="button" tabindex="0" aria-label="Tap anywhere to continue">
-          <span class="tap-text">Tap anywhere to continue</span>
+          <span class="tap-text" data-i18n="index.tap">Tap anywhere to continue</span>
         </div>
-        <p class="legal">By continuing, you agree to our <a href="82-legal.html#terms">Terms</a> and <a href="82-legal.html#privacy">Privacy Policy</a>.</p>
+        <p class="legal" data-i18n-html="index.legal">By continuing, you agree to our <a href="82-legal.html#terms">Terms</a> and <a href="82-legal.html#privacy">Privacy Policy</a>.</p>
       </div>
     </div>
+
+    <!-- ── Language sheet — globe button opens; whole app follows coreLang ── -->
+    <div class="lang-sheet" id="langSheet" aria-hidden="true">
+      <div class="ls-back" id="lsBack"></div>
+      <div class="ls-panel" role="dialog" aria-label="Choose language">
+        <div class="ls-grab" aria-hidden="true"></div>
+        <div class="ls-title">Language</div>
+        <div class="ls-list" id="lsList"></div>
+      </div>
+    </div>
+    <style>
+      .lang-sheet { position:absolute; inset:0; z-index:50; pointer-events:none; }
+      .ls-back { position:absolute; inset:0; background:rgba(0,0,0,0.55);
+        -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+        opacity:0; transition:opacity .3s ease; }
+      .ls-panel { position:absolute; left:10px; right:10px; bottom:10px;
+        border-radius:28px; padding:14px 16px calc(env(safe-area-inset-bottom, 0px) + 18px);
+        background:linear-gradient(180deg, rgba(24,26,32,0.97), rgba(10,11,14,0.98));
+        border:1px solid rgba(214,219,226,0.16);
+        box-shadow:0 1px 0 rgba(255,255,255,0.07) inset, 0 -18px 60px rgba(0,0,0,0.6);
+        transform:translateY(calc(100% + 20px));
+        transition:transform .42s cubic-bezier(.22,1,.36,1); }
+      .lang-sheet.on { pointer-events:auto; }
+      .lang-sheet.on .ls-back { opacity:1; }
+      .lang-sheet.on .ls-panel { transform:none; }
+      .ls-grab { width:36px; height:4px; border-radius:999px; background:rgba(255,255,255,0.22);
+        margin:0 auto 12px; }
+      .ls-title { font-size:13px; font-weight:700; letter-spacing:0.16em; text-transform:uppercase;
+        color:var(--ink-soft); text-align:center; margin-bottom:10px; }
+      .ls-list { display:grid; grid-template-columns:1fr 1fr; gap:7px; max-height:330px; overflow-y:auto; }
+      .ls-item { display:flex; align-items:center; justify-content:space-between; gap:8px;
+        padding:12px 14px; border-radius:14px; border:1px solid rgba(255,255,255,0.07);
+        background:rgba(255,255,255,0.035); color:#fff; font-family:inherit; font-size:14px;
+        font-weight:600; letter-spacing:-0.1px; cursor:pointer; text-align:left;
+        transition:background .2s, border-color .2s, transform .12s; }
+      .ls-item:active { transform:scale(0.97); }
+      .ls-item.sel { border-color:rgba(226,231,238,0.55); background:rgba(255,255,255,0.09);
+        box-shadow:0 0 0 1px rgba(226,231,238,0.25) inset, 0 0 18px rgba(206,212,222,0.10); }
+      .ls-item .tick { width:16px; height:16px; opacity:0; }
+      .ls-item.sel .tick { opacity:1; }
+      .ls-item .tick svg { width:16px; height:16px; stroke:#fff; fill:none; stroke-width:2.6;
+        stroke-linecap:round; stroke-linejoin:round; }
+    </style>
   </div>
 
 <script>
@@ -605,10 +657,14 @@
     document.body.classList.add('leaving');
     try { if (navigator.vibrate) navigator.vibrate([8,30,15]); } catch (e) {}
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    setTimeout(function () { window.location.href = '07-trial.html#enter'; }, reduce ? 150 : 600);
+    // Straight into the trial — Corbit introduces himself on the voice step.
+    setTimeout(function () { window.location.href = '07-trial.html?fresh=1'; }, reduce ? 150 : 600);
   }
   document.addEventListener('click', function (e) {
+    if (!(e.target instanceof Element) || !e.target.isConnected) return; // detached/re-rendered nodes
     if (e.target.closest('#signinBtn')) return;  // avatar still goes to sign-in
+    if (e.target.closest('#langBtn')) return;    // globe opens the language sheet
+    if (e.target.closest('#langSheet')) return;  // taps inside the sheet stay in the sheet
     if (e.target.closest('a')) return;           // legal links open normally
     startJourney();
   });
@@ -621,6 +677,38 @@
     track('index_cta_tapped', { cta: 'sign_in' });
     window.location.href = '04-sign-in.html';
   });
+
+  // ── Language sheet — powered by _lib/core-i18n.js ──
+  (function () {
+    var sheet = document.getElementById('langSheet');
+    var list = document.getElementById('lsList');
+    var btn = document.getElementById('langBtn');
+    if (!sheet || !list || !btn || !window.coreI18n) return;
+    function render() {
+      list.innerHTML = '';
+      coreI18n.LANGS.forEach(function (l) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'ls-item' + (coreI18n.lang === l.code ? ' sel' : '');
+        b.innerHTML = '<span>' + l.name + '</span><span class="tick"><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-11"/></svg></span>';
+        b.addEventListener('click', function (e) {
+          // stop here — render() detaches this node, and a detached target
+          // would fall through the document tap-anywhere handler
+          e.stopPropagation();
+          coreI18n.set(l.code);
+          track('lang_changed', { lang: l.code });
+          render();
+          setTimeout(close, 260);
+        });
+        list.appendChild(b);
+      });
+    }
+    function open() { render(); sheet.classList.add('on'); sheet.setAttribute('aria-hidden', 'false'); }
+    function close() { sheet.classList.remove('on'); sheet.setAttribute('aria-hidden', 'true'); }
+    btn.addEventListener('click', function (e) { e.stopPropagation(); open(); });
+    document.getElementById('lsBack').addEventListener('click', close);
+  })();
+
 
   // ── Owner Easter egg: long-press anywhere (file:// only) -> gallery ──
   (function () {
