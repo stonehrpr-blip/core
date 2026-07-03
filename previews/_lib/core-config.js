@@ -15,8 +15,8 @@
  */
 
 window.CORE_CONFIG = {
-  SUPABASE_URL: "",
-  SUPABASE_ANON_KEY: "",
+  SUPABASE_URL: "https://owjzfhfnefifndiqjspm.supabase.co",
+  SUPABASE_ANON_KEY: "sb_publishable_AtsVyOG66FGTNdhCE0fjAQ_awgdpcey",
   OAUTH_REDIRECT_URL: (location.origin || "http://localhost:8000") + "/04-sign-in.html",
   AI_PROXY_URL: "https://core-ai.stonehrpr.workers.dev",
 };
