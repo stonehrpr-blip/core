@@ -1640,6 +1640,29 @@
         filter:brightness(0.62) contrast(1.3) saturate(0.42);
         transition:opacity .4s ease, filter .4s ease; }
       .rc-tilt.live .rc-holo { opacity:0.5; filter:brightness(0.85) contrast(1.45) saturate(0.6); }
+      /* ProfileCard's pc-shine::before — luminosity hotspot that rides the pointer,
+         brightness/contrast keyed to distance-from-center (--pfc) */
+      .rc-holo::before { content:''; position:absolute; inset:0; opacity:0; transition:opacity .6s ease;
+        background-image:
+          linear-gradient(45deg, hsl(176,100%,76%), hsl(228,100%,74%), hsl(283,100%,73%),
+            hsl(2,100%,73%), hsl(53,100%,69%), hsl(93,100%,69%)),
+          radial-gradient(circle at var(--px,50%) var(--py,50%), hsl(0,0%,70%) 0%, hsla(0,0%,30%,0.2) 90%);
+        background-size:250% 250%, 100% 100%;
+        background-position:var(--px,50%) var(--py,50%), center;
+        background-blend-mode:color-dodge;
+        filter:brightness(calc(2 - var(--pfc,0))) contrast(calc(var(--pfc,0) + 2)) saturate(calc(0.5 + var(--pfc,0)));
+        mix-blend-mode:luminosity; }
+      /* pc-shine::after — the difference pass that gives the foil its depth */
+      .rc-holo::after { content:''; position:absolute; inset:0; opacity:0; transition:opacity .6s ease;
+        background-image:
+          repeating-linear-gradient(0deg,
+            hsl(2,100%,73%) 5%, hsl(53,100%,69%) 10%, hsl(93,100%,69%) 15%,
+            hsl(176,100%,76%) 20%, hsl(228,100%,74%) 25%, hsl(283,100%,73%) 30%, hsl(2,100%,73%) 35%),
+          repeating-linear-gradient(-45deg, #0e152e 0%, hsl(180,10%,60%) 3.8%, hsl(180,29%,66%) 4.5%, hsl(180,10%,60%) 5.2%, #0e152e 10%, #0e152e 12%);
+        background-position:0 var(--bgy,50%), calc(var(--bgx,50%) * 0.4) calc(var(--bgy,50%) * 0.5);
+        background-size:200% 300%, 700% 700%;
+        mix-blend-mode:difference; filter:brightness(0.8) contrast(1.5); }
+      .rc-tilt.live .rc-holo::before, .rc-tilt.live .rc-holo::after { opacity:1; }
       .rc-glare { position:absolute; inset:0; z-index:4; pointer-events:none; mix-blend-mode:overlay;
         background:radial-gradient(farthest-corner circle at var(--px,50%) var(--py,50%),
           rgba(220,228,245,0.85) 10%, rgba(80,95,120,0.35) 60%, rgba(20,25,35,0.5) 110%);
@@ -7629,14 +7652,16 @@
     function runScan() {
       let si = 0; scanning = true;
       track('face_scan_started', {});
-      (function nextStep() {
+      // any unexpected error inside the scan chain must not strand the user
+      const safe = function (fn) { return function () { try { return fn.apply(null, arguments); } catch (e) { scanning = false; showCard(null); } }; };
+      (safe(function nextStep() {
         if (!scanning) return;
-        if (si >= STEPS.length) { finishScan(); return; }
+        if (si >= STEPS.length) { safe(finishScan)(); return; }
         const st = STEPS[si++];
         instr.textContent = st.text;
         const ringWrap = document.getElementById('fidRingWrap');
         if (ringWrap) { if (st.dir) ringWrap.setAttribute('data-dir', st.dir); else ringWrap.removeAttribute('data-dir'); }
-        if (!st.dir) { setTimeout(nextStep, st.hold); return; }
+        if (!st.dir) { setTimeout(safe(nextStep), st.hold); return; }
         let hit = false, sustained = 0; const t0 = performance.now();
         const iv = setInterval(function () {
           if (!scanning) { clearInterval(iv); return; }
@@ -7671,10 +7696,10 @@
             const doneCount = ['left','right','up','down'].indexOf(st.dir) >= 0 ? si - 1 : 0;
             for (let d = 0; d < dots.length; d++) dots[d].classList.toggle('done', d < doneCount);
             try { if (navigator.vibrate) navigator.vibrate(12); } catch (e) {}
-            setTimeout(nextStep, 680);
+            setTimeout(safe(nextStep), 680);
           }
         }, 90);
-      })();
+      }))();
     }
 
     function capture() {
@@ -7753,6 +7778,9 @@
           card.style.setProperty('--py', cy + '%');
           card.style.setProperty('--rx', (((cx - 50) / 50) * 8).toFixed(2) + 'deg');
           card.style.setProperty('--ry', ((-(cy - 50) / 50) * 7).toFixed(2) + 'deg');
+          card.style.setProperty('--pfc', Math.min(1, Math.hypot(cx - 50, cy - 50) / 50).toFixed(3));
+          card.style.setProperty('--bgx', (35 + (cx / 100) * 30).toFixed(1) + '%');
+          card.style.setProperty('--bgy', (35 + (cy / 100) * 30).toFixed(1) + '%');
           if (Math.abs(tx - cx) > 0.2 || Math.abs(ty - cy) > 0.2) raf = requestAnimationFrame(loop);
           else raf = null;
         }
@@ -7806,7 +7834,16 @@
       screen.classList.add('on');
       track('core_id_shown', {});
       if (opts && opts.resume) { screen.classList.add('no-cam'); showCard(null); return; }   // back from the passkey round trip — brushed card, no rescan
-      loadLandmarker();
+      // Watchdog: whatever happens (camera hang, model failure, browser quirk),
+      // the card must appear. If the scan hasn't sealed in 30s, force it.
+      setTimeout(function () {
+        if (!screen.classList.contains('card-on')) {
+          scanning = false;
+          track('core_id_watchdog_fired', {});
+          try { showCard(null); } catch (e) {}
+        }
+      }, 30000);
+      try { loadLandmarker(); } catch (e) {}
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia && fidVideo) {
         navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' } })
           .then(function (st) {
