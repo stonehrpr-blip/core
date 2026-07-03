@@ -1094,7 +1094,7 @@ body.edit-active .w-add-ghost{display:none;}
 <script src="_lib/dash-charts.js"></script>
 <script src="_lib/dash-widgets.js"></script>
 <script src="_lib/core-help.js"></script>
-<script src="_lib/core-ranks.js"></script>
+<script src="_lib/core-ranks.js?v=20260704"></script>
 <script>
 (function(){
   var S  = window.coreState;
@@ -1602,7 +1602,7 @@ body.edit-active .w-add-ghost{display:none;}
   function paintRank(fromXp){
     var xp=parseInt(ls('coreXP','0'),10)||0, idx=rankIdx(xp), r=RANKS[idx];
     var hero=$('lsHero'); if(hero) hero.style.setProperty('--rkc',r.color);
-    var g=$('rankBarGem'); if(g) g.innerHTML='<img src="assets/ranks/'+r.key+'.png" alt="'+r.name+'">';
+    var g=$('rankBarGem'); if(g) g.innerHTML=(window.CORE_RANK_ICON?CORE_RANK_ICON(r,40):'<img src="assets/ranks/'+r.key+'.png" alt="'+r.name+'">');
     if($('rankBarName')) $('rankBarName').textContent=r.name;
     // Feature 3: rank name + XP remaining to the NEXT rank, gold bar
     var lv=$('lsLevel'); if(lv) lv.textContent=r.name;

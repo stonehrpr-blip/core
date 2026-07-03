@@ -7,7 +7,8 @@
     try{(function(){var h=location.hostname;window.__corePreview=(location.protocol==='file:'||h==='localhost'||h==='127.0.0.1'||/[?&]preview=1/.test(location.search));})();}catch(e){}if(!window.__corePreview){try { if (!/[?&]preview=1/.test(location.search) && !/[?&]step=/.test(location.search)) { if (localStorage.getItem('coreSubscribed') === '1') { location.replace('20-dashboard.html'); } else if (localStorage.getItem('coreOnboardComplete') === '1') { location.replace('10-subscribe.html'); } } } catch(e){}}
   </script>
 <meta charset="utf-8" />
-<script src="_lib/core-i18n.js"></script>
+<script src="_lib/core-i18n.js?v=20260704"></script>
+<script src="_lib/core-ranks.js?v=20260704"></script>
 <title>✅ CORE — Free trial (REDESIGNED)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <style>
@@ -1431,6 +1432,12 @@
             <h2 class="rc-name" id="rcName">CORE MEMBER</h2>
             <p class="rc-role" id="rcSince">MEMBER SINCE 2026</p>
           </div>
+          <div class="rc-ach" id="rcAch">
+            <div class="rc-ach-box"><span class="rc-ach-ic" id="achRankIc"></span><span class="rc-ach-v" id="achRank">Novice I</span><span class="rc-ach-k">RANK</span></div>
+            <div class="rc-ach-box"><span class="rc-ach-v" id="achXp">0</span><span class="rc-ach-k">SCORE</span></div>
+            <div class="rc-ach-box"><span class="rc-ach-v" id="achDay">1</span><span class="rc-ach-k">DAY</span></div>
+            <div class="rc-ach-box"><span class="rc-ach-v" id="achHabit">—</span><span class="rc-ach-k">MISSION</span></div>
+          </div>
           <div class="rc-foot">
             <div class="rc-idcol">
               <span class="rc-lab">ID NUMBER</span>
@@ -1624,7 +1631,10 @@
       .rc-tilt.live .rc-behind { opacity:0.55; }
       .rc-card { transform:rotateX(var(--ry,0deg)) rotateY(var(--rx,0deg)); transition:transform .16s ease-out;
         will-change:transform; }
-      .rc-tilt:not(.live) .rc-card { animation:rcSway 7s ease-in-out infinite; }
+      /* idle sway lives on the WRAPPER — putting it on .rc-card overrode the
+         rcIn reveal animation (equal specificity, later in cascade), leaving
+         the card stuck at opacity:0 unless a pointer hovered it */
+      .core-id.card-on .rc-tilt:not(.live) { animation:rcSway 7s ease-in-out infinite; }
       @keyframes rcSway { 0%,100% { transform:rotateX(0deg) rotateY(-2.4deg); } 50% { transform:rotateX(1.6deg) rotateY(2.4deg); } }
       /* holographic sunpillar shine — steel-first, rainbow whisper */
       .rc-holo { position:absolute; inset:0; z-index:3; pointer-events:none; mix-blend-mode:color-dodge; opacity:0.30;
@@ -1663,6 +1673,19 @@
         background-size:200% 300%, 700% 700%;
         mix-blend-mode:difference; filter:brightness(0.8) contrast(1.5); }
       .rc-tilt.live .rc-holo::before, .rc-tilt.live .rc-holo::after { opacity:1; }
+
+      /* ── achievement boxes on the card ── */
+      .rc-ach { display:flex; gap:7px; margin-bottom:14px; }
+      .rc-ach-box { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;
+        padding:8px 4px 7px; border-radius:11px;
+        background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.16);
+        -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); min-width:0; }
+      .rc-ach-ic { display:flex; height:20px; align-items:center; }
+      .rc-ach-ic svg { width:20px; height:20px; }
+      .rc-ach-v { font-size:11.5px; font-weight:800; letter-spacing:-0.1px; color:#fff; white-space:nowrap;
+        overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+      #achRank { font-size:9.5px; letter-spacing:0; }
+      .rc-ach-k { font-size:7px; font-weight:800; letter-spacing:0.14em; color:rgba(255,255,255,0.55); }
       .rc-glare { position:absolute; inset:0; z-index:4; pointer-events:none; mix-blend-mode:overlay;
         background:radial-gradient(farthest-corner circle at var(--px,50%) var(--py,50%),
           rgba(220,228,245,0.85) 10%, rgba(80,95,120,0.35) 60%, rgba(20,25,35,0.5) 110%);
@@ -7811,6 +7834,19 @@
           if (r && typeof r.catch === 'function') r.catch(function () {});
         }
       } catch (e) {}
+      // ── achievement boxes: rank (live insignia), score, day, mission ──
+      try {
+        const xpNow = parseInt(localStorage.getItem('coreXP') || '0', 10) || (typeof trialXpEarned !== 'undefined' ? trialXpEarned : 0) || 0;
+        const ladder = window.CORE_RANKS || [];
+        let ri = 0; for (let i = 0; i < ladder.length; i++) if (xpNow >= ladder[i].xp) ri = i;
+        const rk = ladder[ri];
+        if (rk && window.CORE_RANK_ICON) document.getElementById('achRankIc').innerHTML = CORE_RANK_ICON(rk, 20);
+        if (rk) document.getElementById('achRank').textContent = rk.name;
+        document.getElementById('achXp').textContent = xpNow.toLocaleString();
+        document.getElementById('achDay').textContent = '1';
+        const HN = { vape:'No vape', alcohol:'No alcohol', porn:'No porn', doomscroll:'No scroll', spend:'No splurge', build:'Build' };
+        document.getElementById('achHabit').textContent = HN[state.habit] || 'Build';
+      } catch (e) {}
       // ── passkey chip: shows live state; tap → add one and come right back ──
       const pk = document.getElementById('rcPasskey');
       if (pk) {
@@ -8937,19 +8973,14 @@ body.on-autoadvance .stepwrap::after {
 
 <style id="center-flow">
 /* ════ Centered question column — one rhythm across the whole trial ════ */
-html body .step .kicker { text-align:center !important; align-self:center !important; }
-html body .step .title, html body[data-font="apple"] .step .title { text-align:center !important; }
-html body .step .copy { text-align:center !important; margin-left:auto !important; margin-right:auto !important; max-width:34ch; }
-.step[data-step="1"] .field-wrap { text-align:center; }
-.step[data-step="1"] .field { text-align:center; }
-.step[data-step="1"] .name-status { text-align:center; padding-left:0 !important; }
-.step[data-step="1"] .field-wrap > div:first-child { text-align:center; margin-left:0 !important; }
-.age-chips { justify-content:center; }
-.privacy-note { justify-content:center; text-align:center; }
-#habitChip { align-self:center !important; }
-.step[data-step="0"] .title, .step[data-step="0"] .copy, .step[data-step="0"] .kicker { text-align:center; }
-.commit-dock { text-align:center; }
-#promiseMeta { text-align:center; }
+/* Questions sit on the LEFT — one editorial column, controls keep their own rhythm */
+html body .step .kicker { text-align:left !important; align-self:flex-start !important; }
+html body .step .title, html body[data-font="apple"] .step .title { text-align:left !important; }
+html body .step .copy { text-align:left !important; margin-left:0 !important; margin-right:auto !important; max-width:36ch; }
+.step[data-step="1"] .field { text-align:left; }
+.step[data-step="1"] .name-status { text-align:left; }
+.privacy-note { justify-content:flex-start; text-align:left; }
+#habitChip { align-self:flex-start !important; }
 </style>
 
 <style id="round3-polish">
@@ -9075,6 +9106,43 @@ html body .step .copy { text-align:center !important; margin-left:auto !importan
   border-left:2.5px solid rgba(124,232,164,0.7); }
 .plan-why b { color:#fff; font-style:normal; }
 
+/* ── Compact-height pack — everything fits down to iPhone SE (320×568) ── */
+@media (max-height: 640px) {
+  /* tighter type so tall steps fit above the footer CTA */
+  html body .step .title { font-size:26px !important; line-height:1.06 !important; }
+  html body .step .copy { font-size:12.5px !important; line-height:17px !important; margin-bottom:2px !important; }
+  html body .step .kicker { font-size:9.5px !important; }
+  /* Corbit voice step */
+  .corbit-bot { width:74px !important; height:74px !important; }
+  .cb-eye { width:9px !important; height:15px !important; top:34% !important; }
+  .cb-smile { width:17px !important; margin-left:-8.5px !important; height:8px !important; top:58% !important; border-width:2px !important; }
+  .cb-wave { display:none !important; }
+  .voice-stage { gap:9px !important; margin-top:2px !important; }
+  .voice-line { font-size:15px !important; line-height:1.35 !important; max-width:250px !important; }
+  .voice-mic { padding:9px 16px !important; font-size:12.5px !important; }
+  .voice-status { display:none !important; }
+  .step[data-step="24"] .privacy-note { display:none !important; }
+  .cb-halo { inset:-12px !important; }
+  /* Face ID scan */
+  .fid-ring-wrap { width:218px !important; height:218px !important; }
+  .fid-cam { inset:28px !important; }
+  .fid-instruction { font-size:16px !important; }
+  .fid-stage { gap:11px !important; }
+  /* CORE ID card */
+  .rc-card { width:246px !important; height:372px !important; }
+  .rc-content { padding:18px !important; }
+  .rc-name { font-size:19px !important; }
+  .rc-portrait { width:64px !important; height:64px !important; margin-bottom:10px !important; }
+  .rc-ach-v { font-size:10px !important; }
+  .rc-ach-box { padding:6px 3px 5px !important; }
+  .core-id { gap:10px !important; padding:34px 20px 26px !important; }
+  .rc-cta { padding:12px 24px !important; font-size:14px !important; }
+  .rc-note { font-size:10px !important; }
+}
+@media (max-height: 640px) {
+  .plan-timeline .pt-row { padding:6px 2px !important; }
+  .helix-wrap { height:150px !important; }
+}
 @media (prefers-reduced-motion: reduce) {
   #round3-polish * { animation:none !important; }
 }

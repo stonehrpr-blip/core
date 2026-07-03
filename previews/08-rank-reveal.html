@@ -322,7 +322,7 @@
   </div>
 
   <script src="_lib/core-background.js?v=20260619d"></script>
-  <script src="_lib/core-ranks.js"></script>
+  <script src="_lib/core-ranks.js?v=20260704"></script>
 <script>
 (function(){
   // Reload/resume guard: only valid mid-chain. Already-subscribed members skip
@@ -366,7 +366,8 @@
   var card=document.getElementById('rankCard');
   card.style.setProperty('--rc', rank.color);
   // Real emblem artwork — keyed transparent PNG per rank.
-  document.getElementById('rankGem').innerHTML = '<img src="assets/ranks/'+rank.key+'.png" alt="'+rank.name+'" />';
+  // Clean SVG insignia (tier emblem + grade pips) — crisper than the PNG art.
+  document.getElementById('rankGem').innerHTML = (window.CORE_RANK_ICON ? CORE_RANK_ICON(rank, 114) : '<img src="assets/ranks/'+rank.key+'.png" alt="'+rank.name+'" />');
   // letters punch in one by one on reveal
   (function(){
     var el = document.getElementById('rankName');
