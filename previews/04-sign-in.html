@@ -721,6 +721,14 @@
   }
   window.passkeySignIn = passkeySignIn;
 
+  // ?passkey=1 → jump straight into the passkey ceremony (CORE ID round trip)
+  (function autoPasskey() {
+    try {
+      if (!/[?&]passkey=1/.test(location.search)) return;
+      setTimeout(function () { passkeySignIn(); }, 650);
+    } catch (e) {}
+  })();
+
   // Reveal the passkey button only when a platform authenticator is available.
   (function revealPasskey(){
     var btn = document.getElementById('passkeyBtn');
@@ -779,10 +787,16 @@
     if (window.coreTrack) {
       coreTrack('sign_in', { method, isNew: !!isNew, onboarded: !!(account && account.onboarded) });
     }
-    // Route based on account state
+    // Route based on account state. A sanitized ?return= (same-folder page
+    // only) wins — used by the CORE ID card's add-a-passkey round trip.
     const goTrial = isNew || !(account && account.onboarded);
+    let returnTo = null;
+    try {
+      const raw = new URLSearchParams(location.search).get('return') || '';
+      if (/^[\w-]+\.html(\?[\w=&%.~-]*)?$/.test(raw)) returnTo = raw;
+    } catch (e) {}
     setTimeout(function () {
-      window.location.href = goTrial ? '07-trial.html' : '20-dashboard.html';
+      window.location.href = returnTo || (goTrial ? '07-trial.html' : '20-dashboard.html');
     }, 400);
   }
 
