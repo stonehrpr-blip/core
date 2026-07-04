@@ -352,6 +352,23 @@
     @keyframes exitBurst { 0%{opacity:1;transform:translate(0,0) scale(1.2);} 100%{opacity:0;transform:translate(var(--sx),var(--sy)) scale(0);} }
 
     /* ── Tap-to-enter transition — premium "warp into" the trial ── */
+    /* Text shimmer — loading transition */
+    .shimmer-loading {
+      position: absolute; inset: 0; z-index: 45; pointer-events: none;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity .25s ease;
+    }
+    .shimmer-loading span {
+      font-size: 17px; font-weight: 600; letter-spacing: -0.1px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.7) 45%, rgba(255,255,255,0.15) 100%);
+      background-size: 200% 100%;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 2s linear infinite;
+    }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    body.leaving .shimmer-loading { opacity: 1; }
+
     .leave-veil {
       position: absolute; inset: 0; z-index: 40; pointer-events: none;
       opacity: 0;
@@ -417,6 +434,7 @@
     <div class="bg"></div>
     <div class="stars" id="stars"></div>
     <div class="leave-veil" id="leaveVeil" aria-hidden="true"></div>
+    <div class="shimmer-loading" aria-hidden="true"><span>Preparing your journey</span></div>
     <div class="notch"></div>
     <div class="home-indicator"></div>
 
@@ -659,7 +677,7 @@
     try { if (navigator.vibrate) navigator.vibrate([8,30,15]); } catch (e) {}
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     // Straight into the trial — Corbit introduces himself on the voice step.
-    setTimeout(function () { window.location.href = '07-trial.html?fresh=1'; }, reduce ? 150 : 600);
+    setTimeout(function () { window.location.href = '07-trial.html?fresh=1#enter'; }, reduce ? 150 : 600);
   }
   document.addEventListener('click', function (e) {
     if (!(e.target instanceof Element) || !e.target.isConnected) return; // detached/re-rendered nodes
