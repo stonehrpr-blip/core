@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+  <meta charset="utf-8" />
+  <title>Core — Preview gallery</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <style>
+    :root { --bg-base:#040408; --text-primary:#ffffff; --text-muted:rgba(255,255,255,0.72); --text-dim:rgba(255,255,255,0.45); --accent:#AEB6C4; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(70% 40% at 50% 0%, rgba(10,132,255,0.08) 0%, transparent 62%),
+        linear-gradient(180deg, #050510 0%, var(--bg-base) 50%, #050510 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+      color: var(--text-primary); -webkit-font-smoothing: antialiased; padding: 60px 40px;
+    }
+    .container { max-width: 1320px; margin: 0 auto; }
+
+    .header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 40px; gap: 32px; flex-wrap: wrap; }
+    .title-block { max-width: 720px; }
+    .badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; background: rgba(10,132,255,0.10); border: 1px solid rgba(10,132,255,0.30); font-size: 11px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 18px; }
+    .badge::before { content:""; width:6px; height:6px; border-radius:50%; background:var(--accent); }
+
+    h1 { margin: 0; font-size: 64px; font-weight: 600; letter-spacing: -2.6px; line-height: 1; color: #fff; }
+    .sub { margin: 20px 0 0; font-size: 17px; line-height: 26px; color: var(--text-muted); max-width: 620px; }
+    .meta-line { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--text-dim); letter-spacing: 0.06em; font-family: ui-monospace,"SF Mono",Menlo,monospace; margin-top: 24px; }
+    .meta-line span::before { content: "·"; margin-right: 16px; color: var(--text-dim); }
+    .meta-line span:first-child::before { display: none; }
+    .counter { padding: 14px 22px; border-radius: 14px; background: rgba(10,132,255,0.06); border:1px solid rgba(10,132,255,0.25); text-align: center; flex-shrink: 0; }
+    .counter-num { font-size: 44px; font-weight: 700; letter-spacing: -1.5px; line-height: 1; color: var(--accent); }
+    .counter-lbl { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-muted); margin-top: 4px; }
+
+    .section-label { font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-muted); font-weight: 500; margin: 40px 0 16px; display: flex; align-items: center; gap: 12px; }
+    .section-label::after { content:""; flex:1; height:1px; background: rgba(255,255,255,0.06); }
+    .section-meta { font-size:11px; color:var(--text-dim); letter-spacing:0.06em; font-family:ui-monospace,"SF Mono",Menlo,monospace; text-transform: none; }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+
+    .card { position: relative; display: block; padding: 18px; border-radius: 18px; background: rgba(255,255,255,0.022); border: 1px solid rgba(255,255,255,0.07); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: var(--text-primary); text-decoration: none; transition: all 0.2s ease; cursor: pointer; overflow: hidden; }
+    .card::before { content:""; position:absolute; inset:0; border-radius:18px; background: radial-gradient(80% 100% at 0% 0%, rgba(255,255,255,0.10) 0%, transparent 60%); opacity: 0.5; pointer-events: none; }
+    .card:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.12); transform: translateY(-2px); }
+    .card:active { transform: scale(0.99); }
+    .card-num { font-size: 10px; color: var(--text-dim); letter-spacing: 0.18em; font-family: ui-monospace,"SF Mono",Menlo,monospace; margin-bottom: 10px; }
+    .card-title { font-size: 17px; font-weight: 600; letter-spacing: -0.3px; color: var(--text-primary); }
+    .card-sub { font-size: 12px; color: var(--text-muted); margin-top: 6px; line-height: 18px; letter-spacing: -0.1px; }
+    .card-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+    .card-pill { display: inline-block; padding: 3px 8px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted); font-weight: 500; }
+    .card-pill.signature { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.08); color: var(--text-muted); }
+    .card-pill.new { background: rgba(10,132,255,0.10); border-color: rgba(10,132,255,0.30); color: var(--accent); }
+    .card-pill.warm { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.08); color: var(--text-muted); }
+    .lock-mark { display:inline-flex; align-items:center; justify-content:center; vertical-align: middle; margin-left: 8px; color: var(--text-muted); opacity: 0.85; }
+    .card.owner-only { border-color: rgba(255,255,255,0.10) !important; }
+    .card.owner-only:hover { border-color: rgba(255,255,255,0.18) !important; }
+    .card-pill.tier { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.08); color: var(--text-muted); }
+
+    footer { margin-top: 80px; padding-top: 40px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 12px; color: var(--text-dim); display: flex; justify-content: space-between; align-items: center; font-family: ui-monospace,"SF Mono",Menlo,monospace; letter-spacing: 0.06em; flex-wrap: wrap; gap: 16px; }
+    footer a { color: var(--accent); text-decoration: none; padding: 8px 18px; border-radius: 999px; background: rgba(10,132,255,0.08); border: 1px solid rgba(10,132,255,0.30); }
+    footer a:hover { background: rgba(10,132,255,0.15); }
+  </style>
+  <script>
+    // Owner-only gate. file:// is always allowed (Stone's local dev).
+    // On any other origin we require the passphrase. Stored once in localStorage.
+    (function() {
+      try {
+        var local = location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+        if (local) return;
+        if (localStorage.getItem('coreStoneAccess') === '1') return;
+        // Allow ?pass=<phrase> direct-link unlock (URL-only — no UI exposes this).
+        var p = new URLSearchParams(location.search);
+        var PASS = 'stone-core-2026';
+        if (p.get('pass') === PASS) {
+          localStorage.setItem('coreStoneAccess','1');
+          // strip the query param so it doesn't linger in browser history
+          history.replaceState(null,'', location.pathname);
+          return;
+        }
+        // Block: render a tiny passphrase prompt and stop everything else from loading.
+        // Template literal + escaped closing tags so the inner HTML doesn't break the outer block.
+        document.documentElement.innerHTML = `<head><meta charset="utf-8"/><title>CORE</title><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="_lib/core-theme.css?v=20260619d"><script src="_lib/core-theme.js" defer><\/script><link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"><link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png"><link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png"><link rel="stylesheet" href="_lib/core-background.css?v=20260619d"><script src="_lib/core-background.js?v=20260619d"><\/script>  <link rel="stylesheet" href="_lib/core-responsive.css?v=20260619d">
+  
+  <meta name="theme-color" content="#000000">
+  <link rel="stylesheet" href="_lib/core-ui.css?v=20260619d">
+</head><body style="margin:0;min-height:100vh;background:#040408;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;display:flex;align-items:center;justify-content:center;padding:24px;"><form id="lf" style="max-width:320px;width:100%;text-align:center;"><div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:18px;"><span style="width:7px;height:7px;border-radius:50%;background:#AEB6C4;display:inline-block;"></span><span style="font-size:12px;font-weight:700;letter-spacing:0.36em;">CORE</span></div><div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,0.72);font-weight:700;margin-bottom:10px;">Owner only</div><div style="font-size:14px;color:rgba(255,255,255,0.72);line-height:20px;margin-bottom:18px;">This preview index is private. Enter the passphrase to continue.</div><input id="pp" type="password" placeholder="passphrase" style="width:100%;padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.10);background:rgba(255,255,255,0.04);color:#fff;font-size:15px;text-align:center;outline:none;font-family:inherit;letter-spacing:0.06em;"/><button type="submit" style="display:block;width:100%;margin-top:12px;padding:14px;border-radius:12px;border:none;background:#AEB6C4;color:#fff;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;">Unlock</button><div id="err" style="color:#FF4F6B;font-size:12px;margin-top:10px;min-height:16px;"></div><a href="01-index.html" style="display:block;margin-top:18px;color:rgba(255,255,255,0.45);font-size:12px;text-decoration:none;"><svg viewBox="0 0 24 24" width="0.7em" height="0.7em" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;display:inline-block;margin:0 .3em 0 0"><path d="M9 6l6 6-6 6"/></svg>Go to the app instead</a></form></body>`;
+        var lf = document.getElementById('lf');
+        lf.addEventListener('submit', function(e){
+          e.preventDefault();
+          var v = document.getElementById('pp').value;
+          if (v === PASS) { localStorage.setItem('coreStoneAccess','1'); location.reload(); }
+          else { document.getElementById('err').textContent = 'Wrong passphrase.'; }
+        });
+        // Halt further script execution by throwing once.
+        throw 'core_gallery_locked';
+      } catch(e){
+        if (e === 'core_gallery_locked') throw e;
+      }
+    })();
+  </script>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="title-block">
+        <div class="badge" style="display:inline-flex; align-items:center; gap:6px;">
+          <svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.85;"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+          Core · Preview v4 · Owner only
+        </div>
+        <h1>The whole app, on one page.</h1>
+        <p class="sub">89 polished HTML mockups in 20 sections. Every flow connects — launch, onboarding, the 5 tabs, habits, stats, scanners, AI coach, ranks, social, streaks, monetization, safety, brand, B2B. Click any card to jump in.</p>
+        <div class="meta-line">
+          <span>Apple Vision Pro × Jarvis</span>
+          <span>5-stat life-OS</span>
+          <span>3 scanners · AI agent · rank ladder</span>
+          <span>$7.99/mo · $44.99/yr</span>
+        </div>
+      </div>
+      <div class="counter">
+        <div class="counter-num">36</div>
+        <div class="counter-lbl">screens</div>
+      </div>
+    </div>
+
+
+    <div class="section-label"><span>Entry & onboarding</span><span class="section-meta">splash · sign-in · trial · first chest</span></div>
+    <div class="grid">
+      <a class="card" href="01-index.html" style="--c: #B388FF;"><div class="card-num">01-index</div><div class="card-title">Welcome</div><div class="card-sub">Glowing stat orbs · gradient CTA to trial.</div></a>
+      <a class="card" href="03-welcome-back.html" style="--c: #FF7A45;"><div class="card-num">03-welcome-back</div><div class="card-title">Welcome back</div><div class="card-sub">Reactivation screen for idle users.</div></a>
+      <a class="card" href="04-sign-in.html" style="--c: #4A8FFF;"><div class="card-num">04-sign-in</div><div class="card-title">Sign in</div><div class="card-sub">Apple · Google · email.</div></a>
+      <a class="card" href="05-sign-in-email.html" style="--c: #4A8FFF;"><div class="card-num">05-sign-in-email</div><div class="card-title">Email capture</div><div class="card-sub">Validates + sends a code.</div></a>
+      <a class="card" href="06-sign-in-otp.html" style="--c: #4A8FFF;"><div class="card-num">06-sign-in-otp</div><div class="card-title">Enter code</div><div class="card-sub">6-digit OTP entry.</div></a>
+      <a class="card" href="07-trial.html" style="--c: #4A8FFF;"><div class="card-num">07-trial</div><div class="card-title">Free-trial gate</div><div class="card-sub">Name · coach tone · 7-day pitch.</div></a>
+      <a class="card" href="08-rank-reveal.html" style="--c: #FF7A45;"><div class="card-num">08-rank-reveal</div><div class="card-title">Rank reveal</div><div class="card-sub">Cinematic first-rank assignment.</div></a>
+      <a class="card" href="09-first-chest.html" style="--c: #FFD05C;"><div class="card-num">09-first-chest</div><div class="card-title">First chest</div><div class="card-sub">Opening reward sequence.</div></a>
+    </div>
+
+    <div class="section-label"><span>Main app</span><span class="section-meta">home · quests · profile · more</span></div>
+    <div class="grid">
+      <a class="card" href="20-dashboard.html" style="--c: #B388FF;"><div class="card-num">20-dashboard</div><div class="card-title">Dashboard · Home</div><div class="card-sub">Life Score · quick actions · 5 stats · feed.</div></a>
+      <a class="card" href="21-quests.html" style="--c: #5CE1E6;"><div class="card-num">21-quests</div><div class="card-title">Quests</div><div class="card-sub">Daily quests & tasks.</div></a>
+      <a class="card" href="23-profile.html" style="--c: #5BB1FF;"><div class="card-num">23-profile</div><div class="card-title">Profile</div><div class="card-sub">Avatar · rank · stats · inventory.</div></a>
+      <a class="card" href="24-more.html" style="--c: rgba(255,255,255,0.72);"><div class="card-num">24-more</div><div class="card-title">More</div><div class="card-sub">Hub of secondary destinations.</div></a>
+    </div>
+
+    <div class="section-label"><span>Stats · the 5-stat life-OS</span><span class="section-meta">each stat its own page</span></div>
+    <div class="grid">
+      <a class="card" href="stat.html" style="--c: #B388FF;"><div class="card-num">stat</div><div class="card-title">Stat drilldown</div><div class="card-sub">Universal stat page (ring · chart · activity).</div></a>
+      <a class="card" href="focus.html" style="--c: #5CE1E6;"><div class="card-num">focus</div><div class="card-title">Focus</div><div class="card-sub">Deep-work sessions & focus score.</div></a>
+      <a class="card" href="gym.html" style="--c: #FF6B6B;"><div class="card-num">gym</div><div class="card-title">Strength</div><div class="card-sub">Muscle map · workouts · tools.</div></a>
+      <a class="card" href="health.html" style="--c: #34D399;"><div class="card-num">health</div><div class="card-title">Health</div><div class="card-sub">Nutrition · meals · health score.</div></a>
+      <a class="card" href="wealth.html" style="--c: #FFCB3D;"><div class="card-num">wealth</div><div class="card-title">Wealth</div><div class="card-sub">Net worth · spending · savings.</div></a>
+      <a class="card" href="social.html" style="--c: #AEB6C4;"><div class="card-num">social</div><div class="card-title">Social</div><div class="card-sub">Weekly wins & connection.</div></a>
+      <a class="card" href="willpower.html" style="--c: #B388FF;"><div class="card-num">willpower</div><div class="card-title">Willpower</div><div class="card-sub">Streaks · slips · recovery.</div></a>
+    </div>
+
+    <div class="section-label"><span>Camera & scanners</span><span class="section-meta">pose tracking · AI vision</span></div>
+    <div class="grid">
+      <a class="card" href="strength-camera.html" style="--c: #FF6B6B;"><div class="card-num">strength-camera</div><div class="card-title">Live rep counter</div><div class="card-sub">MoveNet pose rep tracking + form demos.</div></a>
+      <a class="card" href="physique-scan.html" style="--c: #AEB6C4;"><div class="card-num">physique-scan</div><div class="card-title">Physique scan</div><div class="card-sub">Rate & track your body.</div></a>
+      <a class="card" href="scan.html" style="--c: #34D399;"><div class="card-num">scan</div><div class="card-title">Scanner</div><div class="card-sub">Food · physique · outfit · posture · looks.</div></a>
+    </div>
+
+    <div class="section-label"><span>Coach & community</span><span class="section-meta">AI coach · social feed</span></div>
+    <div class="grid">
+      <a class="card" href="coach.html" style="--c: #5EEAD4;"><div class="card-num">coach</div><div class="card-title">AI Coach</div><div class="card-sub">Conversational coaching.</div></a>
+      <a class="card" href="community.html" style="--c: #AEB6C4;"><div class="card-num">community</div><div class="card-title">Community</div><div class="card-sub">Posts · reactions · feed.</div></a>
+      <a class="card" href="community-guidelines.html" style="--c: rgba(255,255,255,0.72);"><div class="card-num">community-guidelines</div><div class="card-title">Guidelines</div><div class="card-sub">Community rules.</div></a>
+    </div>
+
+    <div class="section-label"><span>Progression · ranks · streaks · loot</span></div>
+    <div class="grid">
+      <a class="card" href="24-ranks.html" style="--c: #FFD05C;"><div class="card-num">24-ranks</div><div class="card-title">Ranks</div><div class="card-sub">7-tier progression ladder.</div></a>
+      <a class="card" href="26-streak.html" style="--c: #FF7A45;"><div class="card-num">26-streak</div><div class="card-title">Streaks</div><div class="card-sub">Streak board · milestones · restore.</div></a>
+      <a class="card" href="26-friends.html" style="--c: #5BB1FF;"><div class="card-num">26-friends</div><div class="card-title">Friends</div><div class="card-sub">Friends & compare.</div></a>
+      <a class="card" href="22-inventory.html" style="--c: #9F8FFF;"><div class="card-num">22-inventory</div><div class="card-title">Inventory</div><div class="card-sub">Items & gear.</div></a>
+      <a class="card" href="28-chest.html" style="--c: #FFD05C;"><div class="card-num">28-chest</div><div class="card-title">Chest</div><div class="card-sub">Loot chest opening.</div></a>
+    </div>
+
+    <div class="section-label"><span>Money & shop</span></div>
+    <div class="grid">
+      <a class="card" href="wallet.html" style="--c: #34D399;"><div class="card-num">wallet</div><div class="card-title">Wallet</div><div class="card-sub">Coins & balance.</div></a>
+      <a class="card" href="27-shop.html" style="--c: #FFCB3D;"><div class="card-num">27-shop</div><div class="card-title">Shop</div><div class="card-sub">Earn & spend coins.</div></a>
+      <a class="card" href="29-core-plus.html" style="--c: #B388FF;"><div class="card-num">29-core-plus</div><div class="card-title">CORE+</div><div class="card-sub">Subscription upsell.</div></a>
+    </div>
+
+    <div class="section-label"><span>Settings & legal</span></div>
+    <div class="grid">
+      <a class="card" href="25-settings.html" style="--c: rgba(255,255,255,0.72);"><div class="card-num">25-settings</div><div class="card-title">Settings</div><div class="card-sub">Account & preferences.</div></a>
+      <a class="card" href="82-legal.html" style="--c: rgba(255,255,255,0.72);"><div class="card-num">82-legal</div><div class="card-title">Legal</div><div class="card-sub">Privacy · Terms · EULA.</div></a>
+      <a class="card" href="refund-policy.html" style="--c: rgba(255,255,255,0.72);"><div class="card-num">refund-policy</div><div class="card-title">Refund policy</div><div class="card-sub">Subscription refunds.</div></a>
+    </div>
+
+    <footer>
+      <span>core · ~/Desktop/lifeos · 89 screens · 20 sections · every button wired · v5</span>
+      <a href="01-index.html"><svg viewBox="0 0 24 24" width="0.7em" height="0.7em" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;display:inline-block;margin:0 .3em 0 0"><path d="M9 6l6 6-6 6"/></svg>Walk the flow</a>
+    </footer>
+  </div>
+
+  <!-- Demo state toolbar (dev only) -->
+  <div id="demoBar" style="position:fixed; right:18px; bottom:18px; z-index:9999; background: rgba(10,10,20,0.92); border:1px solid rgba(255,255,255,0.12); border-radius:14px; padding:10px; backdrop-filter: blur(10px); box-shadow: 0 14px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.07); font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',"Helvetica Neue",Arial,sans-serif; color:#fff; min-width:240px;">
+    <div id="demoHead" style="display:flex; align-items:center; justify-content:space-between; gap:10px; cursor:pointer;" onclick="toggleDemoBar()">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="width:8px; height:8px; border-radius:50%; background:#AEB6C4; display:inline-block;"></span>
+        <span style="font-size:11px; letter-spacing:0.18em; text-transform:uppercase; font-weight:700; color:rgba(255,255,255,0.72);">Demo state</span>
+      </div>
+      <span id="demoChev" style="color:rgba(255,255,255,0.72); font-size:13px; display:inline-flex; align-items:center;"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+    </div>
+    <div id="demoBody" style="margin-top:10px; display:flex; flex-direction:column; gap:5px;">
+      <button class="dbtn" data-state="new" onclick="setDemoState('new')">New user</button>
+      <button class="dbtn" data-state="day3" onclick="setDemoState('day3')">Mid-trial · day 3</button>
+      <button class="dbtn" data-state="expired" onclick="setDemoState('expired')">Trial expired</button>
+      <button class="dbtn" data-state="idle" onclick="setDemoState('idle')">Returning · 5 days idle</button>
+      <button class="dbtn" data-state="sub" onclick="setDemoState('sub')">Subscribed (paid)</button>
+      <div style="height:1px; background:rgba(255,255,255,0.08); margin:4px 0;"></div>
+      <button class="dbtn ghost" onclick="resetDemo()">Reset · clear all state</button>
+      <button class="dbtn ghost" onclick="openInspector()">Open analytics log</button>
+    </div>
+    <style>
+      /* Aligned with core-buttons.css palette but local (gallery doesn't import it). */
+      .dbtn {
+        font-family:inherit; font-size:12px; font-weight:500; text-align:left;
+        padding:9px 12px; border-radius:10px;
+        background: rgba(255,255,255,0.04);
+        border:1px solid rgba(255,255,255,0.08);
+        color:#fff; cursor:pointer;
+        transition: background .15s ease, border-color .15s ease, transform .12s ease;
+      }
+      .dbtn:hover  { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.14); }
+      .dbtn:active { transform: scale(0.985); }
+      .dbtn.active {
+        border-color: rgba(10,132,255,0.55);
+        background: rgba(10,132,255,0.14);
+        color:#AEB6C4;
+        box-shadow: none;
+      }
+      .dbtn.ghost { color:rgba(255,255,255,0.72); background: transparent; border-color: transparent; }
+      .dbtn.ghost:hover { color:#fff; background: rgba(255,255,255,0.04); }
+    </style>
+  </div>
+
+<script>
+  // Demo state presets — set localStorage keys and reload the right landing page.
+  const PRESETS = {
+    new: { clear:true, target:'01-index.html' },
+    day3: {
+      keys: {
+        coreOnboardComplete: '1',
+        coreOnboardTrial: JSON.stringify({ name:'Stone', tone:'balanced', checkin:'both', committed:true, trialStartedAt: Date.now() - 3*24*60*60*1000 }),
+        coreLastSeen: String(Date.now()),
+      },
+      target: '20-dashboard.html',
+    },
+    expired: {
+      keys: {
+        coreOnboardComplete: '1',
+        coreOnboardTrial: JSON.stringify({ name:'Stone', tone:'balanced', checkin:'both', committed:true, trialStartedAt: Date.now() - 10*24*60*60*1000 }),
+      },
+      target: '78-trial-expired.html',
+    },
+    idle: {
+      keys: {
+        coreOnboardComplete: '1',
+        coreOnboardTrial: JSON.stringify({ name:'Stone', tone:'balanced', checkin:'both', committed:true, trialStartedAt: Date.now() - 5*24*60*60*1000 }),
+        coreLastSeen: String(Date.now() - 5*24*60*60*1000),
+      },
+      target: '03-welcome-back.html',
+    },
+    sub: {
+      keys: {
+        coreOnboardComplete: '1',
+        coreSubscriptionActive: '1',
+        coreOnboardTrial: JSON.stringify({ name:'Stone', tone:'balanced', checkin:'both', committed:true, trialStartedAt: Date.now() - 30*24*60*60*1000 }),
+        coreLastSeen: String(Date.now()),
+      },
+      target: '20-dashboard.html',
+    },
+  };
+  function setDemoState(name) {
+    const cfg = PRESETS[name]; if (!cfg) return;
+    try {
+      if (cfg.clear) {
+        ['coreOnboardComplete','coreOnboardTrial','coreSubscriptionActive','coreLastSeen','corePauseUntil','coreDownPlan','coreCancelledAt','coreReferralGift','coreSelectedHabits','coreDevBypass'].forEach(k => localStorage.removeItem(k));
+      }
+      if (cfg.keys) for (const k in cfg.keys) localStorage.setItem(k, cfg.keys[k]);
+      localStorage.setItem('coreDemoState', name);
+      if (window.coreTrack) coreTrack('demo_state_set', { state: name });
+    } catch(e){}
+    location.href = cfg.target;
+  }
+  function resetDemo() {
+    if (!confirm('Clear all CORE localStorage state?')) return;
+    try {
+      Object.keys(localStorage).filter(k => k.startsWith('core')).forEach(k => localStorage.removeItem(k));
+      sessionStorage.removeItem('coreAnalyticsRing');
+    } catch(e){}
+    location.reload();
+  }
+  function openInspector() {
+    try {
+      const ring = JSON.parse(sessionStorage.getItem('coreAnalyticsRing') || '[]');
+      const w = window.open('', '_blank', 'width=720,height=600');
+      const lines = ring.map(r => '<div style="padding:8px 12px; border-bottom:1px solid #222;"><span style="color:#AEB6C4; font-weight:700;">' + r.event + '</span> <code style="color:#aaa;">' + JSON.stringify(r.payload) + '</code></div>').join('');
+      w.document.write('<html><head><title>CORE analytics</title></head><body style="font-family:ui-monospace,monospace; background:#0a0a14; color:#fff; padding:0; margin:0;"><div style="padding:14px; border-bottom:1px solid #222; font-weight:700;">Analytics ring buffer · ' + ring.length + ' events</div>' + (lines || '<div style="padding:20px; color:#666;">No events yet. Click around the app.</div>') + '</body></html>');
+    } catch(e){ alert('Inspector failed: '+e.message); }
+  }
+  function toggleDemoBar() {
+    const body = document.getElementById('demoBody');
+    const chev = document.getElementById('demoChev');
+    const open = body.style.display !== 'none';
+    body.style.display = open ? 'none' : 'flex';
+    var chevR = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
+    var chevD = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+    chev.innerHTML = open ? chevR : chevD;
+  }
+  // Highlight active state
+  (function(){
+    try {
+      const cur = localStorage.getItem('coreDemoState');
+      if (cur) document.querySelectorAll('.dbtn[data-state]').forEach(b => {
+        if (b.dataset.state === cur) b.classList.add('active');
+      });
+    } catch(e){}
+  })();
+</script>
+<script>
+/* Mark cards that point to pages not yet built as "Soon" (dim + non-clickable),
+   so the owner index has no dead 404 links. Built list mirrors /previews/*.html. */
+(function(){
+  var BUILT = new Set(['01-index.html','03-welcome-back.html','04-sign-in.html','05-sign-in-email.html','06-sign-in-otp.html','07-trial.html','08-rank-reveal.html','09-first-chest.html','20-dashboard.html','21-quests.html','22-inventory.html','23-profile.html','24-more.html','24-ranks.html','25-settings.html','26-friends.html','26-streak.html','27-shop.html','28-chest.html','29-core-plus.html','82-legal.html','97-gallery.html','coach.html','community-guidelines.html','community.html','focus.html','gym.html','health.html','index.html','physique-scan.html','refund-policy.html','scan.html','social.html','stat.html','strength-camera.html','wallet.html','wealth.html','willpower.html']);
+  document.querySelectorAll('a.card[href]').forEach(function(a){
+    var base = (a.getAttribute('href')||'').split('#')[0].split('?')[0];
+    if (BUILT.has(base)) return;
+    a.classList.add('soon');
+    a.setAttribute('aria-disabled','true');
+    a.style.opacity = '0.4';
+    a.style.filter = 'grayscale(0.6)';
+    a.style.pointerEvents = 'none';
+    var pills = a.querySelector('.card-pills');
+    var tag = document.createElement('span');
+    tag.className = 'card-pill';
+    tag.textContent = 'Soon';
+    tag.style.background = 'rgba(255,255,255,0.08)';
+    tag.style.color = 'rgba(255,255,255,0.72)';
+    if (pills) pills.appendChild(tag); else a.appendChild(tag);
+  });
+})();
+</script>
+</body>
+</html>

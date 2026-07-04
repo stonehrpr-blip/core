@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+  <meta charset="utf-8" />
+  <title>CORE — Rank reveal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#000000" />
+  <link rel="stylesheet" href="_lib/core-responsive.css?v=20260619d" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    html,body{height:100%;}
+    body{min-height:100%;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;
+      padding:24px;overflow:hidden;
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif;
+      -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
+    .phone{position:relative;width:390px;height:844px;border-radius:56px;overflow:hidden;background:#08090C;
+      box-shadow:0 40px 120px rgba(0,0,0,0.85),0 0 0 1px rgba(255,255,255,0.06),0 0 0 10px #060608,0 0 0 11px #1b1b22;}
+
+    .stage{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center;}
+
+    .grain{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:.04;mix-blend-mode:overlay;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='150' height='150' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size:150px 150px;}
+
+    /* ===== Stage 1 — blank screen, tap to reveal ===== */
+    #stage1{justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+    #stage1::before{content:'';position:absolute;left:50%;top:42%;width:300px;height:300px;
+      transform:translate(-50%,-50%);pointer-events:none;
+      background:radial-gradient(closest-side, rgba(214,219,226,0.08), rgba(214,219,226,0.03) 40%, transparent 65%);}
+    .pre-eyebrow{position:relative;font-size:11px;font-weight:800;letter-spacing:0.34em;text-transform:uppercase;color:rgba(214,219,226,0.5);
+      animation:s1In .8s ease both;}
+    /* mystery emblem — a sealed gem socket teasing the reveal */
+    .mystery{position:relative;width:200px;height:200px;margin:24px auto 32px;display:flex;align-items:center;justify-content:center;
+      animation:s1In .9s ease .05s both;}
+    .myst-ring{position:absolute;border-radius:50%;pointer-events:none;}
+    .myst-ring.r-a{width:200px;height:200px;border:1.5px dashed rgba(206,212,222,0.26);animation:mSpin 22s linear infinite;}
+    .myst-ring.r-b{width:160px;height:160px;border:1px solid rgba(206,212,222,0.14);
+      box-shadow:0 0 36px rgba(206,212,222,0.12) inset;animation:mSpinRev 13s linear infinite;}
+    /* faint orbiting tick that draws the eye round the emblem */
+    .myst-ring.r-orbit{width:200px;height:200px;animation:mSpin 7s linear infinite;}
+    .myst-ring.r-orbit::after{content:'';position:absolute;top:-3px;left:50%;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;
+      background:#fff;box-shadow:0 0 10px 2px rgba(214,219,226,0.85);}
+    .myst-socket{position:relative;width:118px;height:118px;display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(150deg, rgba(232,236,242,0.62) 0%, rgba(170,178,192,0.16) 52%, rgba(120,128,142,0.42) 100%);
+      clip-path:polygon(26% 0,74% 0,100% 26%,100% 74%,74% 100%,26% 100%,0 74%,0 26%);
+      box-shadow:0 0 40px rgba(206,212,222,0.28), 0 14px 30px rgba(0,0,0,0.55);
+      animation:mPulse 3s ease-in-out infinite, mBob 5s ease-in-out infinite;}
+    .myst-socket::before{content:'';position:absolute;inset:2px;
+      background:radial-gradient(circle at 50% 38%, rgba(206,212,222,0.26), #050510 76%);
+      clip-path:polygon(26% 0,74% 0,100% 26%,100% 74%,74% 100%,26% 100%,0 74%,0 26%);}
+    /* moving specular highlight sweeping the bezel — brushed-steel sheen */
+    .myst-socket::after{content:'';position:absolute;inset:0;
+      background:linear-gradient(115deg, transparent 38%, rgba(255,255,255,0.5) 50%, transparent 62%);
+      clip-path:polygon(26% 0,74% 0,100% 26%,100% 74%,74% 100%,26% 100%,0 74%,0 26%);
+      mix-blend-mode:screen;opacity:0.55;animation:mSheen 4.2s ease-in-out infinite;}
+    .myst-core{position:absolute;width:58px;height:58px;border-radius:50%;z-index:1;
+      background:radial-gradient(circle,#fff,rgba(206,212,222,0.5) 46%,transparent 72%);
+      animation:mPulse 3s ease-in-out infinite;}
+    .myst-q{position:relative;z-index:2;font-size:46px;font-weight:900;color:rgba(255,255,255,0.92);
+      text-shadow:0 0 26px rgba(206,212,222,0.8), 0 2px 4px rgba(0,0,0,0.4);}
+    @keyframes mPulse{0%,100%{opacity:0.74;}50%{opacity:1;}}
+    @keyframes mBob{0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(-6px) scale(1.03);}}
+    @keyframes mSheen{0%,18%{transform:translateX(-120%);opacity:0;}30%{opacity:0.6;}50%{transform:translateX(120%);opacity:0.6;}55%,100%{opacity:0;}}
+    @keyframes mSpin{to{transform:rotate(360deg);}}
+    @keyframes mSpinRev{to{transform:rotate(-360deg);}}
+    @keyframes s1In{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    .pre-title{position:relative;margin-top:2px;font-size:31px;font-weight:800;letter-spacing:-0.6px;color:#fff;line-height:1.08;animation:s1In .9s ease .12s both;}
+    .pre-sub{position:relative;margin-top:10px;font-size:13.5px;color:rgba(255,255,255,0.46);letter-spacing:-0.1px;animation:s1In .9s ease .18s both;}
+    /* tap affordance — a glowing pill with an expanding ripple ring */
+    .tap-hint{position:absolute;bottom:78px;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:16px;
+      animation:s1In 1s ease .3s both;}
+    .tap-ripple{position:relative;width:54px;height:54px;display:flex;align-items:center;justify-content:center;}
+    .tap-ripple::before,.tap-ripple::after{content:'';position:absolute;inset:0;border-radius:50%;
+      border:1.5px solid rgba(214,219,226,0.5);animation:tapRing 2.4s ease-out infinite;}
+    .tap-ripple::after{animation-delay:1.2s;}
+    @keyframes tapRing{0%{transform:scale(0.55);opacity:0.9;}100%{transform:scale(1.5);opacity:0;}}
+    .tap-dot{width:13px;height:13px;border-radius:50%;background:rgba(255,255,255,0.92);
+      box-shadow:0 0 14px rgba(214,219,226,0.8);animation:tapPulse 2.4s ease-in-out infinite;}
+    .tap-label{font-size:12px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;
+      color:rgba(255,255,255,0.5);animation:tapPulse 2.4s ease-in-out infinite;}
+    @keyframes tapPulse{0%,100%{opacity:0.5;}50%{opacity:1;}}
+    /* tap -> emblem winds up (recoil), then rushes toward you, then white, then bang */
+    body.charging #stage1{animation:introZoom .58s cubic-bezier(.55,0,.85,.2) forwards;transform-origin:center 42%;}
+    @keyframes introZoom{0%{transform:scale(1);opacity:1;filter:brightness(1);}
+      14%{transform:scale(0.82);opacity:1;filter:brightness(1.1);}
+      30%{transform:scale(0.88);opacity:1;}
+      100%{transform:scale(8);opacity:0;filter:brightness(2.4);}}
+    /* charge-up bloom behind the emblem as it winds up */
+    .charge-bloom{position:absolute;left:50%;top:42%;width:24px;height:24px;margin:-12px 0 0 -12px;border-radius:50%;
+      background:radial-gradient(circle,#fff,rgba(214,219,226,0.7) 40%,transparent 72%);
+      opacity:0;pointer-events:none;z-index:19;}
+    body.charging .charge-bloom{animation:chargeBloom .58s cubic-bezier(.5,0,.9,.4) forwards;}
+    @keyframes chargeBloom{0%{opacity:0;transform:scale(0.2);}30%{opacity:0.4;transform:scale(1.4);}
+      78%{opacity:0.95;transform:scale(9);}100%{opacity:1;transform:scale(20);}}
+
+    /* white flash — covers the text early (before it gets too big), holds ~230ms */
+    .flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:20;}
+    body.charging .flash{animation:flashIn 0.58s ease-in forwards;}
+    @keyframes flashIn{0%{opacity:0;}30%{opacity:0;}62%{opacity:1;}100%{opacity:1;}}
+    body.revealed .flash{animation:flashOut .42s ease forwards;}
+    @keyframes flashOut{from{opacity:1;}to{opacity:0;}}
+
+    /* ===== Stage 2 — rank + unlocks (all centered) ===== */
+    #stage2{opacity:0;pointer-events:none;justify-content:flex-start;padding:54px 0 0;
+      overflow-y:auto;scrollbar-width:none;}
+    #stage2::-webkit-scrollbar{display:none;}
+    body.revealed #stage1{display:none;}
+    body.revealed #stage2{opacity:1;pointer-events:auto;}
+
+    .rank-card{width:304px;padding:32px 24px 24px;position:relative;flex-shrink:0;text-align:center;overflow:hidden;
+      background:
+        linear-gradient(165deg, color-mix(in srgb, var(--rc) 24%, rgba(10,11,18,0.62)), color-mix(in srgb, var(--rc) 5%, rgba(5,6,11,0.5)));
+      border:1px solid color-mix(in srgb, var(--rc) 55%, transparent);
+      clip-path:polygon(0 0, calc(100% - 28px) 0, 100% 28px, 100% 100%, 28px 100%, 0 calc(100% - 28px));
+      box-shadow:0 30px 70px rgba(0,0,0,0.55), 0 0 0 1px color-mix(in srgb, var(--rc) 22%, transparent) inset, 0 0 64px color-mix(in srgb, var(--rc) 28%, transparent);
+      animation:cardPop .62s cubic-bezier(.16,1.7,.3,1) both;}
+    @keyframes cardPop{0%{transform:scale(0.2);opacity:0;}35%{opacity:1;}65%{transform:scale(1.06);}100%{transform:scale(1);opacity:1;}}
+    /* top hairline highlight — light catching the bevel of the glass */
+    .rank-card::before{content:'';position:absolute;left:0;right:0;top:0;height:90px;pointer-events:none;
+      background:linear-gradient(180deg, color-mix(in srgb,var(--rc) 18%, rgba(255,255,255,0.16)), transparent);
+      opacity:0.7;}
+    /* a single specular light-sweep across the whole card after it lands */
+    .rank-card::after{content:'';position:absolute;top:-40%;bottom:-40%;left:-60%;width:55%;pointer-events:none;z-index:3;
+      background:linear-gradient(105deg, transparent, rgba(255,255,255,0.16) 50%, transparent);
+      transform:skewX(-16deg);}
+    body.revealed .rank-card::after{animation:cardSweep 1.1s ease .85s 1 both;}
+    @keyframes cardSweep{0%{left:-60%;opacity:0;}10%{opacity:1;}60%{left:120%;opacity:1;}100%{left:120%;opacity:0;}}
+    /* gem mounted in an octagonal metal socket */
+    .rank-socket{width:152px;height:152px;margin:2px auto 0;padding:2px;position:relative;overflow:hidden;
+      background:linear-gradient(135deg, color-mix(in srgb,var(--rc) 92%,#fff 6%), color-mix(in srgb,var(--rc) 22%,transparent));
+      clip-path:polygon(26% 0,74% 0,100% 26%,100% 74%,74% 100%,26% 100%,0 74%,0 26%);
+      box-shadow:0 0 40px color-mix(in srgb,var(--rc) 50%,transparent);}
+    .rank-socket-in{width:100%;height:100%;position:relative;display:flex;align-items:center;justify-content:center;
+      background:radial-gradient(circle at 50% 40%, color-mix(in srgb,var(--rc) 20%,#06060c), #04040a 76%);
+      clip-path:polygon(26% 0,74% 0,100% 26%,100% 74%,74% 100%,26% 100%,0 74%,0 26%);}
+    /* radial light rays behind the gem — the "halo" of the reveal */
+    .rank-socket-in::before{content:'';position:absolute;inset:-30%;z-index:0;pointer-events:none;
+      background:conic-gradient(from 0deg, transparent 0deg, color-mix(in srgb,var(--rc) 30%,transparent) 8deg, transparent 16deg,
+        transparent 30deg, color-mix(in srgb,var(--rc) 24%,transparent) 38deg, transparent 46deg,
+        transparent 90deg, color-mix(in srgb,var(--rc) 30%,transparent) 98deg, transparent 106deg,
+        transparent 180deg, color-mix(in srgb,var(--rc) 24%,transparent) 188deg, transparent 196deg,
+        transparent 270deg, color-mix(in srgb,var(--rc) 30%,transparent) 278deg, transparent 286deg, transparent 360deg);
+      opacity:0.55;mix-blend-mode:screen;animation:raySpin 26s linear infinite;
+      -webkit-mask:radial-gradient(circle, #000 30%, transparent 70%);mask:radial-gradient(circle, #000 30%, transparent 70%);}
+    @keyframes raySpin{to{transform:rotate(360deg);}}
+    .rank-gem{position:relative;z-index:1;width:114px;height:114px;
+      filter:drop-shadow(0 0 16px color-mix(in srgb, var(--rc) 64%, transparent)) drop-shadow(0 8px 22px color-mix(in srgb, var(--rc) 45%, transparent));
+      animation:gemFloat 4s ease-in-out 1s infinite;}
+    .rank-gem img{width:100%;height:100%;object-fit:contain;display:block;}
+    @keyframes gemFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+    .rank-eyebrow{margin-top:22px;font-size:11px;font-weight:900;font-style:italic;letter-spacing:0.26em;text-transform:uppercase;
+      color:color-mix(in srgb,var(--rc) 72%, #ffffff);}
+    .rank-name{margin-top:5px;font-size:39px;font-weight:900;font-style:italic;text-transform:uppercase;letter-spacing:-1.2px;line-height:1;color:#fff;
+      text-shadow:0 0 28px color-mix(in srgb,var(--rc) 55%,transparent);}
+    /* tier label as a refined inline chip */
+    .rank-tier{display:inline-block;margin-top:11px;padding:5px 12px;font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;
+      color:color-mix(in srgb,var(--rc) 40%, #ffffff);
+      background:color-mix(in srgb,var(--rc) 12%, transparent);
+      border:1px solid color-mix(in srgb,var(--rc) 34%, transparent);border-radius:100px;}
+    .rank-divider{height:1px;margin-top:24px;
+      background:linear-gradient(90deg, transparent, color-mix(in srgb,var(--rc) 40%, rgba(255,255,255,0.18)), transparent);}
+    .rank-rows{display:flex;}
+    .rank-row{flex:1;padding:16px 0 2px;text-align:center;}
+    .rank-row+.rank-row{border-left:1px solid rgba(255,255,255,0.08);}
+    .rr-v{font-size:21px;font-weight:800;color:#fff;letter-spacing:-0.3px;}
+    .rr-k{margin-top:5px;font-size:9.5px;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.60);}
+    /* progress toward the next rank — makes the starting rank feel like the
+       bottom of a climb instead of a dead end */
+    .rank-next{margin:18px 4px 2px;}
+    .rn-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px;
+      font-size:10px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;
+      font-family:'Space Mono',ui-monospace,"SF Mono",Menlo,monospace;}
+    .rn-head #rnLabel{color:color-mix(in srgb,var(--rc) 78%, #fff);}
+    .rn-head #rnXp{color:rgba(255,255,255,0.5);letter-spacing:0.04em;}
+    .rn-track{height:7px;border-radius:999px;background:rgba(255,255,255,0.08);
+      box-shadow:0 1px 1px rgba(0,0,0,0.45) inset;overflow:hidden;}
+    .rn-fill{height:100%;width:0;border-radius:999px;
+      background:linear-gradient(90deg,color-mix(in srgb,var(--rc) 80%, #000) 0%,var(--rc) 70%,#fff 130%);
+      box-shadow:0 0 10px color-mix(in srgb,var(--rc) 70%, transparent);
+      transition:width 1.15s cubic-bezier(.22,1,.36,1) .85s;}
+    body.revealed .rn-fill{width:var(--rn-pct,0%);}
+    @media (prefers-reduced-motion: reduce){ .rn-fill{transition:none;} }
+
+    /* unlock list — premium rows on hairline cards, green Apple ticks, slides in one by one */
+    .unlocks{width:300px;margin:20px auto 150px;display:flex;flex-direction:column;align-items:stretch;gap:9px;}
+    .unlocks-head{font-size:10px;font-weight:800;letter-spacing:0.22em;text-transform:uppercase;
+      color:rgba(255,255,255,0.4);text-align:left;padding-left:4px;margin-bottom:3px;opacity:0;}
+    .unlock{display:flex;align-items:center;justify-content:flex-start;gap:13px;opacity:0;text-align:left;
+      padding:12px 14px;border-radius:13px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.018));
+      border:1px solid rgba(255,255,255,0.07);
+      box-shadow:0 6px 16px rgba(0,0,0,0.25);}
+    .unlock-ic{width:24px;height:24px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:50%;
+      background:rgba(36,138,61,0.16);box-shadow:0 0 0 1px rgba(36,138,61,0.3) inset;}
+    .unlock-ic svg{width:14px;height:14px;stroke:#34C759;fill:none;stroke-width:3.4;stroke-linecap:round;stroke-linejoin:round;}
+    .unlock-label{font-size:14.5px;font-weight:600;color:rgba(255,255,255,0.94);letter-spacing:-0.1px;}
+    body.revealed .unlocks-head{animation:unlockIn .5s ease .7s both;}
+    body.revealed .unlock{animation:unlockIn .55s cubic-bezier(.22,1,.32,1) both;}
+    @keyframes unlockIn{from{opacity:0;transform:translateY(14px) scale(.96);}to{opacity:1;transform:translateY(0) scale(1);}}
+
+    /* CTA — premium with a soft gradient lift above it so it reads as floating UI */
+    .cta-fade{position:absolute;bottom:0;left:0;right:0;height:128px;z-index:4;pointer-events:none;
+      background:linear-gradient(180deg, transparent, rgba(4,5,11,0.8) 50%, rgba(4,5,11,0.96));opacity:0;}
+    body.revealed .cta-fade{animation:ctaIn .6s ease 1.6s both;}
+    .reveal-cta{position:absolute;bottom:46px;left:32px;right:32px;padding:17px;border-radius:16px;border:none;
+      background:linear-gradient(180deg,#ffffff,#e9ebef);color:#0E1014;font-family:inherit;font-size:16px;font-weight:700;letter-spacing:-0.2px;cursor:pointer;
+      box-shadow:0 14px 34px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.6) inset;
+      opacity:0;z-index:5;transition:transform .12s;-webkit-tap-highlight-color:transparent;}
+    body.revealed .reveal-cta{animation:ctaIn .5s ease 1.75s both;}
+    @keyframes ctaIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+    .reveal-cta:active{transform:scale(0.98);}
+
+    /* ===== celebratory pop — shockwave + particle burst ===== */
+    .burst{position:absolute;left:50%;top:34%;width:0;height:0;z-index:3;pointer-events:none;}
+    .particle{position:absolute;left:0;top:0;border-radius:50%;will-change:transform,opacity;}
+    @keyframes burstFly{0%{transform:translate(0,0) scale(1);opacity:1;}
+      100%{transform:translate(var(--tx),var(--ty)) scale(0.25);opacity:0;}}
+    /* hard slam — brief screen shake as the rank lands */
+    body.revealed .stage{animation:shake .42s cubic-bezier(.36,.07,.19,.97) both;}
+    @keyframes shake{0%{transform:translate(0,0);}12%{transform:translate(-6px,3px);}24%{transform:translate(7px,-2px);}
+      38%{transform:translate(-5px,2px);}52%{transform:translate(4px,-3px);}68%{transform:translate(-3px,1px);}
+      84%{transform:translate(2px,-1px);}100%{transform:translate(0,0);}}
+    .shockwave{position:absolute;left:0;top:0;width:84px;height:84px;margin:-42px 0 0 -42px;border-radius:50%;
+      border:2px solid #fff;transform:scale(0.1);opacity:0.9;will-change:transform,opacity;}
+    @keyframes shock{to{transform:scale(5);opacity:0;}}
+    .spark{position:absolute;left:0;top:0;will-change:transform,opacity;}
+    @keyframes sparkFly{0%{transform:translate(0,0) rotate(0deg) scale(1);opacity:1;}
+      100%{transform:translate(var(--tx),var(--ty)) rotate(var(--rot)) scale(0.4);opacity:0;}}
+    /* ===== 1000x layer ===== */
+    /* rank name letters punch in one by one */
+    .rank-name .rl{display:inline-block;opacity:0;transform:translateY(18px) scale(1.3);filter:blur(6px);}
+    body.revealed .rank-name .rl{animation:rlIn .5s cubic-bezier(.2,1.4,.3,1) both;}
+    @keyframes rlIn{to{opacity:1;transform:none;filter:blur(0);}}
+    /* gem slams in from above AFTER the flash, with a squash */
+    body.revealed .rank-gem{animation:gemSlam .55s cubic-bezier(.3,1.6,.4,1) .12s both, gemFloat 4s ease-in-out 1.2s infinite;}
+    @keyframes gemSlam{0%{transform:translateY(-90px) scale(1.5);opacity:0;}55%{transform:translateY(4px) scale(0.92);opacity:1;}
+      78%{transform:translateY(-3px) scale(1.04);}100%{transform:translateY(0) scale(1);}}
+    /* pointer-tilt on the rank card (ProfileCard-style) + moving glare */
+    .card-tilt-wrap{perspective:700px;}
+    .rank-card{transform:rotateX(var(--ry,0deg)) rotateY(var(--rx,0deg));transition:transform .18s ease-out;will-change:transform;}
+    .rank-card .card-glare{content:'';position:absolute;inset:0;pointer-events:none;z-index:6;
+      background:radial-gradient(farthest-corner circle at var(--px,50%) var(--py,50%), rgba(255,255,255,0.16) 8%, transparent 60%);
+      mix-blend-mode:overlay;opacity:0;transition:opacity .3s;}
+    .rank-card.tilting .card-glare{opacity:1;}
+    /* ambient embers rising in the rank colour */
+    .embers{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden;opacity:0;}
+    body.revealed .embers{opacity:1;transition:opacity 1s ease .8s;}
+    .ember{position:absolute;bottom:-10px;border-radius:50%;opacity:0;animation:emberUp linear infinite;}
+    @keyframes emberUp{0%{opacity:0;transform:translateY(0) translateX(0) scale(1);}12%{opacity:.75;}
+      85%{opacity:.25;}100%{opacity:0;transform:translateY(-108vh) translateX(var(--ex,20px)) scale(0.4);}}
+    /* confetti strips raining after the slam */
+    .confetti{position:absolute;top:-14px;border-radius:2px;opacity:0;pointer-events:none;z-index:6;
+      animation:confFall ease-in forwards;}
+    @keyframes confFall{0%{opacity:1;transform:translateY(0) rotate(0deg);}
+      100%{opacity:0.9;transform:translateY(108vh) rotate(var(--cr,540deg));}}
+    /* score counts up in champagne — subtle pop each tick handled in JS */
+    #rScore.bump{animation:scoreBump .18s ease;}
+    @keyframes scoreBump{50%{transform:scale(1.14);}}
+    @media (prefers-reduced-motion: reduce){ *{animation-duration:.01ms !important;} }
+  </style>
+  <link rel="stylesheet" href="_lib/core-ui.css?v=20260619d">
+</head>
+<body data-font="apple">
+  <div class="phone">
+    <!-- core-background.js injects the shared atmosphere (same as index/trial) here -->
+
+    <!-- Stage 1: blank tap screen -->
+    <div class="stage" id="stage1" role="button" tabindex="0" aria-label="Tap to reveal your rank">
+      <div class="pre-eyebrow">Standing calculated</div>
+      <div class="mystery" aria-hidden="true">
+        <span class="myst-ring r-a"></span>
+        <span class="myst-ring r-b"></span>
+        <span class="myst-ring r-orbit"></span>
+        <span class="myst-socket"><span class="myst-core"></span><span class="myst-q">?</span></span>
+      </div>
+      <div class="pre-title">Reveal your rank</div>
+      <div class="pre-sub">Where you stand is ready to be seen.</div>
+      <div class="tap-hint">
+        <span class="tap-ripple"><span class="tap-dot"></span></span>
+        <span class="tap-label">Tap to reveal</span>
+      </div>
+    </div>
+
+    <!-- Stage 2: rank card + unlocks -->
+    <div class="stage" id="stage2">
+      <div class="embers" id="embers" aria-hidden="true"></div>
+      <div class="card-tilt-wrap">
+      <div class="rank-card" id="rankCard">
+        <span class="card-glare" aria-hidden="true"></span>
+        <div class="rank-socket"><div class="rank-socket-in"><div class="rank-gem" id="rankGem"></div></div></div>
+        <div class="rank-eyebrow">You are ranked</div>
+        <div class="rank-name" id="rankName">Moonstone</div>
+        <div class="rank-tier" id="rankTier">Rank 1 of 10</div>
+        <div class="rank-divider"></div>
+        <div class="rank-rows">
+          <div class="rank-row"><div class="rr-v" id="rPlayer">Player</div><div class="rr-k">Name</div></div>
+          <div class="rank-row"><div class="rr-v" id="rScore">0</div><div class="rr-k">Score</div></div>
+        </div>
+        <div class="rank-next" id="rankNext">
+          <div class="rn-head"><span id="rnLabel">Next rank</span><span id="rnXp">0 XP</span></div>
+          <div class="rn-track"><div class="rn-fill" id="rnFill"></div></div>
+        </div>
+      </div>
+      </div><!-- /card-tilt-wrap -->
+
+      <div class="unlocks" id="unlocks">
+        <div class="unlocks-head">Unlocked at this rank</div>
+      </div>
+
+      <div class="cta-fade"></div>
+      <button class="reveal-cta" id="enterBtn">Claim your rank</button>
+    </div>
+
+    <div class="burst" id="burst"></div>
+    <div class="charge-bloom"></div>
+    <div class="flash"></div>
+    <div class="grain" aria-hidden="true"></div>
+  </div>
+
+  <script src="_lib/core-background.js?v=20260619d"></script>
+  <script src="_lib/core-ranks.js?v=20260704"></script>
+<script>
+(function(){
+  // Reload/resume guard: only valid mid-chain. Already-subscribed members skip
+  // straight to the dashboard; anyone who hasn't finished onboarding is sent to
+  // the start — so reloading this page always lands somewhere sensible.
+  try {
+    var prev = (location.protocol==='file:'||location.hostname==='localhost'||location.hostname==='127.0.0.1'||/[?&]preview=1/.test(location.search));
+    if (!prev) {
+      if (localStorage.getItem('coreSubscribed')==='1') { location.replace('20-dashboard.html'); return; }
+      if (localStorage.getItem('coreOnboardComplete')!=='1') { location.replace('01-index.html'); return; }
+    }
+  } catch(e){}
+  // 21 ranks across 7 tiers — shared ladder so reveal mirrors the rest of the app.
+  var RANKS = window.CORE_RANKS || [];
+  // Detailed brilliant-cut gem — balanced octagon, gradient body, full facet pattern + sparkle.
+  function gemSvg(color){
+    return '<svg viewBox="0 0 64 64" fill="none" aria-hidden="true">'
+      + '<defs><linearGradient id="gg" x1="0.15" y1="0" x2="0.5" y2="1">'
+      +   '<stop offset="0" stop-color="#ffffff" stop-opacity="0.55"/>'
+      +   '<stop offset="0.45" stop-color="'+color+'" stop-opacity="0.95"/>'
+      +   '<stop offset="1" stop-color="'+color+'"/>'
+      + '</linearGradient></defs>'
+      + '<path d="M42 9 L22 9 L9 22 L9 42 L22 55 L42 55 L55 42 L55 22 Z" fill="url(#gg)"/>'
+      + '<path d="M42 9 L37 24 M42 9 L43 30 M22 9 L27 24 M22 9 L21 30 M9 22 L21 30 M9 22 L21 34 M9 42 L21 34 M9 42 L27 40 M22 55 L27 40 M22 55 L37 40 M42 55 L37 40 M42 55 L43 34 M55 42 L43 34 M55 42 L43 30 M55 22 L43 30 M55 22 L37 24" stroke="#ffffff" stroke-opacity="0.3" stroke-width="0.9" stroke-linejoin="round"/>'
+      + '<path d="M22 9 L42 9 L37 24 L27 24 Z" fill="#ffffff" fill-opacity="0.13"/>'
+      + '<path d="M9 22 L22 9 L27 24 L21 30 Z" fill="#ffffff" fill-opacity="0.06"/>'
+      + '<path d="M37 24 L27 24 L21 30 L21 34 L27 40 L37 40 L43 34 L43 30 Z" fill="#ffffff" fill-opacity="0.16" stroke="#ffffff" stroke-opacity="0.5" stroke-width="1"/>'
+      + '<path d="M42 9 L22 9 L9 22 L9 42 L22 55 L42 55 L55 42 L55 22 Z" stroke="'+color+'" stroke-width="1.7" stroke-linejoin="round"/>'
+      + '</svg>';
+  }
+  function tick(){ return '<svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>'; }
+  function ls(k,d){ try{ var v=localStorage.getItem(k); return v==null?d:v; }catch(e){ return d; } }
+  function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+
+  var trial={}; try{ trial=JSON.parse(localStorage.getItem('coreOnboardTrial')||'{}')||{}; }catch(e){}
+  var name = ls('coreName',null) || trial.name || 'Player';
+  var xp = parseInt(ls('coreXP','0'),10) || 0;
+  var idx = 0; for(var i=0;i<RANKS.length;i++){ if(xp>=RANKS[i].xp) idx=i; }
+  var rank = RANKS[idx];
+
+  var card=document.getElementById('rankCard');
+  card.style.setProperty('--rc', rank.color);
+  // Real emblem artwork — keyed transparent PNG per rank.
+  // Clean SVG insignia (tier emblem + grade pips) — crisper than the PNG art.
+  document.getElementById('rankGem').innerHTML = (window.CORE_RANK_ICON ? CORE_RANK_ICON(rank, 114) : '<img src="assets/ranks/'+rank.key+'.png" alt="'+rank.name+'" />');
+  // letters punch in one by one on reveal
+  (function(){
+    var el = document.getElementById('rankName');
+    el.innerHTML = rank.name.split('').map(function(ch, i){
+      return '<span class="rl" style="animation-delay:'+(0.32 + i*0.045)+'s">'+(ch===' '?'&nbsp;':ch)+'</span>';
+    }).join('');
+  })();
+  var pad2=function(n){return (n<10?'0':'')+n;};
+  document.getElementById('rankTier').textContent = 'Rank '+pad2(idx+1)+' of '+RANKS.length;
+  document.getElementById('rPlayer').textContent = name;
+  // score counts up with easing once revealed (kicked from go())
+  function countScore(){
+    var el = document.getElementById('rScore');
+    var t0 = null, DUR = 1300;
+    function tk(ts){
+      if(t0===null) t0 = ts;
+      var k = Math.min(1,(ts-t0)/DUR), e = 1-Math.pow(1-k,3);
+      var v = Math.round(xp*e);
+      el.textContent = v.toLocaleString();
+      if(k<1) requestAnimationFrame(tk);
+      else { el.classList.add('bump'); setTimeout(function(){el.classList.remove('bump');},220); }
+    }
+    requestAnimationFrame(tk);
+  }
+  document.getElementById('rScore').textContent = '0';
+
+  // Progress toward the next rank — fills on reveal so the starting rank reads
+  // as the bottom of a climb, with a concrete next goal.
+  (function(){
+    var nx = document.getElementById('rankNext');
+    var next = RANKS[idx+1];
+    if(!nx) return;
+    if(!next){ nx.style.display='none'; return; }   // already at the top rank
+    var lo = rank.xp, hi = next.xp;
+    var pct = hi>lo ? Math.max(0, Math.min(100, Math.round((xp-lo)/(hi-lo)*100))) : 100;
+    document.getElementById('rnLabel').textContent = 'Next · '+next.name;
+    document.getElementById('rnXp').textContent = xp.toLocaleString()+' / '+hi.toLocaleString()+' XP';
+    document.getElementById('rnFill').style.setProperty('--rn-pct', Math.max(3,pct)+'%');
+  })();
+
+  var ul = document.getElementById('unlocks');
+  rank.perks.forEach(function(p, i){
+    var row = document.createElement('div');
+    row.className = 'unlock';
+    row.style.animationDelay = (0.95 + i*0.22) + 's';
+    row.innerHTML = '<div class="unlock-ic">'+tick()+'</div><div class="unlock-label">'+p+'</div>';
+    ul.appendChild(row);
+  });
+
+  function persist(){
+    lsSet('coreRank', rank.name); lsSet('coreXP', String(xp)); lsSet('coreLevel','1'); lsSet('coreName', name);
+    if(!ls('corePlayerId',null)){
+      var c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789', s='CR-';
+      for(var i=0;i<8;i++){ if(i===4) s+='-'; s+=c.charAt(Math.floor(Math.random()*c.length)); }
+      lsSet('corePlayerId', s);
+    }
+  }
+  persist();
+
+  function spawnBurst(){
+    var burst=document.getElementById('burst'); if(!burst) return;
+    var colors=[rank.color, '#ffffff', '#FFD60A', rank.color];
+    // expanding shockwave ring
+    var wv=document.createElement('span'); wv.className='shockwave';
+    wv.style.borderColor=rank.color;
+    wv.style.animation='shock .75s ease-out forwards';
+    burst.appendChild(wv); setTimeout(function(){wv.remove();},900);
+    // round particles flying outward
+    for(var i=0;i<34;i++){
+      var p=document.createElement('span'); p.className='particle';
+      var ang=Math.random()*Math.PI*2, dist=70+Math.random()*170;
+      p.style.setProperty('--tx',(Math.cos(ang)*dist).toFixed(0)+'px');
+      p.style.setProperty('--ty',(Math.sin(ang)*dist).toFixed(0)+'px');
+      var sz=(4+Math.random()*7).toFixed(1), col=colors[i%colors.length];
+      p.style.width=sz+'px'; p.style.height=sz+'px';
+      p.style.background=col; p.style.boxShadow='0 0 9px '+col;
+      p.style.animation='burstFly '+(0.7+Math.random()*0.7).toFixed(2)+'s cubic-bezier(.12,.7,.3,1) forwards';
+      burst.appendChild(p);
+      (function(el){ setTimeout(function(){el.remove();},1600);})(p);
+    }
+    // a few star sparkles
+    for(var j=0;j<10;j++){
+      var s=document.createElement('span'); s.className='spark';
+      var a2=Math.random()*Math.PI*2, d2=50+Math.random()*150;
+      s.style.setProperty('--tx',(Math.cos(a2)*d2).toFixed(0)+'px');
+      s.style.setProperty('--ty',(Math.sin(a2)*d2).toFixed(0)+'px');
+      s.style.setProperty('--rot',(Math.random()*360).toFixed(0)+'deg');
+      s.innerHTML='<svg viewBox="0 0 24 24" width="14" height="14" fill="#fff" style="filter:drop-shadow(0 0 6px '+rank.color+')"><path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4z"/></svg>';
+      s.style.animation='sparkFly '+(0.8+Math.random()*0.6).toFixed(2)+'s ease-out forwards';
+      burst.appendChild(s);
+      (function(el){ setTimeout(function(){el.remove();},1600);})(s);
+    }
+  }
+
+  // ── ambient embers in the rank colour, rising for the life of stage 2 ──
+  function spawnEmbers(){
+    var host=document.getElementById('embers'); if(!host) return;
+    for(var i=0;i<22;i++){
+      var e=document.createElement('span'); e.className='ember';
+      var sz=(2+Math.random()*3.5).toFixed(1);
+      e.style.cssText='left:'+(Math.random()*100)+'%;width:'+sz+'px;height:'+sz+'px;'
+        +'background:'+(i%4?rank.color:'#fff')+';box-shadow:0 0 6px '+rank.color+';'
+        +'--ex:'+((Math.random()-.5)*90).toFixed(0)+'px;'
+        +'animation-duration:'+(7+Math.random()*8).toFixed(1)+'s;'
+        +'animation-delay:'+(Math.random()*9).toFixed(1)+'s;';
+      host.appendChild(e);
+    }
+  }
+  // ── confetti strips raining after the slam ──
+  function spawnConfetti(){
+    var ph=document.querySelector('.phone'); if(!ph) return;
+    var cols=[rank.color,'#ffffff','#FFD60A','#34C759',rank.color];
+    for(var i=0;i<26;i++){
+      var c=document.createElement('span'); c.className='confetti';
+      c.style.cssText='left:'+(4+Math.random()*92)+'%;width:'+(4+Math.random()*4)+'px;height:'+(8+Math.random()*7)+'px;'
+        +'background:'+cols[i%cols.length]+';--cr:'+(360+Math.random()*540).toFixed(0)+'deg;'
+        +'animation-duration:'+(2.4+Math.random()*2.2).toFixed(2)+'s;'
+        +'animation-delay:'+(0.15+Math.random()*0.9).toFixed(2)+'s;z-index:6;position:absolute;';
+      ph.appendChild(c);
+      (function(el){ setTimeout(function(){el.remove();},5200); })(c);
+    }
+  }
+  // ── pointer tilt on the rank card (ProfileCard-style) ──
+  (function(){
+    var card=document.getElementById('rankCard'); if(!card) return;
+    function move(e){
+      var r=card.getBoundingClientRect();
+      var px=((e.clientX-r.left)/r.width)*100, py=((e.clientY-r.top)/r.height)*100;
+      card.style.setProperty('--px',px+'%'); card.style.setProperty('--py',py+'%');
+      card.style.setProperty('--rx',(((px-50)/50)*7).toFixed(2)+'deg');
+      card.style.setProperty('--ry',((-(py-50)/50)*6).toFixed(2)+'deg');
+      card.classList.add('tilting');
+    }
+    function leave(){
+      card.classList.remove('tilting');
+      card.style.setProperty('--rx','0deg'); card.style.setProperty('--ry','0deg');
+    }
+    card.addEventListener('pointermove', move);
+    card.addEventListener('pointerleave', leave);
+  })();
+
+  var revealed=false;
+  function go(){
+    if(revealed) return; revealed=true;
+    try{ if(navigator.vibrate) navigator.vibrate(40); }catch(e){}
+    document.body.classList.add('charging');
+    setTimeout(function(){
+      document.body.classList.remove('charging');
+      document.body.classList.add('revealed');
+      spawnBurst();
+      countScore();
+      spawnEmbers();
+      setTimeout(spawnConfetti, 450);
+      // second, wider shockwave as the gem slams home
+      setTimeout(spawnBurst, 520);
+      try{ if(navigator.vibrate) navigator.vibrate([0,40,30,60,50,90]); }catch(e){}
+    }, 580);
+  }
+  var s1=document.getElementById('stage1');
+  s1.addEventListener('click', go);
+  s1.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); go(); } });
+
+  document.getElementById('enterBtn').addEventListener('click', function(){
+    lsSet('coreRankRevealComplete','1');
+    // Membership gate: subscribed members go straight in; everyone else must
+    // activate their membership before the dashboard unlocks.
+    var subbed=false; try{ subbed = localStorage.getItem('coreSubscribed')==='1'; }catch(e){}
+    window.location.href = subbed ? '20-dashboard.html' : '05-sign-in-email.html?next=10-subscribe.html';
+  });
+})();
+</script>
+<style id="steel-tokens">
+/* Brushed-steel skin to match the matte-black + silver logo (scoped to this
+   onboarding page; the main app keeps its own tokens for now). */
+:root, .phone {
+  --accent:#AEB6C4; --accent-hi:#C4C9D2; --blue:#AEB6C4;
+  --peri:#B6BCC8; --peri-soft:rgba(206,212,222,0.18);
+  --glow:rgba(206,212,222,0.6); --glow-soft:rgba(206,212,222,0.18); --green:#C4C9D2;
+}
+</style>
+<style id="rr-consistency">
+/* Match the trial: Space Grotesk display + Space Mono labels + champagne XP */
+@font-face{font-family:'Space Grotesk';font-style:normal;font-weight:400 700;font-display:swap;src:url(assets/fonts/grotesk-var.woff2) format('woff2');}
+@font-face{font-family:'Space Mono';font-style:normal;font-weight:400;font-display:swap;src:url(assets/fonts/mono-400.woff2) format('woff2');}
+@font-face{font-family:'Space Mono';font-style:normal;font-weight:700;font-display:swap;src:url(assets/fonts/mono-700.woff2) format('woff2');}
+.pre-title, .rank-name { font-family:'Space Grotesk',-apple-system,BlinkMacSystemFont,sans-serif !important; letter-spacing:-0.5px !important; }
+.pre-eyebrow, .rank-eyebrow, .rank-tier, .rr-k, .unlocks-head, .tap-hint { font-family:'Space Mono',ui-monospace,"SF Mono",Menlo,monospace !important; }
+#rScore { color:#E8C878 !important; }
+</style>
+</body>
+</html>

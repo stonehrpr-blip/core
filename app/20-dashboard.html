@@ -958,47 +958,6 @@ body.edit-active .w-add-ghost{display:none;}
       <div id="dashNudge"></div>
       <div id="dashRecap"></div>
 
-      <!-- Notification batch banner -->
-      <div id="notifyBatch" style="display:flex;align-items:center;gap:10px;margin:0 6px 10px;padding:14px 16px;border-radius:16px;background:linear-gradient(135deg,rgba(77,163,255,.12),rgba(77,163,255,.04));border:1px solid rgba(77,163,255,.18);cursor:pointer;transition:all .15s">
-        <div style="width:36px;height:36px;border-radius:50%;background:rgba(77,163,255,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#4DA3FF" stroke-width="2" style="width:18px;height:18px"><path d="M18 16V11a6 6 0 0 0-12 0v5l-2 3h16z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
-        </div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:700;color:#fff">You have 3 unread notifications</div>
-          <div style="font-size:11px;color:rgba(255,255,255,.45);margin-top:2px">Tap to expand · Swipe to dismiss</div>
-        </div>
-        <button style="font-size:11px;font-weight:600;color:#4DA3FF;background:none;border:none;cursor:pointer;flex-shrink:0" onclick="markAllRead()">Read all</button>
-      </div>
-
-      <!-- Notifications widget -->
-      <div class="dash-sec wg-sec">Notifications</div>
-      <div class="notify-widget" id="notifyWidget" style="display:flex;flex-direction:column;gap:6px;padding:0 6px;max-height:340px;overflow-y:auto;-webkit-overflow-scrolling:touch">
-        <div class="notify-item" style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);cursor:pointer;transition:background .15s">
-          <span style="width:8px;height:8px;border-radius:50%;background:#4DA3FF;flex-shrink:0;margin-top:4px" class="notify-dot"></span>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:2px">Welcome to CORE</div>
-            <div style="font-size:11px;color:rgba(255,255,255,.5);line-height:1.4">Your dashboard is ready. Start by building your daily routine.</div>
-            <div style="font-size:10px;color:rgba(255,255,255,.3);margin-top:6px">Just now</div>
-          </div>
-        </div>
-        <div class="notify-item" style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);cursor:pointer;transition:background .15s">
-          <span style="width:8px;height:8px;border-radius:50%;background:#FF9F0A;flex-shrink:0;margin-top:4px" class="notify-dot"></span>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:2px">Streak at risk</div>
-            <div style="font-size:11px;color:rgba(255,255,255,.5);line-height:1.4">You haven't logged activity today. Don't break your 3-day streak.</div>
-            <div style="font-size:10px;color:rgba(255,255,255,.3);margin-top:6px">2 hours ago</div>
-          </div>
-        </div>
-        <div class="notify-item" style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);cursor:pointer;transition:background .15s">
-          <span style="width:8px;height:8px;border-radius:50%;background:#30D158;flex-shrink:0;margin-top:4px" class="notify-dot"></span>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:2px">Weekly recap ready</div>
-            <div style="font-size:11px;color:rgba(255,255,255,.5);line-height:1.4">You completed 85% of your tasks this week. Great consistency.</div>
-            <div style="font-size:10px;color:rgba(255,255,255,.3);margin-top:6px">Yesterday</div>
-          </div>
-        </div>
-      </div>
-
       <!-- Coach-built routine → daily checklist -->
       <div id="coachRoutineCard"></div>
 
@@ -1135,7 +1094,7 @@ body.edit-active .w-add-ghost{display:none;}
 <script src="_lib/dash-charts.js"></script>
 <script src="_lib/dash-widgets.js"></script>
 <script src="_lib/core-help.js"></script>
-<script src="_lib/core-ranks.js"></script>
+<script src="_lib/core-ranks.js?v=20260704"></script>
 <script>
 (function(){
   var S  = window.coreState;
@@ -1643,7 +1602,7 @@ body.edit-active .w-add-ghost{display:none;}
   function paintRank(fromXp){
     var xp=parseInt(ls('coreXP','0'),10)||0, idx=rankIdx(xp), r=RANKS[idx];
     var hero=$('lsHero'); if(hero) hero.style.setProperty('--rkc',r.color);
-    var g=$('rankBarGem'); if(g) g.innerHTML='<img src="assets/ranks/'+r.key+'.png" alt="'+r.name+'">';
+    var g=$('rankBarGem'); if(g) g.innerHTML=(window.CORE_RANK_ICON?CORE_RANK_ICON(r,40):'<img src="assets/ranks/'+r.key+'.png" alt="'+r.name+'">');
     if($('rankBarName')) $('rankBarName').textContent=r.name;
     // Feature 3: rank name + XP remaining to the NEXT rank, gold bar
     var lv=$('lsLevel'); if(lv) lv.textContent=r.name;
@@ -2164,19 +2123,6 @@ body.edit-active .w-add-ghost{display:none;}
   paintLifeScore();
   paintTrends();
   (function(){ var tg=$('stToggle'); if(!tg) return; tg.addEventListener('click',function(e){ var b=e.target.closest('button[data-d]'); if(!b) return; trendWin=parseInt(b.getAttribute('data-d'),10)||30; Array.prototype.forEach.call(tg.querySelectorAll('button'),function(x){x.classList.toggle('on',x===b);}); try{window.coreSfx&&window.coreSfx('tick');}catch(e){} paintTrends(); }); })();
-  // Batch notifications: mark all read
-  window.markAllRead=function(){
-    var dots=document.querySelectorAll('.notify-dot');
-    dots.forEach(function(d){d.style.background='rgba(255,255,255,.15)'});
-    var items=document.querySelectorAll('.notify-item');
-    items.forEach(function(i){i.style.opacity='.45'});
-    document.getElementById('notifyBatch').style.opacity='.4';
-    toast('All notifications cleared');
-  };
-  // Batch banner click: scroll to notifications
-  document.getElementById('notifyBatch').addEventListener('click',function(){
-    document.getElementById('notifyWidget').scrollIntoView({behavior:'smooth'});
-  });
   window.addEventListener('coreStateChange', paintTrends);
 })();
 </script>

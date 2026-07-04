@@ -1,0 +1,868 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script>try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8"/>
+<title>CORE — Community</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<style>
+:root {
+  --bg-base:#040408;--bg-card:rgba(255,255,255,0.035);--bg-card-2:rgba(255,255,255,0.07);
+  --border:rgba(255,255,255,0.08);--text:#ffffff;--muted:rgba(255,255,255,0.72);--dim:rgba(255,255,255,0.45);
+  --blue:#AEB6C4;--purple:#9F8FFF;--green:#34D399;--gold:#FFC857;
+  --ch:#AEB6C4;--ch-rgb:10,132,255;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{min-height:100vh;background:#000;display:flex;align-items:center;justify-content:center;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif;
+  color:var(--text);-webkit-font-smoothing:antialiased;padding:24px;overflow:hidden;}
+
+/* ── Phone frame ── */
+.phone{position:relative;width:390px;height:844px;background:var(--bg-base);border-radius:56px;overflow:hidden;
+  box-shadow:0 40px 100px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.06),0 0 0 10px #0a0a12,0 0 0 11px #2b2b38;}
+.notch{position:absolute;top:14px;left:50%;transform:translateX(-50%);width:124px;height:32px;background:#000;border-radius:20px;z-index:60;}
+.home-indicator{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;background:rgba(245,247,251,0.55);border-radius:999px;z-index:60;}
+
+/* ── Ambient ── */
+#ambBg{position:absolute;inset:0;z-index:0;
+  background:radial-gradient(60% 35% at 50% 30%,rgba(10,132,255,0.14) 0%,transparent 55%),
+    radial-gradient(50% 30% at 50% 100%,rgba(255,255,255,0.04) 0%,transparent 65%),
+    linear-gradient(180deg,#070713 0%,#040408 50%,#050510 100%);}
+#ambAurora{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0.32;mix-blend-mode:screen;}
+#ambAurora::before,#ambAurora::after{content:"";position:absolute;border-radius:50%;filter:blur(40px);will-change:transform,opacity;transform:translateZ(0);}
+#ambAurora::before{width:80%;height:45%;left:-10%;top:8%;background:radial-gradient(circle,rgba(10,132,255,0.40),transparent 70%);animation:auroraDriftA 24s ease-in-out infinite;}
+#ambAurora::after{width:70%;height:40%;right:-10%;bottom:16%;background:radial-gradient(circle,rgba(255,255,255,0.10),transparent 70%);animation:auroraDriftB 30s ease-in-out -15s infinite;}
+@keyframes auroraDriftA{0%,100%{transform:translate(0,0) scale(1);opacity:.45;}50%{transform:translate(40px,-22px) scale(1.12);opacity:.75;}}
+@keyframes auroraDriftB{0%,100%{transform:translate(0,0) scale(1);opacity:.40;}50%{transform:translate(-30px,18px) scale(1.10);opacity:.70;}}
+#ambStars{position:absolute;inset:-2%;pointer-events:none;z-index:2;}
+#ambCelestial{position:absolute;inset:0;pointer-events:none;z-index:3;}
+#ambOverlay{position:absolute;inset:0;pointer-events:none;z-index:4;}
+@media(prefers-reduced-motion:reduce){#ambAurora::before,#ambAurora::after{animation:none!important;}}
+
+/* ── Frame layout ── */
+.frame{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;padding-top:54px;}
+
+/* ── Topbar ── */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:6px 20px 8px;flex-shrink:0;}
+.brand{display:flex;align-items:center;gap:8px;}
+.brand .dot{width:7px;height:7px;border-radius:50%;background:var(--blue);box-shadow:0 0 10px var(--blue);}
+.brand .wm{font-size:12px;font-weight:800;letter-spacing:0.34em;}
+.ch-label{display:flex;align-items:center;gap:6px;}
+.ch-label-icon{font-size:16px;line-height:1;transition:color .25s;display:inline-flex;color:var(--ch);}
+.ch-label-icon svg{width:1em;height:1em;}
+.ch-label-name{font-size:15px;font-weight:800;letter-spacing:-.01em;transition:color .25s;color:var(--ch);}
+.ch-online{font-size:10px;font-weight:600;color:var(--dim);margin-left:2px;}
+
+/* ── Channel switcher ── */
+.ch-switcher-wrap{flex-shrink:0;border-bottom:1px solid rgba(255,255,255,0.05);}
+.ch-switcher{display:flex;gap:7px;padding:8px 16px 10px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.ch-switcher::-webkit-scrollbar{display:none;}
+.ch-pill{flex-shrink:0;display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:999px;
+  border:1px solid rgba(255,255,255,0.09);background:rgba(255,255,255,0.04);
+  font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;color:var(--muted);}
+.ch-pill .pill-icon{font-size:13px;line-height:1;display:inline-flex;}
+.ch-pill .pill-icon svg{width:1em;height:1em;}
+.ch-pill.active{color:var(--ch);border-color:var(--ch);background:rgba(var(--ch-rgb),.13);
+  box-shadow:0 0 10px rgba(var(--ch-rgb),.18);}
+.ch-pill .pill-dot{width:5px;height:5px;border-radius:50%;background:var(--ch);margin-left:2px;display:none;}
+.ch-pill.has-unread .pill-dot{display:block;}
+
+/* ── Moderation banner ── */
+.mod-banner{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;
+  background:rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.06);flex-shrink:0;
+  font-size:11px;color:var(--muted);}
+.mod-banner.hidden{display:none;}
+.mod-link{color:var(--ch);text-decoration:none;font-weight:700;}
+.mod-dismiss{background:none;border:none;font:inherit;color:var(--dim);cursor:pointer;
+  font-size:13px;padding:0 2px;line-height:1;transition:color .15s;display:inline-flex;align-items:center;}
+.mod-dismiss svg{width:14px;height:14px;}
+.mod-dismiss:hover{color:var(--text);}
+
+/* ── Message area ── */
+.msg-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.msg-area::-webkit-scrollbar{display:none;}
+.msg-list{display:flex;flex-direction:column;padding:10px 0 6px;}
+
+/* ── Messages ── */
+.msg{display:flex;gap:9px;padding:6px 14px;position:relative;transition:background .15s;}
+.msg:hover{background:rgba(255,255,255,0.015);}
+.msg.mine{flex-direction:row-reverse;}
+.msg-avatar{width:32px;height:32px;flex:none;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;margin-top:2px;}
+.msg-body{display:flex;flex-direction:column;max-width:75%;}
+.msg.mine .msg-body{align-items:flex-end;}
+.msg-meta{display:flex;align-items:center;gap:5px;margin-bottom:4px;flex-wrap:wrap;}
+.msg.mine .msg-meta{flex-direction:row-reverse;}
+.msg-name{font-size:11px;font-weight:700;color:var(--text);}
+.msg.mine .msg-name{color:var(--ch);}
+.msg-rank{font-size:9px;font-weight:800;padding:2px 6px;border-radius:999px;
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);}
+.msg-stat{font-size:9px;font-weight:700;padding:2px 6px;border-radius:999px;
+  background:rgba(var(--ch-rgb),.1);border:1px solid rgba(var(--ch-rgb),.22);color:var(--ch);}
+.msg-time{font-size:9.5px;color:var(--dim);margin-left:auto;white-space:nowrap;}
+.msg.mine .msg-time{margin-left:0;margin-right:auto;}
+.msg-more{background:none;border:none;font:inherit;color:var(--dim);cursor:pointer;
+  font-size:14px;padding:0 3px;line-height:1;opacity:0;transition:opacity .15s;margin-left:2px;display:inline-flex;align-items:center;}
+.msg-more svg{width:16px;height:16px;}
+.msg:hover .msg-more{opacity:1;}
+.msg-bubble{border-radius:16px 16px 16px 4px;padding:8px 12px;
+  background:transparent;border:none;
+  backdrop-filter:none;-webkit-backdrop-filter:none;}
+.msg.mine .msg-bubble{border-radius:16px 16px 4px 16px;
+  background:rgba(var(--ch-rgb),.12);border-color:rgba(var(--ch-rgb),.28);}
+.msg-text{font-size:13px;line-height:1.45;color:var(--text);}
+.msg-footer{display:flex;align-items:center;gap:8px;margin-top:4px;}
+.msg.mine .msg-footer{justify-content:flex-end;}
+.msg-reactions{font-size:10px;color:var(--muted);display:inline-flex;align-items:center;gap:4px;}
+.msg-reactions svg{width:12px;height:12px;color:var(--muted);}
+.msg.reported .msg-bubble{opacity:0.45;}
+.msg.reported::after{content:'Reported';position:absolute;top:10px;right:14px;
+  font-size:9px;font-weight:700;color:var(--dim);background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);padding:2px 7px;border-radius:999px;}
+.msg.mine.reported::after{right:auto;left:14px;}
+
+/* ── Empty state ── */
+.msg-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  flex:1;padding:40px 24px;text-align:center;gap:12px;}
+.msg-empty-icon{font-size:40px;line-height:1;opacity:.5;display:inline-flex;color:var(--ch);}
+.msg-empty-icon svg{width:1em;height:1em;}
+.msg-empty-title{font-size:15px;font-weight:700;color:var(--text);}
+.msg-empty-sub{font-size:12px;color:var(--muted);line-height:1.5;}
+
+/* ── Composer ── */
+.composer-wrap{flex-shrink:0;padding:8px 14px 6px;
+  background:rgba(3,3,14,0.4);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-top:1px solid rgba(255,255,255,0.07);}
+.composer{display:flex;align-items:center;gap:9px;}
+.composer-input{flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);
+  border-radius:22px;padding:10px 16px;font:inherit;font-size:13px;color:var(--text);
+  outline:none;transition:border-color .2s;}
+.composer-input::placeholder{color:var(--dim);}
+.composer-input:focus{border-color:rgba(var(--ch-rgb),.45);}
+.composer-send{width:38px;height:38px;flex:none;border:none;border-radius:50%;cursor:pointer;
+  background:var(--ch);display:flex;align-items:center;justify-content:center;
+  transition:transform .15s,box-shadow .2s,background .25s;
+  box-shadow:0 4px 14px rgba(var(--ch-rgb),.35);}
+.composer-send:active{transform:scale(.92);}
+.composer-send svg{width:16px;height:16px;color:#fff;}
+.word-warn{font-size:11px;color:#FF6B6B;padding:4px 4px 0;min-height:0;transition:all .2s;overflow:hidden;}
+.word-warn:empty{padding:0;}
+
+/* ── Nav ── */
+.nav{flex-shrink:0;
+  padding:10px 12px 26px;
+  display:flex;justify-content:space-around;align-items:flex-end;
+  background:rgba(3,3,14,0.42);
+  backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6);
+  border-top:1px solid rgba(255,255,255,0.07);}
+.nav a{background:none;border:none;font:inherit;cursor:pointer;position:relative;
+  display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 8px;
+  min-width:48px;text-decoration:none;color:var(--dim);transition:color .2s;}
+.nav svg{width:23px;height:23px;}
+.nl{font-size:10px;font-weight:800;}
+.nav a.active{color:var(--text);}
+.nav a.active svg{color:var(--ch);filter:drop-shadow(0 0 8px rgba(var(--ch-rgb),.75));transition:color .25s,filter .25s;}
+.nav a.active::before{content:"";position:absolute;top:-2px;width:5px;height:5px;
+  border-radius:50%;background:var(--ch);box-shadow:0 0 8px var(--ch);transition:background .25s,box-shadow .25s;}
+
+/* ── Context menu ── */
+.ctx-menu{position:absolute;z-index:80;
+  background:rgba(14,14,28,0.97);border:1px solid rgba(255,255,255,0.1);
+  border-radius:14px;padding:6px;min-width:140px;
+  box-shadow:0 16px 40px rgba(0,0,0,.6);display:none;}
+.ctx-menu.show{display:block;}
+.ctx-btn{display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;
+  font:inherit;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;
+  padding:10px 12px;border-radius:9px;transition:background .12s;}
+.ctx-btn:hover{background:rgba(255,255,255,.06);}
+.ctx-btn svg{width:16px;height:16px;flex:none;}
+.ctx-btn.ctx-danger{color:#FF6B6B;}
+.ctx-btn.ctx-cancel{color:var(--muted);border-top:1px solid rgba(255,255,255,.06);margin-top:4px;padding-top:12px;}
+
+/* ── Toast ── */
+.toast{position:absolute;left:50%;bottom:110px;transform:translateX(-50%) translateY(14px);z-index:90;
+  background:rgba(20,22,34,.96);border:1px solid var(--border);border-radius:14px;padding:11px 16px;
+  font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:.3s;
+  box-shadow:0 12px 30px rgba(0,0,0,.5);white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ── Message enter animation ── */
+@keyframes msgIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+.msg{animation:msgIn .22s cubic-bezier(.2,.8,.2,1);}
+@media(prefers-reduced-motion:reduce){.msg{animation:none;}.ch-pill,.composer-send,.composer-input{transition:none!important;}}
+</style>
+  <link rel="stylesheet" href="_lib/core-responsive.css?v=20260619d">
+  
+  <link rel="stylesheet" href="_lib/core-background.css?v=20260619d">
+  <style>
+    #ambBg,#ambAurora,#ambStars,#ambCelestial,#ambOverlay{display:none !important;}
+    .phone{background:#040408 !important;}
+    .nav{justify-content:space-evenly !important;}
+    .nav .item{flex:1 1 0;}
+  </style>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <meta name="theme-color" content="#000000">
+  <link rel="stylesheet" href="_lib/core-ui.css?v=20260619d">
+</head>
+<body>
+<div class="phone">
+  <div id="ambBg"></div>
+  <div id="ambAurora"></div>
+  <div id="ambStars"></div>
+  <div id="ambCelestial"></div>
+  <div id="ambOverlay"></div>
+  <div class="notch"></div>
+  <div class="home-indicator"></div>
+
+  <div class="frame">
+    <!-- Header -->
+    <div class="topbar">
+      <div class="brand"><span class="dot"></span><span class="wm">CORE</span></div>
+      <div class="ch-label">
+        <span class="ch-label-icon" id="chIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+        <span class="ch-label-name" id="chName">General</span>
+        <span class="ch-online" id="chOnline">• 847 active</span>
+      </div>
+      <button id="helpBtn" aria-label="Help" style="margin-left:auto;width:34px;height:34px;flex:none;border-radius:50%;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.72);font:800 14px -apple-system,sans-serif;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;-webkit-appearance:none;appearance:none;">?</button>
+    </div>
+
+    <!-- Channel switcher -->
+    <div class="ch-switcher-wrap">
+      <div class="ch-switcher" id="chSwitcher"></div>
+    </div>
+
+    <!-- Moderation banner -->
+    <div class="mod-banner" id="modBanner">
+      <span>Be kind &nbsp;·&nbsp; <a class="mod-link" href="community-guidelines.html">Community Guidelines</a></span>
+      <button class="mod-dismiss" id="modDismiss" aria-label="Dismiss banner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+
+    <!-- Messages -->
+    <div class="msg-area" id="msgArea">
+      <div class="msg-list" id="msgList"></div>
+    </div>
+
+    <!-- Composer -->
+    <div class="composer-wrap">
+      <div class="composer">
+        <input class="composer-input" id="composerInput" type="text" placeholder="Message #general…" maxlength="280" autocomplete="off"/>
+        <button class="composer-send" id="composerSend" aria-label="Send message">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7Z"/></svg>
+        </button>
+      </div>
+      <div class="word-warn" id="wordWarn"></div>
+    </div>
+
+    <!-- Nav -->
+    <nav class="nav" aria-label="Primary">
+      <a class="item" href="20-dashboard.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 11l9-7 9 7M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/></svg>
+        <span class="nl">Home</span>
+      </a>
+      <a class="item" href="21-quests.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M9 5h11M9 12h11M9 19h11M4 5l1 1 2-2M4 12l1 1 2-2M4 19l1 1 2-2"/></svg>
+        <span class="nl">Quests</span>
+      </a>
+      <a class="item" href="coach.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+        <span class="nl">Coach</span>
+      </a>
+      <a class="item active" href="community.html" aria-current="page">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M7 8h10M7 11h7M7 14h5" stroke-linecap="round"/></svg>
+        <span class="nl">Community</span>
+      </a>
+      <a class="item" href="24-more.html">
+        <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2.5"/><circle cx="12" cy="12" r="2.5"/><circle cx="19" cy="12" r="2.5"/></svg>
+        <span class="nl">More</span>
+      </a>
+    </nav>
+  </div>
+
+  <!-- Context menu -->
+  <div class="ctx-menu" id="ctxMenu">
+    <button class="ctx-btn ctx-danger" id="ctxReport"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V4M4 4h11l-1.5 4L15 12H4"/></svg>Report message</button>
+    <button class="ctx-btn ctx-danger" id="ctxFlag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17h.01"/></svg>Flag content</button>
+    <button class="ctx-btn ctx-cancel" id="ctxCancel">Cancel</button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script src="_lib/core-state.js"></script>
+<script src="_lib/dash-ambient.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* ── Channels ── */
+  var ICONS = {
+    chat:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+    dumbbell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/></svg>',
+    focus:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/><path d="M12 1.5v3M12 19.5v3M22.5 12h-3M4.5 12h-3"/></svg>',
+    coin:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/></svg>',
+    heart:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-7.2-4.6-7.2-9.8A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 7.2 3.7c0 5.2-7.2 9.8-7.2 9.8Z"/></svg>',
+    people:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.4"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 5.2a3.4 3.4 0 0 1 0 6.6M17.5 20a6 6 0 0 0-3-5.2"/></svg>',
+    target:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg>'
+  };
+
+  var CHANNELS = [
+    { id:'general',  name:'General',  color:'#AEB6C4', rgb:'10,132,255',   icon:ICONS.chat,     statKey:null,        online:847 },
+    { id:'strength', name:'Strength', color:'#AEB6C4', rgb:'10,132,255',   icon:ICONS.dumbbell, statKey:'body',      online:324 },
+    { id:'focus',    name:'Focus',    color:'#AEB6C4', rgb:'10,132,255',   icon:ICONS.focus,    statKey:'brain',     online:218 },
+    { id:'wealth',   name:'Wealth',   color:'#AEB6C4', rgb:'10,132,255',   icon:ICONS.coin,     statKey:'wallet',    online:191 },
+    { id:'health',   name:'Health',   color:'#AEB6C4', rgb:'10,132,255',   icon:ICONS.heart,    statKey:'lungs',     online:276 },
+    { id:'social',   name:'Social',   color:'#AEB6C4', rgb:'10,132,255',   icon:ICONS.people,   statKey:'social',    online:155 },
+    { id:'purpose',  name:'Purpose',  color:'#AEB6C4', rgb:'10,132,255',   icon:ICONS.target,   statKey:'willpower', online:203 },
+  ];
+
+  var RANK_COLORS = {
+    Stone:'rgba(255,255,255,0.72)',Earth:'rgba(255,255,255,0.72)',Leaf:'rgba(255,255,255,0.72)',Water:'rgba(255,255,255,0.72)',Crystal:'rgba(255,255,255,0.72)',
+    Gold:'rgba(255,255,255,0.72)',Ember:'rgba(255,255,255,0.72)',Wind:'rgba(255,255,255,0.72)',Aurora:'rgba(255,255,255,0.72)',Ascend:'rgba(255,255,255,0.72)',CORE:'rgba(255,255,255,0.72)'
+  };
+
+  var N = Date.now();
+  var h = function(n){ return N - n * 3600000; };
+  var m = function(n){ return N - n * 60000; };
+
+  /* ── Seed data ── */
+  var SEEDS = {
+    general: [
+      { id:'g1', user:'Alex',   rank:'Water',   statKey:'brain',    statVal:73, text:'Crushed day 14 clean today. This community keeps me honest like nothing else has', ts:h(8), reactions:12 },
+      { id:'g2', user:'Sam',    rank:'Leaf',    statKey:'lungs',    statVal:61, text:'Anyone else feel weirdly proud checking off quests at 6am? Just me?', ts:h(7), reactions:8 },
+      { id:'g3', user:'Jordan', rank:'Crystal', statKey:'willpower',statVal:81, text:'Just hit Water rank. Wild how fast time moves when you stay consistent', ts:h(6), reactions:15 },
+      { id:'g4', user:'Casey',  rank:'Earth',   statKey:'body',     statVal:55, text:'Having a rough week but logging in anyway. Sometimes just showing up is enough', ts:h(5), reactions:24 },
+      { id:'g5', user:'Morgan', rank:'Gold',    statKey:'wallet',   statVal:71, text:'CORE has genuinely changed how I think about habits. No exaggeration', ts:h(4), reactions:9 },
+      { id:'g6', user:'Riley',  rank:'Leaf',    statKey:'social',   statVal:58, text:'Week 3 done. For anyone just starting — it gets easier. Stay in it', ts:h(2), reactions:18 },
+      { id:'g7', user:'Jamie',  rank:'Water',   statKey:'brain',    statVal:77, text:'The streak mechanic is brutal in the absolute best way. Cannot let it break', ts:h(1), reactions:6 },
+      { id:'g8', user:'Quinn',  rank:'Crystal', statKey:'willpower',statVal:84, text:'Morning check-in done. Love what this community is building', ts:m(30), reactions:4 },
+    ],
+    strength: [
+      { id:'s1', user:'Taylor', rank:'Water',   statKey:'body', statVal:68, text:'5k run before coffee this morning. Feeling genuinely unstoppable today', ts:h(6), reactions:11 },
+      { id:'s2', user:'Avery',  rank:'Leaf',    statKey:'body', statVal:52, text:'Switched to progressive overload this week — the gains already feel different', ts:h(5), reactions:7 },
+      { id:'s3', user:'Jordan', rank:'Crystal', statKey:'body', statVal:79, text:'Rest day. Body is sore in the good way', ts:h(4), reactions:5 },
+      { id:'s4', user:'Casey',  rank:'Earth',   statKey:'body', statVal:44, text:'45 min + cold shower. Strength score actually moving up now', ts:h(3), reactions:9 },
+      { id:'s5', user:'Morgan', rank:'Gold',    statKey:'body', statVal:74, text:'Anyone else doing calisthenics? Starting a 30-day pull-up challenge from zero', ts:h(2), reactions:13 },
+      { id:'s6', user:'Riley',  rank:'Leaf',    statKey:'body', statVal:56, text:'Morning stretches count too right? Starting small and building consistency', ts:m(90), reactions:6 },
+      { id:'s7', user:'Alex',   rank:'Water',   statKey:'body', statVal:71, text:'Week 6 of consistent training — body and mind finally feel aligned', ts:m(40), reactions:8 },
+    ],
+    focus: [
+      { id:'f1', user:'Jamie',  rank:'Water',   statKey:'brain', statVal:73, text:'90-minute deep work session done. Pomodoro + CORE quests is the combo', ts:h(7), reactions:10 },
+      { id:'f2', user:'Quinn',  rank:'Crystal', statKey:'brain', statVal:85, text:'No phone for the first 2 hours of the day. It completely changed my morning', ts:h(6), reactions:14 },
+      { id:'f3', user:'Sam',    rank:'Leaf',    statKey:'brain', statVal:60, text:'Reading 30 min before bed instead of scrolling. Sleep quality is noticeably up', ts:h(5), reactions:9 },
+      { id:'f4', user:'Avery',  rank:'Earth',   statKey:'brain', statVal:58, text:'Anyone tried a focus playlist with a timer? Flow state is genuinely real', ts:h(4), reactions:6 },
+      { id:'f5', user:'Morgan', rank:'Gold',    statKey:'brain', statVal:77, text:'Brain score up 12 points this week. Consistency is finally compounding', ts:h(3), reactions:11 },
+      { id:'f6', user:'Taylor', rank:'Leaf',    statKey:'brain', statVal:64, text:'Finish tasks before checking notifications = life-changing. Seriously try it', ts:h(2), reactions:7 },
+      { id:'f7', user:'Riley',  rank:'Water',   statKey:'brain', statVal:72, text:'Blocked social apps during work hours. Focus doubled, no exaggeration', ts:h(1), reactions:5 },
+      { id:'f8', user:'Casey',  rank:'Crystal', statKey:'brain', statVal:80, text:'Cold journaling every morning to clear the mental fog — 14 days in and counting', ts:m(20), reactions:3 },
+    ],
+    wealth: [
+      { id:'w1', user:'Alex',   rank:'Gold',    statKey:'wallet', statVal:71, text:'No-spend day 3 in a row. Watching the wallet stat climb is genuinely motivating', ts:h(8), reactions:8 },
+      { id:'w2', user:'Sam',    rank:'Leaf',    statKey:'wallet', statVal:47, text:'Automated savings this week. Set and forget hits different when it\'s your own money', ts:h(6), reactions:6 },
+      { id:'w3', user:'Jordan', rank:'Crystal', statKey:'wallet', statVal:72, text:'Started tracking all expenses. Seeing the real numbers is uncomfortable but necessary', ts:h(5), reactions:10 },
+      { id:'w4', user:'Casey',  rank:'Earth',   statKey:'wallet', statVal:38, text:'Cut a sub I never used — $18/month saved. Small but the habit is the point', ts:h(4), reactions:7 },
+      { id:'w5', user:'Morgan', rank:'Gold',    statKey:'wallet', statVal:84, text:'Cooked at home every single day this week. Eating better AND saving. Win-win', ts:h(2), reactions:12 },
+      { id:'w6', user:'Riley',  rank:'Leaf',    statKey:'wallet', statVal:51, text:'Side project is moving. Starting small, staying consistent, watching the stat rise', ts:h(1), reactions:5 },
+      { id:'w7', user:'Jamie',  rank:'Water',   statKey:'wallet', statVal:63, text:'Emergency fund hit 1-month target. Next: 3 months. Feels real now', ts:m(30), reactions:9 },
+    ],
+    health: [
+      { id:'h1', user:'Avery',  rank:'Water',   statKey:'lungs', statVal:64, text:'8 hours sleep two nights in a row. I forgot this feeling was possible', ts:h(9), reactions:14 },
+      { id:'h2', user:'Quinn',  rank:'Leaf',    statKey:'lungs', statVal:58, text:'5-min breathing exercise every morning. Lungs feel clearer heading into week 2', ts:h(7), reactions:8 },
+      { id:'h3', user:'Taylor', rank:'Crystal', statKey:'lungs', statVal:78, text:'Hydration tracker on — hitting 2.5L is actually achievable once you track it', ts:h(6), reactions:6 },
+      { id:'h4', user:'Casey',  rank:'Earth',   statKey:'lungs', statVal:52, text:'Meal prep Sunday sorted. Starting the week with a clean win feels great', ts:h(4), reactions:11 },
+      { id:'h5', user:'Morgan', rank:'Gold',    statKey:'lungs', statVal:70, text:'No screens 1hr before bed. Sleep quality jumped, resting heart rate is down', ts:h(3), reactions:9 },
+      { id:'h6', user:'Sam',    rank:'Leaf',    statKey:'lungs', statVal:62, text:'Morning sunlight + walk combo. Mood is different, can\'t fully explain it', ts:h(2), reactions:7 },
+      { id:'h7', user:'Alex',   rank:'Water',   statKey:'lungs', statVal:67, text:'Recovery after movement is as important as the movement itself. Rest is progress', ts:m(45), reactions:5 },
+    ],
+    social: [
+      { id:'c1', user:'Riley',  rank:'Water',   statKey:'social', statVal:52, text:'Called my mum instead of texting. 30 min conversation, worth it every time', ts:h(8), reactions:17 },
+      { id:'c2', user:'Jordan', rank:'Leaf',    statKey:'social', statVal:43, text:'Social score finally climbing — reconnecting with people I\'d drifted from', ts:h(6), reactions:9 },
+      { id:'c3', user:'Avery',  rank:'Crystal', statKey:'social', statVal:68, text:'Coffee with a colleague instead of eating alone. New habit that\'s actually paying off', ts:h(5), reactions:7 },
+      { id:'c4', user:'Taylor', rank:'Earth',   statKey:'social', statVal:38, text:'Goal: one real in-person connection per week. Just finished week 2', ts:h(4), reactions:6 },
+      { id:'c5', user:'Sam',    rank:'Gold',    statKey:'social', statVal:74, text:'Showed up to a group thing even though I was anxious. So glad I went', ts:h(2), reactions:13 },
+      { id:'c6', user:'Jamie',  rank:'Leaf',    statKey:'social', statVal:55, text:'Texted 3 friends I\'d been meaning to reach for months. All replied within the day', ts:h(1), reactions:8 },
+      { id:'c7', user:'Casey',  rank:'Water',   statKey:'social', statVal:60, text:'Community accountability is something I genuinely didn\'t expect to rely on this much', ts:m(20), reactions:4 },
+    ],
+    purpose: [
+      { id:'p1', user:'Quinn',  rank:'Water',   statKey:'willpower', statVal:81, text:'Day 18 streak. Most disciplined I\'ve been in literal years', ts:h(9), reactions:19 },
+      { id:'p2', user:'Alex',   rank:'Leaf',    statKey:'willpower', statVal:67, text:'Journal entry today clarified exactly what I\'m actually building here', ts:h(7), reactions:10 },
+      { id:'p3', user:'Morgan', rank:'Crystal', statKey:'willpower', statVal:88, text:'Purpose score going up — daily quests make my values visible and concrete. That matters', ts:h(6), reactions:8 },
+      { id:'p4', user:'Riley',  rank:'Earth',   statKey:'willpower', statVal:55, text:'Small wins compounding. This is how identity forms', ts:h(4), reactions:15 },
+      { id:'p5', user:'Sam',    rank:'Gold',    statKey:'willpower', statVal:76, text:'Streak broke, reset, started again. The restart is the actual win', ts:h(3), reactions:11 },
+      { id:'p6', user:'Taylor', rank:'Leaf',    statKey:'willpower', statVal:72, text:'Having a "why" bigger than the habit itself is everything. That\'s CORE for me', ts:h(1), reactions:7 },
+      { id:'p7', user:'Avery',  rank:'Water',   statKey:'willpower', statVal:79, text:'Morning intention written for 14 days straight. Character is genuinely forming', ts:m(30), reactions:5 },
+    ],
+  };
+
+  /* ── Banned words ── */
+  var BANNED = ['fuck','shit','bitch','asshole','cunt','dick','cock','pussy','whore','faggot','nigger','kike','spic','retard'];
+
+  /* ── Avatar colour palette ── */
+  var AVATAR_COLORS = [
+    ['#3A4055','#2A2F40'],['#3A4055','#2A2F40'],['#3A4055','#2A2F40'],
+    ['#3A4055','#2A2F40'],['#3A4055','#2A2F40'],['#3A4055','#2A2F40'],
+    ['#3A4055','#2A2F40'],['#3A4055','#2A2F40'],
+  ];
+  function avatarColor(name) {
+    var idx = 0;
+    for (var i = 0; i < name.length; i++) idx += name.charCodeAt(i);
+    return AVATAR_COLORS[idx % AVATAR_COLORS.length];
+  }
+
+  /* ── State ── */
+  var activeChannelId = 'general';
+  var msgs = {};
+  var reported = new Set();
+
+  /* ── User identity ── */
+  var ME = { name: 'You', initials: 'Y', rankName: 'Stone', rankColor: '#AEB4BD' };
+  try {
+    var S = window.coreState;
+    if (S) {
+      var st = S.read();
+      if (st.profile && st.profile.name) {
+        ME.name = st.profile.name.split(' ')[0];
+        ME.initials = ME.name.charAt(0).toUpperCase();
+      }
+      var rk = S.rankFor(st.xp || 0);
+      ME.rankName = rk.name;
+      ME.rankColor = rk.color;
+    }
+  } catch(e) {}
+
+  /* ── Load / save ── */
+  function loadMsgs() {
+    var base = {};
+    CHANNELS.forEach(function(ch) { base[ch.id] = (SEEDS[ch.id] || []).map(function(m){ return Object.assign({},m); }); });
+    try {
+      var saved = JSON.parse(localStorage.getItem('coreCommunity.v1') || '{}');
+      CHANNELS.forEach(function(ch) {
+        var userMsgs = saved[ch.id] || [];
+        if (!Array.isArray(userMsgs)) return;
+        var ids = new Set(base[ch.id].map(function(m){ return m.id; }));
+        userMsgs.forEach(function(m){ if (m && !ids.has(m.id)) base[ch.id].push(m); });
+        base[ch.id].sort(function(a,b){ return a.ts - b.ts; });
+      });
+    } catch(e) {}
+    return base;
+  }
+
+  function saveMsgs() {
+    var toSave = {};
+    CHANNELS.forEach(function(ch) {
+      toSave[ch.id] = msgs[ch.id].filter(function(m){ return m.mine; });
+    });
+    try { localStorage.setItem('coreCommunity.v1', JSON.stringify(toSave)); } catch(e) {}
+  }
+
+  function loadReported() {
+    try {
+      var r = JSON.parse(localStorage.getItem('coreCommunityReported') || '[]');
+      return new Set(Array.isArray(r) ? r : []);
+    } catch(e) { return new Set(); }
+  }
+
+  function saveReported() {
+    try { localStorage.setItem('coreCommunityReported', JSON.stringify(Array.from(reported))); } catch(e) {}
+  }
+
+  /* ── Helpers ── */
+  function formatTime(ts) {
+    var diff = Date.now() - ts;
+    var min = Math.floor(diff / 60000);
+    if (min < 1) return 'now';
+    if (min < 60) return min + 'm ago';
+    var hr = Math.floor(min / 60);
+    if (hr < 24) return hr + 'h ago';
+    var d = new Date(ts);
+    return d.toLocaleDateString(undefined, { month:'short', day:'numeric' });
+  }
+
+  var toastTimer;
+  function showToast(text) {
+    var el = document.getElementById('toast');
+    el.textContent = text;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 2800);
+  }
+
+  function hasBanned(text) {
+    var lower = text.toLowerCase();
+    return BANNED.some(function(w){ return lower.indexOf(w) !== -1; });
+  }
+
+  /* ── Channel theme ── */
+  function applyTheme(ch) {
+    document.documentElement.style.setProperty('--ch', ch.color);
+    document.documentElement.style.setProperty('--ch-rgb', ch.rgb);
+    var iconEl = document.getElementById('chIcon');
+    var nameEl = document.getElementById('chName');
+    var onlineEl = document.getElementById('chOnline');
+    if (iconEl) iconEl.innerHTML = ch.icon;
+    if (nameEl) { nameEl.textContent = ch.name; nameEl.style.color = ch.color; }
+    if (onlineEl) onlineEl.textContent = '• ' + ch.online.toLocaleString() + ' active';
+    var inp = document.getElementById('composerInput');
+    if (inp) inp.placeholder = 'Message #' + ch.name.toLowerCase() + '…';
+  }
+
+  /* ── Render messages ── */
+  function renderMessages(channelId) {
+    var list = document.getElementById('msgList');
+    var area = document.getElementById('msgArea');
+    if (!list) return;
+    var ch = CHANNELS.find(function(c){ return c.id === channelId; });
+    var chMsgs = msgs[channelId] || [];
+
+    if (chMsgs.length === 0) {
+      list.innerHTML = '<div class="msg-empty"><div class="msg-empty-icon">' + (ch ? ch.icon : ICONS.chat) + '</div><div class="msg-empty-title">No messages yet</div><div class="msg-empty-sub">Be the first to say something in #' + (ch ? ch.name.toLowerCase() : channelId) + '</div></div>';
+      return;
+    }
+
+    var frag = document.createDocumentFragment();
+    chMsgs.forEach(function(msg) {
+      var isMine = !!msg.mine;
+      var isReported = reported.has(msg.id);
+
+      var el = document.createElement('div');
+      el.className = 'msg' + (isMine ? ' mine' : '') + (isReported ? ' reported' : '');
+      el.dataset.id = msg.id;
+
+      // Avatar
+      var av = document.createElement('div');
+      av.className = 'msg-avatar';
+      var initial = isMine ? ME.initials : (msg.user || 'U').charAt(0);
+      var colors = avatarColor(isMine ? ME.name : (msg.user || 'User'));
+      av.style.background = 'linear-gradient(135deg,' + colors[0] + ',' + colors[1] + ')';
+      av.textContent = initial;
+
+      // Body
+      var body = document.createElement('div');
+      body.className = 'msg-body';
+
+      // Meta
+      var meta = document.createElement('div');
+      meta.className = 'msg-meta';
+
+      var nameSpan = document.createElement('span');
+      nameSpan.className = 'msg-name';
+      nameSpan.textContent = isMine ? ME.name : (msg.user || 'User');
+
+      var rankColor = isMine ? ME.rankColor : (RANK_COLORS[msg.rank] || '#AEB4BD');
+      var rankSpan = document.createElement('span');
+      rankSpan.className = 'msg-rank';
+      rankSpan.textContent = isMine ? ME.rankName : (msg.rank || 'Stone');
+      rankSpan.style.color = rankColor;
+      rankSpan.style.borderColor = rankColor + '44';
+
+      var timeSpan = document.createElement('span');
+      timeSpan.className = 'msg-time';
+      timeSpan.textContent = formatTime(msg.ts);
+
+      var moreBtn = document.createElement('button');
+      moreBtn.className = 'msg-more';
+      moreBtn.setAttribute('aria-label', 'Message options');
+      moreBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>';
+      moreBtn.dataset.msgId = msg.id;
+
+      if (isMine) {
+        meta.appendChild(moreBtn);
+        meta.appendChild(timeSpan);
+        meta.appendChild(rankSpan);
+        meta.appendChild(nameSpan);
+      } else {
+        meta.appendChild(nameSpan);
+        meta.appendChild(rankSpan);
+        // Stat badge for channel stat
+        if (ch && ch.statKey && msg.statVal) {
+          var statSpan = document.createElement('span');
+          statSpan.className = 'msg-stat';
+          statSpan.textContent = msg.statVal;
+          meta.appendChild(statSpan);
+        }
+        meta.appendChild(timeSpan);
+        meta.appendChild(moreBtn);
+      }
+
+      // Bubble
+      var bubble = document.createElement('div');
+      bubble.className = 'msg-bubble';
+      var textP = document.createElement('p');
+      textP.className = 'msg-text';
+      textP.textContent = msg.text;
+      bubble.appendChild(textP);
+
+      // Footer (reactions)
+      var footer = document.createElement('div');
+      footer.className = 'msg-footer';
+      if (msg.reactions && msg.reactions > 0 && !isMine) {
+        var react = document.createElement('span');
+        react.className = 'msg-reactions';
+        react.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 20.5s-7.2-4.6-7.2-9.8A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 7.2 3.7c0 5.2-7.2 9.8-7.2 9.8Z"/></svg><span>' + msg.reactions + '</span>';
+        footer.appendChild(react);
+      }
+
+      body.appendChild(meta);
+      body.appendChild(bubble);
+      if (footer.children.length > 0) body.appendChild(footer);
+
+      el.appendChild(av);
+      el.appendChild(body);
+      frag.appendChild(el);
+    });
+
+    list.innerHTML = '';
+    list.appendChild(frag);
+    if (area) area.scrollTop = area.scrollHeight;
+  }
+
+  /* ── Channel switcher ── */
+  function renderSwitcher() {
+    var wrap = document.getElementById('chSwitcher');
+    if (!wrap) return;
+    // Mark general + 2 random channels as having "unread" initially
+    var unread = new Set(['strength', 'focus', 'purpose']);
+    wrap.innerHTML = '';
+    CHANNELS.forEach(function(ch) {
+      var pill = document.createElement('button');
+      pill.className = 'ch-pill' + (ch.id === activeChannelId ? ' active' : '') + (unread.has(ch.id) && ch.id !== activeChannelId ? ' has-unread' : '');
+      pill.dataset.chId = ch.id;
+      pill.style.setProperty('--ch', ch.color);
+      pill.style.setProperty('--ch-rgb', ch.rgb);
+      pill.innerHTML = '<span class="pill-icon">' + ch.icon + '</span><span>' + ch.name + '</span><span class="pill-dot"></span>';
+      pill.addEventListener('click', function(){ switchChannel(ch.id); });
+      wrap.appendChild(pill);
+    });
+  }
+
+  /* ── Switch channel ── */
+  function switchChannel(id) {
+    activeChannelId = id;
+    var ch = CHANNELS.find(function(c){ return c.id === id; });
+    if (!ch) return;
+
+    applyTheme(ch);
+    renderSwitcher();
+    renderMessages(id);
+    // clear word warn
+    var ww = document.getElementById('wordWarn');
+    if (ww) ww.textContent = '';
+  }
+
+  /* ── Send message ── */
+  function sendMessage() {
+    var inp = document.getElementById('composerInput');
+    var ww = document.getElementById('wordWarn');
+    if (!inp) return;
+    var text = inp.value.trim();
+    if (!text) return;
+
+    if (hasBanned(text)) {
+      if (ww) ww.textContent = 'Please keep it kind — that word isn\'t allowed here';
+      inp.focus();
+      return;
+    }
+    if (ww) ww.textContent = '';
+
+    var newMsg = {
+      id: 'u_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+      user: ME.name,
+      rank: ME.rankName,
+      text: text,
+      ts: Date.now(),
+      mine: true,
+      reactions: 0,
+    };
+
+    msgs[activeChannelId] = msgs[activeChannelId] || [];
+    msgs[activeChannelId].push(newMsg);
+    saveMsgs();
+
+    inp.value = '';
+
+    // Append single message to DOM (faster than full re-render)
+    var list = document.getElementById('msgList');
+    var area = document.getElementById('msgArea');
+    // Remove empty state if present
+    var empty = list ? list.querySelector('.msg-empty') : null;
+    if (empty) list.innerHTML = '';
+
+    var ch = CHANNELS.find(function(c){ return c.id === activeChannelId; });
+    appendMessage(list, newMsg, ch);
+    if (area) { requestAnimationFrame(function(){ area.scrollTop = area.scrollHeight; }); }
+  }
+
+  /* ── Append a single message element ── */
+  function appendMessage(list, msg, ch) {
+    if (!list) return;
+    var isMine = !!msg.mine;
+
+    var el = document.createElement('div');
+    el.className = 'msg' + (isMine ? ' mine' : '');
+    el.dataset.id = msg.id;
+
+    var av = document.createElement('div');
+    av.className = 'msg-avatar';
+    var initial = isMine ? ME.initials : (msg.user || 'U').charAt(0);
+    var colors = avatarColor(isMine ? ME.name : (msg.user || 'User'));
+    av.style.background = 'linear-gradient(135deg,' + colors[0] + ',' + colors[1] + ')';
+    av.textContent = initial;
+
+    var body = document.createElement('div');
+    body.className = 'msg-body';
+
+    var meta = document.createElement('div');
+    meta.className = 'msg-meta';
+
+    var nameSpan = document.createElement('span');
+    nameSpan.className = 'msg-name';
+    nameSpan.textContent = isMine ? ME.name : (msg.user || 'User');
+
+    var rankColor = isMine ? ME.rankColor : (RANK_COLORS[msg.rank] || '#AEB4BD');
+    var rankSpan = document.createElement('span');
+    rankSpan.className = 'msg-rank';
+    rankSpan.textContent = isMine ? ME.rankName : (msg.rank || 'Stone');
+    rankSpan.style.color = rankColor;
+    rankSpan.style.borderColor = rankColor + '44';
+
+    var timeSpan = document.createElement('span');
+    timeSpan.className = 'msg-time';
+    timeSpan.textContent = 'now';
+
+    var moreBtn = document.createElement('button');
+    moreBtn.className = 'msg-more';
+    moreBtn.setAttribute('aria-label', 'Message options');
+    moreBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>';
+    moreBtn.dataset.msgId = msg.id;
+
+    if (isMine) {
+      meta.appendChild(moreBtn); meta.appendChild(timeSpan);
+      meta.appendChild(rankSpan); meta.appendChild(nameSpan);
+    } else {
+      meta.appendChild(nameSpan); meta.appendChild(rankSpan);
+      meta.appendChild(timeSpan); meta.appendChild(moreBtn);
+    }
+
+    var bubble = document.createElement('div');
+    bubble.className = 'msg-bubble';
+    var textP = document.createElement('p');
+    textP.className = 'msg-text';
+    textP.textContent = msg.text;
+    bubble.appendChild(textP);
+
+    body.appendChild(meta);
+    body.appendChild(bubble);
+    el.appendChild(av);
+    el.appendChild(body);
+    list.appendChild(el);
+  }
+
+  /* ── Context menu ── */
+  var ctxTargetId = null;
+  var ctxMenu = document.getElementById('ctxMenu');
+
+  function openCtx(msgId, anchorEl) {
+    ctxTargetId = msgId;
+    if (!ctxMenu || !anchorEl) return;
+    var phone = document.querySelector('.phone');
+    var phoneRect = phone ? phone.getBoundingClientRect() : { left:0, top:0 };
+    var anchorRect = anchorEl.getBoundingClientRect();
+    var x = anchorRect.left - phoneRect.left - 10;
+    var y = anchorRect.top - phoneRect.top + 26;
+    // Keep inside phone
+    x = Math.max(8, Math.min(x, 240));
+    y = Math.max(60, Math.min(y, 680));
+    ctxMenu.style.left = x + 'px';
+    ctxMenu.style.top = y + 'px';
+    ctxMenu.classList.add('show');
+  }
+
+  function closeCtx() {
+    if (ctxMenu) ctxMenu.classList.remove('show');
+    ctxTargetId = null;
+  }
+
+  function reportMsg(id) {
+    if (!id) return;
+    reported.add(id);
+    saveReported();
+    var el = document.querySelector('.msg[data-id="' + id + '"]');
+    if (el) el.classList.add('reported');
+    showToast('Reported — thanks for keeping CORE safe');
+    closeCtx();
+  }
+
+  document.addEventListener('click', function(e) {
+    var moreBtn = e.target.closest('.msg-more');
+    if (moreBtn) { e.stopPropagation(); openCtx(moreBtn.dataset.msgId, moreBtn); return; }
+    if (ctxMenu && !ctxMenu.contains(e.target)) closeCtx();
+  });
+
+  var ctxReport = document.getElementById('ctxReport');
+  var ctxFlag = document.getElementById('ctxFlag');
+  var ctxCancel = document.getElementById('ctxCancel');
+  if (ctxReport) ctxReport.addEventListener('click', function(){ reportMsg(ctxTargetId); });
+  if (ctxFlag) ctxFlag.addEventListener('click', function(){ reportMsg(ctxTargetId); });
+  if (ctxCancel) ctxCancel.addEventListener('click', closeCtx);
+
+  /* ── Composer wiring ── */
+  var composerSend = document.getElementById('composerSend');
+  var composerInput = document.getElementById('composerInput');
+  var wordWarn = document.getElementById('wordWarn');
+
+  if (composerSend) composerSend.addEventListener('click', sendMessage);
+  if (composerInput) {
+    composerInput.addEventListener('keydown', function(e){
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    });
+    composerInput.addEventListener('input', function(){
+      if (wordWarn && wordWarn.textContent && !hasBanned(composerInput.value)) {
+        wordWarn.textContent = '';
+      }
+    });
+  }
+
+  /* ── Moderation banner ── */
+  var BANNER_KEY = 'coreCommBannerDismissed';
+  var modBanner = document.getElementById('modBanner');
+  var modDismiss = document.getElementById('modDismiss');
+
+  if (localStorage.getItem(BANNER_KEY) === '1' && modBanner) {
+    modBanner.classList.add('hidden');
+  }
+  if (modDismiss) {
+    modDismiss.addEventListener('click', function(){
+      if (modBanner) modBanner.classList.add('hidden');
+      try { localStorage.setItem(BANNER_KEY, '1'); } catch(e) {}
+    });
+  }
+
+  /* ── Init ── */
+  msgs = loadMsgs();
+  reported = loadReported();
+
+  // Mark existing reported messages
+  CHANNELS.forEach(function(ch) {
+    msgs[ch.id].forEach(function(m) {
+      if (reported.has(m.id)) m.isReported = true;
+    });
+  });
+
+  renderSwitcher();
+  applyTheme(CHANNELS[0]);
+  renderMessages('general');
+
+  // Init ambient
+  if (window.dashAmbient) { window.dashAmbient.init(); }
+
+})();
+</script>
+  <script src="_lib/core-background.js?v=20260619d"></script>
+  <script src="_lib/core-pagefx.js"></script>
+  <script src="_lib/core-help.js"></script>
+  <script>if(window.coreHelp)window.coreHelp.attach("helpBtn",{"title":"Community","bullets":["See posts from the CORE community and share your own wins.","Switch channels at the top to find topics that fit you.","React to posts to support others on their journey."]});</script>
+</body>
+</html>

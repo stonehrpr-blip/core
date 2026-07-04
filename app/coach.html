@@ -1,0 +1,1087 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script>try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8"/>
+<title>CORE — Coach</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<style>
+:root{
+  --bg-base:#040408;--bg-card:rgba(255,255,255,0.035);--bg-card-2:rgba(255,255,255,0.07);
+  --border:rgba(255,255,255,0.08);--text:#ffffff;--muted:rgba(255,255,255,0.72);--dim:rgba(255,255,255,0.45);
+  --blue:#AEB6C4;--purple:#9F8FFF;--green:#34D399;--gold:#FFC857;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{min-height:100vh;background:#000;display:flex;align-items:center;justify-content:center;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif;
+  color:var(--text);-webkit-font-smoothing:antialiased;padding:24px;overflow:hidden;}
+.phone{position:relative;width:390px;height:844px;background:var(--bg-base);border-radius:56px;overflow:hidden;
+  box-shadow:0 40px 100px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.06),0 0 0 10px #0a0a12,0 0 0 11px #2b2b38;}
+.notch{position:absolute;top:14px;left:50%;transform:translateX(-50%);width:124px;height:32px;background:#000;border-radius:20px;z-index:60;}
+.home-indicator{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;background:rgba(245,247,251,0.55);border-radius:999px;z-index:60;}
+#ambBg{position:absolute;inset:0;z-index:0;
+  background:
+    radial-gradient(60% 35% at 50% 30%,rgba(10,132,255,0.14) 0%,transparent 55%),
+    radial-gradient(50% 30% at 50% 100%,rgba(255,255,255,0.04) 0%,transparent 65%),
+    linear-gradient(180deg,#070713 0%,#040408 50%,#050510 100%);}
+#ambAurora{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0.32;mix-blend-mode:screen;}
+#ambAurora::before,#ambAurora::after{content:"";position:absolute;border-radius:50%;filter:blur(40px);will-change:transform,opacity;}
+#ambAurora::before{width:80%;height:45%;left:-10%;top:8%;background:radial-gradient(circle,rgba(10,132,255,0.40),transparent 70%);animation:driftA 24s ease-in-out infinite;}
+#ambAurora::after{width:70%;height:40%;right:-10%;bottom:16%;background:radial-gradient(circle,rgba(255,255,255,0.10),transparent 70%);animation:driftB 30s ease-in-out -15s infinite;}
+@keyframes driftA{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(40px,-22px) scale(1.12);}}
+@keyframes driftB{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-30px,18px) scale(1.10);}}
+#ambCelestial{position:absolute;inset:0;pointer-events:none;z-index:3;}
+@media(prefers-reduced-motion:reduce){#ambAurora::before,#ambAurora::after{animation:none!important;}}
+
+.frame{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;padding-top:54px;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:6px 20px 10px;flex-shrink:0;position:relative;}
+.brand{display:flex;align-items:center;gap:8px;}
+.brand .dot{width:7px;height:7px;border-radius:50%;background:var(--blue);box-shadow:0 0 10px var(--blue);}
+.brand .wm{font-size:12px;font-weight:800;letter-spacing:0.34em;}
+.topbar-title{position:absolute;left:50%;top:6px;bottom:10px;transform:translateX(-50%);display:flex;align-items:center;font-size:16px;font-weight:800;color:var(--text);pointer-events:none;}
+
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 0 14px;display:flex;flex-direction:column;}
+.scroll::-webkit-scrollbar{display:none;}
+
+/* Section heading */
+.sec-head{padding:12px 20px 8px;font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);text-align:center;}
+
+/* Scanner grid */
+.scan-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 18px 6px;flex:1;grid-auto-rows:1fr;align-content:stretch;}
+.scan-card{border-radius:20px;overflow:hidden;padding:16px;text-align:center;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:rgba(4,4,18,0.40);border:1px solid rgba(255,255,255,0.08);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  cursor:pointer;transition:transform .15s,border-color .2s;position:relative;}
+.scan-card:active{transform:scale(.97);}
+.scan-card.coming{opacity:.5;cursor:default;}
+.scan-icon{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;
+  color:var(--sc,rgba(255,255,255,0.72));
+  background:color-mix(in srgb, var(--sc,rgba(255,255,255,0.72)) 15%, transparent);
+  border:1px solid color-mix(in srgb, var(--sc,rgba(255,255,255,0.72)) 36%, transparent);}
+.scan-icon svg{width:22px;height:22px;}
+.scan-name{font-size:13px;font-weight:800;margin-bottom:3px;}
+.scan-desc{font-size:10.5px;color:var(--muted);line-height:1.4;}
+.scan-badge{position:absolute;top:10px;right:10px;font-size:8.5px;font-weight:800;letter-spacing:.06em;
+  padding:2px 7px;border-radius:999px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);color:var(--dim);}
+.scan-badge.live{display:inline-flex;align-items:center;gap:5px;padding:3px 9px 3px 7px;font-size:9px;text-transform:uppercase;letter-spacing:.1em;
+  color:#86F2CB;background:linear-gradient(135deg,rgba(52,211,153,0.24),rgba(45,212,191,0.16));border:1px solid rgba(52,211,153,0.55);
+  box-shadow:0 3px 12px rgba(52,211,153,0.28),inset 0 1px 0 rgba(255,255,255,0.12);}
+.scan-badge.live::before{content:"";width:5px;height:5px;border-radius:50%;background:#34D399;box-shadow:0 0 7px #34D399,0 0 2px #fff;animation:livePulse 1.6s ease-in-out infinite;}
+@keyframes livePulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.35;transform:scale(.55);}}
+
+/* Chat preview */
+/* full-screen ChatGPT-style chat panel */
+/* Fills the phone frame exactly like every other page — same fitted size. */
+.chat-panel{position:absolute;inset:0;z-index:95;display:flex;flex-direction:column;overflow:hidden;border-radius:inherit;
+  background:linear-gradient(180deg,#0A0F1E 0%,#06070F 52%,#08060F 100%);
+  transform:translateX(100%);transition:transform .34s cubic-bezier(.16,1,.3,1);visibility:hidden;}
+.chat-panel.on{transform:translateX(0);visibility:visible;}
+/* animated aurora top blob + glowing bottom */
+.chat-panel::before,.chat-panel::after{content:"";position:absolute;pointer-events:none;z-index:0;will-change:transform,opacity;}
+.chat-panel::before{width:78%;height:36%;left:-16%;top:0;border-radius:50%;filter:blur(72px);background:radial-gradient(circle, rgba(47,143,255,0.38), transparent 70%);animation:cpDriftA 19s ease-in-out infinite;}
+.chat-panel::after{left:0;right:0;bottom:0;height:44%;background:radial-gradient(120% 92% at 50% 132%, rgba(167,108,255,0.50), rgba(120,80,255,0.20) 40%, transparent 72%);animation:cpGlow 8s ease-in-out infinite;}
+@keyframes cpDriftA{0%,100%{transform:translate(0,0) scale(1);opacity:.5;}50%{transform:translate(34px,26px) scale(1.18);opacity:.8;}}
+@keyframes cpGlow{0%,100%{opacity:.82;}50%{opacity:1;}}
+.cp-head,.chat-panel .chat-msgs,.cp-suggest,.cp-input,.cp-hero{position:relative;z-index:1;}
+.cp-head{display:flex;align-items:center;gap:12px;padding:52px 16px 14px;
+  background:linear-gradient(180deg, rgba(8,12,24,0.72), transparent);}
+.cp-back{width:38px;height:38px;flex:none;border-radius:50%;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.07);color:#fff;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-appearance:none;appearance:none;padding:0;}
+.cp-back svg{width:19px;height:19px;}
+/* keep round buttons perfectly circular despite the global 44px min-height */
+.cp-back,.cp-iconbtn,.cp-quiz-x,.cp-hist-del,.cp-hist-edit{min-height:0;}
+.cp-av{position:relative;width:42px;height:42px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 35% 30%, #5BB1FF, #AEB6C4 45%, #6F70FF);box-shadow:0 0 22px rgba(47,143,255,0.5), inset 0 1px 2px rgba(255,255,255,0.3);}
+.cp-av svg{width:23px;height:23px;color:#fff;}
+.cp-av::after{content:"";position:absolute;right:-1px;bottom:-1px;width:11px;height:11px;border-radius:50%;background:#34D399;border:2px solid #0A1226;box-shadow:0 0 8px #34D399;}
+.cp-id{flex:1;min-width:0;}
+.cp-name{font-size:17px;font-weight:900;letter-spacing:-0.4px;line-height:1.1;
+  background:linear-gradient(180deg,#fff,#BFD6FF);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.cp-status{font-size:10.5px;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:5px;margin-top:3px;}
+.cp-dot{width:7px;height:7px;border-radius:50%;background:#34D399;box-shadow:0 0 7px #34D399;animation:cpDot 1.8s ease-in-out infinite;}
+@keyframes cpDot{0%,100%{opacity:1;}50%{opacity:.4;}}
+/* empty welcome state — centered CORE mark + greeting */
+.cp-hero{position:absolute;left:0;right:0;top:44%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 36px;pointer-events:none;transition:opacity .3s, transform .3s;}
+.cp-hero.gone{opacity:0;transform:translateY(-46%);visibility:hidden;}
+.cp-star{width:60px;height:60px;margin-bottom:20px;animation:cpBreathe 4.2s ease-in-out infinite;}
+@keyframes cpBreathe{0%,100%{transform:scale(1);filter:drop-shadow(0 0 16px rgba(140,120,255,0.5));}50%{transform:scale(1.09);filter:drop-shadow(0 0 34px rgba(140,120,255,0.9));}}
+.cp-hero-title{font-size:27px;font-weight:800;line-height:1.22;letter-spacing:-0.6px;
+  background:linear-gradient(180deg,#fff,#AFC4FF);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.cp-hero-sub{margin-top:11px;font-size:13px;color:var(--muted);max-width:240px;line-height:1.5;}
+.chat-panel .chat-msgs{flex:1;max-height:none;padding:16px 16px 8px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;}
+.chat-panel .chat-msgs::-webkit-scrollbar{display:none;}
+.chat-bubble{padding:12px 15px;border-radius:18px;font-size:13.5px;line-height:1.5;max-width:86%;word-wrap:break-word;
+  animation:msgIn .28s cubic-bezier(.2,.9,.3,1) both;}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.chat-bubble.ai{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.09);align-self:flex-start;border-bottom-left-radius:6px;color:#EAF0FB;backdrop-filter:blur(6px);}
+.chat-bubble.user{background:linear-gradient(135deg,#AEB6C4,#6F70FF);border:none;align-self:flex-end;border-bottom-right-radius:6px;color:#fff;box-shadow:0 6px 18px rgba(10,132,255,0.28);}
+/* typing indicator — 3 bouncing dots */
+.chat-bubble.typing{display:inline-flex;gap:5px;align-items:center;padding:15px 17px;animation:msgIn .28s both;}
+.chat-bubble.typing i{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:typBounce 1.2s ease-in-out infinite;}
+.chat-bubble.typing i:nth-child(2){animation-delay:.16s;} .chat-bubble.typing i:nth-child(3){animation-delay:.32s;}
+@keyframes typBounce{0%,60%,100%{transform:translateY(0);opacity:.35;}30%{transform:translateY(-5px);opacity:1;}}
+/* streaming caret */
+.chat-bubble.streaming::after{content:"";display:inline-block;width:2px;height:1em;margin-left:1px;background:currentColor;vertical-align:-2px;animation:cpCaret .8s step-end infinite;}
+@keyframes cpCaret{50%{opacity:0;}}
+/* AI bubble gets a small orb avatar */
+.chat-bubble.ai{position:relative;}
+.chat-bubble.ai.av{margin-left:34px;}
+.chat-bubble.ai.av::before{content:"";position:absolute;left:-34px;bottom:0;width:26px;height:26px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#5BB1FF,#A06CFF 60%,#FF7AC4);box-shadow:0 0 12px rgba(140,120,255,.55);}
+.cp-suggest{display:flex;gap:8px;padding:2px 16px 8px;overflow-x:auto;}
+.cp-suggest::-webkit-scrollbar{display:none;}
+.cp-suggest.hide{display:none;}
+.cp-chip{flex:none;display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:999px;border:1px solid rgba(255,255,255,0.13);background:rgba(255,255,255,0.06);
+  color:var(--text);font:inherit;font-size:12px;font-weight:700;white-space:nowrap;cursor:pointer;-webkit-appearance:none;appearance:none;}
+.cp-chip svg{width:14px;height:14px;color:#7FB6FF;}
+/* colour-code the quick-prompt chips */
+.cp-suggest .cp-chip:nth-child(1) svg{color:#34D399;}
+.cp-suggest .cp-chip:nth-child(2) svg{color:#FF6B6B;}
+.cp-suggest .cp-chip:nth-child(3) svg{color:#4A8FFF;}
+.cp-suggest .cp-chip:nth-child(4) svg{color:#FFCB3D;}
+.cp-suggest .cp-chip:nth-child(5) svg{color:#B388FF;}
+.cp-chip:active{transform:scale(.96);}
+.cp-input{display:flex;align-items:flex-end;gap:9px;padding:10px 14px calc(26px + env(safe-area-inset-bottom,0px));
+  background:linear-gradient(180deg, transparent, rgba(6,5,15,0.88) 42%);}
+.cp-field{flex:1;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:23px;
+  padding:13px 18px;font:inherit;font-size:14px;line-height:1.4;color:var(--text);outline:none;resize:none;max-height:120px;overflow-y:auto;
+  transition:border-color .15s, box-shadow .15s;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:0 8px 26px rgba(0,0,0,0.35);}
+.cp-field::-webkit-scrollbar{display:none;}
+.cp-field::placeholder{color:var(--dim);}
+.cp-field:focus{border-color:rgba(10,132,255,0.55);}
+.cp-send{width:46px;height:46px;flex:none;border-radius:50%;border:none;cursor:pointer;-webkit-appearance:none;appearance:none;
+  background:linear-gradient(135deg,#AEB6C4,#6F70FF);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(10,132,255,0.35);transition:transform .12s, opacity .15s;}
+.cp-send svg{width:20px;height:20px;}
+.cp-send:active{transform:scale(0.92);}
+.cp-send.busy{pointer-events:none;}
+.cp-send.busy svg{display:none;}
+.cp-send.busy::after{content:"";width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,0.55);border-top-color:#fff;animation:cpSpin .7s linear infinite;}
+@keyframes cpSpin{to{transform:rotate(360deg);}}
+/* markdown in coach replies */
+.chat-bubble.ai strong{font-weight:800;color:#fff;}
+.chat-bubble.ai em{font-style:italic;}
+.chat-bubble.ai code{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:5px;}
+.chat-bubble.ai h4{font-size:14px;font-weight:900;margin:9px 0 4px;color:#fff;}
+.chat-bubble.ai ul,.chat-bubble.ai ol{margin:5px 0;padding-left:19px;display:flex;flex-direction:column;gap:3px;}
+.chat-bubble.ai li{line-height:1.45;}
+.chat-bubble.ai p{margin:0 0 6px;}
+.chat-bubble.ai p:last-child,.chat-bubble.ai ul:last-child,.chat-bubble.ai ol:last-child{margin-bottom:0;}
+.chat-bubble.ai hr{height:1px;background:rgba(255,255,255,0.13);margin:9px 0;border:0;}
+/* routine entry chip */
+.cp-chip-go{border-color:rgba(10,132,255,0.5);background:linear-gradient(135deg,rgba(10,132,255,0.22),rgba(111,112,255,0.22));color:#fff;}
+.cp-chip-go svg{color:#9FC4FF;}
+/* routine builder popups + confirm dialog */
+.cp-quiz,.cp-confirm{position:absolute;inset:0;z-index:20;display:flex;justify-content:center;
+  background:rgba(4,6,14,0.62);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  opacity:0;visibility:hidden;transition:opacity .25s;padding:16px;}
+.cp-quiz{align-items:flex-end;}
+.cp-confirm{align-items:center;}
+.cp-quiz.on,.cp-confirm.on{opacity:1;visibility:visible;}
+.cp-quiz-card{width:100%;max-width:340px;background:linear-gradient(180deg,#141A2C,#0C1020);border:1px solid rgba(255,255,255,0.1);
+  border-radius:24px;padding:20px 18px 22px;box-shadow:0 24px 60px rgba(0,0,0,0.5);margin-bottom:24px;
+  transform:translateY(16px);transition:transform .3s cubic-bezier(.16,1,.3,1);}
+.cp-quiz.on .cp-quiz-card{transform:translateY(0);}
+.cp-quiz-top{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.cp-quiz-prog{flex:1;height:6px;border-radius:99px;background:rgba(255,255,255,0.1);overflow:hidden;}
+.cp-quiz-prog span{display:block;height:100%;width:20%;border-radius:99px;background:linear-gradient(90deg,#AEB6C4,#6F70FF);transition:width .3s;}
+.cp-quiz-x{width:30px;height:30px;flex:none;border-radius:50%;border:none;background:rgba(255,255,255,0.08);color:#C7D2E8;font-size:14px;cursor:pointer;-webkit-appearance:none;appearance:none;}
+.cp-quiz-step{font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#7E8AA8;margin-bottom:6px;}
+.cp-quiz-q{font-size:19px;font-weight:800;letter-spacing:-0.3px;color:#fff;line-height:1.25;margin-bottom:16px;}
+.cp-quiz-opts{display:flex;flex-direction:column;gap:9px;}
+.cp-quiz-opt{text-align:left;padding:14px 15px;border-radius:15px;border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.05);color:#EAF0FB;font:inherit;font-size:14px;font-weight:700;cursor:pointer;-webkit-appearance:none;appearance:none;transition:background .14s,border-color .14s,transform .1s;}
+.cp-quiz-opt:active{transform:scale(.98);}
+.cp-quiz-opt.sel{border-color:rgba(10,132,255,0.6);background:rgba(10,132,255,0.16);}
+.cp-confirm-card{width:100%;max-width:300px;background:linear-gradient(180deg,#141A2C,#0C1020);border:1px solid rgba(255,255,255,0.1);
+  border-radius:22px;padding:22px 20px 18px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.5);
+  transform:scale(.94);transition:transform .25s;}
+.cp-confirm.on .cp-confirm-card{transform:scale(1);}
+.cp-confirm-msg{font-size:15px;font-weight:700;color:#EAF0FB;line-height:1.4;margin-bottom:18px;}
+.cp-confirm-btns{display:flex;gap:10px;}
+.cp-confirm-btns button{flex:1;padding:12px;border-radius:13px;font:inherit;font-size:14px;font-weight:800;cursor:pointer;-webkit-appearance:none;appearance:none;border:1px solid rgba(255,255,255,0.14);transition:transform .1s;}
+.cp-confirm-no{background:rgba(255,255,255,0.06);color:#EAF0FB;}
+.cp-confirm-yes{background:linear-gradient(135deg,#FF5A5A,#E0356B);border:none;color:#fff;}
+.cp-confirm-btns button:active{transform:scale(.96);}
+.cp-prompt{position:absolute;inset:0;z-index:21;display:flex;align-items:center;justify-content:center;
+  background:rgba(4,6,14,0.62);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);opacity:0;visibility:hidden;transition:opacity .25s;padding:16px;}
+.cp-prompt.on{opacity:1;visibility:visible;}
+.cp-prompt-card{width:100%;max-width:320px;background:linear-gradient(180deg,#141A2C,#0C1020);border:1px solid rgba(255,255,255,0.1);
+  border-radius:22px;padding:20px;box-shadow:0 24px 60px rgba(0,0,0,0.5);transform:scale(.94);transition:transform .25s;}
+.cp-prompt.on .cp-prompt-card{transform:scale(1);}
+.cp-prompt-title{font-size:15px;font-weight:800;color:#fff;margin-bottom:12px;}
+.cp-prompt-input{width:100%;box-sizing:border-box;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.16);border-radius:13px;
+  padding:12px 14px;font:inherit;font-size:14px;color:#fff;outline:none;margin-bottom:16px;}
+.cp-prompt-input:focus{border-color:rgba(10,132,255,0.6);}
+.cp-prompt-save{flex:1;padding:12px;border-radius:13px;font:inherit;font-size:14px;font-weight:800;cursor:pointer;border:none;
+  background:linear-gradient(135deg,#AEB6C4,#6F70FF);color:#fff;transition:transform .1s;}
+.cp-prompt-save:active{transform:scale(.96);}
+.rt-cta{margin:2px 2px 12px;animation:msgIn .26s cubic-bezier(.2,.9,.3,1) both;}
+.rt-cta-btn{display:inline-flex;align-items:center;gap:9px;padding:13px 18px;border-radius:16px;border:none;cursor:pointer;-webkit-appearance:none;appearance:none;
+  font:inherit;font-size:14px;font-weight:800;color:#fff;background:linear-gradient(135deg,#AEB6C4,#6F70FF);box-shadow:0 10px 26px rgba(10,132,255,0.32);transition:transform .12s;}
+.rt-cta-btn:active{transform:scale(.97);}
+.rt-cta-btn svg{width:18px;height:18px;}
+.rt-cta-done{display:inline-flex;align-items:center;gap:8px;padding:12px 16px;border-radius:14px;font-size:13px;font-weight:700;color:#8fe9b8;
+  background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.32);}
+.rt-cta-done svg{width:16px;height:16px;}
+/* header action buttons — new chat + saved-chat history */
+.cp-iconbtn{width:38px;height:38px;flex:none;border-radius:50%;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);
+  color:#C7D2E8;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-appearance:none;appearance:none;padding:0;transition:background .15s, transform .12s;}
+.cp-iconbtn:active{transform:scale(.92);background:rgba(255,255,255,0.12);}
+.cp-iconbtn svg{width:19px;height:19px;}
+/* saved-chats history panel */
+.cp-history{position:absolute;inset:0;z-index:6;display:flex;flex-direction:column;
+  background:linear-gradient(180deg,#0A0F1E 0%,#06070F 60%,#08060F 100%);
+  transform:translateX(100%);transition:transform .3s cubic-bezier(.16,1,.3,1);visibility:hidden;}
+.cp-history.on{transform:translateX(0);visibility:visible;}
+.cp-hist-head{display:flex;align-items:center;gap:12px;padding:52px 16px 14px;}
+.cp-hist-title{flex:1;font-size:18px;font-weight:900;letter-spacing:-0.3px;color:#fff;}
+.cp-hist-list{flex:1;overflow-y:auto;padding:4px 12px 14px;display:flex;flex-direction:column;gap:8px;}
+.cp-hist-list::-webkit-scrollbar{display:none;}
+.cp-hist-item{position:relative;display:flex;flex-direction:column;gap:2px;padding:13px 82px 13px 15px;border-radius:16px;
+  border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.05);cursor:pointer;transition:background .15s;
+  animation:msgIn .26s cubic-bezier(.2,.9,.3,1) both;}
+.cp-hist-item:active{background:rgba(255,255,255,0.10);}
+.cp-hist-t{font-size:14px;font-weight:700;color:#EAF0FB;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cp-hist-p{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cp-hist-time{font-size:10.5px;color:var(--dim);font-weight:600;margin-top:2px;}
+.cp-hist-del{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;border:none;
+  background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.72);display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-appearance:none;appearance:none;padding:0;}
+.cp-hist-del svg{width:15px;height:15px;}
+.cp-hist-del:active{background:rgba(255,80,80,0.28);color:#fff;}
+.cp-hist-edit{position:absolute;right:44px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;border:none;
+  background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.72);display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-appearance:none;appearance:none;padding:0;}
+.cp-hist-edit svg{width:15px;height:15px;}
+.cp-hist-edit:active{background:rgba(10,132,255,0.28);color:#fff;}
+.cp-hist-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 48px;
+  color:var(--muted);font-size:13px;line-height:1.6;}
+.cp-hist-empty.hide{display:none;}
+.cp-hist-clear{margin:0 12px 16px;padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);
+  color:rgba(255,255,255,0.72);font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;-webkit-appearance:none;appearance:none;}
+.cp-hist-clear:active{background:rgba(255,80,80,0.2);color:#fff;}
+.cp-hist-clear.hide{display:none;}
+@media (prefers-reduced-motion:reduce){.chat-panel::before,.chat-panel::after{animation:none;}}
+.chat-av{width:38px;height:38px;flex:none;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  background:#AEB6C4;}
+.chat-av svg{width:20px;height:20px;color:#fff;}
+.chat-av-info{flex:1;}
+.chat-av-name{font-size:14px;font-weight:800;}
+.chat-av-sub{font-size:10px;color:var(--muted);}
+.chat-online{width:8px;height:8px;border-radius:50%;background:var(--blue);box-shadow:0 0 6px var(--blue);}
+.chat-msgs{padding:12px 14px;display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;}
+.chat-msgs::-webkit-scrollbar{display:none;}
+.chat-bubble{padding:9px 12px;border-radius:14px;font-size:12.5px;line-height:1.45;max-width:82%;}
+.chat-bubble.ai{background:rgba(10,132,255,0.12);border:1px solid rgba(10,132,255,0.22);align-self:flex-start;}
+.chat-bubble.user{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.09);align-self:flex-end;text-align:right;}
+.chat-bubble.typing{color:var(--muted);letter-spacing:2px;}
+.chat-input-row{display:flex;align-items:center;gap:9px;padding:10px 14px 14px;border-top:1px solid rgba(255,255,255,0.05);}
+.chat-input{flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);
+  border-radius:22px;padding:9px 14px;font:inherit;font-size:12.5px;color:var(--text);outline:none;transition:border-color .15s;}
+.chat-input::placeholder{color:var(--dim);}
+.chat-input:focus{border-color:rgba(10,132,255,0.5);}
+.chat-send{width:34px;height:34px;flex:none;border:none;border-radius:50%;background:var(--blue);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s,opacity .15s;}
+.chat-send:active{transform:scale(.9);}
+.chat-send svg{width:14px;height:14px;color:#fff;}
+
+/* Toast */
+.toast{position:absolute;left:50%;bottom:104px;transform:translateX(-50%) translateY(10px);z-index:80;
+  background:rgba(10,12,22,0.94);border:1px solid var(--border);color:var(--text);font-size:12.5px;font-weight:600;
+  padding:10px 16px;border-radius:14px;max-width:280px;text-align:center;opacity:0;pointer-events:none;
+  transition:opacity .25s,transform .25s;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* Coming soon banner */
+.coming-banner{margin:0 18px 16px;border-radius:16px;padding:14px 16px;
+  background:rgba(10,132,255,0.06);border:1px solid rgba(10,132,255,0.18);
+  display:flex;align-items:center;justify-content:center;gap:10px;}
+.coming-banner svg{width:18px;height:18px;color:var(--blue);flex:none;}
+.coming-text{font-size:12px;color:var(--muted);line-height:1.4;}
+.coming-text strong{color:var(--blue);font-weight:700;}
+
+/* Nav */
+.nav{flex-shrink:0;padding:10px 12px 26px;display:flex;justify-content:space-around;align-items:flex-end;
+  background:rgba(3,3,14,0.42);backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6);
+  border-top:1px solid rgba(255,255,255,0.07);}
+.nav a{background:none;border:none;font:inherit;cursor:pointer;position:relative;
+  display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 8px;
+  min-width:48px;text-decoration:none;color:var(--dim);transition:color .2s;}
+.nav svg{width:23px;height:23px;}.nl{font-size:10px;font-weight:800;}
+.nav a.active{color:var(--text);}
+.nav a.active svg{color:var(--blue);filter:drop-shadow(0 0 8px rgba(10,132,255,.75));}
+.nav a.active::before{content:"";position:absolute;top:-2px;width:5px;height:5px;
+  border-radius:50%;background:var(--blue);box-shadow:0 0 8px var(--blue);}
+</style>
+  <link rel="stylesheet" href="_lib/core-responsive.css?v=20260619d">
+  <link rel="stylesheet" href="_lib/core-background.css?v=20260619d">
+  <style>
+    #ambBg,#ambAurora,#ambCelestial{display:none !important;}
+    .phone{background:#040408 !important;}
+    .nav{justify-content:space-evenly !important;}
+    .nav .item{flex:1 1 0;}
+  </style>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <meta name="theme-color" content="#000000">
+  <link rel="stylesheet" href="_lib/core-ui.css?v=20260619d">
+</head>
+<body>
+<div class="phone">
+  <div id="ambBg"></div>
+  <div id="ambAurora"></div>
+  <div id="ambCelestial"></div>
+  <div class="notch"></div>
+  <div class="home-indicator"></div>
+
+  <div class="frame">
+    <div class="topbar">
+      <div class="brand"><span class="dot"></span><span class="wm">CORE</span></div>
+      <span class="topbar-title">Coach</span>
+      <button id="helpBtn" aria-label="Help" style="margin-left:auto;width:34px;height:34px;min-height:34px;flex:none;border-radius:50%;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.72);font:800 14px -apple-system,sans-serif;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;-webkit-appearance:none;appearance:none;">?</button>
+    </div>
+
+    <div class="scroll">
+
+      <!-- Coach + scanners (8 buttons) -->
+      <div class="sec-head">Coach &amp; tools</div>
+      <div class="scan-grid">
+        <div class="scan-card" data-chat="general" style="--sc:#A78BFA">
+          <span class="scan-badge live">Live</span>
+          <div class="scan-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div class="scan-name">Coach Chat</div>
+          <div class="scan-desc">Talk to your AI coach</div>
+        </div>
+        <div class="scan-card" data-go="scan.html?type=physique" style="--sc:#3B9EFF">
+          <span class="scan-badge live">Live</span>
+          <div class="scan-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/></svg>
+          </div>
+          <div class="scan-name">Physique</div>
+          <div class="scan-desc">Live body scan + tracking</div>
+        </div>
+        <div class="scan-card" data-go="scan.html?type=food" style="--sc:#34D399">
+          <div class="scan-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 20.5s-7.2-4.6-7.2-9.8A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 7.2 3.7c0 5.2-7.2 9.8-7.2 9.8Z"/></svg>
+          </div>
+          <div class="scan-name">Food</div>
+          <div class="scan-desc">Scan meals <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.1em;display:inline-block"><path d="M9 6l6 6-6 6"/></svg> Health score</div>
+        </div>
+        <div class="scan-card" data-go="scan.html?type=outfit" style="--sc:#FFCB3D">
+          <div class="scan-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/></svg>
+          </div>
+          <div class="scan-name">Outfit</div>
+          <div class="scan-desc">Style feedback + fit check</div>
+        </div>
+        <div class="scan-card" data-go="scan.html?type=posture" style="--sc:#FF9F59">
+          <div class="scan-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/><path d="M12 1.5v3M12 19.5v3M22.5 12h-3M4.5 12h-3"/></svg>
+          </div>
+          <div class="scan-name">Posture</div>
+          <div class="scan-desc">Alignment check + correction</div>
+        </div>
+        <div class="scan-card" data-go="scan.html?type=looks" style="--sc:#FF6FB5">
+          <div class="scan-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/><path d="M12 12v4M9 16h6"/></svg>
+          </div>
+          <div class="scan-name">Looks</div>
+          <div class="scan-desc">Skin, symmetry + hair tips</div>
+        </div>
+        <div class="scan-card" data-go="scan.html?type=voice" style="--sc:#5EEAD4">
+          <div class="scan-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>
+          </div>
+          <div class="scan-name">Voice</div>
+          <div class="scan-desc">Speaking drills + feedback</div>
+        </div>
+        <div class="scan-card" data-chat="mind" style="--sc:#FF6B6B">
+          <span class="scan-badge live">Live</span>
+          <div class="scan-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a7 7 0 0 0-4 12.7V18h8v-2.3A7 7 0 0 0 12 3Z"/><path d="M9 21h6"/></svg>
+          </div>
+          <div class="scan-name">Mind</div>
+          <div class="scan-desc">Reflect with your coach</div>
+        </div>
+      </div>
+
+      <!-- Connect / status banner (rendered by JS) -->
+      <button class="coming-banner" id="coachBanner" type="button" style="width:calc(100% - 36px);text-align:center;font:inherit;cursor:pointer;-webkit-appearance:none;appearance:none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+        <div class="coming-text" id="coachBannerTx"><strong>Your Coach is live.</strong> Chat any time — your scans and stats feed the conversation.</div>
+      </button>
+
+    </div>
+
+    <!-- Nav -->
+    <nav class="nav" aria-label="Primary">
+      <a class="item" href="20-dashboard.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 11l9-7 9 7M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/></svg>
+        <span class="nl">Home</span>
+      </a>
+      <a class="item" href="21-quests.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M9 5h11M9 12h11M9 19h11M4 5l1 1 2-2M4 12l1 1 2-2M4 19l1 1 2-2"/></svg>
+        <span class="nl">Quests</span>
+      </a>
+      <a class="item active" href="coach.html" aria-current="page">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+        <span class="nl">Coach</span>
+      </a>
+      <a class="item" href="community.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M7 8h10M7 11h7M7 14h5" stroke-linecap="round"/></svg>
+        <span class="nl">Community</span>
+      </a>
+      <a class="item" href="24-more.html">
+        <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2.5"/><circle cx="12" cy="12" r="2.5"/><circle cx="19" cy="12" r="2.5"/></svg>
+        <span class="nl">More</span>
+      </a>
+    </nav>
+
+    <!-- Coach chat — full-screen, opened by the Coach Chat / Mind buttons -->
+    <div class="chat-panel" id="chatPanel">
+      <div class="cp-head">
+        <button class="cp-back" id="chatBack" type="button" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+        <div class="cp-av"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.2"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/><circle cx="12" cy="3.8" r="1.5" fill="currentColor" stroke="none"/></svg></div>
+        <div class="cp-id"><div class="cp-name">CORE Coach</div><div class="cp-status"><span class="cp-dot"></span>Online · always here</div></div>
+        <button class="cp-iconbtn" id="chatNew" type="button" aria-label="New chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button>
+        <button class="cp-iconbtn" id="chatHistory" type="button" aria-label="Saved chats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l3.2 2"/></svg></button>
+      </div>
+      <div class="cp-hero" id="cpHero">
+        <svg class="cp-star" viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="cpStarG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5BB1FF"/><stop offset=".5" stop-color="#A06CFF"/><stop offset="1" stop-color="#FF7AC4"/></linearGradient></defs><circle cx="12" cy="12" r="9" fill="none" stroke="url(#cpStarG)" stroke-width="1.6" opacity=".55"/><circle cx="12" cy="12" r="3.9" fill="url(#cpStarG)"/><circle cx="12" cy="3" r="1.7" fill="url(#cpStarG)"/></svg>
+        <div class="cp-hero-title">How can I help today?</div>
+        <div class="cp-hero-sub">Ask me anything — training, food, focus or motivation. I'm always here.</div>
+      </div>
+      <div class="chat-msgs"></div>
+      <div class="cp-suggest" id="cpSuggest">
+        <button class="cp-chip cp-chip-go" type="button" data-routine="1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Build my routine</button>
+        <button class="cp-chip" type="button" data-q="Give me a quick 10-minute push-up workout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9v6M9 7v10M15 7v10M18 9v6M9 12h6"/></svg>Quick workout</button>
+        <button class="cp-chip" type="button" data-q="I'm struggling to focus today — help me reset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.6" fill="currentColor"/></svg>Help me focus</button>
+        <button class="cp-chip" type="button" data-q="What should I eat after training?"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-7.2-4.6-7.2-9.8A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 7.2 3.7c0 5.2-7.2 9.8-7.2 9.8Z"/></svg>Post-workout food</button>
+        <button class="cp-chip" type="button" data-q="I need some motivation right now"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1.6 3.6 4 4.6 4 8a4 4 0 0 1-8 0c0-1.3.5-2.1 1-2.7C9 11 12 8 12 3z"/></svg>Motivate me</button>
+      </div>
+      <div class="cp-input">
+        <textarea class="cp-field" id="chatInput" rows="1" placeholder="Message your coach…" autocomplete="off" enterkeyhint="send"></textarea>
+        <button class="cp-send" id="chatSend" type="button" aria-label="Send">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+        </button>
+      </div>
+
+      <!-- Saved chats — history list, auto-clears after inactivity -->
+      <div class="cp-history" id="cpHistory">
+        <div class="cp-hist-head">
+          <button class="cp-back" id="histBack" type="button" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+          <div class="cp-hist-title">Saved chats</div>
+          <button class="cp-iconbtn" id="histNew" type="button" aria-label="New chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button>
+        </div>
+        <div class="cp-hist-list" id="cpHistList"></div>
+        <div class="cp-hist-empty" id="cpHistEmpty">No saved chats yet.<br>Conversations save here and clear after 2 hours of inactivity.</div>
+        <button class="cp-hist-clear hide" id="cpHistClear" type="button">Clear all saved chats</button>
+      </div>
+
+      <!-- Routine builder — guided popup questions -->
+      <div class="cp-quiz" id="cpQuiz" aria-hidden="true">
+        <div class="cp-quiz-card">
+          <div class="cp-quiz-top">
+            <div class="cp-quiz-prog"><span id="cpQuizBar"></span></div>
+            <button class="cp-quiz-x" id="cpQuizClose" type="button" aria-label="Close">✕</button>
+          </div>
+          <div class="cp-quiz-step" id="cpQuizStep">Step 1 of 5</div>
+          <div class="cp-quiz-q" id="cpQuizQ"></div>
+          <div class="cp-quiz-opts" id="cpQuizOpts"></div>
+        </div>
+      </div>
+
+      <!-- Rename chat -->
+      <div class="cp-prompt" id="cpRename" aria-hidden="true">
+        <div class="cp-prompt-card">
+          <div class="cp-prompt-title">Rename chat</div>
+          <input class="cp-prompt-input" id="cpRenameInput" type="text" maxlength="60" placeholder="Chat name" enterkeyhint="done" />
+          <div class="cp-confirm-btns">
+            <button class="cp-confirm-no" id="cpRenameCancel" type="button">Cancel</button>
+            <button class="cp-prompt-save" id="cpRenameSave" type="button">Save</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Confirm dialog -->
+      <div class="cp-confirm" id="cpConfirm" aria-hidden="true">
+        <div class="cp-confirm-card">
+          <div class="cp-confirm-msg" id="cpConfirmMsg">Are you sure?</div>
+          <div class="cp-confirm-btns">
+            <button class="cp-confirm-no" id="cpConfirmNo" type="button">Cancel</button>
+            <button class="cp-confirm-yes" id="cpConfirmYes" type="button">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
+</div>
+
+<script src="_lib/core-config.js"></script>
+<script src="_lib/core-state.js"></script>
+<script src="_lib/core-ai.js"></script>
+<script src="_lib/dash-ambient.js"></script>
+<script>if(window.dashAmbient)window.dashAmbient.init();</script>
+<script>
+(function(){
+  "use strict";
+  var $=function(s){ return document.querySelector(s); };
+  var input=$('#chatInput'), sendBtn=$('#chatSend'), msgs=$('.chat-msgs'), toastEl=$('#toast');
+
+  // ── Scanner cards: real link if it has one, else an honest "coming" toast ──
+  function toast(msg){ toastEl.textContent=msg; toastEl.classList.add('show'); clearTimeout(toastEl._t); toastEl._t=setTimeout(function(){ toastEl.classList.remove('show'); }, 1900); }
+  // ── Saved chats ────────────────────────────────────────────────────────────
+  // Conversations persist in this browser so you can scroll back or resume them.
+  // Each chat auto-clears after IDLE_MS of inactivity to keep history tidy.
+  var STORE_KEY='coreCoachChats';
+  var IDLE_MS=2*60*60*1000;          // 2 hours of inactivity → chat expires
+  var store={ chats:[] };
+  var activeId=null;                 // id of the conversation on screen
+  var convo=[];                      // working messages for the active chat
+
+  function loadStore(){
+    try{ store=JSON.parse(localStorage.getItem(STORE_KEY))||{chats:[]}; }catch(e){ store={chats:[]}; }
+    if(!store || !Array.isArray(store.chats)) store={chats:[]};
+    purgeStale();
+  }
+  function saveStore(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(store)); }catch(e){} }
+  function purgeStale(){
+    var now=Date.now();
+    store.chats=store.chats.filter(function(c){
+      return c && c.messages && c.messages.length && (now-(c.updated||0) < IDLE_MS);
+    });
+    saveStore();
+  }
+  function uid(){ return 'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+  function clip(s,n){ s=(s||'').replace(/\s+/g,' ').trim(); return s.length>n ? s.slice(0,n-1)+'…' : s; }
+  function titleFor(m){
+    for(var i=0;i<m.length;i++){ if(m[i].role==='user') return clip(m[i].content,42); }
+    return m.length ? clip(m[0].content,42) : 'New chat';
+  }
+  function previewFor(m){ return m.length ? clip(m[m.length-1].content,60) : ''; }
+  function relTime(t){
+    var mins=Math.round((Date.now()-t)/60000);
+    if(mins<1) return 'just now';
+    if(mins<60) return mins+'m ago';
+    return Math.round(mins/60)+'h ago';
+  }
+  function recordById(id){ for(var i=0;i<store.chats.length;i++){ if(store.chats[i].id===id) return store.chats[i]; } return null; }
+  function sortedChats(){ return store.chats.slice().sort(function(a,b){ return (b.updated||0)-(a.updated||0); }); }
+
+  // Write the active conversation back into the store (or drop it if empty).
+  function persistActive(){
+    if(!activeId) return;
+    if(!convo.length){ store.chats=store.chats.filter(function(c){ return c.id!==activeId; }); saveStore(); return; }
+    var rec=recordById(activeId);
+    if(!rec){ rec={ id:activeId, created:Date.now() }; store.chats.push(rec); }
+    rec.messages=convo.slice();
+    rec.title=rec.customTitle || titleFor(convo);   // keep a user-set name
+    rec.updated=Date.now();
+    saveStore();
+  }
+
+  function clearMsgsDOM(){ Array.prototype.forEach.call(msgs.querySelectorAll('.chat-bubble'), function(b){ b.remove(); }); }
+  function showHero(on){ var h=$('#cpHero'); if(h) h.classList.toggle('gone', !on); }
+  function showSuggest(on){ var s=$('#cpSuggest'); if(s) s.classList.toggle('hide', !on); }
+
+  function newChat(){
+    persistActive();
+    activeId=uid(); convo=[];
+    if(typeof setBusy==='function') setBusy(false);   // drop any in-flight reply's spinner
+    clearMsgsDOM(); showHero(true); showSuggest(true);
+  }
+  function resumeChat(id){
+    persistActive();
+    var rec=recordById(id); if(!rec) return;
+    activeId=id; convo=rec.messages.slice();
+    if(typeof setBusy==='function') setBusy(false);
+    clearMsgsDOM();
+    convo.forEach(function(m){ bubble(m.role==='user'?'user':'ai', m.content); });
+    showHero(convo.length===0); showSuggest(convo.length===0);
+  }
+
+  var started=false;   // has this open-session picked a conversation yet?
+  function openPanel(){ var p=$('#chatPanel'); if(p){ p.classList.add('on'); fitViewport(); } setTimeout(function(){ if(input) input.focus(); }, 320); }
+  function openChat(seed){
+    openPanel();
+    if(seed){ newChat(); bubble('ai', seed); convo.push({ role:'assistant', content:seed }); persistActive(); started=true; return; }
+    if(started) return;                       // keep the conversation already on screen
+    started=true;
+    if(freshSession){ newChat(); return; }    // new app session → always start a fresh chat
+    var recent=sortedChats()[0];
+    if(recent) resumeChat(recent.id); else newChat();
+  }
+  function closeChat(){ persistActive(); var p=$('#chatPanel'); if(p){ p.classList.remove('on'); p.style.height=''; } }
+  var chatBack=$('#chatBack'); if(chatBack) chatBack.addEventListener('click', closeChat);
+
+  // ── History panel ──
+  function renderHistory(){
+    purgeStale();
+    var list=$('#cpHistList'), empty=$('#cpHistEmpty'), clear=$('#cpHistClear');
+    var items=sortedChats();
+    list.innerHTML='';
+    empty.classList.toggle('hide', items.length>0);
+    clear.classList.toggle('hide', items.length===0);
+    items.forEach(function(rec){
+      var el=document.createElement('div');
+      el.className='cp-hist-item';
+      var t=document.createElement('div'); t.className='cp-hist-t'; t.textContent=rec.title||'Chat';
+      var p=document.createElement('div'); p.className='cp-hist-p'; p.textContent=previewFor(rec.messages);
+      var tm=document.createElement('div'); tm.className='cp-hist-time'; tm.textContent=relTime(rec.updated||rec.created||Date.now());
+      var edit=document.createElement('button'); edit.className='cp-hist-edit'; edit.type='button'; edit.setAttribute('aria-label','Rename chat');
+      edit.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
+      edit.addEventListener('click', function(e){ e.stopPropagation(); openRename(rec); });
+      var del=document.createElement('button'); del.className='cp-hist-del'; del.type='button'; del.setAttribute('aria-label','Delete chat');
+      del.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>';
+      del.addEventListener('click', function(e){
+        e.stopPropagation();
+        askConfirm('Delete this chat?', 'Delete', function(){
+          store.chats=store.chats.filter(function(c){ return c.id!==rec.id; });
+          if(activeId===rec.id) newChat();
+          saveStore(); renderHistory();
+        });
+      });
+      el.appendChild(t); el.appendChild(p); el.appendChild(tm); el.appendChild(edit); el.appendChild(del);
+      el.addEventListener('click', function(){ resumeChat(rec.id); closeHistory(); });
+      list.appendChild(el);
+    });
+  }
+  function openHistory(){ renderHistory(); var h=$('#cpHistory'); if(h) h.classList.add('on'); }
+  function closeHistory(){ var h=$('#cpHistory'); if(h) h.classList.remove('on'); }
+  var elHist=$('#chatHistory'); if(elHist) elHist.addEventListener('click', openHistory);
+  var elHistBack=$('#histBack'); if(elHistBack) elHistBack.addEventListener('click', closeHistory);
+  var elNew=$('#chatNew'); if(elNew) elNew.addEventListener('click', function(){ newChat(); if(input) input.focus(); });
+  var elHistNew=$('#histNew'); if(elHistNew) elHistNew.addEventListener('click', function(){ newChat(); closeHistory(); if(input) input.focus(); });
+  var elHistClear=$('#cpHistClear'); if(elHistClear) elHistClear.addEventListener('click', function(){
+    askConfirm("Clear all saved chats? This can't be undone.", 'Clear all', function(){ store.chats=[]; saveStore(); newChat(); renderHistory(); });
+  });
+  loadStore();
+
+  // The coach opens a fresh chat on every app launch/restart, while saved chats
+  // stay in History. sessionStorage survives in-app navigation but is cleared when
+  // the app is closed — so a missing marker means this is a brand-new app session.
+  var freshSession=false;
+  try{ if(!sessionStorage.getItem('coreCoachSession')){ freshSession=true; sessionStorage.setItem('coreCoachSession','1'); } }catch(e){}
+
+  // ── Confirm dialog ──
+  var _confirmFn=null;
+  function askConfirm(msg, yesLabel, onYes){
+    $('#cpConfirmMsg').textContent=msg; $('#cpConfirmYes').textContent=yesLabel||'Delete';
+    _confirmFn=onYes; var m=$('#cpConfirm'); m.classList.add('on'); m.setAttribute('aria-hidden','false');
+  }
+  function closeConfirm(){ var m=$('#cpConfirm'); m.classList.remove('on'); m.setAttribute('aria-hidden','true'); _confirmFn=null; }
+  $('#cpConfirmNo').addEventListener('click', closeConfirm);
+  $('#cpConfirmYes').addEventListener('click', function(){ var fn=_confirmFn; closeConfirm(); if(fn) fn(); });
+  $('#cpConfirm').addEventListener('click', function(e){ if(e.target===this) closeConfirm(); });
+
+  // ── Rename a saved chat ──
+  var _renameId=null;
+  function openRename(rec){
+    _renameId=rec.id;
+    var inp=$('#cpRenameInput'); inp.value=rec.title||'';
+    var m=$('#cpRename'); m.classList.add('on'); m.setAttribute('aria-hidden','false');
+    setTimeout(function(){ inp.focus(); inp.select(); }, 60);
+  }
+  function closeRename(){ var m=$('#cpRename'); m.classList.remove('on'); m.setAttribute('aria-hidden','true'); _renameId=null; }
+  function saveRename(){
+    var name=$('#cpRenameInput').value.trim(), rec=recordById(_renameId);
+    if(rec){
+      if(name){ rec.customTitle=name; rec.title=name; }
+      else { delete rec.customTitle; rec.title=titleFor(rec.messages||[]); }   // empty clears the custom name
+      saveStore();
+    }
+    closeRename(); renderHistory();
+  }
+  $('#cpRenameCancel').addEventListener('click', closeRename);
+  $('#cpRenameSave').addEventListener('click', saveRename);
+  $('#cpRename').addEventListener('click', function(e){ if(e.target===this) closeRename(); });
+  $('#cpRenameInput').addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); saveRename(); } });
+
+  // ── Natural-language commands (typo-tolerant) ──
+  function levo(a,b){
+    var m=a.length, n=b.length; if(!m) return n; if(!n) return m;
+    var prev=[], cur=[], i, j;
+    for(j=0;j<=n;j++) prev[j]=j;
+    for(i=1;i<=m;i++){ cur[0]=i;
+      for(j=1;j<=n;j++){ var c=a.charAt(i-1)===b.charAt(j-1)?0:1; cur[j]=Math.min(prev[j]+1, cur[j-1]+1, prev[j-1]+c); }
+      for(j=0;j<=n;j++) prev[j]=cur[j];
+    }
+    return prev[n];
+  }
+  function tokenize(s){ return s.toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(Boolean); }
+  function nearWord(t,w){ var max = w.length<=4 ? 1 : 2; return t===w || levo(t,w)<=max; }   // allow more slop on longer words
+  function hasAny(tokens,words){ for(var i=0;i<tokens.length;i++) for(var j=0;j<words.length;j++) if(nearWord(tokens[i],words[j])) return true; return false; }
+  function detectCommand(text){
+    var tk=tokenize(text); if(!tk.length) return null;
+    var ACT=['build','make','create','new','start','design','setup','generate','give','want','need','set'];
+    var CHAT=['chat','chats','conversation','conversations','convo','convos','thread'];
+    // build a routine
+    if(hasAny(tk,['routine','rutine','routene','rountine','ruteen','plan','program','schedule']) && (hasAny(tk,ACT) || tk.length<=2))
+      return openQuiz;
+    // what can you do / commands
+    if(hasAny(tk,['commands','command']) || (hasAny(tk,['what']) && hasAny(tk,['do','can']) && hasAny(tk,['you']) && tk.length<=7))
+      return showCommandHelp;
+    // clear everything
+    if(hasAny(tk,['clear','delete','wipe','erase','remove']) && hasAny(tk,['all','everything']))
+      return function(){ askConfirm("Clear all saved chats? This can't be undone.",'Clear all',function(){ store.chats=[]; saveStore(); newChat(); renderHistory(); }); };
+    // show saved chats / history
+    if(hasAny(tk,['history','saved','previous','past','recent','earlier']) && (hasAny(tk,CHAT) || hasAny(tk,['show','open','see'])))
+      return openHistory;
+    // rename this chat
+    if(hasAny(tk,['rename','retitle']) || (hasAny(tk,['name','title','call']) && hasAny(tk,['this','it'].concat(CHAT))))
+      return function(){ var rec=recordById(activeId); if(rec) openRename(rec); };
+    // new / fresh chat, start over
+    if(hasAny(tk,['new','fresh','reset','clear','start','restart']) && (hasAny(tk,CHAT) || hasAny(tk,['over'])))
+      return function(){ newChat(); if(input) input.focus(); };
+    return null;
+  }
+  function showCommandHelp(){
+    if(!activeId) newChat();
+    var sg=$('#cpSuggest'); if(sg) sg.classList.add('hide');
+    var msg="I can chat about anything — and I can run a few things for you right from here:\n\n"
+      +"- **Build a routine** — say *\"build me a routine\"* and I'll ask a few quick questions, then make a plan\n"
+      +"- **New chat** — *\"start a new chat\"*\n"
+      +"- **Saved chats** — *\"show my history\"*\n"
+      +"- **Rename this chat** — *\"rename this chat\"*\n"
+      +"- **Clear everything** — *\"clear all chats\"*\n\n"
+      +"Don't worry about typos — I'll figure out what you mean.";
+    bubble('ai', msg); convo.push({ role:'assistant', content: msg }); persistActive();
+  }
+
+  // ── Routine builder — guided popup questions, then a tailored plan ──
+  var ROUTINE_Q=[
+    { key:'goal',  q:'What should your routine build?',          opts:['Fitness & strength','Focus & productivity','Sleep & recovery','Discipline & habits','Nutrition & energy'] },
+    { key:'days',  q:'How many days a week can you commit?',     opts:['3 days','4 days','5 days','6–7 days'] },
+    { key:'time',  q:'How much time per day?',                   opts:['15 min','30 min','45 min','60+ min'] },
+    { key:'when',  q:'When do you perform best?',                opts:['Morning','Midday','Evening','Flexible'] },
+    { key:'level', q:'Where are you starting from?',             opts:['Just starting out','Some experience','Pretty advanced'] }
+  ];
+  var quizIdx=0, quizAns={};
+  function openQuiz(){ quizIdx=0; quizAns={}; renderQuiz(); var q=$('#cpQuiz'); q.classList.add('on'); q.setAttribute('aria-hidden','false'); }
+  function closeQuiz(){ var q=$('#cpQuiz'); q.classList.remove('on'); q.setAttribute('aria-hidden','true'); }
+  function renderQuiz(){
+    var step=ROUTINE_Q[quizIdx];
+    $('#cpQuizStep').textContent='Step '+(quizIdx+1)+' of '+ROUTINE_Q.length;
+    $('#cpQuizBar').style.width=Math.round(((quizIdx+1)/ROUTINE_Q.length)*100)+'%';
+    $('#cpQuizQ').textContent=step.q;
+    var wrap=$('#cpQuizOpts'); wrap.innerHTML='';
+    step.opts.forEach(function(v){
+      var btn=document.createElement('button'); btn.className='cp-quiz-opt'; btn.type='button'; btn.textContent=v;
+      btn.addEventListener('click', function(){
+        quizAns[step.key]=v;
+        if(quizIdx<ROUTINE_Q.length-1){ quizIdx++; renderQuiz(); }
+        else { closeQuiz(); finishRoutine(); }
+      });
+      wrap.appendChild(btn);
+    });
+  }
+  $('#cpQuizClose').addEventListener('click', closeQuiz);
+  $('#cpQuiz').addEventListener('click', function(e){ if(e.target===this) closeQuiz(); });
+
+  var ROUTINE_THEMES={
+    'Fitness & strength':  ['Full-body strength','Push — chest, shoulders, triceps','Pull — back & biceps','Legs & core','Conditioning & cardio','Mobility & active recovery'],
+    'Focus & productivity':['Deep-work sprint','Plan & prioritize the week','One big task, no distractions','Learning & skill block','Review & reset','Light catch-up day'],
+    'Sleep & recovery':    ['Lock a consistent wake time','Evening wind-down practice','Screen curfew 60 min before bed','Caffeine cut-off by 2pm','Evening walk + stretch','Full reset night'],
+    'Discipline & habits': ['Keystone habit first','Hard thing before anything else','No-zero day (do the minimum)','Habit stack onto a routine','Track & review progress','Reward & reset'],
+    'Nutrition & energy':  ['High-protein day','Hydration focus (2–3L)','Batch-cook & meal prep','Whole-food, no processed','Mindful eating — no screens','Flexible / planned treat']
+  };
+  function localRoutine(a){
+    var themes=ROUTINE_THEMES[a.goal]||ROUTINE_THEMES['Discipline & habits'];
+    var daysN={'3 days':3,'4 days':4,'5 days':5,'6–7 days':6}[a.days]||4;
+    var mins=parseInt(a.time,10)||30;
+    var blocks = mins<=15 ? 3 : mins<=30 ? 4 : mins<=45 ? 5 : 6;
+    var when = a.when==='Flexible' ? 'whenever it fits your day' : ('in the '+a.when.toLowerCase());
+    var levelTip = a.level==='Just starting out'
+        ? 'Start light and nail consistency before intensity — showing up is the win for the first two weeks.'
+      : a.level==='Some experience'
+        ? 'Push the difficulty a notch each week — add reps, time, or focus so it keeps challenging you.'
+        : 'Periodize it — go hard 3 weeks, then take a lighter deload week so you keep progressing without burning out.';
+    var out='Here\'s your starter **'+a.goal+'** routine — **'+a.days+'**, **'+a.time+'/day**, '+when+'.\n\n';
+    out+='#### Your week\n';
+    for(var d=0; d<daysN; d++){ out+='- **Day '+(d+1)+':** '+themes[d % themes.length]+'\n'; }
+    if(daysN<7) out+='- **Rest of the week:** rest or a gentle walk — recovery is when the work sticks.\n';
+    out+='\n#### Each session ('+a.time+')\n';
+    var struct=[];
+    struct.push('Warm up & set your intention (2–3 min)');
+    for(var i=0;i<blocks-2;i++){ struct.push('Main block '+(i+1)+' — the core work for the day'); }
+    struct.push('Cool down, log it, and tick the day off');
+    struct.forEach(function(s,idx){ out+=(idx+1)+'. '+s+'\n'; });
+    out+='\n#### One tip for your level\n'+levelTip+'\n\n';
+    out+='---\nWant me to swap any days, make it harder/easier, or turn this into a daily checklist? Just say the word.';
+    return out;
+  }
+  // Concrete daily checklist items per goal — these become the dashboard routine.
+  var ROUTINE_TASKS={
+    'Fitness & strength':  ['10-min mobility warm-up','{time} training session','Hit your protein target','Get 8k+ steps','Lights out for 7–8h sleep'],
+    'Focus & productivity':['Plan your top 3 tasks','{time} deep-work block — phone away','Single-task, no multitasking','Take one real break','Review what you got done'],
+    'Sleep & recovery':    ['Wake at your set time','No caffeine after 2pm','10-min evening wind-down','Screens off 60 min before bed','In bed by your target time'],
+    'Discipline & habits': ['Do your keystone habit first','Tackle the hard thing first','No-zero day — do the minimum','Track it / tick it off','Quick evening review'],
+    'Nutrition & energy':  ['Hit your protein target','Drink 2–3L of water','Eat whole foods, minimal processed','No mindless snacking','Plan tomorrow’s meals']
+  };
+  var GOAL_COLOR={'Fitness & strength':'#FF6B6B','Focus & productivity':'#AEB6C4','Sleep & recovery':'#6F70FF','Discipline & habits':'#34D399','Nutrition & energy':'#FFCB3D'};
+  // Pull the actual routine items out of the generated plan so the dashboard
+  // checklist matches what the coach actually said (AI or local).
+  function routineTasksFromText(md){
+    var lines=String(md||'').split('\n'), nums=[], bullets=[];
+    function clean(s){ return s.replace(/\*\*([^*]+)\*\*/g,'$1').replace(/[*_`#]/g,'').replace(/^Day\s*\d+\s*[:\-–—]\s*/i,'').trim(); }
+    lines.forEach(function(l){
+      var n=l.match(/^\s*\d+[.)]\s+(.+)/); if(n){ nums.push(clean(n[1])); return; }
+      var bl=l.match(/^\s*[-*•]\s+(.+)/); if(bl){ bullets.push(clean(bl[1])); }
+    });
+    var src = bullets.length>=3 ? bullets : (nums.length>=3 ? nums : bullets.concat(nums));
+    src=src.filter(function(t){ return t && t.length<=80 && !/^rest of the week/i.test(t); });
+    return src.slice(0,6);
+  }
+  function saveRoutineToDashboard(a, md){
+    var parsed=routineTasksFromText(md);
+    var titles = parsed.length>=3 ? parsed
+      : (ROUTINE_TASKS[a.goal]||ROUTINE_TASKS['Discipline & habits']).map(function(t){ return t.replace('{time}', a.time||'30 min'); });
+    var tasks=titles.map(function(t,i){ return { id:'cr'+i, title:t }; });
+    var rec={ goal:a.goal, when:a.when, days:a.days, color:(GOAL_COLOR[a.goal]||'#AEB6C4'), created:Date.now(), tasks:tasks };
+    try{ localStorage.setItem('coreCoachRoutine.v1', JSON.stringify(rec)); localStorage.removeItem('coreCoachRoutineDone.v1'); }catch(e){}
+  }
+  async function finishRoutine(){
+    if(!activeId) newChat();
+    var ans=Object.assign({}, quizAns);   // snapshot for the "add to dashboard" action
+    var sg=$('#cpSuggest'); if(sg) sg.classList.add('hide');
+    var summary='Build me a '+String(quizAns.goal||'').toLowerCase()+' routine — '+quizAns.days+'/week, '+quizAns.time+'/day, '+String(quizAns.when||'').toLowerCase()+', '+String(quizAns.level||'').toLowerCase()+'.';
+    bubble('user', summary); convo.push({ role:'user', content: summary }); persistActive();
+    setBusy(true);
+    var typing=mkTyping();
+    var reply=null;
+    try{
+      if(window.coreAI && coreAI.chat){
+        var ask=convo.slice(-8).concat([{ role:'user', content:'Create the routine now as a concise markdown plan: a one-line intro, a "Your week" bullet list, a numbered "Each session" structure, and one short tip. Keep it motivating.' }]);
+        var ar=await coreAI.chat(ask, { role:'coach' });
+        if(ar && ar.ok && ar.text && !ar.fallback) reply=ar.text;
+      }
+    }catch(e){}
+    if(!reply) reply=localRoutine(quizAns);
+    typing.remove();
+    var rb=bubble('ai', '', false); await streamInto(rb, reply); convo.push({ role:'assistant', content: reply }); persistActive();
+    // offer to turn the routine into a daily checklist on the dashboard
+    var act=document.createElement('div'); act.className='rt-cta';
+    act.innerHTML='<button class="rt-cta-btn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Add to my dashboard</button>';
+    msgs.appendChild(act); msgs.scrollTop=msgs.scrollHeight;
+    act.querySelector('button').addEventListener('click', function(){
+      function doSave(){
+        saveRoutineToDashboard(ans, reply);
+        act.innerHTML='<div class="rt-cta-done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-11"/></svg>Added to your dashboard — open Home to check it off.</div>';
+      }
+      var existing=null; try{ existing=localStorage.getItem('coreCoachRoutine.v1'); }catch(e){}
+      if(existing) askConfirm('Replace your current dashboard routine?', 'Replace', doSave);
+      else doSave();
+    });
+    setBusy(false);
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('.scan-card'), function(c){
+    c.addEventListener('click', function(){
+      var chat=c.getAttribute('data-chat'), go=c.getAttribute('data-go');
+      if(chat==='general'){ openChat(); }
+      else if(chat==='mind'){ openChat("Let's check in — how are you feeling right now, and what's one thing on your mind? I'll help you make sense of it."); }
+      else if(go){ location.href=go; }
+      else { var n=c.querySelector('.scan-name'); toast((n?n.textContent:'That')+' scanner arrives with the full app'); }
+    });
+  });
+
+  // ── Chat ──────────────────────────────────────────────────────────────────
+  // Talk to the real ai-coach function when it's deployed, falling back to a
+  // warm local responder until then. Messages are persisted per saved chat.
+
+  // ── Minimal, safe markdown for coach replies (escapes first, then our tags) ──
+  function escapeHtml(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function mdInline(s){
+    return s
+      .replace(/`([^`]+)`/g, function(m,c){ return '<code>'+c+'</code>'; })
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/(^|[\s(])\*([^*\n]+)\*(?=[\s).,!?:;]|$)/g, '$1<em>$2</em>')
+      .replace(/(^|[\s(])_([^_\n]+)_(?=[\s).,!?:;]|$)/g, '$1<em>$2</em>');
+  }
+  function mdToHtml(text){
+    var lines=escapeHtml(text).replace(/\r\n/g,'\n').split('\n');
+    var html='', para=[], i=0;
+    function flush(){ if(para.length){ html+='<p>'+mdInline(para.join('<br>'))+'</p>'; para=[]; } }
+    while(i<lines.length){
+      var ln=lines[i];
+      if(/^\s*$/.test(ln)){ flush(); i++; continue; }
+      if(/^\s*-{3,}\s*$/.test(ln)){ flush(); html+='<hr>'; i++; continue; }
+      var hm=ln.match(/^\s*#{1,6}\s+(.*)$/);
+      if(hm){ flush(); html+='<h4>'+mdInline(hm[1])+'</h4>'; i++; continue; }
+      if(/^\s*[-*•]\s+/.test(ln)){ flush(); html+='<ul>';
+        while(i<lines.length && /^\s*[-*•]\s+/.test(lines[i])){ html+='<li>'+mdInline(lines[i].replace(/^\s*[-*•]\s+/,''))+'</li>'; i++; }
+        html+='</ul>'; continue; }
+      if(/^\s*\d+[.)]\s+/.test(ln)){ flush(); html+='<ol>';
+        while(i<lines.length && /^\s*\d+[.)]\s+/.test(lines[i])){ html+='<li>'+mdInline(lines[i].replace(/^\s*\d+[.)]\s+/,''))+'</li>'; i++; }
+        html+='</ol>'; continue; }
+      para.push(ln); i++;
+    }
+    flush();
+    return html || '<p></p>';
+  }
+
+  function bubble(role, text, asMarkdown){
+    var h=$('#cpHero'); if(h && !h.classList.contains('gone')) h.classList.add('gone');  // leave the empty welcome state
+    var b=document.createElement('div');
+    b.className='chat-bubble '+(role==='user'?'user':'ai av');
+    if(role!=='user' && asMarkdown!==false){ b.innerHTML=mdToHtml(text); }
+    else { b.textContent=text; }
+    msgs.appendChild(b); msgs.scrollTop=msgs.scrollHeight;
+    return b;
+  }
+  // typing indicator (3 bouncing dots) + word-by-word streaming reveal
+  function mkTyping(){ var b=bubble('ai','',false); b.classList.add('typing'); b.innerHTML='<i></i><i></i><i></i>'; return b; }
+  function streamInto(b, text){
+    return new Promise(function(resolve){
+      b.classList.add('streaming'); b.textContent='';
+      var toks=String(text||'').split(/(\s+)/), i=0;
+      var per=toks.length>90?8:toks.length>45?14:24;   // long replies stream faster
+      (function step(){
+        if(i>=toks.length){ b.classList.remove('streaming'); b.innerHTML=mdToHtml(text); msgs.scrollTop=msgs.scrollHeight; resolve(); return; }
+        b.textContent+=toks[i++]; msgs.scrollTop=msgs.scrollHeight;
+        setTimeout(step, per+Math.random()*14);
+      })();
+    });
+  }
+
+  function localReply(t){
+    var s=(t||'').toLowerCase();
+    if(/\b(kill myself|suicid|end it all|want to die|self[- ]?harm|hurt myself|no reason to live)\b/.test(s))
+      return "I'm really glad you told me. Please reach out for real human support right now — a crisis line can be there with you: Lifeline 13 11 14 (Australia) or 988 (US), or your local emergency number. You're not alone in this.";
+    if(/\b(crav|urge|tempt|want to vape|trigger)\b/.test(s))
+      return "Cravings peak at about three minutes, then fade — you can ride this one out. Slow breath, change rooms, glass of water. What set it off?";
+    if(/\b(relaps|slipped|caved|failed|messed up|gave in|broke)\b/.test(s))
+      return "One slip isn't a verdict, it's data. Be as kind to yourself as you'd be to a friend. What was happening right before it?";
+    if(/\b(tired|exhausted|drained|burnt? ?out|no energy)\b/.test(s))
+      return "Sounds like you're running on empty — rest is part of the work, not a break from it. What's one small kind thing you can do tonight?";
+    if(/\b(stress|anxious|anxiety|overwhelm|panic|worried)\b/.test(s))
+      return "Let's slow it down. Box breath with me: in 4, hold 4, out 4, hold 4 — twice. What's the biggest thing on your mind?";
+    if(/\b(proud|did it|stayed|streak|won|smashed|crushed|good day|great|nailed)\b/.test(s))
+      return "That's a real win — own it. What helped today that you can repeat tomorrow?";
+    if(/\b(hi|hey|hello|yo|sup|good morning|gm|heya)\b/.test(s))
+      return "Hey — good to see you. How are you feeling right now, honestly?";
+    if(/\b(thank|thanks|appreciate|cheers)\b/.test(s))
+      return "Anytime — I'm in your corner. What's next for you today?";
+    return "I hear you. Tell me a bit more — what's been the hardest part, and what would a good outcome look like?";
+  }
+
+  async function getReply(){
+    // Real AI via coreAI — routes to your local key OR the hosted proxy (Cloudflare worker) automatically.
+    try{
+      if(window.coreAI && coreAI.chat){
+        var ar=await coreAI.chat(convo.slice(-12), { role:'coach' });
+        if(ar && ar.ok && ar.text && !ar.fallback) return ar.text;   // got a real reply
+      }
+    }catch(e){}
+    return localReply(convo.length ? convo[convo.length-1].content : '');
+  }
+
+  // Auto-grow the input as you type (up to the CSS max-height).
+  function autogrow(){ input.style.height='auto'; input.style.height=Math.min(input.scrollHeight,120)+'px'; }
+  input.addEventListener('input', autogrow);
+  // Keep the input visible above the on-screen keyboard (iOS/Android).
+  function fitViewport(){
+    var vv=window.visualViewport, p=$('#chatPanel');
+    if(!vv||!p) return;
+    p.style.height = p.classList.contains('on') ? vv.height+'px' : '';
+  }
+  if(window.visualViewport){ window.visualViewport.addEventListener('resize', fitViewport); window.visualViewport.addEventListener('scroll', fitViewport); }
+  input.addEventListener('focus', function(){ setTimeout(function(){ msgs.scrollTop=msgs.scrollHeight; }, 300); });
+
+  var busy=false;
+  function setBusy(on){ busy=on; sendBtn.classList.toggle('busy', on); }
+  async function send(){
+    var t=input.value.trim();
+    if(!t || busy) return;
+    input.value=''; autogrow();
+    // typed commands ("build a routine", "show history", "rename chat"…) run instead of a chat reply — typo-tolerant
+    var cmd=detectCommand(t);
+    if(cmd){ cmd(); return; }
+    var sg=$('#cpSuggest'); if(sg) sg.classList.add('hide');   // hide quick prompts after first message
+    setBusy(true);
+    if(!activeId) newChat();
+    var myId=activeId;                          // remember which chat this reply belongs to
+    bubble('user', t); convo.push({ role:'user', content:t }); persistActive();
+    var typing=mkTyping();
+    var reply;
+    try{ reply=await getReply(); }catch(e){ reply=localReply(t); }
+    if(activeId!==myId){ typing.remove(); return; }   // switched chats while waiting — drop stale reply
+    typing.remove();
+    var b=bubble('ai', '', false); await streamInto(b, reply);
+    convo.push({ role:'assistant', content:reply }); persistActive();
+    setBusy(false); input.focus();
+  }
+
+  sendBtn.addEventListener('click', send);
+  Array.prototype.forEach.call(document.querySelectorAll('#cpSuggest .cp-chip'), function(b){
+    b.addEventListener('click', function(){
+      if(busy) return;
+      if(b.getAttribute('data-routine')){ openQuiz(); return; }
+      input.value=b.getAttribute('data-q'); send();
+    });
+  });
+  input.addEventListener('keydown', function(e){ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); send(); } });
+
+  // ── Connect your own OpenAI key (stored only in this browser) ──
+  var banner=$('#coachBanner'), bannerTx=$('#coachBannerTx');
+  function aiConnected(){ return !!(window.coreAI && coreAI.hasKey()); }
+  function renderBanner(){
+    if(!banner) return;
+    var proxy = !!(window.coreAI && coreAI.usingProxy && coreAI.usingProxy());
+    if(aiConnected() || proxy){
+      bannerTx.innerHTML='<strong>Your Coach is live.</strong> Ask anything — training, food, focus, motivation.';
+      banner.style.borderColor='rgba(52,211,153,0.35)';
+    } else {
+      bannerTx.innerHTML='<strong>Connect AI for real replies.</strong> Tap here and paste a key — free Groq (gsk_…) or OpenAI (sk-…). It stays in this browser, no server needed.';
+    }
+  }
+  function connectAI(){
+    if(!window.coreAI){ toast('AI module not loaded'); return; }
+    var cur=coreAI.getKey();
+    var k=window.prompt(cur?'Update your AI key (leave blank to remove):':'Paste your AI key — free Groq (gsk_…) or OpenAI (sk-…). It stays only in this browser.', cur||'');
+    if(k===null) return;                 // cancelled
+    k=k.trim();
+    if(k && !/^(sk-|gsk_)/.test(k)){ toast('Use a Groq (gsk_…) or OpenAI (sk-…) key'); return; }
+    coreAI.setKey(k);
+    renderBanner();
+    toast(k ? 'AI connected — real replies on' : 'AI key removed');
+  }
+  if(banner) banner.addEventListener('click', connectAI);
+  renderBanner();
+
+  // ── Arrived from a scanner's "Discuss with Coach"? Seed the conversation ──
+  function coachScanReply(seed){
+    var sc=seed.score|0, nm=(seed.name||'scan').toLowerCase();
+    var lead = sc>=85 ? "That's a strong "+nm+" score — you're clearly putting the work in."
+      : sc>=70 ? "Solid "+nm+" result. There's a clear path to push it higher."
+      : "Good baseline to build from — small, consistent changes move this number fast.";
+    var focus = (seed.tips && seed.tips.length) ? " First thing I'd focus on: "+String(seed.tips[0]).replace(/\.$/,'')+"." : "";
+    return lead + focus + " Want me to turn this into a simple 2-week plan?";
+  }
+  async function seedFromScan(){
+    var seed=null; try{ seed=JSON.parse(localStorage.getItem('coreCoachSeed')||'null'); }catch(e){}
+    if(!seed) return;
+    try{ localStorage.removeItem('coreCoachSeed'); }catch(e){}
+    openPanel(); newChat(); started=true;   // scanner "discuss with coach" → fresh chat
+    var umsg='I just did my '+seed.name+' scan and scored '+seed.score+'/100. What should I work on?';
+    bubble('user', umsg);
+    convo.push({ role:'user', content: umsg + (seed.tips&&seed.tips.length ? (' (App notes: '+seed.tips.join('; ')+'.)') : '') }); persistActive();
+    var typing=mkTyping();
+    var fb=localReply(convo[convo.length-1].content), reply=null;
+    if(window.CORE_BACKEND_READY){ try{ reply=await getReply(); }catch(e){} }
+    if(!reply || reply===fb) reply=coachScanReply(seed);
+    typing.remove(); var sb=bubble('ai', '', false); await streamInto(sb, reply); convo.push({ role:'assistant', content:reply }); persistActive();
+  }
+  seedFromScan();
+})();
+</script>
+  <script src="_lib/core-background.js?v=20260619d"></script>
+  <script src="_lib/core-pagefx.js"></script>
+  <script src="_lib/core-help.js"></script>
+  <script>if(window.coreHelp)window.coreHelp.attach("helpBtn",{"title":"AI Coach","bullets":["Chat with your AI coach for guidance, plans and motivation.","Ask about any area — training, focus, money or habits.","The coach keeps your goals in mind and nudges you forward."]});</script>
+</body>
+</html>

@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+  <script>
+    // Onboarding gate — same rules as the launch screen.
+    try{(function(){var h=location.hostname;window.__corePreview=(location.protocol==='file:'||h==='localhost'||h==='127.0.0.1'||/[?&]preview=1/.test(location.search));})();}catch(e){}if(!window.__corePreview){try { if (!/[?&]preview=1/.test(location.search)) { if (localStorage.getItem('coreSubscribed') === '1') { location.replace('20-dashboard.html'); } else if (localStorage.getItem('coreOnboardComplete') === '1') { location.replace('10-subscribe.html'); } } } catch(e){}}
+  </script>
+  <meta charset="utf-8" />
+  <title>CORE — Meet Corbit</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#000000" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <script src="_lib/analytics.js" defer></script>
+  <script src="_lib/core-i18n.js?v=20260704"></script>
+  <style>
+    /* ===============================================================
+       CORE — Meet Corbit · "Quiet System" chapter two
+       Sits between the launch screen and the trial. Same matte-black
+       brushed-steel language as 01-index: white ink, silver glow,
+       sparse stars. Corbit introduces itself in four Apple-style
+       scenes, then asks for its permissions like a polite guest.
+       =============================================================== */
+    :root {
+      --apple-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+                    "Helvetica Neue", Helvetica, Arial, "Segoe UI", Roboto, sans-serif;
+      --ink:       #ffffff;
+      --ink-soft:  rgba(255,255,255,0.72);
+      --ink-faint: rgba(255,255,255,0.55);
+      --hair:      rgba(255,255,255,0.08);
+      --hair-2:    rgba(255,255,255,0.14);
+      --glow:      rgba(206,212,222,0.55);
+      --glow-soft: rgba(206,212,222,0.18);
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body { height:100%; }
+    body {
+      min-height:100vh; background:#000 !important; color:var(--ink);
+      font-family:var(--apple-font); font-feature-settings:"ss01","cv11","tnum";
+      display:flex; align-items:center; justify-content:center;
+      padding:24px; overflow:hidden;
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+    }
+    .phone {
+      position:relative; width:390px; height:844px; background:#000;
+      border-radius:56px; overflow:hidden;
+      box-shadow:0 40px 120px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.06),
+                 0 0 0 10px #060608, 0 0 0 11px #1b1b22;
+    }
+    .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%);
+      width:124px; height:32px; background:#000; border-radius:20px; z-index:30; }
+    .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%);
+      width:134px; height:5px; background:rgba(255,255,255,0.60); border-radius:999px; z-index:30; }
+    .bg { position:absolute; inset:0; z-index:0;
+      background:
+        radial-gradient(50% 36% at 50% 30%, rgba(206,212,222,0.12) 0%, rgba(206,212,222,0.045) 28%, transparent 58%),
+        radial-gradient(120% 40% at 50% 110%, rgba(206,212,222,0.10) 0%, rgba(206,212,222,0.03) 34%, transparent 60%),
+        #000; }
+    .grain { position:absolute; inset:0; z-index:5; pointer-events:none; opacity:.04; mix-blend-mode:overlay;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='150' height='150' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size:150px 150px; }
+    .stars { position:absolute; inset:0; z-index:1; pointer-events:none; }
+    .star { position:absolute; border-radius:50%; background:#fff;
+      animation:twinkle var(--d,5s) ease-in-out var(--del,0s) infinite; }
+    @keyframes twinkle { 0%,100% { opacity:var(--min,0.10); transform:scale(0.75); }
+      50% { opacity:var(--max,0.52); transform:scale(1.12); } }
+
+    .frame { position:absolute; inset:0; z-index:10; display:flex; flex-direction:column;
+      padding:max(60px, calc(env(safe-area-inset-top,0px) + 26px)) 28px
+              max(34px, calc(env(safe-area-inset-bottom,0px) + 18px)); }
+
+    .topbar { display:flex; align-items:center; justify-content:space-between; }
+    .brand { display:flex; align-items:center; gap:9px; user-select:none; }
+    .brand .dot { width:7px; height:7px; border-radius:50%; background:#fff;
+      box-shadow:0 0 8px var(--glow); }
+    .brand .wm { font-size:13px; font-weight:600; letter-spacing:0.34em; color:var(--ink); }
+    .skip { background:none; border:none; color:var(--ink-faint); font-family:inherit;
+      font-size:12px; font-weight:600; letter-spacing:0.06em; cursor:pointer; padding:8px 2px;
+      transition:color .2s; }
+    .skip:hover { color:#fff; }
+
+    /* ── Scene stage ── */
+    .stage { position:relative; flex:1; }
+    .scene { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center;
+      justify-content:center; text-align:center; opacity:0; pointer-events:none;
+      transform:translateY(14px); transition:opacity .5s cubic-bezier(.22,1,.36,1),
+      transform .6s cubic-bezier(.22,1,.36,1); }
+    .scene.on { opacity:1; pointer-events:auto; transform:none; }
+    .scene.gone { transform:translateY(-14px); }
+
+    /* ── The Corbit orb — a small silver mind ── */
+    .orb { position:relative; width:150px; height:150px; margin-bottom:34px; }
+    .orb-core { position:absolute; inset:36px; border-radius:50%;
+      background:radial-gradient(circle at 38% 30%, #ffffff 0%, #E2E6EC 26%, #9AA1AC 62%, #565C66 100%);
+      box-shadow:0 0 40px rgba(206,212,222,0.5), 0 0 120px rgba(206,212,222,0.16),
+                 0 14px 34px rgba(0,0,0,0.6);
+      animation:orbBreathe 5s ease-in-out infinite; }
+    @keyframes orbBreathe { 0%,100% { transform:scale(1); } 50% { transform:scale(1.05); } }
+    .orb-ring { position:absolute; border-radius:50%; pointer-events:none;
+      -webkit-mask:radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1.5px));
+      mask:radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1.5px)); }
+    .orb-ring.r1 { inset:16px;
+      background:conic-gradient(from 0deg, transparent 0deg, rgba(238,241,246,0.95) 42deg, transparent 108deg,
+        transparent 196deg, rgba(196,201,210,0.55) 252deg, transparent 320deg);
+      animation:orbSpin 3.6s linear infinite; }
+    .orb-ring.r2 { inset:2px;
+      background:conic-gradient(from 180deg, transparent 0deg, rgba(196,201,210,0.5) 60deg, transparent 140deg);
+      animation:orbSpin 7s linear infinite reverse; }
+    @keyframes orbSpin { to { transform:rotate(360deg); } }
+    /* converging build particles (spawned by JS at scene 0) */
+    .orb-dust { position:absolute; width:3px; height:3px; border-radius:50%; background:#E2E6EC;
+      box-shadow:0 0 6px rgba(226,231,238,0.9); opacity:0; pointer-events:none;
+      animation:dustIn 1s cubic-bezier(.22,1,.36,1) forwards; }
+    @keyframes dustIn { 0% { opacity:0; transform:translate(var(--fx),var(--fy)) scale(0.4); }
+      30% { opacity:1; } 100% { opacity:0; transform:translate(0,0) scale(1); } }
+
+    .hi { font-size:42px; font-weight:700; letter-spacing:-1.6px; line-height:1.04; min-height:48px; }
+    .hi .cursor { display:inline-block; width:5px; height:30px; background:#fff; margin-left:3px;
+      vertical-align:-2px; box-shadow:0 0 8px var(--glow); animation:blink .9s steps(1) infinite; }
+    @keyframes blink { 0%,50% { opacity:1; } 51%,100% { opacity:0; } }
+    .hi-sub { margin-top:14px; font-size:13px; font-weight:500; letter-spacing:0.2em;
+      text-transform:uppercase; color:var(--ink-soft); opacity:0; transition:opacity .5s ease .1s; }
+    .hi-sub.on { opacity:1; }
+
+    /* ── Apple-style bento feature cards ── */
+    .bento { display:flex; flex-direction:column; gap:12px; width:100%; max-width:320px; }
+    .bcard { display:flex; align-items:center; gap:15px; text-align:left;
+      padding:18px 18px; border-radius:22px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.028));
+      border:1px solid rgba(255,255,255,0.10);
+      box-shadow:0 1px 0 rgba(255,255,255,0.08) inset, 0 16px 40px rgba(0,0,0,0.42);
+      opacity:0; transform:translateY(18px) scale(0.97); }
+    .scene.on .bcard { animation:bIn .65s cubic-bezier(.22,1,.36,1) forwards; }
+    .scene.on .bcard:nth-child(2) { animation-delay:.16s; }
+    .scene.on .bcard:nth-child(3) { animation-delay:.32s; }
+    @keyframes bIn { to { opacity:1; transform:none; } }
+    .b-ico { width:46px; height:46px; min-width:46px; border-radius:14px; display:flex;
+      align-items:center; justify-content:center;
+      background:linear-gradient(155deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03));
+      border:1px solid rgba(214,219,226,0.28);
+      box-shadow:0 1px 0 rgba(255,255,255,0.12) inset, 0 3px 8px rgba(0,0,0,0.35); }
+    .b-ico svg { width:22px; height:22px; stroke:#E2E6EC; fill:none; stroke-width:1.8;
+      stroke-linecap:round; stroke-linejoin:round; }
+    .b-name { font-size:15.5px; font-weight:700; letter-spacing:-0.2px; }
+    .b-copy { margin-top:3px; font-size:12.5px; line-height:17px; color:var(--ink-faint); letter-spacing:-0.05px; }
+
+    /* ── DNA helix — the Mr-DNA moment ── */
+    .helix-wrap { position:relative; width:110px; height:230px; margin-bottom:30px;
+      perspective:600px; }
+    .rung { position:absolute; left:50%; top:calc(var(--i) * 16px + 8px); width:96px; height:2px;
+      margin-left:-48px; transform-origin:50% 50%;
+      animation:rungSpin 3.4s linear infinite; animation-delay:calc(var(--i) * -0.243s); }
+    .rung::before, .rung::after { content:""; position:absolute; top:50%; margin-top:-3.5px;
+      width:7px; height:7px; border-radius:50%; }
+    .rung::before { left:-2px; background:radial-gradient(circle at 35% 30%, #fff, #B6BCC8 70%);
+      box-shadow:0 0 8px rgba(226,231,238,0.8); }
+    .rung::after { right:-2px; background:radial-gradient(circle at 35% 30%, #E2E6EC, #71767F 75%);
+      box-shadow:0 0 6px rgba(196,201,210,0.55); }
+    .rung .bar { position:absolute; inset:0 8px; top:0; height:2px; border-radius:2px;
+      background:linear-gradient(90deg, rgba(238,241,246,0.85), rgba(120,126,136,0.35), rgba(238,241,246,0.85)); }
+    @keyframes rungSpin { from { transform:rotateY(0deg); } to { transform:rotateY(360deg); } }
+    .dna-line { max-width:290px; font-size:17px; line-height:26px; font-weight:600;
+      letter-spacing:-0.3px; color:var(--ink); }
+    .dna-line .soft { color:var(--ink-faint); font-weight:500; }
+
+    /* ── Permissions ── */
+    .perm-title { font-size:30px; font-weight:700; letter-spacing:-1px; }
+    .perm-copy { margin-top:8px; font-size:13px; line-height:19px; color:var(--ink-faint);
+      max-width:270px; }
+    .perm-list { margin-top:26px; display:flex; flex-direction:column; gap:11px; width:100%; max-width:320px; }
+    .prow { display:flex; align-items:center; gap:13px; text-align:left; padding:14px 15px;
+      border-radius:18px; background:linear-gradient(180deg, rgba(255,255,255,0.065), rgba(255,255,255,0.022));
+      border:1px solid rgba(255,255,255,0.09);
+      box-shadow:0 1px 0 rgba(255,255,255,0.07) inset, 0 10px 26px rgba(0,0,0,0.36);
+      opacity:0; transform:translateY(14px); }
+    .scene.on .prow { animation:bIn .55s cubic-bezier(.22,1,.36,1) forwards; }
+    .scene.on .prow:nth-child(2) { animation-delay:.12s; }
+    .scene.on .prow:nth-child(3) { animation-delay:.24s; }
+    .p-ico { width:38px; height:38px; min-width:38px; border-radius:11px; display:flex;
+      align-items:center; justify-content:center;
+      background:linear-gradient(155deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03));
+      border:1px solid rgba(214,219,226,0.26); }
+    .p-ico svg { width:18px; height:18px; stroke:#E2E6EC; fill:none; stroke-width:1.9;
+      stroke-linecap:round; stroke-linejoin:round; }
+    .p-body { flex:1; min-width:0; }
+    .p-name { font-size:14px; font-weight:700; letter-spacing:-0.15px; }
+    .p-copy { margin-top:2px; font-size:11.5px; color:var(--ink-faint); letter-spacing:-0.05px; }
+    .p-btn { padding:8px 15px; border-radius:999px; border:1px solid rgba(214,219,226,0.35);
+      background:linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
+      color:#fff; font-family:inherit; font-size:12px; font-weight:700; cursor:pointer;
+      letter-spacing:-0.1px; transition:transform .14s, border-color .2s, background .2s, box-shadow .25s;
+      min-width:74px; }
+    .p-btn:active { transform:scale(0.94); }
+    .p-btn.granted { background:linear-gradient(180deg, #ffffff, #E4E8EF); color:#0A0B0E;
+      border-color:transparent; box-shadow:0 0 18px rgba(226,231,238,0.30); pointer-events:none; }
+    .p-btn.blocked { opacity:0.45; pointer-events:none; }
+
+    .begin { margin-top:30px; display:flex; align-items:center; gap:9px; padding:16px 34px;
+      border-radius:999px; border:none; background:linear-gradient(180deg, #ffffff, #E4E8EF);
+      color:#0A0B0E; font-family:inherit; font-size:15.5px; font-weight:800; letter-spacing:-0.2px;
+      cursor:pointer; box-shadow:0 18px 44px rgba(255,255,255,0.13);
+      opacity:0; transform:translateY(12px);
+      transition:transform .15s cubic-bezier(.22,1,.36,1); }
+    .scene.on .begin { animation:bIn .55s .4s cubic-bezier(.22,1,.36,1) forwards; }
+    .begin:active { transform:scale(0.96); }
+    .begin svg { width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2.4;
+      stroke-linecap:round; stroke-linejoin:round; }
+
+    .tap-note { position:absolute; left:0; right:0; bottom:6px; text-align:center;
+      font-size:11px; font-weight:700; letter-spacing:0.22em; text-transform:uppercase;
+      color:rgba(255,255,255,0.42); z-index:12; pointer-events:none;
+      animation:tapPulse 2.6s ease-in-out infinite; transition:opacity .3s; }
+    .tap-note.off { opacity:0; }
+    @keyframes tapPulse { 0%,100% { opacity:0.35; } 50% { opacity:0.75; } }
+
+    /* leaving veil — same warp language as the launch screen */
+    .leave-veil { position:absolute; inset:0; z-index:40; pointer-events:none; opacity:0;
+      background:radial-gradient(circle at 50% 42%, rgba(255,255,255,0.95) 0%, rgba(206,212,222,0.5) 15%, rgba(0,0,0,0) 45%, #000 75%);
+      transition:opacity .5s ease; }
+    body.leaving .leave-veil { opacity:1; }
+    body.leaving .frame { opacity:0; transform:scale(1.06);
+      transition:opacity .35s ease, transform .5s cubic-bezier(0.4,0,0.2,1); }
+
+    @media (max-width:460px) { .notch, .home-indicator { display:none; } }
+    @media (max-height:720px) {
+      .orb { width:120px; height:120px; margin-bottom:24px; }
+      .hi { font-size:34px; }
+      .helix-wrap { height:180px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .orb-ring, .orb-core, .rung, .tap-note { animation:none !important; }
+      .scene, .scene .bcard, .scene .prow, .scene .begin { transition:opacity .2s !important;
+        animation:none !important; opacity:1 !important; transform:none !important; }
+      .scene:not(.on) { opacity:0 !important; }
+    }
+  </style>
+</head>
+<body data-font="apple">
+  <div class="phone">
+    <div class="bg"></div>
+    <div class="stars" id="stars"></div>
+    <div class="grain"></div>
+    <div class="leave-veil" aria-hidden="true"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="frame">
+      <div class="topbar">
+        <div class="brand" aria-label="CORE">
+          <span class="dot" aria-hidden="true"></span>
+          <span class="wm">CORE</span>
+        </div>
+        <button class="skip" id="skipBtn" data-i18n="corbit.skip">Skip intro</button>
+      </div>
+
+      <div class="stage" id="stage">
+
+        <!-- SCENE 0 — the orb assembles, Corbit says hi -->
+        <section class="scene on" data-scene="0">
+          <div class="orb" id="orb">
+            <span class="orb-ring r2"></span>
+            <span class="orb-ring r1"></span>
+            <span class="orb-core"></span>
+          </div>
+          <h1 class="hi"><span id="hiTyped"></span><span class="cursor" aria-hidden="true"></span></h1>
+          <div class="hi-sub" id="hiSub" data-i18n="corbit.sub">Your coach. Built into CORE.</div>
+        </section>
+
+        <!-- SCENE 1 — what Corbit does (bento) -->
+        <section class="scene" data-scene="1">
+          <div class="bento">
+            <div class="bcard">
+              <div class="b-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.5"/><path d="M12 3.5V7M12 17v3.5M3.5 12H7M17 12h3.5"/></svg></div>
+              <div><div class="b-name" data-i18n="corbit.f1t">Learns you</div>
+                <div class="b-copy" data-i18n="corbit.f1c">Every answer tunes your plan. Nothing generic.</div></div>
+            </div>
+            <div class="bcard">
+              <div class="b-ico"><svg viewBox="0 0 24 24"><path d="M12 3l2.1 5.4L20 10l-5 3.7 1.6 6L12 16.2 7.4 19.7 9 13.7 4 10l5.9-1.6z"/></svg></div>
+              <div><div class="b-name" data-i18n="corbit.f2t">Guides every step</div>
+                <div class="b-copy" data-i18n="corbit.f2c">Stuck on a question? I'll appear with the answer.</div></div>
+            </div>
+            <div class="bcard">
+              <div class="b-ico"><svg viewBox="0 0 24 24"><rect x="9" y="3.5" width="6" height="10.5" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><path d="M12 17.5V21"/></svg></div>
+              <div><div class="b-name" data-i18n="corbit.f3t">Knows your voice</div>
+                <div class="b-copy" data-i18n="corbit.f3c">Say one line and I'll recognise you from then on.</div></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SCENE 2 — the DNA moment -->
+        <section class="scene" data-scene="2">
+          <div class="helix-wrap" id="helix" aria-hidden="true"></div>
+          <p class="dna-line" data-i18n="corbit.dna">Your plan is built from your DNA — the answers you give in the next two minutes.</p>
+        </section>
+
+        <!-- SCENE 3 — permissions + begin -->
+        <section class="scene" data-scene="3">
+          <h2 class="perm-title" data-i18n="corbit.permT">A few permissions.</h2>
+          <p class="perm-copy" data-i18n="corbit.permC">Only what makes me useful. Deny anything — I adapt.</p>
+          <div class="perm-list">
+            <div class="prow">
+              <div class="p-ico"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></div>
+              <div class="p-body"><div class="p-name" data-i18n="corbit.notif">Notifications</div>
+                <div class="p-copy" data-i18n="corbit.notifC">Nudges on the days you slip</div></div>
+              <button class="p-btn" id="permNotif" data-i18n="corbit.allow">Allow</button>
+            </div>
+            <div class="prow">
+              <div class="p-ico"><svg viewBox="0 0 24 24"><rect x="9" y="3.5" width="6" height="10.5" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><path d="M12 17.5V21"/></svg></div>
+              <div class="p-body"><div class="p-name" data-i18n="corbit.mic">Microphone</div>
+                <div class="p-copy" data-i18n="corbit.micC">So I can learn your voice</div></div>
+              <button class="p-btn" id="permMic" data-i18n="corbit.allow">Allow</button>
+            </div>
+            <div class="prow">
+              <div class="p-ico"><svg viewBox="0 0 24 24"><path d="M4 10v4M8 7v10M12 4v16M16 7v10M20 10v4"/></svg></div>
+              <div class="p-body"><div class="p-name" data-i18n="corbit.voice">Corbit's voice</div>
+                <div class="p-copy" data-i18n="corbit.voiceC">I speak my tips out loud</div></div>
+              <button class="p-btn" id="permVoice" data-i18n="corbit.allow">Allow</button>
+            </div>
+          </div>
+          <button class="begin" id="beginBtn">
+            <span data-i18n="corbit.begin">Let's begin</span>
+            <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+        </section>
+      </div>
+
+      <div class="tap-note" id="tapNote" data-i18n="corbit.tap">Tap to continue</div>
+    </div>
+  </div>
+
+<script>
+  function track(name, props) { try { if (window.coreTrack) window.coreTrack(name, props || {}); } catch (e) {} }
+  var T = function (k, fb) { try { var v = window.coreI18n && coreI18n.t(k); return v ? v.replace(/<[^>]+>/g, '') : fb; } catch (e) { return fb; } };
+
+  // ── stars (same quiet field as the launch screen) ──
+  (function () {
+    var wrap = document.getElementById('stars'); if (!wrap) return;
+    for (var i = 0; i < 54; i++) {
+      var s = document.createElement('div');
+      var r = Math.random();
+      s.className = 'star';
+      s.style.width = s.style.height = (r < 0.7 ? 1 : r < 0.94 ? 1.5 : 2) + 'px';
+      s.style.left = (Math.random() * 100) + '%';
+      s.style.top = (Math.random() * 100) + '%';
+      s.style.setProperty('--d', (4 + Math.random() * 6) + 's');
+      s.style.setProperty('--del', (Math.random() * 6) + 's');
+      s.style.setProperty('--min', (0.04 + Math.random() * 0.10).toFixed(2));
+      s.style.setProperty('--max', (0.30 + Math.random() * 0.25).toFixed(2));
+      wrap.appendChild(s);
+    }
+  })();
+
+  // ── DNA helix rungs ──
+  (function () {
+    var h = document.getElementById('helix'); if (!h) return;
+    for (var i = 0; i < 14; i++) {
+      var r = document.createElement('div');
+      r.className = 'rung';
+      r.style.setProperty('--i', i);
+      r.innerHTML = '<span class="bar"></span>';
+      h.appendChild(r);
+    }
+  })();
+
+  // ── orb build: dust converges into the core ──
+  (function () {
+    var orb = document.getElementById('orb'); if (!orb) return;
+    for (var i = 0; i < 22; i++) {
+      var d = document.createElement('span');
+      d.className = 'orb-dust';
+      var a = Math.random() * Math.PI * 2, dist = 90 + Math.random() * 110;
+      d.style.left = '50%'; d.style.top = '50%';
+      d.style.setProperty('--fx', (Math.cos(a) * dist).toFixed(0) + 'px');
+      d.style.setProperty('--fy', (Math.sin(a) * dist).toFixed(0) + 'px');
+      d.style.animationDelay = (Math.random() * 0.7) + 's';
+      orb.appendChild(d);
+      (function (el) { setTimeout(function () { el.remove(); }, 2200); })(d);
+    }
+  })();
+
+  // ── Corbit speaks (only if its voice is on) ──
+  function corbitSpeak(text) {
+    try {
+      if (localStorage.getItem('coreCorbitVoice') !== '1' || !window.speechSynthesis) return;
+      var u = new SpeechSynthesisUtterance(text);
+      u.rate = 1.05; u.pitch = 1.1; u.volume = 0.9;
+      speechSynthesis.cancel(); speechSynthesis.speak(u);
+    } catch (e) {}
+  }
+
+  // ── typewriter for "Hi. I'm Corbit." ──
+  (function () {
+    var el = document.getElementById('hiTyped'), sub = document.getElementById('hiSub');
+    var text = T('corbit.hi', "Hi. I'm Corbit.");
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) { el.textContent = text; sub.classList.add('on'); return; }
+    var i = 0;
+    setTimeout(function tick() {
+      el.textContent = text.slice(0, ++i);
+      if (i < text.length) setTimeout(tick, 46);
+      else sub.classList.add('on');
+    }, 800);
+  })();
+
+  // ── scene engine — tap anywhere advances (buttons excluded) ──
+  var SCENES = document.querySelectorAll('.scene');
+  var cur = 0;
+  var VOICE_LINES = {
+    1: T('corbit.f2c', "Stuck on a question? I'll appear with the answer."),
+    2: T('corbit.dna', 'Your plan is built from your answers.'),
+    3: T('corbit.permC', 'Only what makes me useful.'),
+  };
+  function goScene(n) {
+    if (n === cur || n < 0 || n >= SCENES.length) return;
+    SCENES[cur].classList.remove('on'); SCENES[cur].classList.add('gone');
+    cur = n;
+    var s = SCENES[cur];
+    s.classList.remove('gone');
+    // force reflow so the enter transition replays
+    void s.offsetWidth;
+    s.classList.add('on');
+    track('corbit_scene', { scene: n });
+    if (VOICE_LINES[n]) corbitSpeak(VOICE_LINES[n]);
+    var note = document.getElementById('tapNote');
+    if (note) note.classList.toggle('off', n === SCENES.length - 1);
+  }
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('button')) return;
+    if (cur < SCENES.length - 1) goScene(cur + 1);
+  });
+
+  // ── permissions — the real asks ──
+  function mark(btn, ok) {
+    btn.classList.add(ok ? 'granted' : 'blocked');
+    btn.textContent = ok ? T('corbit.granted', 'On') : '—';
+  }
+  document.getElementById('permNotif').addEventListener('click', function () {
+    var btn = this;
+    track('perm_notif_asked', {});
+    if (!('Notification' in window)) { mark(btn, false); return; }
+    Notification.requestPermission().then(function (res) {
+      mark(btn, res === 'granted');
+      try { localStorage.setItem('coreNotifAsked', '1'); } catch (e) {}
+    }).catch(function () { mark(btn, false); });
+  });
+  document.getElementById('permMic').addEventListener('click', function () {
+    var btn = this;
+    track('perm_mic_asked', {});
+    if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) { mark(btn, false); return; }
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+      stream.getTracks().forEach(function (t) { t.stop(); });   // permission only — never keep it open
+      mark(btn, true);
+    }).catch(function () { mark(btn, false); });
+  });
+  document.getElementById('permVoice').addEventListener('click', function () {
+    var btn = this;
+    try { localStorage.setItem('coreCorbitVoice', '1'); } catch (e) {}
+    mark(btn, true);
+    track('corbit_voice_on', {});
+    corbitSpeak(T('corbit.hi', "Hi. I'm Corbit.") + ' ' + T('corbit.sub', 'Your coach.'));
+  });
+  // reflect already-granted states
+  (function () {
+    try {
+      if ('Notification' in window && Notification.permission === 'granted') mark(document.getElementById('permNotif'), true);
+      if (localStorage.getItem('coreCorbitVoice') === '1') mark(document.getElementById('permVoice'), true);
+    } catch (e) {}
+  })();
+
+  // ── leave → trial (the trial's fresh-start guard sees us as referrer) ──
+  var _leaving = false;
+  function leave(src) {
+    if (_leaving) return; _leaving = true;
+    track('corbit_intro_done', { via: src });
+    try {
+      localStorage.setItem('coreCorbitIntroSeen', '1');
+      // The trial's Corbit Engine (docked orb + chat sidebar) treats the
+      // intro as done — this page IS the introduction, so no second arrival.
+      localStorage.setItem('corbitIntroDone', '1');
+    } catch (e) {}
+    try { speechSynthesis && speechSynthesis.cancel(); } catch (e) {}
+    document.body.classList.add('leaving');
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    setTimeout(function () { window.location.href = '07-trial.html?fresh=1'; }, reduce ? 150 : 550);
+  }
+  document.getElementById('beginBtn').addEventListener('click', function () { leave('begin'); });
+  document.getElementById('skipBtn').addEventListener('click', function () { leave('skip'); });
+  window.addEventListener('load', function () { track('corbit_intro_viewed', {}); });
+</script>
+</body>
+</html>

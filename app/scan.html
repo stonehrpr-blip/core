@@ -1,0 +1,2001 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script>try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8"/>
+<title>CORE — Scanner</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<style>
+:root{
+  --bg-base:#040408;--bg-card:rgba(255,255,255,0.035);--border:rgba(255,255,255,0.08);
+  --text:#ffffff;--muted:rgba(255,255,255,0.72);--dim:rgba(255,255,255,0.45);--blue:#AEB6C4;--green:#34D399;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{min-height:100vh;background:#000;display:flex;align-items:center;justify-content:center;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif;
+  color:var(--text);-webkit-font-smoothing:antialiased;padding:24px;overflow:hidden;}
+.phone{position:relative;width:390px;height:844px;background:var(--bg-base);border-radius:56px;overflow:hidden;
+  box-shadow:0 40px 100px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.06),0 0 0 10px #0a0a12,0 0 0 11px #2b2b38;}
+.notch{position:absolute;top:14px;left:50%;transform:translateX(-50%);width:124px;height:32px;background:#000;border-radius:20px;z-index:60;}
+.home-indicator{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;background:rgba(245,247,251,0.55);border-radius:999px;z-index:60;}
+#ambBg{position:absolute;inset:0;z-index:0;
+  background:
+    radial-gradient(60% 35% at 50% 30%, color-mix(in srgb, var(--sc,#2F8FFF) 20%, transparent) 0%, transparent 55%),
+    radial-gradient(50% 30% at 50% 100%, rgba(159,143,255,0.10) 0%, transparent 65%),
+    linear-gradient(180deg,#060B26 0%,#040408 50%,#050510 100%);transition:background 2.4s ease;}
+/* Drifting aurora veil — matches the dashboard / strength pages */
+#ambAurora{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0.45;mix-blend-mode:screen;}
+#ambAurora::before,#ambAurora::after{content:"";position:absolute;border-radius:50%;filter:blur(40px);will-change:transform,opacity;transform:translateZ(0);}
+#ambAurora::before{width:80%;height:45%;left:-10%;top:8%;background:radial-gradient(circle, color-mix(in srgb, var(--sc,#2F8FFF) 55%, transparent), transparent 70%);animation:auroraDriftA 24s ease-in-out infinite;}
+#ambAurora::after{width:70%;height:40%;right:-10%;bottom:16%;background:radial-gradient(circle,rgba(159,143,255,0.50),transparent 70%);animation:auroraDriftB 30s ease-in-out -15s infinite;}
+@keyframes auroraDriftA{0%,100%{transform:translate(0,0) scale(1);opacity:0.45;}50%{transform:translate(40px,-22px) scale(1.12);opacity:0.75;}}
+@keyframes auroraDriftB{0%,100%{transform:translate(0,0) scale(1);opacity:0.40;}50%{transform:translate(-30px,18px) scale(1.10);opacity:0.70;}}
+@media (prefers-reduced-motion:reduce){#ambAurora::before,#ambAurora::after{animation:none!important;}}
+
+.frame{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;padding-top:54px;}
+.top{display:flex;align-items:center;gap:12px;padding:6px 18px 4px;flex-shrink:0;}
+.back{width:38px;height:38px;flex:none;border-radius:50%;border:1px solid var(--border);background:rgba(255,255,255,0.06);
+  color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s;text-decoration:none;}
+.back:active{transform:scale(.94);}.back svg{width:18px;height:18px;}
+.top h1{font-size:16px;font-weight:800;letter-spacing:-0.3px;}
+
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 20px 28px;}
+.scroll::-webkit-scrollbar{display:none;}
+
+.hero{display:flex;flex-direction:column;align-items:center;text-align:center;padding:18px 0 8px;}
+.hero .ic{width:96px;height:96px;border-radius:28px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;
+  color:var(--sc,#AEB6C4);
+  background:color-mix(in srgb, var(--sc,#AEB6C4) 16%, transparent);
+  border:1px solid color-mix(in srgb, var(--sc,#AEB6C4) 38%, transparent);
+  box-shadow:0 0 36px color-mix(in srgb, var(--sc,#AEB6C4) 26%, transparent);}
+.hero .ic svg{width:46px;height:46px;}
+.hero h2{font-size:26px;font-weight:800;letter-spacing:-0.6px;}
+.hero p{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.5;max-width:280px;}
+.badge{display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-size:10px;font-weight:800;letter-spacing:.08em;
+  text-transform:uppercase;padding:5px 11px;border-radius:999px;
+  background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.34);color:var(--green);}
+.badge .d{width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 6px currentColor;}
+
+.sec{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:24px 2px 10px;}
+.card{border-radius:18px;background:rgba(4,4,18,0.40);border:1px solid var(--border);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:6px 4px;}
+.row{display:flex;align-items:flex-start;gap:12px;padding:13px 14px;border-bottom:1px solid rgba(255,255,255,0.05);}
+.row:last-child{border-bottom:none;}
+.row .ck{width:22px;height:22px;flex:none;border-radius:7px;display:flex;align-items:center;justify-content:center;margin-top:1px;
+  color:var(--sc,#AEB6C4);background:color-mix(in srgb, var(--sc,#AEB6C4) 14%, transparent);}
+.row .ck svg{width:13px;height:13px;}
+.row span{font-size:13.5px;line-height:1.45;color:#D7DCEA;}
+
+.cta{width:100%;margin-top:22px;border:none;border-radius:18px;padding:16px;font:inherit;font-size:15px;font-weight:800;
+  cursor:pointer;color:#02030A;background:var(--sc,#AEB6C4);box-shadow:0 12px 30px color-mix(in srgb, var(--sc,#AEB6C4) 34%, transparent);
+  display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .12s;}
+.cta:active{transform:scale(.98);}.cta svg{width:17px;height:17px;}
+.note{text-align:center;font-size:11.5px;color:var(--dim);margin-top:12px;line-height:1.5;}
+
+.last{margin-top:18px;border-radius:18px;border:1px solid var(--border);background:rgba(4,4,18,0.4);padding:14px 16px;
+  display:none;align-items:center;gap:14px;}
+.last.show{display:flex;}
+.last .ls-ring{width:46px;height:46px;flex:none;}
+.last .ls-meta{flex:1;}
+.last .ls-k{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.last .ls-v{font-size:14px;font-weight:700;margin-top:2px;}
+
+/* ── Camera scanner overlay ─────────────────────────────────────────── */
+.cam{position:absolute;inset:0;z-index:90;background:#000;display:none;flex-direction:column;}
+.cam.on{display:flex;}
+.cam video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000;}
+.cam.front video{transform:scaleX(-1);}
+.cam canvas{display:none;}
+.cam-shade{position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 42%,transparent 40%,rgba(0,0,0,0.55) 100%);pointer-events:none;}
+.cam-top{position:absolute;top:0;left:0;right:0;z-index:3;display:flex;align-items:center;justify-content:space-between;
+  padding:58px 18px 0;}
+.cam-x{width:38px;height:38px;border-radius:50%;border:none;background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);
+  color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.cam-x svg{width:18px;height:18px;}
+.cam-tt{font-size:13px;font-weight:800;letter-spacing:.02em;background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);
+  padding:7px 13px;border-radius:999px;}
+.cam-flip{width:38px;height:38px;border-radius:50%;border:none;background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);
+  color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.cam-flip svg{width:18px;height:18px;}
+/* framing guide */
+.reticle{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);z-index:2;pointer-events:none;
+  width:230px;height:300px;border-radius:26px;
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--sc,#AEB6C4) 75%,transparent);}
+.reticle.oval{width:220px;height:280px;border-radius:50%;}
+.reticle.wide{width:280px;height:200px;border-radius:22px;}
+.reticle::before,.reticle::after{content:"";position:absolute;width:26px;height:26px;border:3px solid #fff;}
+.reticle::before{left:-2px;top:-2px;border-right:none;border-bottom:none;border-radius:8px 0 0 0;}
+.reticle::after{right:-2px;bottom:-2px;border-left:none;border-top:none;border-radius:0 0 8px 0;}
+.scanline{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);z-index:2;pointer-events:none;
+  width:230px;height:300px;overflow:hidden;border-radius:26px;display:none;}
+.scanning .scanline{display:block;}
+.scanline i{position:absolute;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,transparent,var(--sc,#AEB6C4),transparent);
+  box-shadow:0 0 16px 3px color-mix(in srgb,var(--sc,#AEB6C4) 70%,transparent);
+  animation:sweep 1.5s ease-in-out infinite;}
+@keyframes sweep{0%{top:4%;}50%{top:94%;}100%{top:4%;}}
+.cam-hint{position:absolute;left:0;right:0;bottom:152px;z-index:3;text-align:center;font-size:13.5px;font-weight:600;
+  color:#fff;padding:0 30px;text-shadow:0 1px 10px rgba(0,0,0,0.6);}
+/* shutter */
+.cam-bottom{position:absolute;left:0;right:0;bottom:46px;z-index:3;display:flex;align-items:center;justify-content:center;}
+.shutter{width:74px;height:74px;border-radius:50%;border:4px solid rgba(255,255,255,0.85);background:transparent;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .12s;}
+.shutter:active{transform:scale(.92);}
+.cam.cam-needstart .shutter{animation:shPulse 1.4s ease-in-out infinite;}
+@keyframes shPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.45)}50%{box-shadow:0 0 0 12px rgba(255,255,255,0)}}
+.shutter i{width:56px;height:56px;border-radius:50%;background:#fff;transition:.15s;}
+.scanning .shutter{opacity:.4;pointer-events:none;}
+/* voice mode */
+.cam.voice video,.cam.voice .reticle,.cam.voice .scanline,.cam.voice .cam-shade,.cam.voice .cam-flip{display:none;}
+.cam.voice{background:radial-gradient(70% 50% at 50% 38%,color-mix(in srgb,var(--sc,#AEB6C4) 22%,#05050d),#04040a);}
+.wave{position:absolute;left:0;right:0;top:40%;transform:translateY(-50%);z-index:2;display:none;align-items:flex-end;justify-content:center;gap:5px;height:120px;}
+.cam.voice .wave{display:flex;}
+.wave b{width:6px;border-radius:3px;background:var(--sc,#AEB6C4);height:10px;box-shadow:0 0 10px color-mix(in srgb,var(--sc,#AEB6C4) 60%,transparent);}
+
+/* ── Physique 360 capture ── */
+#GREEN{--g:#34D399;}
+.phyz{position:absolute;inset:0;z-index:2;display:none;}
+.cam.physique .reticle,.cam.physique .scanline{display:none!important;}
+.cam.physique .phyz{display:block;}
+.phyz-ring{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);width:252px;height:252px;}
+.phyz-svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);}
+.phyz-svg circle{fill:none;stroke-width:5;}
+.pr-bg{stroke:rgba(255,255,255,0.16);}
+.pr-fg{stroke:#34D399;stroke-linecap:round;stroke-dasharray:590.6;stroke-dashoffset:590.6;
+  transition:stroke-dashoffset .55s cubic-bezier(.22,1,.36,1);filter:drop-shadow(0 0 7px rgba(52,211,153,.7));}
+.phyz-guide{position:absolute;inset:16px;border-radius:50%;border:2px dashed rgba(255,255,255,0.55);}
+.phyz-body{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:78px;height:118px;color:rgba(255,255,255,0.5);}
+.phyz-body svg{width:100%;height:100%;}
+.phyz-bar{position:absolute;left:18px;right:18px;height:4px;border-radius:4px;top:18px;display:none;
+  background:linear-gradient(90deg,transparent,#34D399,transparent);box-shadow:0 0 18px 4px rgba(52,211,153,.65);}
+.cam.phyz-scanning .phyz-bar{display:block;animation:phyzSweep 1.5s ease-in-out infinite;}
+@keyframes phyzSweep{0%{top:20px;}50%{top:228px;}100%{top:20px;}}
+.cam.phyz-scanning .phyz-guide{border-color:rgba(52,211,153,0.6);}
+.phyz-count{position:absolute;left:0;right:0;top:calc(40% + 150px);text-align:center;color:#fff;font-size:34px;font-weight:900;
+  text-shadow:0 2px 14px rgba(0,0,0,.6);min-height:42px;}
+.phyz-dots{position:absolute;left:0;right:0;bottom:128px;display:flex;justify-content:center;gap:10px;}
+.phyz-dots .pd{width:30px;height:5px;border-radius:3px;background:rgba(255,255,255,0.22);transition:.3s;}
+.phyz-dots .pd.on{background:#34D399;box-shadow:0 0 10px rgba(52,211,153,.7);}
+.phyz-flash{position:absolute;inset:0;z-index:4;background:#fff;animation:phyzFlash .25s ease forwards;pointer-events:none;}
+@keyframes phyzFlash{from{opacity:.85;}to{opacity:0;}}
+/* result snapshot gallery (4 angles) */
+.snap-row{display:flex;gap:7px;justify-content:center;margin-bottom:6px;}
+.snap-cell{flex:1;max-width:74px;text-align:center;}
+.snap-cell img{width:100%;aspect-ratio:.62;object-fit:cover;border-radius:10px;border:1px solid var(--border);background:#05050c;display:block;}
+.snap-ph{width:100%;aspect-ratio:.62;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid var(--border);}
+.nb-ic{width:70px;height:70px;margin:8px auto 14px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  color:var(--sc,#FF6B6B);background:color-mix(in srgb,var(--sc,#FF6B6B) 14%,transparent);border:1px solid color-mix(in srgb,var(--sc,#FF6B6B) 32%,transparent);}
+.nb-ic svg{width:34px;height:34px;}
+.snap-cell span{display:block;font-size:8.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:4px;}
+
+/* analyzing overlay */
+.analyze{position:absolute;inset:0;z-index:95;background:rgba(3,4,12,0.86);backdrop-filter:blur(14px);
+  display:none;flex-direction:column;align-items:center;justify-content:center;gap:22px;}
+.analyze.on{display:flex;}
+.analyze .ring{width:128px;height:128px;}
+.analyze .ring circle{fill:none;stroke-width:8;stroke-linecap:round;}
+.analyze .ring .bg{stroke:rgba(255,255,255,0.08);}
+.analyze .ring .fg{stroke:var(--sc,#AEB6C4);transform:rotate(-90deg);transform-origin:50% 50%;
+  transition:stroke-dashoffset .2s linear;filter:drop-shadow(0 0 8px color-mix(in srgb,var(--sc,#AEB6C4) 60%,transparent));}
+.analyze .pct{font-size:26px;font-weight:800;}
+.analyze .lbl{font-size:13px;color:var(--muted);font-weight:600;}
+
+/* result sheet */
+.result,.organizer{position:absolute;inset:0;z-index:96;background:linear-gradient(180deg,#0c0d16,#06070e);
+  display:none;flex-direction:column;padding:64px 22px calc(28px + env(safe-area-inset-bottom));overflow-y:auto;}
+.result.on,.organizer.on{display:flex;animation:resIn .4s ease both;}
+.organizer{z-index:97;}
+.org-h{text-align:center;font-size:23px;font-weight:900;letter-spacing:-.5px;margin-top:6px;}
+.org-sub{text-align:center;font-size:12.5px;color:var(--muted);margin-top:7px;line-height:1.5;}
+.org-sub b{color:#cfd6e6;}
+.oslots{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:20px;}
+.oslot{position:relative;aspect-ratio:.74;border-radius:16px;overflow:hidden;cursor:pointer;font:inherit;color:#fff;
+  -webkit-appearance:none;appearance:none;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+  transition:transform .12s,border-color .15s;}
+.oslot:active{transform:scale(.98);}
+.oslot.empty{border:1.5px dashed rgba(255,255,255,0.18);background:rgba(255,255,255,0.03);}
+.oslot.empty .plus{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#9aa1b7;animation:slotPulse 2s ease-in-out infinite;}
+.oslot.empty .plus svg{width:20px;height:20px;}
+@keyframes slotPulse{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.08);opacity:1}}
+.oslot.filled{border:1px solid var(--border);background:#05050c;animation:slotIn .45s cubic-bezier(.22,1,.36,1) both;}
+@keyframes slotIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+.oslot.filled img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+.oslot .ok{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:50%;background:#34d399;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(52,211,153,.5);}
+.oslot .ok svg{width:14px;height:14px;color:#04130c;stroke-width:3;}
+.oslot .re{position:absolute;top:8px;left:8px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.5);
+  display:flex;align-items:center;justify-content:center;}.oslot .re svg{width:13px;height:13px;color:#fff;}
+.oslot .ol{position:relative;z-index:2;font-size:11.5px;font-weight:800;letter-spacing:.04em;}
+.oslot.filled .ol{position:absolute;left:0;right:0;bottom:0;padding:14px 8px 8px;text-align:center;
+  background:linear-gradient(180deg,transparent,rgba(0,0,0,.72));}
+.org-actions{display:flex;flex-direction:column;gap:10px;margin-top:22px;}
+.org-sorting{display:flex;flex-direction:column;align-items:center;gap:14px;padding:50px 0;}
+.org-spin{width:42px;height:42px;border-radius:50%;border:3px solid rgba(255,255,255,0.12);border-top-color:var(--sc);animation:ospin .8s linear infinite;}
+@keyframes ospin{to{transform:rotate(360deg)}}
+
+/* ── Voice Coach ── */
+.vc-intro-hero{text-align:center;margin-top:6px;}
+.vc-ic{width:84px;height:84px;border-radius:24px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(120% 120% at 30% 20%, color-mix(in srgb,var(--sc) 30%,transparent), color-mix(in srgb,var(--sc) 9%,transparent));
+  border:1px solid color-mix(in srgb,var(--sc) 45%,transparent);box-shadow:0 0 50px color-mix(in srgb,var(--sc) 26%,transparent);}
+.vc-ic svg{width:38px;height:38px;color:var(--sc);}
+.vc-intro-hero h2{font-size:25px;font-weight:900;letter-spacing:-.5px;}
+.vc-intro-hero p{font-size:13.5px;color:var(--muted);margin-top:8px;line-height:1.5;max-width:300px;margin-left:auto;margin-right:auto;}
+.vc-sec{display:flex;align-items:center;justify-content:space-between;font-size:10.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:22px 2px 11px;}
+.vc-sec .all{color:var(--sc);letter-spacing:.02em;text-transform:none;font-size:12.5px;cursor:pointer;background:none;border:none;font-weight:700;-webkit-appearance:none;appearance:none;}
+.vc-cards{display:flex;flex-direction:column;gap:10px;}
+.vc-card{display:block;width:100%;text-align:left;border-radius:16px;border:1px solid var(--border);background:rgba(255,255,255,0.04);
+  padding:15px 16px;cursor:pointer;font:inherit;color:#fff;-webkit-appearance:none;appearance:none;transition:transform .12s,border-color .15s,background .15s;}
+.vc-card:active{transform:scale(.99);background:rgba(255,255,255,0.07);}
+.vc-card .t{display:flex;align-items:center;gap:9px;font-size:16px;font-weight:800;}
+.vc-card .dot{width:9px;height:9px;border-radius:50%;flex:none;box-shadow:0 0 8px currentColor;}
+.vc-card .d{font-size:13px;color:var(--muted);margin-top:5px;line-height:1.45;}
+.vc-recent{display:flex;flex-direction:column;gap:10px;}
+.vc-rcard{display:flex;gap:12px;align-items:center;width:100%;text-align:left;border-radius:16px;border:1px solid var(--border);
+  background:rgba(255,255,255,0.04);padding:12px;cursor:pointer;font:inherit;color:#fff;-webkit-appearance:none;appearance:none;}
+.vc-rscore{width:50px;height:50px;flex:none;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:19px;}
+.vc-rmeta{flex:1;min-width:0;}
+.vc-rtitle{font-size:13.5px;color:#e7ecf6;font-weight:600;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.vc-rtag{display:inline-block;font-size:10px;font-weight:800;padding:2px 9px;border-radius:99px;margin-top:5px;}
+.vc-rtime{font-size:11px;color:var(--muted);margin-top:5px;}
+.vc-empty{text-align:center;color:var(--muted);font-size:13px;padding:30px 20px;line-height:1.6;border:1px dashed var(--border);border-radius:16px;}
+/* prompt + record stage */
+.vc-stage{position:absolute;inset:0;z-index:97;background:linear-gradient(180deg,#0c0d16,#06070e);display:none;flex-direction:column;
+  padding:64px 22px calc(28px + env(safe-area-inset-bottom));overflow-y:auto;}
+.vc-stage.on{display:flex;animation:resIn .4s ease both;}
+.vc-tagrow{display:flex;justify-content:center;margin-top:4px;}
+.vc-bigtag{font-size:11px;font-weight:800;letter-spacing:.04em;padding:5px 13px;border-radius:99px;}
+.vc-pcard{border-radius:20px;border:1px solid var(--border);background:linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.025));
+  box-shadow:0 10px 30px rgba(0,0,0,0.28);padding:18px;margin-top:16px;}
+.vc-pcard .ph{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--sc);}
+.vc-pcard .ph svg{width:15px;height:15px;}
+.vc-ptext{font-size:16px;line-height:1.55;color:#eef2fa;margin-top:11px;font-weight:500;}
+.vc-how{margin-top:18px;}
+.vc-how .hh{font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.vc-step{display:flex;gap:11px;align-items:flex-start;margin-bottom:11px;}
+.vc-step .n{width:24px;height:24px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;
+  color:var(--sc);background:color-mix(in srgb,var(--sc) 15%,transparent);border:1px solid color-mix(in srgb,var(--sc) 30%,transparent);}
+.vc-step span{font-size:13.5px;color:#cfd6e6;line-height:1.4;padding-top:2px;}
+.vc-rec-wrap{margin-top:auto;padding-top:24px;display:flex;flex-direction:column;align-items:center;gap:12px;}
+.vc-mic{width:88px;height:88px;border-radius:50%;border:none;cursor:pointer;-webkit-appearance:none;appearance:none;
+  display:flex;align-items:center;justify-content:center;background:var(--sc);box-shadow:0 12px 34px color-mix(in srgb,var(--sc) 45%,transparent);transition:transform .12s;}
+.vc-mic:active{transform:scale(.94);}
+.vc-mic svg{width:38px;height:38px;color:#06121f;}
+.vc-mic.rec{background:#ff5a5a;box-shadow:0 0 0 0 rgba(255,90,90,.5);animation:micPulse 1.3s ease-out infinite;}
+@keyframes micPulse{0%{box-shadow:0 0 0 0 rgba(255,90,90,.5)}100%{box-shadow:0 0 0 26px rgba(255,90,90,0)}}
+.vc-rec-lbl{font-size:13px;font-weight:700;color:#cfd6e6;}.vc-rec-lbl b{color:var(--sc);}
+.vc-rec-sub{font-size:11.5px;color:var(--muted);}
+.vc-live{width:100%;min-height:38px;margin-top:6px;font-size:13px;color:#aab2c5;text-align:center;line-height:1.5;font-style:italic;}
+.vc-newp{background:none;border:none;color:var(--sc);font:inherit;font-weight:700;font-size:13px;cursor:pointer;-webkit-appearance:none;appearance:none;display:inline-flex;align-items:center;gap:5px;}
+.vc-newp svg{width:14px;height:14px;}
+.vc-transcript{border-radius:14px;border:1px solid var(--border);background:rgba(255,255,255,0.03);padding:13px 15px;font-size:13px;color:#cfd6e6;line-height:1.6;margin-top:4px;}
+@keyframes resIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+.result::-webkit-scrollbar{display:none;}
+.res-close{position:absolute;top:58px;right:18px;width:38px;height:38px;border-radius:50%;border:1px solid var(--border);
+  background:rgba(255,255,255,0.06);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;}
+.res-close:active{transform:scale(.94);}.res-close svg{width:18px;height:18px;}
+.res-snap{width:120px;height:120px;border-radius:24px;object-fit:cover;align-self:center;margin-bottom:4px;
+  border:1px solid var(--border);background:#05050c;}
+.res-score{display:flex;flex-direction:column;align-items:center;margin:6px 0 6px;}
+.res-ring{width:172px;height:172px;}
+.res-ring circle{fill:none;stroke-width:11;stroke-linecap:round;}
+.res-ring .bg{stroke:rgba(255,255,255,0.08);}
+.res-ring .fg{stroke:var(--sc,#AEB6C4);transform:rotate(-90deg);transform-origin:50% 50%;
+  transition:stroke-dashoffset 1s cubic-bezier(.22,1,.36,1);filter:drop-shadow(0 0 10px color-mix(in srgb,var(--sc,#AEB6C4) 55%,transparent));}
+.res-num{font-size:46px;font-weight:900;letter-spacing:-2px;}
+.res-num small{font-size:16px;font-weight:700;color:var(--muted);}
+.res-grade{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--sc,#AEB6C4);margin-top:-6px;}
+.res-title{text-align:center;font-size:22px;font-weight:800;letter-spacing:-0.5px;margin-top:8px;}
+.res-sub{text-align:center;font-size:13px;color:var(--muted);margin-top:5px;line-height:1.5;}
+.res-sec{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:20px 2px 10px;}
+.tip{display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,0.04);border:1px solid var(--border);
+  border-radius:14px;padding:13px 14px;margin-bottom:9px;}
+.tip .ti{width:26px;height:26px;flex:none;border-radius:9px;display:flex;align-items:center;justify-content:center;
+  color:var(--sc,#AEB6C4);background:color-mix(in srgb,var(--sc,#AEB6C4) 16%,transparent);}
+.tip .ti svg{width:15px;height:15px;}
+.tip span{font-size:13.5px;line-height:1.5;color:#E4E8F2;}
+.res-actions{display:flex;gap:10px;margin-top:18px;}
+.btn{flex:1;border:none;border-radius:16px;padding:15px;font:inherit;font-size:14.5px;font-weight:800;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:7px;transition:transform .12s;}
+.btn:active{transform:scale(.98);}.btn svg{width:16px;height:16px;}
+.btn.save{color:#02030A;background:var(--sc,#AEB6C4);box-shadow:0 10px 26px color-mix(in srgb,var(--sc,#AEB6C4) 30%,transparent);}
+.btn.save.done{background:var(--green);box-shadow:none;}
+.btn.again{color:var(--text);background:rgba(255,255,255,0.06);border:1px solid var(--border);}
+.btn.coach{width:100%;flex:none;margin-top:10px;color:#fff;
+  background:color-mix(in srgb, var(--sc,#AEB6C4) 22%, rgba(255,255,255,0.04));
+  border:1px solid color-mix(in srgb, var(--sc,#AEB6C4) 42%, transparent);}
+
+.toast{position:absolute;left:50%;bottom:40px;transform:translateX(-50%) translateY(10px);z-index:120;
+  background:rgba(10,12,22,0.94);border:1px solid var(--border);color:var(--text);font-size:12.5px;font-weight:600;
+  padding:10px 16px;border-radius:14px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;backdrop-filter:blur(10px);max-width:300px;text-align:center;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+@media(prefers-reduced-motion:reduce){.scanline i,.analyze .ring .fg{animation:none!important;}}
+
+/* ── Physique intro (analysis landing) ───────────────────────── */
+.pq-card{margin-top:20px;border-radius:20px;background:rgba(255,255,255,0.045);border:1px solid var(--border);padding:16px;}
+.pq-prog-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.pq-prog-top .l{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;color:#cfd6e6;}
+.pq-prog-top .l svg{width:15px;height:15px;color:var(--sc);}
+.pq-vh{display:inline-flex;align-items:center;gap:3px;font-size:12.5px;font-weight:700;color:var(--sc);background:none;border:none;cursor:pointer;-webkit-appearance:none;appearance:none;min-height:0;}
+.pq-vh svg{width:14px;height:14px;}
+.pq-stats{display:flex;align-items:stretch;}
+.pq-stat{flex:1;text-align:center;}
+.pq-stat .n{font-size:24px;font-weight:900;letter-spacing:-1px;}
+.pq-stat.best .n{color:var(--sc);}
+.pq-stat .k{font-size:11px;color:var(--muted);font-weight:600;margin-top:2px;}
+.pq-stat+.pq-stat{border-left:1px solid rgba(255,255,255,0.07);}
+.pq-getsec,.pq-tipsec{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:22px 2px 10px;}
+.pq-get{border-radius:20px;background:rgba(255,255,255,0.045);border:1px solid var(--border);overflow:hidden;}
+.pq-grow{display:flex;align-items:center;gap:13px;padding:15px 16px;border-bottom:1px solid rgba(255,255,255,0.05);}
+.pq-grow:last-child{border-bottom:none;}
+.pq-gic{width:40px;height:40px;flex:none;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--sc);
+  background:color-mix(in srgb,var(--sc) 15%,transparent);border:1px solid color-mix(in srgb,var(--sc) 30%,transparent);}
+.pq-gic svg{width:20px;height:20px;}
+.pq-gt{font-size:14.5px;font-weight:700;color:#fff;}
+.pq-gd{font-size:12px;color:var(--muted);margin-top:2px;}
+.pq-tips{border-radius:18px;background:rgba(255,255,255,0.04);border:1px solid var(--border);padding:15px 16px;}
+.pq-tips p{font-size:12.5px;color:var(--muted);line-height:1.75;}
+.pq-tips p b{color:#dfe6f2;font-weight:700;}
+.pq-btns{margin-top:22px;display:flex;flex-direction:column;gap:10px;}
+.pq-take{border:none;border-radius:16px;padding:16px;font:inherit;font-size:15px;font-weight:800;cursor:pointer;-webkit-appearance:none;appearance:none;
+  background:var(--sc);color:#06121f;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 10px 26px color-mix(in srgb,var(--sc) 40%,transparent);}
+.pq-take svg{width:19px;height:19px;}
+.pq-upload{border:1px solid var(--border);border-radius:16px;padding:15px;font:inherit;font-size:14.5px;font-weight:700;cursor:pointer;-webkit-appearance:none;appearance:none;
+  background:rgba(255,255,255,0.05);color:#EAF0FB;display:flex;align-items:center;justify-content:center;gap:9px;}
+.pq-upload svg{width:18px;height:18px;}
+.pq-disc{font-size:11px;color:var(--dim,#6b7280);text-align:center;margin-top:16px;line-height:1.5;}
+.pq-btns button:active{transform:scale(.985);}
+/* cleaner landing: section labels, step strip, tips checklist, helper */
+.pq-sec{font-size:10.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:22px 2px 11px;}
+.pq-sec .h{color:var(--sc);letter-spacing:.04em;}
+.pq-steps{display:flex;gap:8px;}
+.pq-step{flex:1;text-align:center;border-radius:16px;border:1px solid var(--border);background:rgba(255,255,255,0.04);padding:13px 6px 11px;}
+.pq-step .num{width:30px;height:30px;margin:0 auto 8px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#06121f;}
+.pq-step .lb{font-size:11px;font-weight:700;color:#cfd6e6;}
+.pq-tips2{border-radius:18px;background:rgba(255,255,255,0.04);border:1px solid var(--border);padding:5px 3px;}
+.pq-tip{display:flex;align-items:center;gap:11px;padding:9px 13px;}
+.pq-tip .ck{width:22px;height:22px;flex:none;border-radius:7px;display:flex;align-items:center;justify-content:center;
+  background:color-mix(in srgb,#34D399 16%,transparent);color:#34D399;}
+/* Physique = restrained two-colour page: green checks become the blue accent */
+body.type-physique .pq-tip .ck{background:color-mix(in srgb,var(--sc) 16%,transparent);color:var(--sc);}
+body.type-physique .tip .ti{background:color-mix(in srgb,var(--sc) 15%,transparent);color:var(--sc);}
+.pq-tip .ck svg{width:13px;height:13px;}
+.pq-tip span{font-size:13px;color:#dfe6f2;font-weight:600;line-height:1.4;}
+.pq-help{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--muted);font-weight:600;margin-top:12px;}
+.pq-help svg{width:14px;height:14px;color:var(--sc);}
+/* Recipe Generator entry (food scanner only) */
+.pq-recipe{display:flex;align-items:center;gap:13px;margin-top:14px;padding:14px 15px;border-radius:16px;text-decoration:none;
+  border:1px solid color-mix(in srgb,var(--sc) 30%,transparent);background:color-mix(in srgb,var(--sc) 10%,transparent);color:#fff;transition:transform .12s,background .15s;}
+.pq-recipe:active{transform:scale(.99);background:color-mix(in srgb,var(--sc) 16%,transparent);}
+.pq-recipe-ic{width:40px;height:40px;flex:none;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  background:color-mix(in srgb,var(--sc) 20%,transparent);color:var(--sc);}
+.pq-recipe-ic svg{width:20px;height:20px;}
+.pq-recipe-tx{flex:1;min-width:0;}
+.pq-recipe-tx b{display:block;font-size:14.5px;font-weight:800;}
+.pq-recipe-tx span{display:block;font-size:12px;color:var(--muted);margin-top:1px;}
+.pq-recipe>svg:last-child{width:18px;height:18px;color:var(--muted);flex:none;}
+.pq-stat .n.col{color:var(--sc);}
+
+/* ── Physique history panel ───────────────────────── */
+.phist{position:absolute;inset:0;z-index:120;background:linear-gradient(180deg,#080a14,#04050c);display:none;flex-direction:column;}
+.phist.on{display:flex;animation:resIn .35s ease both;}
+.phist-top{display:flex;align-items:center;gap:10px;padding:54px 16px 8px;}
+.phist-top h2{flex:1;text-align:center;font-size:14px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:8px;}
+.phist-top h2 svg{width:17px;height:17px;color:var(--sc);}
+.phist-ic{width:38px;height:38px;flex:none;border-radius:50%;min-height:0;border:1px solid var(--border);background:rgba(255,255,255,0.06);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-appearance:none;appearance:none;padding:0;}
+.phist-ic svg{width:18px;height:18px;}
+.phist-body{flex:1;overflow-y:auto;padding:8px 18px 28px;}
+.phist-body::-webkit-scrollbar{display:none;}
+.ph-h{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:20px 2px 10px;}
+.ph-stats{display:flex;border-radius:16px;border:1px solid var(--border);background:rgba(255,255,255,0.04);overflow:hidden;}
+.ph-st{flex:1;text-align:center;padding:16px 6px;}
+.ph-st+.ph-st{border-left:1px solid rgba(255,255,255,0.07);}
+.ph-st .k{display:flex;align-items:center;justify-content:center;gap:5px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;}
+.ph-st .k svg{width:13px;height:13px;}
+.ph-st .n{font-size:25px;font-weight:900;letter-spacing:-1px;margin-top:5px;}
+.ph-tabs{display:flex;gap:4px;margin-top:10px;background:rgba(255,255,255,0.05);border-radius:13px;padding:4px;}
+.ph-tab{flex:1;text-align:center;padding:9px;border-radius:10px;font:inherit;font-size:13px;font-weight:700;color:var(--muted);background:none;border:none;cursor:pointer;-webkit-appearance:none;appearance:none;min-height:0;}
+.ph-tab.on{background:rgba(255,255,255,0.10);color:#fff;}
+.ph-chart{margin-top:14px;border-radius:18px;border:1px solid var(--border);background:rgba(255,255,255,0.03);padding:14px 14px 10px;}
+.ph-chart svg{width:100%;height:150px;display:block;overflow:visible;}
+.ph-cx{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:8px;}
+.ph-cx b{color:#cfd6e6;font-weight:700;}
+.ph-item{display:flex;align-items:center;gap:12px;border-radius:16px;border:1px solid var(--border);background:rgba(255,255,255,0.04);padding:12px;margin-bottom:10px;}
+.ph-thumb{width:52px;height:52px;flex:none;border-radius:12px;overflow:hidden;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;}
+.ph-thumb img{width:100%;height:100%;object-fit:cover;}
+.ph-thumb svg{width:22px;height:22px;color:var(--muted);}
+.ph-meta{flex:1;min-width:0;}
+.ph-name{font-size:14.5px;font-weight:700;color:#fff;}
+.ph-time{font-size:12px;color:var(--muted);margin-top:2px;}
+.ph-score{flex:none;min-width:54px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;
+  color:var(--sc);background:color-mix(in srgb,var(--sc) 14%,transparent);border:1px solid color-mix(in srgb,var(--sc) 28%,transparent);}
+.ph-del{flex:none;width:44px;height:44px;min-height:0;border-radius:12px;border:1px solid rgba(255,90,90,0.3);background:rgba(255,90,90,0.1);color:#ff6b6b;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-appearance:none;appearance:none;padding:0;}
+.ph-del svg{width:18px;height:18px;}
+.ph-empty{text-align:center;color:var(--muted);font-size:13px;padding:46px 20px;line-height:1.6;}
+
+/* ── premium polish (physique) ── */
+body.pq .hero .ic{width:104px;height:104px;border-radius:30px;
+  background:radial-gradient(120% 120% at 30% 20%, color-mix(in srgb,var(--sc) 30%,transparent), color-mix(in srgb,var(--sc) 10%,transparent));
+  border:1px solid color-mix(in srgb,var(--sc) 45%,transparent);
+  box-shadow:0 0 60px color-mix(in srgb,var(--sc) 30%,transparent), inset 0 1px 0 rgba(255,255,255,0.12);}
+body.pq .hero .ic svg{width:48px;height:48px;filter:drop-shadow(0 4px 12px color-mix(in srgb,var(--sc) 55%,transparent));}
+body.pq .hero h2{font-size:28px;background:linear-gradient(180deg,#fff,#bcd4f5);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.pq-card,.pq-get,.pq-tips{background:linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.025));box-shadow:0 10px 30px rgba(0,0,0,0.28);}
+.pq-take{background:linear-gradient(135deg,var(--sc),color-mix(in srgb,var(--sc) 62%,#0a2f63));}
+.pq-gic{background:linear-gradient(135deg,color-mix(in srgb,var(--sc) 26%,transparent),color-mix(in srgb,var(--sc) 8%,transparent));}
+
+/* result: gradient ring, grade pill, breakdown bars */
+.res-grade{display:inline-block;color:#06121f;background:linear-gradient(90deg,var(--sc),color-mix(in srgb,var(--sc) 50%,#ffffff));
+  padding:5px 15px;border-radius:999px;margin-top:10px;font-size:11px;font-weight:900;letter-spacing:.12em;
+  box-shadow:0 8px 22px color-mix(in srgb,var(--sc) 32%,transparent);}
+.btn.save{background:linear-gradient(135deg,var(--sc),color-mix(in srgb,var(--sc) 62%,#0a2f63));}
+.bd{display:flex;flex-direction:column;gap:13px;background:linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02));
+  border:1px solid var(--border);border-radius:16px;padding:16px;}
+.bd-row{display:flex;align-items:center;gap:12px;}
+.bd-k{width:92px;flex:none;font-size:12.5px;font-weight:700;color:#cfd6e6;}
+.bd-track{flex:1;height:8px;border-radius:99px;background:rgba(255,255,255,0.09);overflow:hidden;}
+.bd-track i{display:block;height:100%;width:0;border-radius:99px;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--sc) 70%,#0a2f63),var(--sc));
+  box-shadow:0 0 10px color-mix(in srgb,var(--sc) 50%,transparent);transition:width 1.1s cubic-bezier(.22,1,.36,1);}
+.bd-v{width:26px;flex:none;text-align:right;font-size:13px;font-weight:800;color:#fff;}
+.snap-cell img,.snap-cell .snap-ph{aspect-ratio:.62;border-radius:12px;}
+.snap-cell img{box-shadow:0 6px 18px rgba(0,0,0,0.35);}
+
+/* ── colour-coded result + percentile ── */
+.res-pct{display:inline-flex;align-items:center;gap:6px;margin-top:9px;font-size:12px;font-weight:700;color:#aab2c5;}
+.res-pct svg{width:14px;height:14px;color:var(--sc);}.res-pct b{color:#fff;font-weight:900;}
+/* glass card surface */
+.glass{background:linear-gradient(180deg,rgba(255,255,255,0.07),rgba(255,255,255,0.02))!important;
+  border:1px solid rgba(255,255,255,0.09)!important;box-shadow:0 12px 34px rgba(0,0,0,0.32),inset 0 1px 0 rgba(255,255,255,0.06)!important;}
+/* bigger ring + glow */
+.res-ring{filter:drop-shadow(0 0 18px color-mix(in srgb,var(--sc) 40%,transparent));}
+/* letter grade + tier pill row */
+.res-letterrow{display:flex;align-items:center;gap:9px;margin-top:2px;}
+.res-letter{width:34px;height:34px;flex:none;border-radius:11px;display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:900;color:#06121f;background:linear-gradient(135deg,var(--sc),color-mix(in srgb,var(--sc) 55%,#fff));
+  box-shadow:0 6px 18px color-mix(in srgb,var(--sc) 38%,transparent);}
+/* percentile bar */
+.res-pctbar{width:210px;max-width:80%;margin-top:13px;}
+.res-pctbar-track{position:relative;height:7px;border-radius:99px;background:rgba(255,255,255,0.09);overflow:visible;}
+.res-pctbar-track i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,color-mix(in srgb,var(--sc) 50%,#0a2f63),var(--sc));box-shadow:0 0 10px color-mix(in srgb,var(--sc) 50%,transparent);transition:width 1s cubic-bezier(.22,1,.36,1);}
+.res-pctbar-dot{position:absolute;top:50%;width:13px;height:13px;border-radius:50%;background:#fff;transform:translate(-50%,-50%);box-shadow:0 0 0 3px color-mix(in srgb,var(--sc) 60%,transparent);}
+.res-pctbar-cap{margin-top:8px;font-size:11.5px;font-weight:700;color:#aab2c5;text-align:center;}.res-pctbar-cap b{color:#fff;font-weight:900;}
+/* radar chart */
+.bd-radar{border-radius:18px;padding:16px 14px 12px;}
+.radar-svg{width:100%;max-width:230px;height:auto;display:block;margin:0 auto;overflow:visible;}
+.radar-poly{filter:drop-shadow(0 0 8px color-mix(in srgb,var(--sc) 45%,transparent));animation:radarIn .7s cubic-bezier(.22,1,.36,1) both;transform-origin:100px 100px;}
+@keyframes radarIn{from{transform:scale(.2);opacity:0;}to{transform:scale(1);opacity:1;}}
+.radar-legend{display:grid;grid-template-columns:1fr 1fr;gap:7px 14px;margin-top:12px;padding:0 4px;}
+.rl{display:flex;align-items:center;gap:8px;}
+.rl-dot{width:8px;height:8px;border-radius:50%;flex:none;box-shadow:0 0 7px currentColor;}
+.rl-k{flex:1;font-size:12px;font-weight:600;color:#cfd6e6;}
+.rl-v{font-size:13px;font-weight:900;color:#fff;}
+/* hero photo gallery + lightbox */
+.snap-gallery{display:flex;gap:9px;margin-bottom:10px;}
+.snap-hero{flex:1.5;position:relative;aspect-ratio:.72;border-radius:16px;overflow:hidden;border:1px solid var(--border);background:#05050c;
+  cursor:pointer;-webkit-appearance:none;appearance:none;padding:0;box-shadow:0 10px 26px rgba(0,0,0,.4);}
+.snap-hero img{width:100%;height:100%;object-fit:cover;display:block;}
+.snap-hero-lbl{position:absolute;left:8px;bottom:8px;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#fff;
+  background:rgba(0,0,0,.5);padding:3px 8px;border-radius:99px;}
+.snap-side{flex:1;display:flex;flex-direction:column;gap:9px;}
+.snap-side .snap-cell{flex:1;position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--border);background:#05050c;cursor:pointer;-webkit-appearance:none;appearance:none;padding:0;}
+.snap-side .snap-cell img{width:100%;height:100%;object-fit:cover;display:block;}
+.snap-side .snap-cell span{position:absolute;left:6px;bottom:5px;font-size:8px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.7);}
+.snap-side .snap-ph{width:100%;height:100%;}
+.snap-lightbox{position:fixed;inset:0;z-index:340;display:flex;align-items:center;justify-content:center;padding:30px;
+  background:rgba(2,3,8,0.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:0;transition:opacity .25s;}
+.snap-lightbox.on{opacity:1;}
+.snap-lightbox img{max-width:100%;max-height:100%;border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.7);transform:scale(.92);transition:transform .3s cubic-bezier(.22,1,.36,1);}
+.snap-lightbox.on img{transform:scale(1);}
+/* food nutrition card */
+.res-snap.food-hero{width:100%;height:190px;border-radius:20px;object-fit:cover;margin-bottom:8px;box-shadow:0 14px 34px rgba(0,0,0,.45);}
+.food-nutri{border-radius:18px;padding:16px 16px 14px;}
+.food-cal{display:flex;align-items:baseline;justify-content:center;gap:6px;margin-bottom:15px;}
+.food-cal-n{font-size:40px;font-weight:900;letter-spacing:-1.5px;color:#fff;font-variant-numeric:tabular-nums;text-shadow:0 0 24px color-mix(in srgb,var(--sc) 45%,transparent);}
+.food-cal-u{font-size:14px;font-weight:800;color:var(--sc);}
+.food-macros{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.fm{text-align:center;}
+.fm-g{font-size:19px;font-weight:900;color:#fff;}.fm-g small{font-size:11px;font-weight:700;opacity:.65;margin-left:1px;}
+.fm-k{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:2px;}
+.fm-bar{height:5px;border-radius:99px;background:rgba(255,255,255,0.09);overflow:hidden;margin-top:9px;}
+.fm-bar i{display:block;height:100%;width:0;border-radius:99px;box-shadow:0 0 8px currentColor;transition:width .9s cubic-bezier(.22,1,.36,1);}
+/* Food landing — Today's Nutrition card */
+.food-today{margin-top:20px;border-radius:20px;padding:16px 16px 14px;}
+.ft-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.ft-h{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:800;color:#dfe6f2;}
+.ft-h svg{width:15px;height:15px;color:#34D399;}
+.ft-all{display:inline-flex;align-items:center;gap:3px;font:inherit;font-size:12.5px;font-weight:700;color:#34D399;background:none;border:none;cursor:pointer;-webkit-appearance:none;appearance:none;}
+.ft-all svg{width:13px;height:13px;}
+.ft-stats{display:flex;align-items:center;}
+.ft-stat{flex:1;text-align:center;}
+.ft-stat .n{font-size:26px;font-weight:900;letter-spacing:-1px;color:#fff;}.ft-stat .n small{font-size:13px;font-weight:700;opacity:.7;margin-left:1px;}
+.ft-stat .k{font-size:10.5px;font-weight:700;color:var(--muted);margin-top:3px;letter-spacing:.02em;}
+.ft-div{width:1px;height:34px;background:rgba(255,255,255,0.08);flex:none;}
+.res-lead{margin:12px 2px 2px;font-size:14.5px;line-height:1.5;color:#e7ecf6;font-weight:600;text-align:center;}
+.bd-dot{width:9px;height:9px;border-radius:50%;flex:none;box-shadow:0 0 8px currentColor;}
+.res-sec .sec-hint{font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:.02em;text-transform:none;margin-left:6px;}
+/* focus chips (tap → train it) */
+.res-foc{display:flex;flex-direction:column;gap:9px;}
+.foc{display:flex;align-items:center;gap:12px;width:100%;text-align:left;cursor:pointer;-webkit-appearance:none;appearance:none;
+  border:1px solid var(--border);background:rgba(255,255,255,0.045);border-radius:15px;padding:11px 12px;color:#fff;font:inherit;
+  transition:transform .12s,background .15s;}
+.foc:active{transform:scale(.98);background:rgba(255,255,255,0.075);}
+.foc .fi{width:36px;height:36px;flex:none;border-radius:11px;display:flex;align-items:center;justify-content:center;}
+.foc .fi svg{width:18px;height:18px;}
+.foc .ft{flex:1;min-width:0;}
+.foc .ft b{display:block;font-size:14px;font-weight:800;}
+.foc .ft span{display:block;font-size:11.5px;color:var(--muted);margin-top:1px;}
+.foc .fa{color:var(--muted);flex:none;}.foc .fa svg{width:16px;height:16px;}
+.btn.lock{background:linear-gradient(135deg,#3B9EFF,#1565c0);box-shadow:0 10px 26px rgba(59,158,255,.32);}
+.btn.lock.done{background:rgba(59,158,255,.16);border:1px solid rgba(59,158,255,.5);color:#bcd9ff;box-shadow:none;}
+/* history lock chips */
+.ph-lock{flex:none;width:44px;height:44px;min-height:0;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,0.05);
+  color:#9aa1b7;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-appearance:none;appearance:none;padding:0;}
+.ph-lock svg{width:18px;height:18px;}.ph-lock:active{transform:scale(.94);}
+.ph-lk{flex:none;width:44px;height:44px;border-radius:12px;border:1px solid rgba(59,158,255,.5);background:rgba(59,158,255,.15);
+  color:#bcd9ff;display:flex;align-items:center;justify-content:center;}.ph-lk svg{width:18px;height:18px;}
+.ph-item.locked{border-color:rgba(59,158,255,.32);background:rgba(59,158,255,.06);}
+.ph-thumb{position:relative;}
+.ph-thumb-lk{position:absolute;right:3px;bottom:3px;width:18px;height:18px;border-radius:6px;background:rgba(59,158,255,.92);
+  display:flex;align-items:center;justify-content:center;}.ph-thumb-lk svg{width:11px;height:11px;color:#fff;}
+.locked-badge{display:inline-flex;align-items:center;gap:4px;color:#9fc6ff;font-size:10.5px;font-weight:800;vertical-align:middle;}
+.locked-badge svg{width:11px;height:11px;}
+/* ── confirm dialog (double-confirm) ── */
+.cdlg{position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;padding:26px;
+  background:rgba(4,6,14,0.66);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);opacity:0;transition:opacity .22s;}
+.cdlg.on{opacity:1;}
+.cdlg-card{width:100%;max-width:322px;border-radius:22px;border:1px solid var(--border);
+  background:linear-gradient(180deg,#171b27,#0e1119);box-shadow:0 30px 70px rgba(0,0,0,0.6);padding:22px;text-align:center;
+  transform:translateY(14px) scale(.96);transition:transform .26s cubic-bezier(.22,1,.36,1);}
+.cdlg.on .cdlg-card{transform:none;}
+.cdlg-ic{width:60px;height:60px;border-radius:18px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(120% 120% at 30% 20%,rgba(59,158,255,.42),rgba(59,158,255,.12));border:1px solid rgba(59,158,255,.5);}
+.cdlg-ic svg{width:28px;height:28px;color:#bcd9ff;}
+.cdlg h3{font-size:19px;font-weight:900;letter-spacing:-.3px;}
+.cdlg p{font-size:13.5px;color:var(--muted);line-height:1.5;margin-top:8px;}
+.cdlg-row{display:flex;gap:10px;margin-top:18px;}.cdlg-row .btn{flex:1;}
+.btn.ghost{background:rgba(255,255,255,0.06);border:1px solid var(--border);color:#cfd6e6;}
+.btn.danger2{background:linear-gradient(135deg,#3B9EFF,#1565c0);color:#fff;}
+/* ── lock ceremony ── */
+.lockc{position:fixed;inset:0;z-index:320;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;
+  background:rgba(4,6,14,0);backdrop-filter:blur(0);-webkit-backdrop-filter:blur(0);transition:background .5s,backdrop-filter .5s;pointer-events:none;}
+.lockc.blur{background:rgba(4,6,14,0.52);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);pointer-events:auto;}
+.lockc-photo{position:relative;width:208px;aspect-ratio:.62;border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,.14);
+  background:#05050c;box-shadow:0 30px 80px rgba(0,0,0,.6);
+  transform:translateY(60vh) scale(.7);opacity:0;transition:transform .7s cubic-bezier(.18,.9,.25,1.05),opacity .5s;}
+.lockc-photo img{width:100%;height:100%;object-fit:cover;display:block;}
+.lockc.in .lockc-photo{transform:translateY(0) scale(1);opacity:1;}
+.lockc.up .lockc-photo{transform:translateY(-40px) scale(.9);}
+.lockc.shake.in .lockc-photo{animation:lockShake .5s cubic-bezier(.36,.07,.19,.97);}
+@keyframes lockShake{10%,90%{transform:translateX(-3px)}20%,80%{transform:translateX(5px)}30%,50%,70%{transform:translateX(-9px)}40%,60%{transform:translateX(9px)}}
+.lockc-lk{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(0);width:74px;height:74px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;background:rgba(59,158,255,.94);box-shadow:0 0 42px rgba(59,158,255,.85);}
+.lockc-lk svg{width:34px;height:34px;color:#fff;}
+.lockc.shake .lockc-lk{animation:lkPop .55s cubic-bezier(.22,1,.36,1) forwards;}
+@keyframes lkPop{0%{transform:translate(-50%,-50%) scale(0)}60%{transform:translate(-50%,-50%) scale(1.28)}100%{transform:translate(-50%,-50%) scale(1)}}
+.lockc-panel{width:100%;max-width:332px;margin-top:22px;opacity:0;transform:translateY(18px);transition:opacity .42s,transform .42s;}
+.lockc.up .lockc-panel{opacity:1;transform:none;}
+.lockc-panel .lh{display:flex;align-items:center;justify-content:center;gap:6px;text-align:center;font-size:12px;font-weight:900;
+  letter-spacing:.06em;color:#bcd9ff;margin-bottom:13px;}.lockc-panel .lh svg{width:14px;height:14px;}
+</style>
+  <link rel="stylesheet" href="_lib/core-responsive.css?v=20260619d">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <meta name="theme-color" content="#000000">
+  <link rel="stylesheet" href="_lib/core-starfield.css?v=20260619d">
+  <script src="_lib/core-starfield.js?v=20260619d"></script>
+  <link rel="stylesheet" href="_lib/core-ui.css?v=20260619d" />
+</head>
+<body>
+<div class="phone">
+    <div id="ambCelestial" style="position:absolute;inset:0;pointer-events:none;z-index:2;"></div>
+  <div id="ambBg"></div>
+  <div id="ambAurora"></div>
+  <div class="notch"></div>
+  <div class="home-indicator"></div>
+
+  <div class="frame">
+    <div class="top">
+      <a class="back" href="coach.html" aria-label="Back to Coach"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></a>
+      <h1 id="title">Scanner</h1>
+      <button id="histBtn" class="phist-ic" aria-label="History" style="display:none;margin-left:auto;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l3.2 2"/></svg></button>
+      <button id="helpBtn" aria-label="Help" style="margin-left:auto;width:34px;height:34px;min-height:34px;flex:none;border-radius:50%;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.72);font:800 14px -apple-system,sans-serif;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;-webkit-appearance:none;appearance:none;">?</button>
+    </div>
+
+    <div class="scroll">
+      <div class="hero">
+        <div class="ic" id="hero-ic"></div>
+        <h2 id="name">Scanner</h2>
+        <p id="tag"></p>
+        <span class="badge"><span class="d"></span>Live now</span>
+      </div>
+
+      <!-- last saved result for this scanner -->
+      <div class="last" id="last">
+        <svg class="ls-ring" id="lsRing" viewBox="0 0 46 46"></svg>
+        <div class="ls-meta"><div class="ls-k">Last scan</div><div class="ls-v" id="lsV">—</div></div>
+      </div>
+
+      <div class="sec" id="checksSec">What it checks</div>
+      <div class="card" id="checks"></div>
+
+      <button class="cta" id="cta" type="button">Start scan</button>
+      <div class="note" id="note">Runs on your device — your camera frames never leave the phone.</div>
+
+      <!-- Physique analysis landing (built by JS for type=physique) -->
+      <div id="pqIntro" style="display:none;"></div>
+      <input type="file" id="pqFile" accept="image/*" style="display:none;" />
+    </div>
+  </div>
+
+  <!-- Camera scanner -->
+  <div class="cam" id="cam">
+    <video id="video" playsinline autoplay muted></video>
+    <canvas id="canvas"></canvas>
+    <div class="cam-shade"></div>
+    <div class="reticle" id="reticle"></div>
+    <div class="scanline"><i></i></div>
+    <div class="wave" id="wave"></div>
+    <!-- Physique: circular body guide + 360 capture -->
+    <div class="phyz" id="phyz">
+      <div class="phyz-ring">
+        <svg class="phyz-svg" viewBox="0 0 200 200"><circle class="pr-bg" cx="100" cy="100" r="94"/><circle class="pr-fg" id="phyzProg" cx="100" cy="100" r="94"/></svg>
+        <div class="phyz-guide"></div>
+        <div class="phyz-body"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2.6"/><path d="M12 8v7M12 10l-5 3M12 10l5 3M12 15l-3 6M12 15l3 6"/></svg></div>
+        <div class="phyz-bar" id="phyzBar"></div>
+      </div>
+      <div class="phyz-count" id="phyzCount"></div>
+      <div class="phyz-dots" id="phyzDots"></div>
+    </div>
+    <div class="cam-top">
+      <button class="cam-x" id="camX" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      <span class="cam-tt" id="camTT">Scan</span>
+      <button class="cam-flip" id="camFlip" aria-label="Flip camera"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4h5v5"/><path d="M4 9V4h5"/><path d="M20 4l-7 7"/><path d="M9 20H4v-5"/><path d="M20 15v5h-5"/><path d="M4 20l7-7"/></svg></button>
+    </div>
+    <div class="cam-hint" id="camHint">Position yourself in the frame</div>
+    <div class="cam-bottom">
+      <button class="shutter" id="shutter" aria-label="Capture"><i></i></button>
+    </div>
+  </div>
+
+  <!-- Analyzing -->
+  <div class="analyze" id="analyze">
+    <svg class="ring" viewBox="0 0 128 128">
+      <circle class="bg" cx="64" cy="64" r="58"></circle>
+      <circle class="fg" id="anFg" cx="64" cy="64" r="58"></circle>
+    </svg>
+    <div class="pct" id="anPct">0%</div>
+    <div class="lbl" id="anLbl">Analyzing…</div>
+  </div>
+
+  <!-- Result -->
+  <div class="result" id="result"></div>
+
+  <!-- Physique angle organizer (sorts uploaded photos into front/right/back/left) -->
+  <div class="organizer" id="organizer"></div>
+
+  <!-- Voice Coach: prompt + recording stage -->
+  <div class="vc-stage" id="vcStage"></div>
+
+  <!-- Physique history -->
+  <div class="phist" id="phist">
+    <div class="phist-top">
+      <button class="phist-ic" id="phBack" type="button" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+      <h2><svg id="phistIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/></svg><span id="phistTitle">Physique History</span></h2>
+      <button class="phist-ic" id="phNew" type="button" aria-label="New scan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button>
+    </div>
+    <div class="phist-body" id="phBody"></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script src="_lib/core-config.js"></script>
+<script src="_lib/core-ai.js"></script>
+<script src="_lib/core-sfx.js"></script>
+<script src="_lib/core-state.js"></script>
+<script>
+(function(){
+  "use strict";
+  var $=function(s){return document.querySelector(s);};
+  function svg(d){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>';}
+  function ls(k,d){try{var v=localStorage.getItem(k);return v==null?d:v;}catch(e){return d;}}
+  function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+
+  var SCANS={
+    physique:{ name:'Physique', color:'#3B9EFF', facing:'environment', frame:'',
+      tag:'AI-powered physique feedback with personalized improvement tips.',
+      icon:'<circle cx="12" cy="6.4" r="3.1"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/>',
+      hint:'Stand back so your whole body is in frame',
+      checks:['On-device body detection — starts when you’re fully in frame','Guided 360° capture: front, both sides and back','Symmetry, posture & proportion read','Your angle photos saved to track progress'],
+      label:'Physique score',
+      tips:['Upper body leads your lower — add a dedicated leg day to even out proportions.','Shoulders sit slightly forward (side view) — daily wall-angels + rows will pull them back.','Back width is your quickest win — 2 pull sessions/week widens the V-taper.','Core is defined but could read tighter — drop body-fat ~2% to sharpen it.','Left/right symmetry is good; favour single-arm work to keep it balanced.','Same time + same light each scan makes the week-to-week trend honest.'] },
+    food:{ name:'Food', color:'#34D399', facing:'environment', frame:'wide',
+      tag:'Point your camera at a meal for an instant health read.',
+      icon:'<path d="M12 20.5s-7.2-4.6-7.2-9.8A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 7.2 3.7c0 5.2-7.2 9.8-7.2 9.8Z"/>',
+      hint:'Frame the whole plate from above',
+      checks:['Calories & macro estimate per plate','A health score for the meal','Smarter swaps and suggestions'],
+      label:'Health score',
+      tips:['Solid protein on this plate — aim to keep it the largest portion.','Add a fist of greens to lift fibre and slow the sugar curve.','Looks lightly fried — grilled or baked would cut ~120 hidden calories.','Swap the side carb for something whole-grain next time.'] },
+    outfit:{ name:'Outfit', color:'#FFCB3D', facing:'environment', frame:'',
+      tag:'A quick style and fit check before you head out.',
+      icon:'<path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/>',
+      hint:'Stand back for a full head-to-toe shot',
+      checks:['Fit and proportion feedback','Colour and combo tips','Match the outfit to the occasion'],
+      label:'Style score',
+      tips:['Strong colour balance — the neutrals let one accent pop.','Try tucking or cropping the top to define your waistline.','Footwear is a touch casual for this combo — clean it up to level the fit.','Roll the sleeves once to sharpen the proportions.'] },
+    posture:{ name:'Posture', color:'#4A8FFF', facing:'environment', frame:'oval',
+      tag:'Stand in frame for an alignment check and fixes.',
+      icon:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/><path d="M12 1.5v3M12 19.5v3M22.5 12h-3M4.5 12h-3"/>',
+      hint:'Stand side-on, full body in the oval',
+      checks:['Head, shoulder and hip alignment','Imbalances flagged clearly','Daily correction drills'],
+      label:'Posture score',
+      tips:['Slight forward head tilt — tuck your chin and lengthen the back of your neck.','Right shoulder sits a little high; loosen the upper trap with daily rolls.','Set a 45-min reminder to reset your sitting posture.','Add wall-angels: 2 sets of 10 each morning.'] },
+    looks:{ name:'Looks', color:'#B388FF', facing:'user', frame:'oval',
+      tag:'Skin, symmetry and grooming insights from a selfie.',
+      icon:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/><path d="M12 12v4M9 16h6"/>',
+      hint:'Center your face in the oval, even light',
+      checks:['Skin condition read','Facial symmetry analysis','Hair and grooming tips'],
+      label:'Looks score',
+      tips:['Good facial symmetry — your strong side is the left, angle to it for photos.','Skin looks a little dry on the forehead — a light moisturiser will even tone.','Tidy the brow line to frame the eyes more sharply.','Drink more water today; it shows on the skin within a day.'] },
+    voice:{ name:'Voice', color:'#5EEAD4', facing:'audio', frame:'',
+      tag:'Record a clip for speaking and delivery feedback.',
+      icon:'<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/>',
+      hint:'Speak naturally for a few seconds',
+      checks:['Pace, clarity and filler words','Tone and confidence read','Drills to sharpen delivery'],
+      label:'Delivery score',
+      tips:['Clear pace overall — slow the first sentence to land with authority.','A few filler "ums" — pause silently instead; it reads as confidence.','Pitch stays a little flat; vary it to hold attention.','Record one 30-sec take daily this week and compare.'] }
+  };
+
+  var type=(new URLSearchParams(location.search).get('type')||'physique').toLowerCase();
+  var s=SCANS[type]||SCANS.physique;
+
+  // theme
+  document.documentElement.style.setProperty('--sc', s.color);
+  $('#ambBg').style.setProperty('--sc', s.color);
+  $('#title').textContent=s.name+' Scanner';
+  $('#name').textContent=s.name;
+  $('#tag').textContent=s.tag;
+  $('#hero-ic').innerHTML=svg(s.icon);
+  $('#camTT').textContent=s.name+' scan';
+  $('#camHint').textContent=s.hint;
+  $('#checks').innerHTML=s.checks.map(function(c){
+    return '<div class="row"><div class="ck">'+svg('<path d="M5 12l4 4 10-11"/>')+'</div><span>'+c+'</span></div>';
+  }).join('');
+  var rt=$('#reticle'); if(s.frame) rt.classList.add(s.frame);
+
+  function grade(n){ return n>=90?'Elite':n>=80?'Strong':n>=70?'Solid':n>=60?'Developing':'Needs work'; }
+  function miniRing(el,n,color){
+    var r=18,c=2*Math.PI*r;
+    el.innerHTML='<circle cx="23" cy="23" r="'+r+'" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="5"/>'
+      +'<circle cx="23" cy="23" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="5" stroke-linecap="round" '
+      +'stroke-dasharray="'+c+'" stroke-dashoffset="'+(c*(1-n/100))+'" transform="rotate(-90 23 23)"/>';
+  }
+
+  // ── last saved result for this scanner ──
+  function readScans(){ try{ return JSON.parse(ls('coreScans.v1','[]'))||[]; }catch(e){ return []; } }
+  function updateLast(){
+    var all=readScans().filter(function(x){return x.type===type;});
+    if(!all.length) return;
+    var lastR=all[all.length-1];
+    miniRing($('#lsRing'), lastR.score, s.color);
+    var ago=Math.max(0,Math.round((Date.now()-lastR.ts)/86400000));
+    $('#lsV').textContent=lastR.score+' / 100 · '+(ago===0?'today':ago+'d ago');
+    $('#last').classList.add('show');
+  }
+  updateLast();
+
+  // ── camera ──
+  var cam=$('#cam'), video=$('#video'), canvas=$('#canvas');
+  var stream=null, facing=s.facing==='user'?'user':'environment', isVoice=s.facing==='audio';
+  var snapDataUrl=null, audioCtx=null, analyser=null, waveRAF=null;
+  var isPhysique=(type==='physique'), shots=[];
+  var detector=null, poseRAF=null, gateStable=0, gateManual=false;
+  var aiResult=null, aiPending=false, lastAIError='';
+  var ANG=[{k:'front',label:'Face the camera'},{k:'right',label:'Turn to your right side'},
+           {k:'back',label:'Turn around — back to camera'},{k:'left',label:'Turn to your left side'}];
+
+  async function startStream(){
+    try{
+      if(stream){ stream.getTracks().forEach(function(t){t.stop();}); stream=null; }
+      if(isVoice){
+        stream=await navigator.mediaDevices.getUserMedia({ audio:true });
+        setupWave(stream);
+      } else {
+        stream=await navigator.mediaDevices.getUserMedia({ video:{ facingMode:facing }, audio:false });
+        video.srcObject=stream; cam.classList.toggle('front', facing==='user');
+      }
+      return true;
+    }catch(e){
+      toast('Camera unavailable — running a demo scan');
+      return false;
+    }
+  }
+
+  function setupWave(st){
+    try{
+      audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+      var src=audioCtx.createMediaStreamSource(st);
+      analyser=audioCtx.createAnalyser(); analyser.fftSize=64; src.connect(analyser);
+      var wave=$('#wave'); wave.innerHTML=''; var bars=[];
+      for(var i=0;i<20;i++){ var b=document.createElement('b'); wave.appendChild(b); bars.push(b); }
+      var data=new Uint8Array(analyser.frequencyBinCount);
+      (function tick(){
+        analyser.getByteFrequencyData(data);
+        for(var i=0;i<bars.length;i++){ var v=data[i]||0; bars[i].style.height=(10+v/255*100).toFixed(0)+'px'; }
+        waveRAF=requestAnimationFrame(tick);
+      })();
+    }catch(e){}
+  }
+
+  function openCam(){
+    cam.classList.add('on');
+    cam.classList.toggle('voice', isVoice);
+    cam.classList.toggle('physique', isPhysique);
+    if(isPhysique){ renderDots(0); setProg(0); $('#phyzCount').textContent=''; $('#camHint').textContent='Starting camera…'; }
+    startStream().then(function(ok){ cam._demo=!ok; if(isPhysique) runPhysique(); });
+  }
+  function stopCam(){
+    cam.classList.remove('on','scanning');
+    if(poseRAF){ clearTimeout(poseRAF); poseRAF=null; }
+    if(detector){ try{ detector.dispose(); }catch(e){} detector=null; }
+    gateStable=0;
+    if(stream){ try{stream.getTracks().forEach(function(t){t.stop();});}catch(e){} stream=null; }
+    if(waveRAF) cancelAnimationFrame(waveRAF);
+    if(audioCtx){ try{audioCtx.close();}catch(e){} audioCtx=null; }
+    video.srcObject=null;
+  }
+
+  // capture current frame -> data url (for the result snapshot)
+  function snap(){
+    if(isVoice || cam._demo || !video.videoWidth){ snapDataUrl=null; return; }
+    try{
+      var W=video.videoWidth, H=video.videoHeight, side=Math.min(W,H);
+      canvas.width=240; canvas.height=240;
+      var cx=(W-side)/2, cy=(H-side)/2, ctx=canvas.getContext('2d');
+      if(facing==='user'){ ctx.translate(240,0); ctx.scale(-1,1); }
+      ctx.drawImage(video, cx, cy, side, side, 0, 0, 240, 240);
+      snapDataUrl=canvas.toDataURL('image/jpeg',0.7);
+    }catch(e){ snapDataUrl=null; }
+  }
+
+  // ── analyze ──
+  var anFg=$('#anFg'), AN_R=58, AN_C=2*Math.PI*AN_R;
+  anFg.setAttribute('stroke-dasharray', AN_C);
+  // The progress ring tracks the REAL AI call: it eases toward ~92% over the
+  // first ~8.5s, holds there if the model is still thinking, and only fills to
+  // 100% once a genuine score is back. Fast read → ~8.5s; slow read → up to 16s.
+  function doAnalyze(){
+    var an=$('#analyze'); an.classList.add('on');
+    var anPct=$('#anPct'), anLbl=$('#anLbl');
+    var labels=isPhysique?['Reading proportions…','Mapping shoulder-to-waist…','Checking left/right symmetry…','Measuring muscularity…','Scoring definition & leanness…','Writing your breakdown…']
+                         :['Analyzing…','Reading details…','Comparing references…','Scoring…','Writing your notes…'];
+    var MIN=8500, MAX=16000, start=performance.now(), p=0;
+    anFg.setAttribute('stroke-dashoffset', AN_C);
+    (function frame(now){
+      var el=now-start, aiDone=!aiPending;
+      var ceil=(aiDone && el>=MIN) ? 1 : Math.min(0.92, el/MIN*0.92);   // reserve last 8% for a real score
+      p += (ceil-p)*0.08;
+      if(ceil===1 && p>0.992) p=1;
+      var pct=Math.round(p*100);
+      anPct.textContent=pct+'%';
+      anFg.setAttribute('stroke-dashoffset', AN_C*(1-p));
+      anLbl.textContent=(!aiDone && el>MIN) ? 'Scoring with AI…' : labels[Math.min(labels.length-1, Math.floor(p*labels.length))];
+      if(p>=1 || el>MAX){ an.classList.remove('on'); showResult(); return; }
+      requestAnimationFrame(frame);
+    })(start);
+  }
+  function runAnalyze(){   // single-capture types (food, outfit, looks, posture)
+    cam.classList.add('scanning');
+    $('#camHint').textContent='Hold still — scanning…';
+    setTimeout(function(){
+      snap(); stopCam();
+      aiResult=null; aiPending=true;
+      requestScanAI(snapDataUrl).then(function(r){ aiResult=r; aiPending=false; }).catch(function(){ aiResult=null; aiPending=false; });
+      doAnalyze();
+    }, 1500);
+  }
+
+  // ── Physique: guided 360° capture (front · right · back · left) ──
+  function snapPortrait(){
+    if(cam._demo||!video.videoWidth) return null;
+    try{
+      var W=video.videoWidth,H=video.videoHeight, cw2=Math.min(W,H*0.62), ch2=Math.min(H,W/0.62);
+      var cx=(W-cw2)/2, cy=(H-ch2)/2, ctx=canvas.getContext('2d');
+      // Capture at real resolution so the vision model can actually read muscle
+      // definition — a 150px thumbnail reads as "no muscle" and scores everyone low.
+      var OW=760, OH=1226;
+      canvas.width=OW; canvas.height=OH;
+      if(facing==='user'){ ctx.setTransform(1,0,0,1,0,0); ctx.translate(OW,0); ctx.scale(-1,1); } else { ctx.setTransform(1,0,0,1,0,0); }
+      ctx.drawImage(video, cx, cy, cw2, ch2, 0,0,OW,OH);
+      return canvas.toDataURL('image/jpeg',0.88);
+    }catch(e){ return null; }
+  }
+  // Small thumbnails for storage/display — full-res photos are kept in memory only
+  // for the AI call, never written to localStorage (would blow the ~5MB quota).
+  function shrinkCanvas(src,maxW){ try{ var w=Math.min(maxW,src.width||maxW), h=Math.round(w*((src.height||1)/(src.width||1))); var c=document.createElement('canvas'); c.width=w; c.height=h; c.getContext('2d').drawImage(src,0,0,w,h); return c.toDataURL('image/jpeg',0.78); }catch(e){ return null; } }
+  function shrinkUrl(url,maxW,cb){ var im=new Image(); im.onload=function(){ try{ var w=Math.min(maxW,im.naturalWidth||maxW), h=Math.round(w*((im.naturalHeight||1)/(im.naturalWidth||1))); var c=document.createElement('canvas'); c.width=w; c.height=h; c.getContext('2d').drawImage(im,0,0,w,h); cb(c.toDataURL('image/jpeg',0.85)); }catch(e){ cb(url); } }; im.onerror=function(){ cb(url); }; im.src=url; }
+  function frontThumb(){ for(var i=0;i<shots.length;i++){ if(shots[i].k==='front') return shots[i].thumb||shots[i].url; } return (shots[0]&&(shots[0].thumb||shots[0].url))||null; }
+  // colour-code by score: green / amber / red
+  function scoreColor(n){ n=+n||0; return n>=75?'#34d399':n>=55?'#fbbf24':n>=40?'#fb923c':'#fb7185'; }
+  function topPctile(n){ return Math.max(1, Math.min(99, Math.round(100 - (+n||0)*0.95))); }
+  function letterGrade(n){ n=+n||0; return n>=90?'S':n>=80?'A':n>=70?'B':n>=60?'C':n>=45?'D':'E'; }
+  // Food nutrition card — calorie hero + protein/carbs/fat macro bars
+  function foodHtml(ai){
+    if(!ai) return '';
+    var cals=ai.calories, p=ai.protein, c=ai.carbs, f=ai.fat;
+    var hasMacros=(p!=null||c!=null||f!=null);
+    if(cals==null && !hasMacros) return '';
+    var macros=[{k:'Protein',g:p,col:'#FF6B6B',cal:(p||0)*4},{k:'Carbs',g:c,col:'#FFCB3D',cal:(c||0)*4},{k:'Fat',g:f,col:'#4A8FFF',cal:(f||0)*9}];
+    var tot=macros.reduce(function(a,m){return a+m.cal;},0)||1;
+    var cal=(cals!=null)?'<div class="food-cal"><span class="food-cal-n" id="foodCal" data-n="'+cals+'">0</span><span class="food-cal-u">kcal</span></div>':'';
+    var mac=hasMacros?('<div class="food-macros">'+macros.map(function(m){ var pct=Math.round(m.cal/tot*100);
+      return '<div class="fm"><div class="fm-g" style="color:'+m.col+'">'+(m.g!=null?m.g+'<small>g</small>':'—')+'</div><div class="fm-k">'+m.k+'</div>'
+        +'<div class="fm-bar"><i data-w="'+pct+'" style="background:'+m.col+'"></i></div></div>'; }).join('')+'</div>'):'';
+    return '<div class="res-sec">Nutrition <span class="sec-hint">AI estimate</span></div><div class="food-nutri glass">'+cal+mac+'</div>';
+  }
+  // 4-axis radar for the physique breakdown (Proportions/Symmetry/Muscularity/Definition)
+  function radarHtml(BD, color){
+    var keys=Object.keys(BD), cx=100, cy=100, maxR=64, ang=[-90,0,90,180];
+    function pt(i,r){ var a=ang[i]*Math.PI/180; return [cx+Math.cos(a)*r, cy+Math.sin(a)*r]; }
+    var grid=[0.25,0.5,0.75,1].map(function(f){ var p=ang.map(function(_,i){ var q=pt(i,maxR*f); return q[0].toFixed(1)+','+q[1].toFixed(1); }).join(' '); return '<polygon points="'+p+'" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>'; }).join('');
+    var axes=ang.map(function(_,i){ var p=pt(i,maxR); return '<line x1="'+cx+'" y1="'+cy+'" x2="'+p[0].toFixed(1)+'" y2="'+p[1].toFixed(1)+'" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>'; }).join('');
+    var dpts=keys.map(function(k,i){ var p=pt(i, maxR*(BD[k]/100)); return p[0].toFixed(1)+','+p[1].toFixed(1); }).join(' ');
+    var dots=keys.map(function(k,i){ var p=pt(i, maxR*(BD[k]/100)); return '<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="3.4" fill="'+color+'"/>'; }).join('');
+    var legend='<div class="radar-legend">'+keys.map(function(k){ return '<div class="rl"><span class="rl-dot" style="background:'+color+'"></span><span class="rl-k">'+k+'</span><span class="rl-v">'+BD[k]+'</span></div>'; }).join('')+'</div>';
+    return '<div class="res-sec">Breakdown</div><div class="bd-radar glass"><svg viewBox="0 0 200 200" class="radar-svg">'
+      +grid+axes
+      +'<polygon class="radar-poly" points="'+dpts+'" fill="color-mix(in srgb,'+color+' 22%,transparent)" stroke="'+color+'" stroke-width="2" style="--full:'+dpts+'"/>'
+      +dots+'</svg>'+legend+'</div>';
+  }
+  function setProg(n){ var el=$('#phyzProg'); if(el) el.style.strokeDashoffset=(590.6*(1-n/4)).toFixed(1); }
+  function renderDots(done){ var d=$('#phyzDots'); if(!d) return; var h=''; for(var i=0;i<4;i++) h+='<span class="pd'+(i<done?' on':'')+'"></span>'; d.innerHTML=h; }
+  function phyzFlash(){ var f=document.createElement('div'); f.className='phyz-flash'; cam.appendChild(f); setTimeout(function(){ f.remove(); },260); }
+  // Lazy-load TensorFlow.js + MoveNet only when the physique scan needs it.
+  function loadPose(cb){
+    if(window.poseDetection && window.tf){ cb(true); return; }
+    function load(src,next){ var sc=document.createElement('script'); sc.async=true; sc.src=src; sc.onload=next; sc.onerror=function(){ cb(false); }; document.head.appendChild(sc); }
+    load('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js', function(){
+      load('https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@2.1.3/dist/pose-detection.min.js', function(){ cb(!!window.poseDetection); });
+    });
+  }
+  function kp(p,n){ for(var i=0;i<p.keypoints.length;i++){ if(p.keypoints[i].name===n) return p.keypoints[i]; } return null; }
+  function startPoseGate(){
+    $('#camHint').textContent='Loading body detection…'; $('#phyzCount').textContent='';
+    loadPose(function(ok){
+      if(!ok || !window.poseDetection){ simulatedGate(); return; }
+      window.poseDetection.createDetector(window.poseDetection.SupportedModels.MoveNet,
+        { modelType: window.poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING })
+        .then(function(det){ detector=det; cam.classList.add('phyz-scanning'); gateStable=0;
+          $('#camHint').textContent='Step back so your whole body is in the ring'; loopGate(); })
+        .catch(function(){ simulatedGate(); });
+    });
+  }
+  function loopGate(){
+    if(!detector || !cam.classList.contains('on')) return;
+    detector.estimatePoses(video,{maxPoses:1}).then(function(poses){
+      var Hh=video.videoHeight||1, msg='Step back so your whole body is visible', good=false;
+      if(poses && poses.length){
+        var p=poses[0];
+        var need=['nose','left_shoulder','right_shoulder','left_hip','right_hip','left_knee','right_knee','left_ankle','right_ankle'];
+        var miss=0; for(var i=0;i<need.length;i++){ var k=kp(p,need[i]); if(!k||k.score<0.35) miss++; }
+        var nose=kp(p,'nose'), la=kp(p,'left_ankle'), ra=kp(p,'right_ankle');
+        var ankY=Math.max(la?la.y:0, ra?ra.y:0);
+        if(miss>2) msg='Step back — show your full body';
+        else if(nose && nose.y>0.34*Hh) msg='Step back — get your head near the top';
+        else if(ankY && ankY<0.74*Hh) msg='Step back — I can’t see your feet';
+        else if(nose && nose.y<0.03*Hh) msg='Lower the phone slightly';
+        else { good=true; msg='Hold still…'; }
+      }
+      $('#camHint').textContent=msg;
+      if(good){ if(!gateStable) gateStable=Date.now(); if(Date.now()-gateStable>1000){ passGate(); return; } }
+      else gateStable=0;
+      poseRAF=setTimeout(loopGate, 110);
+    }).catch(function(){ poseRAF=setTimeout(loopGate, 200); });
+  }
+  function beginCapture(label){
+    gateManual=false;
+    cam.classList.add('phyz-scanning');
+    cam.classList.remove('cam-needstart');
+    $('#camHint').textContent=''; $('#phyzCount').textContent=label||'Body detected ✓';
+    try{ if(navigator.vibrate) navigator.vibrate(40); }catch(_){}
+    setTimeout(function(){ captureAngle(0); }, 800);
+  }
+  function passGate(){
+    if(poseRAF){ clearTimeout(poseRAF); poseRAF=null; }
+    if(detector){ try{ detector.dispose(); }catch(e){} detector=null; }
+    beginCapture('Body detected ✓');
+  }
+  // Fallback when the pose model can't load (offline / CDN blocked). We can't
+  // verify a body, so DON'T auto-capture — require a deliberate tap to start.
+  function simulatedGate(){
+    gateManual=true;
+    cam.classList.add('phyz-scanning','cam-needstart');
+    $('#camHint').textContent='Auto-detect unavailable — fit your whole body in the ring, then tap the button to start.';
+    $('#phyzCount').textContent='';
+  }
+  function runPhysique(){
+    shots=[]; renderDots(0); setProg(0); $('#phyzCount').textContent='';
+    if(cam._demo){ simulatedGate(); return; }   // no real camera → demo path
+    startPoseGate();
+  }
+  function captureAngle(i){
+    if(i>=ANG.length){ finishPhysique(); return; }
+    var a=ANG[i];
+    $('#camHint').textContent=a.label+'  ·  '+(i+1)+' of 4';
+    var n=3; $('#phyzCount').textContent=n;
+    try{window.coreSfx&&window.coreSfx('tick');}catch(_){}
+    var iv=setInterval(function(){
+      n--;
+      if(n>0){ $('#phyzCount').textContent=n; try{window.coreSfx&&window.coreSfx('tick');}catch(_){} return; }
+      clearInterval(iv); $('#phyzCount').textContent='';
+      var url=snapPortrait();
+      var thumb=(url&&!cam._demo)?shrinkCanvas(canvas,360):url;
+      shots.push({k:a.k,label:a.k.charAt(0).toUpperCase()+a.k.slice(1),url:url,thumb:thumb});
+      phyzFlash(); renderDots(shots.length); setProg(shots.length);
+      try{window.coreSfx&&window.coreSfx('confirm');}catch(_){}
+      try{ if(navigator.vibrate) navigator.vibrate(30); }catch(_){}
+      setTimeout(function(){ captureAngle(i+1); }, 650);
+    }, 1000);
+  }
+  function finishPhysique(){
+    cam.classList.remove('phyz-scanning','physique');
+    stopCam();
+    // keep the captured angles in the "backfiles" (latest physique scan) — thumbs only
+    try{ lsSet('corePhysiqueShots.v1', JSON.stringify({ ts:Date.now(), shots:shots.map(function(x){ return { k:x.k, label:x.label, url:x.thumb||x.url }; }) })); }catch(e){}
+    // kick off the real vision-AI scoring (all 4 angles) in parallel with the analyze animation
+    aiResult=null; aiPending=true;
+    requestScanAI(shots.map(function(x){ return x.url; })).then(function(r){ aiResult=r; aiPending=false; }).catch(function(){ aiResult=null; aiPending=false; });
+    doAnalyze();
+  }
+  // Score the physique from the captured photo using real vision AI.
+  // Tries the dedicated Supabase backend AND the shared coreAI bridge (personal
+  // key or hosted proxy) in parallel, taking whichever returns a valid read first.
+  // Falls back to the simulated score only if every AI path fails.
+  function frontImage(){
+    for(var i=0;i<shots.length;i++){ if(shots[i].k==='front'&&shots[i].url) return shots[i].url; }
+    for(var j=0;j<shots.length;j++){ if(shots[j].url) return shots[j].url; }
+    return null;
+  }
+  // Per-type vision prompts — every scan type now scores through real AI.
+  var AI_PROMPT={
+    physique:'You are CORE\'s physique-analysis vision model — an expert, fair fitness coach. Assess ONLY the person\'s PHYSIQUE: muscular development, body-fat level / leanness, proportions, shoulder-to-waist (V-taper), symmetry and posture. When several angles are given, weigh them together. '
+      +'Do NOT judge their face, attractiveness, skin, hair, clothing style or general "looks" — those are irrelevant and must not affect the score. '
+      +'Judge from whatever the body actually shows. If clothing covers part of the body, quietly base the read on the visible structure (frame, shoulder/waist ratio, posture, overall build) and do NOT assume the worst — and do NOT mention clothing, what they are wearing, or whether they are covered, in your reply. '
+      +'Reply with STRICT JSON only, no markdown: {"isBody":true|false,"score":0-100,"tier":"Elite|Strong|Solid|Developing|Needs work","summary":"one honest, specific, respectful sentence about the physique only","weakPoints":["chest"|"back"|"shoulders"|"arms"|"legs"|"core"],"breakdown":{"proportions":0-100,"symmetry":0-100,"muscularity":0-100,"definition":0-100}}. '
+      +'isBody=false ONLY if no human body is visible. '
+      +'Scoring rubric — be accurate, do not inflate: 90-100 = competition-level conditioning, very lean with dense muscle; 80-89 = clearly athletic and muscular, advanced; 70-79 = fit, in good shape, some definition; 60-69 = average build, beginner muscularity or moderate body fat; below 60 = little visible muscle or high body fat. '
+      +'Be honest and accurate — give a genuinely low score when it is deserved — but keep every word respectful and constructive. Never be insulting, mocking or demeaning; frame weak areas as things to build, not flaws to ridicule.',
+    food:'You are CORE\'s nutrition vision model — an expert dietitian. Identify the meal and estimate the nutrition of the visible portion. Reply with STRICT JSON only, no markdown: '
+      +'{"isMeal":true|false,"name":"short meal name (e.g. Grilled chicken & rice)","score":0-100,"tier":"Excellent|Good|Balanced|Heavy|Poor","calories":0,"protein":0,"carbs":0,"fat":0,"summary":"one honest sentence about the meal","tips":["3 short specific swaps to make it healthier"]}. '
+      +'calories = total kcal for the visible plate; protein/carbs/fat = grams. score = how healthy and balanced the meal is. isMeal=false ONLY if no food is clearly visible.',
+    posture:'You are CORE\'s posture vision model. Look at this full-body photo and assess head, shoulder and hip alignment. Reply with STRICT JSON only, no markdown: '
+      +'{"isPerson":true|false,"score":0-100,"tier":"Excellent|Good|Fair|Needs work","summary":"one sentence on the main alignment issue","tips":["3 short corrective tips"]}. '
+      +'isPerson=false if no standing person is clearly visible.',
+    outfit:'You are CORE\'s style vision model. Look at this outfit photo and assess fit, colour and occasion. Reply with STRICT JSON only, no markdown: '
+      +'{"isPerson":true|false,"score":0-100,"tier":"Sharp|Good|Decent|Off","summary":"one honest sentence","tips":["3 short style tips"]}. '
+      +'isPerson=false if no person wearing an outfit is clearly visible.',
+    looks:'You are CORE\'s grooming vision model. Look at this face selfie and assess skin, facial symmetry and grooming. Be kind and constructive. Reply with STRICT JSON only, no markdown: '
+      +'{"isPerson":true|false,"score":0-100,"tier":"Excellent|Good|Fair|Developing","summary":"one constructive sentence","tips":["3 short grooming/skin tips"]}. '
+      +'isPerson=false if no face is clearly visible.'
+  };
+  function normalizeAI(d){
+    if(!d) return null;
+    if(d.rank && typeof d.rank.score==='number'){ d.breakdown=d.breakdown||null; d.tips=d.tips||null; return d; }   // already in result shape
+    var score=(typeof d.score==='number') ? d.score : null;
+    return { isBody:d.isBody, isMeal:d.isMeal, isPerson:d.isPerson, summary:d.summary||'', weakPoints:d.weakPoints||[], breakdown:d.breakdown||null, tips:(d.tips&&d.tips.length?d.tips:null),
+             name:d.name||null, calories:(typeof d.calories==='number'?d.calories:null), protein:(typeof d.protein==='number'?d.protein:null), carbs:(typeof d.carbs==='number'?d.carbs:null), fat:(typeof d.fat==='number'?d.fat:null),
+             rank: score==null ? null : { score:score, tier:d.tier||grade(Math.round(score)) } };
+  }
+  function supabasePhysique(img){
+    return new Promise(function(resolve,reject){
+      var c=window.CORE_CONFIG;
+      if(!c||!c.SUPABASE_URL||!c.SUPABASE_ANON_KEY){ reject(); return; }
+      fetch(c.SUPABASE_URL+'/functions/v1/physique-scan',{
+        method:'POST',
+        headers:{ 'content-type':'application/json','authorization':'Bearer '+c.SUPABASE_ANON_KEY,'apikey':c.SUPABASE_ANON_KEY },
+        body:JSON.stringify({ image: img, mediaType:'image/jpeg' })
+      }).then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(d){ if(d && (d.isBody===true || d.isBody===false)) resolve(normalizeAI(d)); else reject(); })
+        .catch(reject);
+    });
+  }
+  // Parse a model's text reply into our normalized result (or throw).
+  function parseScanJson(text){
+    var txt=String(text||'').replace(/^```json\s*|\s*```$/g,'').trim();
+    var s=txt.indexOf('{'), e=txt.lastIndexOf('}');
+    if(s>=0 && e>s) txt=txt.slice(s,e+1);
+    var j=JSON.parse(txt);
+    if(typeof j.isBody!=='boolean' && typeof j.isMeal!=='boolean' && typeof j.isPerson!=='boolean' && typeof j.score!=='number') throw new Error('no score');
+    return normalizeAI(j);
+  }
+  function coreAIScan(imgs){
+    return new Promise(function(resolve,reject){
+      if(!(window.coreAI && coreAI.chat && coreAI.ready && coreAI.ready())){ reject(); return; }
+      var prompt=AI_PROMPT[type]; if(!prompt){ reject(); return; }
+      var arr=(Array.isArray(imgs)?imgs:[imgs]).filter(Boolean).slice(0,4);
+      if(!arr.length){ reject(); return; }
+      var content=[{ type:'text', text:prompt }].concat(arr.map(function(u){ return { type:'image_url', image_url:{ url:u, detail:'high' } }; }));
+      coreAI.chat([{ role:'user', content:content }], { role:'vision', temperature:0.3, maxTokens:500, json:true })
+        .then(function(r){
+          if(!r || !r.ok || !r.text || r.fallback){ if(r && r.reason) lastAIError=r.reason; reject(); return; }
+          try{ resolve(parseScanJson(r.text)); }catch(err){ lastAIError='bad AI response'; reject(); }
+        }, function(e){ lastAIError=(e&&e.message)||'request failed'; reject(); });
+    });
+  }
+  // The hosted proxy's dedicated vision endpoint (image-capable — the plain chat
+  // path often can't process images). Mirrors core-ai.js proxyCall({type:'vision'}).
+  function proxyVision(img){
+    return new Promise(function(resolve,reject){
+      var c=window.CORE_CONFIG||{}, prompt=AI_PROMPT[type];
+      if(!img || !prompt){ reject(); return; }
+      var url=c.AI_PROXY_URL || (c.SUPABASE_URL ? c.SUPABASE_URL+'/functions/v1/ai' : null);
+      if(!url){ reject(); return; }
+      var headers={ 'Content-Type':'application/json' };
+      if(!c.AI_PROXY_URL && c.SUPABASE_ANON_KEY){ headers['apikey']=c.SUPABASE_ANON_KEY; headers['Authorization']='Bearer '+c.SUPABASE_ANON_KEY; }
+      fetch(url, { method:'POST', headers:headers, body:JSON.stringify({ type:'vision', image:img, prompt:prompt }) })
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(jj){ if(jj && (jj.reply||jj.text)){ try{ resolve(parseScanJson(jj.reply||jj.text)); }catch(e){ reject(); } } else reject(); })
+        .catch(reject);
+    });
+  }
+  function firstValid(promises){
+    return new Promise(function(resolve,reject){
+      var pending=promises.length, settled=false;
+      if(!pending){ reject(); return; }
+      promises.forEach(function(pr){
+        Promise.resolve(pr).then(function(v){ if(!settled && v){ settled=true; resolve(v); } else if(--pending<=0 && !settled){ reject(); } },
+          function(){ if(--pending<=0 && !settled){ reject(); } });
+      });
+    });
+  }
+  // Score one or more photos through real AI. Physique also tries the dedicated backend.
+  function requestScanAI(imgs){
+    var arr=(Array.isArray(imgs)?imgs:[imgs]).filter(Boolean);
+    if(!arr.length) return Promise.reject();
+    lastAIError='';
+    var tries=[ coreAIScan(arr), proxyVision(arr[0]) ];
+    if(isPhysique) tries.unshift(supabasePhysique(arr[0]));
+    return firstValid(tries);
+  }
+  // Upload-from-gallery path: score a chosen photo without the camera capture.
+  function analyzeFromImages(urls){
+    urls=(urls||[]).filter(Boolean);
+    if(!urls.length) return;
+    cam._demo=false;
+    var labels=['front','right','back','left'];
+    var n=Math.min(4,urls.length), tmp=new Array(n), pending=n;
+    for(var i=0;i<n;i++){ (function(i){
+      shrinkUrl(urls[i], 1080, function(big){ shrinkUrl(big, 360, function(th){   // cap AI image at 1080px
+        var k=isPhysique?(labels[i]||('a'+i)):'front';
+        tmp[i]={ k:k, label:k.charAt(0).toUpperCase()+k.slice(1), url:big, thumb:th };
+        if(--pending===0) go();
+      }); });
+    })(i); }
+    function go(){
+      shots=tmp; snapDataUrl=tmp[0].thumb||tmp[0].url;   // non-physique results show the uploaded image
+      try{ lsSet('corePhysiqueShots.v1', JSON.stringify({ ts:Date.now(), shots:shots.map(function(x){ return { k:x.k, label:x.label, url:x.thumb||x.url }; }) })); }catch(e){}
+      aiResult=null; aiPending=true;
+      requestScanAI(tmp.map(function(x){ return x.url; })).then(function(r){ aiResult=r; aiPending=false; }).catch(function(){ aiResult=null; aiPending=false; });
+      doAnalyze();
+    }
+  }
+  function analyzeFromImage(url){ analyzeFromImages([url]); }
+
+  // ── Physique angle organizer ──────────────────────────────────────
+  // Upload any number of photos; the AI sorts each into front/right/back/left,
+  // then you fill the missing angles (upload or guided scan) before scoring.
+  var slots={front:null,right:null,back:null,left:null}, pendingSlot=null;
+  var SLOT_ORDER=[{k:'front',l:'Front'},{k:'right',l:'Right'},{k:'back',l:'Back'},{k:'left',l:'Left'}];
+  function cap(k){ return k.charAt(0).toUpperCase()+k.slice(1); }
+  function slotCount(){ return SLOT_ORDER.filter(function(o){ return slots[o.k]; }).length; }
+  // Cap the AI image at 1080px (plenty for vision, light on memory/upload) and
+  // derive a 360px thumb for storage. Avoids sending multi-MB phone photos.
+  function readFile(f, cb){ var rd=new FileReader(); rd.onload=function(){ shrinkUrl(rd.result,1080,function(big){ shrinkUrl(big,360,function(th){ cb({ url:big, thumb:th }); }); }); }; rd.onerror=function(){ cb(null); }; rd.readAsDataURL(f); }
+  // Ask the vision AI which way each body faces. Resolves to an array of views
+  // (same order as input) or null if the AI can't be reached.
+  function classifyViews(urls){
+    return new Promise(function(resolve){
+      if(!urls.length || !(window.coreAI && coreAI.chat && coreAI.ready && coreAI.ready())){ resolve(null); return; }
+      var prompt='You are sorting physique photos by camera angle. For EACH image, in order, say which way the body faces the camera. '
+        +'Reply STRICT JSON only, no markdown: {"views":["front"|"back"|"left"|"right", ...]} — exactly one entry per image, in the same order. '
+        +'front = chest/front toward the camera; back = back toward the camera; left = the person’s LEFT side toward the camera; right = the person’s RIGHT side toward the camera. If a photo shows no clear person, use "front".';
+      var content=[{ type:'text', text:prompt }].concat(urls.map(function(u){ return { type:'image_url', image_url:{ url:u, detail:'low' } }; }));
+      coreAI.chat([{ role:'user', content:content }], { role:'vision', temperature:0, maxTokens:120, json:true })
+        .then(function(r){ if(!r||!r.ok||!r.text||r.fallback){ resolve(null); return; }
+          try{ var j=JSON.parse(String(r.text).replace(/^```json\s*|\s*```$/g,'').trim()); resolve(Array.isArray(j.views)?j.views:null); }catch(e){ resolve(null); } },
+          function(){ resolve(null); });
+    });
+  }
+  function placeIntoSlots(items, views){
+    items.forEach(function(it,i){
+      if(!it) return;
+      var v=(views && SLOT_ORDER.some(function(o){return o.k===views[i];})) ? views[i] : null;
+      if(v && !slots[v]){ slots[v]=it; return; }
+      for(var j=0;j<SLOT_ORDER.length;j++){ if(!slots[SLOT_ORDER[j].k]){ slots[SLOT_ORDER[j].k]=it; return; } }
+    });
+  }
+  function handlePhysiqueUploads(files){
+    openOrganizer(true);   // show the sorting spinner immediately
+    var items=new Array(files.length), urls=new Array(files.length), pending=files.length;
+    files.forEach(function(f,i){ readFile(f, function(it){ items[i]=it; urls[i]=it?it.url:null; if(--pending===0) afterRead(); }); });
+    function afterRead(){
+      var valid=urls.filter(Boolean);
+      classifyViews(valid).then(function(views){ placeIntoSlots(items.filter(Boolean), views); renderOrganizer(); });
+    }
+  }
+  function openOrganizer(sorting){
+    var org=$('#organizer');
+    if(sorting){
+      org.innerHTML='<button class="res-close" id="orgClose" type="button" aria-label="Close">'+svg('<path d="M6 6l12 12M18 6L6 18"/>')+'</button>'
+        +'<div class="org-h">Sorting your angles</div>'
+        +'<div class="org-sorting"><div class="org-spin"></div><div class="org-sub">CORE is reading each photo and sorting it into front, back, left and right…</div></div>';
+      org.classList.add('on');
+      var oc=$('#orgClose'); if(oc) oc.addEventListener('click', function(){ org.classList.remove('on'); });
+    } else { org.classList.add('on'); }
+  }
+  function renderOrganizer(){
+    var org=$('#organizer'), n=slotCount();
+    var grid=SLOT_ORDER.map(function(o){ var it=slots[o.k];
+      return it
+        ? '<button class="oslot filled" data-fill="'+o.k+'" type="button"><img src="'+it.thumb+'" alt=""/><span class="ok">'+svg('<path d="M20 6L9 17l-5-5"/>')+'</span><span class="re">'+svg('<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>')+'</span><span class="ol">'+o.l+'</span></button>'
+        : '<button class="oslot empty" data-add="'+o.k+'" type="button"><span class="plus">'+svg('<path d="M12 5v14M5 12h14"/>')+'</span><span class="ol">'+o.l+'</span></button>';
+    }).join('');
+    org.innerHTML='<button class="res-close" id="orgClose" type="button" aria-label="Close">'+svg('<path d="M6 6l12 12M18 6L6 18"/>')+'</button>'
+      +'<div class="org-h">Your angles</div>'
+      +'<div class="org-sub"><b>'+n+' of 4</b> added · more angles = a more accurate score</div>'
+      +'<div class="oslots">'+grid+'</div>'
+      +'<div class="org-actions">'
+        +'<button class="btn save" id="orgScore" type="button"'+(n<1?' disabled style="opacity:.5"':'')+'>'+svg('<path d="M5 12l4 4 10-11"/>')+'Score my physique · '+n+'/4</button>'
+        +'<button class="btn again" id="orgUpload" type="button">'+svg('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5-5 5 5"/><path d="M12 5v12"/>')+'Upload more photos</button>'
+        +'<button class="btn ghost" id="orgCam" type="button">'+svg('<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>')+'Take a guided physique scan</button>'
+      +'</div>';
+    org.classList.add('on');
+    $('#orgClose').addEventListener('click', function(){ org.classList.remove('on'); });
+    Array.prototype.forEach.call(org.querySelectorAll('.oslot.empty'), function(b){ b.addEventListener('click', function(){ pendingSlot=b.getAttribute('data-add'); var pf=$('#pqFile'); pf.multiple=false; pf.click(); }); });
+    Array.prototype.forEach.call(org.querySelectorAll('.oslot.filled'), function(b){ b.addEventListener('click', function(){ pendingSlot=b.getAttribute('data-fill'); var pf=$('#pqFile'); pf.multiple=false; pf.click(); }); });
+    $('#orgUpload').addEventListener('click', function(){ pendingSlot=null; var pf=$('#pqFile'); pf.multiple=true; pf.click(); });
+    $('#orgCam').addEventListener('click', function(){ org.classList.remove('on'); openCam(); });
+    $('#orgScore').addEventListener('click', function(){ if(slotCount()<1) return; scoreFromSlots(); });
+  }
+  function scoreFromSlots(){
+    var ordered=SLOT_ORDER.filter(function(o){ return slots[o.k]; });
+    if(!ordered.length) return;
+    shots=ordered.map(function(o){ var it=slots[o.k]; return { k:o.k, label:o.l, url:it.url, thumb:it.thumb }; });
+    snapDataUrl=shots[0].thumb||shots[0].url; cam._demo=false;
+    $('#organizer').classList.remove('on');
+    try{ lsSet('corePhysiqueShots.v1', JSON.stringify({ ts:Date.now(), shots:shots.map(function(x){ return { k:x.k, label:x.label, url:x.thumb||x.url }; }) })); }catch(e){}
+    aiResult=null; aiPending=true;
+    requestScanAI(shots.map(function(x){ return x.url; })).then(function(r){ aiResult=r; aiPending=false; }).catch(function(){ aiResult=null; aiPending=false; });
+    doAnalyze();
+  }
+
+  // ── result ──
+  function pick(arr,k){ var a=arr.slice(), out=[]; while(a.length&&out.length<k){ out.push(a.splice(Math.floor(Math.random()*a.length),1)[0]); } return out; }
+  function clampb(v){ v=Math.round(+v||0); return Math.max(28,Math.min(99,v)); }
+  function deriveBreakdown(score, weak){
+    weak=weak||[]; function has(k){ return weak.indexOf(k)>=0; }
+    return {
+      Proportions: clampb(score + (weak.length?-3:4)),
+      Symmetry:    clampb(score + 5),
+      Muscularity: clampb(score - (has('arms')||has('legs')||has('back')?6:1)),
+      Definition:  clampb(score - (has('core')?8:4))
+    };
+  }
+  // ── Focus areas: each weak point deep-links to where you train it ──
+  var LK_ICON='<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>';
+  var IMPROVE={
+    chest:{t:'Build your chest',s:'Incline & flat pressing',c:'#fb7185',href:'gym.html#chest',ic:'<path d="M3 9h18v7a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z"/><path d="M3 9l3-4h12l3 4"/>'},
+    back:{t:'Widen your back',s:'Rows & pull-ups',c:'#fbbf24',href:'gym.html#back',ic:'<path d="M12 3v18M5 8l7-5 7 5M5 16l7 5 7-5"/>'},
+    shoulders:{t:'Round your shoulders',s:'Presses & lateral raises',c:'#34d399',href:'gym.html#shoulders',ic:'<path d="M4 18a8 8 0 0 1 16 0M12 6a3 3 0 1 0 0-0.01"/>'},
+    arms:{t:'Grow your arms',s:'Curls & extensions',c:'#60a5fa',href:'gym.html#arms',ic:'<path d="M6 10v6a2 2 0 0 0 2 2h2M6 10a3 3 0 0 1 6 0v4M14 8h2a2 2 0 0 1 2 2v2"/>'},
+    legs:{t:'Grow your legs',s:'Squats & lunges',c:'#a78bfa',href:'gym.html#legs',ic:'<path d="M8 3v8l-2 10M16 3v8l2 10M8 11h8"/>'},
+    core:{t:'Sharpen your core',s:'Abs & conditioning',c:'#22d3ee',href:'gym.html#core',ic:'<rect x="6" y="3" width="12" height="18" rx="3"/><path d="M9 8h6M9 12h6M9 16h6"/>'}
+  };
+  function focHtml(weak){
+    weak=(weak||[]).filter(function(k){ return IMPROVE[k]; });
+    if(!weak.length) weak=['chest','legs','back'];
+    return weak.slice(0,4).map(function(k){ var m=IMPROVE[k], mc=(isPhysique?s.color:m.c);   // physique = single blue accent
+      return '<button class="foc" type="button" data-go="'+m.href+'">'
+        +'<div class="fi" style="background:color-mix(in srgb,'+mc+' 16%,transparent);color:'+mc+'">'+svg(m.ic)+'</div>'
+        +'<div class="ft"><b>'+m.t+'</b><span>'+m.s+'</span></div>'
+        +'<div class="fa">'+svg('<path d="M9 6l6 6-6 6"/>')+'</div></button>';
+    }).join('');
+  }
+  function wireFoc(el){ if(!el) return; Array.prototype.forEach.call(el.querySelectorAll('.foc'), function(b){ b.addEventListener('click', function(){ var go=b.getAttribute('data-go'); if(go){ try{window.coreSfx&&window.coreSfx('click');}catch(e){} location.href=go; } }); }); }
+  // Tap a captured photo → fullscreen zoom (lightbox)
+  function wireZoom(root){ if(!root) return; Array.prototype.forEach.call(root.querySelectorAll('[data-zoom]'), function(b){ b.addEventListener('click', function(e){ e.preventDefault(); var url=b.getAttribute('data-zoom'); if(!url) return;
+    var lb=document.createElement('div'); lb.className='snap-lightbox'; lb.innerHTML='<img src="'+url+'" alt="">'; document.body.appendChild(lb);
+    requestAnimationFrame(function(){ lb.classList.add('on'); });
+    lb.addEventListener('click', function(){ lb.classList.remove('on'); setTimeout(function(){ lb.remove(); }, 260); });
+    try{ if(navigator.vibrate) navigator.vibrate(10); }catch(_){}
+  }); }); }
+  // ── Confirm dialog (used twice for the lock double-confirm) ──
+  function confirmDialog(o){
+    var d=document.createElement('div'); d.className='cdlg';
+    d.innerHTML='<div class="cdlg-card">'
+      +'<div class="cdlg-ic">'+svg(o.icon||LK_ICON)+'</div>'
+      +'<h3>'+o.title+'</h3><p>'+o.body+'</p>'
+      +'<div class="cdlg-row"><button class="btn ghost" type="button" data-no>'+(o.no||'Cancel')+'</button>'
+      +'<button class="btn danger2" type="button" data-yes>'+(o.yes||'Yes')+'</button></div></div>';
+    document.body.appendChild(d);
+    requestAnimationFrame(function(){ d.classList.add('on'); });
+    function close(cb){ d.classList.remove('on'); setTimeout(function(){ d.remove(); if(cb)cb(); }, 240); }
+    d.querySelector('[data-no]').addEventListener('click', function(){ close(o.onNo); });
+    d.querySelector('[data-yes]').addEventListener('click', function(){ close(o.onYes); });
+  }
+  function lockRecord(ts){ var all=readScans(), ch=false; all.forEach(function(x){ if(x.ts===ts){ x.locked=true; ch=true; } }); if(ch) lsSet('coreScans.v1', JSON.stringify(all)); }
+  // Two yes-popups, then the lock ceremony.
+  function lockFlow(rec, after){
+    confirmDialog({ title:'Lock this photo in?', body:'Locked photos become a permanent benchmark — they can’t be deleted or removed later.', yes:'Lock it in', no:'Not yet',
+      onYes:function(){
+        confirmDialog({ title:'You’re sure? This is final.', body:'Once locked, this photo stays in your profile for good. No take-backs.', yes:'Yes — lock it', no:'Cancel',
+          onYes:function(){ lockRecord(rec.ts); runLockCeremony(rec, after); } });
+      }});
+  }
+  // The ceremony: blur the page, the photo flies up, the lock snaps on with a
+  // shake, then the panel slides up revealing what to build next (tappable).
+  function runLockCeremony(rec, after){
+    var img=rec.thumb || (rec.shots&&rec.shots[0]&&rec.shots[0].url) || frontThumb() || '';
+    var weak=(rec.weak&&rec.weak.length)?rec.weak:((aiResult&&aiResult.weakPoints)||[]);
+    var c=document.createElement('div'); c.className='lockc';
+    c.innerHTML='<div class="lockc-photo"><img src="'+img+'" alt=""/><div class="lockc-lk">'+svg(LK_ICON)+'</div></div>'
+      +'<div class="lockc-panel"><div class="lh">'+svg(LK_ICON)+' LOCKED IN · NOW BUILD THIS</div>'
+      +'<div class="res-foc" id="lockFoc">'+focHtml(weak)+'</div>'
+      +'<button class="btn ghost" id="lockDone" type="button" style="margin-top:14px;width:100%">Done</button></div>';
+    document.body.appendChild(c);
+    wireFoc(c.querySelector('#lockFoc'));
+    c.querySelector('#lockDone').addEventListener('click', function(){ c.classList.remove('blur','up','in'); setTimeout(function(){ c.remove(); if(after)after(); }, 420); });
+    requestAnimationFrame(function(){ c.classList.add('blur'); });
+    setTimeout(function(){ c.classList.add('in'); try{window.coreSfx&&window.coreSfx('whoosh');}catch(e){} }, 70);
+    setTimeout(function(){ c.classList.add('shake'); try{ if(navigator.vibrate) navigator.vibrate([0,45,55,40,90]); }catch(e){} try{window.coreSfx&&window.coreSfx('confirm');}catch(e){} }, 840);
+    setTimeout(function(){ c.classList.add('up'); }, 1520);
+  }
+  function showMessage(title, sub){
+    var res=$('#result');
+    res.innerHTML='<button class="res-close" id="resClose" type="button" aria-label="Done">'+svg('<path d="M6 6l12 12M18 6L6 18"/>')+'</button>'
+      +'<div class="nb-ic">'+svg('<circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/>')+'</div>'
+      +'<div class="res-title">'+title+'</div>'
+      +'<div class="res-sub">'+sub+'</div>'
+      +'<div class="res-actions"><button class="btn save" id="btnAgain2" type="button">'+svg('<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>')+'Scan again</button></div>';
+    res.classList.add('on');
+    $('#resClose').addEventListener('click', function(){ res.classList.remove('on'); });
+    $('#btnAgain2').addEventListener('click', function(){ res.classList.remove('on'); openCam(); });
+  }
+  function showNotBody(){ showMessage('Couldn’t read a body','Stand back so your whole body is in frame, in good light, and scan again.'); }
+  // True when the AI says the photo isn't the right subject for this scan type.
+  function aiInvalidSubject(ai){
+    if(!ai) return false;
+    if(isPhysique) return ai.isBody===false;
+    if(type==='food') return ai.isMeal===false;
+    return ai.isPerson===false;   // posture / outfit / looks
+  }
+  var INVALID_MSG={
+    physique:['Couldn’t read a body','Stand back so your whole body is in frame, in good light, and scan again.'],
+    food:['Couldn’t read a meal','Point the camera at your plate from above and scan again.'],
+    posture:['Couldn’t read a photo of you','Make sure your full body is in frame and scan again.'],
+    outfit:['Couldn’t read your outfit','Stand back for a full head-to-toe shot and scan again.'],
+    looks:['Couldn’t read your photo','Center your face with even lighting and scan again.']
+  };
+  function showResult(){
+    var ai = aiResult;
+    if(aiInvalidSubject(ai)){ var m=INVALID_MSG[type]||INVALID_MSG.physique; showMessage(m[0], m[1]); return; }
+    // Never fabricate a number — if the AI didn't return a real score, say so.
+    if(!(ai && ai.rank && typeof ai.rank.score==='number')){
+      var hasKey=!!(window.coreAI && coreAI.hasKey && coreAI.hasKey());
+      if(cam._demo) showMessage('Camera needed for a real score','Allow camera access and scan again for an accurate AI read.');
+      else if(hasKey) showMessage('Couldn’t score that one', (lastAIError?('Error: '+lastAIError+'. '):'')+'The AI didn’t return a read — try again.');
+      else showMessage('AI scoring isn’t set up','This needs an AI vision model. Add your own AI key in Settings → AI Setup for instant scoring, then scan again.');
+      return;
+    }
+    var score, tips, gradeTxt, subTxt;
+    {
+      score=Math.max(0,Math.min(100,Math.round(ai.rank.score)));
+      gradeTxt=ai.rank.tier || grade(score);
+      if(isPhysique){
+        var WP={chest:'Add incline pressing for upper-chest fullness.',back:'2 pull sessions a week to widen your back.',shoulders:'Lateral raises to round out your delts.',arms:'Direct curls + extensions to bring your arms up.',legs:'Prioritise squats — your legs need the volume.',core:'Tighten nutrition and add core work to sharpen the midsection.'};
+        tips=[]; if(ai.summary) tips.push(ai.summary);
+        (ai.weakPoints||[]).forEach(function(k){ if(WP[k]) tips.push(WP[k]); });
+        if(!tips.length) tips=pick(s.tips,3);
+      } else {
+        tips = (ai.tips && ai.tips.length) ? ai.tips.slice(0) : (ai.summary ? [ai.summary] : pick(s.tips,3));
+      }
+      tips=tips.slice(0,4);
+      subTxt='Scored by CORE vision AI from your '+(isPhysique?'photo':'scan')+'.';
+    }
+    // Feed the scan score into CORE stats (physique→Strength, food/posture→Health, looks/outfit/voice→Social)
+    try{
+      if(window.coreState && coreState.addStat){
+        var SM={physique:'strength',food:'health',posture:'health',outfit:'social',looks:'social',voice:'social'};
+        var stat=SM[type]||'health', gain=Math.max(1,Math.round(score/40));
+        coreState.addStat(stat,gain,s.name+' scan');
+        if(coreState.addXp) coreState.addXp(Math.round(gain*8),s.name.toLowerCase()+'-scan');
+      }
+    }catch(e){}
+    var R=78, C=2*Math.PI*R;
+    var res=$('#result');
+    // physique → gallery of the 4 captured angles; others → single snapshot
+    var gallery='';
+    if(isPhysique){
+      function shotFor(k){ for(var i=0;i<shots.length;i++){ if(shots[i].k===k) return shots[i]; } return null; }
+      var front=shotFor('front');
+      var heroImg=(front&&front.url)?'<img src="'+front.url+'" alt="front"/>':'<div class="snap-ph"></div>';
+      var sides=['right','back','left'].map(function(k){ var sh=shotFor(k);
+        var inner=(sh&&sh.url)?'<img src="'+sh.url+'" alt="'+k+'"/>':'<div class="snap-ph"></div>';
+        return '<button class="snap-cell"'+((sh&&sh.url)?' data-zoom="'+sh.url+'"':'')+' type="button">'+inner+'<span>'+k+'</span></button>';
+      }).join('');
+      gallery='<div class="snap-gallery">'
+        +'<button class="snap-hero"'+((front&&front.url)?' data-zoom="'+front.url+'"':'')+' type="button">'+heroImg+'<span class="snap-hero-lbl">Front</span></button>'
+        +'<div class="snap-side">'+sides+'</div></div>';
+    }
+    var bdHtml='', BD=null;
+    // Only show the breakdown if the AI actually returned one — never fabricate
+    // sub-scores from the overall number.
+    if(isPhysique && ai && ai.breakdown && typeof ai.breakdown.proportions==='number'){
+      BD = {
+        Proportions: clampb(ai.breakdown.proportions),
+        Symmetry:    clampb(ai.breakdown.symmetry),
+        Muscularity: clampb(ai.breakdown.muscularity),
+        Definition:  clampb(ai.breakdown.definition)
+      };
+      bdHtml=radarHtml(BD, s.color);   // radar chart instead of flat bars
+    }
+    // colour-code the whole result card by the overall score (scoped to #result)
+    var SC=(isPhysique?s.color:scoreColor(score)), topP=topPctile(score);
+    var focSec = isPhysique ? ('<div class="res-sec">Focus areas <span class="sec-hint">tap to train</span></div><div class="res-foc" id="resFoc">'+focHtml(ai&&ai.weakPoints)+'</div>') : '';
+    res.innerHTML=
+      '<button class="res-close" id="resClose" type="button" aria-label="Done">'+svg('<path d="M6 6l12 12M18 6L6 18"/>')+'</button>'
+      +gallery
+      +((!isPhysique&&snapDataUrl)?'<img class="res-snap'+(type==='food'?' food-hero':'')+'" src="'+snapDataUrl+'" alt="scan"/>':'')
+      +'<div class="res-score"><svg class="res-ring" viewBox="0 0 172 172">'
+        +'<defs><linearGradient id="resGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--sc)" stop-opacity="1"/><stop offset="1" stop-color="var(--sc)" stop-opacity="0.5"/></linearGradient></defs>'
+        +'<circle class="bg" cx="86" cy="86" r="'+R+'"></circle>'
+        +'<circle class="fg" id="resFg" cx="86" cy="86" r="'+R+'" style="stroke:url(#resGrad)" stroke-dasharray="'+C+'" stroke-dashoffset="'+C+'"></circle>'
+        +'<text x="86" y="80" text-anchor="middle" class="res-num" id="resNum" fill="#fff" style="font:900 46px -apple-system,sans-serif;letter-spacing:-2px">0</text>'
+        +'<text x="86" y="104" text-anchor="middle" fill="rgba(255,255,255,0.72)" style="font:700 13px -apple-system,sans-serif" id="resOf">/ 100</text>'
+      +'</svg>'
+      +'<div class="res-letterrow"><span class="res-letter">'+letterGrade(score)+'</span><span class="res-grade">'+gradeTxt+'</span></div>'
+      +'<div class="res-pctbar"><div class="res-pctbar-track"><i style="width:'+(100-topP)+'%"></i><span class="res-pctbar-dot" style="left:'+(100-topP)+'%"></span></div>'
+        +'<div class="res-pctbar-cap">Top <b>'+topP+'%</b> · better than <b>'+(100-topP)+'%</b></div></div></div>'
+      +'<div class="res-title">'+((type==='food'&&ai&&ai.name)?ai.name:s.label)+'</div>'
+      +'<div class="res-sub">'+(type==='food'?'Health score · scored by CORE vision AI':subTxt)+'</div>'
+      +(ai&&ai.summary?'<div class="res-lead">'+ai.summary+'</div>':'')
+      +(type==='food'?foodHtml(ai):'')
+      +bdHtml
+      +focSec
+      +'<div class="res-sec">Coach notes</div>'
+      +tips.map(function(t){return '<div class="tip"><div class="ti">'+svg('<path d="M20 6L9 17l-5-5"/>')+'</div><span>'+t+'</span></div>';}).join('')
+      +'<div class="res-actions">'
+        +'<button class="btn again" id="btnAgain" type="button">'+svg('<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>')+'Scan again</button>'
+        +'<button class="btn save" id="btnSave" type="button">'+svg('<path d="M5 12l4 4 10-11"/>')+'Save to profile</button>'
+      +'</div>'
+      +(isPhysique?'<button class="btn lock" id="btnLock" type="button">'+svg(LK_ICON)+'Lock this in</button>':'')
+      +'<button class="btn coach" id="btnCoach" type="button">'+svg('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>')+'Discuss with Coach</button>';
+    res.style.setProperty('--sc', SC);
+    res.classList.add('on');
+    wireFoc($('#resFoc'));
+    wireZoom(res);
+    // animate the ring + number
+    var fg=$('#resFg'); requestAnimationFrame(function(){ fg.setAttribute('stroke-dashoffset', C*(1-score/100)); });
+    var numEl=$('#resNum'), n0=0, t0=performance.now();
+    (function count(t){ var p=Math.min(1,(t-t0)/1000); numEl.textContent=Math.round(score*(1-Math.pow(1-p,3))); if(p<1) requestAnimationFrame(count); })(t0);
+    requestAnimationFrame(function(){ Array.prototype.forEach.call(res.querySelectorAll('.bd-track i,.fm-bar i'), function(el){ el.style.width=el.getAttribute('data-w')+'%'; }); });
+    // food: count up calories
+    var fc=res.querySelector('#foodCal');
+    if(fc){ var cal=+fc.getAttribute('data-n')||0, ct=performance.now(); (function cc(t){ var pr=Math.min(1,(t-ct)/1000); fc.textContent=Math.round(cal*(1-Math.pow(1-pr,3))); if(pr<1) requestAnimationFrame(cc); })(ct); }
+    try{ if(navigator.vibrate) navigator.vibrate([0,30,40,20]); }catch(e){}
+
+    $('#resClose').addEventListener('click', function(){ res.classList.remove('on'); updateLast(); });
+    $('#btnAgain').addEventListener('click', function(){ res.classList.remove('on'); openCam(); });
+    var saved=false, savedTs=null;
+    function persist(){
+      if(saved) return; saved=true;
+      if(type==='food' && ai && (ai.calories!=null || ai.protein!=null)) addFoodDaily(ai.calories, ai.protein);   // feed Today's Nutrition
+      var all=readScans();
+      var rec={ type:type, name:s.name, score:score, label:s.label, tips:tips, ts:Date.now(),
+                thumb:(isPhysique?frontThumb():snapDataUrl)||null, breakdown:(isPhysique?BD:null), grade:gradeTxt,
+                weak:(isPhysique&&ai&&ai.weakPoints)?ai.weakPoints.slice(0,6):[],
+                shots:(isPhysique?shots.map(function(x){ return { k:x.k, url:x.thumb||x.url }; }):null),
+                locked:false };
+      all.push(rec); savedTs=rec.ts;
+      if(isPhysique){
+        // Keep at most 3 physique photos. Locked ones are never dropped; trim the
+        // oldest UNLOCKED first. If 3 are already locked, the new one isn't kept.
+        var phys=all.filter(function(x){ return x.type==='physique'; }).sort(function(a,b){ return a.ts-b.ts; });
+        var others=all.filter(function(x){ return x.type!=='physique'; });
+        while(phys.length>3){
+          var idx=-1; for(var i=0;i<phys.length;i++){ if(!phys[i].locked){ idx=i; break; } }
+          if(idx<0){ break; }
+          if(phys[idx].ts===rec.ts) savedTs=null;   // the new one got bumped (all others locked)
+          phys.splice(idx,1);
+        }
+        all=others.concat(phys);
+      }
+      lsSet('coreScans.v1', JSON.stringify(all.slice(-60)));
+      if(typeof refreshPqProgress==='function') refreshPqProgress();
+      lsSet('coreLastScan', JSON.stringify({ type:type, score:score, ts:Date.now() }));
+      updateLast();
+    }
+    $('#btnSave').addEventListener('click', function(){
+      persist();
+      var b=$('#btnSave'); b.classList.add('done'); b.innerHTML=svg('<path d="M5 12l4 4 10-11"/>')+'Saved to profile';
+      toast(s.name+' scan saved · '+score+'/100');
+    });
+    // results auto-save to the profile so progress always tracks
+    if(!isVoice){
+      persist();
+      var sb=$('#btnSave'); if(sb){ sb.classList.add('done'); sb.innerHTML=svg('<path d="M5 12l4 4 10-11"/>')+'Saved to profile'; }
+    }
+    var lb=$('#btnLock');
+    if(lb) lb.addEventListener('click', function(){
+      persist();
+      if(savedTs==null){ toast('You already have 3 locked photos — unlock one first.'); return; }
+      var rec={ ts:savedTs, thumb:frontThumb(), weak:(ai&&ai.weakPoints)||[], shots:shots.map(function(x){ return { k:x.k, url:x.thumb||x.url }; }) };
+      lockFlow(rec, function(){ lb.classList.add('done'); lb.innerHTML=svg(LK_ICON)+'Locked in'; lb.disabled=true; });
+    });
+    // hand the result to the AI coach to talk through
+    $('#btnCoach').addEventListener('click', function(){
+      persist();
+      lsSet('coreCoachSeed', JSON.stringify({ type:type, name:s.name, label:s.label, score:score, tips:tips, ts:Date.now() }));
+      try{ window.coreSfx&&window.coreSfx('click'); }catch(_){}
+      location.href='coach.html';
+    });
+  }
+
+  // ── wire up ──
+  $('#cta').addEventListener('click', openCam);
+  $('#shutter').addEventListener('click', function(){
+    if(isPhysique){
+      if(detector) passGate();                 // detector found a body → tap to begin
+      else if(gateManual) beginCapture('Starting…');  // fallback path → deliberate manual start
+      return;
+    }
+    if(!cam.classList.contains('scanning')) runAnalyze();
+  });
+  $('#camX').addEventListener('click', stopCam);
+  $('#camFlip').addEventListener('click', function(){ facing=(facing==='user'?'environment':'user'); startStream(); });
+
+  var toastEl=$('#toast');
+  function toast(m){ toastEl.textContent=m; toastEl.classList.add('show'); clearTimeout(toastEl._t); toastEl._t=setTimeout(function(){ toastEl.classList.remove('show'); }, 2200); }
+
+  // ── analysis landing + history (works for every scan type) ──
+  function pqScans(){ return readScans().filter(function(x){ return x.type===type; }); }
+  function pqStats(){
+    var a=pqScans(); if(!a.length) return { best:0, avg:0, total:0 };
+    var best=0, sum=0; a.forEach(function(x){ best=Math.max(best, x.score||0); sum+=(x.score||0); });
+    return { best:best, avg:Math.round(sum/a.length), total:a.length };
+  }
+  function refreshPqProgress(){
+    var st=pqStats();
+    if($('#pqBest')) $('#pqBest').textContent=st.total?st.best:'—';
+    if($('#pqAvg'))  $('#pqAvg').textContent=st.total?st.avg:'—';
+    if($('#pqCount'))$('#pqCount').textContent=st.total;
+  }
+  function timeAgo(ts){
+    var d=Math.floor((Date.now()-ts)/86400000);
+    if(d<=0){ var h=Math.floor((Date.now()-ts)/3600000); return h<=0?'just now':(h+'h ago'); }
+    if(d===1) return 'yesterday';
+    return d+' days ago';
+  }
+  var INTRO={
+    physique:{ get:[['Proportions Analysis','Body symmetry & balance breakdown'],['Muscle Assessment','Development & definition scoring'],['Personalized Tips','Actionable improvement suggestions']],
+      tips:'<b>Men:</b> athletic shorts, shirtless preferred<br><b>Women:</b> sports attire showing body shape<br>Stand 6–8 feet from camera, full body visible' },
+    food:{ get:[['Calorie & Macro Read','Protein, carbs and fat per plate'],['Health Score','How balanced the meal is'],['Smarter Swaps','Specific upgrade suggestions']],
+      tips:'Frame the whole plate from above in good, even light so every item is visible.' },
+    posture:{ get:[['Alignment Read','Head, shoulder & hip position'],['Imbalance Flags','Issues highlighted clearly'],['Correction Drills','Daily fixes that actually work']],
+      tips:'Stand side-on with your full body in frame, relaxed and natural — don\'t pose.' },
+    outfit:{ get:[['Fit & Proportion','How the cut suits you'],['Colour & Combo','Palette and pairing tips'],['Occasion Match','The right look for the moment']],
+      tips:'Stand back for a full head-to-toe shot in good light.' },
+    looks:{ get:[['Skin Read','Condition and tone'],['Facial Symmetry','Balance analysis'],['Grooming Tips','Hair and styling pointers']],
+      tips:'Center your face with even lighting and no filters.' }
+  };
+  // Per-type "best results" checklists (replaces a single tip line on every landing)
+  var TIPS_LIST={
+    physique:['Good, even lighting — avoid harsh shadows','Shirtless or fitted clothing reads your frame best','Stand 6–8 ft back so your whole body fits the ring','Plain background, phone at chest height'],
+    food:['Shoot the whole plate from directly above','Bright, even light so colours read true','Fit every item in the frame','One dish at a time scores most accurately'],
+    outfit:['Full head-to-toe shot in a mirror or by a friend','Stand against a plain background','Good light shows the true colours','Wear the actual outfit you’re scoring'],
+    posture:['Stand side-on to the camera','Get your whole body in the frame','Relax — stand how you normally do, don’t pose','Even lighting on a plain background'],
+    looks:['Face the camera in soft, even light','No filters or heavy editing','Pull hair back so your face is visible','A neutral expression reads most accurately']
+  };
+  // ── Food: daily nutrition tracker (fed by each food scan) ──
+  function getFoodDaily(){
+    try{ var raw=JSON.parse(ls('coreFoodDaily.v1','{}')||'{}'); var k=new Date().toDateString();
+      if(raw.day!==k) return { day:k, calories:0, protein:0, scans:0 };
+      return { day:k, calories:raw.calories||0, protein:raw.protein||0, scans:raw.scans||0 };
+    }catch(e){ return { day:new Date().toDateString(), calories:0, protein:0, scans:0 }; }
+  }
+  function addFoodDaily(cal, protein){ var fd=getFoodDaily(); fd.calories+=(+cal||0); fd.protein+=(+protein||0); fd.scans+=1; try{ lsSet('coreFoodDaily.v1', JSON.stringify(fd)); }catch(e){} }
+  function buildFoodIntro(){
+    var fd=getFoodDaily(), G='#34D399';
+    var I_FLAME='<path d="M12 2s4 4 4 8a4 4 0 0 1-8 0c0-1.5 1-3 1-3"/>',
+        I_HEART='<path d="M12 20.5s-7.2-4.6-7.2-9.8A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 7.2 3.7c0 5.2-7.2 9.8-7.2 9.8Z"/>',
+        I_SPARK='<path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6z"/>',
+        I_CHEV='<path d="M9 6l6 6-6 6"/>';
+    var GET=[{t:'Calorie & Macro Read',d:'Protein, carbs and fat per plate',c:'#FF6B6B',i:I_FLAME},
+             {t:'Health Score',d:'How balanced the meal is',c:'#34D399',i:I_HEART},
+             {t:'Smarter Swaps',d:'Specific upgrades for next time',c:'#4A8FFF',i:I_SPARK}];
+    var FLOW=[{n:1,l:'Snap'},{n:2,l:'Analyse'},{n:3,l:'Track'}];
+    var h='';
+    h+='<div class="food-today glass">'
+      +'<div class="ft-head"><span class="ft-h">'+svg(I_FLAME)+'Today’s Nutrition</span><button class="ft-all" id="pqVH" type="button">History '+svg(I_CHEV)+'</button></div>'
+      +'<div class="ft-stats">'
+        +'<div class="ft-stat"><div class="n" style="color:'+G+'">'+fd.calories+'</div><div class="k">Calories</div></div>'
+        +'<div class="ft-div"></div>'
+        +'<div class="ft-stat"><div class="n">'+fd.protein+'<small>g</small></div><div class="k">Protein</div></div>'
+        +'<div class="ft-div"></div>'
+        +'<div class="ft-stat"><div class="n">'+fd.scans+'</div><div class="k">Scans</div></div>'
+      +'</div></div>';
+    h+='<div class="pq-sec">How it works</div><div class="pq-steps">'
+      +FLOW.map(function(p){ return '<div class="pq-step"><div class="num" style="background:'+G+'">'+p.n+'</div><div class="lb">'+p.l+'</div></div>'; }).join('')+'</div>';
+    h+='<div class="pq-sec">What you’ll get</div><div class="pq-get">'
+      +GET.map(function(g){ return '<div class="pq-grow"><div class="pq-gic" style="color:'+g.c+';background:color-mix(in srgb,'+g.c+' 15%,transparent);border-color:color-mix(in srgb,'+g.c+' 30%,transparent)">'+svg(g.i)+'</div><div><div class="pq-gt">'+g.t+'</div><div class="pq-gd">'+g.d+'</div></div></div>'; }).join('')+'</div>';
+    h+='<div class="pq-sec">For best results</div><div class="pq-tips2">'
+      +TIPS_LIST.food.map(function(t){ return '<div class="pq-tip"><div class="ck">'+svg('<path d="M20 6L9 17l-5-5"/>')+'</div><span>'+t+'</span></div>'; }).join('')+'</div>';
+    h+='<div class="pq-btns">'
+      +'<button class="pq-take" id="pqTake" type="button">'+svg('<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>')+'Scan Food</button>'
+      +'<button class="pq-upload" id="pqUpload" type="button">'+svg('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5-5 5 5"/><path d="M12 5v12"/>')+'Upload from Gallery</button></div>';
+    h+='<a class="pq-recipe" href="recipe.html"><div class="pq-recipe-ic">'+svg('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>')+'</div><div class="pq-recipe-tx"><b>Recipe Generator</b><span>Get 3 tailored recipes, fast</span></div>'+svg(I_CHEV)+'</a>';
+    h+='<div class="pq-help">'+svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>')+'Instant AI nutrition read, kept private</div>';
+    h+='<div class="pq-disc">This analysis is for guidance only.</div>';
+    $('#pqIntro').innerHTML=h;
+    $('#pqTake').addEventListener('click', openCam);
+    $('#pqUpload').addEventListener('click', function(){ $('#pqFile').click(); });
+    $('#pqVH').addEventListener('click', openHistory);
+  }
+  function buildPqIntro(){
+    if(type==='food'){ buildFoodIntro(); return; }
+    var st=pqStats();
+    var cfg=INTRO[type] || { get:(s.checks||[]).slice(0,3).map(function(c){ return [c.split(/[\s—-]/).slice(0,3).join(' '), c]; }), tips:s.hint };
+    var GIC=['<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.7" fill="currentColor"/>','<path d="M3 17l6-6 4 4 7-8"/>','<path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="3.4"/>'];
+    // Physique is a restrained two-colour page (blue + white); other types keep their accents.
+    var GCOL=isPhysique?[s.color,s.color,s.color]:['#3B9EFF','#34D399','#FFCB3D'];
+    var GET=cfg.get.map(function(g,i){ return { t:g[0], d:g[1], i:GIC[i%GIC.length], c:GCOL[i%GCOL.length] }; });
+    var bestCol=st.total?(isPhysique?s.color:scoreColor(st.best)):'';
+    var h='';
+    h+='<div class="pq-card">'
+      +'<div class="pq-prog-top"><span class="l">'+svg('<path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/>')+'Your Progress</span>'
+      +'<button class="pq-vh" id="pqVH" type="button">View History '+svg('<path d="M9 6l6 6-6 6"/>')+'</button></div>'
+      +'<div class="pq-stats">'
+        +'<div class="pq-stat best"><div class="n" id="pqBest"'+(bestCol?' style="color:'+bestCol+'"':'')+'>'+(st.total?st.best:'—')+'</div><div class="k">Best</div></div>'
+        +'<div class="pq-stat"><div class="n" id="pqAvg">'+(st.total?st.avg:'—')+'</div><div class="k">Average</div></div>'
+        +'<div class="pq-stat"><div class="n" id="pqCount">'+st.total+'</div><div class="k">Scans</div></div>'
+      +'</div></div>';
+    if(isPhysique){
+      var STEPS=[{n:1,l:'Front',c:s.color},{n:2,l:'Right',c:s.color},{n:3,l:'Back',c:s.color},{n:4,l:'Left',c:s.color}];
+      h+='<div class="pq-sec">How it works <span class="h">· 4 angles</span></div><div class="pq-steps">'
+        +STEPS.map(function(p){ return '<div class="pq-step"><div class="num" style="background:'+p.c+'">'+p.n+'</div><div class="lb">'+p.l+'</div></div>'; }).join('')
+        +'</div>';
+    } else {
+      var FLOW=[{n:1,l:'Capture'},{n:2,l:'Analyse'},{n:3,l:'Improve'}];
+      h+='<div class="pq-sec">How it works</div><div class="pq-steps">'
+        +FLOW.map(function(p){ return '<div class="pq-step"><div class="num" style="background:'+s.color+'">'+p.n+'</div><div class="lb">'+p.l+'</div></div>'; }).join('')
+        +'</div>';
+    }
+    h+='<div class="pq-sec">What you’ll get</div><div class="pq-get">'
+      +GET.map(function(g){ return '<div class="pq-grow"><div class="pq-gic" style="color:'+g.c+';background:color-mix(in srgb,'+g.c+' 15%,transparent);border-color:color-mix(in srgb,'+g.c+' 30%,transparent)">'+svg(g.i)+'</div><div><div class="pq-gt">'+g.t+'</div><div class="pq-gd">'+g.d+'</div></div></div>'; }).join('')
+      +'</div>';
+    var TIPS=TIPS_LIST[type] || [cfg.tips];
+    h+='<div class="pq-sec">For best results</div><div class="pq-tips2">'
+      +TIPS.map(function(t){ return '<div class="pq-tip"><div class="ck">'+svg('<path d="M20 6L9 17l-5-5"/>')+'</div><span>'+t+'</span></div>'; }).join('')
+      +'</div>';
+    h+='<div class="pq-btns">'
+      +'<button class="pq-take" id="pqTake" type="button">'+svg('<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>')+'Take Photo</button>'
+      +'<button class="pq-upload" id="pqUpload" type="button">'+svg('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5-5 5 5"/><path d="M12 5v12"/>')+(isPhysique?'Upload photos':'Upload from Gallery')+'</button>'
+      +'</div>';
+    if(type==='food'){
+      h+='<a class="pq-recipe" href="recipe.html">'
+        +'<div class="pq-recipe-ic">'+svg('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>')+'</div>'
+        +'<div class="pq-recipe-tx"><b>Recipe Generator</b><span>Get 3 tailored recipes, fast</span></div>'
+        +svg('<path d="M9 6l6 6-6 6"/>')+'</a>';
+    }
+    h+='<div class="pq-help">'+svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>')+(isPhysique?'Upload 1–4 angles · AI sorts them for you':'Instant AI score, kept private')+'</div>';
+    h+='<div class="pq-disc">'+((type==='physique'||type==='looks')?'This analysis is for educational purposes only and not medical advice.':'This analysis is for guidance only.')+'</div>';
+    $('#pqIntro').innerHTML=h;
+    $('#pqTake').addEventListener('click', openCam);
+    $('#pqUpload').addEventListener('click', function(){ $('#pqFile').click(); });
+    $('#pqVH').addEventListener('click', openHistory);
+  }
+  $('#pqFile').addEventListener('change', function(e){
+    var files=e.target.files ? Array.prototype.slice.call(e.target.files) : [];
+    e.target.value='';
+    if(!files.length){ pendingSlot=null; return; }
+    // Filling one specific angle slot (tapped an empty tile)
+    if(isPhysique && pendingSlot){
+      var k=pendingSlot; pendingSlot=null;
+      readFile(files[0], function(it){ slots[k]=it; renderOrganizer(); });
+      return;
+    }
+    // Physique multi-upload → AI sorts them into front/right/back/left
+    if(isPhysique){ handlePhysiqueUploads(files.slice(0,4)); return; }
+    // Other scan types: single photo, score directly
+    var rd=new FileReader(); rd.onload=function(){ analyzeFromImage(rd.result); }; rd.readAsDataURL(files[0]);
+  });
+
+  // history panel
+  var phRange='month';
+  function inRange(ts){ if(phRange==='all') return true; var days=phRange==='week'?7:30; return (Date.now()-ts)<=days*86400000; }
+  function lineChart(points){
+    var W=300, H=150, pad=12;
+    if(!points.length) return '<svg viewBox="0 0 '+W+' '+H+'"></svg>';
+    function X(i){ return points.length===1 ? W/2 : pad + i*(W-2*pad)/(points.length-1); }
+    function Y(v){ return H-pad - (v/100)*(H-2*pad); }
+    var grid=''; for(var g=0;g<=4;g++){ var yy=(pad+g*(H-2*pad)/4).toFixed(1); grid+='<line x1="0" y1="'+yy+'" x2="'+W+'" y2="'+yy+'" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>'; }
+    var d=points.map(function(p,i){ return (i?'L':'M')+X(i).toFixed(1)+' '+Y(p.score).toFixed(1); }).join(' ');
+    var area=points.length>1 ? ('<path d="'+d+' L'+X(points.length-1).toFixed(1)+' '+(H-pad)+' L'+X(0).toFixed(1)+' '+(H-pad)+' Z" fill="var(--sc)" opacity="0.10"/>') : '';
+    var line=points.length>1 ? ('<path d="'+d+'" fill="none" stroke="var(--sc)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>') : '';
+    var dots=points.map(function(p,i){ return '<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(p.score).toFixed(1)+'" r="4.5" fill="var(--sc)" stroke="#04050c" stroke-width="2"/>'; }).join('');
+    return '<svg viewBox="0 0 '+W+' '+H+'">'+grid+area+line+dots+'</svg>';
+  }
+  function renderHistory(){
+    var all=pqScans().slice().sort(function(a,b){ return a.ts-b.ts; });
+    var st=pqStats();
+    var inr=all.filter(function(x){ return inRange(x.ts); });
+    var chartPts=inr.map(function(x){ return { ts:x.ts, score:x.score }; });
+    var latest=chartPts.length?chartPts[chartPts.length-1].score:'—';
+    function dlabel(ts){ try{ return new Date(ts).toLocaleDateString(undefined,{month:'short',day:'numeric'}); }catch(e){ return ''; } }
+    var first=chartPts.length?dlabel(chartPts[0].ts):'—', last=chartPts.length?dlabel(chartPts[chartPts.length-1].ts):'—';
+    var h='';
+    h+='<div class="ph-h">Your stats</div><div class="ph-stats">'
+      +'<div class="ph-st"><div class="k">'+svg('<path d="M8 21h8M12 17v4M6 4h12v3a6 6 0 0 1-12 0z"/>')+'Best</div><div class="n" style="color:var(--sc)">'+(st.total?st.best:'—')+'</div></div>'
+      +'<div class="ph-st"><div class="k">'+svg('<path d="M3 17l6-6 4 4 7-8"/>')+'Avg</div><div class="n">'+(st.total?st.avg:'—')+'</div></div>'
+      +'<div class="ph-st"><div class="k">'+svg('<path d="M4 7h16M4 12h16M4 17h16"/>')+'Total</div><div class="n">'+st.total+'</div></div>'
+      +'</div>';
+    h+='<div class="ph-h">Score progress</div>'
+      +'<div class="ph-tabs">'+['week','month','all'].map(function(r){ return '<button class="ph-tab'+(r===phRange?' on':'')+'" data-r="'+r+'">'+(r.charAt(0).toUpperCase()+r.slice(1))+'</button>'; }).join('')+'</div>'
+      +'<div class="ph-chart">'+lineChart(chartPts)+'<div class="ph-cx"><span>'+first+'</span><span>Latest: <b>'+latest+'</b></span><span>'+last+'</span></div></div>';
+    h+='<div class="ph-h">All scans</div>';
+    if(!all.length){ h+='<div class="ph-empty">No '+s.name.toLowerCase()+' scans yet.<br>Run a scan to start tracking.</div>'; }
+    else {
+      h+=all.slice().reverse().map(function(x){
+        var thumb=x.thumb?('<img src="'+x.thumb+'" alt=""/>'):('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+s.icon+'</svg>');
+        var locked=!!x.locked, col=scoreColor(x.score);
+        var right = locked
+          ? '<span class="ph-lk" title="Locked in">'+svg(LK_ICON)+'</span>'
+          : (isPhysique?'<button class="ph-lock" data-ts="'+x.ts+'" type="button" aria-label="Lock in">'+svg('<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/>')+'</button>':'')
+            +'<button class="ph-del" data-ts="'+x.ts+'" type="button" aria-label="Delete">'+svg('<path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/>')+'</button>';
+        return '<div class="ph-item'+(locked?' locked':'')+'"><div class="ph-thumb">'+thumb+(locked?'<span class="ph-thumb-lk">'+svg(LK_ICON)+'</span>':'')+'</div>'
+          +'<div class="ph-meta"><div class="ph-name">'+(isVoice?(x.label||'Voice')+' practice':s.name+' Scan')+(locked?' <span class="locked-badge">'+svg(LK_ICON)+'Locked</span>':'')+'</div><div class="ph-time">'+(isVoice&&x.title?(x.title.length>40?x.title.slice(0,40)+'…':x.title)+' · ':'')+timeAgo(x.ts)+'</div></div>'
+          +'<div class="ph-score" style="color:'+col+';background:color-mix(in srgb,'+col+' 14%,transparent);border-color:color-mix(in srgb,'+col+' 28%,transparent)">'+x.score+'</div>'
+          +right+'</div>';
+      }).join('');
+    }
+    $('#phBody').innerHTML=h;
+    Array.prototype.forEach.call($('#phBody').querySelectorAll('.ph-tab'), function(b){ b.addEventListener('click', function(){ phRange=b.getAttribute('data-r'); renderHistory(); }); });
+    Array.prototype.forEach.call($('#phBody').querySelectorAll('.ph-del'), function(b){ b.addEventListener('click', function(){
+      var ts=+b.getAttribute('data-ts');
+      var keep=readScans().filter(function(x){ return !(x.type===type && x.ts===ts && !x.locked); });
+      lsSet('coreScans.v1', JSON.stringify(keep));
+      renderHistory(); refreshPqProgress();
+    }); });
+    Array.prototype.forEach.call($('#phBody').querySelectorAll('.ph-lock'), function(b){ b.addEventListener('click', function(){
+      var ts=+b.getAttribute('data-ts');
+      var rec=readScans().filter(function(x){ return x.type===type && x.ts===ts; })[0];
+      if(!rec) return;
+      lockFlow(rec, function(){ renderHistory(); refreshPqProgress(); });
+    }); });
+  }
+  function openHistory(){ phRange='month'; renderHistory(); $('#phist').classList.add('on'); }
+  function closeHistory(){ $('#phist').classList.remove('on'); }
+  $('#phBack').addEventListener('click', closeHistory);
+  $('#histBtn').addEventListener('click', openHistory);
+  $('#phNew').addEventListener('click', function(){ closeHistory(); if(isVoice){ buildVoiceLanding(); } else { openCam(); } });
+
+  // ══════════════════════ Voice Coach ══════════════════════
+  var VOICE_SCENARIOS={
+    date:{name:'Date',color:'#FF6FB5',desc:'Practice attraction, warmth, and confident romantic conversation.',focus:'warmth, confidence, genuine curiosity and easy conversational flow',
+      prompts:['You’re on a first date at a cozy coffee shop. Your date smiles and asks, “So, what actually makes you come alive these days?” — answer out loud.','Your date admits they’ve been feeling a little lost lately. Respond in a way that’s warm, reassuring and keeps the connection going.','There’s a lull in the conversation. Restart it with a playful, interesting question — and share a bit about yourself too.']},
+    networking:{name:'Networking',color:'#34D399',desc:'Practice concise value statements and professional rapport.',focus:'a concise, memorable value statement and natural professional rapport',
+      prompts:['You’re at an industry event. Someone asks, “So, what do you do?” — give a sharp, memorable answer in 20 seconds.','Introduce yourself to a senior person you admire and open a genuine conversation.','Someone asks what you’re working on right now. Pitch it clearly and make them care.']},
+    interview:{name:'Interview',color:'#A78BFA',desc:'Practice structured, role-relevant answers under pressure.',focus:'clear structure (situation, action, result), relevance and measurable impact',
+      prompts:['You’re interviewing for a Senior Product Manager role at a fast-growing startup. Tell me about a time you launched a new product with limited resources — and the measurable impact of that launch.','“What’s your biggest weakness?” — answer honestly and turn it into a strength with a real example.','“Why should we hire you over everyone else?” — make a confident, specific case.']},
+    friends:{name:'Friends',color:'#3B9EFF',desc:'Practice natural, authentic social flow with balanced energy.',focus:'authenticity, balanced energy and being a good, engaged listener',
+      prompts:['Your friend just shared exciting news about a new job. React naturally and keep the energy going.','You haven’t seen an old friend in a year. Catch up in a way that shows you genuinely care.','Your group can’t decide what to do tonight. Suggest a plan and bring everyone along.']},
+    difficult:{name:'Difficult Conversation',color:'#FFCB3D',desc:'Practice calm accountability and resolution-focused language.',focus:'a calm tone, personal accountability and resolution-focused language',
+      prompts:['A teammate keeps missing deadlines and it’s affecting your work. Raise it calmly and aim for a solution.','You need to apologize to someone you let down. Own it sincerely, without over-explaining.','Someone crossed a boundary with you. Address it firmly but respectfully.']},
+    general:{name:'General',color:'#5EEAD4',desc:'Practice all-around communication confidence and clarity.',focus:'overall clarity, confidence and conciseness',
+      prompts:['Explain something you’re passionate about to someone who knows nothing about it — in under a minute.','Tell a 30-second story about a moment that changed how you think.','Describe where you want to be a year from now — clearly and vividly.']}
+  };
+  var VC_ORDER=['date','networking','interview','friends','difficult','general'];
+  var IC_MIC='<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/>';
+  var IC_STOP='<rect x="6" y="6" width="12" height="12" rx="2.5"/>';
+  var voiceCurrent=null, voicePrompt='', recog=null, recording=false, voiceTranscript='', voicePending=false, voiceData=null;
+  function vcScans(){ return readScans().filter(function(x){ return x.type==='voice'; }); }
+  function buildVoiceLanding(){
+    var h='<div class="vc-intro-hero"><div class="vc-ic">'+svg(IC_MIC)+'</div><h2>Choose Your Scenario</h2><p>Pick what you want to practice, then get category-specific voice coaching and scoring.</p></div>';
+    h+='<div class="vc-sec">Core Categories</div><div class="vc-cards">'
+      + VC_ORDER.map(function(k){ var sc=VOICE_SCENARIOS[k];
+          return '<button class="vc-card" type="button" data-sc="'+k+'"><div class="t"><span class="dot" style="background:'+sc.color+';color:'+sc.color+'"></span>'+sc.name+'</div><div class="d">'+sc.desc+'</div></button>'; }).join('')
+      + '</div>';
+    var recents=vcScans().slice(-5).reverse();
+    h+='<div class="vc-sec">Recent Sessions'+(recents.length?'<button class="all" id="vcAll" type="button">See All</button>':'')+'</div>';
+    if(!recents.length){ h+='<div class="vc-empty">No sessions yet.<br>Pick a scenario and record your first answer.</div>'; }
+    else { h+='<div class="vc-recent">'+recents.map(function(x){ var col=scoreColor(x.score), sc=VOICE_SCENARIOS[x.scenario]||{name:x.label||'Voice',color:col};
+        return '<button class="vc-rcard" type="button" data-sc="'+(x.scenario||'general')+'"><div class="vc-rscore" style="color:'+col+';background:color-mix(in srgb,'+col+' 14%,transparent)">'+x.score+'</div>'
+          +'<div class="vc-rmeta"><div class="vc-rtitle">'+(x.title||sc.name+' practice')+'</div>'
+          +'<span class="vc-rtag" style="color:'+sc.color+';background:color-mix(in srgb,'+sc.color+' 16%,transparent)">'+sc.name+'</span>'
+          +'<div class="vc-rtime">'+timeAgo(x.ts)+'</div></div></button>'; }).join('')+'</div>'; }
+    $('#pqIntro').innerHTML=h;
+    Array.prototype.forEach.call($('#pqIntro').querySelectorAll('.vc-card,.vc-rcard'), function(b){ b.addEventListener('click', function(){ showScenario(b.getAttribute('data-sc')); }); });
+    var va=$('#vcAll'); if(va) va.addEventListener('click', openHistory);
+  }
+  function randomPrompt(key){ var ps=VOICE_SCENARIOS[key].prompts; return ps[Math.floor(Math.random()*ps.length)]; }
+  function showScenario(key){ if(!VOICE_SCENARIOS[key]) key='general'; voiceCurrent=key; voicePrompt=randomPrompt(key); renderStage(); $('#vcStage').classList.add('on'); }
+  function renderStage(){
+    var sc=VOICE_SCENARIOS[voiceCurrent], supported=!!(window.SpeechRecognition||window.webkitSpeechRecognition);
+    var stage=$('#vcStage');
+    stage.innerHTML='<button class="res-close" id="vcClose" type="button" aria-label="Back">'+svg('<path d="M6 6l12 12M18 6L6 18"/>')+'</button>'
+      +'<div class="vc-tagrow"><span class="vc-bigtag" style="color:'+sc.color+';background:color-mix(in srgb,'+sc.color+' 16%,transparent)">'+sc.name+'</span></div>'
+      +'<div class="vc-pcard"><div class="ph">'+svg('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>')+'Your Prompt</div><div class="vc-ptext">'+voicePrompt+'</div></div>'
+      +'<div class="vc-how"><div class="hh">How this works</div>'
+        +'<div class="vc-step"><span class="n">1</span><span>Tap record and answer this scenario out loud.</span></div>'
+        +'<div class="vc-step"><span class="n">2</span><span>Speak naturally for 20–60 seconds, like it’s real.</span></div>'
+        +'<div class="vc-step"><span class="n">3</span><span>Tap stop and CORE scores your delivery instantly.</span></div>'
+      +'</div>'
+      +(supported?'':'<textarea id="vcType" rows="4" placeholder="On-device speech isn’t available here — type what you’d say, then tap Score." style="width:100%;margin-top:14px;border-radius:14px;border:1px solid var(--border);background:rgba(255,255,255,0.04);color:#fff;padding:13px;font:inherit;font-size:14px;resize:vertical;-webkit-appearance:none;"></textarea>')
+      +'<div class="vc-live" id="vcLive"></div>'
+      +'<div class="vc-rec-wrap"><button class="vc-mic" id="vcMic" type="button">'+svg(supported?IC_MIC:'<path d="M5 12l4 4 10-11"/>')+'</button>'
+        +'<div class="vc-rec-lbl" id="vcRecLbl">'+(supported?'Tap to record':'Tap to score')+'</div>'
+        +'<button class="vc-newp" id="vcNewP" type="button">'+svg('<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>')+'New prompt</button></div>';
+    $('#vcClose').addEventListener('click', function(){ stopRecSilently(); stage.classList.remove('on'); });
+    $('#vcNewP').addEventListener('click', function(){ voicePrompt=randomPrompt(voiceCurrent); var t=stage.querySelector('.vc-ptext'); if(t) t.textContent=voicePrompt; });
+    $('#vcMic').addEventListener('click', function(){
+      if(!supported){ var t=($('#vcType')&&$('#vcType').value||'').trim(); if(t.length<10){ toast('Type a little more first.'); return; } scoreVoice(t); return; }
+      if(recording) stopRec(); else startRec();
+    });
+  }
+  function updateRecUI(on){ var m=$('#vcMic'); if(!m) return; m.classList.toggle('rec',on); m.innerHTML=svg(on?IC_STOP:IC_MIC); var l=$('#vcRecLbl'); if(l) l.innerHTML=on?'<b>Recording…</b> tap to stop':'Tap to record'; }
+  function startRec(){
+    var SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR) return;
+    voiceTranscript=''; var live=$('#vcLive'); if(live) live.textContent='Listening…';
+    try{ recog=new SR(); }catch(e){ toast('Mic unavailable'); return; }
+    recog.continuous=true; recog.interimResults=true; recog.lang='en-US';
+    recog.onresult=function(e){ var fin='',intr=''; for(var i=e.resultIndex;i<e.results.length;i++){ var r=e.results[i]; if(r.isFinal) fin+=r[0].transcript; else intr+=r[0].transcript; } if(fin) voiceTranscript+=fin; var lv=$('#vcLive'); if(lv) lv.textContent=(voiceTranscript+' '+intr).trim()||'Listening…'; };
+    recog.onerror=function(){};
+    recog.onend=function(){ if(recording){ try{ recog.start(); }catch(e){} } };   // iOS stops on pauses — keep going
+    try{ recog.start(); recording=true; updateRecUI(true); try{ if(navigator.vibrate) navigator.vibrate(30); }catch(_){} }catch(e){ toast('Allow microphone access to record.'); }
+  }
+  function stopRecSilently(){ recording=false; if(recog){ try{ recog.onend=null; recog.stop(); }catch(e){} recog=null; } }
+  function stopRec(){
+    recording=false; updateRecUI(false);
+    if(recog){ try{ recog.onend=null; recog.stop(); }catch(e){} recog=null; }
+    var t=(voiceTranscript||'').trim();
+    if(t.length<5){ toast('Didn’t catch that — try recording again.'); return; }
+    scoreVoice(t);
+  }
+  function scoreVoice(transcript){
+    var key=voiceCurrent, prompt=voicePrompt, sc=VOICE_SCENARIOS[key];
+    $('#vcStage').classList.remove('on');
+    voicePending=true; voiceData=null; lastAIError='';
+    var p='You are an expert communication and delivery coach. The user practiced a "'+sc.name+'" speaking scenario. PROMPT: "'+prompt+'". Their spoken answer was transcribed (punctuation may be imperfect): "'+transcript+'". '
+      +'Assess ONLY their spoken communication for this scenario — judge '+sc.focus+'. Reply STRICT JSON only, no markdown: '
+      +'{"score":0-100,"tier":"Excellent|Strong|Good|Developing|Needs work","summary":"one honest, specific, encouraging sentence about their delivery","breakdown":{"clarity":0-100,"confidence":0-100,"structure":0-100,"relevance":0-100},"tips":["3 short, specific, actionable tips to improve their delivery next time"]}. '
+      +'Be fair and constructive. If the answer is empty, far too short, or off-topic, score it low and kindly say why.';
+    voiceTextScore(p).then(function(d){ voiceData=d; voicePending=false; }, function(){ voiceData=null; voicePending=false; });
+    voiceAnalyze(function(){ showVoiceResult(transcript, key, prompt); });
+  }
+  function voiceTextScore(prompt){
+    return new Promise(function(resolve,reject){
+      if(!(window.coreAI && coreAI.chat && coreAI.ready && coreAI.ready())){ reject(); return; }
+      coreAI.chat([{ role:'user', content:prompt }], { role:'plan', temperature:0.3, maxTokens:420, json:true })
+        .then(function(r){ if(!r||!r.ok||!r.text||r.fallback){ if(r&&r.reason) lastAIError=r.reason; reject(); return; }
+          try{ resolve(parseScanJson(r.text)); }catch(e){ lastAIError='bad AI response'; reject(); } },
+          function(e){ lastAIError=(e&&e.message)||'request failed'; reject(); });
+    });
+  }
+  function voiceAnalyze(done){
+    var an=$('#analyze'); an.classList.add('on');
+    var anPct=$('#anPct'), anLbl=$('#anLbl');
+    var labels=['Transcribing your answer…','Reading your delivery…','Scoring clarity & confidence…','Writing your feedback…'];
+    var MIN=6000, MAX=14000, start=performance.now(), p=0;
+    anFg.setAttribute('stroke-dashoffset', AN_C);
+    (function frame(now){ var el=now-start, aiDone=!voicePending;
+      var ceil=(aiDone&&el>=MIN)?1:Math.min(0.92, el/MIN*0.92);
+      p+=(ceil-p)*0.08; if(ceil===1&&p>0.992)p=1;
+      anPct.textContent=Math.round(p*100)+'%';
+      anFg.setAttribute('stroke-dashoffset', AN_C*(1-p));
+      anLbl.textContent=(!aiDone&&el>MIN)?'Scoring with AI…':labels[Math.min(labels.length-1,Math.floor(p*labels.length))];
+      if(p>=1||el>MAX){ an.classList.remove('on'); done(); return; }
+      requestAnimationFrame(frame);
+    })(start);
+  }
+  function showVoiceResult(transcript, key, prompt){
+    var ai=voiceData, sc=VOICE_SCENARIOS[key];
+    if(!(ai && ai.rank && typeof ai.rank.score==='number')){
+      var hk=!!(window.coreAI && coreAI.hasKey && coreAI.hasKey());
+      showMessage(hk?'Couldn’t score that one':'Voice scoring isn’t set up',
+        hk?((lastAIError?'Error: '+lastAIError+'. ':'')+'Record again with a steady connection.'):'Add your AI key in Settings → AI Setup to score your delivery.');
+      return;
+    }
+    var score=Math.max(0,Math.min(100,Math.round(ai.rank.score))), SC=scoreColor(score), topP=topPctile(score);
+    var BD=(ai.breakdown && typeof ai.breakdown.clarity==='number') ? { Clarity:clampb(ai.breakdown.clarity), Confidence:clampb(ai.breakdown.confidence), Structure:clampb(ai.breakdown.structure), Relevance:clampb(ai.breakdown.relevance) } : null;
+    var tips=(ai.tips && ai.tips.length)?ai.tips.slice(0,4):(ai.summary?[ai.summary]:[]);
+    var R=78, C=2*Math.PI*R, res=$('#result');
+    var bdHtml=BD?('<div class="res-sec">Breakdown</div><div class="bd">'+Object.keys(BD).map(function(k){ var v=BD[k], col=scoreColor(v);
+      return '<div class="bd-row"><span class="bd-dot" style="background:'+col+'"></span><span class="bd-k">'+k+'</span><div class="bd-track"><i data-w="'+v+'" style="background:linear-gradient(90deg,color-mix(in srgb,'+col+' 55%,#0a2f63),'+col+');box-shadow:0 0 10px color-mix(in srgb,'+col+' 50%,transparent)"></i></div><span class="bd-v" style="color:'+col+'">'+v+'</span></div>'; }).join('')+'</div>'):'';
+    res.style.setProperty('--sc', SC);
+    res.innerHTML='<button class="res-close" id="resClose" type="button" aria-label="Done">'+svg('<path d="M6 6l12 12M18 6L6 18"/>')+'</button>'
+      +'<div class="vc-tagrow" style="margin-top:2px"><span class="vc-bigtag" style="color:'+sc.color+';background:color-mix(in srgb,'+sc.color+' 16%,transparent)">'+sc.name+'</span></div>'
+      +'<div class="res-score"><svg class="res-ring" viewBox="0 0 172 172"><defs><linearGradient id="vGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--sc)"/><stop offset="1" stop-color="var(--sc)" stop-opacity="0.5"/></linearGradient></defs>'
+        +'<circle class="bg" cx="86" cy="86" r="'+R+'"></circle><circle class="fg" id="resFg" cx="86" cy="86" r="'+R+'" style="stroke:url(#vGrad)" stroke-dasharray="'+C+'" stroke-dashoffset="'+C+'"></circle>'
+        +'<text x="86" y="80" text-anchor="middle" id="resNum" fill="#fff" style="font:900 46px -apple-system,sans-serif;letter-spacing:-2px">0</text>'
+        +'<text x="86" y="104" text-anchor="middle" fill="rgba(255,255,255,0.72)" style="font:700 13px -apple-system,sans-serif">/ 100</text></svg>'
+        +'<div class="res-grade">'+(ai.rank.tier||grade(score))+'</div><div class="res-pct">'+svg('<path d="M3 17l6-6 4 4 7-8"/>')+'Top <b>'+topP+'%</b> · better than <b>'+(100-topP)+'%</b></div></div>'
+      +'<div class="res-title">Delivery score</div><div class="res-sub">Scored by CORE voice AI from your answer.</div>'
+      +(ai.summary?'<div class="res-lead">'+ai.summary+'</div>':'')
+      +bdHtml
+      +'<div class="res-sec">Coach notes</div>'
+      +tips.map(function(t){ return '<div class="tip"><div class="ti">'+svg('<path d="M20 6L9 17l-5-5"/>')+'</div><span>'+t+'</span></div>'; }).join('')
+      +'<div class="res-sec">Your answer</div><div class="vc-transcript">“'+transcript+'”</div>'
+      +'<div class="res-actions"><button class="btn again" id="vcAgain" type="button">'+svg('<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>')+'Practice again</button>'
+        +'<button class="btn save done" id="vcSaved" type="button">'+svg('<path d="M5 12l4 4 10-11"/>')+'Saved</button></div>'
+      +'<button class="btn coach" id="vcCoach" type="button">'+svg('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>')+'Discuss with Coach</button>';
+    res.classList.add('on');
+    var fg=$('#resFg'); requestAnimationFrame(function(){ fg.setAttribute('stroke-dashoffset', C*(1-score/100)); });
+    var numEl=$('#resNum'), t0=performance.now();
+    (function count(t){ var pr=Math.min(1,(t-t0)/1000); numEl.textContent=Math.round(score*(1-Math.pow(1-pr,3))); if(pr<1) requestAnimationFrame(count); })(t0);
+    requestAnimationFrame(function(){ Array.prototype.forEach.call(res.querySelectorAll('.bd-track i'), function(el){ el.style.width=el.getAttribute('data-w')+'%'; }); });
+    try{ if(navigator.vibrate) navigator.vibrate([0,30,40,20]); }catch(e){}
+    saveVoiceSession(key, score, ai, transcript, prompt);
+    $('#resClose').addEventListener('click', function(){ res.classList.remove('on'); buildVoiceLanding(); });
+    $('#vcAgain').addEventListener('click', function(){ res.classList.remove('on'); showScenario(key); });
+    var vcb=$('#vcCoach'); if(vcb) vcb.addEventListener('click', function(){ lsSet('coreCoachSeed', JSON.stringify({ type:'voice', name:sc.name, label:sc.name+' practice', score:score, tips:tips, ts:Date.now() })); try{ window.coreSfx&&window.coreSfx('click'); }catch(_){} location.href='coach.html'; });
+  }
+  function saveVoiceSession(key, score, ai, transcript, prompt){
+    try{ var all=readScans();
+      all.push({ type:'voice', name:'Voice', scenario:key, label:VOICE_SCENARIOS[key].name, title:prompt.slice(0,90), score:score, grade:(ai.rank&&ai.rank.tier)||grade(score),
+        tips:(ai.tips||[]).slice(0,4), transcript:transcript.slice(0,600), breakdown:ai.breakdown||null, ts:Date.now() });
+      // keep at most 25 voice sessions
+      var voice=all.filter(function(x){ return x.type==='voice'; }), other=all.filter(function(x){ return x.type!=='voice'; });
+      if(voice.length>25) voice=voice.slice(-25);
+      lsSet('coreScans.v1', JSON.stringify(other.concat(voice).slice(-80)));
+      lsSet('coreLastScan', JSON.stringify({ type:'voice', score:score, ts:Date.now() }));
+      if(typeof updateLast==='function') updateLast();
+    }catch(e){}
+  }
+
+  if(!isVoice){
+    document.body.classList.add('pq');
+    document.body.classList.add('type-'+type);
+    $('#title').textContent=s.name+' Scan';
+    $('#name').textContent=s.name+' Analysis';
+    $('#tag').textContent=s.tag;
+    var bd=document.querySelector('.hero .badge'); if(bd) bd.style.display='none';
+    ['#last','#checksSec','#checks','#cta','#note'].forEach(function(sel){ var el=$(sel); if(el) el.style.display='none'; });
+    buildPqIntro();
+    if(isPhysique){ var pf=$('#pqFile'); if(pf) pf.multiple=true; }   // physique upload = all 4 angles
+    $('#pqIntro').style.display='block';
+    $('#histBtn').style.display='inline-flex';
+    var hb=$('#helpBtn'); if(hb) hb.style.display='none';
+    var pt=$('#phistTitle'); if(pt) pt.textContent=s.name+' History';
+    var pic=$('#phistIcon'); if(pic) pic.innerHTML=s.icon;
+    if((location.hash||'')==='#history') openHistory();   // deep-link from a profile card
+  } else {
+    // Voice Coach: scenario-based practice landing
+    document.body.classList.add('pq');
+    $('#title').textContent='Voice Coach';
+    var vh=document.querySelector('.hero'); if(vh) vh.style.display='none';
+    ['#last','#checksSec','#checks','#cta','#note'].forEach(function(sel){ var el=$(sel); if(el) el.style.display='none'; });
+    var hbv=$('#helpBtn'); if(hbv) hbv.style.display='none';
+    $('#histBtn').style.display='inline-flex';
+    var pt2=$('#phistTitle'); if(pt2) pt2.textContent='Voice History';
+    var pic2=$('#phistIcon'); if(pic2) pic2.innerHTML=s.icon;
+    buildVoiceLanding();
+    $('#pqIntro').style.display='block';
+  }
+
+  // be a good citizen: release the camera if the page is hidden/closed
+  window.addEventListener('pagehide', stopCam);
+  document.addEventListener('visibilitychange', function(){ if(document.hidden && cam.classList.contains('on') && !cam.classList.contains('scanning')) stopCam(); });
+})();
+</script>
+  <script src="_lib/core-pagefx.js"></script>
+  <script src="_lib/dash-ambient.js"></script>
+  <script>if(window.dashAmbient)try{window.dashAmbient.init();}catch(e){}</script>
+  <script src="_lib/core-help.js"></script>
+  <script>if(window.coreHelp)window.coreHelp.attach("helpBtn",{"title":"Scanner","bullets":["Point your camera to scan food, physique, outfit, posture or looks.","CORE vision AI scores each scan 0–100 with quick tips.","Physique feeds Strength, food feeds Health, looks & style feed Social."]});</script>
+</body>
+</html>

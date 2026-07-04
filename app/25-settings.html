@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8" />
+<title>CORE — Settings</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<style>
+  :root { --bg-base:#040408; --bg-card:rgba(255,255,255,0.022); --bg-card-2:rgba(255,255,255,0.06); --border:rgba(255,255,255,0.07); --text:#ffffff; --muted:rgba(255,255,255,0.72); --dim:rgba(255,255,255,0.45); --accent:#AEB6C4; --grad-a:#AEB6C4; --grad-b:#AEB6C4; --good:rgba(255,255,255,0.72); --danger:rgba(255,255,255,0.72); }
+  * { box-sizing:border-box; } html,body{ margin:0; padding:0; height:100%; }
+  body { min-height:100vh; background:#000; display:flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text); -webkit-font-smoothing:antialiased; padding:24px; overflow:hidden; }
+  .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+  .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:60; }
+  .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:60; }
+  .bg { position:absolute; inset:0; z-index:0; background: radial-gradient(60% 30% at 50% 8%, rgba(10,132,255,0.10), transparent 65%), linear-gradient(180deg, #060a18 0%, #040408 55%, #050510 100%); }
+  .frame { position:absolute; inset:0; z-index:10; display:flex; flex-direction:column; padding:54px 0 0; }
+  .hdr { display:flex; align-items:center; gap:12px; padding:2px 18px 10px; }
+  .back { width:38px; height:38px; border-radius:50%; border:none; background:rgba(255,255,255,0.06); color:var(--text); display:flex; align-items:center; justify-content:center; text-decoration:none; flex:none; } .back svg{ width:19px; height:19px; }
+  .hdr .ttl { font-size:19px; font-weight:900; }
+  .scroll { flex:1; overflow-y:auto; padding:6px 18px 40px; } .scroll::-webkit-scrollbar{ display:none; }
+  .lab { font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); margin:20px 4px 9px; }
+  .group{ border-radius:18px; background:transparent; border:none; overflow:hidden; }
+  .row{ display:flex; align-items:center; gap:12px; padding:14px 15px; border-bottom:1px solid var(--border); }
+  .row:last-child{ border-bottom:none; }
+  .row .ri{ width:34px; height:34px; flex:none; border-radius:10px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.05); border:1px solid var(--border); } .row .ri svg{ width:18px; height:18px; color:var(--muted); }
+  .row .rb{ flex:1; min-width:0; } .row .rb b{ font-size:14px; font-weight:700; display:block; } .row .rb span{ font-size:12px; color:var(--muted); }
+  .row input.name{ flex:1; background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:10px; padding:9px 11px; color:var(--text); font:inherit; font-size:14px; font-weight:700; outline:none; } .row input.name:focus{ border-color:var(--accent); }
+  .row .val{ font-size:13px; font-weight:700; color:var(--muted); font-variant-numeric:tabular-nums; }
+  .row .mini{ border:1px solid var(--border); background:rgba(255,255,255,0.04); color:var(--text); font:inherit; font-size:12px; font-weight:800; padding:7px 12px; border-radius:10px; cursor:pointer; } .row .mini.ok{ color:var(--accent); border-color:color-mix(in srgb,var(--accent) 45%,transparent); }
+  /* toggle */
+  .sw{ width:46px; height:28px; border-radius:999px; background:rgba(255,255,255,0.12); border:none; position:relative; cursor:pointer; flex:none; transition:.2s; }
+  .sw::after{ content:""; position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:#fff; transition:.2s; }
+  .sw.on{ background:linear-gradient(135deg,var(--grad-a),var(--grad-b)); } .sw.on::after{ transform:translateX(18px); }
+  .danger{ color:var(--danger); } .danger .ri{ background:rgba(255,255,255,0.05); border-color:var(--border); } .danger .ri svg{ color:var(--danger); }
+  .danger .rb b{ color:var(--danger); }
+  .confirm{ border:1px solid var(--border); background:rgba(255,255,255,0.05); color:var(--text); font:inherit; font-size:12px; font-weight:800; padding:8px 13px; border-radius:10px; cursor:pointer; }
+  .about{ text-align:center; font-size:11px; color:var(--dim); margin-top:24px; font-weight:600; }
+  .toast{ position:absolute; left:50%; bottom:40px; transform:translateX(-50%) translateY(14px); z-index:90; background:rgba(20,22,34,0.96); border:1px solid var(--border); border-radius:14px; padding:11px 16px; font-size:13px; font-weight:700; opacity:0; pointer-events:none; transition:.3s; } .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+</style>
+  <link rel="stylesheet" href="_lib/core-responsive.css?v=20260619d">
+  <link rel="stylesheet" href="_lib/core-background.css?v=20260619d">
+  <style>.bg{display:none !important;}</style>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <meta name="theme-color" content="#000000">
+  <link rel="stylesheet" href="_lib/core-ui.css?v=20260619d">
+</head>
+<body>
+  <div class="phone">
+    <div id="ambCelestial" style="position:absolute;inset:0;pointer-events:none;z-index:0;"></div>
+    <div class="bg"></div><div class="notch"></div>
+    <div class="frame">
+      <div class="hdr"><a class="back" href="23-profile.html" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"/></svg></a><div class="ttl">Settings</div>
+      <button id="helpBtn" aria-label="Help" style="margin-left:auto;width:34px;height:34px;flex:none;border-radius:50%;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.72);font:800 14px -apple-system,sans-serif;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;-webkit-appearance:none;appearance:none;">?</button></div>
+      <div class="scroll">
+        <div class="lab">Account</div>
+        <div class="group">
+          <div class="row"><div class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></div><div class="rb"><b>Display name</b></div><input class="name" id="nameInput" maxlength="18" /></div>
+          <div class="row"><div class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18"/></svg></div><div class="rb"><b>Player ID</b><span id="pidVal">—</span></div><button class="mini" id="copyId">Copy</button></div>
+          <div class="row"><div class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14.5 4H20v5.5L9 20.5l-5.5-5.5L14.5 4Z"/></svg></div><div class="rb"><b>Class</b></div><span class="val" id="classVal">Warrior</span></div>
+        </div>
+
+        <div class="lab">AI Coach</div>
+        <div class="group">
+          <div class="row"><div class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a3 3 0 0 1 3 3 3 3 0 0 1 0 6 3 3 0 0 1-3 3 3 3 0 0 1-3-3 3 3 0 0 1 0-6 3 3 0 0 1 3-3Z"/><path d="M12 15v6M9 21h6"/></svg></div><div class="rb"><b>AI key</b><span id="aiKeyVal">Not connected</span></div><button class="mini" id="aiKeyBtn">Connect</button></div>
+        </div>
+
+        <div class="lab">Preferences</div>
+        <div class="group" id="prefs"></div>
+
+        <div class="lab">Privacy</div>
+        <div class="group" id="privacy"></div>
+
+        <div class="lab">Legal</div>
+        <div class="group">
+          <a class="row" href="82-legal.html" style="text-decoration:none;color:inherit;"><div class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2h9l5 5v15a0 0 0 0 1 0 0H6a0 0 0 0 1 0 0V2Z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg></div><div class="rb"><b>Privacy &amp; Terms</b><span>Privacy Policy · Terms · EULA</span></div><svg class="val" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></a>
+          <a class="row" href="refund-policy.html" style="text-decoration:none;color:inherit;"><div class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7h18v10H3zM3 11h18"/><path d="M7 15h4"/></svg></div><div class="rb"><b>Refund &amp; Cancellation</b><span>How to cancel · refunds · your rights</span></div><svg class="val" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></a>
+          <a class="row" href="community-guidelines.html" style="text-decoration:none;color:inherit;"><div class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0M16 6a3 3 0 0 1 0 6M21 20a6 6 0 0 0-5-5.9"/></svg></div><div class="rb"><b>Community Guidelines</b><span>Be honest · be kind · keep it safe</span></div><svg class="val" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></a>
+        </div>
+
+        <div class="lab">Data</div>
+        <div class="group">
+          <div class="row danger"><div class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13"/></svg></div><div class="rb"><b>Reset progress</b><span>Clears all XP, rank, items & perks</span></div><button class="confirm" id="resetBtn">Reset</button></div>
+        </div>
+
+        <div class="about">CORE · v0.9 preview<br>Settings sync to this device.</div>
+      </div>
+    </div>
+    <div class="toast" id="toast"></div>
+  </div>
+  <script src="_lib/core-background.js?v=20260619d"></script>
+  <script src="_lib/core-sfx.js"></script>
+  <script src="_lib/core-state.js"></script>
+  <script src="_lib/core-ai.js"></script>
+  <script>
+  (function(){
+    // Resilient fallback so the rows always render even if core-state isn't ready.
+    var S=window.coreState||{read:function(){return{};},corePlusActive:function(){return false;},corePlusDaysLeft:function(){return 0;},setCorePlus:function(){},syncProgress:function(){},resetAll:function(){},seedDemo:function(){}};
+    var qs=function(s){return document.querySelector(s);};
+    try{ if(/[?&]demo=1/.test(location.search)) S.seedDemo(); }catch(e){}
+    function pget(k,d){ try{var v=localStorage.getItem(k); return v===null?d:v;}catch(e){return d;} }
+    function pset(k,v){ try{localStorage.setItem(k,v);}catch(e){} }
+    var toastT; function toast(m){ var t=qs('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(function(){t.classList.remove('show');},1600); }
+    function copyText(t,cb){ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(cb,fb);} else fb(); function fb(){ try{var ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);}catch(e){} cb&&cb(); } }
+
+    // account — generate a real Player ID if one doesn't exist yet (so it never shows a placeholder)
+    function ensurePlayerId(){ var id=pget('corePlayerId',null);
+      if(!id){ var c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',a='',b=''; for(var i=0;i<4;i++){a+=c.charAt(Math.floor(Math.random()*c.length));b+=c.charAt(Math.floor(Math.random()*c.length));} id='CORE-'+a+'-'+b; pset('corePlayerId',id); } return id; }
+    var pid=ensurePlayerId(); qs('#pidVal').textContent=pid;
+    var s=S.read(); qs('#classVal').textContent=(s.class||'Warrior').replace(/^\w/,function(c){return c.toUpperCase();});
+    var nm=''; try{ var t=JSON.parse(localStorage.getItem('coreOnboardTrial')||'{}'); nm=t.name||t.firstName||''; }catch(e){}
+    var ni=qs('#nameInput'); ni.value=nm||'Player';
+    ni.addEventListener('change', function(){ var v=ni.value.trim()||'Player'; try{ var o=JSON.parse(localStorage.getItem('coreOnboardTrial')||'{}'); o.name=v; localStorage.setItem('coreOnboardTrial',JSON.stringify(o)); }catch(e){} pset('coreName',v); toast('Name saved'); });
+    qs('#copyId').addEventListener('click', function(){ var b=this; copyText(pid,function(){ b.textContent='Copied'; b.classList.add('ok'); setTimeout(function(){ b.textContent='Copy'; b.classList.remove('ok'); },1400); }); });
+
+    // toggle rows (persisted to localStorage)
+    function toggleRow(host, key, def, icon, title, sub, onChange){
+      var on = pget(key, def?'1':'0')==='1';
+      var row=document.createElement('div'); row.className='row';
+      row.innerHTML='<div class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">'+icon+'</svg></div><div class="rb"><b>'+title+'</b><span>'+sub+'</span></div><button class="sw'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" aria-label="'+title+'"></button>';
+      var sw=row.querySelector('.sw');
+      sw.addEventListener('click', function(){ on=!on; sw.classList.toggle('on',on); sw.setAttribute('aria-checked',on); pset(key,on?'1':'0'); if(onChange) onChange(on); });
+      host.appendChild(row);
+      if(onChange) onChange(on); // apply persisted state on load
+    }
+    var P=qs('#prefs');
+    toggleRow(P,'coreSet.notifs',true,'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/>','Notifications','Quest reminders & rank-ups');
+    // Sounds -> drives the core-sfx engine. Seed the toggle from the engine's own
+    // mute flag so it stays in sync with the in-app mute button.
+    try{ if(window.coreSfx) pset('coreSet.sounds', coreSfx.muted()?'0':'1'); }catch(e){}
+    toggleRow(P,'coreSet.sounds',true,'<path d="M11 5L6 9H2v6h4l5 4V5ZM16 9a4 4 0 0 1 0 6"/>','Sounds','Reward, chest & level-up sounds', function(on){ try{ if(window.coreSfx) coreSfx.mute(!on); }catch(e){} });
+    toggleRow(P,'coreSet.motion',false,'<path d="M5 12h14M12 5v14"/>','Reduce motion','Calmer card animations');
+    var PR=qs('#privacy');
+    toggleRow(PR,'coreSet.public',true,'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/>','Public profile','Others can find you by ID');
+    toggleRow(PR,'coreSet.leaderboard',true,'<path d="M4 20h4v-7H4v7ZM10 20h4V6h-4v14ZM16 20h4v-10h-4v10Z"/>','Show on leaderboard','Appear in rankings (when live)');
+
+    // CORE Plus — status + days-left. Real billing isn't wired, so the in-app
+    // toggle only appears with ?dev=1; everyone else taps through to the paywall.
+    (function(){
+      var DEVm=/[?&]dev=1/.test(location.search);
+      function plusState(){ var a=false,d=0; try{ a=S.corePlusActive&&S.corePlusActive(); d=S.corePlusDaysLeft?S.corePlusDaysLeft():0; }catch(e){} return {a:a,d:d}; }
+      function subText(st){ if(!st.a) return '2× rewards + weekly Epic chest'; var extra=''; try{ var n=parseInt(localStorage.getItem('corePlusNextChestAt')||'0',10)||0; if(n){ var nd=Math.max(0,Math.ceil((n-Date.now())/86400000)); extra=' · chest in '+nd+'d'; } }catch(e){} return 'Active'+(st.d?(' · '+st.d+'d left'):'')+extra; }
+      var st=plusState();
+      var row=document.createElement('div'); row.className='row';
+      var ctrl = DEVm
+        ? '<button class="sw'+(st.a?' on':'')+'" id="plusSw" role="switch" aria-checked="'+st.a+'" aria-label="CORE Plus (dev)"></button>'
+        : '<a class="mini" href="29-core-plus.html?from=settings" style="text-decoration:none">'+(st.a?'Manage':'Upgrade')+'</a>';
+      row.innerHTML='<div class="ri"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 16l-2-9 6 4 3-6 3 6 6-4-2 9z"/><path d="M5 18h14v2H5z"/></svg></div><div class="rb"><b>CORE Plus</b><span id="plusSub">'+subText(st)+'</span></div>'+ctrl;
+      P.appendChild(row);
+      if(DEVm){ var sw=row.querySelector('#plusSw'); sw.addEventListener('click', function(){ var on=!(S.corePlusActive&&S.corePlusActive()); try{ S.setCorePlus(on); S.syncProgress(); }catch(e){} sw.classList.toggle('on',on); sw.setAttribute('aria-checked',on); qs('#plusSub').textContent=subText(plusState()); toast(on?'CORE Plus on (dev)':'CORE Plus off'); }); }
+    })();
+
+    // reset (two-tap confirm — no native alert)
+    var armed=false, rb=qs('#resetBtn'), rt;
+    rb.addEventListener('click', function(){
+      if(!armed){ armed=true; rb.textContent='Tap again to confirm'; clearTimeout(rt); rt=setTimeout(function(){ armed=false; rb.textContent='Reset'; },3000); return; }
+      S.resetAll();
+      ['corePlayerId','coreFriends','coreAchievements','coreUnlockedPerks','coreProfileTheme','coreProfileTitle','coreEquippedBadge','coreEquippedFrame','coreLastRankIndex','corePendingRankUp','corePendingRankUpData','coreCorePower','coreRank','coreRankIndex','coreLevel','coreTotalXP','coreStreak','corePlusActive','corePlusNextChestAt','coreFreeChestNextAt','coreDashChestDay','coreOwnedChests','coreOwnedShopItems'].forEach(function(k){ try{localStorage.removeItem(k);}catch(e){} });
+      try{ S.syncProgress(); }catch(e){}
+      armed=false; rb.textContent='Reset'; toast('Progress reset');
+    });
+
+    // ── OpenAI key (powers the real AI Coach) ──
+    (function(){
+      var val=qs('#aiKeyVal'), btn=qs('#aiKeyBtn');
+      if(!val||!btn) return;
+      function mask(k){ return k ? k.slice(0,5)+'…'+k.slice(-4) : ''; }
+      function render(){
+        var has=window.coreAI && coreAI.hasKey();
+        var prov=has ? (/^gsk_/.test(coreAI.getKey())?'Groq':'OpenAI') : '';
+        val.textContent = has ? (prov+' · '+mask(coreAI.getKey())) : 'Not connected';
+        val.style.color = has ? 'var(--green,#34D399)' : '';
+        btn.textContent = has ? 'Change' : 'Connect';
+      }
+      btn.addEventListener('click', function(){
+        if(!window.coreAI){ toast('AI module not loaded'); return; }
+        var cur=coreAI.getKey();
+        var k=window.prompt(cur?'Update your AI key (leave blank to remove):':'Paste your AI key — free Groq (gsk_…) or OpenAI (sk-…). It stays only in this browser.', cur||'');
+        if(k===null) return; k=k.trim();
+        if(k && !/^(sk-|gsk_)/.test(k)){ toast('Use a Groq (gsk_…) or OpenAI (sk-…) key'); return; }
+        coreAI.setKey(k); render(); toast(k?'AI connected':'AI key removed');
+      });
+      render();
+    })();
+  })();
+  </script>
+  <script src="_lib/core-back.js"></script>
+  <script src="_lib/dash-ambient.js"></script>
+  <script>if(window.dashAmbient)try{window.dashAmbient.init();}catch(e){}</script>
+  <script src="_lib/core-pagefx.js"></script>
+  <script src="_lib/core-help.js"></script>
+  <script>if(window.coreHelp)window.coreHelp.attach("helpBtn",{"title":"Settings","bullets":["Manage your account, notifications and preferences here.","Review legal and privacy info anytime.","Your data stays on your device unless you choose to sync."]});</script>
+</body>
+</html>

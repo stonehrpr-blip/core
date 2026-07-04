@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+  <script>
+    // Onboarding gate — if user has completed onboarding, no re-entry from here
+    try{(function(){var h=location.hostname;window.__corePreview=(location.protocol==='file:'||h==='localhost'||h==='127.0.0.1'||/[?&]preview=1/.test(location.search));})();}catch(e){}if(!window.__corePreview){try { if (localStorage.getItem('coreOnboardComplete') === '1' && !/[?&]preview=1/.test(location.search)) { location.replace('20-dashboard.html'); } } catch(e){}}
+  </script>
+  <meta charset="utf-8" />
+  <title>CORE — Welcome back</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#000000" />
+  <link rel="stylesheet" href="_lib/core-theme.css?v=20260619d">
+  <link rel="stylesheet" href="_lib/core-responsive.css?v=20260619d">
+  <link rel="stylesheet" href="_lib/core-buttons.css">
+  <script src="_lib/core-state.js"></script>
+  <script src="_lib/analytics.js"></script>
+  <script src="_lib/core-back.js"></script>
+  <script src="_lib/core-theme.js" defer></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+
+  <style>
+    /* ===============================================================
+       CORE — 04-welcome-back v2 (Apple restraint pass)
+       Returning user, idle 3+ days. The flame stays warm — it's the
+       emotional anchor — but everything else strips to tokens.
+       =============================================================== */
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; height: 100%; }
+    /* Monochrome + single electric-blue accent override */
+    :root {
+      --accent: #AEB6C4;
+      --accent-hi: #C4C9D2;
+      --core-blue-500: #AEB6C4;
+      --core-blue-300: #AEB6C4;
+      --core-violet-500: rgba(255,255,255,0.72);
+      --core-amber-500: rgba(255,255,255,0.72);
+      --grad-cta: #AEB6C4;
+      --grad-wordmark: none;
+      --glow-blue-md: none;
+    }
+    body {
+      min-height: 100vh; background: #000;
+      display: flex; align-items: center; justify-content: center;
+      font-family: -apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',Helvetica,Arial,sans-serif;
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+      padding: 24px; overflow: hidden;
+    }
+    .phone {
+      position: relative;
+      width: 390px; height: 844px;
+      background: var(--bg-page);
+      border-radius: 56px;
+      overflow: hidden;
+      box-shadow:
+        0 40px 120px rgba(0,0,0,0.85),
+        0 0 0 1px var(--border-subtle),
+        0 0 0 10px #060608,
+        0 0 0 11px #1b1b22;
+    }
+    .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background: var(--bg-page); border-radius:20px; z-index:30; }
+    .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:30; }
+
+    /* Single soft halo — warm orange-blue hint reflecting the streak flame */
+    .bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(60% 35% at 50% 36%, rgba(255,255,255,0.05) 0%, transparent 55%),
+        radial-gradient(50% 30% at 50% 100%, rgba(174,182,196,0.08) 0%, transparent 65%);
+    }
+
+    .frame {
+      position: absolute; inset: 0;
+      z-index: 10;
+      display: flex; flex-direction: column;
+      padding: 68px 28px 32px;
+    }
+
+    /* Brand mark — top center, restrained */
+    .topbrand {
+      display: flex; align-items: center; justify-content: center;
+      gap: 9px; margin-bottom: 28px;
+    }
+    .topbrand .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--core-blue-500);
+      animation: pulse 2.6s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50%      { transform: scale(1.25); opacity: 0.85; }
+    }
+    .topbrand .wm {
+      font-size: 13px; font-weight: 700; letter-spacing: 0.38em;
+      color: var(--text-primary);
+    }
+
+    /* Hero */
+    .hero { text-align: center; }
+    .kicker {
+      font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--text-soft); font-weight: 700;
+      margin-bottom: 14px;
+    }
+    .title {
+      font-size: 38px; font-weight: 700;
+      letter-spacing: -1.2px; line-height: 1.05;
+      margin: 0;
+      color: var(--text-primary);
+    }
+    .title .g {
+      color: #fff;
+      -webkit-text-fill-color: #fff;
+    }
+    @keyframes gradShift {
+      0%, 100% { background-position: 0% 50%; }
+      50%      { background-position: 100% 50%; }
+    }
+    .copy {
+      color: var(--text-secondary);
+      font-size: 14px; line-height: 21px;
+      margin: 14px auto 0;
+      max-width: 304px;
+      letter-spacing: -0.1px;
+    }
+    .copy strong { color: var(--text-primary); font-weight: 700; }
+
+    /* Streak flame card — the emotional anchor.
+       Warm orange + violet hint, frozen-state framing. */
+    .streak {
+      margin: 26px auto 0;
+      padding: 22px;
+      border-radius: var(--radius-xl);
+      max-width: 320px;
+      background: rgba(255,255,255,0.022);
+      border: 1px solid rgba(255,255,255,0.07);
+      position: relative; overflow: hidden;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .streak::before { content: none; }
+    .streak::after { content: none; }
+    .streak-flame {
+      width: 64px; height: 64px;
+      margin: 0 auto 14px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.07);
+      display: flex; align-items: center; justify-content: center;
+      animation: flameFlicker 2.4s ease-in-out infinite;
+      position: relative;
+    }
+    @keyframes flameFlicker {
+      0%, 100% { transform: scale(1); filter: brightness(1); }
+      50%      { transform: scale(1.05); filter: brightness(1.15); }
+    }
+    .streak-flame svg {
+      width: 32px; height: 32px;
+      stroke: var(--text-primary); fill: none;
+      stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .streak-num {
+      font-size: 48px; font-weight: 800;
+      letter-spacing: -1.8px;
+      text-align: center;
+      color: var(--text-primary);
+      -webkit-text-fill-color: var(--text-primary);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .streak-lbl {
+      font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase;
+      color: rgba(255,255,255,0.72);
+      text-align: center; margin-top: 8px;
+      font-weight: 700;
+    }
+    .streak-meta {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 12px; margin-top: 14px;
+      letter-spacing: -0.05px; line-height: 17px;
+    }
+    .streak-meta strong { color: var(--text-primary); font-weight: 700; }
+
+    /* Missed list — calmer, all icons in electric blue with subtle accent */
+    .missed {
+      margin: 22px 0 0;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .missed-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 14px;
+      border-radius: var(--radius-lg);
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border-subtle);
+      cursor: pointer;
+      transition: background var(--dur-fast) var(--ease-default);
+      backdrop-filter: blur(10px) saturate(160%);
+      -webkit-backdrop-filter: blur(10px) saturate(160%);
+    }
+    .missed-row:hover { background: rgba(255,255,255,0.05); }
+    .missed-row:active { transform: scale(0.99); }
+    .missed-ico {
+      width: 32px; height: 32px;
+      border-radius: 9px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.07);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .missed-ico svg {
+      width: 15px; height: 15px;
+      stroke: var(--muted); fill: none;
+      stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .missed-txt { flex: 1; min-width: 0; }
+    .missed-ttl {
+      font-size: 13px; font-weight: 600;
+      color: var(--text-primary);
+      letter-spacing: -0.1px;
+    }
+    .missed-sub {
+      font-size: 11px; color: var(--text-secondary);
+      margin-top: 3px; line-height: 15px;
+    }
+    .missed-chev { color: var(--text-soft); font-size: 16px; flex-shrink: 0; display: flex; align-items: center; }
+    .missed-chev svg { width: 16px; height: 16px; stroke: currentColor; fill: none; }
+
+    .footer { margin-top: auto; padding-top: 18px; }
+    .cta {
+      width: 100%; padding: 16px 22px;
+      border-radius: var(--radius-pill);
+      border: none;
+      color: var(--text-primary);
+      font-family: inherit; font-size: 16px; font-weight: 700;
+      letter-spacing: -0.2px;
+      background: #AEB6C4;
+      box-shadow: none;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      cursor: pointer;
+      transition: transform var(--dur-instant) var(--ease-default);
+    }
+    .cta:active { transform: scale(0.985); }
+    .cta svg {
+      width: 18px; height: 18px;
+      stroke: var(--text-primary); fill: none;
+      stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .secondary {
+      text-align: center;
+      color: var(--text-soft);
+      font-size: 13px;
+      padding: 14px;
+      cursor: pointer; background: none; border: none;
+      font-family: inherit; width: 100%;
+      margin-top: 4px;
+      transition: color var(--dur-fast) var(--ease-default);
+    }
+    .secondary:hover { color: var(--text-primary); }
+
+    /* Placeholder flagging — fake data lives in PLACEHOLDER text below */
+    [data-placeholder] { position: relative; }
+    body[data-show-fake] [data-placeholder]::before {
+      content: "PREVIEW";
+      position: absolute; top: -4px; right: -8px; z-index: 2;
+      font-size: 7px; letter-spacing: 0.16em; font-weight: 800;
+      padding: 2px 5px; border-radius: 4px;
+      background: var(--core-amber-500); color: #000;
+    }
+
+    /* Responsive caps */
+    @media (max-width: 460px) {
+      .notch, .home-indicator { display: none; }
+    }
+    @media (max-width: 380px), (max-height: 720px) {
+      .frame { padding: 56px 22px 24px; }
+      .title { font-size: 30px; letter-spacing: -0.9px; }
+      .copy { font-size: 13px; line-height: 19px; max-width: 280px; }
+      .kicker { font-size: 10px; letter-spacing: 0.18em; margin-bottom: 10px; }
+      .streak { margin: 18px auto 0; padding: 16px; border-radius: 18px; }
+      .streak-flame { width: 52px; height: 52px; margin-bottom: 10px; }
+      .streak-flame svg { width: 26px; height: 26px; }
+      .streak-num { font-size: 38px; }
+      .streak-lbl { font-size: 10px; margin-top: 6px; }
+      .streak-meta { font-size: 11px; margin-top: 10px; line-height: 15px; }
+      .missed { margin-top: 16px; gap: 6px; }
+      .missed-row { padding: 10px 12px; }
+      .missed-ico { width: 28px; height: 28px; border-radius: 8px; }
+      .missed-ico svg { width: 13px; height: 13px; }
+      .missed-ttl { font-size: 12px; }
+      .missed-sub { font-size: 10.5px; line-height: 14px; }
+      .footer { padding-top: 14px; }
+      .cta { padding: 14px; font-size: 14.5px; }
+      .secondary { padding: 10px; font-size: 12px; }
+    }
+    @media (max-width: 340px) {
+      .title { font-size: 26px; }
+      .streak-num { font-size: 32px; }
+    }
+
+    /* Reduce motion — kill gradient shift, flame flicker, dot pulse */
+    @media (prefers-reduced-motion: reduce) {
+      .cta, .title .g, .topbrand .dot, .streak-flame { animation: none !important; }
+    }
+  </style>
+<link rel="stylesheet" href="_lib/core-starfield.css?v=20260619d">
+  <script src="_lib/core-starfield.js?v=20260619d"></script>
+  <link rel="stylesheet" href="_lib/core-ui.css?v=20260619d">
+</head>
+<body>
+  <div class="phone" data-bg-skip>
+    <div class="bg"></div>
+    <div class="notch"></div>
+    <div class="home-indicator"></div>
+
+    <div class="frame">
+      <div class="topbrand">
+        <span class="dot" aria-hidden="true"></span>
+        <span class="wm">CORE</span>
+      </div>
+
+      <div class="hero">
+        <div class="kicker">Welcome back</div>
+        <h1 class="title">We kept<br/>your seat<br/><span class="g" id="wbName">warm.</span></h1>
+        <p class="copy" id="wbCopy">You've been away <strong id="wbAway">5 days</strong>. Your streak is paused, not gone. Pick up where you left off — no shame, no reset.</p>
+      </div>
+
+      <div class="streak">
+        <div class="streak-flame" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 2c0 4 4 5 4 9a4 4 0 0 1-8 0c0-1 .5-2 1-3-.5 2 0 4 1 5"/><path d="M9 13c-2 1-3 3-3 5a6 6 0 0 0 12 0c0-2-1-4-3-5"/></svg>
+        </div>
+        <div class="streak-num" id="streakNum">14</div>
+        <div class="streak-lbl">Day streak · frozen</div>
+        <div class="streak-meta">Resume in the next <strong id="freezeWindow">48 hours</strong> to keep it.</div>
+      </div>
+
+      <div class="missed">
+        <div class="missed-row" data-tint="coach" onclick="window.location.href='coach.html'">
+          <div class="missed-ico">
+            <svg viewBox="0 0 24 24"><path d="M21 12c0 5-4.5 8-9 8a9 9 0 0 1-3.5-.7L3 21l1.7-5.5A9 9 0 0 1 3 12c0-5 4.5-8 9-8s9 3 9 8z"/></svg>
+          </div>
+          <div class="missed-txt">
+            <div class="missed-ttl" data-placeholder>3 messages from Coach</div>
+            <div class="missed-sub">Read them before today's first slip log</div>
+          </div>
+          <div class="missed-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+        </div>
+        <div class="missed-row" data-tint="rank" onclick="window.location.href='24-ranks.html'">
+          <div class="missed-ico">
+            <svg viewBox="0 0 24 24"><path d="M6 9l3-6 3 6 3-3 3 3v12H6z"/><path d="M2 21h20"/></svg>
+          </div>
+          <div class="missed-txt">
+            <div class="missed-ttl">You dropped 2 ranks</div>
+            <div class="missed-sub" data-placeholder>Mia and Jordan passed you · Forge II <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;vertical-align:-1px;display:inline-block;"><path d="M9 6l6 6-6 6"/></svg> Flow III</div>
+          </div>
+          <div class="missed-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+        </div>
+        <div class="missed-row" onclick="window.location.href='20-dashboard.html'">
+          <div class="missed-ico">
+            <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 10h6M9 14h6"/></svg>
+          </div>
+          <div class="missed-txt">
+            <div class="missed-ttl">Last week's review is waiting</div>
+            <div class="missed-sub" data-placeholder>Brain +6 · Wallet +3 · Body −2</div>
+          </div>
+          <div class="missed-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <button class="cta" onclick="resume()">
+          Keep going
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </button>
+        <button class="secondary" onclick="window.location.href='20-dashboard.html'">Just take me home</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ?showFake=1 reveals PREVIEW badges over placeholder elements
+  if (/[?&]showFake=1/.test(location.search)) document.body.setAttribute('data-show-fake', '1');
+
+  function resume() {
+    try { localStorage.setItem('coreLastSeen', String(Date.now())); } catch(e){}
+    if (window.coreTrack) coreTrack('welcome_back_resumed', {});
+    window.location.href = '20-dashboard.html';
+  }
+
+  // Personalize from trial state + days-away + real streak.previousDays
+  (function(){
+    try {
+      const t = JSON.parse(localStorage.getItem('coreOnboardTrial')||'{}');
+      const wbName = document.getElementById('wbName');
+      if (t.name && wbName) wbName.textContent = t.name + '.';
+
+      const last = parseInt(localStorage.getItem('coreLastSeen')||'0', 10);
+      if (last) {
+        const days = Math.max(1, Math.round((Date.now()-last) / (24*60*60*1000)));
+        const aw = document.getElementById('wbAway');
+        if (aw) aw.textContent = days === 1 ? '1 day' : days + ' days';
+      }
+
+      // Pull real streak.previousDays from coreState if available
+      try {
+        const s = window.coreState && coreState.read();
+        if (s && s.streak) {
+          const prev = s.streak.previousDays || s.streak.days || 14;
+          const sn = document.getElementById('streakNum');
+          if (sn) sn.textContent = prev;
+        }
+      } catch(e){}
+    } catch(e){}
+  })();
+
+  if (window.coreTrack) coreTrack('welcome_back_viewed', {});
+</script>
+<style id="steel-tokens">
+/* Brushed-steel skin to match the matte-black + silver logo (scoped to this
+   onboarding page; the main app keeps its own tokens for now). */
+:root, .phone {
+  --accent:#AEB6C4; --accent-hi:#C4C9D2; --blue:#AEB6C4;
+  --peri:#B6BCC8; --peri-soft:rgba(206,212,222,0.18);
+  --glow:rgba(206,212,222,0.6); --glow-soft:rgba(206,212,222,0.18); --green:#C4C9D2;
+}
+</style>
+</body>
+</html>

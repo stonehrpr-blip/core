@@ -1,0 +1,1231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8" />
+<title>CORE — Live Reps</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<style>
+  :root{
+    --bg-base:#040408; --bg-card:rgba(255,255,255,0.022); --border:rgba(255,255,255,0.07);
+    --text:#ffffff; --muted:rgba(255,255,255,0.72); --dim:rgba(255,255,255,0.45); --good:#AEB6C4; --str:#AEB6C4; --str2:#AEB6C4; --accent:#AEB6C4;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; height:100%; }
+  body{ min-height:100vh; background:#000; display:flex; align-items:center; justify-content:center;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text); -webkit-font-smoothing:antialiased; padding:24px; overflow:hidden; }
+  .phone{ position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden;
+    box-shadow:0 40px 100px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.06),0 0 0 10px #0a0a12,0 0 0 11px #2b2b38; }
+  .notch{ position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:60; }
+  .home-indicator{ position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.5); border-radius:999px; z-index:60; }
+  .frame{ position:absolute; inset:0; z-index:10; display:flex; flex-direction:column; }
+
+  /* ── Ambient (static — matches dashboard) ── */
+  #ambBg{ position:absolute; inset:0; z-index:0;
+    background:
+      radial-gradient(60% 35% at 50% 30%,rgba(47,143,255,0.18) 0%,transparent 55%),
+      radial-gradient(50% 30% at 50% 100%,rgba(159,143,255,0.10) 0%,transparent 65%),
+      linear-gradient(180deg,#060B26 0%,#040408 50%,#050510 100%); transition:background 2.4s ease; }
+  #ambAurora{ position:absolute; inset:0; z-index:1; pointer-events:none; opacity:0.45; mix-blend-mode:screen; }
+  #ambAurora::before,#ambAurora::after{ content:""; position:absolute; border-radius:50%;
+    filter:blur(40px); will-change:transform,opacity; transform:translateZ(0); }
+  #ambAurora::before{ width:80%; height:45%; left:-10%; top:8%;
+    background:radial-gradient(circle,rgba(47,143,255,0.55),transparent 70%); animation:auroraDriftA 24s ease-in-out infinite; }
+  #ambAurora::after{ width:70%; height:40%; right:-10%; bottom:16%;
+    background:radial-gradient(circle,rgba(159,143,255,0.50),transparent 70%); animation:auroraDriftB 30s ease-in-out -15s infinite; }
+  @keyframes auroraDriftA{ 0%,100%{transform:translate(0,0) scale(1);opacity:0.45;} 50%{transform:translate(40px,-22px) scale(1.12);opacity:0.75;} }
+  @keyframes auroraDriftB{ 0%,100%{transform:translate(0,0) scale(1);opacity:0.40;} 50%{transform:translate(-30px,18px) scale(1.10);opacity:0.70;} }
+  #ambCelestial{ position:absolute; inset:0; pointer-events:none; z-index:2; }
+  @media (prefers-reduced-motion:reduce){ #ambAurora::before,#ambAurora::after{ animation:none!important; } }
+
+  /* ── Help button ── */
+  .help-btn{ width:30px; height:30px; flex:none; border-radius:50%; border:1px solid rgba(255,255,255,0.12);
+    background:rgba(255,255,255,0.04); color:var(--muted); font-size:14px; font-weight:700; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; transition:background .16s,color .16s,border-color .16s; }
+  .help-btn:hover{ background:rgba(10,132,255,0.14); color:var(--accent); border-color:rgba(10,132,255,0.35); }
+
+  /* ── Nav (canonical) ── */
+  .nav{ position:absolute; left:0; right:0; bottom:0; z-index:50; padding:10px 12px 26px; display:flex; justify-content:space-around; align-items:flex-end;
+    background:rgba(3,3,14,0.42); backdrop-filter:blur(28px) saturate(1.6); -webkit-backdrop-filter:blur(28px) saturate(1.6); border-top:1px solid rgba(255,255,255,0.07); }
+  .nav a{ background:none; border:none; font:inherit; cursor:pointer; position:relative; display:flex; flex-direction:column; align-items:center; gap:4px; padding:6px 8px; min-width:48px; min-height:44px; text-decoration:none; color:var(--dim); transition:color .2s; }
+  .nav svg{ width:23px; height:23px; } .nav .nl{ font-size:10px; font-weight:800; }
+  .nav .item.active{ color:var(--text); } .nav .item.active svg{ color:var(--accent); }
+
+  .top{ display:flex; align-items:center; gap:12px; padding:54px 20px 6px; position:relative; z-index:12; }
+  .back{ -webkit-appearance:none; appearance:none; width:36px; height:36px; flex:none; padding:0; border-radius:50%; border:1px solid var(--border); background:rgba(255,255,255,0.06); color:var(--text); font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .top h1{ margin:0; font-size:17px; font-weight:800; letter-spacing:-0.4px; flex:1; }
+  .plusbadge{ font-size:9px; font-weight:800; letter-spacing:0.8px; padding:4px 9px; border-radius:999px; background:var(--accent); color:#fff; }
+  .plusbadge.off{ background:rgba(255,255,255,0.06); color:var(--muted); border:1px solid var(--border); }
+
+  /* ----- select screen ----- */
+  .pick{ position:relative; z-index:12; padding:14px 20px 104px; flex:1; overflow-y:auto; }
+  .pick::-webkit-scrollbar{ display:none; }
+  .pick .lead{ font-size:13px; color:var(--muted); margin:4px 2px 16px; line-height:1.5; }
+  .exsel{ display:flex; flex-direction:column; gap:11px; }
+  .exo{ display:flex; align-items:center; gap:14px; padding:16px; border-radius:20px; border:1px solid var(--border); background:var(--bg-card); cursor:pointer; transition:transform .14s, border-color .2s; }
+  .exo:active{ transform:scale(0.97); }
+  .exo .ei{ position:relative; width:58px; height:58px; flex:none; border-radius:17px; display:flex; align-items:center; justify-content:center; font-size:28px; overflow:hidden;
+    background:#0a0c13;
+    box-shadow:inset 0 0 0 1.5px color-mix(in srgb, currentColor 55%, transparent), 0 4px 14px rgba(0,0,0,0.32); }
+  .exo .ei::after{ content:""; position:absolute; inset:0; border-radius:inherit; background:radial-gradient(80% 60% at 50% 120%, color-mix(in srgb, currentColor 30%, transparent), transparent 70%); pointer-events:none; }
+  .formdemo{ display:block; width:100%; height:100%; }
+  .exo .ei .formdemo{ position:relative; z-index:1; width:46px; height:46px; filter:drop-shadow(0 1px 4px rgba(0,0,0,0.45)); }
+  .cam .silho .formdemo{ width:132px; height:132px; opacity:.92; filter:drop-shadow(0 4px 16px rgba(0,0,0,.5)); }
+  .cam .silho .fd-cap{ position:absolute; left:18px; right:18px; bottom:26%; text-align:center; font-size:11.5px; font-weight:700; letter-spacing:.04em; line-height:1.35; color:rgba(255,255,255,.58); }
+  .exo .et{ flex:1; } .exo .et b{ font-size:16px; font-weight:800; letter-spacing:-0.3px; } .exo .et span{ display:block; font-size:11.5px; color:var(--muted); margin-top:2px; }
+  .exo .ego{ color:var(--dim); font-size:20px; display:flex; align-items:center; }
+  /* variant-screen header */
+  .varhead{ display:flex; align-items:center; gap:12px; margin:2px 0 14px; }
+  .vback{ -webkit-appearance:none; appearance:none; width:40px; height:40px; flex:none; padding:0; border-radius:50%; border:1px solid var(--border); background:rgba(255,255,255,0.05); color:var(--text); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform .12s; }
+  .vback:active{ transform:scale(0.94); }
+  .vh-t{ flex:1; min-width:0; } .vh-t b{ display:block; font-size:19px; font-weight:800; letter-spacing:-0.4px; } .vh-t span{ font-size:12px; color:var(--muted); }
+  .vh-ic{ width:48px; height:48px; flex:none; border-radius:14px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.04); box-shadow:inset 0 0 0 1px var(--border); }
+  .ratebar{ margin-top:18px; display:flex; align-items:center; gap:10px; padding:13px 15px; border-radius:16px; background:color-mix(in srgb,var(--accent) 9%,transparent); border:1px solid color-mix(in srgb,var(--accent) 30%,transparent); }
+  .ratebar .rr{ font-size:12px; color:var(--text); } .ratebar .rr b{ color:var(--accent); }
+
+  /* ----- live screen ----- */
+  /* live camera is an immersive mode — sits above the floating nav */
+  .live{ position:absolute; inset:0; z-index:70; display:none; flex-direction:column; }
+  .live.on{ display:flex; }
+  .cam{ position:absolute; inset:0; z-index:0; background:#06060d; overflow:hidden; }
+  .cam{ --zoom:1; --fit:cover; }   /* default = fill the screen fully (cover) */
+  .cam video{ width:100%; height:100%; object-fit:var(--fit); transform:scaleX(-1) scale(var(--zoom)); transform-origin:center center; opacity:0.55; transition:opacity .3s, transform .25s ease; }
+  /* Skeleton overlay — sized to the video's intrinsic resolution and given the
+     SAME object-fit/mirror/zoom as the video so landmarks line up exactly. */
+  #pose{ position:absolute; inset:0; width:100%; height:100%; object-fit:var(--fit); transform:scaleX(-1) scale(var(--zoom)); transform-origin:center center; z-index:1; pointer-events:none; transition:transform .25s ease; }
+  .cam.tracking video{ opacity:0.95; }
+  /* zoom meter (iPhone-style 0.5× / 1×) */
+  .zoom{ position:absolute; left:50%; transform:translateX(-50%); bottom:118px; z-index:6; display:flex; gap:5px; padding:5px; border-radius:999px;
+    background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.12); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
+  .zoom button{ border:none; background:none; color:var(--muted); font:inherit; font-size:12px; font-weight:800; width:44px; height:30px; border-radius:999px; cursor:pointer; transition:background .15s,color .15s; }
+  .zoom button.on{ background:rgba(255,255,255,0.18); color:#fff; }
+  /* big guide text */
+  .guide{ position:absolute; left:0; right:0; top:30%; z-index:6; text-align:center; pointer-events:none;
+    font-size:25px; font-weight:900; letter-spacing:0.4px; text-transform:uppercase; color:rgba(255,255,255,0.92);
+    text-shadow:0 2px 26px rgba(0,0,0,0.65); opacity:0; transform:translateY(8px) scale(.96);
+    transition:opacity .2s ease, transform .26s cubic-bezier(.16,1,.3,1); }
+  .guide.show{ opacity:1; transform:translateY(0) scale(1); }
+  .guide.warn{ color:#FF8A3D; }
+  .cam .silho{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+  .cam .scan{ position:absolute; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--accent),transparent); box-shadow:0 0 14px color-mix(in srgb,var(--accent) 70%,transparent); animation:scan 3s ease-in-out infinite; }
+  @keyframes scan{ 0%,100%{top:14%;} 50%{top:80%;} }
+  .camgrad{ position:absolute; inset:0; background:linear-gradient(180deg, rgba(2,2,10,0.5) 0%, transparent 25%, transparent 55%, rgba(2,2,10,0.85) 100%); }
+  .livetop{ position:relative; z-index:5; display:flex; align-items:center; justify-content:space-between; padding:56px 20px 0; }
+  .holo-dot{ width:6px; height:6px; border-radius:50%; background:#34D399; box-shadow:0 0 8px #34D399; animation:holoBlink 1.6s ease-in-out infinite; }
+  @keyframes holoBlink{ 0%,100%{opacity:1;} 50%{opacity:.4;} }
+  .holo-say{ font-size:10px; font-weight:700; line-height:1.3; text-align:center; color:#EaF4ff; min-height:26px;
+    display:flex; align-items:center; justify-content:center; padding:0 2px; }
+  .holo-say.say-warn{ color:#FFC24B; }
+  @media (prefers-reduced-motion:reduce){ .holo-dot{ animation:none; } }
+  /* Per-arm effort bars — bottom */
+  /* Per-arm strength — clean frosted card, bottom-left */
+  .armhud{ position:absolute; left:14px; bottom:120px; z-index:6; width:120px; padding:9px 12px 10px; border-radius:14px; pointer-events:none;
+    background:rgba(8,12,22,0.42); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border:1px solid rgba(255,255,255,0.09); box-shadow:0 6px 20px rgba(0,0,0,0.3); }
+  .ah-t{ font-size:7.5px; font-weight:900; letter-spacing:.18em; color:rgba(255,255,255,0.46); margin-bottom:5px; }
+  .ah-row{ display:flex; align-items:center; gap:7px; margin-top:6px; }
+  .ah-k{ font-size:10px; font-weight:900; width:8px; }
+  .ah-tr{ flex:1; height:5px; border-radius:999px; background:rgba(255,255,255,0.14); overflow:hidden; }
+  .ah-tr i{ display:block; height:100%; width:0%; border-radius:999px; box-shadow:0 0 8px currentColor; transition:width .5s cubic-bezier(.2,.9,.2,1); }
+  .ah-n{ font-size:12px; font-weight:900; min-width:13px; text-align:right; font-variant-numeric:tabular-nums; }
+  .armhud.pulse .ah-tr i{ animation:ahPulse .5s ease; }
+  @keyframes ahPulse{ 0%{filter:brightness(1.9);} 100%{filter:brightness(1);} }
+  .lt-right{ display:flex; align-items:center; gap:7px; }
+  .pmute{ width:30px; height:30px; padding:0; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; -webkit-appearance:none; appearance:none; border:none; }
+  .pmute svg{ width:15px; height:15px; }
+  .livetop .pill{ font-size:10px; font-weight:700; padding:5px 10px; border-radius:999px; background:rgba(0,0,0,0.5); border:1px solid var(--border); }
+  .livetop .pill .d{ display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--accent); margin-right:6px; animation:pulse 1.2s infinite; vertical-align:1px; } @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.3;} }
+
+  .counter{ position:relative; z-index:5; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .counter .clbl{ font-size:9.5px; color:var(--muted); text-transform:uppercase; letter-spacing:1.5px; font-weight:700; }
+
+  /* speed multiplier bar — fills the faster you rep */
+  .multi{ display:flex; align-items:center; gap:9px; width:188px; margin-bottom:14px; }
+  .multibar{ flex:1; height:7px; border-radius:999px; background:rgba(255,255,255,0.10); overflow:hidden; box-shadow:inset 0 0 0 1px rgba(255,255,255,0.06); }
+  .multibar i{ display:block; height:100%; width:0%; border-radius:999px;
+    background:linear-gradient(90deg,#AEB6C4,#5BB1FF 60%,#FFCB3D); transition:width .18s ease; }
+  .multilbl{ font-size:13px; font-weight:900; font-variant-numeric:tabular-nums; color:#FFCB3D; min-width:34px; text-align:right; text-shadow:0 0 12px rgba(255,203,61,0.4); }
+  .multilbl.hot{ animation:multipulse .5s ease; } @keyframes multipulse{ 0%,100%{transform:scale(1);} 50%{transform:scale(1.22);} }
+
+  .cwrap{ position:relative; display:flex; flex-direction:column; align-items:center; }
+  /* #3 Depth ring around the rep number — bigger, fills as you lower */
+  .depthring{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:176px; height:176px; pointer-events:none; }
+  .depthring circle{ fill:none; stroke-linecap:round; }
+  .depthring .dr-bg{ stroke:rgba(255,255,255,0.12); stroke-width:7.5; }
+  .depthring .dr-fg{ stroke:var(--str,#AEB6C4); stroke-width:7.5; stroke-dasharray:339.3; stroke-dashoffset:339.3; transform:rotate(-90deg); transform-origin:60px 60px; transition:stroke-dashoffset .08s linear, stroke .15s; filter:drop-shadow(0 0 8px color-mix(in srgb,var(--str,#AEB6C4) 75%,transparent)); }
+  /* multiplier badge (clean, only shows when active) */
+  .multbadge{ position:absolute; top:8px; right:-4px; transform:translateX(100%); font-size:15px; font-weight:900; color:#FFCB3D; text-shadow:0 0 14px rgba(255,203,61,.55); opacity:0; transition:opacity .2s; white-space:nowrap; }
+  .multbadge.on{ opacity:1; } .multbadge.bump{ animation:mbBump .4s ease; } @keyframes mbBump{ 0%{transform:translateX(100%) scale(1.6);} 100%{transform:translateX(100%) scale(1);} }
+  /* #6 rep goal bar */
+  .goalwrap{ display:flex; flex-direction:column; align-items:center; gap:5px; margin-top:6px; }
+  .goalbar{ width:128px; height:5px; border-radius:999px; background:rgba(255,255,255,0.14); overflow:hidden; }
+  .goalbar i{ display:block; height:100%; width:0%; border-radius:999px; background:var(--str,#AEB6C4); box-shadow:0 0 10px var(--str,#AEB6C4); transition:width .4s cubic-bezier(.2,.9,.2,1); }
+  .goaltxt{ font-size:9px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+  .ah-t b{ color:#fff; }
+  /* #11 mode toggle on the picker */
+  .modetog{ display:flex; gap:4px; padding:4px; border-radius:14px; background:rgba(255,255,255,0.05); border:1px solid var(--border); margin:0 0 16px; }
+  .mt-opt{ flex:1; padding:10px; border-radius:11px; border:none; background:none; color:var(--muted); font:inherit; font-size:12.5px; font-weight:800; cursor:pointer; -webkit-appearance:none; appearance:none; transition:.16s; }
+  .mt-opt.on{ background:var(--accent); color:#fff; }
+  /* #12 history on the picker */
+  .histwrap{ margin-top:18px; }
+  .hist-h{ font-size:10px; font-weight:900; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin:0 2px 9px; }
+  .hist-row{ display:flex; align-items:center; gap:11px; padding:11px 13px; border-radius:14px; border:1px solid var(--border); background:var(--bg-card); margin-bottom:8px; }
+  .hist-row .hr-t{ flex:1; } .hist-row .hr-t b{ font-size:13.5px; font-weight:800; } .hist-row .hr-t span{ display:block; font-size:11px; color:var(--muted); margin-top:1px; }
+  .hist-row .hr-v{ font-size:15px; font-weight:900; color:var(--accent); } .hist-row .hr-v span{ font-size:10px; color:var(--muted); font-weight:700; }
+  /* set badge + timer pill */
+  .setbadge{ color:var(--str,#AEB6C4); font-weight:900; }
+  .timerpill{ font-variant-numeric:tabular-nums; font-weight:900; color:#fff; }
+  .timerpill.low{ color:#FF6B6B; border-color:rgba(255,107,107,0.5); }
+  /* #8 new-best flash */
+  .live.prflash::before{ content:""; position:absolute; inset:0; z-index:9; pointer-events:none; background:radial-gradient(circle at 50% 44%, rgba(255,203,61,0.28), transparent 62%); animation:prFlash .6s ease forwards; }
+  @keyframes prFlash{ 0%{opacity:1;} 100%{opacity:0;} }
+  .cwrap.full .dr-fg{ stroke:#34D399; }
+  .cwrap.full{ animation:ringFlash .4s ease; } @keyframes ringFlash{ 0%{transform:scale(1.06);} 100%{transform:scale(1);} }
+  /* Get-ready countdown */
+  .countdown{ position:absolute; inset:0; z-index:8; display:none; align-items:center; justify-content:center; pointer-events:none; }
+  .countdown.on{ display:flex; }
+  .countdown b{ font-size:130px; font-weight:900; color:#fff; letter-spacing:-4px; text-shadow:0 0 50px rgba(10,132,255,0.6); animation:cdPop .8s ease both; }
+  .countdown b.go{ font-size:88px; color:#34D399; text-shadow:0 0 50px rgba(52,211,153,0.6); }
+  @keyframes cdPop{ 0%{transform:scale(1.7);opacity:0;} 25%{opacity:1;} 100%{transform:scale(1);opacity:1;} }
+  @media (prefers-reduced-motion:reduce){ .countdown b{ animation:none; } }
+  /* End-of-set countdown (when you pause) */
+  .endcd{ position:absolute; left:0; right:0; top:40%; z-index:8; display:none; flex-direction:column; align-items:center; gap:8px; pointer-events:none; }
+  .endcd.on{ display:flex; }
+  .ec-num{ width:66px; height:66px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:900; color:#fff;
+    background:rgba(8,12,22,0.55); border:2.5px solid #FF6B6B; box-shadow:0 0 26px rgba(255,107,107,0.5); }
+  .ec-lbl{ font-size:11.5px; font-weight:800; color:rgba(255,255,255,0.88); text-shadow:0 1px 6px rgba(0,0,0,.6); }
+  .counter .cnum{ font-size:92px; font-weight:800; letter-spacing:-3px; line-height:0.9; font-variant-numeric:tabular-nums; text-shadow:0 0 32px color-mix(in srgb, var(--str,#AEB6C4) 50%, transparent); }
+  .counter .cnum.bump{ animation:bump .28s cubic-bezier(.2,1.5,.4,1); } @keyframes bump{ 0%{transform:scale(1);} 40%{transform:scale(1.22);} 100%{transform:scale(1);} }
+  .counter .pts{ font-size:14.5px; font-weight:800; color:#fff; margin-top:2px; font-variant-numeric:tabular-nums; letter-spacing:-0.2px; }
+  .counter .pts b{ color:var(--accent); } .counter .pts .u{ color:var(--muted); font-size:11px; font-weight:700; }
+  .counter .cgain{ font-size:11.5px; color:var(--accent); font-weight:700; margin-top:4px; opacity:.9; }
+  /* cleaner HUD — hide the busy secondary meters (XP / multiplier / gain line) */
+  .xpwrap{ display:none !important; }
+  .counter .multi{ display:none !important; }
+  .counter .cgain{ display:none !important; }
+  .counter{ gap:2px; }
+  .counter .clbl{ font-size:9px; letter-spacing:2px; opacity:.8; }
+
+  /* particle + floating "+N" layer, centred on the number */
+  .poplayer{ position:absolute; inset:0; pointer-events:none; z-index:9; }
+  .floatN{ position:absolute; left:0; top:0; transform:translate(-50%,-50%); font-size:34px; font-weight:900; letter-spacing:-1px;
+    color:#FFCB3D; text-shadow:0 2px 18px rgba(255,203,61,0.55); white-space:nowrap; animation:floatN 1s cubic-bezier(.2,.9,.3,1) forwards; }
+  @keyframes floatN{ 0%{ opacity:0; transform:translate(-50%,-30%) scale(.5);} 18%{ opacity:1; transform:translate(-50%,-90%) scale(1.1);} 100%{ opacity:0; transform:translate(-50%,-200%) scale(.95);} }
+  .pcl{ position:absolute; left:0; top:0; width:9px; height:9px; border-radius:50%; will-change:transform,opacity;
+    transform:translate(-50%,-50%); animation:pcl .72s ease-out forwards; }
+  @keyframes pcl{ 0%{ opacity:1; transform:translate(-50%,-50%) translate(0,0) scale(1);} 100%{ opacity:0; transform:translate(-50%,-50%) translate(var(--dx),var(--dy)) scale(.3);} }
+
+  /* clean popup cue — a single slot that cross-fades (no stacking) */
+  .cuewrap{ position:absolute; left:0; right:0; top:63%; z-index:8; display:flex; justify-content:center; pointer-events:none; }
+  .cue{ display:inline-flex; align-items:center; gap:7px; padding:8px 15px; border-radius:16px; font-size:12.5px; font-weight:800; letter-spacing:-0.2px;
+    background:rgba(8,10,18,0.62); border:1px solid rgba(255,255,255,0.10); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    color:#fff; box-shadow:0 10px 30px rgba(0,0,0,0.4); white-space:nowrap;
+    opacity:0; transform:translateY(9px) scale(.96); transition:opacity .24s ease, transform .3s cubic-bezier(.16,1,.3,1); }
+  .cue.show{ opacity:1; transform:translateY(0) scale(1); }
+  .cue.good{ color:#46E0A8; border-color:rgba(52,211,153,0.4); }
+  .cue.warn{ color:#FFB061; border-color:rgba(255,159,69,0.4); }
+  .cue.bonus{ color:#FFD45E; border-color:rgba(255,203,61,0.45); }
+
+  /* XP bar (fills with reps; "boosts" when the speed multiplier is high) */
+  .xpwrap{ position:relative; z-index:5; display:flex; align-items:center; gap:10px; padding:12px 22px 0; }
+  .xplvl{ font-size:10px; font-weight:900; letter-spacing:0.6px; color:var(--muted); white-space:nowrap; } .xplvl b{ color:#fff; }
+  .xpbar{ flex:1; height:9px; border-radius:999px; background:rgba(255,255,255,0.08); overflow:hidden; box-shadow:inset 0 0 0 1px rgba(255,255,255,0.06); }
+  .xpbar i{ display:block; height:100%; width:0%; border-radius:999px; background:linear-gradient(90deg,#7C5CFF,#5BB1FF); transition:width .3s cubic-bezier(.16,1,.3,1); }
+  .xpwrap.boost .xpbar i{ background:linear-gradient(90deg,#FFCB3D,#FF8A3D); box-shadow:0 0 16px rgba(255,170,60,0.65); }
+  .xpwrap.levelup .xpbar{ animation:lvlflash .55s ease; } @keyframes lvlflash{ 0%{filter:brightness(2.2);} 100%{filter:none;} }
+  .xpboost{ font-size:9px; font-weight:900; letter-spacing:1px; color:#FFCB3D; opacity:0; transition:opacity .25s; white-space:nowrap; }
+  .xpwrap.boost .xpboost{ opacity:1; animation:xpb .85s ease infinite; } @keyframes xpb{ 0%,100%{opacity:1;} 50%{opacity:.45;} }
+
+  .livebtns{ position:relative; z-index:5; padding:0 20px 36px; display:flex; flex-direction:column; gap:11px; }
+  .row2{ display:flex; gap:11px; } .row2 .gb{ flex:1; border:1px solid var(--border); background:rgba(255,255,255,0.05); color:var(--text); border-radius:16px; padding:15px; font-size:14px; font-weight:700; cursor:pointer; transition:transform .12s; } .row2 .gb:active{ transform:scale(0.96); }
+  .row2 .gb.fin{ background:var(--accent); border-color:transparent; color:#fff; }
+  @media (prefers-reduced-motion:reduce){ .floatN,.pcl,.cue,.cnum.bump,.multilbl.hot{ animation-duration:.01ms!important; } }
+
+  /* summary */
+  .scrim{ position:absolute; inset:0; z-index:80; background:rgba(2,2,10,0.7); backdrop-filter:blur(8px); opacity:0; pointer-events:none; transition:.3s; } .scrim.show{ opacity:1; pointer-events:auto; }
+  .sheet{ position:absolute; left:0; right:0; bottom:0; z-index:81; background:#0E0E1B; border-top-left-radius:30px; border-top-right-radius:30px; border-top:1px solid rgba(255,255,255,0.09); transform:translateY(102%); transition:transform .42s cubic-bezier(.16,1,.3,1); } .sheet.show{ transform:translateY(0); }
+  .grab{ width:40px; height:5px; border-radius:999px; background:rgba(255,255,255,0.18); margin:11px auto 4px; }
+  .sb{ padding:6px 22px 28px; }
+  .sumhead{ text-align:center; } .sumhead .ring{ width:84px; height:84px; margin:6px auto 12px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:40px; color:var(--accent); background:radial-gradient(circle at 50% 40%, color-mix(in srgb,var(--accent) 26%,transparent), color-mix(in srgb,var(--accent) 4%,transparent)); box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 40%,transparent); animation:pop .5s cubic-bezier(.2,1.4,.4,1) both; } @keyframes pop{ from{transform:scale(.3); opacity:0;} to{transform:scale(1); opacity:1;} }
+  .sumhead .rankbadge{ width:96px; height:96px; margin:6px auto 12px; border-radius:26px; display:flex; align-items:center; justify-content:center; font-size:48px; font-weight:900; border:2px solid currentColor; background:radial-gradient(circle at 50% 38%, color-mix(in srgb, currentColor 26%, transparent), color-mix(in srgb, currentColor 5%, transparent)); box-shadow:0 0 30px color-mix(in srgb, currentColor 30%, transparent); animation:pop .5s cubic-bezier(.2,1.4,.4,1) both; }
+  .big3 .bn .newmax{ font-size:13px; color:#FFCB3D; vertical-align:super; margin-left:1px; }
+  .subline{ text-align:center; font-size:12.5px; color:var(--muted); font-weight:600; margin:-4px 0 14px; }
+  .sum-coach{ display:flex; gap:10px; align-items:flex-start; margin:0 0 16px; padding:12px 14px; border-radius:15px;
+    background:color-mix(in srgb, var(--accent) 9%, transparent); border:1px solid color-mix(in srgb, var(--accent) 28%, transparent); }
+  .sum-coach .sc-ic{ flex:none; width:18px; height:18px; color:var(--accent); margin-top:1px; } .sum-coach .sc-ic svg{ width:18px; height:18px; }
+  .sum-coach span:last-child{ font-size:12.5px; font-weight:600; line-height:1.45; color:rgba(248,250,254,.92); }
+  .rest-timer{ display:flex; align-items:center; justify-content:center; gap:7px; margin:0 0 14px; font-size:13px; font-weight:800; color:var(--muted); }
+  .rest-timer b{ color:#fff; font-variant-numeric:tabular-nums; } .rest-timer .rt-dot{ width:7px; height:7px; border-radius:50%; background:#34D399; box-shadow:0 0 8px #34D399; animation:holoBlink 1.4s ease-in-out infinite; }
+  @keyframes holoBlink{ 0%,100%{opacity:1;} 50%{opacity:.35;} }
+  .sumhead h2{ margin:0; font-size:23px; font-weight:800; letter-spacing:-0.6px; } .sumhead p{ margin:5px 0 0; font-size:12.5px; color:var(--muted); }
+  /* premium summary */
+  .sum-hero{ text-align:center; margin-top:2px; }
+  .sum-hero .rankbadge{ width:82px; height:82px; font-size:40px; border-radius:24px; margin:4px auto 10px; }
+  .sh-rt{ font-size:25px; font-weight:900; letter-spacing:-0.6px; line-height:1; }
+  .sh-ex{ font-size:12.5px; color:var(--muted); font-weight:600; margin-top:5px; }
+  .sh-new{ color:#FFCB3D; font-weight:900; font-size:10px; letter-spacing:.06em; padding:2px 6px; border-radius:6px; background:rgba(255,203,61,0.14); }
+  .sum-score{ text-align:center; margin:16px 0 4px; }
+  .ss-num{ font-size:56px; font-weight:900; letter-spacing:-2px; line-height:1; font-variant-numeric:tabular-nums; background:linear-gradient(180deg,#fff,#9FC6FF); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+  .ss-lbl{ font-size:9px; font-weight:900; letter-spacing:.24em; color:var(--muted); margin-top:5px; }
+  .sh-xp{ text-align:center; font-size:11.5px; color:var(--muted); font-weight:700; margin:8px 0 16px; }
+  .big3{ display:flex; gap:9px; margin:16px 0 0; }
+  .big3 .b{ flex:1; border-radius:16px; padding:15px 8px; text-align:center; border:1px solid rgba(255,255,255,0.08); background:linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.018)); }
+  .big3 .bn{ font-size:24px; font-weight:900; font-variant-numeric:tabular-nums; } .big3 .bl{ font-size:8.5px; color:var(--muted); text-transform:uppercase; letter-spacing:1.2px; margin-top:4px; font-weight:800; }
+  .big3 .b.str{ border-color:color-mix(in srgb,var(--accent) 30%,transparent); } .big3 .b.str .bn{ color:var(--accent); }
+  .sheet::before{ content:""; position:absolute; top:0; left:0; right:0; height:120px; border-radius:30px 30px 0 0; pointer-events:none;
+    background:radial-gradient(80% 100% at 50% 0%, color-mix(in srgb,var(--str,#AEB6C4) 16%,transparent), transparent 70%); }
+  .bigbtn{ width:100%; border:none; border-radius:18px; padding:16px; font-size:15px; font-weight:800; cursor:pointer; color:#fff; background:var(--accent); transition:transform .12s; } .bigbtn:active{ transform:scale(0.97); }
+  .againbtn{ width:100%; margin-top:9px; border:1px solid var(--border); background:rgba(255,255,255,0.05); color:var(--text); border-radius:16px; padding:13px; font-size:13px; font-weight:700; cursor:pointer; }
+  .sumbtns2{ display:flex; gap:9px; } .sumbtns2 .againbtn{ flex:1; }
+  @media (prefers-reduced-motion:reduce){ .scan{ animation:none!important; } }
+</style>
+  <link rel="stylesheet" href="_lib/core-responsive.css?v=20260619d">
+  
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <meta name="theme-color" content="#000000">
+  <link rel="stylesheet" href="_lib/core-starfield.css?v=20260619d">
+  <script src="_lib/core-starfield.js?v=20260619d"></script>
+  <link rel="stylesheet" href="_lib/core-ui.css?v=20260619d" />
+</head>
+<body>
+  <div class="phone">
+    <div class="notch"></div>
+    <div id="ambBg"></div><div id="ambAurora"></div><div id="ambCelestial"></div>
+
+    <div class="frame">
+      <div class="top">
+        <button class="back" id="backBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M15 6l-6 6 6 6"/></svg></button>
+        <h1>Live Rep Counter</h1>
+        <span class="plusbadge off" id="plusBadge">1× RATE</span>
+        <button class="help-btn" id="helpBtn" aria-label="Live rep counter help">?</button>
+      </div>
+
+      <!-- SELECT -->
+      <div class="pick" id="pick">
+        <div class="lead" id="pickLead">Pick a movement</div>
+        <div class="modetog" id="modeTog">
+          <button class="mt-opt on" data-mode="reps" type="button">Free reps</button>
+          <button class="mt-opt" data-mode="timed" type="button">60s timer</button>
+          <button class="mt-opt" data-mode="plan" type="button">AI plan</button>
+        </div>
+        <div class="exsel" id="exsel"></div>
+        <div class="histwrap" id="histWrap"></div>
+        <div class="ratebar"><span style="display:inline-flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg></span><div class="rr">You earn <b id="rateTxt">0.01</b> Strength per rep. <span id="plusHint"></span></div></div>
+      </div>
+
+      <!-- LIVE -->
+      <div class="live" id="live">
+        <div class="cam" id="cam">
+          <video id="vid" autoplay playsinline muted></video>
+          <canvas id="pose"></canvas>
+          <div class="silho" id="silho"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:64px;height:64px"><circle cx="12" cy="5" r="2.5"/><path d="M12 8v7M12 15l-3 6M12 15l3 6M7 11h10"/></svg></div>
+          <div class="scan"></div>
+        </div>
+        <div class="camgrad"></div>
+        <div class="poplayer" id="popLayer"></div>
+        <div class="guide" id="guideTxt"></div>
+        <div class="countdown" id="countdown"></div>
+        <div class="endcd" id="endCd"><div class="ec-num" id="endCdN">5</div><div class="ec-lbl">Keep moving — or the set ends</div></div>
+        <div class="livetop">
+          <span class="pill"><span class="d"></span><span id="liveEx">Push-ups</span> <span class="setbadge" id="setBadge">Set 1</span></span>
+          <span class="pill timerpill" id="setTimer" style="display:none">1:00</span>
+          <span class="pill" id="camState">Camera off</span>
+        </div>
+        <div class="xpwrap" id="xpWrap">
+          <span class="xplvl">LV <b id="xpLvl">1</b></span>
+          <div class="xpbar"><i id="xpFill"></i></div>
+          <span class="xpboost" id="xpBoost">BOOST</span>
+        </div>
+        <div class="counter">
+          <div class="multi"><div class="multibar"><i id="multiFill"></i></div><span class="multilbl" id="multiLbl">×1.0</span></div>
+          <div class="clbl">Reps</div>
+          <div class="cwrap">
+            <svg class="depthring" id="depthRing" viewBox="0 0 120 120"><circle class="dr-bg" cx="60" cy="60" r="54"/><circle class="dr-fg" id="drFg" cx="60" cy="60" r="54"/></svg>
+            <div class="cnum" id="cnum">0</div>
+            <span class="multbadge" id="multBadge">×2</span>
+          </div>
+          <div class="goalwrap"><div class="goalbar"><i id="goalFill"></i></div><span class="goaltxt" id="goalTxt">0 / 10</span></div>
+          <div class="pts"><b id="pts">0</b> <span class="u">pts</span></div>
+          <div class="cgain" id="cgain">+0.00 Strength</div>
+        </div>
+        <div class="cuewrap"><div class="cue" id="cueEl"></div></div>
+
+        <!-- Per-arm strength — clean frosted card, bottom-left -->
+        <div class="armhud" id="armBars">
+          <div class="ah-t">ARM BALANCE <b id="ahBal">100%</b></div>
+          <div class="ah-row"><span class="ah-k" style="color:#FF9F0A">L</span><div class="ah-tr"><i id="abL" style="background:#FF9F0A;color:#FF9F0A"></i></div><b class="ah-n" id="abLn" style="color:#FF9F0A">0</b></div>
+          <div class="ah-row"><span class="ah-k" style="color:#34D399">R</span><div class="ah-tr"><i id="abR" style="background:#34D399;color:#34D399"></i></div><b class="ah-n" id="abRn" style="color:#34D399">0</b></div>
+        </div>
+        <div class="livebtns">
+          <div class="row2"><button class="gb" id="camToggle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px"><path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg> Camera</button><button class="gb fin" id="finBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px"><path d="M5 12l4 4 10-11"/></svg> Finish</button></div>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Primary">
+        <a class="item" href="20-dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 11l9-7 9 7M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/></svg><span class="nl">Home</span></a>
+        <a class="item" href="21-quests.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M9 5h11M9 12h11M9 19h11M4 5l1 1 2-2M4 12l1 1 2-2M4 19l1 1 2-2"/></svg><span class="nl">Quests</span></a>
+        <a class="item" href="coach.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="nl">Coach</span></a>
+        <a class="item" href="community.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="nl">Community</span></a>
+        <a class="item" href="24-more.html"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2.5"/><circle cx="12" cy="12" r="2.5"/><circle cx="19" cy="12" r="2.5"/></svg><span class="nl">More</span></a>
+      </nav>
+    </div>
+
+    <div class="scrim" id="sumScrim"></div>
+    <div class="sheet" id="sumSheet"><div class="grab"></div><div class="sb" id="sumBody"></div></div>
+    <div class="home-indicator"></div>
+  </div>
+
+  <script src="_lib/core-sfx.js"></script>
+  <script src="_lib/core-state.js"></script>
+  <script src="_lib/core-ai.js"></script>
+  <script src="_lib/core-gym-data.js"></script>
+  <script src="_lib/core-strength.js"></script>
+  <script>window.CORE_STARS=7;</script>
+  <script src="_lib/dash-ambient.js"></script>
+  <script src="_lib/core-help.js"></script>
+  <!-- Pose model loader (ES module, lazy). Pulls MediaPipe Tasks-Vision +
+       the lightweight pose model from a CDN only when auto-tracking is first
+       enabled. All inference runs on-device; no frames ever leave the phone.
+       If the CDN/model can't load, the page falls back to manual rep tapping. -->
+  <script type="module">
+    let _p = null;
+    async function load(){
+      if (_p) return _p;
+      _p = (async () => {
+        const V = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
+        const m = await import(V);
+        const fileset = await m.FilesetResolver.forVisionTasks(V + "/wasm");
+        let landmarker;
+        try {
+          landmarker = await m.PoseLandmarker.createFromOptions(fileset, {
+            baseOptions: { modelAssetPath: "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task", delegate: "GPU" },
+            runningMode: "VIDEO", numPoses: 1,
+          });
+        } catch (e) {
+          // Some devices have no WebGL/GPU delegate — retry on CPU.
+          landmarker = await m.PoseLandmarker.createFromOptions(fileset, {
+            baseOptions: { modelAssetPath: "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task", delegate: "CPU" },
+            runningMode: "VIDEO", numPoses: 1,
+          });
+        }
+        return { landmarker, PoseLandmarker: m.PoseLandmarker, DrawingUtils: m.DrawingUtils };
+      })();
+      return _p;
+    }
+    window.PoseKit = { load };
+  </script>
+  <script>
+  (function(){
+    "use strict";
+    var $=function(s){ return document.querySelector(s); };
+    var S=window.CoreStrength;
+    if(window.dashAmbient) try{ window.dashAmbient.init(); }catch(e){}
+    function sfx(n){ S.sfx(n); } function haptic(){ try{ navigator.vibrate&&navigator.vibrate(10); }catch(e){} }
+    function ic(d,s,st){ s=s||14; return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="'+(st||2)+'" stroke-linecap="round" stroke-linejoin="round" style="width:'+s+'px;height:'+s+'px;vertical-align:-2px">'+d+'</svg>'; }
+    var GI={
+      flame:    ic('<path d="M12 3c1.6 3.6 4 4.6 4 8a4 4 0 0 1-8 0c0-1.3.5-2.1 1-2.7C9 11 12 8 12 3z"/>',14),
+      dumbbell: ic('<path d="M4 9v6M7 7v10M17 7v10M20 9v6M7 12h10"/>',14),
+      bolt:     ic('<path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/>',14),
+      spark:    ic('<path d="M12 3v6M12 15v6M3 12h6M15 12h6M6 6l3 3M15 15l3 3M18 6l-3 3M9 15l-3 3"/>',14),
+      chevron:  ic('<path d="M9 6l6 6-6 6"/>',20,2),
+      cleft:    ic('<path d="M15 6l-6 6 6 6"/>',20,2),
+      camera:   ic('<path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/>',15),
+      person:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:64px;height:64px"><circle cx="12" cy="5" r="2.5"/><path d="M12 8v7M12 15l-3 6M12 15l3 6M7 11h10"/></svg>',
+      pushup:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:28px;height:28px"><circle cx="5" cy="8" r="1.6"/><path d="M5 10l4 3 7-1M9 13l5 4M3 18h18"/></svg>',
+      legs:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:28px;height:28px"><path d="M9 3v8l-2 10M15 3v8l2 10M9 7h6"/></svg>',
+      pullup:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:28px;height:28px"><path d="M4 4h16M8 4v3M16 4v3"/><circle cx="12" cy="11" r="2"/><path d="M12 13v5M12 18l-2 3M12 18l2 3"/></svg>',
+      dot:      '<svg viewBox="0 0 24 24" style="width:9px;height:9px;vertical-align:1px"><circle cx="12" cy="12" r="7" fill="currentColor"/></svg>'
+    };
+
+    // ── Animated form demos (self-authored, copyright-free, fully in-app). Each
+    //    movement has its OWN demo that morphs between the two ends of the rep, so
+    //    push variants differ by hand width, squats by stance, pulls by grip.
+    //    Tinted by the exercise colour. ──
+    function fdAnim(attr,vals,dur){ return '<animate attributeName="'+attr+'" values="'+vals+'" dur="'+dur+'" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1" repeatCount="indefinite"/>'; }
+    // vb=viewBox, extra=static bits (floor/bar), hcy=head cy keyframes, rest/active=morph poses
+    function fdSvg(vb,extra,hcy,rest,active,dur){
+      return '<svg class="formdemo" viewBox="'+vb+'" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">'+extra+
+        '<circle r="3.2">'+fdAnim('cx','24;24;24',dur)+fdAnim('cy',hcy,dur)+'</circle>'+
+        '<path d="'+rest+'">'+fdAnim('d',rest+';'+active+';'+rest,dur)+'</path></svg>';
+    }
+    var PGND='<line x1="7" y1="40" x2="41" y2="40" stroke-opacity="0.26"/>',
+        SGND='<line x1="7" y1="44" x2="41" y2="44" stroke-opacity="0.26"/>',
+        BAR ='<line x1="7" y1="6" x2="41" y2="6" stroke-opacity="0.55"/>';
+    // Push-ups (side view) — clean straight-plank rep; variants differ by elbow flare:
+    // diamond tucks the elbow in tight, standard is moderate, wide flares it out.
+    var PSV='<svg class="formdemo" viewBox="0 0 64 48" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="42" x2="58" y2="42" stroke-opacity="0.22"/>';
+    function pushSV(hx,ex){ var up='M18 26 L52 42 M'+hx+' 42 L'+hx+' 33 L18 26', dn='M19 35 L52 42 M'+hx+' 42 L'+ex+' 39 L19 35';
+      return PSV+'<circle r="3.6">'+fdAnim('cx','13;14;13','2.2s')+fdAnim('cy','23;32;23','2.2s')+'</circle><path d="'+up+'">'+fdAnim('d',up+';'+dn+';'+up,'2.2s')+'</path></svg>'; }
+    var FORM_EX={
+      pushups:    pushSV(18,23),
+      pushwide:   pushSV(18,26),
+      pushdiamond:pushSV(20,20),
+      // Squats (front view) — feet planted, knees track out. Stance varies; jump leaves the floor.
+      squats:     fdSvg('0 0 48 50',SGND,'8;16;8','M24 26 L20 34 L18 43 M24 26 L28 34 L30 43 M24 12 L24 26 M24 12 L19 22 M24 12 L29 22','M24 34 L16 38 L18 43 M24 34 L32 38 L30 43 M24 20 L24 34 M24 20 L15 18 M24 20 L33 18','2.1s'),
+      squatsumo:  fdSvg('0 0 48 50',SGND,'10;20;10','M24 27 L19 35 L17 42 M24 27 L29 35 L31 42 M24 14 L24 27 M24 14 L19 23 M24 14 L29 23','M24 36 L15 40 L17 42 M24 36 L33 40 L31 42 M24 24 L24 36 M24 24 L18 21 M24 24 L30 21','2.1s'),
+      squatjump:  fdSvg('0 0 48 50',SGND,'16;6;16','M24 34 L16 38 L18 43 M24 34 L32 38 L30 43 M24 20 L24 34 M24 20 L16 24 M24 20 L32 24','M24 24 L21 30 L20 36 M24 24 L27 30 L28 36 M24 10 L24 24 M24 10 L19 4 M24 10 L29 4','1.5s'),
+      // Pull-ups (front view) — hands grip the bar, body rises. Grip width / under-hand varies.
+      pullups:    fdSvg('0 0 48 48',BAR,'17;10;17','M19 6 L19 13 L21 20 M29 6 L29 13 L27 20 M21 20 L27 20 M24 20 L24 32 M24 32 L21 43 M24 32 L27 43','M19 6 L15 14 L21 13 M29 6 L33 14 L27 13 M21 13 L27 13 M24 13 L24 25 M24 25 L21 35 M24 25 L27 35','2.2s'),
+      chinups:    fdSvg('0 0 48 48',BAR,'17;10;17','M22 6 L22 13 L22 20 M26 6 L26 13 L26 20 M22 20 L26 20 M24 20 L24 32 M24 32 L21 43 M24 32 L27 43','M22 6 L21 14 L22 13 M26 6 L27 14 L26 13 M22 13 L26 13 M24 13 L24 25 M24 25 L21 35 M24 25 L27 35','2.2s'),
+      pullwide:   fdSvg('0 0 48 48',BAR,'17;9;17','M15 6 L16 13 L21 20 M33 6 L32 13 L27 20 M21 20 L27 20 M24 20 L24 32 M24 32 L21 43 M24 32 L27 43','M15 6 L13 13 L21 12 M33 6 L35 13 L27 12 M21 12 L27 12 M24 12 L24 24 M24 24 L21 34 M24 24 L27 34','2.4s')
+    };
+    var FORM={ push:FORM_EX.pushups, squat:FORM_EX.squats, pull:FORM_EX.pullups };
+    var FORMTIP={
+      pushups:'Hands shoulder-width · lower chest · push up', pushwide:'Hands wide · elbows flare out · press up', pushdiamond:'Hands together · elbows tucked in · press up',
+      squats:'Feet shoulder-width · sit back · stand tall', squatsumo:'Wide stance · toes out · drive up', squatjump:'Squat · explode up · land soft',
+      pullups:'Overhand grip · pull chin over the bar', chinups:'Underhand grip · pull chin over the bar', pullwide:'Wide grip · drive your elbows down',
+      push:'Lower chest · push up', squat:'Sit back · stand tall', pull:'Pull chin over the bar'
+    };
+    function formCat(id){ var c=CATS.find(function(k){ return k.modes.indexOf(id)>=0; }); return c?c.id:'push'; }
+    function formFor(id){ return FORM_EX[id]||FORM[formCat(id)]||FORM_EX.pushups; }
+    function formTip(id){ return FORMTIP[id]||FORMTIP[formCat(id)]||''; }
+
+    var EXOS=[
+      { id:'pushups',     name:'Standard Push-ups', emoji:GI.pushup, muscle:'chest', c:'#FF6B6B', diff:'easy',   pf:1,   sub:'Chest · triceps · core' },
+      { id:'pushwide',    name:'Wide Push-ups',     emoji:GI.pushup, muscle:'chest', c:'#FF8A5B', diff:'medium', pf:1.1, sub:'Outer chest · shoulders' },
+      { id:'pushdiamond', name:'Diamond Push-ups',  emoji:GI.pushup, muscle:'chest', c:'#FF5BA8', diff:'hard',   pf:1.3, sub:'Triceps · inner chest' },
+      { id:'squats',    name:'Standard Squats', emoji:GI.legs, muscle:'legs', c:'#34D399', diff:'medium', pf:1,   sub:'Quads · glutes' },
+      { id:'squatsumo', name:'Sumo Squats',     emoji:GI.legs, muscle:'legs', c:'#2BD4B0', diff:'medium', pf:1.1, sub:'Glutes · inner thigh' },
+      { id:'squatjump', name:'Jump Squats',     emoji:GI.legs, muscle:'legs', c:'#19C3E6', diff:'hard',   pf:1.3, sub:'Power · explosive quads' },
+      { id:'pullups',  name:'Standard Pull-ups', emoji:GI.pullup, muscle:'back', c:'#4A8FFF', diff:'hard', pf:1,    sub:'Back · biceps' },
+      { id:'chinups',  name:'Chin-ups',          emoji:GI.pullup, muscle:'back', c:'#6E8BFF', diff:'hard', pf:1.05, sub:'Biceps · back' },
+      { id:'pullwide', name:'Wide-grip Pull-ups',emoji:GI.pullup, muscle:'back', c:'#8A6BFF', diff:'hard', pf:1.2,  sub:'Lats · upper back' }
+    ];
+    // Three top-level movements; each opens its variants.
+    var CATS=[
+      { id:'push',  name:'Push-ups', emoji:GI.pushup, c:'#FF6B6B', sub:'Chest · triceps · core', modes:['pushups','pushwide','pushdiamond'] },
+      { id:'pull',  name:'Pull-ups', emoji:GI.pullup, c:'#4A8FFF', sub:'Back · biceps',           modes:['pullups','chinups','pullwide'] },
+      { id:'squat', name:'Squats',   emoji:GI.legs,   c:'#34D399', sub:'Quads · glutes',          modes:['squats','squatsumo','squatjump'] }
+    ];
+
+    // Rank/rating from session reps (scaled by difficulty so a pull-up is worth
+    // more than a push-up). Returns tier name + letter grade + colour.
+    function ratingFor(reps, diff){
+      var e = reps * (diff==='hard'?2 : diff==='medium'?1.4 : 1);
+      if(e>=60) return { t:'Elite',    l:'S', c:'#FFCB3D' };
+      if(e>=42) return { t:'Diamond',  l:'A', c:'#7CE0FF' };
+      if(e>=30) return { t:'Platinum', l:'B', c:'#C9D2FF' };
+      if(e>=18) return { t:'Gold',     l:'C', c:'#FFD45E' };
+      if(e>=9)  return { t:'Silver',   l:'D', c:'#CBD5E1' };
+      return { t:'Bronze', l:'E', c:'#E1996B' };
+    }
+    function readMax(){ try{ return JSON.parse(localStorage.getItem('core.reps.max.v1'))||{}; }catch(e){ return {}; } }
+    function writeMax(o){ try{ localStorage.setItem('core.reps.max.v1', JSON.stringify(o)); }catch(e){} }
+
+    var plus=S.isPlus(), rate=S.perRep();
+    var cur=null, reps=0, stream=null, pickStage='cat', lastMode='pushups';
+
+    // ── Pose tracking + scoring state ────────────────────────────────────
+    // BlazePose 33-landmark indices: 11/12 shoulders, 13/14 elbows, 15/16
+    // wrists, 23/24 hips, 25/26 knees, 27/28 ankles.
+    var poseRunning=false, pk=null, ctx=null;
+    var phase='up', repMin=180, repMax=0, lastRepAt=0, lastTrack='';
+    var BASE_PTS=10;                                  // points per rep at ×1.0
+    var points=0, ptsShown=0;                         // target vs animated display
+    var mult=1, combo=0, lastRepTime=0;               // milestone multiplier + combo streak
+    var MILESTONE=5, MAXMULT=5;                        // +0.1× every MILESTONE reps in the streak
+    var downAt=0, holdReady=false, holdScored=false;  // hold-for-bonus
+    var lastCueTxt='', lastCueAt=0, uiRunning=false, _mw=-1, _ml='';
+    var angEMA=null, cueTimer=null, lastDetect=0, lastGuide='';
+    var seenHi=null, seenLo=null;                     // adaptive calibration (per-person range)
+    var lastL=null, camW=0, camH=0;                   // for popping numbers out of the body
+    var DETECT_MS=55;  // ~18fps — catches faster reps without missing the bottom
+    // Minimal skeleton: body limbs only (no face mesh), hand-drawn (cheaper than DrawingUtils).
+    var BODY=[[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],[23,25],[25,27],[24,26],[26,28]];
+    var JOINTS=[11,12,13,14,15,16,23,24,25,26,27,28];
+    var xpInto=0, xpNeed=150, xpLevel=1, xpShown=0;   // XP bar + level
+    var MINROM=20;                                     // min range of motion (deg) to count a rep (lenient)
+    var refLo=1, refHi=0, MINSHIFT=0.008;              // body must translate a little (anti-fake, gentle)
+    var armLmin=180, armRmin=180, holoCtx=null, lastSay='';  // per-arm effort + coach
+    var scoreL=0, scoreR=0, faceTimer=null, talkTimer=null;  // arm scores + coach face state
+    var sessMin=180;  // deepest tracked angle this set (for the AI recap)
+    var repBest=0, repTarget=10;  // #6 goal + #8 personal-best
+    var setNum=1, sessionLog=[];           // #10 multiple sets per workout
+    var timedMode=false, timedDur=60, timedStart=0, timedInt=null;   // #11 60-second AMRAP
+    var planMode=false, plan=null, lastRt=null;   // #16 AI workout plan + last summary rating
+    var armed=false, cdActive=false, cdStartAt=0, lastMoveAt=0, prevAng=null, restInt=null, lastCd='';
+    var RINGC=339.3;  // 2π·54
+    function framingCheck(L){
+      // lenient: just need shoulders + hips roughly in view so the count-in can start
+      var sh = (L[11].visibility>0.4)||(L[12].visibility>0.4);
+      var hp = (L[23].visibility>0.35)||(L[24].visibility>0.35);
+      if(!(sh && hp)) return {ok:false, msg:'SHOW YOUR WHOLE BODY', short:'Show your whole body'};
+      return {ok:true};
+    }
+    function showCountdown(t, go){ var el=$('#countdown'); if(!el) return;
+      if(t!==lastCd){ lastCd=t; el.innerHTML='<b'+(go?' class="go"':'')+'>'+t+'</b>'; try{ sfx(go?'confirm':'tick'); }catch(e){} }
+      el.classList.add('on'); }
+    function hideCountdown(){ var el=$('#countdown'); if(el){ el.classList.remove('on'); el.innerHTML=''; } lastCd=''; }
+    function setRing(frac){ var fg=$('#drFg'); if(fg){ frac=Math.max(0,Math.min(1,frac||0)); fg.style.strokeDashoffset=(RINGC*(1-frac)).toFixed(1); } }
+    function ringFull(){ var cw=$('.cwrap'); if(cw){ cw.classList.remove('full'); void cw.offsetWidth; cw.classList.add('full'); } }
+    function startRest(){ var el=$('#restTimer'); if(!el) return; var t0=Date.now(); stopRest();
+      function tick(){ var s=Math.floor((Date.now()-t0)/1000), mm=Math.floor(s/60), ss=s%60; el.innerHTML='<span class="rt-dot"></span>Resting <b>'+mm+':'+(ss<10?'0':'')+ss+'</b>'; }
+      tick(); restInt=setInterval(tick,1000); }
+    function stopRest(){ if(restInt){ clearInterval(restInt); restInt=null; } }
+    function autoEnd(){ if(!armed) return; armed=false; hideEndCd(); if(reps>0) finish(); }
+    var endCd=false, endCdStart=0, lastEc=-1;
+    function showEndCd(n){ var el=$('#endCd'); if(!el) return; el.classList.add('on'); if(n!==lastEc){ lastEc=n; var num=$('#endCdN'); if(num) num.textContent=n; try{ sfx('tick'); }catch(e){} } }
+    function hideEndCd(){ var el=$('#endCd'); if(el) el.classList.remove('on'); lastEc=-1; }
+    var ENC=['Keep going — strong!','Nice pace, don\'t stop!','You\'ve got more in you!','Looking strong — push!','Almost there — keep it up!'];
+    function encourage(){ cue(ENC[Math.floor(reps/5)%ENC.length],'good'); }
+    // Coach facial expressions — instant reactions
+    var FACE_DEF={ neutral:{m:'M39 66 Q50 71 61 66',h:0,b:0}, happy:{m:'M36 63 Q50 78 64 63',h:1,b:0}, concerned:{m:'M41 70 Q50 63 59 70',h:0,b:1}, excited:{m:'M39 62 Q50 81 61 62',h:0,b:0} };
+    function applyFace(st){ var f=FACE_DEF[st]||FACE_DEF.neutral; var mo=$('#cfMouth'); if(mo) mo.setAttribute('d',f.m);
+      var en=$('#cfEyesN'), eh=$('#cfEyesH'), br=$('#cfBrows');
+      if(en) en.style.display=f.h?'none':''; if(eh) eh.style.display=f.h?'':'none'; if(br) br.style.display=f.b?'':'none'; }
+    function setFace(st, ttl){ var fc=$('#coachFace'); if(!fc) return;
+      fc.classList.remove('happy','concerned','excited'); if(st&&st!=='neutral') fc.classList.add(st);
+      applyFace(st||'neutral');
+      if(faceTimer) clearTimeout(faceTimer);
+      if(ttl) faceTimer=setTimeout(function(){ setFace('neutral'); }, ttl); }
+    function coachTalk(t){ var fc=$('#coachFace'); if(!fc) return; fc.classList.add('speaking');
+      var ms=Math.min(2200, 500+(t?String(t).length:6)*55);
+      if(talkTimer) clearTimeout(talkTimer); talkTimer=setTimeout(function(){ fc.classList.remove('speaking'); }, ms); }
+    // colour-coded limbs: left arm orange, right arm green, rest cyan
+    var LIMBS=[ {c:[11,12],a:'#CFE9FF'},{c:[11,13],a:'#FF9F0A'},{c:[13,15],a:'#FF9F0A'},{c:[12,14],a:'#34D399'},{c:[14,16],a:'#34D399'},
+      {c:[11,23],a:'#CFE9FF'},{c:[12,24],a:'#CFE9FF'},{c:[23,24],a:'#CFE9FF'},{c:[23,25],a:'#CFE9FF'},{c:[25,27],a:'#CFE9FF'},{c:[24,26],a:'#CFE9FF'},{c:[26,28],a:'#CFE9FF'} ];
+    var SAY={ 'LOWER':'Lower your chest to the floor','PUSH UP':'Now drive back up — strong!','HOLD':'Hold it… nice and tight','SQUAT':'Sit back and down','STAND UP':'Drive up tall','SUMO DOWN':'Sink into the squat','DRIVE UP':'Drive up!','LOAD':'Load up…','JUMP!':'Explode up!','PULL UP':'Pull your chin over the bar','GET SET':'Get into position…','SHOW YOUR WHOLE BODY':'Step back — show your whole body','STEP INTO FRAME':'Step into frame','FACE THE CAMERA':'Turn so I can see you' };
+    function isArmFam(){ return cur && /^(push|pull|chin)/.test(cur.id); }
+    function coachSay(t, warn){ /* voice removed — guidance shows via the big on-screen text */ }
+    function drawSkeleton(L,W,H){
+      ctx.lineCap='round'; ctx.lineJoin='round';
+      for(var pass=0; pass<2; pass++){
+        for(var k=0;k<LIMBS.length;k++){ var lm=LIMBS[k], p=L[lm.c[0]], q=L[lm.c[1]];
+          if(Math.min(p.visibility,q.visibility)<=0.4) continue;
+          ctx.beginPath(); ctx.moveTo(p.x*W,p.y*H); ctx.lineTo(q.x*W,q.y*H);
+          ctx.strokeStyle=lm.a; ctx.globalAlpha = pass===0?0.22:0.96; ctx.lineWidth = pass===0?12:4.5; ctx.stroke();
+        }
+      }
+      ctx.globalAlpha=1;
+      for(var i=0;i<JOINTS.length;i++){ var j=L[JOINTS[i]]; if(j.visibility>0.4){
+        ctx.beginPath(); ctx.arc(j.x*W,j.y*H,5,0,6.283); ctx.fillStyle='#fff'; ctx.fill();
+        ctx.beginPath(); ctx.arc(j.x*W,j.y*H,2.2,0,6.283); ctx.fillStyle='#AEB6C4'; ctx.fill();
+      }}
+    }
+    function drawHolo(L){
+      var hc=$('#holoCv'); if(!hc) return;
+      if(!holoCtx) holoCtx=hc.getContext('2d');
+      var W=hc.width, H=hc.height; holoCtx.clearRect(0,0,W,H);
+      var vis=JOINTS.map(function(i){return L[i];}).filter(function(p){return p.visibility>0.4;});
+      if(vis.length<4) return;
+      var minX=1,minY=1,maxX=0,maxY=0;
+      vis.forEach(function(p){ if(p.x<minX)minX=p.x; if(p.x>maxX)maxX=p.x; if(p.y<minY)minY=p.y; if(p.y>maxY)maxY=p.y; });
+      var bw=(maxX-minX)||0.001, bh=(maxY-minY)||0.001, pad=16, sc=Math.min((W-pad*2)/bw,(H-pad*2)/bh);
+      var ox=(W-bw*sc)/2, oy=(H-bh*sc)/2;
+      function tx(x){ return W-(ox+(x-minX)*sc); }   // mirror to match on-screen view
+      function ty(y){ return oy+(y-minY)*sc; }
+      holoCtx.lineCap='round'; holoCtx.lineJoin='round';
+      for(var pass=0; pass<2; pass++){
+        holoCtx.shadowColor='rgba(80,180,255,0.9)'; holoCtx.shadowBlur = pass===0?2:7;
+        for(var k=0;k<LIMBS.length;k++){ var lm=LIMBS[k], p=L[lm.c[0]], q=L[lm.c[1]]; if(Math.min(p.visibility,q.visibility)<=0.4) continue;
+          var hc2=(lm.a==='#FF9F0A'||lm.a==='#34D399')? lm.a : '#7DD4FF';
+          holoCtx.strokeStyle=hc2; holoCtx.globalAlpha = pass===0?0.22:0.95; holoCtx.lineWidth = pass===0?8:2.6;
+          holoCtx.beginPath(); holoCtx.moveTo(tx(p.x),ty(p.y)); holoCtx.lineTo(tx(q.x),ty(q.y)); holoCtx.stroke(); }
+      }
+      holoCtx.globalAlpha=1; holoCtx.shadowBlur=0;
+      var nose=L[0]; if(nose&&nose.visibility>0.3){ holoCtx.fillStyle='rgba(160,225,255,0.95)'; holoCtx.beginPath(); holoCtx.arc(tx(nose.x),ty(nose.y),5,0,6.283); holoCtx.fill(); }
+      // holographic scanlines
+      holoCtx.globalAlpha=0.06; holoCtx.fillStyle='#9FE0FF';
+      for(var sy=0; sy<H; sy+=3){ holoCtx.fillRect(0,sy,W,1); }
+      holoCtx.globalAlpha=1;
+    }
+    function paintArmBars(){
+      var mx=Math.max(scoreL,scoreR,1);
+      var eL=$('#abL'), eR=$('#abR'), nL=$('#abLn'), nR=$('#abRn'), bal=$('#ahBal');
+      if(eL) eL.style.width=(scoreL/mx*100).toFixed(0)+'%';
+      if(eR) eR.style.width=(scoreR/mx*100).toFixed(0)+'%';
+      if(nL) nL.textContent=scoreL; if(nR) nR.textContent=scoreR;
+      if(bal) bal.textContent=((scoreL+scoreR)>0 ? Math.round(100-Math.abs(scoreL-scoreR)/mx*100) : 100)+'%';
+    }
+    function updateArmBars(cfg){
+      // +1 (scores only climb in 1s) to the arm(s) that did the work this rep
+      var dl=armLmin, dr=armRmin;
+      if(dl<170 || dr<170){
+        if(Math.abs(dl-dr)<12){ scoreL++; scoreR++; }
+        else if(dl<dr) scoreL++; else scoreR++;
+      }
+      paintArmBars();
+      var ab=$('#armBars'); if(ab){ ab.classList.remove('pulse'); void ab.offsetWidth; ab.classList.add('pulse'); }
+      armLmin=180; armRmin=180;
+    }
+
+    function angleAt(L,a,b,c,W,H){
+      var ax=L[a].x*W, ay=L[a].y*H, bx=L[b].x*W, by=L[b].y*H, cx=L[c].x*W, cy=L[c].y*H;
+      var v1x=ax-bx, v1y=ay-by, v2x=cx-bx, v2y=cy-by;
+      var m1=Math.hypot(v1x,v1y), m2=Math.hypot(v2x,v2y);
+      if(m1===0||m2===0) return null;
+      var cos=Math.max(-1,Math.min(1,(v1x*v2x+v1y*v2y)/(m1*m2)));
+      return Math.acos(cos)*180/Math.PI;
+    }
+    // Average the named joint angle over whichever side(s) are clearly visible.
+    function exAngle(L,cfg,W,H){
+      var vals=[];
+      cfg.joints.forEach(function(j){
+        var vis=Math.min(L[j[0]].visibility,L[j[1]].visibility,L[j[2]].visibility);
+        if(vis>0.5){ var a=angleAt(L,j[0],j[1],j[2],W,H); if(a!=null) vals.push(a); }
+      });
+      if(!vals.length) return null;
+      return vals.reduce(function(s,x){return s+x;},0)/vals.length;
+    }
+    // Torso lean from vertical (0° = upright). Used for squat "chest up" cue.
+    function torsoLean(L,W,H){
+      if(Math.min(L[11].visibility,L[12].visibility,L[23].visibility,L[24].visibility)<0.4) return null;
+      var sx=(L[11].x+L[12].x)/2*W, sy=(L[11].y+L[12].y)/2*H;
+      var hx=(L[23].x+L[24].x)/2*W, hy=(L[23].y+L[24].y)/2*H;
+      return Math.abs(Math.atan2(sx-hx, -(sy-hy)))*180/Math.PI;
+    }
+
+    // Per-exercise rep + form model. A rep = a full flex→extend cycle: the
+    // tracked joint angle drops below `down`, then rises back above `up`.
+    var POSE_CFG={
+      pushups:{ joints:[[12,14,16],[11,13,15]], down:100, up:150, label:'arms', gUp:'LOWER', gDn:'PUSH UP',
+        summary:function(mn){ return mn>112 ? {t:'Go lower — full range',ok:false} : {t:'Clean rep',ok:true}; },
+        live:function(L,W,H){ var a=angleAt(L,12,24,26,W,H); if(a!=null&&a<148) return {t:'Keep your hips in line',ok:false}; return null; } },
+      pushwide:{ joints:[[12,14,16],[11,13,15]], down:105, up:150, label:'arms', gUp:'LOWER', gDn:'PUSH UP',
+        summary:function(mn){ return mn>116 ? {t:'Lower — chest toward the floor',ok:false} : {t:'Wide & strong',ok:true}; },
+        live:function(L,W,H){ var a=angleAt(L,12,24,26,W,H); if(a!=null&&a<148) return {t:'Keep your hips in line',ok:false}; return null; } },
+      pushdiamond:{ joints:[[12,14,16],[11,13,15]], down:95, up:150, label:'arms', gUp:'LOWER', gDn:'PUSH UP',
+        summary:function(mn){ return mn>108 ? {t:'Lower — keep elbows tight',ok:false} : {t:'Triceps torched',ok:true}; },
+        live:function(L,W,H){ var a=angleAt(L,12,24,26,W,H); if(a!=null&&a<148) return {t:'Keep your hips in line',ok:false}; return null; } },
+      squats:{  joints:[[24,26,28],[23,25,27]], down:105, up:155, label:'legs', gUp:'SQUAT', gDn:'STAND UP',
+        summary:function(mn){ return mn>116 ? {t:'Squat deeper next rep',ok:false} : {t:'Good depth',ok:true}; },
+        live:function(L,W,H){ var t=torsoLean(L,W,H); if(t!=null&&t>50) return {t:'Chest up — sit back',ok:false}; return null; } },
+      squatsumo:{ joints:[[24,26,28],[23,25,27]], down:110, up:155, label:'legs', gUp:'SUMO DOWN', gDn:'DRIVE UP',
+        summary:function(mn){ return mn>120 ? {t:'Sink a little deeper',ok:false} : {t:'Strong glutes',ok:true}; },
+        live:function(L,W,H){ var t=torsoLean(L,W,H); if(t!=null&&t>54) return {t:'Chest up',ok:false}; return null; } },
+      squatjump:{ joints:[[24,26,28],[23,25,27]], down:105, up:162, label:'legs', gUp:'LOAD', gDn:'JUMP!',
+        summary:function(mn){ return mn>118 ? {t:'Load deeper before the jump',ok:false} : {t:'Explosive!',ok:true}; },
+        live:function(L,W,H){ var t=torsoLean(L,W,H); if(t!=null&&t>54) return {t:'Chest up',ok:false}; return null; } },
+      pullups:{ joints:[[12,14,16],[11,13,15]], down:85, up:150, label:'arms', gUp:'PULL UP', gDn:'LOWER',
+        summary:function(mn,mx){ return mx<145 ? {t:'Lower to a full hang',ok:false} : (mn>92?{t:'Pull a little higher',ok:false}:{t:'Strong pull',ok:true}); },
+        live:function(){ return null; } },
+      chinups:{ joints:[[12,14,16],[11,13,15]], down:80, up:150, label:'arms', gUp:'PULL UP', gDn:'LOWER',
+        summary:function(mn,mx){ return mx<145 ? {t:'Lower to a full hang',ok:false} : (mn>90?{t:'Chin over the bar',ok:false}:{t:'Strong curl',ok:true}); },
+        live:function(){ return null; } },
+      pullwide:{ joints:[[12,14,16],[11,13,15]], down:90, up:150, label:'arms', gUp:'PULL UP', gDn:'LOWER',
+        summary:function(mn,mx){ return mx<145 ? {t:'Full hang at the bottom',ok:false} : (mn>95?{t:'Chest to the bar',ok:false}:{t:'Wide & strong',ok:true}); },
+        live:function(){ return null; } }
+    };
+    function resetRange(){ repMin=180; repMax=0; refLo=1; refHi=0; }
+    // Exercise family → expected body orientation, the body point that must
+    // move during a rep, and the "get in position" prompt. Used for anti-fake.
+    function famOf(id){
+      if(id.indexOf('push')===0)  return { orient:'h', ref:[11,12], pos:'GET INTO PUSH-UP POSITION' };
+      if(id.indexOf('squat')===0) return { orient:'v', ref:[23,24], pos:'STAND TALL TO START' };
+      return { orient:'v', ref:[11,12], pos:'GET ON THE BAR' };   // pull-ups / chin-ups
+    }
+    function setTrack(t){ if(t!==lastTrack){ lastTrack=t; $('#camState').innerHTML=t; } }
+
+    // Clean popup cue — a single reused slot that cross-fades. Throttled so an
+    // identical cue doesn't re-trigger constantly.
+    function cue(txt, kind, force){
+      var now=performance.now();
+      if(!force && txt===lastCueTxt && now-lastCueAt<1300) return;
+      lastCueTxt=txt; lastCueAt=now;
+      var el=$('#cueEl'); if(!el) return;
+      el.innerHTML=txt; el.className='cue '+(kind||'')+' show';
+      clearTimeout(cueTimer); cueTimer=setTimeout(function(){ el.classList.remove('show'); }, 1050);
+      if(kind==='warn') setFace('concerned',1400); else if(kind==='bonus') setFace('excited',1400); else if(kind==='good') setFace('happy',1000);
+    }
+    // Big guide text ("LOWER", "PUSH UP", "HOLD"…). Only writes on change.
+    function setGuide(t, warn){ if(t===lastGuide) return; lastGuide=t; var g=$('#guideTxt'); coachSay(SAY[t]||t, warn); if(!g) return; g.textContent=t; g.className='guide show'+(warn?' warn':''); }
+    // Particle burst + floating "+N" — popped out of the body when given x,y
+    // (in #popLayer/.live px), else centred on the number.
+    function burstAtBody(label, gold){
+      var layer=$('#popLayer'); if(!layer) return;
+      var x=camW*0.5, y=camH*0.42;
+      if(lastL && camW){
+        // Map the body point through the SAME object-fit the video uses, so the
+        // number pops out of the body in both 0.5× (contain) and 1× (cover).
+        var v=$('#vid'), vw=v.videoWidth||3, vh=v.videoHeight||4;
+        var fit=((getComputedStyle($('#cam')).getPropertyValue('--fit'))||'contain').trim();
+        var sc=fit==='cover' ? Math.max(camW/vw,camH/vh) : Math.min(camW/vw,camH/vh);
+        var dw=vw*sc, dh=vh*sc, ox=(camW-dw)/2, oy=(camH-dh)/2;
+        var sx=(lastL[11].x+lastL[12].x)/2, sy=(lastL[11].y+lastL[12].y)/2;
+        x=ox+(1-sx)*dw; y=oy+sy*dh;                      // mirror + object-fit aware
+      }
+      var col=(cur&&cur.c)||'#5BB1FF';
+      var f=document.createElement('div'); f.className='floatN'; f.textContent=label;
+      f.style.left=x+'px'; f.style.top=y+'px'; if(!gold) f.style.color=col;
+      layer.appendChild(f); setTimeout(function(){ if(f.parentNode) f.parentNode.removeChild(f); }, 1000);
+      var n=gold?13:8;
+      for(var i=0;i<n;i++){
+        var p=document.createElement('i'); p.className='pcl';
+        var a=Math.random()*Math.PI*2, d=30+Math.random()*60;
+        p.style.left=x+'px'; p.style.top=y+'px';
+        p.style.setProperty('--dx',(Math.cos(a)*d).toFixed(0)+'px');
+        p.style.setProperty('--dy',(Math.sin(a)*d-20).toFixed(0)+'px');
+        p.style.background=gold?(Math.random()<0.5?'#FFCB3D':'#FFE08A'):col;
+        layer.appendChild(p);
+        (function(el){ setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 780); })(p);
+      }
+    }
+    // Milestone multiplier: +0.1× every MILESTONE reps in the current streak.
+    function milestoneHit(){ var mb=$('#multBadge'); if(mb){ mb.textContent='×'+mult.toFixed(1); mb.classList.add('on'); mb.classList.remove('bump'); void mb.offsetWidth; mb.classList.add('bump'); } sfx('coin'); cue('MULTIPLIER ×'+mult.toFixed(1), 'bonus', true); }
+    // Stopping for >10s breaks the streak → multiplier back to ×1.0.
+    function breakCombo(){ if(combo===0 && mult===1) return; combo=0; mult=1; var g=$('#guideTxt'); if(g) g.className='guide'; lastGuide=''; cue('Streak reset — keep moving!', 'warn', true); }
+    // One rAF loop while live: eases the points number + decays the multiplier.
+    function startUI(){ if(uiRunning) return; uiRunning=true; requestAnimationFrame(uiLoop); }
+    function stopUI(){ uiRunning=false; }
+    function uiLoop(){
+      if(!uiRunning) return;
+      // Only touch the DOM when a value actually changed (avoids per-frame thrash).
+      if(Math.abs(points-ptsShown)>0.5){ ptsShown += (points-ptsShown)*0.18; $('#pts').textContent=Math.round(ptsShown).toLocaleString(); }
+      else if(ptsShown!==points){ ptsShown=points; $('#pts').textContent=points.toLocaleString(); }
+      var mw=Math.round((combo%MILESTONE)/MILESTONE*100);
+      if(mw!==_mw){ _mw=mw; $('#multiFill').style.width=mw+'%'; }
+      var ml='×'+mult.toFixed(1); if(ml!==_ml){ _ml=ml; $('#multiLbl').textContent=ml; }
+      var xpT=Math.max(0,Math.min(100, xpInto/xpNeed*100));
+      if(Math.abs(xpT-xpShown)>0.3){ xpShown += (xpT-xpShown)*0.2; $('#xpFill').style.width=xpShown.toFixed(1)+'%'; }
+      $('#xpWrap').classList.toggle('boost', mult>=1.5);
+      // #11 timed-mode clock — counts down, ends the set at 0
+      if(timedMode && armed && timedStart){
+        var rem=Math.max(0, timedDur-(performance.now()-timedStart)/1000);
+        var ss=Math.floor(rem%60), tp=$('#setTimer');
+        if(tp){ tp.textContent=Math.floor(rem/60)+':'+(ss<10?'0':'')+ss; tp.classList.toggle('low', rem<=10); }
+        if(rem<=0){ timedStart=0; autoEnd(); }
+      }
+      requestAnimationFrame(uiLoop);
+    }
+
+    function initSelect(){
+      $('#plusBadge').textContent = plus ? '5× CORE+' : '1× RATE';
+      $('#plusBadge').classList.toggle('off', !plus);
+      $('#rateTxt').textContent = rate.toFixed(2);
+      $('#plusHint').innerHTML = plus ? '<b style="color:#FFCB3D">CORE+ 5× active.</b>' : 'CORE+ earns <b style="color:#FFCB3D">5×</b> (0.05/rep).';
+      renderCats();
+    }
+    // Stage 1 — the three movements.
+    function renderCats(){
+      pickStage='cat';
+      $('#pickLead').style.display=''; $('#pickLead').textContent='Pick a movement';
+      $('#exsel').innerHTML = CATS.map(function(c){
+        return '<div class="exo" data-cat="'+c.id+'"><div class="ei" style="color:'+c.c+'">'+(FORM[c.id]||c.emoji)+'</div><div class="et"><b>'+c.name+'</b><span>'+c.sub+'</span></div><div class="ego">'+GI.chevron+'</div></div>';
+      }).join('');
+      Array.prototype.forEach.call(document.querySelectorAll('#exsel .exo'), function(x){ x.addEventListener('click', function(){ openCat(x.getAttribute('data-cat')); }); });
+      var pk=$('#pick'); if(pk) pk.scrollTop=0;
+    }
+    // Stage 2 — variants of the chosen movement, with a proper header.
+    function openCat(id){
+      var c=CATS.find(function(k){ return k.id===id; }); if(!c) return;
+      pickStage='var'; sfx('tick'); $('#pickLead').style.display='none';
+      var html='<div class="varhead"><button type="button" class="vback" id="vBack" aria-label="Back to movements">'+GI.cleft+'</button>'+
+        '<div class="vh-t"><b>'+c.name+'</b><span>Choose a variant</span></div></div>';
+      html+=c.modes.map(function(mid){
+        var e=EXOS.find(function(x){ return x.id===mid; }); if(!e) return '';
+        var nm=e.name.replace('Standard ','');
+        return '<div class="exo" data-id="'+e.id+'"><div class="ei" style="color:'+e.c+'">'+formFor(e.id)+'</div><div class="et"><b>'+nm+'</b><span>'+e.sub+'</span></div><div class="ego">'+GI.chevron+'</div></div>';
+      }).join('');
+      $('#exsel').innerHTML=html;
+      $('#vBack').addEventListener('click', function(){ renderCats(); });
+      Array.prototype.forEach.call(document.querySelectorAll('#exsel .exo'), function(x){ x.addEventListener('click', function(){ beginWorkout(x.getAttribute('data-id')); }); });
+      var pk=$('#pick'); if(pk) pk.scrollTop=0;
+    }
+
+    // #10 workout flow — a workout is one or more sets of the same movement
+    function calRate(){ return /^push/.test(cur.id)?0.5 : /^(squat|sumo|jump)/.test(cur.id)?0.45 : 0.9; }
+    // #16 rep-target plan per set (instant rule-based; AI refines it if a key is set)
+    function rulePlan(id){ var b=(readMax()[id]||0)||10; return [Math.max(5,Math.round(b*0.8)), Math.max(5,Math.round(b*0.65)), Math.max(4,Math.round(b*0.5))]; }
+    async function aiPlan(id){
+      if(!(window.coreAI && coreAI.hasKey())) return;
+      var ex=EXOS.find(function(e){ return e.id===id; }), best=readMax()[id]||0;
+      var prompt='Make a 3-set '+ex.name+' workout. My best single set is '+(best||'unknown')+' reps. Reply with ONLY a JSON array of 3 integers (rep targets per set), descending and realistic, e.g. [12,10,8].';
+      try{ var r=await coreAI.chat([{role:'user',content:prompt}], {maxTokens:40, temperature:0.4});
+        if(r && r.ok && r.text){ var arr=JSON.parse((r.text.match(/\[[^\]]*\]/)||['[]'])[0]);
+          if(Array.isArray(arr) && arr.length){ plan=arr.map(function(n){ return Math.max(1,Math.round(n)); });
+            if(planMode && cur){ repTarget=plan[Math.min(setNum-1,plan.length-1)]; var gt=$('#goalTxt'); if(gt) gt.textContent=reps+' / '+repTarget; updateSetBadge(); } } }
+      }catch(e){}
+    }
+    function updateSetBadge(){ var sb=$('#setBadge'); if(sb) sb.textContent = (planMode&&plan) ? ('Set '+setNum+'/'+plan.length) : ('Set '+setNum); }
+    function beginWorkout(id){ setNum=1; sessionLog=[]; plan = planMode ? rulePlan(id) : null; startSession(id); if(planMode) aiPlan(id); }
+    function nextSet(){ setNum++; stopRest(); $('#sumScrim').classList.remove('show'); $('#sumSheet').classList.remove('show'); startSession(cur.id); }
+    // Each finished set lights up the Strength muscle map (gym diagram, store coreGym.v1).
+    // Push→chest(+triceps), Pull→back(+biceps→arms), Squat→legs(+core). Cumulative & it decays.
+    var GYMK='coreGym.v1';
+    function gymStore(){ var g; try{ g=JSON.parse(localStorage.getItem(GYMK)); }catch(e){ g=null; } if(!g||typeof g!=='object') g={}; if(!g.muscles||typeof g.muscles!=='object') g.muscles={}; if(!Array.isArray(g.history)) g.history=[]; return g; }
+    function bumpMuscle(setReps){
+      try{
+        if(!setReps || !cur) return;
+        var g=gymStore(), diffM=cur.diff==='hard'?1.3:cur.diff==='medium'?1.15:1, add=setReps*0.14*diffM, now=Date.now();
+        function b(mid,amt){ var m=g.muscles[mid]||{score:0,lastTs:0,sessions:0}; m.score=(m.score||0)+amt; m.lastTs=now; g.muscles[mid]=m; }
+        var SEC={ chest:'arms', back:'arms', legs:'core' };
+        b(cur.muscle, add); if(SEC[cur.muscle]) b(SEC[cur.muscle], add*0.4);
+        localStorage.setItem(GYMK, JSON.stringify(g));
+      }catch(e){}
+    }
+    function logGymHistory(){
+      try{
+        var totalReps=sessionLog.reduce(function(a,s){ return a+s.reps; },0); if(!totalReps || !cur) return;
+        var g=gymStore(), diffM=cur.diff==='hard'?1.3:cur.diff==='medium'?1.15:1, now=Date.now();
+        var m=g.muscles[cur.muscle]||{score:0,lastTs:0,sessions:0}; m.sessions=(m.sessions||0)+1; m.lastTs=now; g.muscles[cur.muscle]=m;
+        g.history.unshift({ id:'cam-'+now, ts:now, muscle:cur.muscle, exercises:[{ name:cur.name, sets:sessionLog.length, reps:totalReps, weight:0 }], totalSets:sessionLog.length, str:Math.round(totalReps*diffM*0.1), xp:Math.round(totalReps*2*diffM), source:'camera' });
+        g.history=g.history.slice(0,40);
+        localStorage.setItem(GYMK, JSON.stringify(g));
+      }catch(e){}
+    }
+    function endWorkout(){ stopRest(); logGymHistory(); saveSession(); location.href='gym.html'; }
+    function saveSession(){
+      if(!sessionLog.length) return;
+      try{
+        var hist=JSON.parse(localStorage.getItem('core.reps.history.v1')||'[]');
+        var totalReps=sessionLog.reduce(function(a,s){ return a+s.reps; },0);
+        hist.unshift({ ex:cur.id, name:cur.name, ts:Date.now(), sets:sessionLog.map(function(s){ return s.reps; }), total:totalReps, mode:(planMode?'plan':timedMode?'timed':'reps') });
+        localStorage.setItem('core.reps.history.v1', JSON.stringify(hist.slice(0,30)));
+      }catch(e){}
+    }
+    // #13 shareable result card (PNG → native share or download)
+    function hexA(hex,a){ var m=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})/i.exec(hex)||[]; return 'rgba('+parseInt(m[1]||'10',16)+','+parseInt(m[2]||'84',16)+','+parseInt(m[3]||'ff',16)+','+a+')'; }
+    function shareCard(){
+      try{
+        var c=document.createElement('canvas'); c.width=1080; c.height=1350; var g=c.getContext('2d');
+        var col=(cur&&cur.c)||'#AEB6C4';
+        var grd=g.createLinearGradient(0,0,0,1350); grd.addColorStop(0,'#0A1530'); grd.addColorStop(0.5,'#04040E'); grd.addColorStop(1,'#0A0A16'); g.fillStyle=grd; g.fillRect(0,0,1080,1350);
+        var rg=g.createRadialGradient(540,440,40,540,440,660); rg.addColorStop(0,hexA(col,0.30)); rg.addColorStop(1,'rgba(0,0,0,0)'); g.fillStyle=rg; g.fillRect(0,0,1080,980);
+        var wkReps=sessionLog.reduce(function(a,s){ return a+s.reps; },0), wkSets=sessionLog.length||1;
+        g.textAlign='center'; g.fillStyle='#9FC6FF'; g.font='900 36px -apple-system,"Helvetica Neue",Arial,sans-serif'; g.fillText('●  C O R E', 540, 150);
+        g.fillStyle='#fff'; g.font='800 58px -apple-system,"Helvetica Neue",Arial,sans-serif'; g.fillText(cur.name, 540, 360);
+        g.fillStyle=col; g.font='900 300px -apple-system,"Helvetica Neue",Arial,sans-serif'; g.fillText(String(wkReps), 540, 740);
+        g.fillStyle='rgba(255,255,255,0.72)'; g.font='800 44px -apple-system,"Helvetica Neue",Arial,sans-serif'; g.fillText('TOTAL REPS', 540, 820);
+        g.fillStyle='#fff'; g.font='700 42px -apple-system,"Helvetica Neue",Arial,sans-serif'; g.fillText(wkSets+' set'+(wkSets>1?'s':'')+(lastRt?(' · '+lastRt.t):''), 540, 960);
+        g.fillStyle='#5B6072'; g.font='700 32px -apple-system,"Helvetica Neue",Arial,sans-serif'; g.fillText('Tracked live with the CORE camera', 540, 1290);
+        c.toBlob(function(blob){ if(!blob) return;
+          var file=new File([blob],'core-workout.png',{type:'image/png'});
+          if(navigator.canShare && navigator.canShare({files:[file]})){ navigator.share({files:[file], title:'My CORE workout'}).catch(function(){}); }
+          else { var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='core-workout.png'; document.body.appendChild(a); a.click(); a.remove(); }
+        },'image/png');
+        sfx('tick');
+      }catch(e){}
+    }
+    // #12 recent-sessions list on the picker
+    function renderHistory(){
+      var w=$('#histWrap'); if(!w) return;
+      var hist=[]; try{ hist=JSON.parse(localStorage.getItem('core.reps.history.v1')||'[]'); }catch(e){}
+      if(!hist.length){ w.innerHTML=''; return; }
+      function ago(ts){ var s=(Date.now()-ts)/1000; if(s<3600) return Math.round(s/60)+'m ago'; if(s<86400) return Math.round(s/3600)+'h ago'; return Math.round(s/86400)+'d ago'; }
+      w.innerHTML='<div class="hist-h">Recent sessions</div>'+hist.slice(0,5).map(function(h){
+        return '<div class="hist-row"><div class="hr-t"><b>'+h.name+'</b><span>'+h.sets.length+' set'+(h.sets.length>1?'s':'')+' · '+ago(h.ts)+'</span></div><div class="hr-v">'+h.total+' <span>reps</span></div></div>';
+      }).join('');
+    }
+
+    function startSession(id){
+      cur=EXOS.find(function(e){ return e.id===id; });
+      reps=0; points=0; ptsShown=0; mult=1; combo=0; lastRepTime=0; lastRepAt=0; phase='up'; angEMA=null; seenHi=null; seenLo=null; lastGuide=''; lastL=null; _mw=-1; _ml=''; resetRange();
+      xpInto=0; xpNeed=150; xpLevel=1; xpShown=0;
+      armLmin=180; armRmin=180; lastSay=''; scoreL=0; scoreR=0; sessMin=180;
+      armed=false; cdActive=false; prevAng=null; lastMoveAt=0; endCd=false; lastRepTime=0;
+      repBest=(readMax()[cur.id]||0); repTarget=repBest>0?repBest:10;   // #6 goal = beat your best (or 10 to start)
+      if(planMode && plan) repTarget=plan[Math.min(setNum-1, plan.length-1)];   // #16 plan target for this set
+      var _gf=$('#goalFill'), _gt=$('#goalTxt'), _mb=$('#multBadge'); if(_gf)_gf.style.width='0%'; if(_gt)_gt.textContent='0 / '+repTarget; if(_mb)_mb.classList.remove('on');
+      timedStart=0;
+      updateSetBadge();
+      var _tp=$('#setTimer'); if(_tp){ _tp.style.display=timedMode?'inline-flex':'none'; _tp.classList.remove('low'); _tp.textContent='1:00'; }
+      try{ hideCountdown(); hideEndCd(); setRing(0); stopRest(); }catch(e){}
+      sfx('confirm'); haptic();
+      document.documentElement.style.setProperty('--str', cur.c);
+      $('#liveEx').textContent=cur.name; $('#silho').innerHTML=formFor(cur.id)+'<span class="fd-cap">'+formTip(cur.id)+'</span>';
+      // coach face + per-arm bars (arm movements only)
+      var hs=$('#holoSay'); if(hs){ hs.className='holo-say'; hs.textContent=formTip(cur.id)||'Get into position…'; }
+      setFace('neutral');
+      var ab=$('#armBars'); if(ab) ab.style.display=isArmFam()?'flex':'none';
+      paintArmBars();
+      $('#cnum').textContent='0'; $('#pts').textContent='0'; $('#cgain').textContent='+0.00 Strength';
+      $('#multiFill').style.width='0%'; $('#multiLbl').textContent='×1.0';
+      $('#xpLvl').textContent='1'; $('#xpFill').style.width='0%'; $('#xpWrap').classList.remove('boost','levelup');
+      $('#cueEl').className='cue'; $('#guideTxt').className='guide'; $('#popLayer').innerHTML='';
+      // Pause the ambient aurora while live — it's hidden behind the camera and
+      // its blur animation just costs GPU during tracking.
+      var amb=$('#ambAurora'); if(amb) amb.style.display='none';
+      $('#pick').style.display='none'; $('#live').classList.add('on');
+      startUI();
+      toggleCam(); // auto-start the camera — we're inside the tap gesture
+    }
+
+    // Count n reps (n=2 on a held bottom). Multiplier steps +0.1× per milestone.
+    function countRep(){
+      var now=performance.now(), interval = lastRepTime ? now-lastRepTime : 9999;   // #7 tempo
+      reps += 1; combo += 1; lastRepTime=now;   // one exercise = +1, always
+      var nm=Math.min(MAXMULT, +(1+Math.floor(combo/MILESTONE)*0.1).toFixed(1));
+      if(nm>mult){ mult=nm; milestoneHit(); }
+      // Score (XP) only climbs while a multiplier is active, and only by 1 at a time.
+      var gain = (mult>1) ? 1 : 0;
+      points += gain; xpInto += gain;
+      while(xpInto>=xpNeed){ xpInto-=xpNeed; xpLevel++; xpNeed=150+xpLevel*40; levelUp(); }
+      sfx('coin'); haptic();
+      var num=$('#cnum'); num.textContent=reps; num.classList.remove('bump'); void num.offsetWidth; num.classList.add('bump');
+      // #6 goal progress
+      var gf=$('#goalFill'), gt=$('#goalTxt');
+      if(gf) gf.style.width=Math.min(100, reps/repTarget*100).toFixed(0)+'%';
+      if(gt) gt.textContent=reps+' / '+repTarget;
+      // multiplier badge
+      var mb=$('#multBadge'); if(mb){ if(mult>1){ mb.textContent='×'+mult.toFixed(1); mb.classList.add('on'); } else mb.classList.remove('on'); }
+      // #7 tempo nudge for rushed reps
+      if(interval<620 && reps>2) cue('Control it — slow down', 'warn');
+      // #8 personal-best / goal celebration
+      if(repBest>0 && reps===repBest+1) celebratePR();
+      else if(repBest===0 && reps===repTarget) { sfx('reward'); cue('🎯 GOAL HIT!', 'bonus', true); }
+      if(gain) burstAtBody('+'+gain, true);
+    }
+    function celebratePR(){ sfx('reward'); cue('🔥 NEW BEST!', 'bonus', true); burstAtBody('★', true); var l=$('#live'); if(l){ l.classList.remove('prflash'); void l.offsetWidth; l.classList.add('prflash'); } }
+    function levelUp(){
+      $('#xpLvl').textContent=xpLevel;
+      var w=$('#xpWrap'); w.classList.remove('levelup'); void w.offsetWidth; w.classList.add('levelup');
+      sfx('reward'); cue('LEVEL '+xpLevel+'!', 'bonus', true);
+    }
+
+    async function toggleCam(){
+      if(stream){ stopCam(); return; }
+      try{
+        // Request the camera's NATURAL landscape orientation (width>height).
+        // Asking for a portrait frame makes some phones hand back a rotated
+        // (sideways) stream; landscape + object-fit:cover fills upright.
+        stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:'user', width:{ ideal:640 }, height:{ ideal:480 }, frameRate:{ ideal:24 } }, audio:false });
+        $('#vid').srcObject=stream; $('#silho').style.display='none';
+        lastTrack=''; setTrack(GI.dot+' Live'); $('#camToggle').innerHTML=GI.camera+' Camera on';
+        startPose();
+      }catch(e){
+        setTrack('Camera blocked'); cue('Allow camera access to auto-track', 'warn', true); sfx('warn');
+      }
+    }
+    function stopCam(){ stopPose(); if(stream){ stream.getTracks().forEach(function(t){ t.stop(); }); stream=null; } $('#vid').srcObject=null; $('#silho').style.display='flex'; lastTrack=''; setTrack('Camera off'); $('#camToggle').innerHTML=GI.camera+' Turn on camera'; }
+
+    // End-of-set coaching recap — instant rule-based line, upgraded by AI if a key is set.
+    function buildRecap(){
+      if(isArmFam() && (scoreL+scoreR)>0){
+        var diff=Math.abs(scoreL-scoreR), tot=Math.max(scoreL,scoreR,1);
+        if(diff/tot>=0.25){ return 'Your '+(scoreL<scoreR?'left':'right')+' arm did less of the work — pause an extra beat at the bottom on that side next set.'; }
+      }
+      var cfg=POSE_CFG[cur.id];
+      if(cfg && sessMin<180 && sessMin>cfg.down+14) return 'Push for a little more depth next set — aim for a full range every rep.';
+      return 'Clean set — good depth and balance. Try +2 reps next time.';
+    }
+    var RECAP_IC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.6" fill="currentColor"/></svg>';
+    async function aiRecap(){
+      var host=$('#sumCoach'); if(!host) return;
+      host.innerHTML='<span class="sc-ic">'+RECAP_IC+'</span><span>'+buildRecap()+'</span>';
+      if(!(window.coreAI && coreAI.hasKey())) return;
+      host.querySelector('span:last-child').textContent='Coach is reviewing your set…';
+      var cfg=POSE_CFG[cur.id];
+      var bal = isArmFam()? ('Arm work split L'+scoreL+' / R'+scoreR+'.') : '';
+      var depth = (cfg&&sessMin<180)? ('Deepest joint angle reached '+Math.round(sessMin)+'°, target around '+cfg.down+'°.') : '';
+      var prompt='I just finished a set of '+reps+' '+cur.name+'. '+bal+' '+depth+' In ONE short sentence (under 24 words, no preamble), give me a specific, encouraging tip for my next set.';
+      try{ var r=await coreAI.chat([{role:'user',content:prompt}], {maxTokens:80, temperature:0.6});
+        if(r && r.ok && r.text){ host.innerHTML='<span class="sc-ic">'+RECAP_IC+'</span><span>'+r.text.replace(/</g,'&lt;').trim()+'</span>'; }
+        else host.innerHTML='<span class="sc-ic">'+RECAP_IC+'</span><span>'+buildRecap()+'</span>';
+      }catch(e){ host.innerHTML='<span class="sc-ic">'+RECAP_IC+'</span><span>'+buildRecap()+'</span>'; }
+    }
+    function finish(){
+      stopCam(); stopUI();
+      lastMode=cur.id;
+      var diffF = cur.diff==='hard'?1.3:cur.diff==='medium'?1.15:1;
+      S.addReps(cur.muscle, reps, { diff:cur.diff });           // muscle map + total reps
+      // Commit a visible, synced reward into the real profile (Strength stat +
+      // XP) so camera reps show up everywhere — not only after 100 reps.
+      var strGain=Math.max(1, Math.round(reps*diffF*0.1));      // ~1 Strength / 10 reps
+      var xpGain =Math.max(10, Math.round(reps*2*diffF));
+      try{ if(window.coreState){ window.coreState.addStat('strength', strGain, 'camera:reps'); window.coreState.addXp(xpGain, 'camera:reps'); } }
+      catch(e){ try{ S.commitRepStrength(reps*S.perRep()); }catch(_){} }
+      // Personal max for this variant + rank/rating from the reps done.
+      var mx=readMax(), prev=mx[cur.id]||0, isNew=reps>prev, best=Math.max(prev,reps);
+      if(isNew){ mx[cur.id]=reps; writeMax(mx); }
+      var rt=ratingFor(reps, cur.diff); lastRt=rt;
+      sfx('reward');
+      sessionLog.push({ reps:reps, points:points });   // #10 record this set
+      bumpMuscle(reps);   // light up the muscle map immediately for this set
+      var wkSets=sessionLog.length, wkReps=sessionLog.reduce(function(a,s){ return a+s.reps; },0);
+      var setCal=Math.round(reps*calRate()), wkCal=Math.round(wkReps*calRate());   // #14 calories
+      var planDone = planMode && plan && setNum>=plan.length;
+      $('#sumBody').innerHTML=
+        '<div class="sum-hero">'+
+          '<div class="rankbadge" style="color:'+rt.c+';border-color:'+rt.c+'">'+rt.l+'</div>'+
+          '<div class="sh-rt" style="color:'+rt.c+'">'+(planDone?'Workout done':'Set '+setNum+' done')+'</div>'+
+          '<div class="sh-ex">'+cur.name+' · '+rt.t+(isNew?' · <span class="sh-new">NEW BEST</span>':'')+'</div>'+
+        '</div>'+
+        '<div class="sum-score"><div class="ss-num" id="sumScore">0</div><div class="ss-lbl">POINTS</div></div>'+
+        '<div class="big3">'+
+          '<div class="b"><div class="bn">'+reps+'</div><div class="bl">Reps</div></div>'+
+          '<div class="b"><div class="bn">'+best+(isNew?'<span class="newmax">★</span>':'')+'</div><div class="bl">Best</div></div>'+
+          '<div class="b str"><div class="bn">~'+setCal+'</div><div class="bl">Cal</div></div>'+
+        '</div>'+
+        (wkSets>1 ? '<div class="sh-xp"><b style="color:#fff">Workout: '+wkReps+' reps · ~'+wkCal+' cal</b> · '+wkSets+' sets · +'+xpGain+' XP</div>' : '<div class="sh-xp">+'+strGain+' Strength · +'+xpGain+' XP</div>')+
+        '<div class="rest-timer" id="restTimer"></div>'+
+        '<div class="sum-coach" id="sumCoach"><span class="sc-ic">'+RECAP_IC+'</span><span>Analyzing your set…</span></div>'+
+        (planDone ? '' : '<button class="bigbtn" id="sumNext">Next set'+(planMode&&plan?(' · aim '+plan[Math.min(setNum,plan.length-1)]):'')+'</button>')+
+        '<div class="sumbtns2"><button class="againbtn" id="sumShare">Share</button><button class="againbtn" id="sumFinish">Finish workout</button></div>';
+      $('#sumScrim').classList.add('show'); $('#sumSheet').classList.add('show');
+      armed=false; startRest();
+      (function(){ var t=$('#sumScore'); if(!t) return; var tg=points, t0=performance.now();
+        function step(now){ var p=Math.min(1,(now-t0)/700); t.textContent=Math.round(tg*(1-Math.pow(1-p,3))).toLocaleString(); if(p<1) requestAnimationFrame(step); }
+        requestAnimationFrame(step); })();
+      try{ aiRecap(); }catch(e){}
+      var _sn=$('#sumNext'); if(_sn) _sn.addEventListener('click', function(){ nextSet(); });
+      $('#sumShare').addEventListener('click', shareCard);
+      $('#sumFinish').addEventListener('click', function(){ endWorkout(); });
+    }
+
+    // ── Pose loop ────────────────────────────────────────────────────────
+    var poseStarting=false;
+    async function startPose(){
+      if(poseRunning||poseStarting) return;
+      if(!window.PoseKit){ cue('Auto-tracking not supported here', 'warn', true); return; }
+      poseStarting=true;
+      setTrack(GI.dot+' Loading…'); setGuide('GET SET');
+      try{ pk=await window.PoseKit.load(); }
+      catch(e){ pk=null; poseStarting=false; setTrack('● Live'); cue('Auto-tracking unavailable here', 'warn', true); return; }
+      poseStarting=false;
+      if(!stream){ return; } // user turned camera off while the model loaded
+      var cv=$('#pose'); ctx=cv.getContext('2d');
+      $('#cam').classList.add('tracking');
+      poseRunning=true; phase='up'; angEMA=null; lastDetect=0; seenHi=null; seenLo=null; lastGuide=''; resetRange();
+      requestAnimationFrame(poseLoop);
+    }
+    function stopPose(){
+      poseRunning=false; var cv=$('#pose'); if(cv&&ctx){ ctx.clearRect(0,0,cv.width,cv.height); }
+      if(holoCtx){ var _h=$('#holoCv'); if(_h) holoCtx.clearRect(0,0,_h.width,_h.height); }
+      $('#cam').classList.remove('tracking'); lastTrack='';
+    }
+    function poseLoop(){
+      if(!poseRunning||!stream||!pk){ return; }
+      var v=$('#vid'), cv=$('#pose');
+      if(v.readyState>=2 && v.videoWidth){
+        if(cv.width!==v.videoWidth){ cv.width=v.videoWidth; cv.height=v.videoHeight; }
+        var now=performance.now();
+        if(now-lastDetect>=DETECT_MS){           // throttle inference → smooth, low-lag
+          lastDetect=now;
+          try{ handlePose(pk.landmarker.detectForVideo(v, now), cv); }catch(e){ /* skip frame */ }
+        }
+      }
+      requestAnimationFrame(poseLoop);
+    }
+    function handlePose(res, cv){
+      var W=cv.width, H=cv.height;
+      ctx.clearRect(0,0,W,H);
+      var L=res&&res.landmarks&&res.landmarks[0];
+      var cam=$('#cam'); camW=cam.clientWidth; camH=cam.clientHeight;
+      if(!L){ setTrack('Step into frame'); setGuide('STEP INTO FRAME'); angEMA=null; lastL=null; return; }
+      lastL=L;
+      var cfg=POSE_CFG[cur&&cur.id]; if(!cfg){ setTrack('● Live'); return; }
+      var fam=famOf(cur.id);
+      // ── #1 Framing + get-ready countdown (before counting starts) ──
+      var fr=framingCheck(L);
+      if(!fr.ok){ setTrack(fr.short); setGuide(fr.msg, true); angEMA=null; phase='up'; resetRange(); setRing(0);
+        if(!armed){ cdActive=false; hideCountdown(); }   // only re-run countdown if we haven't started yet
+        return; }
+      if(!armed){
+        if(!cdActive){ cdActive=true; cdStartAt=performance.now(); }
+        var elc=performance.now()-cdStartAt, n=3-Math.floor(elc/800);
+        if(n>0){ showCountdown(String(n)); setTrack('● Get ready'); setGuide(''); return; }
+        showCountdown('GO', true); armed=true; cdActive=false; lastRepAt=performance.now(); lastMoveAt=performance.now(); prevAng=null;
+        if(timedMode && !timedStart) timedStart=performance.now();   // #11 start the 60s clock
+        setTimeout(hideCountdown, 500); setGuide(cfg.gUp);
+      }
+      // ── Armed: track each arm's deepest bend this rep (arm moves only) ──
+      if(isArmFam()){
+        var aL=angleAt(L,11,13,15,W,H), aR=angleAt(L,12,14,16,W,H);
+        if(aL!=null) armLmin=Math.min(armLmin,aL);
+        if(aR!=null) armRmin=Math.min(armRmin,aR);
+      }
+      var raw=exAngle(L,cfg,W,H);
+      if(raw==null){ setTrack('Turn so your '+cfg.label+' show'); setGuide('FACE THE CAMERA'); angEMA=null; return; }
+      setTrack('● Tracking');
+      angEMA = angEMA==null ? raw : angEMA*0.45 + raw*0.55;   // lighter smoothing → more responsive crossings
+      var ang=angEMA;
+      repMin=Math.min(repMin,raw); repMax=Math.max(repMax,raw); sessMin=Math.min(sessMin,raw);   // true ROM from raw angle
+      var refY=(L[fam.ref[0]].y+L[fam.ref[1]].y)/2; refLo=Math.min(refLo,refY); refHi=Math.max(refHi,refY);
+      // Adaptive calibration: learn this person's real extended/contracted
+      // angles and set thresholds from them, so it counts properly for anyone.
+      if(seenHi==null){ seenHi=ang; seenLo=ang; }
+      seenHi=Math.max(ang, seenHi-0.06); seenLo=Math.min(ang, seenLo+0.06);
+      var rng=seenHi-seenLo, downTh=cfg.down, upTh=cfg.up;
+      if(rng>=30){ downTh=seenHi-rng*0.5; upTh=seenHi-rng*0.22; }   // adapt to the person's real range sooner
+      // #2 depth ring — 0 at the top of the rep, full at the bottom
+      setRing((upTh-ang)/(upTh-downTh));
+      // #3 set-end — pause at the top → a visible "keep moving or it ends" countdown
+      if(prevAng!=null && Math.abs(ang-prevAng)>2.2) lastMoveAt=performance.now();
+      prevAng=ang;
+      var idle = !timedMode && reps>=1 && phase==='up' && (performance.now()-lastRepAt>3000) && (performance.now()-lastMoveAt>2000);
+      if(idle){
+        if(!endCd){ endCd=true; endCdStart=performance.now(); }
+        var er=5-Math.floor((performance.now()-endCdStart)/1000);
+        if(er<=0){ autoEnd(); return; }
+        showEndCd(er); setGuide('KEEP GOING'); return;   // hold counting while resting
+      } else if(endCd){ endCd=false; hideEndCd(); }
+      var lc=cfg.live(L,W,H); if(lc) cue(lc.t, 'warn');
+      // Rep state machine (hold-for-bonus removed) with big guide text.
+      if(phase==='up' && ang<downTh){
+        phase='down'; ringFull();
+        setGuide(cfg.gDn);                              // bottom reached → drive back up
+      } else if(phase==='down'){
+        if(ang>upTh){
+          var now=performance.now();
+          if(now-lastRepAt>400){
+            lastRepAt=now;
+            // Anti-fake gate — a real rep needs full range of motion AND real body translation.
+            if((repMax-repMin)>=MINROM && (refHi-refLo)>=MINSHIFT){ finishRep(cfg); }
+            else { cue('Use your whole body — full rep', 'warn', true); resetRange(); }
+          }
+          phase='up'; setGuide(cfg.gUp);                // locked out → lower for the next rep
+        }
+      }
+    }
+    function finishRep(cfg){
+      countRep(1);   // every rep counts as exactly +1 (1,2,3,4,5…)
+      if(endCd){ endCd=false; hideEndCd(); }   // any rep cancels the end-countdown
+      setFace('happy', 1000);   // instant coach reaction
+      if(isArmFam()) updateArmBars(cfg);   // climb the two arm bars each rep
+      if(reps>0 && reps%5===0){ encourage(); }     // periodic "keep going"
+      else { var s=cfg.summary(repMin,repMax); if(s && !s.ok) cue(s.t, 'warn'); }
+      resetRange();
+    }
+
+    function init(){
+      initSelect();
+      try{ renderHistory(); }catch(e){}
+      // #11 mode toggle
+      Array.prototype.forEach.call(document.querySelectorAll('#modeTog .mt-opt'), function(b){ b.addEventListener('click', function(){
+        var md=b.getAttribute('data-mode'); timedMode=(md==='timed'); planMode=(md==='plan');
+        Array.prototype.forEach.call(document.querySelectorAll('#modeTog .mt-opt'), function(x){ x.classList.toggle('on', x===b); }); sfx('tick');
+      }); });
+      // deep-link: ?ex=<id> opens straight into that movement (from Strength quick wins)
+      try{ var pm=(location.search.match(/[?&]ex=([a-z]+)/i)||[])[1]; if(pm && EXOS.some(function(e){return e.id===pm;})) beginWorkout(pm); }catch(e){}
+      // "?" help sheet
+      try{
+        if(window.coreHelp){
+          window.coreHelp.attach('helpBtn',{
+            title:'Live Rep Counter',
+            bullets:[
+              'Pick an exercise — CORE turns on the camera and tracks your joints automatically. No buttons to tap.',
+              'A thick skeleton overlay shows what the tracker sees; every rep counts itself with a particle pop.',
+              'Rep faster to fill the speed multiplier (up to ×3) and bank more points. Hold the bottom of a rep for a +2 bonus.',
+              'Form cues pop up live (e.g. "squat deeper", "chest up") so you can fix your technique on the fly.',
+              'All tracking runs on your device — camera frames never leave your phone. Reps log to your Strength when you Finish.'
+            ]
+          });
+        }
+      }catch(e){}
+      $('#camToggle').addEventListener('click', toggleCam);
+      Array.prototype.forEach.call(document.querySelectorAll('#zoomMeter button'), function(b){
+        b.addEventListener('click', function(){
+          $('#cam').style.setProperty('--fit', b.getAttribute('data-fit'));
+          Array.prototype.forEach.call(document.querySelectorAll('#zoomMeter button'), function(x){ x.classList.toggle('on', x===b); });
+          sfx('tick');
+        });
+      });
+      $('#finBtn').addEventListener('click', function(){ if(reps===0){ stopCam(); stopUI(); location.href='gym.html'; return; } finish(); });
+      $('#backBtn').addEventListener('click', function(){
+        sfx('tick');
+        if($('#live').classList.contains('on')){
+          if(reps>0 && !confirm('Leave without saving these reps?')) return;
+          stopCam(); stopUI(); location.href='gym.html'; return;
+        }
+        if(pickStage==='var'){ renderCats(); return; }   // variants → movements
+        location.href='gym.html';
+      });
+      window.addEventListener('pagehide', function(){ stopCam(); stopUI(); });
+    }
+    if(document.readyState!=='loading') init(); else document.addEventListener('DOMContentLoaded', init);
+  })();
+  </script>
+  <script src="_lib/core-pagefx.js"></script>
+</body>
+</html>

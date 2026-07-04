@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+  <meta charset="utf-8" />
+  <title>CORE — Ranks</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="description" content="CORE ranks — climb the 7 tiers from Novice to Vanguard. See your current rank, XP progress and the rewards each rank unlocks." />
+  <link rel="stylesheet" href="_lib/core-responsive.css?v=20260619d" />
+  <link rel="stylesheet" href="_lib/core-background.css?v=20260619d" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    html,body{height:100%;}
+    :root{--muted:rgba(255,255,255,0.72);--dim:#5A6076;--blue:#AEB6C4;}
+    body{min-height:100%;background:#000;color:#F4F7FF;display:flex;align-items:center;justify-content:center;
+      padding:24px;overflow:hidden;
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif;
+      -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
+    .phone{position:relative;width:390px;height:844px;border-radius:56px;overflow:hidden;background:#040408;
+      box-shadow:0 40px 100px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.06),0 0 0 10px #0a0a12,0 0 0 11px #2b2b38;}
+    .notch{position:absolute;top:14px;left:50%;transform:translateX(-50%);width:124px;height:32px;background:#000;border-radius:20px;z-index:60;}
+    .home-indicator{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;background:rgba(245,247,251,0.55);border-radius:999px;z-index:60;}
+    .frame{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;padding:54px 0 0;}
+    .hdr{display:flex;align-items:center;gap:12px;padding:2px 18px 10px;}
+    .back{width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,0.10);background:rgba(255,255,255,0.06);
+      color:#cfd6e6;display:flex;align-items:center;justify-content:center;text-decoration:none;flex:none;cursor:pointer;font-size:17px;font-weight:800;}
+    .back svg{width:19px;height:19px;}
+    .hdr .ttl{font-size:19px;font-weight:900;}
+    .hdr .sp{flex:1;}
+    .scroll{flex:1;overflow-y:auto;padding:6px 18px 96px;scrollbar-width:none;}
+    .scroll::-webkit-scrollbar{display:none;}
+
+    /* hero — current rank */
+    .hero{text-align:center;padding:14px 0 8px;position:relative;}
+    .hero > *{position:relative;z-index:1;}
+    /* gem mounted in an octagonal metal socket */
+    .hero-socket{width:170px;height:170px;margin:0 auto;cursor:pointer;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;}
+    .hero-socket-in{width:100%;height:100%;display:flex;align-items:center;justify-content:center;}
+    .hero-gem{width:148px;height:148px;animation:float 4s ease-in-out infinite;}
+    .hero-gem img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 4px 9px rgba(0,0,0,.4));}
+    @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+    .hero-tag{font-size:11px;font-weight:900;font-style:italic;letter-spacing:.22em;text-transform:uppercase;color:color-mix(in srgb,var(--rc) 72%,#fff);margin-top:16px;}
+    .hero-name{font-size:38px;font-weight:900;font-style:italic;text-transform:uppercase;letter-spacing:-1.2px;line-height:1;margin-top:3px;}
+    .hero-prog{margin:18px 6px 4px;}
+    .hero-bar{height:8px;border-radius:999px;background:rgba(255,255,255,0.08);overflow:hidden;}
+    .hero-fill{display:block;height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,var(--rc),#fff);
+      transition:width 1s cubic-bezier(.22,1,.36,1);}
+    .hero-prog-meta{display:flex;justify-content:space-between;margin-top:8px;font-size:11.5px;font-weight:700;color:var(--muted);}
+    .hero-prog-meta b{color:#fff;}
+
+    .sec{font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin:26px 4px 11px;}
+
+    /* how to rank up */
+    .guide{display:flex;flex-direction:column;gap:11px;}
+    .gstep{display:flex;gap:12px;align-items:flex-start;}
+    .gn{width:26px;height:26px;flex:none;border-radius:50%;background:rgba(10,132,255,0.16);border:1px solid rgba(10,132,255,0.4);
+      color:#6BA9FF;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;}
+    .gt{font-size:14px;font-weight:800;}
+    .gd{font-size:12.5px;color:var(--muted);line-height:1.45;margin-top:2px;}
+
+    /* ladder — grouped into tiers (Novice → Vanguard) */
+    .ladder{display:flex;flex-direction:column;gap:24px;}
+    .tier{display:flex;flex-direction:column;gap:9px;}
+    .tier-head{display:flex;align-items:center;gap:11px;padding:0 2px;}
+    .tier-name{font-size:13px;font-weight:900;font-style:italic;text-transform:uppercase;letter-spacing:.06em;
+      color:color-mix(in srgb,var(--tc) 78%,#fff);white-space:nowrap;}
+    .tier-line{flex:1;height:1px;background:linear-gradient(90deg,color-mix(in srgb,var(--tc) 45%,transparent),transparent);}
+    .lr{display:flex;align-items:center;gap:14px;padding:11px 13px 11px 14px;cursor:pointer;text-align:left;overflow:hidden;position:relative;width:100%;
+      border-radius:18px;border:none;
+      background:linear-gradient(105deg, color-mix(in srgb,var(--rc) 22%,#0c0d17) 0%, color-mix(in srgb,var(--rc) 8%,#0a0a12) 56%, #0a0a12 100%);
+      box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--rc) 36%,transparent);
+      transition:transform .14s ease;-webkit-tap-highlight-color:transparent;
+      animation:rowIn .5s cubic-bezier(.22,1,.36,1) backwards;}
+    @keyframes rowIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+    .lr:active{transform:scale(.985);}
+    .lr.current{background:linear-gradient(105deg, color-mix(in srgb,var(--rc) 38%,#0c0d17) 0%, color-mix(in srgb,var(--rc) 13%,#0a0a12) 58%, #0a0a12 100%);
+      box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--rc) 78%,transparent);}
+    .lr.locked .lr-name{opacity:.74;}
+    .lr.locked .lr-xp{opacity:.6;}
+    /* gem socket — clean, no glow */
+    .lr-gem{width:54px;height:54px;flex:none;display:flex;align-items:center;justify-content:center;}
+    .lr-gem img{width:96%;height:96%;object-fit:contain;filter:drop-shadow(0 2px 5px rgba(0,0,0,.45));}
+    .lr.locked .lr-gem img{filter:brightness(.92) drop-shadow(0 2px 5px rgba(0,0,0,.45));}
+    .lr-body{flex:1;min-width:0;display:flex;flex-direction:column;}
+    .lr-name{font-size:16.5px;font-weight:900;font-style:italic;text-transform:uppercase;letter-spacing:-0.4px;color:#fff;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .lr-xp{font-size:10.5px;color:var(--muted);font-weight:800;letter-spacing:.05em;margin-top:3px;text-transform:uppercase;}
+    .lr-right{display:flex;align-items:center;gap:9px;flex:none;}
+    .lr-pill{font-size:9px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;padding:5px 10px;border-radius:999px;white-space:nowrap;}
+    .lr-pill.cur{color:#06120f;background:var(--rc);}
+    .lr-pill.unl{color:#34C759;background:rgba(52,199,89,0.16);border:1px solid rgba(52,199,89,0.4);}
+    .lr-pill.lock{color:var(--muted);background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);}
+    .lr-chev{width:16px;height:16px;flex:none;color:color-mix(in srgb,var(--rc) 70%,#8089a0);opacity:.9;}
+
+    nav.nav{position:absolute;left:0;right:0;bottom:0;z-index:50;padding:10px 12px calc(26px + env(safe-area-inset-bottom));display:flex;justify-content:space-evenly;align-items:flex-end;
+      background:rgba(3,3,14,0.42);backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6);border-top:1px solid rgba(255,255,255,0.07);}
+    nav.nav a{flex:1 1 0;background:none;border:none;text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 8px;color:var(--muted);}
+    nav.nav svg{width:23px;height:23px;}nav.nav .nl{font-size:10px;font-weight:800;}
+    nav.nav .item.active{color:#fff;}nav.nav .item.active svg{color:var(--blue);}
+
+    /* detail sheet — rich rank popup */
+    .dt{position:absolute;inset:0;z-index:80;pointer-events:none;}
+    .dt .scrim{position:absolute;inset:0;background:rgba(0,0,0,0.58);opacity:0;transition:.3s;}
+    .dt .sheet{position:absolute;left:0;right:0;bottom:0;padding:10px 22px calc(26px + env(safe-area-inset-bottom));
+      background:linear-gradient(180deg,#16171f 0%, #0e0f16 100%);
+      -webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);border-radius:30px 30px 0 0;
+      box-shadow:0 -1px 0 color-mix(in srgb,var(--rc) 32%,transparent), 0 -24px 60px rgba(0,0,0,.55);
+      transform:translateY(110%);transition:transform .42s cubic-bezier(.22,1,.36,1);text-align:center;}
+    .dt.on{pointer-events:auto;}.dt.on .scrim{opacity:1;}.dt.on .sheet{transform:translateY(0);}
+    .dt .grab{width:40px;height:5px;border-radius:999px;background:rgba(255,255,255,0.22);margin:2px auto 16px;cursor:pointer;
+      box-sizing:content-box;padding:8px 60px;background-clip:content-box;-webkit-tap-highlight-color:transparent;}
+    .dt .grab:active{background:rgba(255,255,255,0.4);background-clip:content-box;}
+    .dt-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 13px;border-radius:999px;font-size:10px;font-weight:900;
+      letter-spacing:.14em;text-transform:uppercase;margin-bottom:14px;}
+    .dt-badge.cur{color:#06120f;background:var(--rc);}
+    .dt-badge.unl{color:#34C759;background:rgba(52,199,89,.16);border:1px solid rgba(52,199,89,.4);}
+    .dt-badge.lock{color:var(--muted);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);}
+    .dt-socket{width:124px;height:124px;margin:0 auto;display:flex;align-items:center;justify-content:center;}
+    .dt-socket-in{width:100%;height:100%;display:flex;align-items:center;justify-content:center;}
+    .dt-gem{width:114px;height:114px;animation:float 4s ease-in-out infinite;}
+    .dt-gem img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 4px 9px rgba(0,0,0,.4));}
+    .dt-name{font-size:33px;font-weight:900;font-style:italic;text-transform:uppercase;letter-spacing:-1px;margin-top:14px;line-height:1;}
+    .dt-sub{font-size:12.5px;color:var(--muted);font-weight:700;margin-top:8px;}
+    .dt-stats{display:flex;margin:18px 0 4px;border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08);}
+    .dt-stat{flex:1;padding:13px 4px;}
+    .dt-stat+.dt-stat{border-left:1px solid rgba(255,255,255,.08);}
+    .dt-stat .v{font-size:18px;font-weight:900;font-style:italic;color:#fff;}
+    .dt-stat .k{font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim);margin-top:4px;font-weight:800;}
+    .dt-unl{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin:18px 2px 12px;text-align:left;}
+    .dt-perks{display:flex;flex-direction:column;gap:9px;}
+    .dt-perk{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.07);
+      border-radius:14px;padding:12px 14px;text-align:left;}
+    .dt-perk .ic{width:26px;height:26px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;
+      background:color-mix(in srgb,var(--rc) 26%,transparent);}
+    .dt-perk .ic svg{width:15px;height:15px;stroke:#fff;fill:none;stroke-width:3.4;stroke-linecap:round;stroke-linejoin:round;}
+    .dt-perk span{font-size:14.5px;font-weight:600;color:#fff;}
+    /* popup content rises in, one element after another */
+    .dt.on #dtBody > *{animation:sheetItem .5s cubic-bezier(.22,1,.36,1) backwards;}
+    .dt.on #dtBody > *:nth-child(1){animation-delay:.10s;}
+    .dt.on #dtBody > *:nth-child(2){animation-delay:.15s;}
+    .dt.on #dtBody > *:nth-child(3){animation-delay:.20s;}
+    .dt.on #dtBody > *:nth-child(4){animation-delay:.25s;}
+    .dt.on #dtBody > *:nth-child(5){animation-delay:.30s;}
+    .dt.on #dtBody > *:nth-child(6){animation-delay:.35s;}
+    @keyframes sheetItem{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+
+    /* respect users who reduce motion */
+    @media (prefers-reduced-motion: reduce){ *{animation-duration:.01ms !important;animation-iteration-count:1 !important;} }
+    /* keyboard focus visibility (core-ui removes default outlines app-wide) */
+    .lr:focus-visible,.back:focus-visible,nav.nav a:focus-visible{outline:2px solid var(--blue);outline-offset:2px;}
+  </style>
+  <link rel="stylesheet" href="_lib/core-ui.css?v=20260619d">
+</head>
+<body>
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="frame">
+      <div class="hdr">
+        <a class="back" href="20-dashboard.html" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"/></svg></a>
+        <div class="ttl">Ranks</div>
+        <div class="sp"></div>
+      </div>
+      <div class="scroll" id="scroll">
+        <div class="hero" id="hero"></div>
+        <div class="sec">How to rank up</div>
+        <div class="guide">
+          <div class="gstep"><div class="gn">1</div><div><div class="gt">Earn XP every day</div><div class="gd">Finishing your routine, holding streaks and completing quests all feed your XP.</div></div></div>
+          <div class="gstep"><div class="gn">2</div><div><div class="gt">Cross the threshold</div><div class="gd">Each rank unlocks at a set XP. Fill the bar to break into the next one.</div></div></div>
+          <div class="gstep"><div class="gn">3</div><div><div class="gt">Unlock perks</div><div class="gd">Higher tiers unlock frames, auras and bonuses. Tap any rank to preview its rewards.</div></div></div>
+        </div>
+        <div class="sec" id="ladderSec">The 10 ranks</div>
+        <div class="ladder" id="ladder"></div>
+      </div>
+      <nav class="nav" aria-label="Primary">
+        <a class="item" href="20-dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 11l9-7 9 7M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/></svg><span class="nl">Home</span></a>
+        <a class="item" href="21-quests.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M9 5h11M9 12h11M9 19h11M4 5l1 1 2-2M4 12l1 1 2-2M4 19l1 1 2-2"/></svg><span class="nl">Quests</span></a>
+        <a class="item" href="coach.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="nl">Coach</span></a>
+        <a class="item" href="community.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M7 8h10M7 11h7M7 14h5" stroke-linecap="round"/></svg><span class="nl">Community</span></a>
+        <a class="item active" href="24-more.html" aria-current="page"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2.5"/><circle cx="12" cy="12" r="2.5"/><circle cx="19" cy="12" r="2.5"/></svg><span class="nl">More</span></a>
+      </nav>
+      <div class="home-indicator"></div>
+    </div>
+
+    <div class="dt" id="dt" role="dialog" aria-modal="true">
+      <div class="scrim" id="dtScrim"></div>
+      <div class="sheet"><div class="grab" id="dtGrab" role="button" tabindex="0" aria-label="Close"></div><div id="dtBody"></div></div>
+    </div>
+  </div>
+
+  <script src="_lib/core-background.js?v=20260619d"></script>
+  <script src="_lib/core-sfx.js"></script>
+  <script src="_lib/core-ranks.js?v=20260704"></script>
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var RANKS = window.CORE_RANKS || [];
+  function ls(k,d){try{var v=localStorage.getItem(k);return v==null?d:v;}catch(e){return d;}}
+  function gemImg(r){ return window.CORE_RANK_ICON ? CORE_RANK_ICON(r, 64) : '<img src="assets/ranks/'+r.key+'.png" alt="'+r.name+'">'; }
+  function fmt(n){ return n.toLocaleString(); }
+  function pad(n){ return (n<10?'0':'')+n; }
+
+  var xp=parseInt(ls('coreXP','0'),10)||0;
+  var idx=0; for(var i=0;i<RANKS.length;i++){ if(xp>=RANKS[i].xp) idx=i; }
+  var cur=RANKS[idx], nx=RANKS[Math.min(idx+1,RANKS.length-1)];
+
+  // hero
+  var hero=$('hero'); hero.style.setProperty('--rc',cur.color);
+  var pct = idx>=RANKS.length-1 ? 100 : Math.max(3,Math.min(100,Math.round((xp-cur.xp)/(nx.xp-cur.xp)*100)));
+  var toNext = idx>=RANKS.length-1 ? 0 : (nx.xp-xp);
+  hero.innerHTML='<div class="hero-socket" id="heroSocket" role="button" tabindex="0" aria-label="'+cur.name+', your current rank — view rewards">'
+      +'<div class="hero-socket-in"><div class="hero-gem">'+gemImg(cur)+'</div></div></div>'
+    +'<div class="hero-tag">Rank '+pad(idx+1)+' // '+RANKS.length+'</div>'
+    +'<div class="hero-name">'+cur.name+'</div>'
+    +'<div class="hero-prog"><div class="hero-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+pct+'" aria-label="Progress to next rank"><span class="hero-fill" id="hf"></span></div>'
+    +'<div class="hero-prog-meta"><span><b>'+fmt(xp)+'</b> XP</span>'
+    +(idx>=RANKS.length-1?'<span>Max rank 🏆</span>':'<span><b>'+fmt(toNext)+'</b> XP to '+nx.name+'</span>')+'</div></div>';
+  setTimeout(function(){ var hf=$('hf'); if(hf) hf.style.width=pct+'%'; },150);
+
+  // section label driven by the data so it never drifts from the list
+  var secEl=$('ladderSec'); if(secEl) secEl.textContent='The ladder · '+RANKS.length+' ranks';
+
+  // ladder — grouped by tier (Novice, Initiate, … Vanguard)
+  function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+  var groups=[];
+  RANKS.forEach(function(r,i){
+    var tier=(r.key||'').split('-')[0];
+    var g=groups[groups.length-1];
+    if(!g||g.tier!==tier){ g={tier:tier,color:r.color,rows:[]}; groups.push(g); }
+    g.rows.push({r:r,i:i});
+  });
+  function rowHTML(r,i){
+    var state = i<idx?'unlocked' : i===idx?'current':'locked';
+    var pill = state==='current'?'<span class="lr-pill cur">Current</span>'
+      : state==='unlocked'?'<span class="lr-pill unl">Unlocked</span>'
+      : '<span class="lr-pill lock">'+fmt(r.xp)+' XP</span>';
+    var aria=r.name+', rank '+(i+1)+' of '+RANKS.length+', '
+      +(state==='current'?'your current rank':state==='unlocked'?'unlocked':'locked — unlocks at '+fmt(r.xp)+' XP');
+    return '<button class="lr '+state+'" data-i="'+i+'" style="--rc:'+r.color+';animation-delay:'+(0.03*i).toFixed(2)+'s" aria-label="'+aria+'">'
+      +'<span class="lr-gem">'+gemImg(r)+'</span>'
+      +'<span class="lr-body"><span class="lr-name">'+r.name+'</span><span class="lr-xp">'+(i===0?'Starting rank':fmt(r.xp)+' XP')+'</span></span>'
+      +'<span class="lr-right">'+pill+'<svg class="lr-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>'
+      +'</button>';
+  }
+  $('ladder').innerHTML=groups.map(function(g){
+    return '<div class="tier" style="--tc:'+g.color+'">'
+      +'<div class="tier-head"><span class="tier-name">'+cap(g.tier)+'</span><span class="tier-line"></span></div>'
+      +'<div class="tier-rows">'+g.rows.map(function(o){return rowHTML(o.r,o.i);}).join('')+'</div></div>';
+  }).join('');
+
+  // for higher ranks, ease the current row into view (low ranks already sit
+  // near the top under the hero, so leave that natural view alone)
+  if(idx>=3){
+    setTimeout(function(){
+      var curRow=$('ladder').querySelector('.lr.current');
+      if(curRow&&curRow.scrollIntoView){ try{ curRow.scrollIntoView({block:'center',behavior:'smooth'}); }catch(_){ curRow.scrollIntoView(); } }
+    },720);
+  }
+
+  // detail sheet
+  function tick(){ return '<svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>'; }
+  function openDetail(i){
+    var r=RANKS[i], dt=$('dt');
+    var state = i<idx?'unl' : i===idx?'cur':'lock';
+    var statusTxt = state==='cur'?'Current rank' : state==='unl'?'Unlocked' : 'Locked';
+    var sub = state==='cur' ? "You're here right now"
+      : state==='unl' ? 'Already achieved'
+      : (i===idx+1 ? fmt(Math.max(0,r.xp-xp))+' XP to unlock — you’re next' : 'Unlocks at '+fmt(r.xp)+' XP');
+    dt.style.setProperty('--rc',r.color);
+    $('dtBody').innerHTML='<div class="dt-badge '+state+'">'+statusTxt+'</div>'
+      +'<div class="dt-socket"><div class="dt-socket-in"><div class="dt-gem">'+gemImg(r)+'</div></div></div>'
+      +'<div class="dt-name">'+r.name+'</div>'
+      +'<div class="dt-sub">'+sub+'</div>'
+      +'<div class="dt-stats">'
+        +'<div class="dt-stat"><div class="v">'+pad(i+1)+'/'+RANKS.length+'</div><div class="k">Rank</div></div>'
+        +'<div class="dt-stat"><div class="v">'+(i===0?'0':fmt(r.xp))+'</div><div class="k">XP needed</div></div>'
+        +'<div class="dt-stat"><div class="v">'+r.perks.length+'</div><div class="k">Rewards</div></div>'
+      +'</div>'
+      +'<div class="dt-unl">What you unlock</div>'
+      +'<div class="dt-perks">'+r.perks.map(function(p){return '<div class="dt-perk"><span class="ic">'+tick()+'</span><span>'+p+'</span></div>';}).join('')+'</div>';
+    dt.classList.add('on');
+    try{window.coreSfx&&window.coreSfx('click');}catch(_){}
+    try{ if(navigator.vibrate) navigator.vibrate(12); }catch(_){}
+  }
+  $('ladder').addEventListener('click',function(e){ var b=e.target.closest('.lr'); if(b) openDetail(+b.getAttribute('data-i')); });
+  // hero gem opens its own rewards (parity with the rows)
+  var hs=$('heroSocket');
+  if(hs){
+    hs.addEventListener('click',function(){ openDetail(idx); });
+    hs.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openDetail(idx); } });
+  }
+  function closeDetail(){ $('dt').classList.remove('on'); }
+  $('dtScrim').addEventListener('click',closeDetail);
+  var grab=$('dtGrab');
+  if(grab){
+    grab.addEventListener('click',closeDetail);
+    grab.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); closeDetail(); } });
+  }
+  // Esc closes the sheet (keyboard parity)
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeDetail(); });
+})();
+</script>
+</body>
+</html>

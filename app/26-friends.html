@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
+<meta charset="utf-8" />
+<title>CORE — Friends</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<style>
+  :root { --bg-base:#040408; --bg-card:rgba(255,255,255,0.022); --bg-card-2:rgba(255,255,255,0.05); --border:rgba(255,255,255,0.07); --text:#ffffff; --muted:rgba(255,255,255,0.72); --dim:rgba(255,255,255,0.45); --accent:#AEB6C4; --grad-a:#AEB6C4; --grad-b:#AEB6C4; --good:rgba(255,255,255,0.72); --danger:#FF6B6B; }
+  * { box-sizing:border-box; } html,body{ margin:0; padding:0; height:100%; }
+  body { min-height:100vh; background:#000; display:flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif; color:var(--text); -webkit-font-smoothing:antialiased; padding:24px; overflow:hidden; }
+  .phone { position:relative; width:390px; height:844px; background:var(--bg-base); border-radius:56px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 0 0 10px #0a0a12, 0 0 0 11px #2b2b38; }
+  .notch { position:absolute; top:14px; left:50%; transform:translateX(-50%); width:124px; height:32px; background:#000; border-radius:20px; z-index:60; }
+  .home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(245,247,251,0.55); border-radius:999px; z-index:60; }
+  .bg { position:absolute; inset:0; z-index:0; background: radial-gradient(60% 30% at 50% 8%, rgba(10,132,255,0.10), transparent 65%), linear-gradient(180deg, #07071a 0%, #040408 55%, #050510 100%); }
+  .frame { position:absolute; inset:0; z-index:10; display:flex; flex-direction:column; padding:54px 0 0; }
+  .hdr { display:flex; align-items:center; gap:12px; padding:2px 18px 10px; }
+  .back { width:38px; height:38px; border-radius:50%; border:none; background:rgba(255,255,255,0.06); color:var(--text); display:flex; align-items:center; justify-content:center; text-decoration:none; flex:none; } .back svg{ width:19px; height:19px; }
+  .hdr .ttl { font-size:19px; font-weight:900; } .hdr .sub{ font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); }
+  .scroll { flex:1; overflow-y:auto; padding:6px 18px 110px; } .scroll::-webkit-scrollbar{ display:none; }
+  .sec { margin:22px 4px 11px; font-size:12.5px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); }
+
+  /* your id card */
+  .mecard{ border-radius:20px; padding:18px; background:transparent; border:none; }
+  .mecard .l{ font-size:10px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+  .mecard .id{ font-size:24px; font-weight:900; letter-spacing:.02em; margin-top:6px; font-variant-numeric:tabular-nums; }
+  .acts{ display:flex; gap:9px; margin-top:14px; }
+  .btn{ flex:1; display:flex; align-items:center; justify-content:center; gap:7px; min-height:44px; padding:12px; border-radius:13px; border:1px solid var(--border); background:rgba(0,0,0,0.25); color:var(--text); font:inherit; font-size:13px; font-weight:800; cursor:pointer; transition:.2s; }
+  .btn svg{ width:16px; height:16px; } .btn:active{ transform:scale(.98); } .btn.primary{ background:linear-gradient(135deg,var(--grad-a),var(--grad-b)); border-color:transparent; color:#fff; } .btn.ok{ color:var(--good); border-color:rgba(52,211,153,.4); }
+  .add{ display:flex; gap:9px; margin-top:13px; }
+  .add input{ flex:1; min-height:46px; padding:13px 14px; border-radius:13px; border:1px solid var(--border); background:rgba(0,0,0,0.3); color:var(--text); font:inherit; font-size:14px; letter-spacing:.06em; text-transform:uppercase; outline:none; } .add input:focus{ border-color:rgba(10,132,255,.5); } .add input::placeholder{ color:var(--dim); text-transform:none; letter-spacing:0; }
+  .add .ab{ flex:none; padding:0 20px; }
+
+  .fr{ display:flex; align-items:center; gap:12px; padding:13px 14px; border-radius:15px; background:var(--bg-card); border:1px solid var(--border); margin-bottom:9px; }
+  .fr .av{ width:42px; height:42px; flex:none; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:900; color:#fff; background:linear-gradient(150deg,var(--c1,#3A4055),var(--c2,#2A2F40)); }
+  .fr .fb{ flex:1; min-width:0; } .fr .fn{ font-size:14px; font-weight:800; font-variant-numeric:tabular-nums; } .fr .fs{ font-size:11.5px; color:var(--muted); margin-top:1px; }
+  .fr .rm{ flex:none; width:34px; height:34px; border-radius:10px; border:1px solid var(--border); background:rgba(255,255,255,0.03); color:var(--dim); cursor:pointer; display:flex; align-items:center; justify-content:center; } .fr .rm svg{ width:16px; height:16px; } .fr .rm.arm{ color:var(--danger); border-color:rgba(255,107,107,.4); }
+  .empty{ padding:26px 20px; border-radius:18px; text-align:center; background:var(--bg-card); border:1px dashed rgba(255,255,255,0.14); }
+  .empty svg{ width:34px; height:34px; color:var(--dim); margin-bottom:10px; } .empty .t{ font-size:14px; font-weight:800; } .empty .s{ font-size:12.5px; color:var(--muted); margin-top:4px; }
+
+  .fr{ cursor:pointer; transition:transform .18s, border-color .2s; } .fr:hover{ border-color:rgba(10,132,255,.3); } .fr:active{ transform:scale(.99); }
+  .fr .go{ flex:none; color:var(--dim); display:flex; } .fr .go svg{ width:17px; height:17px; }
+  .fr .fpow{ color:var(--accent); font-weight:800; }
+
+  /* ── you-vs-friend comparison sheet ── */
+  .cmp{ position:absolute; inset:0; z-index:88; display:none; } .cmp.open{ display:block; }
+  .cmp .cscrim{ position:absolute; inset:0; background:rgba(2,2,8,0.72); backdrop-filter:blur(8px); }
+  .cmp .csheet{ position:absolute; left:0; right:0; bottom:0; max-height:92%; overflow-y:auto; border-radius:30px 30px 0 0; background:linear-gradient(180deg,#0c0e1a,#05060e); border-top:1px solid var(--border); padding:14px 20px 30px; animation:rise .3s cubic-bezier(.2,.8,.2,1); } .cmp .csheet::-webkit-scrollbar{ display:none; }
+  @keyframes rise{ from{ transform:translateY(60px); opacity:0; } to{ transform:translateY(0); opacity:1; } }
+  .cmp .grab{ width:42px; height:5px; border-radius:999px; background:rgba(255,255,255,0.18); margin:2px auto 14px; }
+  .cmp .ctop{ display:flex; align-items:center; justify-content:center; gap:14px; margin-bottom:4px; }
+  .cmp .pl{ text-align:center; } .cmp .pl .av{ width:46px; height:46px; margin:0 auto 7px; border-radius:13px; display:flex; align-items:center; justify-content:center; font-size:17px; font-weight:900; color:#fff; } .cmp .pl.you .av{ background:#AEB6C4; } .cmp .pl .nm{ font-size:12px; font-weight:800; } .cmp .pl .pw{ font-size:10.5px; font-weight:800; color:var(--muted); margin-top:2px; }
+  .cmp .vs{ font-size:13px; font-weight:900; letter-spacing:.1em; color:var(--dim); }
+  .cmp .verdict{ text-align:center; font-size:12px; font-weight:800; letter-spacing:.04em; color:var(--muted); margin:10px 0 18px; } .cmp .verdict b{ color:var(--text); }
+  .cmprow{ margin-bottom:13px; }
+  .cmprow .ch{ display:flex; align-items:center; gap:7px; font-size:12px; font-weight:800; margin-bottom:6px; } .cmprow .ch .cemo{ display:inline-flex; color:var(--muted); } .cmprow .ch .cemo svg{ width:14px; height:14px; } .cmprow .ch .cnm{ flex:1; } .cmprow .ch .cwin{ font-size:8.5px; font-weight:900; letter-spacing:.08em; padding:2px 7px; border-radius:999px; } .cmprow .ch .cwin.you{ color:#bfddff; background:rgba(10,132,255,.18); } .cmprow .ch .cwin.them{ color:var(--muted); background:rgba(255,255,255,.06); } .cmprow .ch .cwin.tie{ color:var(--dim); background:rgba(255,255,255,.06); }
+  .cmprow .cbar{ display:flex; height:9px; border-radius:999px; overflow:hidden; background:rgba(0,0,0,.4); } .cmprow .cyou{ width:50%; background:#AEB6C4; transition:width .9s cubic-bezier(.2,.85,.25,1); } .cmprow .cthem{ width:50%; background:rgba(255,255,255,0.22); transition:width .9s cubic-bezier(.2,.85,.25,1); }
+  .cmprow .cnums{ display:flex; justify-content:space-between; font-size:11px; font-weight:900; margin-top:5px; font-variant-numeric:tabular-nums; } .cmprow .cnums .ny{ color:#5BAAFF; } .cmprow .cnums .nt{ color:var(--muted); }
+  .cmp .cclose{ margin-top:8px; width:100%; min-height:46px; border-radius:14px; border:1px solid var(--border); background:var(--bg-card); color:var(--text); font:inherit; font-size:14px; font-weight:800; cursor:pointer; } .cmp .cclose:active{ transform:scale(.99); }
+  .cmp .note{ text-align:center; font-size:10.5px; color:var(--dim); margin-top:12px; }
+
+  /* ── friend card (their card, your eyes) ── */
+  .cmp .fcard{ position:relative; border-radius:18px; padding:16px 16px 15px; margin-bottom:16px; text-align:center; overflow:hidden;
+    background:radial-gradient(120% 70% at 50% 0%, color-mix(in srgb,var(--fc,#AEB6C4) 16%,transparent), transparent 62%), linear-gradient(180deg, color-mix(in srgb,var(--fc,#AEB6C4) 6%,rgba(255,255,255,.03)), rgba(255,255,255,.01));
+    border:1.5px solid color-mix(in srgb,var(--fc,#AEB6C4) 38%,transparent); box-shadow:0 18px 50px rgba(0,0,0,.5); }
+  .cmp .fcard .gem{ width:92px; height:92px; margin:2px auto 8px; color:var(--fc,#AEB6C4); } .cmp .fcard .gem img, .cmp .fcard .gem svg{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 3px 10px rgba(0,0,0,.5)) drop-shadow(0 0 9px color-mix(in srgb,var(--fc,#AEB6C4) 35%,transparent)); }
+  .cmp .fcard .frk{ font-size:22px; font-weight:900; color:var(--text); letter-spacing:.01em; } .cmp .fcard .fid{ font-size:11px; font-weight:800; color:var(--muted); letter-spacing:.04em; margin-top:3px; font-variant-numeric:tabular-nums; }
+  .cmp .fcard .fpw{ display:inline-block; margin-top:9px; font-size:11.5px; font-weight:900; padding:5px 13px; border-radius:999px; background:rgba(0,0,0,.32); border:1px solid var(--border); color:var(--text); letter-spacing:.03em; }
+  .cmp .fcard .fstats{ display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin-top:13px; }
+  .cmp .fcard .fs2{ background:rgba(0,0,0,.3); border:1px solid var(--border); border-radius:10px; padding:7px 6px; } .cmp .fcard .fs2 .v{ font-size:14px; font-weight:900; color:var(--mc,rgba(255,255,255,0.72)); line-height:1; font-variant-numeric:tabular-nums; } .cmp .fcard .fs2 .k{ font-size:7px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; color:var(--dim); margin-top:4px; }
+
+  /* ── leaderboard ── */
+  .lbrow{ display:flex; align-items:center; gap:11px; padding:11px 13px; border-radius:14px; background:var(--bg-card); border:1px solid var(--border); margin-bottom:8px; }
+  .lbrow.you{ border-color:rgba(10,132,255,.5); background:linear-gradient(135deg,rgba(10,132,255,.13),rgba(255,255,255,.02)); }
+  .lbrow .pos{ width:26px; text-align:center; font-size:14px; font-weight:900; color:var(--dim); font-variant-numeric:tabular-nums; } .lbrow .pos .medal{ display:inline-flex; align-items:center; justify-content:center; } .lbrow .pos .medal svg{ width:18px; height:18px; }
+  .lbrow .lav{ width:34px; height:34px; flex:none; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900; color:#fff; background:linear-gradient(150deg,var(--c1,#3A4055),var(--c2,#2A2F40)); }
+  .lbrow .lbb{ flex:1; min-width:0; } .lbrow .lbn{ font-size:13.5px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-variant-numeric:tabular-nums; } .lbrow .lbr{ font-size:11px; color:var(--muted); margin-top:1px; }
+  .lbrow .lbp{ font-size:16px; font-weight:900; color:var(--accent); font-variant-numeric:tabular-nums; text-align:right; } .lbrow .lbp small{ display:block; font-size:7.5px; font-weight:800; letter-spacing:.06em; color:var(--dim); }
+
+  .nav { position:absolute; left:0; right:0; bottom:0; z-index:50; padding:10px 12px 26px; display:flex; justify-content:space-around; align-items:flex-end; background:linear-gradient(180deg, rgba(5,6,14,0) 0%, rgba(5,6,14,0.88) 34%, #04040c 100%); backdrop-filter:blur(14px); }
+  .nav a{ display:flex; flex-direction:column; align-items:center; gap:4px; padding:6px 8px; min-width:48px; min-height:44px; text-decoration:none; color:var(--dim); } .nav svg{ width:23px; height:23px; } .nav .nl{ font-size:10px; font-weight:800; }
+  .nav .item.active{ color:var(--text); } .nav .item.active svg{ color:var(--accent); }
+  .toast{ position:absolute; left:50%; bottom:100px; transform:translateX(-50%) translateY(14px); z-index:90; background:rgba(20,22,34,0.96); border:1px solid var(--border); border-radius:14px; padding:11px 16px; font-size:13px; font-weight:700; opacity:0; pointer-events:none; transition:.3s; } .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+</style>
+  <link rel="stylesheet" href="_lib/core-responsive.css?v=20260619d">
+  <link rel="stylesheet" href="_lib/core-background.css?v=20260619d">
+  <style>
+    .bg{display:none !important;}
+    .phone{background:#040408 !important;}
+    .nav{justify-content:space-evenly !important;}
+    .nav .item{flex:1 1 0;}
+  </style>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <meta name="theme-color" content="#000000">
+  <link rel="stylesheet" href="_lib/core-ui.css?v=20260619d">
+</head>
+<body>
+  <div class="phone">
+    <div class="bg"></div><div class="notch"></div>
+    <div class="frame">
+      <div class="hdr"><a class="back" href="23-profile.html" aria-label="Back" onclick="event.preventDefault();if(history.length>1){history.back();}else{location.href=this.getAttribute('href');}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"/></svg></a><div><div class="ttl">Friends</div><div class="sub" id="frCount">0 friends</div></div></div>
+      <div class="scroll">
+        <div class="mecard">
+          <div class="l">Your Player ID</div>
+          <div class="id" id="myId">CORE-XXXX-XXXX</div>
+          <div class="acts">
+            <button class="btn" id="copyId" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><span>Copy ID</span></button>
+            <button class="btn primary" id="shareId" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg><span>Share</span></button>
+          </div>
+          <div class="add"><input id="addInput" maxlength="14" placeholder="Add by ID (CORE-XXXX-XXXX)" aria-label="Friend ID" /><button class="btn primary ab" id="addBtn" type="button">Add</button></div>
+        </div>
+        <div class="sec" id="lbSec" style="display:none">Leaderboard</div>
+        <div id="lb"></div>
+        <div class="sec">Your friends</div>
+        <div id="list"></div>
+      </div>
+      <nav class="nav" aria-label="Primary">
+        <a class="item" href="20-dashboard.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 11l9-7 9 7M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/></svg>
+          <span class="nl">Home</span>
+        </a>
+        <a class="item" href="21-quests.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M9 5h11M9 12h11M9 19h11M4 5l1 1 2-2M4 12l1 1 2-2M4 19l1 1 2-2"/></svg>
+          <span class="nl">Quests</span>
+        </a>
+        <a class="item" href="coach.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+          <span class="nl">Coach</span>
+        </a>
+        <a class="item" href="community.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M7 8h10M7 11h7M7 14h5" stroke-linecap="round"/></svg>
+          <span class="nl">Community</span>
+        </a>
+        <a class="item active" href="24-more.html" aria-current="page">
+          <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2.5"/><circle cx="12" cy="12" r="2.5"/><circle cx="19" cy="12" r="2.5"/></svg>
+          <span class="nl">More</span>
+        </a>
+      </nav>
+      <div class="home-indicator"></div>
+    </div>
+    <!-- you-vs-friend comparison sheet -->
+    <div class="cmp" id="cmp" role="dialog" aria-modal="true">
+      <div class="cscrim" id="cmpScrim"></div>
+      <div class="csheet">
+        <div class="grab"></div>
+        <div class="fcard" id="cmpCard"></div>
+        <div class="ctop">
+          <div class="pl you"><div class="av">YOU</div><div class="nm">You</div><div class="pw" id="cmpYouPw">CORE Power —</div></div>
+          <div class="vs">VS</div>
+          <div class="pl"><div class="av" id="cmpThemAv">F</div><div class="nm" id="cmpThemNm">Friend</div><div class="pw" id="cmpThemPw">CORE Power —</div></div>
+        </div>
+        <div class="verdict" id="cmpVerdict"></div>
+        <div id="cmpRows"></div>
+        <div class="note">Friend stats are illustrative until live sync is connected.</div>
+        <button class="cclose" id="cmpClose" type="button">Close</button>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+  <script src="_lib/core-state.js?v=20260607c"></script>
+  <script src="_lib/core-gems.js?v=20260607l"></script>
+  <script src="_lib/core-sfx.js"></script>
+  <script src="_lib/core-social.js"></script>
+  <script>
+  (function(){
+    var qs=function(s){return document.querySelector(s);};
+    function pget(k,d){ try{var v=localStorage.getItem(k); return v===null?d:v;}catch(e){return d;} }
+    function pset(k,v){ try{localStorage.setItem(k,v);}catch(e){} }
+    function pjson(k,d){ try{var v=JSON.parse(localStorage.getItem(k)); return v||d;}catch(e){return d;} }
+    function ensureId(){ var id=pget('corePlayerId',null); if(!id){ var c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',a='',b=''; for(var i=0;i<4;i++){a+=c.charAt(Math.floor(Math.random()*c.length));b+=c.charAt(Math.floor(Math.random()*c.length));} id='CORE-'+a+'-'+b; pset('corePlayerId',id);} return id; }
+    var pid=ensureId(); qs('#myId').textContent=pid;
+    var toastT; function toast(m){ var t=qs('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(function(){t.classList.remove('show');},1500); }
+    function copyText(t,cb){ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(cb,fb);} else fb(); function fb(){ try{var ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);}catch(e){} cb&&cb(); } }
+    function inlineOk(b,l){ var sp=b.querySelector('span')||b,p=sp.textContent; sp.textContent=l; b.classList.add('ok'); setTimeout(function(){ sp.textContent=p; b.classList.remove('ok'); },1400); }
+    var COL=[['#3A4055','#2A2F40'],['#3A4055','#2A2F40'],['#3A4055','#2A2F40'],['#3A4055','#2A2F40'],['#3A4055','#2A2F40'],['#3A4055','#2A2F40']];
+    // Monochrome SVG inner-paths per stat (fallback when STAT_DEFS.icon is unavailable).
+    var STAT_ICON={
+      strength:'<path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/>',
+      focus:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/><path d="M12 1.5v3M12 19.5v3M22.5 12h-3M4.5 12h-3"/>',
+      wealth:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v9M9.6 10h4a1.6 1.6 0 0 1 0 3.2h-3.2a1.6 1.6 0 0 0 0 3.2h4.2"/>',
+      health:'<path d="M12 20.5s-7.2-4.6-7.2-9.8A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 7.2 3.7c0 5.2-7.2 9.8-7.2 9.8Z"/>',
+      social:'<circle cx="9" cy="8" r="3.2"/><path d="M3.4 20a5.6 5.6 0 0 1 11.2 0M16 5.2a3.2 3.2 0 0 1 0 6M18.7 20a5.6 5.6 0 0 0-3.1-5"/>',
+      purpose:'<circle cx="12" cy="12" r="8.5"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z"/>'
+    };
+    function statSvg(path,size){ return '<svg viewBox="0 0 24 24" width="'+(size||14)+'" height="'+(size||14)+'" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+(path||'')+'</svg>'; }
+    var S=window.coreState||{}; var STAT_DEFS=S.STAT_DEFS||[]; var RANKS_L=S.RANKS||[];
+
+    // Friends have no live backend yet, so derive STABLE pseudo-stats from the ID hash.
+    // Same ID always yields the same profile — clearly illustrative (noted in the sheet).
+    function hashStr(s){ var h=2166136261>>>0; for(var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619)>>>0; } return h>>>0; }
+    var realProfiles={}; // filled by coreSocial.fetchProfiles when the backend + migration are live
+    function friendProfile(id){ if(realProfiles[id]) return realProfiles[id]; var h=hashStr(id), stats={}, sum=0;
+      STAT_DEFS.forEach(function(d,k){ var v=35+((h>>>((k*5)%27))%61); stats[d.key]=v; sum+=v; }); // >>> unsigned: keeps modulo positive
+      var power=STAT_DEFS.length?Math.round(sum/STAT_DEFS.length):0;
+      var idx=Math.max(0, Math.min(RANKS_L.length-1, Math.floor((power/101)*RANKS_L.length)));
+      var rank=(RANKS_L.length&&RANKS_L[idx])?RANKS_L[idx].name:'Player';
+      return { stats:stats, power:power, rank:rank }; }
+
+    function powerRank(power){ var idx=Math.max(0,Math.min(RANKS_L.length-1,Math.floor((power/101)*RANKS_L.length))); return (RANKS_L.length&&RANKS_L[idx])?RANKS_L[idx].name:'Player'; }
+    function renderLeaderboard(){ var fr=pjson('coreFriends',[]); var sec=qs('#lbSec'), host=qs('#lb'); if(!host) return;
+      if(!fr.length){ if(sec) sec.style.display='none'; host.innerHTML=''; return; }
+      if(sec) sec.style.display='';
+      var myPow=Math.round(STAT_DEFS.reduce(function(a,d){ return a+Math.round((S.statValue&&S.statValue(d.key))||0); },0)/(STAT_DEFS.length||1));
+      var rows=[{id:pid,you:true,power:myPow,rank:powerRank(myPow),ini:'YOU'}];
+      fr.forEach(function(id){ var p=friendProfile(id); rows.push({id:id,you:false,power:p.power,rank:p.rank,ini:(id.replace('CORE-','')[0]||'C')}); });
+      rows.sort(function(a,b){ return b.power-a.power; });
+      // monochrome medal icons (gold/silver/bronze) for the top 3 \u2014 no emoji
+      function medalSvg(col){ return '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="'+col+'" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 3l3.5 6 3.5-6"/><circle cx="12" cy="15.5" r="5.5"/><path d="M12 13l.9 1.8 2 .3-1.45 1.4.35 2-1.8-.95-1.8.95.35-2L9.1 15.1l2-.3z"/></svg>'; }
+      var medals=[medalSvg('#ffffff'),medalSvg('rgba(255,255,255,0.72)'),medalSvg('#6B7186')];
+      host.innerHTML=rows.map(function(r,i){ var c=r.you?['#AEB6C4','#AEB6C4']:COL[(i+1)%COL.length]; var pos=medals[i]?'<span class="medal">'+medals[i]+'</span>':(i+1);
+        return '<div class="lbrow'+(r.you?' you':'')+'"><div class="pos">'+pos+'</div><div class="lav" style="--c1:'+c[0]+';--c2:'+c[1]+'">'+r.ini+'</div><div class="lbb"><div class="lbn">'+(r.you?'You':r.id)+'</div><div class="lbr">'+r.rank+'</div></div><div class="lbp">'+r.power+'<small>POWER</small></div></div>'; }).join('');
+    }
+    function render(){
+      var fr=pjson('coreFriends',[]);
+      qs('#frCount').textContent=fr.length+' friend'+(fr.length===1?'':'s');
+      renderLeaderboard();
+      var host=qs('#list');
+      if(!fr.length){ host.innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="8" r="3.5"/><path d="M2 21a7 7 0 0 1 14 0M17 7a3.5 3.5 0 0 1 0 7M22 21a6 6 0 0 0-4-5.6"/></svg><div class="t">No friends yet</div><div class="s">Share your Player ID or add a friend by theirs.</div></div>'; return; }
+      host.innerHTML=fr.map(function(id,i){ var c=COL[i%COL.length]; var ini=(id.replace('CORE-','')[0]||'C'); var p=friendProfile(id);
+        return '<div class="fr" data-cid="'+id+'" role="button" tabindex="0" aria-label="Compare with '+id+'"><div class="av" style="--c1:'+c[0]+';--c2:'+c[1]+'">'+ini+'</div><div class="fb"><div class="fn">'+id+'</div><div class="fs">'+p.rank+' · <span class="fpow">'+p.power+'</span> Power</div></div><span class="go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></span><button class="rm" data-id="'+id+'" aria-label="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>'; }).join('');
+      host.querySelectorAll('.fr').forEach(function(row){
+        row.addEventListener('click', function(e){ if(e.target.closest('.rm')) return; openCompare(row.dataset.cid); });
+        row.addEventListener('keydown', function(e){ if((e.key==='Enter'||e.key===' ')&&!e.target.closest('.rm')){ e.preventDefault(); openCompare(row.dataset.cid); } });
+      });
+      host.querySelectorAll('.rm').forEach(function(b){ var armed=false,rt; b.addEventListener('click', function(e){ e.stopPropagation();
+        if(!armed){ armed=true; b.classList.add('arm'); clearTimeout(rt); rt=setTimeout(function(){ armed=false; b.classList.remove('arm'); },2500); toast('Tap again to remove'); return; }
+        var arr=pjson('coreFriends',[]).filter(function(x){return x!==b.dataset.id;}); pset('coreFriends',JSON.stringify(arr)); toast('Removed'); render(); }); });
+    }
+    // you-vs-friend stat comparison
+    function openCompare(id){ if(!STAT_DEFS.length){ toast('Stats unavailable'); return; }
+      var fp=friendProfile(id), ini=(id.replace('CORE-','')[0]||'F'), myWins=0, total=STAT_DEFS.length, myAvg=0, thAvg=0;
+      // friend's-eye card: their rank gem + 6 stats, exactly like your own card
+      var fc=qs('#cmpCard');
+      if(fc){
+        var fcol='#AEB6C4';
+        fc.style.setProperty('--fc',fcol);
+        fc.innerHTML='<div class="gem">'+(function(){var G=window.coreGems;if(!G)return '';var f=G.img||G.svg;return f?f.call(G,fp.rank||'Sand',{tier:3}):'';})()+'</div>'+
+          '<div class="frk">'+fp.rank+'</div><div class="fid">'+id+'</div>'+
+          '<div class="fpw">'+fp.power+' CORE POWER</div>'+
+          '<div class="fstats">'+STAT_DEFS.map(function(d){ return '<div class="fs2" style="--mc:rgba(255,255,255,0.72)"><div class="v">'+(fp.stats[d.key]||0)+'</div><div class="k">'+d.name+'</div></div>'; }).join('')+'</div>'; }
+      var rows=STAT_DEFS.map(function(d){
+        var you=Math.round((S.statValue&&S.statValue(d.key))||0), them=fp.stats[d.key]||0; myAvg+=you; thAvg+=them;
+        var win = you>them?'you':(them>you?'them':'tie'); if(win==='you') myWins++;
+        var sum=(you+them)||1, yw=Math.round(you/sum*100), tw=100-yw;
+        var ico=statSvg(d.icon||STAT_ICON[d.key]||'',14);
+        var lbl= win==='you'?'<span class="cwin you">YOU</span>':(win==='them'?'<span class="cwin them">THEM</span>':'<span class="cwin tie">TIE</span>');
+        return '<div class="cmprow" style="--tc:rgba(255,255,255,0.72)"><div class="ch"><span class="cemo">'+ico+'</span><span class="cnm">'+d.name+'</span>'+lbl+'</div>'+
+          '<div class="cbar"><div class="cyou" data-w="'+yw+'"></div><div class="cthem" data-w="'+tw+'"></div></div>'+
+          '<div class="cnums"><b class="ny">You '+you+'</b><b class="nt">'+them+' Them</b></div></div>'; }).join('');
+      myAvg=Math.round(myAvg/total); thAvg=Math.round(thAvg/total);
+      qs('#cmpRows').innerHTML=rows;
+      qs('#cmpThemAv').textContent=ini; qs('#cmpThemNm').textContent=id;
+      qs('#cmpYouPw').textContent='CORE Power '+myAvg; qs('#cmpThemPw').textContent='CORE Power '+thAvg;
+      var loss=total-myWins-STAT_DEFS.filter(function(d){ return Math.round((S.statValue&&S.statValue(d.key))||0)===(fp.stats[d.key]||0); }).length;
+      var v = myWins>loss ? 'You lead <b>'+myWins+' of '+total+'</b> stats' : (myWins<loss ? 'They lead <b>'+loss+' of '+total+'</b> stats' : 'Neck and neck — <b>'+myWins+'/'+total+'</b>');
+      qs('#cmpVerdict').innerHTML=v;
+      var c=qs('#cmp'); c.classList.add('open');
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){ c.querySelectorAll('.cyou,.cthem').forEach(function(el){ el.style.width=(el.getAttribute('data-w')||50)+'%'; }); }); }); }
+    function closeCompare(){ qs('#cmp').classList.remove('open'); }
+    qs('#cmpScrim').addEventListener('click', closeCompare); qs('#cmpClose').addEventListener('click', closeCompare);
+
+    qs('#copyId').addEventListener('click', function(){ var b=this; copyText(pid,function(){ inlineOk(b,'Copied'); }); });
+    qs('#shareId').addEventListener('click', function(){ var txt='Add me on CORE: '+pid+'.'; if(navigator.share){ navigator.share({text:txt}).catch(function(){}); } else { var b=this; copyText(txt,function(){ inlineOk(b,'Copied'); }); } });
+    function add(){ var inp=qs('#addInput'), v=(inp.value||'').trim().toUpperCase(); if(!v){ inp.focus(); return; } if(v===pid){ toast("That's your own ID"); return; } var fr=pjson('coreFriends',[]); if(fr.indexOf(v)>=0){ toast('Already added'); inp.value=''; return; } fr.push(v); pset('coreFriends',JSON.stringify(fr)); inp.value='';
+      // Social stat source — grant once per unique friend (anti-farm), capped via coreSocialRewarded.
+      var granted=false; try{ var rew=pjson('coreSocialRewarded',[]); if(rew.indexOf(v)<0){ rew.push(v); pset('coreSocialRewarded',JSON.stringify(rew)); if(window.coreState&&coreState.addStat){ coreState.addStat('social',2,'friend-added'); granted=true; } } }catch(e){}
+      toast(granted?'Friend added · +2 Social':'Friend added'); try{ if(window.coreSfx) coreSfx('confirm'); }catch(e){}
+      try{window.coreState.syncProgress();}catch(e){} render(); }
+    qs('#addBtn').addEventListener('click', add);
+    qs('#addInput').addEventListener('keydown', function(e){ if(e.key==='Enter') add(); });
+
+    // preview seeding: ?demo=1 populates sample friends so the list + comparison are visible
+    try{ if(/[?&]demo=1/.test(location.search)){ if(S.seedDemo) S.seedDemo(); if(!pjson('coreFriends',[]).length){ pset('coreFriends',JSON.stringify(['CORE-K7Q2-9XMP','CORE-B3FW-RT81','CORE-Z9LC-4HVD'])); } } }catch(e){}
+
+    render();
+    // Progressive enhancement: pull REAL friend cards (no-op until migration 0003 + auth),
+    // then re-render so derived stats upgrade in place. Also publish our own card.
+    function refreshReal(){ if(!window.coreSocial||!coreSocial.ready()) return; var ids=pjson('coreFriends',[]); if(!ids.length) return;
+      coreSocial.fetchProfiles(ids).then(function(map){ var ks=Object.keys(map||{}); if(ks.length){ ks.forEach(function(k){ realProfiles[k]=map[k]; }); render(); } }); }
+    function publishMine(){ if(!window.coreSocial||!coreSocial.ready()) return;
+      try{ var defs=STAT_DEFS, st={}; defs.forEach(function(d){ st[d.key]=Math.round((S.statValue&&S.statValue(d.key))||0); });
+        var pow=Math.round(defs.reduce(function(a,d){return a+st[d.key];},0)/(defs.length||1));
+        var xp=(S.read&&S.read().xp)||0; var lvl=(S.levelFor&&S.levelFor(xp))||1;
+        coreSocial.publishMe({ playerId:pid, name:'', power:pow, rank:powerRank(pow), xp:xp, level:lvl, stats:st }); }catch(e){} }
+    refreshReal(); publishMine();
+    // screenshot/deep-link hook: ?cmp=1 opens the first friend, ?cmp=CORE-XXXX-XXXX opens that one
+    try{ var cm=location.search.match(/[?&]cmp=([^&]+)/); if(cm){ var arr=pjson('coreFriends',[]); var who=cm[1]==='1'?arr[0]:decodeURIComponent(cm[1]); if(who) openCompare(who); } }catch(e){}
+  })();
+  </script>
+  <script src="_lib/core-back.js"></script>
+  <script src="_lib/core-background.js?v=20260619d"></script>
+</body>
+</html>
