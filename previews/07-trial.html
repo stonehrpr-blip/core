@@ -15507,7 +15507,7 @@
   // Corbit recognises it. On-device, nothing recorded. Optional (skippable).
   (function corbitVoice() {
     var userName = (state.name || 'there').trim();
-    var LINE = "Hi Corbit my name is " + (userName || 'there') + " and yours?";
+    var LINE = "Hi Corbit, my name is " + (userName || 'there') + ". What's yours?";
     const line = document.getElementById('voiceLine');
     const mic = document.getElementById('voiceMic');
     const micLabel = document.getElementById('voiceMicLabel');
@@ -15725,17 +15725,24 @@
       setStatus('Locked in. Corbit would know your voice anywhere.');
       try { if (typeof haptic === 'function') haptic([10, 40, 20]); } catch (e) {}
       try { if (window.coreSfx) coreSfx('confirm'); } catch (e) {}
-      // Corbit responds in a nice female voice
+      // Corbit responds like a receptionist — warm, professional, with natural pauses
       try {
-        var utter = new SpeechSynthesisUtterance("Nice to meet you too, " + (userName || '') + ". Let's get started.");
+        var greeting = "Welcome to Core, " + (userName || '') + ". I'm Corbit, your personal coach. I'll be with you every step of the way. Let's begin.";
+        var utter = new SpeechSynthesisUtterance(greeting);
         var voices = speechSynthesis.getVoices();
+        // Priority: Samantha (macOS Siri-quality) > Google enhanced female > any premium female > any female
+        var bestVoice = null;
         for (var vi = 0; vi < voices.length; vi++) {
-          if (voices[vi].name.indexOf('Samantha') >= 0 || voices[vi].name.indexOf('Karen') >= 0 || voices[vi].name.indexOf('Female') >= 0) {
-            utter.voice = voices[vi]; break;
-          }
+          var n = voices[vi].name;
+          if (n === 'Samantha' || n === 'Samantha (Enhanced)') { bestVoice = voices[vi]; break; }
+          if (!bestVoice && (n.indexOf('Google') >= 0 && n.indexOf('Female') >= 0 && n.indexOf('Enhanced') >= 0)) bestVoice = voices[vi];
+          if (!bestVoice && n.indexOf('Siri') >= 0) bestVoice = voices[vi];
+          if (!bestVoice && n.indexOf('Premium') >= 0 && n.indexOf('Female') >= 0) bestVoice = voices[vi];
+          if (!bestVoice && n.indexOf('Female') >= 0 && n.indexOf('en-US') >= 0) bestVoice = voices[vi];
         }
-        if (!utter.voice && voices.length > 0) { for (var vi2 = 0; vi2 < voices.length; vi2++) { if (voices[vi2].name.indexOf('Google UK English Female') >= 0 || voices[vi2].name.indexOf('en-US') >= 0) { utter.voice = voices[vi2]; break; } } }
-        utter.pitch = 1.1; utter.rate = 0.95; utter.volume = 0.9;
+        if (!bestVoice && voices.length > 0) bestVoice = voices[0];
+        if (bestVoice) utter.voice = bestVoice;
+        utter.pitch = 1.05; utter.rate = 0.92; utter.volume = 0.95;
         speechSynthesis.speak(utter);
       } catch(e) {}
       track('voice_linked', {});
