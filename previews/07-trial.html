@@ -14068,6 +14068,24 @@
   }
   nameField.addEventListener('input', paintNameStatus);
   nameField.addEventListener('blur',  paintNameStatus);
+  // Brute-force CTA enforcer — polls to make dead sure the button enables when both fields are filled
+  setInterval(function(){
+    try {
+      var n = (document.getElementById('name').value || '').trim();
+      var a = state.age;
+      var ctaBtn = document.getElementById('cta');
+      var note = document.getElementById('footerNote');
+      if (!ctaBtn) return;
+      var ready = n.length >= 2 && typeof a === 'number' && a >= 13;
+      if (ready && ctaBtn.disabled) {
+        ctaBtn.disabled = false;
+        ctaBtn.style.background = '';
+        ctaBtn.style.color = '';
+        ctaBtn.style.cursor = '';
+        if (note) note.textContent = 'Looks good — tap next';
+      }
+    } catch(e) {}
+  }, 300);
   document.querySelectorAll('#tones .tone-row').forEach(row => {
     row.addEventListener('click', () => {
       document.querySelectorAll('#tones .tone-row').forEach(r => r.classList.remove('sel'));
