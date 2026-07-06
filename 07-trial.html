@@ -14676,20 +14676,21 @@
   // keep Next locked until they raise it to 13+.
   // Age is one tap now — pick a range, no keyboard. (13+ only, so every chip
   // is valid; the representative midpoint is stored for the plan maths.)
-  (function () {
-    const grid = document.getElementById('ageChips'); if (!grid) return;
-    state.age = null;
-    grid.querySelectorAll('.age-chip').forEach(function (chip) {
-      chip.addEventListener('click', function () {
-        grid.querySelectorAll('.age-chip').forEach(function (c) { c.classList.remove('sel'); });
-        chip.classList.add('sel');
-        state.age = parseInt(chip.getAttribute('data-age'), 10);
-        try { if (typeof haptic === 'function') haptic(10); } catch (e) {}
-        try { if (window.coreSfx) coreSfx('tick'); } catch (e) {}
-        refreshCTA();
-      });
-    });
-  })();
+  // Age chip binding — uses event delegation for robustness
+  state.age = null;
+  document.addEventListener('click', function(e) {
+    var chip = e.target.closest('.age-chip');
+    if (!chip) return;
+    e.preventDefault();
+    var grid = document.getElementById('ageChips');
+    if (!grid) return;
+    grid.querySelectorAll('.age-chip').forEach(function(c) { c.classList.remove('sel'); });
+    chip.classList.add('sel');
+    state.age = parseInt(chip.getAttribute('data-age'), 10);
+    try { if (typeof haptic === 'function') haptic(10); } catch (e) {}
+    try { if (window.coreSfx) coreSfx('tick'); } catch (e) {}
+    refreshCTA();
+  });
 
   // ── Water jug interactive (step 9) ────────────────────────────────────
   // Tap the jug or "+" -> adds a cup, drop falls, splash ring pops, fill rises
