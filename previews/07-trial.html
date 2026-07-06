@@ -14167,6 +14167,16 @@
   function pickHabit(card) {
     document.querySelectorAll('.habit-card.sel').forEach(c => c.classList.remove('sel'));
     card.classList.add('sel');
+    // Simple click particles
+    var phone = card.closest('.phone') || card.closest('.step');
+    var pr = phone ? phone.getBoundingClientRect() : {left:0,top:0};
+    var r = card.getBoundingClientRect();
+    var cx = r.left - pr.left + r.width/2, cy = r.top - pr.top + r.height/2;
+    for (var i=0;i<8;i++) {
+      var p = document.createElement('span');
+      p.style.cssText = 'position:absolute;z-index:99;pointer-events:none;width:4px;height:4px;border-radius:50%;background:#C4C9D2;left:'+cx+'px;top:'+cy+'px;animation:genderBurst .5s cubic-bezier(.22,1,.36,1) forwards;animation-delay:'+(i*0.02)+'s;--gx:'+(Math.cos(i/8*Math.PI*2)*45+Math.random()*15)+'px;--gy:'+(Math.sin(i/8*Math.PI*2)*45+Math.random()*15)+'px;';
+      phone.appendChild(p); setTimeout(function(){p.remove()},550);
+    }
     const h = card.dataset.habit;
     state.habit = h;
     state.goal = (h === 'build') ? 'build' : 'quit';
