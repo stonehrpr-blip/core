@@ -9246,31 +9246,30 @@
                 <span class="cb-shine"></span>
               </div>
               <span class="cb-shadow"></span>
-               <span class="cb-vignette"></span>
-               <span class="cb-energy-ring"></span>
-               <span class="cb-part-ring"></span>
             </div>
 
             <div class="cb-wave" id="cbWave" aria-hidden="true"></div>
 
-            <div class="voice-line" id="voiceLine" aria-label="Line to read aloud"><span class="vl-count" id="vlCount">0/12</span><div class="vl-progress"><span class="vl-progress-fill" id="vlFill"></span></div></div>
+            <div class="voice-line" id="voiceLine">
+              <span class="vl-count" id="vlCount">0/8</span>
+              <div class="vl-progress"><span class="vl-progress-fill" id="vlFill"></span></div>
+            </div>
 
-            <button type="button" class="voice-mic" id="voiceMic" aria-label="Start listening">
+            <button type="button" class="voice-mic" id="voiceMic">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="9" y="3" width="6" height="11" rx="3"/>
-                <path d="M5 11a7 7 0 0 0 14 0"/>
-                <path d="M12 18v3"/>
+                <rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/>
               </svg>
               <span id="voiceMicLabel">Tap, then read the line</span>
             </button>
-            <div class="voice-status" id="voiceStatus">This is how you talk to him — anywhere in CORE.</div>
+
+            <div class="voice-status" id="voiceStatus">Say it naturally — Corbit's listening.</div>
           </div>
 
-          <div class="privacy-note" style="margin-top:12px; margin-bottom:4px;">
+          <div class="privacy-note">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
-            <span>Processed on-device. Nothing recorded.</span>
+            <span>On-device. Nothing recorded.</span>
           </div>
-          <button type="button" class="voice-skip" id="voiceSkip" style="margin-top:8px;width:100%;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:rgba(255,255,255,.4);font-family:inherit;font-size:12px;cursor:pointer">Skip for now</button>
+          <button type="button" class="voice-skip" id="voiceSkip">Skip for now</button>
         </div>
         <style>
           /* ── Meet Corbit (step 24) — simplified, friendly ── */
@@ -9288,11 +9287,25 @@
           @keyframes cbEntrance { 0%{opacity:0;transform:translateY(40px)} 60%{opacity:1;transform:translateY(-8px)} 80%{transform:translateY(2px)} 100%{opacity:1;transform:translateY(0)} }
           .step[data-step="24"].on .corbit-bot { animation:cbEntrance .7s .15s cubic-bezier(.22,1,.36,1) both; }
           /* Listening pulse ring */
-          /* Skip button — visible pill */
-          .voice-skip { margin-top:10px;width:100%;padding:14px;border-radius:14px;border:1px solid rgba(255,255,255,0.15);
-            background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.6);font-family:inherit;font-size:13px;font-weight:600;
-            cursor:pointer;letter-spacing:-0.1px;transition:all .2s; }
-          .voice-skip:hover { background:rgba(255,255,255,0.1);color:#fff; }
+          /* Mic button — clean circular design */
+          .voice-mic { display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:16px;
+            border-radius:16px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);
+            color:#fff;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;
+            transition:all .25s ease;letter-spacing:-.1px; }
+          .voice-mic svg { width:20px;height:20px;flex-shrink:0; }
+          .voice-mic:hover { background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2); }
+          .voice-mic.listening { border-color:#4ade80;box-shadow:0 0 20px rgba(74,222,128,.15); }
+          .voice-mic.done { border-color:#4ade80;background:rgba(74,222,128,.08); }
+          /* Voice status */
+          .voice-status { font-size:12px;color:rgba(255,255,255,.45);text-align:center;margin-top:4px; }
+          /* Privacy note */
+          .privacy-note { margin-top:14px;margin-bottom:4px; }
+          /* Skip button */
+          .voice-skip { margin-top:10px;width:100%;padding:14px;border-radius:14px;
+            border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);
+            color:rgba(255,255,255,.45);font-family:inherit;font-size:13px;font-weight:600;
+            cursor:pointer;letter-spacing:-.1px;transition:all .2s; }
+          .voice-skip:hover { background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.18); }
           /* Completion burst particles */
           @keyframes cbBurst { 0%{opacity:1;transform:translate(0,0) scale(1)} 100%{opacity:0;transform:translate(var(--bx),var(--by)) scale(0)} }
           /* Simplification: kill heavy animations */
