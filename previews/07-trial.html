@@ -3330,9 +3330,6 @@
         </div>
       </div>
 
-      <!-- Ambient core glow — fills the lower space on sparse question screens
-           with a soft, slowly-breathing light (a quiet echo of the portal). -->
-      <div class="deck-orb" aria-hidden="true"></div>
       <div class="stepwrap" id="stepwrap">
 
         <!-- STEP 0: Commitment (type PROMISE) -->
@@ -3417,7 +3414,7 @@
 
         <!-- STEP 1: Name + live availability -->
         <div class="step on" data-step="1">
-          <div class="kicker">Step 1 · Basics [synced 16:21:57]</div>
+          <div class="kicker">Step 1 · Basics</div>
           <h1 class="title" data-i18n-html="trial.t1">What should we<br/><span class="g">call you?</span></h1>
           <p class="copy">First name only.</p>
           <div class="field-wrap">
@@ -13978,12 +13975,14 @@
   // Passes the full Core username moderation system AND isn't already taken.
   function passesModeration(n) {
     // Immediate block list — test/placeholder names never allowed
-    const BLOCKED = /^(test|admin|user|demo|guest|root|null|undefined|system|moderator|staff|support|help|info|nobody|anonymous|unknown|delete|remove|none|void|blank|sample|example|asshole|bitch|cunt|dick|fuck|shit|slut|whore)$/i;
+    const BLOCKED = /^(test|admin|user|demo|guest|root|null|undefined|system|moderator|staff|support|help|info|nobody|anonymous|unknown|delete|remove|none|void|blank|sample|example|asshole|bitch|cunt|dick|fuck|shit|slut|whore|bastard|piss|wank|douche|prick|twat|nigger|faggot|retard|chink|spic|kike|gook|tranny|kill|murder|suicide|heroin|cocaine|meth|viagra|xanax|porn|sex|cum|penis|vagina|boob|tits|anal|orgy|rape|pedo|hitler|nazi|isis|terrorist)$/i;
     if (BLOCKED.test(n.trim())) return false;
     // Reject names that look like emails, URLs, or phone numbers
     if (/[@:/]/.test(n) || /^\d{4,}$/.test(n)) return false;
     // Reject names that are only symbols or contain 3+ consecutive same chars (spam)
     if (/^[^a-z0-9]+$/i.test(n) || /(.)\1\1/.test(n)) return false;
+    // Reject names containing any blocked substring (catches compound forms)
+    if (/(asshole|bitch|cunt|dick|fuck|shit|slut|whore|nigger|faggot|retard|chink|spic|kike|gook|tranny|porn|sex|cum|penis|vagina|rape|pedo|hitler|nazi|kill|murder|suicide|cocaine|heroin|meth)/i.test(n)) return false;
     try {
       if (window.coreModeration && window.coreModeration.checkUsername) {
         return window.coreModeration.checkUsername(n).ok;
@@ -16118,20 +16117,7 @@
 .habit-card[data-habit="build"] { box-shadow: inset 0 1.5px 0 rgba(214,219,226,0.22), 0 10px 24px rgba(0,0,0,0.34) !important; }
 .habit-card[data-habit="build"] .habit-desc { color: rgba(214,219,226,0.7) !important; }
 
-/* ── Ambient core glow — gives sparse screens a calm focal point ── */
-.deck-orb { position:absolute; left:50%; top:68%; transform:translate(-50%,-50%);
-  width:240px; height:240px; border-radius:50%; pointer-events:none; z-index:0;
-  opacity:0; transition:opacity .5s ease;
-  background:radial-gradient(circle, rgba(214,221,235,0.11) 0%, rgba(160,170,190,0.045) 36%, transparent 66%); }
-body.deck .deck-orb { opacity:1; animation:orbBreathe 6.5s ease-in-out infinite; }
-body.on-portal .deck-orb, body:not(.deck) .deck-orb { opacity:0; }
-.deck-orb::after { content:""; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
-  width:7px; height:7px; border-radius:50%;
-  background:radial-gradient(circle, rgba(236,240,248,0.55), rgba(200,208,222,0.15) 60%, transparent);
-  box-shadow:0 0 16px rgba(214,221,235,0.3); }
-/* opacity-only (no scale) so it composites cheaply — no per-frame repaint */
-@keyframes orbBreathe { 0%,100%{ opacity:0.6; } 50%{ opacity:1; } }
-@media (prefers-reduced-motion: reduce){ body.deck .deck-orb { animation:none; } }
+
 
 /* ════ COLOUR — real category colour on the icon chips, selections and the
    commitment meter, while cards / text / background stay premium dark. ════ */
