@@ -127,10 +127,6 @@
   .skip { width:38px; height:38px; min-width:38px; min-height:38px; aspect-ratio:1/1; border-radius:50%; display:flex; align-items:center; justify-content:center; background: rgba(255,255,255,0.04); border: 1px solid var(--border); cursor:pointer; transition: background .2s; flex:0 0 38px; box-sizing:border-box; padding:0; font-family:inherit; align-self:center; }
   .skip:hover { background: rgba(255,255,255,0.08); }
   .skip svg { width:14px; height:14px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
-  .brand { display:flex; align-items:center; gap:8px; }
-  .brand .dot { width:7px; height:7px; border-radius:50%; background:#fff; box-shadow:0 0 10px rgba(196,201,210,0.7); animation: brandDot 2.6s ease-in-out infinite; }
-  @keyframes brandDot { 0%,100% { transform:scale(1); opacity:1; } 50% { transform:scale(1.25); opacity:0.85; } }
-  .brand .wm { font-size:12px; font-weight:700; letter-spacing:0.36em; color:rgba(255,255,255,0.92); }
 
   /* progress dots — 5 chapter pills, current chapter glows brighter */
   .progress { display:flex; justify-content:center; align-items:center; gap:7px; padding: 14px 22px 8px; }
@@ -3424,13 +3420,14 @@
           <div class="field-wrap" style="margin-top:18px;">
             <div style="font-size:11.5px; color:var(--muted); margin:0 0 9px 4px; letter-spacing:-0.05px;">Your age</div>
             <div id="ageChips" class="age-chips">
-              <button type="button" class="age-chip" data-age="15">13–17</button>
-              <button type="button" class="age-chip" data-age="21">18–24</button>
-              <button type="button" class="age-chip" data-age="29">25–34</button>
-              <button type="button" class="age-chip" data-age="39">35–44</button>
-              <button type="button" class="age-chip" data-age="49">45–54</button>
-              <button type="button" class="age-chip" data-age="60">55+</button>
+              <button type="button" class="age-chip" data-age="15" onclick="pickAge(this,'15')">13–17</button>
+              <button type="button" class="age-chip" data-age="21" onclick="pickAge(this,'21')">18–24</button>
+              <button type="button" class="age-chip" data-age="29" onclick="pickAge(this,'29')">25–34</button>
+              <button type="button" class="age-chip" data-age="39" onclick="pickAge(this,'39')">35–44</button>
+              <button type="button" class="age-chip" data-age="49" onclick="pickAge(this,'49')">45–54</button>
+              <button type="button" class="age-chip" data-age="60" onclick="pickAge(this,'60')">55+</button>
             </div>
+            <script>window.pickAge=function(el,age){var grid=document.getElementById('ageChips');if(!grid)return;grid.querySelectorAll('.age-chip').forEach(function(c){c.classList.remove('sel')});el.classList.add('sel');state.age=parseInt(age,10);try{if(typeof haptic==='function')haptic(10)}catch(e){}try{if(window.coreSfx)coreSfx('tick')}catch(e){}refreshCTA()}</script>
           </div>
           <div class="privacy-note" style="margin-top:auto;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
@@ -14670,19 +14667,6 @@
   // is valid; the representative midpoint is stored for the plan maths.)
   // Age chip binding — uses event delegation for robustness
   state.age = null;
-  document.addEventListener('click', function(e) {
-    var chip = e.target.closest('.age-chip');
-    if (!chip) return;
-    e.preventDefault();
-    var grid = document.getElementById('ageChips');
-    if (!grid) return;
-    grid.querySelectorAll('.age-chip').forEach(function(c) { c.classList.remove('sel'); });
-    chip.classList.add('sel');
-    state.age = parseInt(chip.getAttribute('data-age'), 10);
-    try { if (typeof haptic === 'function') haptic(10); } catch (e) {}
-    try { if (window.coreSfx) coreSfx('tick'); } catch (e) {}
-    refreshCTA();
-  });
 
   // ── Water jug interactive (step 9) ────────────────────────────────────
   // Tap the jug or "+" -> adds a cup, drop falls, splash ring pops, fill rises
