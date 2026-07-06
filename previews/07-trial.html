@@ -14151,15 +14151,23 @@
   }
   // Passes the full Core username moderation system AND isn't already taken.
   function passesModeration(n) {
-    // Immediate block list — test/placeholder names never allowed
-    const BLOCKED = /^(test|admin|user|demo|guest|root|null|undefined|system|moderator|staff|support|help|info|nobody|anonymous|unknown|delete|remove|none|void|blank|sample|example|asshole|arse|bastard|bitch|bollocks|bugger|cock|cunt|damn|dick|dildo|douche|fag|faggot|fuck|hell|jerk|knob|milf|moron|nigger|paki|piss|prick|pussy|retard|shit|slag|slut|spaz|spic|tits|twat|wank|whore|chink|gook|kike|tranny|dyke|homo|queer|kill|murder|suicide|die|heroin|cocaine|crack|meth|ecstasy|ketamine|opium|viagra|xanax|valium|porn|sex|xxx|cum|penis|vagina|boob|anal|orgy|rape|pedo|incest|hitler|nazi|isis|terrorist|jihad|bomb|shoot|stab|blood|corpse|dead|satan|lucifer|demon)$/i;
-    if (BLOCKED.test(n.trim())) return false;
-    // Reject names that look like emails, URLs, or phone numbers
-    if (/[@:/]/.test(n) || /^\d{4,}$/.test(n)) return false;
-    // Reject names that are only symbols or contain 3+ consecutive same chars (spam)
-    if (/^[^a-z0-9]+$/i.test(n) || /(.)\1\1/.test(n)) return false;
-    // Reject names containing any blocked substring (catches compound forms like "fuckyou123")
-    if (/(asshole|arse|bastard|bitch|bollocks|bugger|cock|cunt|damn|dick|dildo|douche|fag|faggot|fuck|hell|knob|milf|moron|nigger|paki|piss|prick|pussy|retard|shit|slag|slut|spaz|spic|tits|twat|wank|whore|chink|gook|kike|tranny|dyke|homo|queer|kill|murder|suicide|die|heroin|cocaine|crack|meth|ecstasy|ketamine|opium|viagra|xanax|valium|porn|sex|xxx|cum|penis|vagina|boob|anal|orgy|rape|pedo|incest|hitler|nazi|isis|terrorist|jihad|bomb|shoot|stab|blood|corpse|dead|satan|lucifer|demon)/i.test(n)) return false;
+    var s = n.trim();
+    // Must be 2-20 chars, letters only (with hyphens/apostrophes for compound names)
+    if (s.length < 2 || s.length > 20) return false;
+    if (!/^[\p{L}][\p{L}'\-]*$/u.test(s)) return false;
+    // No spaces allowed — first name only
+    if (/\s/.test(s)) return false;
+    // Reject names that are only numbers or contain digits
+    if (/^\d+$/.test(s) || /\d/.test(s)) return false;
+    // Reject 3+ consecutive same chars (spam like "aaaa")
+    if (/(.)\1\1/.test(s)) return false;
+    // Reject if it looks like an email, URL, or phone
+    if (/[@:/]/.test(s)) return false;
+    // Blocked exact matches
+    var BLOCKED = /^(test|admin|user|demo|guest|root|null|undefined|system|moderator|staff|support|help|info|nobody|anonymous|unknown|delete|remove|none|void|blank|sample|example|asshole|arse|bastard|bitch|bollocks|bugger|cock|cunt|damn|dick|dildo|douche|fag|faggot|fuck|hell|jerk|knob|milf|moron|nigger|paki|piss|prick|pussy|retard|shit|slag|slut|spaz|spic|tits|twat|wank|whore|chink|gook|kike|tranny|dyke|homo|queer|kill|murder|suicide|die|heroin|cocaine|crack|meth|ecstasy|ketamine|opium|viagra|xanax|valium|porn|sex|xxx|cum|penis|vagina|boob|anal|orgy|rape|pedo|incest|hitler|nazi|isis|terrorist|jihad|bomb|shoot|stab|blood|corpse|dead|satan|lucifer|demon|god|jesus|allah|yahweh|buddha|church|mosque|temple|abortion|genocide|torture|slave|traffick|cartel|mafia|gang|lynch|execute|poison|anthrax|cyanide|nuke|nuclear)$/i;
+    if (BLOCKED.test(s)) return false;
+    // Blocked substring anywhere in the name
+    if (/(asshole|arse|bastard|bitch|bollocks|bugger|cock|cunt|damn|dick|dildo|douche|fag|faggot|fuck|hell|knob|milf|moron|nigger|paki|piss|prick|pussy|retard|shit|slag|slut|spaz|spic|tits|twat|wank|whore|chink|gook|kike|tranny|dyke|homo|queer|kill|murder|suicide|die|heroin|cocaine|crack|meth|ecstasy|ketamine|opium|viagra|xanax|valium|porn|sex|xxx|cum|penis|vagina|boob|anal|orgy|rape|pedo|incest|hitler|nazi|isis|terrorist|jihad|bomb|shoot|stab|blood|corpse|dead|satan|lucifer|demon|abort|genocide|torture|slave|traffick|cartel|mafia|lynch|execute|poison|nuke)/i.test(s)) return false;
     try {
       if (window.coreModeration && window.coreModeration.checkUsername) {
         return window.coreModeration.checkUsername(n).ok;
@@ -14185,58 +14193,26 @@
     var v = (nameField.value || '').trim();
     nameField.classList.remove('field-ok', 'field-bad');
     nameField.style.borderColor = ''; nameField.style.background = ''; nameField.style.boxShadow = '';
+    nameSugWrap.style.display = 'none';
     if (!v) {
       nameStatus.textContent = 'Just your first name — your coach uses it.';
       nameStatus.style.color = 'var(--muted)';
-      nameSugWrap.style.display = 'none';
       state.name = '';
       refreshCTA();
       return;
     }
-    if (v.length < 2) {
-      nameStatus.textContent = 'A little longer.';
-      nameStatus.style.color = 'var(--muted)';
-      nameSugWrap.style.display = 'none';
-      state.name = '';
-      refreshCTA();
-      return;
-    }
-    // Reject purely numeric / symbol-only input
-    if (/^[0-9_\-\.\s]+$/.test(v)) {
-      nameStatus.innerHTML = '<span style="color:#ef4444;">✕ Try a real first name.</span>';
+    // All validation through passesModeration
+    if (!passesModeration(v)) {
+      nameStatus.innerHTML = '<span style="color:#ef4444;">✕ Try a different name.</span>';
       nameField.classList.add('field-bad');
-      nameSugWrap.style.display = 'none';
       state.name = '';
       refreshCTA();
       return;
     }
-    // Letters-only validation (allows accents, hyphens, apostrophes, spaces)
-    if (!/^[\p{L}][\p{L}' \-]*$/u.test(v)) {
-      nameStatus.innerHTML = '<span style="color:#ef4444;">✕ Letters only — no numbers or symbols.</span>';
-      nameField.classList.add('field-bad');
-      nameSugWrap.style.display = 'none';
-      state.name = '';
-      refreshCTA();
-      return;
-    }
-    // Core moderation
-    var modInput = v.replace(/['\- ]/g, '');
-    var mod = (window.coreModeration && window.coreModeration.checkUsername)
-      ? window.coreModeration.checkUsername(modInput)
-      : { ok: passesModeration(modInput) };
-    if (!mod.ok) {
-      nameStatus.innerHTML = '<span style="color:#ef4444;">✕ That name can\'t be used here.</span>';
-      nameField.classList.add('field-bad');
-      nameSugWrap.style.display = 'none';
-      state.name = '';
-      refreshCTA();
-      return;
-    }
-    // Valid name — green outline
+    // Valid
     var nice = v.charAt(0).toUpperCase() + v.slice(1);
     nameStatus.innerHTML = '<span style="color:#4ade80;">✓ Nice to meet you, ' + escTrialHtml(nice) + '.</span>';
     nameField.classList.add('field-ok');
-    nameSugWrap.style.display = 'none';
     state.name = v;
     refreshCTA();
   }
