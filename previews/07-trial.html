@@ -9226,7 +9226,7 @@
           <p class="copy">Your AI coach, built into CORE. You talk — he listens.</p>
 
           <div class="voice-stage">
-            <div class="cb-speech" id="cbSpeech">I'm done letting this<br>control me.</div>
+            <div class="cb-speech" id="cbSpeech">Hi Corbit,<br>say it back to me.</div>
             <div class="corbit-bot" id="voiceOrb">
               <span class="cb-halo"></span>
               <span class="cb-aura" id="cbAura"></span>
@@ -15506,7 +15506,8 @@
   // The user reads one line aloud; the Web Speech API highlights each word as
   // Corbit recognises it. On-device, nothing recorded. Optional (skippable).
   (function corbitVoice() {
-    const LINE = "I'm done letting this control me. I'm taking my life back.";
+    var userName = (state.name || 'there').trim();
+    var LINE = "Hi Corbit my name is " + (userName || 'there') + " and yours?";
     const line = document.getElementById('voiceLine');
     const mic = document.getElementById('voiceMic');
     const micLabel = document.getElementById('voiceMicLabel');
@@ -15684,7 +15685,7 @@
       // Progress face: expression evolves
       if(orb){orb.classList.remove('progress-25','progress-50','progress-75','progress-90');if(pct>=25)orb.classList.add('progress-25');if(pct>=50)orb.classList.add('progress-50');if(pct>=75)orb.classList.add('progress-75');if(pct>=90)orb.classList.add('progress-90')}
       // Dynamic speech bubble
-      var bubble=document.getElementById('cbSpeech');if(bubble){var left=targets.length-heard;if(left===0)bubble.innerHTML='<span style=color:#4ade80>You did it!</span>';else if(left<=2)bubble.innerHTML='Almost there…<br><span style=color:#4ade80>'+left+' word'+(left>1?'s':'')+' to go</span>';else if(heard===0)bubble.innerHTML='I\'m done letting this<br>control me.';else bubble.innerHTML=heard+'/'+targets.length+' words<br>Keep going…'}
+      var bubble=document.getElementById('cbSpeech');if(bubble){var left=targets.length-heard;if(left===0)bubble.innerHTML='<span style=color:#4ade80>You did it!</span>';else if(left<=2)bubble.innerHTML='Almost there…<br><span style=color:#4ade80>'+left+' word'+(left>1?'s':'')+' to go</span>';else if(heard===0)bubble.innerHTML='Hi Corbit,<br>say it back to me.';else bubble.innerHTML=heard+'/'+targets.length+' words<br>Keep going…'}
       if (!done && heard >= Math.ceil(targets.length * 0.75)) success();
       else if (!done && heard > 0) {setStatus('Keep going — ' + heard + '/' + targets.length + ' words locked.');if(statusEl) statusEl.classList.add('active');if(orb){orb.classList.remove('phoneme-ah','phoneme-ee','phoneme-oh','phoneme-mm');orb.classList.add('speaking');setTimeout(function(){orb.classList.remove('speaking')},600)}}
     }
@@ -15724,6 +15725,19 @@
       setStatus('Locked in. Corbit would know your voice anywhere.');
       try { if (typeof haptic === 'function') haptic([10, 40, 20]); } catch (e) {}
       try { if (window.coreSfx) coreSfx('confirm'); } catch (e) {}
+      // Corbit responds in a nice female voice
+      try {
+        var utter = new SpeechSynthesisUtterance("Nice to meet you too, " + (userName || '') + ". Let's get started.");
+        var voices = speechSynthesis.getVoices();
+        for (var vi = 0; vi < voices.length; vi++) {
+          if (voices[vi].name.indexOf('Samantha') >= 0 || voices[vi].name.indexOf('Karen') >= 0 || voices[vi].name.indexOf('Female') >= 0) {
+            utter.voice = voices[vi]; break;
+          }
+        }
+        if (!utter.voice && voices.length > 0) { for (var vi2 = 0; vi2 < voices.length; vi2++) { if (voices[vi2].name.indexOf('Google UK English Female') >= 0 || voices[vi2].name.indexOf('en-US') >= 0) { utter.voice = voices[vi2]; break; } } }
+        utter.pitch = 1.1; utter.rate = 0.95; utter.volume = 0.9;
+        speechSynthesis.speak(utter);
+      } catch(e) {}
       track('voice_linked', {});
       refreshCTA();
     }
