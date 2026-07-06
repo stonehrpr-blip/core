@@ -15515,6 +15515,11 @@
     const wave = document.getElementById('cbWave');
     if (!line || !mic) return;
     var skipBtn=document.getElementById('voiceSkip');if(skipBtn) skipBtn.addEventListener('click',function(){if(!done){done=true;try{stopRec()}catch(e){};try{stopWave()}catch(e){};setTimeout(function(){advance()},300)}});
+    // Inactivity auto-skip: after 15s of no mic tap, pulse the skip button
+    var inactivityTimer=null;
+    function resetInactivity(){clearTimeout(inactivityTimer);if(skipBtn)skipBtn.classList.remove('pulse');inactivityTimer=setTimeout(function(){if(skipBtn&&!done&&!listening){skipBtn.classList.add('pulse');skipBtn.textContent='Skip for now — tap when ready'}},15000)}
+    resetInactivity();
+    if(mic)mic.addEventListener('click',function(){resetInactivity();if(!listening&&!done)setTimeout(resetInactivity,15000)});
     // ── Corbit 2.0 life: orbiting aura, natural blinks, pupil tracking ──
     (function corbitLife() {
       const bot = document.getElementById('voiceOrb');
@@ -15532,8 +15537,12 @@
         sp.style.setProperty('--or', (72 + Math.random() * 26).toFixed(0) + 'px');
         aura.appendChild(sp);
       }
-      // surprise face on entry
-      setTimeout(function(){bot.classList.add('surprised');setTimeout(function(){bot.classList.remove('surprised')},800)},900);
+      // surprise face + entrance trail particles
+      setTimeout(function(){bot.classList.add('surprised');
+        // Trail particles — burst behind bot as it enters
+        var br=bot.getBoundingClientRect(),host=bot.closest('.phone')||document.body,hr=host.getBoundingClientRect();
+        for(var ti=0;ti<14;ti++){var tp=document.createElement('span');tp.className='cb-trail';tp.style.cssText='left:'+(br.left-hr.left+br.width/2+Math.random()*20-10)+'px;top:'+(br.top-hr.top+br.height/2+Math.random()*30-10)+'px;animation-delay:'+(ti*0.04)+'s';host.appendChild(tp);setTimeout(function(){tp.remove()},700)}
+        setTimeout(function(){bot.classList.remove('surprised')},800)},900);
       // natural double-blinks at irregular intervals
       (function blinkLoop() {
         const delay = 2600 + Math.random() * 3800;
@@ -15649,16 +15658,23 @@
             var wr2=targets[i].el.getBoundingClientRect();var fp2=document.createElement('span');fp2.className='vl-float';fp2.textContent=targets[i].el.textContent;fp2.style.cssText='left:'+(wr2.left+wr2.width/2)+'px;top:'+wr2.top+'px';document.body.appendChild(fp2);setTimeout(function(){fp2.remove()},1000)
             // Sparkle burst
             if(orb){var wr=orb.getBoundingClientRect();var sp=document.createElement('span');sp.className='cb-word-spark';var wa=(i/targets.length)*Math.PI*2;sp.style.cssText='left:'+(wr.left+wr.width/2)+'px;top:'+(wr.top+wr.height/2)+'px;--wx:'+(Math.cos(wa)*20+Math.random()*10)+'px;--wy:'+(Math.sin(wa)*20-10-Math.random()*10)+'px;animation-delay:'+(Math.random()*.1)+'s';document.body.appendChild(sp);setTimeout(function(){sp.remove()},600)}
+            // Haptic pulse on each word match
+            try{if(navigator.vibrate)navigator.vibrate(8)}catch(e){}
             break;
           }
         }
       });
       const heard = targets.filter(function (t) { return t.heard; }).length;
-      // Update progress bar
-      var vlFill=document.getElementById('vlFill');if(vlFill) vlFill.style.width=Math.round(heard/targets.length*100)+'%';
-      var vlCount=document.getElementById('vlCount');if(vlCount) vlCount.textContent=heard+'/'+targets.length
-      // Update blush progress
-      if(orb){var pct=Math.round(heard/targets.length*100);orb.classList.remove('progress-25','progress-50','progress-75');if(pct>=25)orb.classList.add('progress-25');if(pct>=50)orb.classList.add('progress-50');if(pct>=75)orb.classList.add('progress-75')}
+      var pct=Math.round(heard/targets.length*100);
+      // Progress bar
+      var vlFill=document.getElementById('vlFill');if(vlFill) vlFill.style.width=pct+'%';
+      var vlCount=document.getElementById('vlCount');if(vlCount) vlCount.textContent=heard+'/'+targets.length;
+      // Wave bar gradient: shift bars from white to green
+      if(wave){var bars=wave.querySelectorAll('i');bars.forEach(function(b,i){var t=i/bars.length;b.style.background=t<(pct/100)?'#4ade80':'rgba(255,255,255,0.5)'})}
+      // Progress face: expression evolves
+      if(orb){orb.classList.remove('progress-25','progress-50','progress-75','progress-90');if(pct>=25)orb.classList.add('progress-25');if(pct>=50)orb.classList.add('progress-50');if(pct>=75)orb.classList.add('progress-75');if(pct>=90)orb.classList.add('progress-90')}
+      // Dynamic speech bubble
+      var bubble=document.getElementById('cbSpeech');if(bubble){var left=targets.length-heard;if(left===0)bubble.innerHTML='<span style=color:#4ade80>You did it!</span>';else if(left<=2)bubble.innerHTML='Almost there…<br><span style=color:#4ade80>'+left+' word'+(left>1?'s':'')+' to go</span>';else if(heard===0)bubble.innerHTML='I\'m ready to change.<br>This time is different.';else bubble.innerHTML=heard+'/'+targets.length+' words<br>Keep going…'}
       if (!done && heard >= Math.ceil(targets.length * 0.75)) success();
       else if (!done && heard > 0) {setStatus('Keep going — ' + heard + '/' + targets.length + ' words locked.');if(statusEl) statusEl.classList.add('active');if(orb){orb.classList.remove('phoneme-ah','phoneme-ee','phoneme-oh','phoneme-mm');orb.classList.add('speaking');setTimeout(function(){orb.classList.remove('speaking')},600)}}
     }
@@ -15680,8 +15696,8 @@
       if (orb) {
         const r = orb.getBoundingClientRect(), host = orb.closest('.phone') || document.body;
         const hr = host.getBoundingClientRect();
-        // Confetti burst
-      for(let ci=0;ci<30;ci++){var cf=document.createElement('span');cf.className='cb-confetti';cf.style.cssText='left:'+(r.left-hr.left+r.width/2)+'px;top:'+(r.top-hr.top+r.height/2)+'px;--cx:'+((Math.random()-.5)*120)+'px;--cy:'+(60+Math.random()*100)+'px;--cr:'+(Math.random()*360)+'deg;--cd:'+(.8+Math.random()*.8)+'s;--cdel:'+(Math.random()*.3)+'s;background:'+(ci%3?'#30D158':'#fff');host.appendChild(cf);setTimeout(function(){cf.remove()},1500)}
+        // Confetti burst — 50 particles + gold
+      for(let ci=0;ci<50;ci++){var cf=document.createElement('span');cf.className='cb-confetti';var colors=['#30D158','#fff','#FFD700','#7CE8A4','#FFE55C'];cf.style.cssText='left:'+(r.left-hr.left+r.width/2)+'px;top:'+(r.top-hr.top+r.height/2)+'px;--cx:'+((Math.random()-.5)*160)+'px;--cy:'+(-40-Math.random()*120)+'px;--cr:'+(Math.random()*360)+'deg;--cd:'+(.7+Math.random()*1)+'s;--cdel:'+(Math.random()*.4)+'s;background:'+colors[ci%5]+';width:'+(2+Math.random()*6)+'px;height:'+(4+Math.random()*8)+'px';host.appendChild(cf);setTimeout(function(){cf.remove()},1800)}
       // Success ring
       var sring=document.createElement('span');sring.className='cb-success-ring';sring.style.cssText='left:'+(r.left-hr.left+r.width/2)+'px;top:'+(r.top-hr.top+r.height/2)+'px';host.appendChild(sring);setTimeout(function(){sring.remove()},800);
       for (let i = 0; i < 16; i++) {
@@ -15723,7 +15739,7 @@
           var src=audioCtx.createMediaStreamSource(stream);
           analyser=audioCtx.createAnalyser();analyser.fftSize=256;
           src.connect(analyser);
-        }).catch(function(){});
+        }).catch(function(){if(statusEl)statusEl.textContent='Mic access needed — you can allow it later in Settings.'});
         // Play a subtle chime
         var osc=audioCtx.createOscillator(),gain=audioCtx.createGain();
         osc.type='sine';osc.frequency.setValueAtTime(880,audioCtx.currentTime);osc.frequency.exponentialRampToValueAtTime(1760,audioCtx.currentTime+.08);
