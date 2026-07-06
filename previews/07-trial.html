@@ -2393,8 +2393,8 @@
     <div class="notch"></div>
     <div class="home-indicator"></div>
 
-    <!-- ── CORBIT GUIDE — Siri-style helper orb + glass tip bubble ── -->
-    <div class="corbit-guide" id="corbitGuide" aria-live="polite">
+    <!-- ── CORBIT GUIDE — hidden per user request ── -->
+    <div class="corbit-guide" id="corbitGuide" aria-live="polite" style="display:none !important">
       <div class="cg-bubble" id="cgBubble">
         <div class="cg-head">
           <span class="cg-helix" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
@@ -3415,7 +3415,6 @@
         <!-- STEP 1: Name + live availability -->
         <div class="step on" data-step="1">
           <div class="kicker">Step 1 · Basics</div>
-          <div style="background:#ff4444;color:#fff;padding:6px 12px;border-radius:6px;font-weight:700;font-size:12px;margin-bottom:12px;text-align:center">✅ UPDATED — BUTTON FIXED — ORB REMOVED — v4</div>
           <h1 class="title" data-i18n-html="trial.t1">What should we<br/><span class="g">call you?</span></h1>
           <p class="copy">First name only.</p>
           <div class="field-wrap">
@@ -13976,14 +13975,14 @@
   // Passes the full Core username moderation system AND isn't already taken.
   function passesModeration(n) {
     // Immediate block list — test/placeholder names never allowed
-    const BLOCKED = /^(test|admin|user|demo|guest|root|null|undefined|system|moderator|staff|support|help|info|nobody|anonymous|unknown|delete|remove|none|void|blank|sample|example|asshole|bitch|cunt|dick|fuck|shit|slut|whore|bastard|piss|wank|douche|prick|twat|nigger|faggot|retard|chink|spic|kike|gook|tranny|kill|murder|suicide|heroin|cocaine|meth|viagra|xanax|porn|sex|cum|penis|vagina|boob|tits|anal|orgy|rape|pedo|hitler|nazi|isis|terrorist)$/i;
+    const BLOCKED = /^(test|admin|user|demo|guest|root|null|undefined|system|moderator|staff|support|help|info|nobody|anonymous|unknown|delete|remove|none|void|blank|sample|example|asshole|arse|bastard|bitch|bollocks|bugger|cock|cunt|damn|dick|dildo|douche|fag|faggot|fuck|hell|jerk|knob|milf|moron|nigger|paki|piss|prick|pussy|retard|shit|slag|slut|spaz|spic|tits|twat|wank|whore|chink|gook|kike|tranny|dyke|homo|queer|kill|murder|suicide|die|heroin|cocaine|crack|meth|ecstasy|ketamine|opium|viagra|xanax|valium|porn|sex|xxx|cum|penis|vagina|boob|anal|orgy|rape|pedo|incest|hitler|nazi|isis|terrorist|jihad|bomb|shoot|stab|blood|corpse|dead|satan|lucifer|demon)$/i;
     if (BLOCKED.test(n.trim())) return false;
     // Reject names that look like emails, URLs, or phone numbers
     if (/[@:/]/.test(n) || /^\d{4,}$/.test(n)) return false;
     // Reject names that are only symbols or contain 3+ consecutive same chars (spam)
     if (/^[^a-z0-9]+$/i.test(n) || /(.)\1\1/.test(n)) return false;
-    // Reject names containing any blocked substring (catches compound forms)
-    if (/(asshole|bitch|cunt|dick|fuck|shit|slut|whore|nigger|faggot|retard|chink|spic|kike|gook|tranny|porn|sex|cum|penis|vagina|rape|pedo|hitler|nazi|kill|murder|suicide|cocaine|heroin|meth)/i.test(n)) return false;
+    // Reject names containing any blocked substring (catches compound forms like "fuckyou123")
+    if (/(asshole|arse|bastard|bitch|bollocks|bugger|cock|cunt|damn|dick|dildo|douche|fag|faggot|fuck|hell|knob|milf|moron|nigger|paki|piss|prick|pussy|retard|shit|slag|slut|spaz|spic|tits|twat|wank|whore|chink|gook|kike|tranny|dyke|homo|queer|kill|murder|suicide|die|heroin|cocaine|crack|meth|ecstasy|ketamine|opium|viagra|xanax|valium|porn|sex|xxx|cum|penis|vagina|boob|anal|orgy|rape|pedo|incest|hitler|nazi|isis|terrorist|jihad|bomb|shoot|stab|blood|corpse|dead|satan|lucifer|demon)/i.test(n)) return false;
     try {
       if (window.coreModeration && window.coreModeration.checkUsername) {
         return window.coreModeration.checkUsername(n).ok;
@@ -14069,23 +14068,31 @@
   }
   nameField.addEventListener('input', paintNameStatus);
   nameField.addEventListener('blur',  paintNameStatus);
-  // Aggressive CTA fixer — also shows debug info on the page
+  // Direct CTA enabler + green/red name field feedback
   window.__ctaFixer = setInterval(function(){
     try {
-      var n = (document.getElementById('name').value || '').trim();
-      var a = window._state ? window._state.age : (typeof state !== 'undefined' ? state.age : null);
+      var nameField = document.getElementById('name');
+      var n = (nameField && nameField.value || '').trim();
+      var a = (window._state && window._state.age) || (typeof state !== 'undefined' ? state.age : null);
       var ctaBtn = document.getElementById('cta');
       var noteEl = document.getElementById('footerNote');
-      var dbg = document.getElementById('__dbg');
-      if (!dbg) { dbg = document.createElement('div'); dbg.id = '__dbg'; dbg.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#111;color:#0f0;font:10px monospace;padding:6px;z-index:9999;opacity:0.9'; document.body.appendChild(dbg); }
-      dbg.textContent = 'name='+JSON.stringify(n)+' age='+JSON.stringify(a)+' ctaBtn='+!!ctaBtn+' disabled='+(ctaBtn?ctaBtn.disabled:'?')+' state.age='+(typeof state!=='undefined'?JSON.stringify(state.age):'no state');
-      if (!ctaBtn) return;
-      if (n.length >= 2 && typeof a === 'number' && a >= 13) {
-        ctaBtn.disabled = false; ctaBtn.style.background = ''; ctaBtn.style.color = ''; ctaBtn.style.cursor = 'pointer';
-        if (noteEl) noteEl.textContent = 'Looks good — tap next';
-        dbg.textContent += ' ✅ ENABLED';
+      // Green/red outline on name field
+      if (nameField) {
+        if (n.length >= 2 && typeof a === 'number' && a >= 13) {
+          nameField.style.borderColor = '#4ade80'; nameField.style.boxShadow = '0 0 0 2px rgba(74,222,128,0.3)';
+        } else if (n.length >= 1) {
+          nameField.style.borderColor = '#ef4444'; nameField.style.boxShadow = '0 0 0 2px rgba(239,68,68,0.2)';
+        } else {
+          nameField.style.borderColor = ''; nameField.style.boxShadow = '';
+        }
       }
-    } catch(e) { var dbg2 = document.getElementById('__dbg'); if (dbg2) dbg2.textContent = 'ERROR: '+e.message; }
+      // Enable button when both fields filled
+      if (ctaBtn && n.length >= 2 && typeof a === 'number' && a >= 13) {
+        ctaBtn.disabled = false;
+        ctaBtn.style.background = ''; ctaBtn.style.color = ''; ctaBtn.style.cursor = 'pointer';
+        if (noteEl) noteEl.textContent = 'Looks good — tap next';
+      }
+    } catch(e) {}
   }, 200);
   document.querySelectorAll('#tones .tone-row').forEach(row => {
     row.addEventListener('click', () => {
