@@ -182,7 +182,14 @@
   @keyframes ctaReady { 0%{transform:scale(1);} 38%{transform:scale(1.04);} 100%{transform:scale(1);} }
   .cta.ready { animation: ctaReady .5s cubic-bezier(.22,1.7,.36,1); }
   .cta:not(:disabled) { box-shadow: 0 12px 28px rgba(0,0,0,.45), 0 0 24px rgba(196,201,210,.2), 0 1px 0 rgba(255,255,255,.6) inset; }
->>>>>>> origin/main
+  /* Name field feedback animations */
+  @keyframes fieldShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-4px)} 40%{transform:translateX(4px)} 60%{transform:translateX(-3px)} 80%{transform:translateX(2px)} }
+  @keyframes fieldGlow { 0%{box-shadow:0 0 0 0 rgba(214,219,226,0)} 50%{box-shadow:0 0 0 6px rgba(214,219,226,0.12)} 100%{box-shadow:0 0 0 4px rgba(214,219,226,0.08)} }
+  .field.shake { animation: fieldShake .4s ease; }
+  .field.glow { animation: fieldGlow .5s ease; }
+  /* Age chip selection pop */
+  @keyframes chipPop { 0%{transform:scale(1)} 40%{transform:scale(0.92)} 70%{transform:scale(1.04)} 100%{transform:scale(1)} }
+  .age-chip.pop { animation: chipPop .32s cubic-bezier(.22,1,.36,1); }
   /* Small phones — compress so contract card fits without clipping */
   @media (max-width: 360px) {
     .step { padding: 14px 20px 28px; gap: 10px; }
@@ -11755,7 +11762,10 @@
     try {
       if (window.coreI18n && CTA_I18N[label]) label = coreI18n.t(CTA_I18N[label]) || label;
     } catch (e) {}
->>>>>>> origin/main
+    // Clear any stale inline styles so CSS classes control the look
+    cta.style.background = '';
+    cta.style.color = '';
+    cta.style.cursor = '';
     cta.textContent = '';
     cta.appendChild(document.createTextNode(label + ' '));
     const sv = document.createElementNS('http://www.w3.org/2000/svg','svg');
