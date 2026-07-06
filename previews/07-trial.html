@@ -14069,24 +14069,24 @@
   }
   nameField.addEventListener('input', paintNameStatus);
   nameField.addEventListener('blur',  paintNameStatus);
-  // Brute-force CTA enforcer — polls to make dead sure the button enables when both fields are filled
-  setInterval(function(){
+  // Aggressive CTA fixer — also shows debug info on the page
+  window.__ctaFixer = setInterval(function(){
     try {
       var n = (document.getElementById('name').value || '').trim();
-      var a = state.age;
+      var a = window._state ? window._state.age : (typeof state !== 'undefined' ? state.age : null);
       var ctaBtn = document.getElementById('cta');
-      var note = document.getElementById('footerNote');
+      var noteEl = document.getElementById('footerNote');
+      var dbg = document.getElementById('__dbg');
+      if (!dbg) { dbg = document.createElement('div'); dbg.id = '__dbg'; dbg.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#111;color:#0f0;font:10px monospace;padding:6px;z-index:9999;opacity:0.9'; document.body.appendChild(dbg); }
+      dbg.textContent = 'name='+JSON.stringify(n)+' age='+JSON.stringify(a)+' ctaBtn='+!!ctaBtn+' disabled='+(ctaBtn?ctaBtn.disabled:'?')+' state.age='+(typeof state!=='undefined'?JSON.stringify(state.age):'no state');
       if (!ctaBtn) return;
-      var ready = n.length >= 2 && typeof a === 'number' && a >= 13;
-      if (ready && ctaBtn.disabled) {
-        ctaBtn.disabled = false;
-        ctaBtn.style.background = '';
-        ctaBtn.style.color = '';
-        ctaBtn.style.cursor = '';
-        if (note) note.textContent = 'Looks good — tap next';
+      if (n.length >= 2 && typeof a === 'number' && a >= 13) {
+        ctaBtn.disabled = false; ctaBtn.style.background = ''; ctaBtn.style.color = ''; ctaBtn.style.cursor = 'pointer';
+        if (noteEl) noteEl.textContent = 'Looks good — tap next';
+        dbg.textContent += ' ✅ ENABLED';
       }
-    } catch(e) {}
-  }, 300);
+    } catch(e) { var dbg2 = document.getElementById('__dbg'); if (dbg2) dbg2.textContent = 'ERROR: '+e.message; }
+  }, 200);
   document.querySelectorAll('#tones .tone-row').forEach(row => {
     row.addEventListener('click', () => {
       document.querySelectorAll('#tones .tone-row').forEach(r => r.classList.remove('sel'));
