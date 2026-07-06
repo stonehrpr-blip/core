@@ -187,6 +187,10 @@
   @keyframes fieldGlow { 0%{box-shadow:0 0 0 0 rgba(214,219,226,0)} 50%{box-shadow:0 0 0 6px rgba(214,219,226,0.12)} 100%{box-shadow:0 0 0 4px rgba(214,219,226,0.08)} }
   .field.shake { animation: fieldShake .4s ease; }
   .field.glow { animation: fieldGlow .5s ease; }
+  /* Blocked / inappropriate name: blur the typed text itself (transparent
+     colour + soft text-shadow — the classic input-text blur that keeps the
+     caret usable) so the word is never shown sharp on screen. */
+  .field.censored { color: transparent !important; text-shadow: 0 0 7px rgba(235,235,245,0.6); caret-color: #EBEBF5; }
   /* Age chip selection pop */
   @keyframes chipPop { 0%{transform:scale(1)} 40%{transform:scale(0.92)} 70%{transform:scale(1.04)} 100%{transform:scale(1)} }
   .age-chip.pop { animation: chipPop .32s cubic-bezier(.22,1,.36,1); }
@@ -2499,7 +2503,18 @@
       </div>
       </div><!-- /rc-tilt -->
       <p class="rc-note card-el" id="rcReward">Face sealed · your CORE avatar is set.</p>
-      <button type="button" class="rc-cta card-el" id="rcEnter">
+      <!-- account password — required before entering CORE -->
+      <div class="rc-pass card-el" id="rcPassWrap">
+        <label class="rc-pass-lab" for="rcPass">Create your password</label>
+        <div class="rc-pass-row">
+          <input id="rcPass" class="rc-pass-in" type="password" placeholder="At least 8 characters" autocomplete="new-password" maxlength="64" spellcheck="false" />
+          <button type="button" class="rc-pass-eye" id="rcPassEye" aria-label="Show password">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div class="rc-pass-hint" id="rcPassHint">Locks your CORE ID — 8+ characters with a letter and a number.</div>
+      </div>
+      <button type="button" class="rc-cta card-el" id="rcEnter" disabled>
         Enter CORE
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
       </button>
@@ -2611,10 +2626,31 @@
         font-size:15px; font-weight:800; letter-spacing:-0.2px; cursor:pointer;
         box-shadow:0 16px 40px rgba(255,255,255,0.14); opacity:0;
         transition:transform .15s cubic-bezier(.22,1,.36,1); }
-      .core-id.card-on .rc-cta { animation:rcFadeUp .5s .9s cubic-bezier(.22,1,.36,1) forwards; }
+      .core-id.card-on .rc-cta { animation:rcFadeUp .5s 1.05s cubic-bezier(.22,1,.36,1) forwards; }
       .rc-cta:active { transform:scale(0.96); }
       .rc-cta svg { width:16px; height:16px; }
+      .rc-cta:disabled { background:linear-gradient(180deg, rgba(255,255,255,0.16), rgba(228,232,239,0.12));
+        color:rgba(255,255,255,0.38); cursor:default; box-shadow:none; }
+      .rc-cta:disabled:active { transform:none; }
       @keyframes rcFadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+      /* create-password block — the last gate before Enter CORE */
+      .rc-pass { width:min(320px, 84%); display:flex; flex-direction:column; gap:7px; text-align:left; opacity:0; }
+      .core-id.card-on .rc-pass { animation:rcFadeUp .5s .85s cubic-bezier(.22,1,.36,1) forwards; }
+      .rc-pass-lab { font-size:10px; font-weight:800; letter-spacing:0.16em; text-transform:uppercase; color:rgba(255,255,255,0.55); padding-left:2px; }
+      .rc-pass-row { position:relative; display:flex; align-items:center; }
+      .rc-pass-in { flex:1; padding:13px 44px 13px 14px; border-radius:13px; font-family:inherit; font-size:15px;
+        color:#fff; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.14); outline:none;
+        letter-spacing:0.06em; transition:border-color .2s, background .2s, box-shadow .2s; }
+      .rc-pass-in:focus { border-color:rgba(214,219,226,0.5); background:rgba(214,219,226,0.07);
+        box-shadow:0 0 0 4px rgba(214,219,226,0.10); }
+      .rc-pass-in.ok { border-color:rgba(48,209,88,0.55); box-shadow:0 0 0 4px rgba(48,209,88,0.10); }
+      .rc-pass-eye { position:absolute; right:6px; width:34px; height:34px; border:none; background:none; cursor:pointer;
+        color:rgba(255,255,255,0.4); display:flex; align-items:center; justify-content:center; border-radius:50%; }
+      .rc-pass-eye:active { color:#fff; }
+      .rc-pass-eye svg { width:18px; height:18px; }
+      .rc-pass-hint { font-size:10.5px; color:rgba(255,255,255,0.38); letter-spacing:-0.05px; line-height:1.4; padding-left:2px;
+        transition:color .2s; min-height:15px; }
+      .rc-pass-hint.ok { color:#30D158; }
 
       /* ── Face ID scan stage ── */
       .fid-stage { display:flex; flex-direction:column; align-items:center; gap:16px;
@@ -11753,6 +11789,21 @@
   window.setStep = setStep;
   window._state = state;
   window._refreshCTA = refreshCTA;
+  // The .phone frame's overflow:hidden is decorative clipping — it must NEVER
+  // actually scroll. But browsers auto-scroll overflow:hidden boxes to reveal
+  // focused/targeted elements, and some absolutely-positioned stage decoration
+  // sits below the fold; a stray focus mid-flow was silently scrolling the
+  // whole phone ~600px, leaving later steps (the contract slider) off-screen
+  // and unusable. Pin it to 0,0 whenever anything tries.
+  (function pinPhoneScroll() {
+    var ph = document.querySelector('.phone');
+    if (!ph) return;
+    ph.addEventListener('scroll', function () {
+      if (ph.scrollTop) ph.scrollTop = 0;
+      if (ph.scrollLeft) ph.scrollLeft = 0;
+    }, { passive: true });
+    ph.scrollTop = 0; ph.scrollLeft = 0;
+  })();
   // CTA labels follow the chosen language (coreLang) when a translation exists.
   const CTA_I18N = { 'Next':'cta.next', 'Continue':'cta.continue', 'Sign':'cta.sign', 'Skip for now':'cta.skipnow' };
   function setCTA(label, disabled, helper) {
@@ -14006,7 +14057,7 @@
   const nameSugWrap= document.getElementById('nameSuggestions');
   function paintNameStatus() {
     const v = (nameField.value || '').trim();
-    nameField.classList.remove('shake', 'glow');
+    nameField.classList.remove('shake', 'glow', 'censored');
     if (!v) {
       nameStatus.textContent = 'Just your first name — your coach uses it.';
       nameStatus.style.color = 'var(--muted)';
@@ -14038,18 +14089,37 @@
       refreshCTA();
       return;
     }
-    // Core username moderation — runs on the raw value (so leading/trailing
-    // spaces are caught). On any block we show ONE generic message and never
-    // reveal which rule fired, nor suggest alternatives.
-    const mod = (window.coreModeration && window.coreModeration.checkUsername)
-      ? window.coreModeration.checkUsername(nameField.value)
-      : { ok: passesModeration(v) };
-    if (!mod.ok) {
-      nameStatus.innerHTML = '<span style="color:#B6BCC8;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:13px;height:13px;vertical-align:-2px;display:inline-block;"><path d="M6 6l12 12M18 6L6 18"/></svg> ' +
-        (mod.message || 'Try a different name.') + '</span>';
+    // No special characters — a first name is letters (accents fine), plus
+    // spaces / hyphens / apostrophes for names like "Anne-Marie" or "O'Brien".
+    // Digits, emoji, punctuation and symbols are all rejected here.
+    if (!/^[\p{L}][\p{L}' \-]*$/u.test(v)) {
+      nameStatus.innerHTML = '<span style="color:#B6BCC8;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:13px;height:13px;vertical-align:-2px;display:inline-block;"><path d="M6 6l12 12M18 6L6 18"/></svg> Letters only — no numbers or symbols.</span>';
       nameField.style.borderColor = 'rgba(182,188,200,0.55)';
       nameField.style.background = 'rgba(182,188,200,0.05)';
       nameField.classList.add('shake');
+      nameSugWrap.style.display = 'none';
+      state.name = '';
+      refreshCTA();
+      return;
+    }
+    // Core moderation — checkUsername was written for usernames and rejects
+    // hyphens/apostrophes outright, which are legitimate in first names
+    // ("Anne-Marie", "O'Brien"). Strip those separators before the check: the
+    // profanity/impersonation rules only need the letters, and stripping the
+    // same chars means "f-u-c-k" style spacing tricks still get caught.
+    // On any block we show ONE generic message and never reveal which rule
+    // fired, nor suggest alternatives.
+    const modInput = v.replace(/['\- ]/g, '');
+    const mod = (window.coreModeration && window.coreModeration.checkUsername)
+      ? window.coreModeration.checkUsername(modInput)
+      : { ok: passesModeration(modInput) };
+    if (!mod.ok) {
+      nameStatus.innerHTML = '<span style="color:#B6BCC8;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:13px;height:13px;vertical-align:-2px;display:inline-block;"><path d="M6 6l12 12M18 6L6 18"/></svg> ' +
+        'That name can’t be used here — try a different one.</span>';
+      nameField.style.borderColor = 'rgba(182,188,200,0.55)';
+      nameField.style.background = 'rgba(182,188,200,0.05)';
+      nameField.classList.add('shake');
+      nameField.classList.add('censored');   // blur the typed text itself
       nameSugWrap.style.display = 'none';
       state.name = '';
       refreshCTA();
@@ -14068,32 +14138,13 @@
   }
   nameField.addEventListener('input', paintNameStatus);
   nameField.addEventListener('blur',  paintNameStatus);
-  // Direct CTA enabler + green/red name field feedback
-  window.__ctaFixer = setInterval(function(){
-    try {
-      var nameField = document.getElementById('name');
-      var n = (nameField && nameField.value || '').trim();
-      var a = (window._state && window._state.age) || (typeof state !== 'undefined' ? state.age : null);
-      var ctaBtn = document.getElementById('cta');
-      var noteEl = document.getElementById('footerNote');
-      // Green/red outline on name field
-      if (nameField) {
-        if (n.length >= 2 && typeof a === 'number' && a >= 13) {
-          nameField.style.borderColor = '#4ade80'; nameField.style.boxShadow = '0 0 0 2px rgba(74,222,128,0.3)';
-        } else if (n.length >= 1) {
-          nameField.style.borderColor = '#ef4444'; nameField.style.boxShadow = '0 0 0 2px rgba(239,68,68,0.2)';
-        } else {
-          nameField.style.borderColor = ''; nameField.style.boxShadow = '';
-        }
-      }
-      // Enable button when both fields filled
-      if (ctaBtn && n.length >= 2 && typeof a === 'number' && a >= 13) {
-        ctaBtn.disabled = false;
-        ctaBtn.style.background = ''; ctaBtn.style.color = ''; ctaBtn.style.cursor = 'pointer';
-        if (noteEl) noteEl.textContent = 'Looks good — tap next';
-      }
-    } catch(e) {}
-  }, 200);
+  // (The old __ctaFixer interval was removed. It force-enabled the Next
+  // button every 200ms from raw field length — bypassing the name moderation
+  // entirely (a blocked name + any age still enabled Next while state.name
+  // stayed empty) and, because it never stopped, it kept force-enabling the
+  // CTA on every later step too, breaking each step's gating. refreshCTA()
+  // is the single source of truth for enabling; paintNameStatus() and
+  // pickAge() both call it.)
   document.querySelectorAll('#tones .tone-row').forEach(row => {
     row.addEventListener('click', () => {
       document.querySelectorAll('#tones .tone-row').forEach(r => r.classList.remove('sel'));
@@ -15946,12 +15997,65 @@
     };
     const skipBtn = document.getElementById('fidSkip');
     if (skipBtn) skipBtn.addEventListener('click', function () { scanning = false; track('face_scan_skipped', {}); showCard(null); });
+    // ── Create-password gate — Enter CORE stays disabled until it's valid ──
     const enterBtn = document.getElementById('rcEnter');
+    const passIn   = document.getElementById('rcPass');
+    const passHint = document.getElementById('rcPassHint');
+    const passEye  = document.getElementById('rcPassEye');
+    function passValid(v) { return v.length >= 8 && /[a-zA-Z]/.test(v) && /[0-9]/.test(v); }
+    function paintPass() {
+      const v = passIn ? passIn.value : '';
+      const ok = passValid(v);
+      if (passIn)   passIn.classList.toggle('ok', ok);
+      if (passHint) {
+        passHint.classList.toggle('ok', ok);
+        passHint.textContent = ok ? 'Strong enough — you\'re set.'
+          : !v ? 'Locks your CORE ID — 8+ characters with a letter and a number.'
+          : v.length < 8 ? (8 - v.length) + ' more character' + (8 - v.length === 1 ? '' : 's') + '…'
+          : !/[a-zA-Z]/.test(v) ? 'Add a letter.'
+          : 'Add a number.';
+      }
+      if (enterBtn) enterBtn.disabled = !ok;
+    }
+    if (passIn) { passIn.addEventListener('input', paintPass); paintPass(); }
+    if (passEye) passEye.addEventListener('click', function () {
+      if (!passIn) return;
+      passIn.type = passIn.type === 'password' ? 'text' : 'password';
+      passIn.focus();
+    });
+    // SHA-256 the password before storing — never keep the plaintext around.
+    // (Preview build: localStorage stands in for the real backend; in prod
+    // this hash handshake is replaced by Supabase auth.)
+    async function storePassword(v) {
+      let hash = '';
+      try {
+        if (window.crypto && crypto.subtle && window.TextEncoder) {
+          const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(v));
+          hash = Array.from(new Uint8Array(buf)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+        }
+      } catch (e) {}
+      if (!hash) { // non-crypto fallback (file:// etc.) — still never plaintext
+        let h = 5381; for (let i = 0; i < v.length; i++) h = ((h << 5) + h + v.charCodeAt(i)) >>> 0;
+        hash = 'djb2:' + h.toString(16);
+      }
+      try { localStorage.setItem('corePassword', hash); localStorage.setItem('corePasswordSetAt', String(Date.now())); } catch (e) {}
+      try {
+        if (window.coreAccounts && window.coreAccounts.updateCurrent) {
+          const r = window.coreAccounts.updateCurrent(function (acc) { acc.passwordHash = hash; });
+          if (r && typeof r.catch === 'function') r.catch(function () {});
+        }
+      } catch (e) {}
+    }
     if (enterBtn) enterBtn.addEventListener('click', function () {
+      const v = passIn ? passIn.value : '';
+      if (!passValid(v)) { paintPass(); if (passIn) passIn.focus(); return; }
+      enterBtn.disabled = true;   // no double-fire while we wrap up
       if (stream) { try { stream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {} stream = null; }
-      track('core_id_continue', {});
-      if (typeof window.connectAccount === 'function') window.connectAccount('card');
-      else finishOnboarding(true);
+      track('core_id_continue', { passwordSet: true });
+      storePassword(v).then(function () {
+        if (typeof window.connectAccount === 'function') window.connectAccount('card');
+        else finishOnboarding(true);
+      });
     });
   })();
 
