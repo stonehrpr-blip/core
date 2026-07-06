@@ -3,8 +3,6 @@
 <head>
   <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
   <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' blob: data:; font-src 'self' data:; connect-src 'self' data: blob: https://cdn.jsdelivr.net https://storage.googleapis.com https://*.supabase.co wss://*.supabase.co https://api.openai.com https://api.groq.com https://core-ai.stonehrpr.workers.dev; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
-<meta name="referrer" content="no-referrer">
   <title>Core — Sign in</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <style>
@@ -723,14 +721,6 @@
   }
   window.passkeySignIn = passkeySignIn;
 
-  // ?passkey=1 → jump straight into the passkey ceremony (CORE ID round trip)
-  (function autoPasskey() {
-    try {
-      if (!/[?&]passkey=1/.test(location.search)) return;
-      setTimeout(function () { passkeySignIn(); }, 650);
-    } catch (e) {}
-  })();
-
   // Reveal the passkey button only when a platform authenticator is available.
   (function revealPasskey(){
     var btn = document.getElementById('passkeyBtn');
@@ -789,16 +779,10 @@
     if (window.coreTrack) {
       coreTrack('sign_in', { method, isNew: !!isNew, onboarded: !!(account && account.onboarded) });
     }
-    // Route based on account state. A sanitized ?return= (same-folder page
-    // only) wins — used by the CORE ID card's add-a-passkey round trip.
+    // Route based on account state
     const goTrial = isNew || !(account && account.onboarded);
-    let returnTo = null;
-    try {
-      const raw = new URLSearchParams(location.search).get('return') || '';
-      if (/^[\w-]+\.html(\?[\w=&%.~-]*)?$/.test(raw)) returnTo = raw;
-    } catch (e) {}
     setTimeout(function () {
-      window.location.href = returnTo || (goTrial ? '07-trial.html' : '20-dashboard.html');
+      window.location.href = goTrial ? '07-trial.html' : '20-dashboard.html';
     }, 400);
   }
 

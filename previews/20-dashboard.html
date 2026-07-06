@@ -1643,7 +1643,7 @@ body.edit-active .w-add-ghost{display:none;}
   function paintRank(fromXp){
     var xp=parseInt(ls('coreXP','0'),10)||0, idx=rankIdx(xp), r=RANKS[idx];
     var hero=$('lsHero'); if(hero) hero.style.setProperty('--rkc',r.color);
-    var g=$('rankBarGem'); if(g) g.innerHTML=(window.CORE_RANK_ICON?CORE_RANK_ICON(r,40):'<img src="assets/ranks/'+r.key+'.png" alt="'+r.name+'">');
+    var g=$('rankBarGem'); if(g) g.innerHTML='<img src="assets/ranks/'+r.key+'.png" alt="'+r.name+'">';
     if($('rankBarName')) $('rankBarName').textContent=r.name;
     // Feature 3: rank name + XP remaining to the NEXT rank, gold bar
     var lv=$('lsLevel'); if(lv) lv.textContent=r.name;
@@ -2165,28 +2165,9 @@ body.edit-active .w-add-ghost{display:none;}
   paintTrends();
   (function(){ var tg=$('stToggle'); if(!tg) return; tg.addEventListener('click',function(e){ var b=e.target.closest('button[data-d]'); if(!b) return; trendWin=parseInt(b.getAttribute('data-d'),10)||30; Array.prototype.forEach.call(tg.querySelectorAll('button'),function(x){x.classList.toggle('on',x===b);}); try{window.coreSfx&&window.coreSfx('tick');}catch(e){} paintTrends(); }); })();
   // Batch notifications: mark all read
-  // Seed notifications in localStorage if none exist
-  try{
-    var existing=localStorage.getItem('coreNotifications');
-    if(!existing){
-      localStorage.setItem('coreNotifications',JSON.stringify([
-        {id:1,head:'Welcome to CORE',msg:'Your dashboard is ready. Start by building your daily routine.',time:'Just now',color:'#4DA3FF',read:false},
-        {id:2,head:'Streak at risk',msg:"You haven't logged activity today. Don't break your 3-day streak.",time:'2 hours ago',color:'#FF9F0A',read:false},
-        {id:3,head:'Weekly recap ready',msg:'You completed 85% of your tasks this week. Great consistency.',time:'Yesterday',color:'#30D158',read:false},
-        {id:4,head:'New feature: Corbit AI',msg:'Your AI companion is now active. Tap the orb to start a conversation.',time:'2 days ago',color:'#7B4FBF',read:true},
-        {id:5,head:'Goal achieved!',msg:'You crushed your weekly XP target. +100 bonus XP earned.',time:'3 days ago',color:'#FFD60A',read:true}
-      ]));
-    }
-  }catch(e){}
-
   window.markAllRead=function(){
     var dots=document.querySelectorAll('.notify-dot');
     dots.forEach(function(d){d.style.background='rgba(255,255,255,.15)'});
-    var items=document.querySelectorAll('.notify-item');
-    items.forEach(function(i){i.style.opacity='.45'});
-    document.getElementById('notifyBatch').style.opacity='.4';
-    toast('All notifications cleared');
-  };
     var items=document.querySelectorAll('.notify-item');
     items.forEach(function(i){i.style.opacity='.45'});
     document.getElementById('notifyBatch').style.opacity='.4';

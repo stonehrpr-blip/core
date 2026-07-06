@@ -3,8 +3,6 @@
 <head>
   <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
   <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' blob: data:; font-src 'self' data:; connect-src 'self' data: blob: https://cdn.jsdelivr.net https://storage.googleapis.com https://*.supabase.co wss://*.supabase.co https://api.openai.com https://api.groq.com https://core-ai.stonehrpr.workers.dev; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
-<meta name="referrer" content="no-referrer">
   <title>Core — Sign in with email</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <link rel="stylesheet" href="_lib/core-theme.css?v=20260619d">
@@ -259,12 +257,6 @@
           </button>
           <p style="font-size:11px;color:var(--mu);text-align:center;margin-top:8px;">We'll send a code to verify you. New or returning — works either way.</p>
 
-          <button id="skipEmailBtn" type="button" style="display:none;width:100%;margin-top:14px;padding:12px;background:none;border:none;
-                   color:rgba(255,255,255,0.45);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;
-                   letter-spacing:-0.1px;transition:color .2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.45)'">
-            Skip for now →
-          </button>
-
       </div>
 
       <div class="footer">
@@ -303,25 +295,6 @@
       s.style.setProperty('--max', (0.55 + Math.random()*0.40).toFixed(2));
       sl.appendChild(s);
     }
-  })();
-
-  // ── Skip option — shown when this page was reached mid-chain (?next=…).
-  // Email stays optional during onboarding; they can link it later in Settings.
-  (function () {
-    var btn = document.getElementById('skipEmailBtn');
-    if (!btn) return;
-    var next = null;
-    try {
-      var raw = new URLSearchParams(location.search).get('next') || '';
-      if (/^[\w-]+\.html(\?[\w=&%.~-]*)?$/.test(raw)) next = raw;
-    } catch (e) {}
-    if (!next) return;
-    btn.style.display = 'block';
-    btn.addEventListener('click', function () {
-      try { if (window.coreTrack) coreTrack('email_skipped', { next: next }); } catch (e) {}
-      try { localStorage.setItem('coreEmailSkipped', '1'); } catch (e) {}
-      window.location.href = next;
-    });
   })();
 
   const emailInput = document.getElementById('emailInput');
