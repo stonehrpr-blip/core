@@ -9176,23 +9176,18 @@
             <div class="cb-speech" id="cbSpeech">Hey Corbit,<br>what should I do today?</div>
             <div class="corbit-bot" id="voiceOrb">
               <span class="cb-halo"></span>
-              <span class="cb-aura" id="cbAura"></span>
               <span class="cb-ring"></span>
               <span class="cb-antenna"><i class="cb-ant-stem"></i><i class="cb-ant-tip"></i></span>
-              <span class="cb-pod l"></span>
-              <span class="cb-pod r"></span>
+              <span class="cb-pod l"></span><span class="cb-pod r"></span>
               <div class="cb-head">
-                <span class="cb-screen"></span>
                 <div class="cb-face">
-                  <span class="cb-eye l"><i class="cb-lid"></i><i class="cb-pupil"></i></span>
-                  <span class="cb-eye r"><i class="cb-lid"></i><i class="cb-pupil"></i></span>
-                  <span class="cb-blush l"></span>
-                  <span class="cb-blush r"></span>
+                  <span class="cb-eye l"><i class="cb-pupil"></i></span>
+                  <span class="cb-eye r"><i class="cb-pupil"></i></span>
+                  <span class="cb-blush l"></span><span class="cb-blush r"></span>
                   <span class="cb-mouth"></span>
                 </div>
                 <span class="cb-shine"></span>
               </div>
-              <span class="cb-shadow"></span>
             </div>
 
             <div class="cb-wave" id="cbWave" aria-hidden="true"></div>
@@ -15458,22 +15453,9 @@
     if(mic)mic.addEventListener('click',function(){resetInactivity();if(!listening&&!done)setTimeout(resetInactivity,15000)});
     // ── Corbit 2.0 life: orbiting aura, natural blinks, pupil tracking ──
     (function corbitLife() {
-      const bot = document.getElementById('voiceOrb');
-      const aura = document.getElementById('cbAura');
+      var bot = document.getElementById('voiceOrb');
       if (!bot) return;
-      // Connection particles
-      setInterval(function(){if(!bot.classList.contains('listening'))return;var cp=document.createElement('span');cp.className='vl-connect';var br=bot.getBoundingClientRect();cp.style.cssText='left:'+(br.left+br.width/2+Math.random()*60-30)+'px;top:'+(br.top+br.height+10+Math.random()*20)+'px;animation-delay:'+(Math.random()*.5)+'s';document.body.appendChild(cp);setTimeout(function(){cp.remove()},1500)},300);
-      // Ambient floating particles
-      for (let fi=0;fi<10;fi++){var fp=document.createElement('span');fp.className='cb-float-particle';fp.style.cssText='left:'+(20+Math.random()*60)+'%;top:'+(30+Math.random()*50)+'%;--fd:'+(3+Math.random()*5)+'s;--fdel:'+Math.random()*4+'s;--fx:'+((Math.random()-.5)*30)+'px';bot.appendChild(fp)}
-      if (aura) for (let i = 0; i < 7; i++) {
-        const sp = document.createElement('i');
-        sp.className = 'cb-spark';
-        sp.style.setProperty('--od', (4 + Math.random() * 4).toFixed(1) + 's');
-        sp.style.setProperty('--odel', (Math.random() * 5).toFixed(1) + 's');
-        sp.style.setProperty('--or', (72 + Math.random() * 26).toFixed(0) + 'px');
-        aura.appendChild(sp);
-      }
-      // surprise face + entrance trail particles
+      // Entrance trail particles
       setTimeout(function(){bot.classList.add('surprised');
         // Trail particles — burst behind bot as it enters
         var br=bot.getBoundingClientRect(),host=bot.closest('.phone')||document.body,hr=host.getBoundingClientRect();
