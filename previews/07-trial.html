@@ -182,11 +182,9 @@
   @keyframes ctaReady { 0%{transform:scale(1);} 38%{transform:scale(1.04);} 100%{transform:scale(1);} }
   .cta.ready { animation: ctaReady .5s cubic-bezier(.22,1.7,.36,1); }
   .cta:not(:disabled) { box-shadow: 0 12px 28px rgba(0,0,0,.45), 0 0 24px rgba(196,201,210,.2), 0 1px 0 rgba(255,255,255,.6) inset; }
-  /* Name field feedback animations */
-  @keyframes fieldShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-4px)} 40%{transform:translateX(4px)} 60%{transform:translateX(-3px)} 80%{transform:translateX(2px)} }
-  @keyframes fieldGlow { 0%{box-shadow:0 0 0 0 rgba(214,219,226,0)} 50%{box-shadow:0 0 0 6px rgba(214,219,226,0.12)} 100%{box-shadow:0 0 0 4px rgba(214,219,226,0.08)} }
-  .field.shake { animation: fieldShake .4s ease; }
-  .field.glow { animation: fieldGlow .5s ease; }
+  /* Name field — clean red/green validation */
+  .field.field-ok { border-color:#4ade80!important; box-shadow:0 0 0 2px rgba(74,222,128,0.25)!important; }
+  .field.field-bad { border-color:#ef4444!important; box-shadow:0 0 0 2px rgba(239,68,68,0.2)!important; }
   /* Blocked / inappropriate name: blur the typed text itself (transparent
      colour + soft text-shadow — the classic input-text blur that keeps the
      caret usable) so the word is never shown sharp on screen. */
@@ -14184,13 +14182,12 @@
   const nameStatus = document.getElementById('nameStatus');
   const nameSugWrap= document.getElementById('nameSuggestions');
   function paintNameStatus() {
-    const v = (nameField.value || '').trim();
-    nameField.classList.remove('shake', 'glow', 'censored');
+    var v = (nameField.value || '').trim();
+    nameField.classList.remove('field-ok', 'field-bad');
+    nameField.style.borderColor = ''; nameField.style.background = ''; nameField.style.boxShadow = '';
     if (!v) {
       nameStatus.textContent = 'Just your first name — your coach uses it.';
       nameStatus.style.color = 'var(--muted)';
-      nameField.style.borderColor = 'var(--border)';
-      nameField.style.background = '';
       nameSugWrap.style.display = 'none';
       state.name = '';
       refreshCTA();
@@ -14199,67 +14196,46 @@
     if (v.length < 2) {
       nameStatus.textContent = 'A little longer.';
       nameStatus.style.color = 'var(--muted)';
-      nameField.style.borderColor = 'var(--border)';
-      nameField.style.background = '';
       nameSugWrap.style.display = 'none';
       state.name = '';
       refreshCTA();
       return;
     }
-    // Reject purely numeric / symbol-only input (not a real first name)
+    // Reject purely numeric / symbol-only input
     if (/^[0-9_\-\.\s]+$/.test(v)) {
-      nameStatus.innerHTML = '<span style="color:#B6BCC8;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:13px;height:13px;vertical-align:-2px;display:inline-block;"><path d="M6 6l12 12M18 6L6 18"/></svg> Try a real first name.</span>';
-      nameField.style.borderColor = 'rgba(182,188,200,0.55)';
-      nameField.style.background = 'rgba(182,188,200,0.05)';
-      nameField.classList.add('shake');
+      nameStatus.innerHTML = '<span style="color:#ef4444;">✕ Try a real first name.</span>';
+      nameField.classList.add('field-bad');
       nameSugWrap.style.display = 'none';
       state.name = '';
       refreshCTA();
       return;
     }
-    // No special characters — a first name is letters (accents fine), plus
-    // spaces / hyphens / apostrophes for names like "Anne-Marie" or "O'Brien".
-    // Digits, emoji, punctuation and symbols are all rejected here.
+    // Letters-only validation (allows accents, hyphens, apostrophes, spaces)
     if (!/^[\p{L}][\p{L}' \-]*$/u.test(v)) {
-      nameStatus.innerHTML = '<span style="color:#B6BCC8;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:13px;height:13px;vertical-align:-2px;display:inline-block;"><path d="M6 6l12 12M18 6L6 18"/></svg> Letters only — no numbers or symbols.</span>';
-      nameField.style.borderColor = 'rgba(182,188,200,0.55)';
-      nameField.style.background = 'rgba(182,188,200,0.05)';
-      nameField.classList.add('shake');
+      nameStatus.innerHTML = '<span style="color:#ef4444;">✕ Letters only — no numbers or symbols.</span>';
+      nameField.classList.add('field-bad');
       nameSugWrap.style.display = 'none';
       state.name = '';
       refreshCTA();
       return;
     }
-    // Core moderation — checkUsername was written for usernames and rejects
-    // hyphens/apostrophes outright, which are legitimate in first names
-    // ("Anne-Marie", "O'Brien"). Strip those separators before the check: the
-    // profanity/impersonation rules only need the letters, and stripping the
-    // same chars means "f-u-c-k" style spacing tricks still get caught.
-    // On any block we show ONE generic message and never reveal which rule
-    // fired, nor suggest alternatives.
-    const modInput = v.replace(/['\- ]/g, '');
-    const mod = (window.coreModeration && window.coreModeration.checkUsername)
+    // Core moderation
+    var modInput = v.replace(/['\- ]/g, '');
+    var mod = (window.coreModeration && window.coreModeration.checkUsername)
       ? window.coreModeration.checkUsername(modInput)
       : { ok: passesModeration(modInput) };
     if (!mod.ok) {
-      nameStatus.innerHTML = '<span style="color:#B6BCC8;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:13px;height:13px;vertical-align:-2px;display:inline-block;"><path d="M6 6l12 12M18 6L6 18"/></svg> ' +
-        'That name can’t be used here — try a different one.</span>';
-      nameField.style.borderColor = 'rgba(182,188,200,0.55)';
-      nameField.style.background = 'rgba(182,188,200,0.05)';
-      nameField.classList.add('shake');
-      nameField.classList.add('censored');   // blur the typed text itself
+      nameStatus.innerHTML = '<span style="color:#ef4444;">✕ That name can\'t be used here.</span>';
+      nameField.classList.add('field-bad');
       nameSugWrap.style.display = 'none';
       state.name = '';
       refreshCTA();
       return;
     }
-    // A first name isn't a unique username — no "availability" check. Just a warm
-    // confirmation once it's a real name.
-    const nice = v.charAt(0).toUpperCase() + v.slice(1);
-    nameStatus.innerHTML = '<span style="color:#D6DBE2;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;vertical-align:-2px;display:inline-block;"><path d="M5 12l4 4 10-11"/></svg> Nice to meet you, ' + escTrialHtml(nice) + '.</span>';
-    nameField.style.borderColor = 'rgba(214,219,226,0.45)';
-    nameField.style.background = 'rgba(214,219,226,0.06)';
-    nameField.classList.add('glow');
+    // Valid name — green outline
+    var nice = v.charAt(0).toUpperCase() + v.slice(1);
+    nameStatus.innerHTML = '<span style="color:#4ade80;">✓ Nice to meet you, ' + escTrialHtml(nice) + '.</span>';
+    nameField.classList.add('field-ok');
     nameSugWrap.style.display = 'none';
     state.name = v;
     refreshCTA();
