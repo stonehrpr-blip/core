@@ -1618,8 +1618,8 @@
 .corbit-bot.listening .cb-pupil{width:11px;height:14px;margin:-7px 0 0 -5.5px;transition:all .3s ease}
 /* EYE GLOW INTENSIFY */
 .corbit-bot.listening .cb-eye{box-shadow:0 0 18px rgba(214,230,255,1),0 0 36px rgba(190,214,246,.7),0 0 60px rgba(160,200,240,.3)}
-.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4)}
-.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}
+.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4);height:22px;width:22px;border-radius:50%;background:transparent;overflow:visible}
+.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
 /* RING SPIN FASTER ON LISTEN */
 .corbit-bot.listening .cb-ring{animation-duration:2s}
 
@@ -1711,6 +1711,38 @@
 @keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
 .voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
 .voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+
+
+/* HEART EYES — on voice linked success */
+.corbit-bot.done .cb-eye{height:22px;width:22px;border-radius:50%;background:transparent;box-shadow:none;overflow:visible}
+.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}
+@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}
+/* SCREEN FLASH — subtle green pulse on success */
+@keyframes cbScreenFlash{0%{opacity:0}30%{opacity:.15}100%{opacity:0}}
+.cb-screen-flash{position:fixed;inset:0;background:#30D158;pointer-events:none;z-index:199;animation:cbScreenFlash .8s ease-out forwards}
+/* ENERGY FIELD — shimmering aura ring */
+@keyframes cbEnergyField{0%{transform:rotate(0deg) scale(1);opacity:.4}50%{transform:rotate(180deg) scale(1.05);opacity:.7}100%{transform:rotate(360deg) scale(1);opacity:.4}}
+.cb-energy-ring{position:absolute;inset:-14px;border-radius:50%;pointer-events:none;border:1.5px dashed rgba(214,230,255,.15);animation:cbEnergyField 8s linear infinite}
+.corbit-bot.listening .cb-energy-ring{border-color:rgba(214,230,255,.35);animation-duration:3s}
+.corbit-bot.done .cb-energy-ring{border-color:rgba(48,209,88,.3);border-style:solid}
+/* SHADOW GLOW */
+.corbit-bot:not(.listening):not(.done) .cb-shadow{box-shadow:0 0 12px rgba(214,230,255,.08)}
+.corbit-bot.listening .cb-shadow{box-shadow:0 0 20px rgba(214,230,255,.2)}
+.corbit-bot.done .cb-shadow{box-shadow:0 0 24px rgba(48,209,88,.25)}
+/* MIC INNER RIPPLE */
+@keyframes cbMicRipple{0%{transform:scale(.8);opacity:.6}100%{transform:scale(1.5);opacity:0}}
+.voice-mic:active::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(214,230,255,.4);animation:cbMicRipple .5s ease-out forwards}
+/* WAVEFORM GRADIENT — bars color by progress */
+.cb-wave i{background:linear-gradient(180deg,rgba(100,180,255,.4),rgba(160,200,240,.2))}
+.cb-wave.listening i{background:linear-gradient(180deg,rgba(140,210,255,.8),rgba(180,220,250,.5))}
+.cb-wave.done i{background:linear-gradient(180deg,rgba(48,209,88,.7),rgba(100,230,150,.4))}
+/* ANTENNA BEAM on success */
+.corbit-bot.done .cb-ant-tip::before{content:'';position:absolute;top:-30px;left:50%;width:1px;height:30px;background:linear-gradient(180deg,transparent,rgba(48,209,88,.4));transform:translateX(-50%);animation:cbBeamUp .6s ease-out forwards}
+@keyframes cbBeamUp{0%{height:0;opacity:0}100%{height:30px;opacity:1}}
+/* BREATHING PARTICLE RING */
+@keyframes cbPartRing{0%,100%{transform:scale(.9);opacity:.3}50%{transform:scale(1.2);opacity:.7}}
+.cb-part-ring{position:absolute;inset:-18px;border-radius:50%;pointer-events:none;border:1px dotted rgba(214,230,255,.08);animation:cbPartRing 4s ease-in-out infinite}
 
 </style>
   <script src="_lib/analytics.js"></script>
@@ -2062,8 +2094,8 @@
 .corbit-bot.listening .cb-pupil{width:11px;height:14px;margin:-7px 0 0 -5.5px;transition:all .3s ease}
 /* EYE GLOW INTENSIFY */
 .corbit-bot.listening .cb-eye{box-shadow:0 0 18px rgba(214,230,255,1),0 0 36px rgba(190,214,246,.7),0 0 60px rgba(160,200,240,.3)}
-.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4)}
-.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}
+.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4);height:22px;width:22px;border-radius:50%;background:transparent;overflow:visible}
+.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
 /* RING SPIN FASTER ON LISTEN */
 .corbit-bot.listening .cb-ring{animation-duration:2s}
 
@@ -2155,6 +2187,38 @@
 @keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
 .voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
 .voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+
+
+/* HEART EYES — on voice linked success */
+.corbit-bot.done .cb-eye{height:22px;width:22px;border-radius:50%;background:transparent;box-shadow:none;overflow:visible}
+.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}
+@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}
+/* SCREEN FLASH — subtle green pulse on success */
+@keyframes cbScreenFlash{0%{opacity:0}30%{opacity:.15}100%{opacity:0}}
+.cb-screen-flash{position:fixed;inset:0;background:#30D158;pointer-events:none;z-index:199;animation:cbScreenFlash .8s ease-out forwards}
+/* ENERGY FIELD — shimmering aura ring */
+@keyframes cbEnergyField{0%{transform:rotate(0deg) scale(1);opacity:.4}50%{transform:rotate(180deg) scale(1.05);opacity:.7}100%{transform:rotate(360deg) scale(1);opacity:.4}}
+.cb-energy-ring{position:absolute;inset:-14px;border-radius:50%;pointer-events:none;border:1.5px dashed rgba(214,230,255,.15);animation:cbEnergyField 8s linear infinite}
+.corbit-bot.listening .cb-energy-ring{border-color:rgba(214,230,255,.35);animation-duration:3s}
+.corbit-bot.done .cb-energy-ring{border-color:rgba(48,209,88,.3);border-style:solid}
+/* SHADOW GLOW */
+.corbit-bot:not(.listening):not(.done) .cb-shadow{box-shadow:0 0 12px rgba(214,230,255,.08)}
+.corbit-bot.listening .cb-shadow{box-shadow:0 0 20px rgba(214,230,255,.2)}
+.corbit-bot.done .cb-shadow{box-shadow:0 0 24px rgba(48,209,88,.25)}
+/* MIC INNER RIPPLE */
+@keyframes cbMicRipple{0%{transform:scale(.8);opacity:.6}100%{transform:scale(1.5);opacity:0}}
+.voice-mic:active::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(214,230,255,.4);animation:cbMicRipple .5s ease-out forwards}
+/* WAVEFORM GRADIENT — bars color by progress */
+.cb-wave i{background:linear-gradient(180deg,rgba(100,180,255,.4),rgba(160,200,240,.2))}
+.cb-wave.listening i{background:linear-gradient(180deg,rgba(140,210,255,.8),rgba(180,220,250,.5))}
+.cb-wave.done i{background:linear-gradient(180deg,rgba(48,209,88,.7),rgba(100,230,150,.4))}
+/* ANTENNA BEAM on success */
+.corbit-bot.done .cb-ant-tip::before{content:'';position:absolute;top:-30px;left:50%;width:1px;height:30px;background:linear-gradient(180deg,transparent,rgba(48,209,88,.4));transform:translateX(-50%);animation:cbBeamUp .6s ease-out forwards}
+@keyframes cbBeamUp{0%{height:0;opacity:0}100%{height:30px;opacity:1}}
+/* BREATHING PARTICLE RING */
+@keyframes cbPartRing{0%,100%{transform:scale(.9);opacity:.3}50%{transform:scale(1.2);opacity:.7}}
+.cb-part-ring{position:absolute;inset:-18px;border-radius:50%;pointer-events:none;border:1px dotted rgba(214,230,255,.08);animation:cbPartRing 4s ease-in-out infinite}
 
 </style>
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
@@ -2880,8 +2944,8 @@
 .corbit-bot.listening .cb-pupil{width:11px;height:14px;margin:-7px 0 0 -5.5px;transition:all .3s ease}
 /* EYE GLOW INTENSIFY */
 .corbit-bot.listening .cb-eye{box-shadow:0 0 18px rgba(214,230,255,1),0 0 36px rgba(190,214,246,.7),0 0 60px rgba(160,200,240,.3)}
-.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4)}
-.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}
+.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4);height:22px;width:22px;border-radius:50%;background:transparent;overflow:visible}
+.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
 /* RING SPIN FASTER ON LISTEN */
 .corbit-bot.listening .cb-ring{animation-duration:2s}
 
@@ -2973,6 +3037,38 @@
 @keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
 .voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
 .voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+
+
+/* HEART EYES — on voice linked success */
+.corbit-bot.done .cb-eye{height:22px;width:22px;border-radius:50%;background:transparent;box-shadow:none;overflow:visible}
+.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}
+@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}
+/* SCREEN FLASH — subtle green pulse on success */
+@keyframes cbScreenFlash{0%{opacity:0}30%{opacity:.15}100%{opacity:0}}
+.cb-screen-flash{position:fixed;inset:0;background:#30D158;pointer-events:none;z-index:199;animation:cbScreenFlash .8s ease-out forwards}
+/* ENERGY FIELD — shimmering aura ring */
+@keyframes cbEnergyField{0%{transform:rotate(0deg) scale(1);opacity:.4}50%{transform:rotate(180deg) scale(1.05);opacity:.7}100%{transform:rotate(360deg) scale(1);opacity:.4}}
+.cb-energy-ring{position:absolute;inset:-14px;border-radius:50%;pointer-events:none;border:1.5px dashed rgba(214,230,255,.15);animation:cbEnergyField 8s linear infinite}
+.corbit-bot.listening .cb-energy-ring{border-color:rgba(214,230,255,.35);animation-duration:3s}
+.corbit-bot.done .cb-energy-ring{border-color:rgba(48,209,88,.3);border-style:solid}
+/* SHADOW GLOW */
+.corbit-bot:not(.listening):not(.done) .cb-shadow{box-shadow:0 0 12px rgba(214,230,255,.08)}
+.corbit-bot.listening .cb-shadow{box-shadow:0 0 20px rgba(214,230,255,.2)}
+.corbit-bot.done .cb-shadow{box-shadow:0 0 24px rgba(48,209,88,.25)}
+/* MIC INNER RIPPLE */
+@keyframes cbMicRipple{0%{transform:scale(.8);opacity:.6}100%{transform:scale(1.5);opacity:0}}
+.voice-mic:active::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(214,230,255,.4);animation:cbMicRipple .5s ease-out forwards}
+/* WAVEFORM GRADIENT — bars color by progress */
+.cb-wave i{background:linear-gradient(180deg,rgba(100,180,255,.4),rgba(160,200,240,.2))}
+.cb-wave.listening i{background:linear-gradient(180deg,rgba(140,210,255,.8),rgba(180,220,250,.5))}
+.cb-wave.done i{background:linear-gradient(180deg,rgba(48,209,88,.7),rgba(100,230,150,.4))}
+/* ANTENNA BEAM on success */
+.corbit-bot.done .cb-ant-tip::before{content:'';position:absolute;top:-30px;left:50%;width:1px;height:30px;background:linear-gradient(180deg,transparent,rgba(48,209,88,.4));transform:translateX(-50%);animation:cbBeamUp .6s ease-out forwards}
+@keyframes cbBeamUp{0%{height:0;opacity:0}100%{height:30px;opacity:1}}
+/* BREATHING PARTICLE RING */
+@keyframes cbPartRing{0%,100%{transform:scale(.9);opacity:.3}50%{transform:scale(1.2);opacity:.7}}
+.cb-part-ring{position:absolute;inset:-18px;border-radius:50%;pointer-events:none;border:1px dotted rgba(214,230,255,.08);animation:cbPartRing 4s ease-in-out infinite}
 
 </style>
 
@@ -3714,8 +3810,8 @@
 .corbit-bot.listening .cb-pupil{width:11px;height:14px;margin:-7px 0 0 -5.5px;transition:all .3s ease}
 /* EYE GLOW INTENSIFY */
 .corbit-bot.listening .cb-eye{box-shadow:0 0 18px rgba(214,230,255,1),0 0 36px rgba(190,214,246,.7),0 0 60px rgba(160,200,240,.3)}
-.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4)}
-.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}
+.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4);height:22px;width:22px;border-radius:50%;background:transparent;overflow:visible}
+.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
 /* RING SPIN FASTER ON LISTEN */
 .corbit-bot.listening .cb-ring{animation-duration:2s}
 
@@ -3807,6 +3903,38 @@
 @keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
 .voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
 .voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+
+
+/* HEART EYES — on voice linked success */
+.corbit-bot.done .cb-eye{height:22px;width:22px;border-radius:50%;background:transparent;box-shadow:none;overflow:visible}
+.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}
+@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}
+/* SCREEN FLASH — subtle green pulse on success */
+@keyframes cbScreenFlash{0%{opacity:0}30%{opacity:.15}100%{opacity:0}}
+.cb-screen-flash{position:fixed;inset:0;background:#30D158;pointer-events:none;z-index:199;animation:cbScreenFlash .8s ease-out forwards}
+/* ENERGY FIELD — shimmering aura ring */
+@keyframes cbEnergyField{0%{transform:rotate(0deg) scale(1);opacity:.4}50%{transform:rotate(180deg) scale(1.05);opacity:.7}100%{transform:rotate(360deg) scale(1);opacity:.4}}
+.cb-energy-ring{position:absolute;inset:-14px;border-radius:50%;pointer-events:none;border:1.5px dashed rgba(214,230,255,.15);animation:cbEnergyField 8s linear infinite}
+.corbit-bot.listening .cb-energy-ring{border-color:rgba(214,230,255,.35);animation-duration:3s}
+.corbit-bot.done .cb-energy-ring{border-color:rgba(48,209,88,.3);border-style:solid}
+/* SHADOW GLOW */
+.corbit-bot:not(.listening):not(.done) .cb-shadow{box-shadow:0 0 12px rgba(214,230,255,.08)}
+.corbit-bot.listening .cb-shadow{box-shadow:0 0 20px rgba(214,230,255,.2)}
+.corbit-bot.done .cb-shadow{box-shadow:0 0 24px rgba(48,209,88,.25)}
+/* MIC INNER RIPPLE */
+@keyframes cbMicRipple{0%{transform:scale(.8);opacity:.6}100%{transform:scale(1.5);opacity:0}}
+.voice-mic:active::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(214,230,255,.4);animation:cbMicRipple .5s ease-out forwards}
+/* WAVEFORM GRADIENT — bars color by progress */
+.cb-wave i{background:linear-gradient(180deg,rgba(100,180,255,.4),rgba(160,200,240,.2))}
+.cb-wave.listening i{background:linear-gradient(180deg,rgba(140,210,255,.8),rgba(180,220,250,.5))}
+.cb-wave.done i{background:linear-gradient(180deg,rgba(48,209,88,.7),rgba(100,230,150,.4))}
+/* ANTENNA BEAM on success */
+.corbit-bot.done .cb-ant-tip::before{content:'';position:absolute;top:-30px;left:50%;width:1px;height:30px;background:linear-gradient(180deg,transparent,rgba(48,209,88,.4));transform:translateX(-50%);animation:cbBeamUp .6s ease-out forwards}
+@keyframes cbBeamUp{0%{height:0;opacity:0}100%{height:30px;opacity:1}}
+/* BREATHING PARTICLE RING */
+@keyframes cbPartRing{0%,100%{transform:scale(.9);opacity:.3}50%{transform:scale(1.2);opacity:.7}}
+.cb-part-ring{position:absolute;inset:-18px;border-radius:50%;pointer-events:none;border:1px dotted rgba(214,230,255,.08);animation:cbPartRing 4s ease-in-out infinite}
 
 </style>
         </div>
@@ -4194,8 +4322,8 @@
 .corbit-bot.listening .cb-pupil{width:11px;height:14px;margin:-7px 0 0 -5.5px;transition:all .3s ease}
 /* EYE GLOW INTENSIFY */
 .corbit-bot.listening .cb-eye{box-shadow:0 0 18px rgba(214,230,255,1),0 0 36px rgba(190,214,246,.7),0 0 60px rgba(160,200,240,.3)}
-.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4)}
-.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}
+.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4);height:22px;width:22px;border-radius:50%;background:transparent;overflow:visible}
+.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
 /* RING SPIN FASTER ON LISTEN */
 .corbit-bot.listening .cb-ring{animation-duration:2s}
 
@@ -4287,6 +4415,38 @@
 @keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
 .voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
 .voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+
+
+/* HEART EYES — on voice linked success */
+.corbit-bot.done .cb-eye{height:22px;width:22px;border-radius:50%;background:transparent;box-shadow:none;overflow:visible}
+.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}
+@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}
+/* SCREEN FLASH — subtle green pulse on success */
+@keyframes cbScreenFlash{0%{opacity:0}30%{opacity:.15}100%{opacity:0}}
+.cb-screen-flash{position:fixed;inset:0;background:#30D158;pointer-events:none;z-index:199;animation:cbScreenFlash .8s ease-out forwards}
+/* ENERGY FIELD — shimmering aura ring */
+@keyframes cbEnergyField{0%{transform:rotate(0deg) scale(1);opacity:.4}50%{transform:rotate(180deg) scale(1.05);opacity:.7}100%{transform:rotate(360deg) scale(1);opacity:.4}}
+.cb-energy-ring{position:absolute;inset:-14px;border-radius:50%;pointer-events:none;border:1.5px dashed rgba(214,230,255,.15);animation:cbEnergyField 8s linear infinite}
+.corbit-bot.listening .cb-energy-ring{border-color:rgba(214,230,255,.35);animation-duration:3s}
+.corbit-bot.done .cb-energy-ring{border-color:rgba(48,209,88,.3);border-style:solid}
+/* SHADOW GLOW */
+.corbit-bot:not(.listening):not(.done) .cb-shadow{box-shadow:0 0 12px rgba(214,230,255,.08)}
+.corbit-bot.listening .cb-shadow{box-shadow:0 0 20px rgba(214,230,255,.2)}
+.corbit-bot.done .cb-shadow{box-shadow:0 0 24px rgba(48,209,88,.25)}
+/* MIC INNER RIPPLE */
+@keyframes cbMicRipple{0%{transform:scale(.8);opacity:.6}100%{transform:scale(1.5);opacity:0}}
+.voice-mic:active::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(214,230,255,.4);animation:cbMicRipple .5s ease-out forwards}
+/* WAVEFORM GRADIENT — bars color by progress */
+.cb-wave i{background:linear-gradient(180deg,rgba(100,180,255,.4),rgba(160,200,240,.2))}
+.cb-wave.listening i{background:linear-gradient(180deg,rgba(140,210,255,.8),rgba(180,220,250,.5))}
+.cb-wave.done i{background:linear-gradient(180deg,rgba(48,209,88,.7),rgba(100,230,150,.4))}
+/* ANTENNA BEAM on success */
+.corbit-bot.done .cb-ant-tip::before{content:'';position:absolute;top:-30px;left:50%;width:1px;height:30px;background:linear-gradient(180deg,transparent,rgba(48,209,88,.4));transform:translateX(-50%);animation:cbBeamUp .6s ease-out forwards}
+@keyframes cbBeamUp{0%{height:0;opacity:0}100%{height:30px;opacity:1}}
+/* BREATHING PARTICLE RING */
+@keyframes cbPartRing{0%,100%{transform:scale(.9);opacity:.3}50%{transform:scale(1.2);opacity:.7}}
+.cb-part-ring{position:absolute;inset:-18px;border-radius:50%;pointer-events:none;border:1px dotted rgba(214,230,255,.08);animation:cbPartRing 4s ease-in-out infinite}
 
 </style>
           <div class="tone-list" id="vapeYears" style="display:none;" aria-hidden="true">
@@ -4717,8 +4877,8 @@
 .corbit-bot.listening .cb-pupil{width:11px;height:14px;margin:-7px 0 0 -5.5px;transition:all .3s ease}
 /* EYE GLOW INTENSIFY */
 .corbit-bot.listening .cb-eye{box-shadow:0 0 18px rgba(214,230,255,1),0 0 36px rgba(190,214,246,.7),0 0 60px rgba(160,200,240,.3)}
-.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4)}
-.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}
+.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4);height:22px;width:22px;border-radius:50%;background:transparent;overflow:visible}
+.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
 /* RING SPIN FASTER ON LISTEN */
 .corbit-bot.listening .cb-ring{animation-duration:2s}
 
@@ -4810,6 +4970,38 @@
 @keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
 .voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
 .voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+
+
+/* HEART EYES — on voice linked success */
+.corbit-bot.done .cb-eye{height:22px;width:22px;border-radius:50%;background:transparent;box-shadow:none;overflow:visible}
+.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}
+@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}
+/* SCREEN FLASH — subtle green pulse on success */
+@keyframes cbScreenFlash{0%{opacity:0}30%{opacity:.15}100%{opacity:0}}
+.cb-screen-flash{position:fixed;inset:0;background:#30D158;pointer-events:none;z-index:199;animation:cbScreenFlash .8s ease-out forwards}
+/* ENERGY FIELD — shimmering aura ring */
+@keyframes cbEnergyField{0%{transform:rotate(0deg) scale(1);opacity:.4}50%{transform:rotate(180deg) scale(1.05);opacity:.7}100%{transform:rotate(360deg) scale(1);opacity:.4}}
+.cb-energy-ring{position:absolute;inset:-14px;border-radius:50%;pointer-events:none;border:1.5px dashed rgba(214,230,255,.15);animation:cbEnergyField 8s linear infinite}
+.corbit-bot.listening .cb-energy-ring{border-color:rgba(214,230,255,.35);animation-duration:3s}
+.corbit-bot.done .cb-energy-ring{border-color:rgba(48,209,88,.3);border-style:solid}
+/* SHADOW GLOW */
+.corbit-bot:not(.listening):not(.done) .cb-shadow{box-shadow:0 0 12px rgba(214,230,255,.08)}
+.corbit-bot.listening .cb-shadow{box-shadow:0 0 20px rgba(214,230,255,.2)}
+.corbit-bot.done .cb-shadow{box-shadow:0 0 24px rgba(48,209,88,.25)}
+/* MIC INNER RIPPLE */
+@keyframes cbMicRipple{0%{transform:scale(.8);opacity:.6}100%{transform:scale(1.5);opacity:0}}
+.voice-mic:active::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(214,230,255,.4);animation:cbMicRipple .5s ease-out forwards}
+/* WAVEFORM GRADIENT — bars color by progress */
+.cb-wave i{background:linear-gradient(180deg,rgba(100,180,255,.4),rgba(160,200,240,.2))}
+.cb-wave.listening i{background:linear-gradient(180deg,rgba(140,210,255,.8),rgba(180,220,250,.5))}
+.cb-wave.done i{background:linear-gradient(180deg,rgba(48,209,88,.7),rgba(100,230,150,.4))}
+/* ANTENNA BEAM on success */
+.corbit-bot.done .cb-ant-tip::before{content:'';position:absolute;top:-30px;left:50%;width:1px;height:30px;background:linear-gradient(180deg,transparent,rgba(48,209,88,.4));transform:translateX(-50%);animation:cbBeamUp .6s ease-out forwards}
+@keyframes cbBeamUp{0%{height:0;opacity:0}100%{height:30px;opacity:1}}
+/* BREATHING PARTICLE RING */
+@keyframes cbPartRing{0%,100%{transform:scale(.9);opacity:.3}50%{transform:scale(1.2);opacity:.7}}
+.cb-part-ring{position:absolute;inset:-18px;border-radius:50%;pointer-events:none;border:1px dotted rgba(214,230,255,.08);animation:cbPartRing 4s ease-in-out infinite}
 
 </style>
           <div id="vapeReason" style="display:none;" aria-hidden="true">
@@ -6050,8 +6242,8 @@
 .corbit-bot.listening .cb-pupil{width:11px;height:14px;margin:-7px 0 0 -5.5px;transition:all .3s ease}
 /* EYE GLOW INTENSIFY */
 .corbit-bot.listening .cb-eye{box-shadow:0 0 18px rgba(214,230,255,1),0 0 36px rgba(190,214,246,.7),0 0 60px rgba(160,200,240,.3)}
-.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4)}
-.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}
+.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4);height:22px;width:22px;border-radius:50%;background:transparent;overflow:visible}
+.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
 /* RING SPIN FASTER ON LISTEN */
 .corbit-bot.listening .cb-ring{animation-duration:2s}
 
@@ -6143,6 +6335,38 @@
 @keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
 .voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
 .voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+
+
+/* HEART EYES — on voice linked success */
+.corbit-bot.done .cb-eye{height:22px;width:22px;border-radius:50%;background:transparent;box-shadow:none;overflow:visible}
+.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}
+@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}
+/* SCREEN FLASH — subtle green pulse on success */
+@keyframes cbScreenFlash{0%{opacity:0}30%{opacity:.15}100%{opacity:0}}
+.cb-screen-flash{position:fixed;inset:0;background:#30D158;pointer-events:none;z-index:199;animation:cbScreenFlash .8s ease-out forwards}
+/* ENERGY FIELD — shimmering aura ring */
+@keyframes cbEnergyField{0%{transform:rotate(0deg) scale(1);opacity:.4}50%{transform:rotate(180deg) scale(1.05);opacity:.7}100%{transform:rotate(360deg) scale(1);opacity:.4}}
+.cb-energy-ring{position:absolute;inset:-14px;border-radius:50%;pointer-events:none;border:1.5px dashed rgba(214,230,255,.15);animation:cbEnergyField 8s linear infinite}
+.corbit-bot.listening .cb-energy-ring{border-color:rgba(214,230,255,.35);animation-duration:3s}
+.corbit-bot.done .cb-energy-ring{border-color:rgba(48,209,88,.3);border-style:solid}
+/* SHADOW GLOW */
+.corbit-bot:not(.listening):not(.done) .cb-shadow{box-shadow:0 0 12px rgba(214,230,255,.08)}
+.corbit-bot.listening .cb-shadow{box-shadow:0 0 20px rgba(214,230,255,.2)}
+.corbit-bot.done .cb-shadow{box-shadow:0 0 24px rgba(48,209,88,.25)}
+/* MIC INNER RIPPLE */
+@keyframes cbMicRipple{0%{transform:scale(.8);opacity:.6}100%{transform:scale(1.5);opacity:0}}
+.voice-mic:active::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(214,230,255,.4);animation:cbMicRipple .5s ease-out forwards}
+/* WAVEFORM GRADIENT — bars color by progress */
+.cb-wave i{background:linear-gradient(180deg,rgba(100,180,255,.4),rgba(160,200,240,.2))}
+.cb-wave.listening i{background:linear-gradient(180deg,rgba(140,210,255,.8),rgba(180,220,250,.5))}
+.cb-wave.done i{background:linear-gradient(180deg,rgba(48,209,88,.7),rgba(100,230,150,.4))}
+/* ANTENNA BEAM on success */
+.corbit-bot.done .cb-ant-tip::before{content:'';position:absolute;top:-30px;left:50%;width:1px;height:30px;background:linear-gradient(180deg,transparent,rgba(48,209,88,.4));transform:translateX(-50%);animation:cbBeamUp .6s ease-out forwards}
+@keyframes cbBeamUp{0%{height:0;opacity:0}100%{height:30px;opacity:1}}
+/* BREATHING PARTICLE RING */
+@keyframes cbPartRing{0%,100%{transform:scale(.9);opacity:.3}50%{transform:scale(1.2);opacity:.7}}
+.cb-part-ring{position:absolute;inset:-18px;border-radius:50%;pointer-events:none;border:1px dotted rgba(214,230,255,.08);animation:cbPartRing 4s ease-in-out infinite}
 
 </style>
         </div>
@@ -6613,8 +6837,8 @@
 .corbit-bot.listening .cb-pupil{width:11px;height:14px;margin:-7px 0 0 -5.5px;transition:all .3s ease}
 /* EYE GLOW INTENSIFY */
 .corbit-bot.listening .cb-eye{box-shadow:0 0 18px rgba(214,230,255,1),0 0 36px rgba(190,214,246,.7),0 0 60px rgba(160,200,240,.3)}
-.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4)}
-.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}
+.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4);height:22px;width:22px;border-radius:50%;background:transparent;overflow:visible}
+.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
 /* RING SPIN FASTER ON LISTEN */
 .corbit-bot.listening .cb-ring{animation-duration:2s}
 
@@ -6706,6 +6930,38 @@
 @keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
 .voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
 .voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+
+
+/* HEART EYES — on voice linked success */
+.corbit-bot.done .cb-eye{height:22px;width:22px;border-radius:50%;background:transparent;box-shadow:none;overflow:visible}
+.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}
+@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}
+/* SCREEN FLASH — subtle green pulse on success */
+@keyframes cbScreenFlash{0%{opacity:0}30%{opacity:.15}100%{opacity:0}}
+.cb-screen-flash{position:fixed;inset:0;background:#30D158;pointer-events:none;z-index:199;animation:cbScreenFlash .8s ease-out forwards}
+/* ENERGY FIELD — shimmering aura ring */
+@keyframes cbEnergyField{0%{transform:rotate(0deg) scale(1);opacity:.4}50%{transform:rotate(180deg) scale(1.05);opacity:.7}100%{transform:rotate(360deg) scale(1);opacity:.4}}
+.cb-energy-ring{position:absolute;inset:-14px;border-radius:50%;pointer-events:none;border:1.5px dashed rgba(214,230,255,.15);animation:cbEnergyField 8s linear infinite}
+.corbit-bot.listening .cb-energy-ring{border-color:rgba(214,230,255,.35);animation-duration:3s}
+.corbit-bot.done .cb-energy-ring{border-color:rgba(48,209,88,.3);border-style:solid}
+/* SHADOW GLOW */
+.corbit-bot:not(.listening):not(.done) .cb-shadow{box-shadow:0 0 12px rgba(214,230,255,.08)}
+.corbit-bot.listening .cb-shadow{box-shadow:0 0 20px rgba(214,230,255,.2)}
+.corbit-bot.done .cb-shadow{box-shadow:0 0 24px rgba(48,209,88,.25)}
+/* MIC INNER RIPPLE */
+@keyframes cbMicRipple{0%{transform:scale(.8);opacity:.6}100%{transform:scale(1.5);opacity:0}}
+.voice-mic:active::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(214,230,255,.4);animation:cbMicRipple .5s ease-out forwards}
+/* WAVEFORM GRADIENT — bars color by progress */
+.cb-wave i{background:linear-gradient(180deg,rgba(100,180,255,.4),rgba(160,200,240,.2))}
+.cb-wave.listening i{background:linear-gradient(180deg,rgba(140,210,255,.8),rgba(180,220,250,.5))}
+.cb-wave.done i{background:linear-gradient(180deg,rgba(48,209,88,.7),rgba(100,230,150,.4))}
+/* ANTENNA BEAM on success */
+.corbit-bot.done .cb-ant-tip::before{content:'';position:absolute;top:-30px;left:50%;width:1px;height:30px;background:linear-gradient(180deg,transparent,rgba(48,209,88,.4));transform:translateX(-50%);animation:cbBeamUp .6s ease-out forwards}
+@keyframes cbBeamUp{0%{height:0;opacity:0}100%{height:30px;opacity:1}}
+/* BREATHING PARTICLE RING */
+@keyframes cbPartRing{0%,100%{transform:scale(.9);opacity:.3}50%{transform:scale(1.2);opacity:.7}}
+.cb-part-ring{position:absolute;inset:-18px;border-radius:50%;pointer-events:none;border:1px dotted rgba(214,230,255,.08);animation:cbPartRing 4s ease-in-out infinite}
 
 </style>
         </div>
@@ -7092,8 +7348,8 @@
 .corbit-bot.listening .cb-pupil{width:11px;height:14px;margin:-7px 0 0 -5.5px;transition:all .3s ease}
 /* EYE GLOW INTENSIFY */
 .corbit-bot.listening .cb-eye{box-shadow:0 0 18px rgba(214,230,255,1),0 0 36px rgba(190,214,246,.7),0 0 60px rgba(160,200,240,.3)}
-.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4)}
-.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}
+.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4);height:22px;width:22px;border-radius:50%;background:transparent;overflow:visible}
+.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
 /* RING SPIN FASTER ON LISTEN */
 .corbit-bot.listening .cb-ring{animation-duration:2s}
 
@@ -7185,6 +7441,38 @@
 @keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
 .voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
 .voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+
+
+/* HEART EYES — on voice linked success */
+.corbit-bot.done .cb-eye{height:22px;width:22px;border-radius:50%;background:transparent;box-shadow:none;overflow:visible}
+.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}
+@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}
+/* SCREEN FLASH — subtle green pulse on success */
+@keyframes cbScreenFlash{0%{opacity:0}30%{opacity:.15}100%{opacity:0}}
+.cb-screen-flash{position:fixed;inset:0;background:#30D158;pointer-events:none;z-index:199;animation:cbScreenFlash .8s ease-out forwards}
+/* ENERGY FIELD — shimmering aura ring */
+@keyframes cbEnergyField{0%{transform:rotate(0deg) scale(1);opacity:.4}50%{transform:rotate(180deg) scale(1.05);opacity:.7}100%{transform:rotate(360deg) scale(1);opacity:.4}}
+.cb-energy-ring{position:absolute;inset:-14px;border-radius:50%;pointer-events:none;border:1.5px dashed rgba(214,230,255,.15);animation:cbEnergyField 8s linear infinite}
+.corbit-bot.listening .cb-energy-ring{border-color:rgba(214,230,255,.35);animation-duration:3s}
+.corbit-bot.done .cb-energy-ring{border-color:rgba(48,209,88,.3);border-style:solid}
+/* SHADOW GLOW */
+.corbit-bot:not(.listening):not(.done) .cb-shadow{box-shadow:0 0 12px rgba(214,230,255,.08)}
+.corbit-bot.listening .cb-shadow{box-shadow:0 0 20px rgba(214,230,255,.2)}
+.corbit-bot.done .cb-shadow{box-shadow:0 0 24px rgba(48,209,88,.25)}
+/* MIC INNER RIPPLE */
+@keyframes cbMicRipple{0%{transform:scale(.8);opacity:.6}100%{transform:scale(1.5);opacity:0}}
+.voice-mic:active::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(214,230,255,.4);animation:cbMicRipple .5s ease-out forwards}
+/* WAVEFORM GRADIENT — bars color by progress */
+.cb-wave i{background:linear-gradient(180deg,rgba(100,180,255,.4),rgba(160,200,240,.2))}
+.cb-wave.listening i{background:linear-gradient(180deg,rgba(140,210,255,.8),rgba(180,220,250,.5))}
+.cb-wave.done i{background:linear-gradient(180deg,rgba(48,209,88,.7),rgba(100,230,150,.4))}
+/* ANTENNA BEAM on success */
+.corbit-bot.done .cb-ant-tip::before{content:'';position:absolute;top:-30px;left:50%;width:1px;height:30px;background:linear-gradient(180deg,transparent,rgba(48,209,88,.4));transform:translateX(-50%);animation:cbBeamUp .6s ease-out forwards}
+@keyframes cbBeamUp{0%{height:0;opacity:0}100%{height:30px;opacity:1}}
+/* BREATHING PARTICLE RING */
+@keyframes cbPartRing{0%,100%{transform:scale(.9);opacity:.3}50%{transform:scale(1.2);opacity:.7}}
+.cb-part-ring{position:absolute;inset:-18px;border-radius:50%;pointer-events:none;border:1px dotted rgba(214,230,255,.08);animation:cbPartRing 4s ease-in-out infinite}
 
 </style>
         </div>
@@ -7835,8 +8123,8 @@
 .corbit-bot.listening .cb-pupil{width:11px;height:14px;margin:-7px 0 0 -5.5px;transition:all .3s ease}
 /* EYE GLOW INTENSIFY */
 .corbit-bot.listening .cb-eye{box-shadow:0 0 18px rgba(214,230,255,1),0 0 36px rgba(190,214,246,.7),0 0 60px rgba(160,200,240,.3)}
-.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4)}
-.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}
+.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4);height:22px;width:22px;border-radius:50%;background:transparent;overflow:visible}
+.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
 /* RING SPIN FASTER ON LISTEN */
 .corbit-bot.listening .cb-ring{animation-duration:2s}
 
@@ -7928,6 +8216,38 @@
 @keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
 .voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
 .voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+
+
+/* HEART EYES — on voice linked success */
+.corbit-bot.done .cb-eye{height:22px;width:22px;border-radius:50%;background:transparent;box-shadow:none;overflow:visible}
+.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}
+@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}
+/* SCREEN FLASH — subtle green pulse on success */
+@keyframes cbScreenFlash{0%{opacity:0}30%{opacity:.15}100%{opacity:0}}
+.cb-screen-flash{position:fixed;inset:0;background:#30D158;pointer-events:none;z-index:199;animation:cbScreenFlash .8s ease-out forwards}
+/* ENERGY FIELD — shimmering aura ring */
+@keyframes cbEnergyField{0%{transform:rotate(0deg) scale(1);opacity:.4}50%{transform:rotate(180deg) scale(1.05);opacity:.7}100%{transform:rotate(360deg) scale(1);opacity:.4}}
+.cb-energy-ring{position:absolute;inset:-14px;border-radius:50%;pointer-events:none;border:1.5px dashed rgba(214,230,255,.15);animation:cbEnergyField 8s linear infinite}
+.corbit-bot.listening .cb-energy-ring{border-color:rgba(214,230,255,.35);animation-duration:3s}
+.corbit-bot.done .cb-energy-ring{border-color:rgba(48,209,88,.3);border-style:solid}
+/* SHADOW GLOW */
+.corbit-bot:not(.listening):not(.done) .cb-shadow{box-shadow:0 0 12px rgba(214,230,255,.08)}
+.corbit-bot.listening .cb-shadow{box-shadow:0 0 20px rgba(214,230,255,.2)}
+.corbit-bot.done .cb-shadow{box-shadow:0 0 24px rgba(48,209,88,.25)}
+/* MIC INNER RIPPLE */
+@keyframes cbMicRipple{0%{transform:scale(.8);opacity:.6}100%{transform:scale(1.5);opacity:0}}
+.voice-mic:active::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(214,230,255,.4);animation:cbMicRipple .5s ease-out forwards}
+/* WAVEFORM GRADIENT — bars color by progress */
+.cb-wave i{background:linear-gradient(180deg,rgba(100,180,255,.4),rgba(160,200,240,.2))}
+.cb-wave.listening i{background:linear-gradient(180deg,rgba(140,210,255,.8),rgba(180,220,250,.5))}
+.cb-wave.done i{background:linear-gradient(180deg,rgba(48,209,88,.7),rgba(100,230,150,.4))}
+/* ANTENNA BEAM on success */
+.corbit-bot.done .cb-ant-tip::before{content:'';position:absolute;top:-30px;left:50%;width:1px;height:30px;background:linear-gradient(180deg,transparent,rgba(48,209,88,.4));transform:translateX(-50%);animation:cbBeamUp .6s ease-out forwards}
+@keyframes cbBeamUp{0%{height:0;opacity:0}100%{height:30px;opacity:1}}
+/* BREATHING PARTICLE RING */
+@keyframes cbPartRing{0%,100%{transform:scale(.9);opacity:.3}50%{transform:scale(1.2);opacity:.7}}
+.cb-part-ring{position:absolute;inset:-18px;border-radius:50%;pointer-events:none;border:1px dotted rgba(214,230,255,.08);animation:cbPartRing 4s ease-in-out infinite}
 
 </style>
         </div>
@@ -8080,6 +8400,8 @@
               </div>
               <span class="cb-shadow"></span>
                <span class="cb-vignette"></span>
+               <span class="cb-energy-ring"></span>
+               <span class="cb-part-ring"></span>
             </div>
 
             <div class="cb-wave" id="cbWave" aria-hidden="true"></div>
@@ -8569,8 +8891,8 @@
 .corbit-bot.listening .cb-pupil{width:11px;height:14px;margin:-7px 0 0 -5.5px;transition:all .3s ease}
 /* EYE GLOW INTENSIFY */
 .corbit-bot.listening .cb-eye{box-shadow:0 0 18px rgba(214,230,255,1),0 0 36px rgba(190,214,246,.7),0 0 60px rgba(160,200,240,.3)}
-.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4)}
-.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}
+.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4);height:22px;width:22px;border-radius:50%;background:transparent;overflow:visible}
+.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
 /* RING SPIN FASTER ON LISTEN */
 .corbit-bot.listening .cb-ring{animation-duration:2s}
 
@@ -8662,6 +8984,38 @@
 @keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
 .voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
 .voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+
+
+/* HEART EYES — on voice linked success */
+.corbit-bot.done .cb-eye{height:22px;width:22px;border-radius:50%;background:transparent;box-shadow:none;overflow:visible}
+.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}
+@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}
+/* SCREEN FLASH — subtle green pulse on success */
+@keyframes cbScreenFlash{0%{opacity:0}30%{opacity:.15}100%{opacity:0}}
+.cb-screen-flash{position:fixed;inset:0;background:#30D158;pointer-events:none;z-index:199;animation:cbScreenFlash .8s ease-out forwards}
+/* ENERGY FIELD — shimmering aura ring */
+@keyframes cbEnergyField{0%{transform:rotate(0deg) scale(1);opacity:.4}50%{transform:rotate(180deg) scale(1.05);opacity:.7}100%{transform:rotate(360deg) scale(1);opacity:.4}}
+.cb-energy-ring{position:absolute;inset:-14px;border-radius:50%;pointer-events:none;border:1.5px dashed rgba(214,230,255,.15);animation:cbEnergyField 8s linear infinite}
+.corbit-bot.listening .cb-energy-ring{border-color:rgba(214,230,255,.35);animation-duration:3s}
+.corbit-bot.done .cb-energy-ring{border-color:rgba(48,209,88,.3);border-style:solid}
+/* SHADOW GLOW */
+.corbit-bot:not(.listening):not(.done) .cb-shadow{box-shadow:0 0 12px rgba(214,230,255,.08)}
+.corbit-bot.listening .cb-shadow{box-shadow:0 0 20px rgba(214,230,255,.2)}
+.corbit-bot.done .cb-shadow{box-shadow:0 0 24px rgba(48,209,88,.25)}
+/* MIC INNER RIPPLE */
+@keyframes cbMicRipple{0%{transform:scale(.8);opacity:.6}100%{transform:scale(1.5);opacity:0}}
+.voice-mic:active::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(214,230,255,.4);animation:cbMicRipple .5s ease-out forwards}
+/* WAVEFORM GRADIENT — bars color by progress */
+.cb-wave i{background:linear-gradient(180deg,rgba(100,180,255,.4),rgba(160,200,240,.2))}
+.cb-wave.listening i{background:linear-gradient(180deg,rgba(140,210,255,.8),rgba(180,220,250,.5))}
+.cb-wave.done i{background:linear-gradient(180deg,rgba(48,209,88,.7),rgba(100,230,150,.4))}
+/* ANTENNA BEAM on success */
+.corbit-bot.done .cb-ant-tip::before{content:'';position:absolute;top:-30px;left:50%;width:1px;height:30px;background:linear-gradient(180deg,transparent,rgba(48,209,88,.4));transform:translateX(-50%);animation:cbBeamUp .6s ease-out forwards}
+@keyframes cbBeamUp{0%{height:0;opacity:0}100%{height:30px;opacity:1}}
+/* BREATHING PARTICLE RING */
+@keyframes cbPartRing{0%,100%{transform:scale(.9);opacity:.3}50%{transform:scale(1.2);opacity:.7}}
+.cb-part-ring{position:absolute;inset:-18px;border-radius:50%;pointer-events:none;border:1px dotted rgba(214,230,255,.08);animation:cbPartRing 4s ease-in-out infinite}
 
 </style>
 
@@ -9310,8 +9664,8 @@
 .corbit-bot.listening .cb-pupil{width:11px;height:14px;margin:-7px 0 0 -5.5px;transition:all .3s ease}
 /* EYE GLOW INTENSIFY */
 .corbit-bot.listening .cb-eye{box-shadow:0 0 18px rgba(214,230,255,1),0 0 36px rgba(190,214,246,.7),0 0 60px rgba(160,200,240,.3)}
-.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4)}
-.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}
+.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4);height:22px;width:22px;border-radius:50%;background:transparent;overflow:visible}
+.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
 /* RING SPIN FASTER ON LISTEN */
 .corbit-bot.listening .cb-ring{animation-duration:2s}
 
@@ -9403,6 +9757,38 @@
 @keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
 .voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
 .voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+
+
+/* HEART EYES — on voice linked success */
+.corbit-bot.done .cb-eye{height:22px;width:22px;border-radius:50%;background:transparent;box-shadow:none;overflow:visible}
+.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}
+@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}
+/* SCREEN FLASH — subtle green pulse on success */
+@keyframes cbScreenFlash{0%{opacity:0}30%{opacity:.15}100%{opacity:0}}
+.cb-screen-flash{position:fixed;inset:0;background:#30D158;pointer-events:none;z-index:199;animation:cbScreenFlash .8s ease-out forwards}
+/* ENERGY FIELD — shimmering aura ring */
+@keyframes cbEnergyField{0%{transform:rotate(0deg) scale(1);opacity:.4}50%{transform:rotate(180deg) scale(1.05);opacity:.7}100%{transform:rotate(360deg) scale(1);opacity:.4}}
+.cb-energy-ring{position:absolute;inset:-14px;border-radius:50%;pointer-events:none;border:1.5px dashed rgba(214,230,255,.15);animation:cbEnergyField 8s linear infinite}
+.corbit-bot.listening .cb-energy-ring{border-color:rgba(214,230,255,.35);animation-duration:3s}
+.corbit-bot.done .cb-energy-ring{border-color:rgba(48,209,88,.3);border-style:solid}
+/* SHADOW GLOW */
+.corbit-bot:not(.listening):not(.done) .cb-shadow{box-shadow:0 0 12px rgba(214,230,255,.08)}
+.corbit-bot.listening .cb-shadow{box-shadow:0 0 20px rgba(214,230,255,.2)}
+.corbit-bot.done .cb-shadow{box-shadow:0 0 24px rgba(48,209,88,.25)}
+/* MIC INNER RIPPLE */
+@keyframes cbMicRipple{0%{transform:scale(.8);opacity:.6}100%{transform:scale(1.5);opacity:0}}
+.voice-mic:active::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(214,230,255,.4);animation:cbMicRipple .5s ease-out forwards}
+/* WAVEFORM GRADIENT — bars color by progress */
+.cb-wave i{background:linear-gradient(180deg,rgba(100,180,255,.4),rgba(160,200,240,.2))}
+.cb-wave.listening i{background:linear-gradient(180deg,rgba(140,210,255,.8),rgba(180,220,250,.5))}
+.cb-wave.done i{background:linear-gradient(180deg,rgba(48,209,88,.7),rgba(100,230,150,.4))}
+/* ANTENNA BEAM on success */
+.corbit-bot.done .cb-ant-tip::before{content:'';position:absolute;top:-30px;left:50%;width:1px;height:30px;background:linear-gradient(180deg,transparent,rgba(48,209,88,.4));transform:translateX(-50%);animation:cbBeamUp .6s ease-out forwards}
+@keyframes cbBeamUp{0%{height:0;opacity:0}100%{height:30px;opacity:1}}
+/* BREATHING PARTICLE RING */
+@keyframes cbPartRing{0%,100%{transform:scale(.9);opacity:.3}50%{transform:scale(1.2);opacity:.7}}
+.cb-part-ring{position:absolute;inset:-18px;border-radius:50%;pointer-events:none;border:1px dotted rgba(214,230,255,.08);animation:cbPartRing 4s ease-in-out infinite}
 
 </style>
         </div>
@@ -9944,8 +10330,8 @@
 .corbit-bot.listening .cb-pupil{width:11px;height:14px;margin:-7px 0 0 -5.5px;transition:all .3s ease}
 /* EYE GLOW INTENSIFY */
 .corbit-bot.listening .cb-eye{box-shadow:0 0 18px rgba(214,230,255,1),0 0 36px rgba(190,214,246,.7),0 0 60px rgba(160,200,240,.3)}
-.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4)}
-.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}
+.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4);height:22px;width:22px;border-radius:50%;background:transparent;overflow:visible}
+.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
 /* RING SPIN FASTER ON LISTEN */
 .corbit-bot.listening .cb-ring{animation-duration:2s}
 
@@ -10037,6 +10423,38 @@
 @keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
 .voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
 .voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+
+
+/* HEART EYES — on voice linked success */
+.corbit-bot.done .cb-eye{height:22px;width:22px;border-radius:50%;background:transparent;box-shadow:none;overflow:visible}
+.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}
+@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}
+/* SCREEN FLASH — subtle green pulse on success */
+@keyframes cbScreenFlash{0%{opacity:0}30%{opacity:.15}100%{opacity:0}}
+.cb-screen-flash{position:fixed;inset:0;background:#30D158;pointer-events:none;z-index:199;animation:cbScreenFlash .8s ease-out forwards}
+/* ENERGY FIELD — shimmering aura ring */
+@keyframes cbEnergyField{0%{transform:rotate(0deg) scale(1);opacity:.4}50%{transform:rotate(180deg) scale(1.05);opacity:.7}100%{transform:rotate(360deg) scale(1);opacity:.4}}
+.cb-energy-ring{position:absolute;inset:-14px;border-radius:50%;pointer-events:none;border:1.5px dashed rgba(214,230,255,.15);animation:cbEnergyField 8s linear infinite}
+.corbit-bot.listening .cb-energy-ring{border-color:rgba(214,230,255,.35);animation-duration:3s}
+.corbit-bot.done .cb-energy-ring{border-color:rgba(48,209,88,.3);border-style:solid}
+/* SHADOW GLOW */
+.corbit-bot:not(.listening):not(.done) .cb-shadow{box-shadow:0 0 12px rgba(214,230,255,.08)}
+.corbit-bot.listening .cb-shadow{box-shadow:0 0 20px rgba(214,230,255,.2)}
+.corbit-bot.done .cb-shadow{box-shadow:0 0 24px rgba(48,209,88,.25)}
+/* MIC INNER RIPPLE */
+@keyframes cbMicRipple{0%{transform:scale(.8);opacity:.6}100%{transform:scale(1.5);opacity:0}}
+.voice-mic:active::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(214,230,255,.4);animation:cbMicRipple .5s ease-out forwards}
+/* WAVEFORM GRADIENT — bars color by progress */
+.cb-wave i{background:linear-gradient(180deg,rgba(100,180,255,.4),rgba(160,200,240,.2))}
+.cb-wave.listening i{background:linear-gradient(180deg,rgba(140,210,255,.8),rgba(180,220,250,.5))}
+.cb-wave.done i{background:linear-gradient(180deg,rgba(48,209,88,.7),rgba(100,230,150,.4))}
+/* ANTENNA BEAM on success */
+.corbit-bot.done .cb-ant-tip::before{content:'';position:absolute;top:-30px;left:50%;width:1px;height:30px;background:linear-gradient(180deg,transparent,rgba(48,209,88,.4));transform:translateX(-50%);animation:cbBeamUp .6s ease-out forwards}
+@keyframes cbBeamUp{0%{height:0;opacity:0}100%{height:30px;opacity:1}}
+/* BREATHING PARTICLE RING */
+@keyframes cbPartRing{0%,100%{transform:scale(.9);opacity:.3}50%{transform:scale(1.2);opacity:.7}}
+.cb-part-ring{position:absolute;inset:-18px;border-radius:50%;pointer-events:none;border:1px dotted rgba(214,230,255,.08);animation:cbPartRing 4s ease-in-out infinite}
 
 </style>
   </div>
@@ -11363,8 +11781,8 @@
 .corbit-bot.listening .cb-pupil{width:11px;height:14px;margin:-7px 0 0 -5.5px;transition:all .3s ease}
 /* EYE GLOW INTENSIFY */
 .corbit-bot.listening .cb-eye{box-shadow:0 0 18px rgba(214,230,255,1),0 0 36px rgba(190,214,246,.7),0 0 60px rgba(160,200,240,.3)}
-.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4)}
-.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}
+.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4);height:22px;width:22px;border-radius:50%;background:transparent;overflow:visible}
+.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
 /* RING SPIN FASTER ON LISTEN */
 .corbit-bot.listening .cb-ring{animation-duration:2s}
 
@@ -11456,6 +11874,38 @@
 @keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
 .voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
 .voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+
+
+/* HEART EYES — on voice linked success */
+.corbit-bot.done .cb-eye{height:22px;width:22px;border-radius:50%;background:transparent;box-shadow:none;overflow:visible}
+.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}
+@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}
+/* SCREEN FLASH — subtle green pulse on success */
+@keyframes cbScreenFlash{0%{opacity:0}30%{opacity:.15}100%{opacity:0}}
+.cb-screen-flash{position:fixed;inset:0;background:#30D158;pointer-events:none;z-index:199;animation:cbScreenFlash .8s ease-out forwards}
+/* ENERGY FIELD — shimmering aura ring */
+@keyframes cbEnergyField{0%{transform:rotate(0deg) scale(1);opacity:.4}50%{transform:rotate(180deg) scale(1.05);opacity:.7}100%{transform:rotate(360deg) scale(1);opacity:.4}}
+.cb-energy-ring{position:absolute;inset:-14px;border-radius:50%;pointer-events:none;border:1.5px dashed rgba(214,230,255,.15);animation:cbEnergyField 8s linear infinite}
+.corbit-bot.listening .cb-energy-ring{border-color:rgba(214,230,255,.35);animation-duration:3s}
+.corbit-bot.done .cb-energy-ring{border-color:rgba(48,209,88,.3);border-style:solid}
+/* SHADOW GLOW */
+.corbit-bot:not(.listening):not(.done) .cb-shadow{box-shadow:0 0 12px rgba(214,230,255,.08)}
+.corbit-bot.listening .cb-shadow{box-shadow:0 0 20px rgba(214,230,255,.2)}
+.corbit-bot.done .cb-shadow{box-shadow:0 0 24px rgba(48,209,88,.25)}
+/* MIC INNER RIPPLE */
+@keyframes cbMicRipple{0%{transform:scale(.8);opacity:.6}100%{transform:scale(1.5);opacity:0}}
+.voice-mic:active::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(214,230,255,.4);animation:cbMicRipple .5s ease-out forwards}
+/* WAVEFORM GRADIENT — bars color by progress */
+.cb-wave i{background:linear-gradient(180deg,rgba(100,180,255,.4),rgba(160,200,240,.2))}
+.cb-wave.listening i{background:linear-gradient(180deg,rgba(140,210,255,.8),rgba(180,220,250,.5))}
+.cb-wave.done i{background:linear-gradient(180deg,rgba(48,209,88,.7),rgba(100,230,150,.4))}
+/* ANTENNA BEAM on success */
+.corbit-bot.done .cb-ant-tip::before{content:'';position:absolute;top:-30px;left:50%;width:1px;height:30px;background:linear-gradient(180deg,transparent,rgba(48,209,88,.4));transform:translateX(-50%);animation:cbBeamUp .6s ease-out forwards}
+@keyframes cbBeamUp{0%{height:0;opacity:0}100%{height:30px;opacity:1}}
+/* BREATHING PARTICLE RING */
+@keyframes cbPartRing{0%,100%{transform:scale(.9);opacity:.3}50%{transform:scale(1.2);opacity:.7}}
+.cb-part-ring{position:absolute;inset:-18px;border-radius:50%;pointer-events:none;border:1px dotted rgba(214,230,255,.08);animation:cbPartRing 4s ease-in-out infinite}
 
 </style>
     `;
@@ -11918,8 +12368,8 @@
 .corbit-bot.listening .cb-pupil{width:11px;height:14px;margin:-7px 0 0 -5.5px;transition:all .3s ease}
 /* EYE GLOW INTENSIFY */
 .corbit-bot.listening .cb-eye{box-shadow:0 0 18px rgba(214,230,255,1),0 0 36px rgba(190,214,246,.7),0 0 60px rgba(160,200,240,.3)}
-.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4)}
-.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}
+.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4);height:22px;width:22px;border-radius:50%;background:transparent;overflow:visible}
+.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
 /* RING SPIN FASTER ON LISTEN */
 .corbit-bot.listening .cb-ring{animation-duration:2s}
 
@@ -12011,6 +12461,38 @@
 @keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
 .voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
 .voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+
+
+/* HEART EYES — on voice linked success */
+.corbit-bot.done .cb-eye{height:22px;width:22px;border-radius:50%;background:transparent;box-shadow:none;overflow:visible}
+.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}
+@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}
+/* SCREEN FLASH — subtle green pulse on success */
+@keyframes cbScreenFlash{0%{opacity:0}30%{opacity:.15}100%{opacity:0}}
+.cb-screen-flash{position:fixed;inset:0;background:#30D158;pointer-events:none;z-index:199;animation:cbScreenFlash .8s ease-out forwards}
+/* ENERGY FIELD — shimmering aura ring */
+@keyframes cbEnergyField{0%{transform:rotate(0deg) scale(1);opacity:.4}50%{transform:rotate(180deg) scale(1.05);opacity:.7}100%{transform:rotate(360deg) scale(1);opacity:.4}}
+.cb-energy-ring{position:absolute;inset:-14px;border-radius:50%;pointer-events:none;border:1.5px dashed rgba(214,230,255,.15);animation:cbEnergyField 8s linear infinite}
+.corbit-bot.listening .cb-energy-ring{border-color:rgba(214,230,255,.35);animation-duration:3s}
+.corbit-bot.done .cb-energy-ring{border-color:rgba(48,209,88,.3);border-style:solid}
+/* SHADOW GLOW */
+.corbit-bot:not(.listening):not(.done) .cb-shadow{box-shadow:0 0 12px rgba(214,230,255,.08)}
+.corbit-bot.listening .cb-shadow{box-shadow:0 0 20px rgba(214,230,255,.2)}
+.corbit-bot.done .cb-shadow{box-shadow:0 0 24px rgba(48,209,88,.25)}
+/* MIC INNER RIPPLE */
+@keyframes cbMicRipple{0%{transform:scale(.8);opacity:.6}100%{transform:scale(1.5);opacity:0}}
+.voice-mic:active::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(214,230,255,.4);animation:cbMicRipple .5s ease-out forwards}
+/* WAVEFORM GRADIENT — bars color by progress */
+.cb-wave i{background:linear-gradient(180deg,rgba(100,180,255,.4),rgba(160,200,240,.2))}
+.cb-wave.listening i{background:linear-gradient(180deg,rgba(140,210,255,.8),rgba(180,220,250,.5))}
+.cb-wave.done i{background:linear-gradient(180deg,rgba(48,209,88,.7),rgba(100,230,150,.4))}
+/* ANTENNA BEAM on success */
+.corbit-bot.done .cb-ant-tip::before{content:'';position:absolute;top:-30px;left:50%;width:1px;height:30px;background:linear-gradient(180deg,transparent,rgba(48,209,88,.4));transform:translateX(-50%);animation:cbBeamUp .6s ease-out forwards}
+@keyframes cbBeamUp{0%{height:0;opacity:0}100%{height:30px;opacity:1}}
+/* BREATHING PARTICLE RING */
+@keyframes cbPartRing{0%,100%{transform:scale(.9);opacity:.3}50%{transform:scale(1.2);opacity:.7}}
+.cb-part-ring{position:absolute;inset:-18px;border-radius:50%;pointer-events:none;border:1px dotted rgba(214,230,255,.08);animation:cbPartRing 4s ease-in-out infinite}
 
 </style>
     `;
@@ -13855,6 +14337,8 @@
     function success() {
       done = true;
       state.voiceDone = true;
+      // Screen flash
+      var flash=document.createElement('div');flash.className='cb-screen-flash';document.body.appendChild(flash);setTimeout(function(){flash.remove()},800)
       if (line) {line.classList.add('done');line.style.textShadow='0 0 20px rgba(48,209,88,.4)'}
       try { localStorage.setItem('coreVoiceLinked', '1'); } catch (e) {}
       targets.forEach(function (t) { t.el.classList.add('heard'); });
@@ -15267,8 +15751,8 @@ body.on-autoadvance .stepwrap::after {
 .corbit-bot.listening .cb-pupil{width:11px;height:14px;margin:-7px 0 0 -5.5px;transition:all .3s ease}
 /* EYE GLOW INTENSIFY */
 .corbit-bot.listening .cb-eye{box-shadow:0 0 18px rgba(214,230,255,1),0 0 36px rgba(190,214,246,.7),0 0 60px rgba(160,200,240,.3)}
-.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4)}
-.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}
+.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4);height:22px;width:22px;border-radius:50%;background:transparent;overflow:visible}
+.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
 /* RING SPIN FASTER ON LISTEN */
 .corbit-bot.listening .cb-ring{animation-duration:2s}
 
@@ -15360,6 +15844,38 @@ body.on-autoadvance .stepwrap::after {
 @keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
 .voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
 .voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+
+
+/* HEART EYES — on voice linked success */
+.corbit-bot.done .cb-eye{height:22px;width:22px;border-radius:50%;background:transparent;box-shadow:none;overflow:visible}
+.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}
+@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}
+/* SCREEN FLASH — subtle green pulse on success */
+@keyframes cbScreenFlash{0%{opacity:0}30%{opacity:.15}100%{opacity:0}}
+.cb-screen-flash{position:fixed;inset:0;background:#30D158;pointer-events:none;z-index:199;animation:cbScreenFlash .8s ease-out forwards}
+/* ENERGY FIELD — shimmering aura ring */
+@keyframes cbEnergyField{0%{transform:rotate(0deg) scale(1);opacity:.4}50%{transform:rotate(180deg) scale(1.05);opacity:.7}100%{transform:rotate(360deg) scale(1);opacity:.4}}
+.cb-energy-ring{position:absolute;inset:-14px;border-radius:50%;pointer-events:none;border:1.5px dashed rgba(214,230,255,.15);animation:cbEnergyField 8s linear infinite}
+.corbit-bot.listening .cb-energy-ring{border-color:rgba(214,230,255,.35);animation-duration:3s}
+.corbit-bot.done .cb-energy-ring{border-color:rgba(48,209,88,.3);border-style:solid}
+/* SHADOW GLOW */
+.corbit-bot:not(.listening):not(.done) .cb-shadow{box-shadow:0 0 12px rgba(214,230,255,.08)}
+.corbit-bot.listening .cb-shadow{box-shadow:0 0 20px rgba(214,230,255,.2)}
+.corbit-bot.done .cb-shadow{box-shadow:0 0 24px rgba(48,209,88,.25)}
+/* MIC INNER RIPPLE */
+@keyframes cbMicRipple{0%{transform:scale(.8);opacity:.6}100%{transform:scale(1.5);opacity:0}}
+.voice-mic:active::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(214,230,255,.4);animation:cbMicRipple .5s ease-out forwards}
+/* WAVEFORM GRADIENT — bars color by progress */
+.cb-wave i{background:linear-gradient(180deg,rgba(100,180,255,.4),rgba(160,200,240,.2))}
+.cb-wave.listening i{background:linear-gradient(180deg,rgba(140,210,255,.8),rgba(180,220,250,.5))}
+.cb-wave.done i{background:linear-gradient(180deg,rgba(48,209,88,.7),rgba(100,230,150,.4))}
+/* ANTENNA BEAM on success */
+.corbit-bot.done .cb-ant-tip::before{content:'';position:absolute;top:-30px;left:50%;width:1px;height:30px;background:linear-gradient(180deg,transparent,rgba(48,209,88,.4));transform:translateX(-50%);animation:cbBeamUp .6s ease-out forwards}
+@keyframes cbBeamUp{0%{height:0;opacity:0}100%{height:30px;opacity:1}}
+/* BREATHING PARTICLE RING */
+@keyframes cbPartRing{0%,100%{transform:scale(.9);opacity:.3}50%{transform:scale(1.2);opacity:.7}}
+.cb-part-ring{position:absolute;inset:-18px;border-radius:50%;pointer-events:none;border:1px dotted rgba(214,230,255,.08);animation:cbPartRing 4s ease-in-out infinite}
 
 </style>
 
@@ -15866,8 +16382,8 @@ body.on-autoadvance .stepwrap::after {
 .corbit-bot.listening .cb-pupil{width:11px;height:14px;margin:-7px 0 0 -5.5px;transition:all .3s ease}
 /* EYE GLOW INTENSIFY */
 .corbit-bot.listening .cb-eye{box-shadow:0 0 18px rgba(214,230,255,1),0 0 36px rgba(190,214,246,.7),0 0 60px rgba(160,200,240,.3)}
-.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4)}
-.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}
+.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4);height:22px;width:22px;border-radius:50%;background:transparent;overflow:visible}
+.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
 /* RING SPIN FASTER ON LISTEN */
 .corbit-bot.listening .cb-ring{animation-duration:2s}
 
@@ -15959,6 +16475,38 @@ body.on-autoadvance .stepwrap::after {
 @keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
 .voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
 .voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+
+
+/* HEART EYES — on voice linked success */
+.corbit-bot.done .cb-eye{height:22px;width:22px;border-radius:50%;background:transparent;box-shadow:none;overflow:visible}
+.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}
+@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}
+/* SCREEN FLASH — subtle green pulse on success */
+@keyframes cbScreenFlash{0%{opacity:0}30%{opacity:.15}100%{opacity:0}}
+.cb-screen-flash{position:fixed;inset:0;background:#30D158;pointer-events:none;z-index:199;animation:cbScreenFlash .8s ease-out forwards}
+/* ENERGY FIELD — shimmering aura ring */
+@keyframes cbEnergyField{0%{transform:rotate(0deg) scale(1);opacity:.4}50%{transform:rotate(180deg) scale(1.05);opacity:.7}100%{transform:rotate(360deg) scale(1);opacity:.4}}
+.cb-energy-ring{position:absolute;inset:-14px;border-radius:50%;pointer-events:none;border:1.5px dashed rgba(214,230,255,.15);animation:cbEnergyField 8s linear infinite}
+.corbit-bot.listening .cb-energy-ring{border-color:rgba(214,230,255,.35);animation-duration:3s}
+.corbit-bot.done .cb-energy-ring{border-color:rgba(48,209,88,.3);border-style:solid}
+/* SHADOW GLOW */
+.corbit-bot:not(.listening):not(.done) .cb-shadow{box-shadow:0 0 12px rgba(214,230,255,.08)}
+.corbit-bot.listening .cb-shadow{box-shadow:0 0 20px rgba(214,230,255,.2)}
+.corbit-bot.done .cb-shadow{box-shadow:0 0 24px rgba(48,209,88,.25)}
+/* MIC INNER RIPPLE */
+@keyframes cbMicRipple{0%{transform:scale(.8);opacity:.6}100%{transform:scale(1.5);opacity:0}}
+.voice-mic:active::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(214,230,255,.4);animation:cbMicRipple .5s ease-out forwards}
+/* WAVEFORM GRADIENT — bars color by progress */
+.cb-wave i{background:linear-gradient(180deg,rgba(100,180,255,.4),rgba(160,200,240,.2))}
+.cb-wave.listening i{background:linear-gradient(180deg,rgba(140,210,255,.8),rgba(180,220,250,.5))}
+.cb-wave.done i{background:linear-gradient(180deg,rgba(48,209,88,.7),rgba(100,230,150,.4))}
+/* ANTENNA BEAM on success */
+.corbit-bot.done .cb-ant-tip::before{content:'';position:absolute;top:-30px;left:50%;width:1px;height:30px;background:linear-gradient(180deg,transparent,rgba(48,209,88,.4));transform:translateX(-50%);animation:cbBeamUp .6s ease-out forwards}
+@keyframes cbBeamUp{0%{height:0;opacity:0}100%{height:30px;opacity:1}}
+/* BREATHING PARTICLE RING */
+@keyframes cbPartRing{0%,100%{transform:scale(.9);opacity:.3}50%{transform:scale(1.2);opacity:.7}}
+.cb-part-ring{position:absolute;inset:-18px;border-radius:50%;pointer-events:none;border:1px dotted rgba(214,230,255,.08);animation:cbPartRing 4s ease-in-out infinite}
 
 </style>
 <div class="corb-overlay" id="corbOverlay">
@@ -16615,8 +17163,8 @@ html body .step .copy { text-align:left !important; margin-left:0 !important; ma
 .corbit-bot.listening .cb-pupil{width:11px;height:14px;margin:-7px 0 0 -5.5px;transition:all .3s ease}
 /* EYE GLOW INTENSIFY */
 .corbit-bot.listening .cb-eye{box-shadow:0 0 18px rgba(214,230,255,1),0 0 36px rgba(190,214,246,.7),0 0 60px rgba(160,200,240,.3)}
-.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4)}
-.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}
+.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4);height:22px;width:22px;border-radius:50%;background:transparent;overflow:visible}
+.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
 /* RING SPIN FASTER ON LISTEN */
 .corbit-bot.listening .cb-ring{animation-duration:2s}
 
@@ -16708,6 +17256,38 @@ html body .step .copy { text-align:left !important; margin-left:0 !important; ma
 @keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
 .voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
 .voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+
+
+/* HEART EYES — on voice linked success */
+.corbit-bot.done .cb-eye{height:22px;width:22px;border-radius:50%;background:transparent;box-shadow:none;overflow:visible}
+.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}
+@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}
+/* SCREEN FLASH — subtle green pulse on success */
+@keyframes cbScreenFlash{0%{opacity:0}30%{opacity:.15}100%{opacity:0}}
+.cb-screen-flash{position:fixed;inset:0;background:#30D158;pointer-events:none;z-index:199;animation:cbScreenFlash .8s ease-out forwards}
+/* ENERGY FIELD — shimmering aura ring */
+@keyframes cbEnergyField{0%{transform:rotate(0deg) scale(1);opacity:.4}50%{transform:rotate(180deg) scale(1.05);opacity:.7}100%{transform:rotate(360deg) scale(1);opacity:.4}}
+.cb-energy-ring{position:absolute;inset:-14px;border-radius:50%;pointer-events:none;border:1.5px dashed rgba(214,230,255,.15);animation:cbEnergyField 8s linear infinite}
+.corbit-bot.listening .cb-energy-ring{border-color:rgba(214,230,255,.35);animation-duration:3s}
+.corbit-bot.done .cb-energy-ring{border-color:rgba(48,209,88,.3);border-style:solid}
+/* SHADOW GLOW */
+.corbit-bot:not(.listening):not(.done) .cb-shadow{box-shadow:0 0 12px rgba(214,230,255,.08)}
+.corbit-bot.listening .cb-shadow{box-shadow:0 0 20px rgba(214,230,255,.2)}
+.corbit-bot.done .cb-shadow{box-shadow:0 0 24px rgba(48,209,88,.25)}
+/* MIC INNER RIPPLE */
+@keyframes cbMicRipple{0%{transform:scale(.8);opacity:.6}100%{transform:scale(1.5);opacity:0}}
+.voice-mic:active::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(214,230,255,.4);animation:cbMicRipple .5s ease-out forwards}
+/* WAVEFORM GRADIENT — bars color by progress */
+.cb-wave i{background:linear-gradient(180deg,rgba(100,180,255,.4),rgba(160,200,240,.2))}
+.cb-wave.listening i{background:linear-gradient(180deg,rgba(140,210,255,.8),rgba(180,220,250,.5))}
+.cb-wave.done i{background:linear-gradient(180deg,rgba(48,209,88,.7),rgba(100,230,150,.4))}
+/* ANTENNA BEAM on success */
+.corbit-bot.done .cb-ant-tip::before{content:'';position:absolute;top:-30px;left:50%;width:1px;height:30px;background:linear-gradient(180deg,transparent,rgba(48,209,88,.4));transform:translateX(-50%);animation:cbBeamUp .6s ease-out forwards}
+@keyframes cbBeamUp{0%{height:0;opacity:0}100%{height:30px;opacity:1}}
+/* BREATHING PARTICLE RING */
+@keyframes cbPartRing{0%,100%{transform:scale(.9);opacity:.3}50%{transform:scale(1.2);opacity:.7}}
+.cb-part-ring{position:absolute;inset:-18px;border-radius:50%;pointer-events:none;border:1px dotted rgba(214,230,255,.08);animation:cbPartRing 4s ease-in-out infinite}
 
 </style>
 
@@ -17194,8 +17774,8 @@ html body .step .copy { text-align:left !important; margin-left:0 !important; ma
 .corbit-bot.listening .cb-pupil{width:11px;height:14px;margin:-7px 0 0 -5.5px;transition:all .3s ease}
 /* EYE GLOW INTENSIFY */
 .corbit-bot.listening .cb-eye{box-shadow:0 0 18px rgba(214,230,255,1),0 0 36px rgba(190,214,246,.7),0 0 60px rgba(160,200,240,.3)}
-.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4)}
-.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}
+.corbit-bot.done .cb-eye{box-shadow:0 0 14px rgba(48,209,88,.8),0 0 30px rgba(48,209,88,.4);height:22px;width:22px;border-radius:50%;background:transparent;overflow:visible}
+.corbit-bot.done .cb-ant-tip{background:radial-gradient(circle at 35% 30%,#fff,#7CE8A4 55%,#30D158 100%);box-shadow:0 0 16px rgba(48,209,88,.8)}.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
 /* RING SPIN FASTER ON LISTEN */
 .corbit-bot.listening .cb-ring{animation-duration:2s}
 
@@ -17287,6 +17867,38 @@ html body .step .copy { text-align:left !important; margin-left:0 !important; ma
 @keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
 .voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
 .voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+
+
+/* HEART EYES — on voice linked success */
+.corbit-bot.done .cb-eye{height:22px;width:22px;border-radius:50%;background:transparent;box-shadow:none;overflow:visible}
+.corbit-bot.done .cb-eye::before{content:'♥';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:#30D158;text-shadow:0 0 10px rgba(48,209,88,.8);animation:cbHeartBeat .5s ease-in-out infinite}
+@keyframes cbHeartBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.corbit-bot.done .cb-pupil,.corbit-bot.done .cb-lid{display:none}
+/* SCREEN FLASH — subtle green pulse on success */
+@keyframes cbScreenFlash{0%{opacity:0}30%{opacity:.15}100%{opacity:0}}
+.cb-screen-flash{position:fixed;inset:0;background:#30D158;pointer-events:none;z-index:199;animation:cbScreenFlash .8s ease-out forwards}
+/* ENERGY FIELD — shimmering aura ring */
+@keyframes cbEnergyField{0%{transform:rotate(0deg) scale(1);opacity:.4}50%{transform:rotate(180deg) scale(1.05);opacity:.7}100%{transform:rotate(360deg) scale(1);opacity:.4}}
+.cb-energy-ring{position:absolute;inset:-14px;border-radius:50%;pointer-events:none;border:1.5px dashed rgba(214,230,255,.15);animation:cbEnergyField 8s linear infinite}
+.corbit-bot.listening .cb-energy-ring{border-color:rgba(214,230,255,.35);animation-duration:3s}
+.corbit-bot.done .cb-energy-ring{border-color:rgba(48,209,88,.3);border-style:solid}
+/* SHADOW GLOW */
+.corbit-bot:not(.listening):not(.done) .cb-shadow{box-shadow:0 0 12px rgba(214,230,255,.08)}
+.corbit-bot.listening .cb-shadow{box-shadow:0 0 20px rgba(214,230,255,.2)}
+.corbit-bot.done .cb-shadow{box-shadow:0 0 24px rgba(48,209,88,.25)}
+/* MIC INNER RIPPLE */
+@keyframes cbMicRipple{0%{transform:scale(.8);opacity:.6}100%{transform:scale(1.5);opacity:0}}
+.voice-mic:active::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(214,230,255,.4);animation:cbMicRipple .5s ease-out forwards}
+/* WAVEFORM GRADIENT — bars color by progress */
+.cb-wave i{background:linear-gradient(180deg,rgba(100,180,255,.4),rgba(160,200,240,.2))}
+.cb-wave.listening i{background:linear-gradient(180deg,rgba(140,210,255,.8),rgba(180,220,250,.5))}
+.cb-wave.done i{background:linear-gradient(180deg,rgba(48,209,88,.7),rgba(100,230,150,.4))}
+/* ANTENNA BEAM on success */
+.corbit-bot.done .cb-ant-tip::before{content:'';position:absolute;top:-30px;left:50%;width:1px;height:30px;background:linear-gradient(180deg,transparent,rgba(48,209,88,.4));transform:translateX(-50%);animation:cbBeamUp .6s ease-out forwards}
+@keyframes cbBeamUp{0%{height:0;opacity:0}100%{height:30px;opacity:1}}
+/* BREATHING PARTICLE RING */
+@keyframes cbPartRing{0%,100%{transform:scale(.9);opacity:.3}50%{transform:scale(1.2);opacity:.7}}
+.cb-part-ring{position:absolute;inset:-18px;border-radius:50%;pointer-events:none;border:1px dotted rgba(214,230,255,.08);animation:cbPartRing 4s ease-in-out infinite}
 
 </style>
 
