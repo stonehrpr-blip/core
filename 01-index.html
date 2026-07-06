@@ -353,38 +353,21 @@
     }
     @keyframes exitBurst { 0%{opacity:1;transform:translate(0,0) scale(1.2);} 100%{opacity:0;transform:translate(var(--sx),var(--sy)) scale(0);} }
 
-    /* ── Tap-to-enter transition — premium "warp into" the trial ── */
-    /* Text shimmer — loading transition */
-    .shimmer-loading {
-      position: absolute; inset: 0; z-index: 45; pointer-events: none;
-      display: flex; align-items: center; justify-content: center;
-      opacity: 0; transition: opacity .25s ease;
-    }
-    .shimmer-loading span {
-      font-size: 17px; font-weight: 600; letter-spacing: -0.1px;
-      background: linear-gradient(90deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.7) 45%, rgba(255,255,255,0.15) 100%);
-      background-size: 200% 100%;
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text;
-      animation: shimmer 2s linear infinite;
-    }
-    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-    body.leaving .shimmer-loading { opacity: 1; }
-
+    /* ── Tap-to-enter transition — warp jump ── */
     .leave-veil {
-      position: absolute; inset: 0; z-index: 40; pointer-events: none;
+      position: absolute; inset: -10%; z-index: 40; pointer-events: none;
       opacity: 0;
-      background: radial-gradient(circle at 50% 42%, rgba(255,255,255,0.95) 0%, rgba(206,212,222,0.5) 15%, rgba(0,0,0,0) 45%, #000 75%);
-      transition: opacity .5s ease;
+      background: radial-gradient(circle at 50% 42%, rgba(255,255,255,1) 0%, rgba(206,212,222,.6) 12%, rgba(0,0,0,0) 40%, #000 80%);
+      transition: opacity .15s ease;
     }
-    .frame { transition: opacity .35s ease, transform .5s cubic-bezier(0.4,0,0.2,1); }
-    body.leaving .frame { opacity: 0; transform: scale(1.06); }
+    .frame { transition: opacity .15s ease, transform .35s cubic-bezier(0.3,0,0.2,1); }
+    body.leaving .frame { opacity: 0; transform: scale(1.08); }
     body.leaving .leave-veil { opacity: 1; }
-    body.leaving .logo-img { transform: scale(1.25); filter: drop-shadow(0 0 80px rgba(255,255,255,0.80)) brightness(1.5); transition: transform .5s cubic-bezier(0.34,1.56,0.4,1), filter .5s ease; }
+    body.leaving .logo-img { transform: scale(1.6); filter: drop-shadow(0 0 120px rgba(255,255,255,1)) brightness(2); transition: transform .3s cubic-bezier(0.34,1.56,0.4,1), filter .3s ease; }
     body.leaving .topbar,
     body.leaving .hero,
     body.leaving .sub,
-    body.leaving .cta-wrap { opacity: 0; transform: translateY(-6px); transition: opacity .2s ease, transform .3s cubic-bezier(0.4,0,0.2,1); }
+    body.leaving .cta-wrap { opacity: 0; transform: translateY(-4px); transition: opacity .12s ease, transform .2s cubic-bezier(0.4,0,0.2,1); }
     body.leaving #stars .star { animation: none; opacity: 0.9 !important; transition: opacity .4s; }
     body.leaving .fp-dot { animation: none; opacity: 0 !important; transition: opacity .3s; }
     @media (prefers-reduced-motion: reduce) {
@@ -436,7 +419,6 @@
     <div class="bg"></div>
     <div class="stars" id="stars"></div>
     <div class="leave-veil" id="leaveVeil" aria-hidden="true"></div>
-    <div class="shimmer-loading" aria-hidden="true"><span>Preparing your journey</span></div>
     <div class="notch"></div>
     <div class="home-indicator"></div>
 
@@ -647,39 +629,37 @@
     var hint = document.getElementById('tapHint');
     if (hint) hint.classList.add('going');
     // Particle burst on exit — outer ring + inner sparkles
-    var phone = document.querySelector('.phone'), n=20;
+    var phone = document.querySelector('.phone'), n=40;
     for(var i=0;i<n;i++){
       var p=document.createElement('span');
-      var a=(i/n)*Math.PI*2, d=60+Math.random()*90;
-      var sz=i<12?3:2, clr=i<12?'#fff':'#C4C9D2';
+      var a=(i/n)*Math.PI*2, d=40+Math.random()*130;
+      var sz=i<20?3.5:2, clr=i<20?'#fff':'#C4C9D2';
       p.style.cssText='position:absolute;z-index:99;pointer-events:none;width:'+sz+'px;height:'+sz+'px;border-radius:50%;'
-        +'background:'+clr+';left:50%;top:42%;'
+        +'background:'+clr+';box-shadow:0 0 4px '+clr+';left:50%;top:42%;'
         +'--sx:'+(Math.cos(a)*d)+'px;--sy:'+(Math.sin(a)*d)+'px;'
-        +'animation:exitBurst .8s cubic-bezier(.22,1,.36,1) forwards;'
-        +'animation-delay:'+(i*0.015)+'s;';
-      phone.appendChild(p);setTimeout(function(){p.remove();},900);
+        +'animation:exitBurst .6s cubic-bezier(.15,1,.25,1) forwards;'
+        +'animation-delay:'+(i*0.01)+'s;';
+      phone.appendChild(p);setTimeout(function(){p.remove();},700);
     }
-    // Stars intensify + rapid shooting stars on exit
     var stars=document.querySelectorAll('#stars .star');
-    for(var j=0;j<stars.length;j++){stars[j].style.opacity='0.9';stars[j].style.transition='opacity .4s';}
-    for(var k=0;k<3;k++){(function(delay){
+    for(var j=0;j<stars.length;j++){stars[j].style.opacity='1';stars[j].style.transition='opacity .3s';}
+    for(var k=0;k<5;k++){(function(delay){
       setTimeout(function(){
         var s=document.createElement('div');s.className='shoot';
-        s.style.left=(20+Math.random()*50)+'%';s.style.top=(10+Math.random()*30)+'%';
-        var dx=-(80+Math.random()*100),dy=80+Math.random()*100;
+        s.style.left=(15+Math.random()*60)+'%';s.style.top=(5+Math.random()*25)+'%';
+        var dx=-(100+Math.random()*120),dy=100+Math.random()*120;
         var ang=Math.atan2(dy,dx)*180/Math.PI;
         s.style.setProperty('--sx',dx+'px');s.style.setProperty('--sy',dy+'px');
         s.style.setProperty('--ang',ang+'deg');
-        s.style.animation='shootFly '+(0.4+Math.random()*0.3).toFixed(2)+'s cubic-bezier(.3,.5,.3,1) forwards';
+        s.style.animation='shootFly '+(0.35+Math.random()*0.25).toFixed(2)+'s cubic-bezier(.2,.5,.2,1) forwards';
         document.getElementById('stars').appendChild(s);
-        setTimeout(function(){s.remove();},800);
+        setTimeout(function(){s.remove();},700);
       },delay);
-    })(k*80);}
+    })(k*60);}
     document.body.classList.add('leaving');
-    try { if (navigator.vibrate) navigator.vibrate([8,30,15]); } catch (e) {}
+    try { if (navigator.vibrate) navigator.vibrate([6,20,12]); } catch (e) {}
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    // Straight into the trial — Corbit introduces himself on the voice step.
-    setTimeout(function () { window.location.href = '07-trial.html?fresh=1#enter'; }, reduce ? 150 : 600);
+    setTimeout(function () { window.location.href = '07-trial.html?fresh=1#enter'; }, reduce ? 120 : 400);
   }
   document.addEventListener('click', function (e) {
     if (!(e.target instanceof Element) || !e.target.isConnected) return; // detached/re-rendered nodes
