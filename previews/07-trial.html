@@ -14375,10 +14375,15 @@
   // Each pathway uses the user-provided art (mapped exactly, no mix-ups).
   const DEVICE_IMG = { alcohol: 'dev-alcohol', porn: 'dev-porn', doomscroll: 'dev-doomscroll', spend: 'dev-spend' };
   function habitDevice(habit, variant) {
-    if (habit === 'vape') return '<img class="vape-img" src="assets/vape-device' + (variant === 2 ? '-2' : '') + '.png" alt="" aria-hidden="true" />';
+    // Built as separate 'src' + '=' + '"' pieces (not a literal src="...") so the
+    // browser's speculative preload scanner can't mistake this JS string for a
+    // real <img> tag and fire a stray network request for the literal
+    // unevaluated text — that was happening even though this path is unused.
+    var A = 'src' + '=' + '"';
+    if (habit === 'vape') return '<img class="vape-img" ' + A + 'assets/vape-device' + (variant === 2 ? '-2' : '') + '.png" alt="" aria-hidden="true" />';
     const f = DEVICE_IMG[habit];
     if (!f) return '';
-    return '<img class="hdev-img" src="assets/' + f + '.png" alt="" aria-hidden="true" />';
+    return '<img class="hdev-img" ' + A + 'assets/' + f + '.png" alt="" aria-hidden="true" />';
   }
   // Soft synthesized "exhale" + haptic pulse on each puff (user-initiated only).
   let _vapeAudio = null;
@@ -15488,7 +15493,7 @@
       // Update blush progress
       if(orb){var pct=Math.round(heard/targets.length*100);orb.classList.remove('progress-25','progress-50','progress-75');if(pct>=25)orb.classList.add('progress-25');if(pct>=50)orb.classList.add('progress-50');if(pct>=75)orb.classList.add('progress-75')}
       if (!done && heard >= Math.ceil(targets.length * 0.75)) success();
-      else if (!done && heard > 0) {setStatus('Keep going — ' + heard + '/' + targets.length + ' words locked.');if(statusEl) statusEl.classList.add('active')if(orb){orb.classList.remove('phoneme-ah','phoneme-ee','phoneme-oh','phoneme-mm');orb.classList.add('speaking');setTimeout(function(){orb.classList.remove('speaking')},600)}}
+      else if (!done && heard > 0) {setStatus('Keep going — ' + heard + '/' + targets.length + ' words locked.');if(statusEl) statusEl.classList.add('active');if(orb){orb.classList.remove('phoneme-ah','phoneme-ee','phoneme-oh','phoneme-mm');orb.classList.add('speaking');setTimeout(function(){orb.classList.remove('speaking')},600)}}
     }
     function success() {
       done = true;
@@ -15749,8 +15754,12 @@
               (st.dir === 'down'  && mv.y >  3.5));
           }
           // auto-pass keeps it moving even if detection misses (or no camera);
-          // with the landmarker live we give the user longer to actually do it
-          if (ok || performance.now() - t0 > (lmReady ? 6500 : 2600)) {
+          // with the landmarker live we give the user longer to actually do it.
+          // No-camera fallback was 2600ms/direction (~19s total incl. finishScan)
+          // before the Enter CORE button appeared — long enough to read as
+          // "stuck" with no camera preview on screen. Shortened to keep the
+          // trial moving while still giving a real scan its full 6.5s.
+          if (ok || performance.now() - t0 > (lmReady ? 6500 : 700)) {
             if (hit) return; hit = true; clearInterval(iv);
             tickEls.forEach(function (t) { t.classList.remove('live'); });
             lightSeg(st.dir);
