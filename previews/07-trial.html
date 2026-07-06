@@ -14771,7 +14771,11 @@
     };
   })();
   // Wire why-card clicks to hidden reason-orbs
-  (function(){var btns=document.querySelectorAll('#whyPick .why-btn');btns.forEach(function(b){b.addEventListener('click',function(){btns.forEach(function(x){x.classList.remove('sel')});b.classList.add('sel');var orb=document.querySelector('#vapeReason [data-reason="'+b.dataset.reason+'"]');if(orb)orb.click()})})})();
+  (function(){var btns=document.querySelectorAll('#whyPick .why-btn');btns.forEach(function(b){b.addEventListener('click',function(){btns.forEach(function(x){x.classList.remove('sel')});b.classList.add('sel');
+    // Click particle burst
+    var phone=b.closest('.phone')||b.closest('.step');var pr=phone?phone.getBoundingClientRect():{left:0,top:0};var r=b.getBoundingClientRect();var cx=r.left-pr.left+r.width/2,cy=r.top-pr.top+r.height/2;
+    for(var i=0;i<10;i++){var p=document.createElement('span');p.style.cssText='position:absolute;z-index:99;pointer-events:none;width:5px;height:5px;border-radius:50%;background:#C4C9D2;left:'+cx+'px;top:'+cy+'px;animation:genderBurst .55s cubic-bezier(.22,1,.36,1) forwards;animation-delay:'+(i*0.025)+'s;--gx:'+(Math.cos(i/10*Math.PI*2)*50+Math.random()*15)+'px;--gy:'+(Math.sin(i/10*Math.PI*2)*50+Math.random()*15)+'px;';phone.appendChild(p);setTimeout(function(){p.remove()},600);}
+    var orb=document.querySelector('#vapeReason [data-reason="'+b.dataset.reason+'"]');if(orb)orb.click()})})})();
   // waterCups is the interactive jug (separate handler below)
 
   // ── Draggable baseline sliders (sleep / exercise / screen) ────────────
