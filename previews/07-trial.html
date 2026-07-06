@@ -9226,7 +9226,7 @@
           <p class="copy">Your AI coach, built into CORE. You talk — he listens.</p>
 
           <div class="voice-stage">
-            <div class="cb-speech" id="cbSpeech">I'm ready to change.<br>This time is different.</div>
+            <div class="cb-speech" id="cbSpeech">I'm done letting this<br>control me.</div>
             <div class="corbit-bot" id="voiceOrb">
               <span class="cb-halo"></span>
               <span class="cb-aura" id="cbAura"></span>
@@ -15506,7 +15506,7 @@
   // The user reads one line aloud; the Web Speech API highlights each word as
   // Corbit recognises it. On-device, nothing recorded. Optional (skippable).
   (function corbitVoice() {
-    const LINE = "I'm ready to change. This time is different.";
+    const LINE = "I'm done letting this control me. I'm taking my life back.";
     const line = document.getElementById('voiceLine');
     const mic = document.getElementById('voiceMic');
     const micLabel = document.getElementById('voiceMicLabel');
@@ -15634,17 +15634,26 @@
     var SR = window.SpeechRecognition || window.webkitSpeechRecognition;if(!SR){if(micLabel) micLabel.textContent='Voice not supported — tap Skip';if(skipBtn) skipBtn.style.color='#fff';if(mic){mic.disabled=true;mic.style.opacity='.4'}return;}
     let rec = null, listening = false, done = false;
     function setStatus(t) { if (statusEl) statusEl.textContent = t; }
+    // Fuzzy word matching — handles common speech recognition errors
     function wordMatches(target, heard) {
       if (target === heard) return true;
-      if (target === 'corbit') return /orb|corb|cor/i.test(heard);
-      if (target.length <= 2) return target === heard;
-      if (target.length >= 5 && heard.length >= 3 && target.slice(0,3) === heard.slice(0,3)) return true;
-      // Highlight current word
-      targets.forEach(function(t){t.el.classList.remove('current')});
-      // Highlight the first un-heard word as the active target
-      if (target.length >= 4 && heard.length >= 4 && target.slice(0, 4) === heard.slice(0, 4)) return true;
+      var t=target.toLowerCase(),h=heard.toLowerCase();
+      // Exact match after basic normalization
+      if (t===h) return true;
+      // Short words: must be exact
+      if (t.length<=2) return t===h;
+      // Prefix match: if heard starts with 70%+ of target
+      if (t.length>=4&&h.length>=3&&t.slice(0,3)===h.slice(0,3)) return true;
+      // Suffix match for common ending misrecognitions (e.g., "letting" heard as "letting")
+      if (t.length>=4&&h.length>=4&&t.slice(-3)===h.slice(-3)) return true;
+      // Edit distance: 1-2 chars off on longer words
+      if (t.length>=5&&Math.abs(t.length-h.length)<=2&&editDist(t,h)<=2) return true;
+      // Common homophone pairs
+      var homophones={im:"i'm",ive:"i've",ill:"i'll",dont:"don't",cant:"can't",wont:"won't",its:"it's",thats:"that's"};
+      if(homophones[t]===h||homophones[h]===t) return true;
       return false;
     }
+    function editDist(a,b){var m=a.length,n=b.length;if(m===0)return n;if(n===0)return m;var d=[];for(var i=0;i<=m;i++){d[i]=[i]}for(var j=0;j<=n;j++){d[0][j]=j}for(var i=1;i<=m;i++){for(var j=1;j<=n;j++){d[i][j]=a[i-1]===b[j-1]?d[i-1][j-1]:Math.min(d[i-1][j],d[i][j-1],d[i-1][j-1])+1}}return d[m][n]}
     function matchTranscript(text) {
       const heardWords = text.toLowerCase().split(/\s+/).map(norm).filter(Boolean);
       heardWords.forEach(function (hw) {
@@ -15668,13 +15677,14 @@
       var pct=Math.round(heard/targets.length*100);
       // Progress bar
       var vlFill=document.getElementById('vlFill');if(vlFill) vlFill.style.width=pct+'%';
+      if(orb)orb.style.setProperty("--prog",pct);
       var vlCount=document.getElementById('vlCount');if(vlCount) vlCount.textContent=heard+'/'+targets.length;
       // Wave bar gradient: shift bars from white to green
       if(wave){var bars=wave.querySelectorAll('i');bars.forEach(function(b,i){var t=i/bars.length;b.style.background=t<(pct/100)?'#4ade80':'rgba(255,255,255,0.5)'})}
       // Progress face: expression evolves
       if(orb){orb.classList.remove('progress-25','progress-50','progress-75','progress-90');if(pct>=25)orb.classList.add('progress-25');if(pct>=50)orb.classList.add('progress-50');if(pct>=75)orb.classList.add('progress-75');if(pct>=90)orb.classList.add('progress-90')}
       // Dynamic speech bubble
-      var bubble=document.getElementById('cbSpeech');if(bubble){var left=targets.length-heard;if(left===0)bubble.innerHTML='<span style=color:#4ade80>You did it!</span>';else if(left<=2)bubble.innerHTML='Almost there…<br><span style=color:#4ade80>'+left+' word'+(left>1?'s':'')+' to go</span>';else if(heard===0)bubble.innerHTML='I\'m ready to change.<br>This time is different.';else bubble.innerHTML=heard+'/'+targets.length+' words<br>Keep going…'}
+      var bubble=document.getElementById('cbSpeech');if(bubble){var left=targets.length-heard;if(left===0)bubble.innerHTML='<span style=color:#4ade80>You did it!</span>';else if(left<=2)bubble.innerHTML='Almost there…<br><span style=color:#4ade80>'+left+' word'+(left>1?'s':'')+' to go</span>';else if(heard===0)bubble.innerHTML='I\'m done letting this<br>control me.';else bubble.innerHTML=heard+'/'+targets.length+' words<br>Keep going…'}
       if (!done && heard >= Math.ceil(targets.length * 0.75)) success();
       else if (!done && heard > 0) {setStatus('Keep going — ' + heard + '/' + targets.length + ' words locked.');if(statusEl) statusEl.classList.add('active');if(orb){orb.classList.remove('phoneme-ah','phoneme-ee','phoneme-oh','phoneme-mm');orb.classList.add('speaking');setTimeout(function(){orb.classList.remove('speaking')},600)}}
     }
