@@ -1747,7 +1747,7 @@
 
 /* VOICE LINE — typewriter + progress bar */
 .voice-line{font-size:16px;font-weight:500;color:rgba(255,255,255,.35);text-align:center;line-height:1.5;letter-spacing:-.1px;max-width:300px;position:relative;padding-bottom:20px}
-.voice-line .vw{display:inline-block;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
+.voice-line .vw{display:inline-block;position:relative;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
 .voice-line .vw.show{opacity:1;transform:translateY(0)}
 .voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.5);transform:scale(1.08);animation:vwPop .3s cubic-bezier(.34,1.56,.64,1)}
 @keyframes vwPop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1.08)}}
@@ -1762,6 +1762,33 @@
 /* TYPEWRITER REVEAL — staggered word appearance */
 @keyframes vwTypeIn{0%{opacity:0;transform:translateY(6px);filter:blur(2px)}100%{opacity:1;transform:translateY(0);filter:blur(0)}}
 .voice-line.typing .vw.show{animation:vwTypeIn .35s cubic-bezier(.22,1,.36,1) both}
+
+
+/* PROGRESS PARTICLES — tiny dots travel along the progress bar */
+.vl-progress::after{content:'';position:absolute;top:-2px;left:0;width:4px;height:6px;border-radius:2px;background:#7CE8A4;box-shadow:0 0 6px rgba(48,209,88,.6);animation:vlParticleTravel 2s linear infinite;opacity:0}
+.voice-line.listening .vl-progress::after{opacity:1}
+@keyframes vlParticleTravel{0%{left:0}100%{left:100%}}
+/* WORD RIPPLE — expanding circle from each heard word */
+@keyframes vwRipple{0%{box-shadow:0 0 0 0 rgba(48,209,88,.5)}100%{box-shadow:0 0 0 12px rgba(48,209,88,0)}}
+.voice-line .vw.heard{animation:vwPop .3s cubic-bezier(.34,1.56,.64,1),vwRipple .6s ease-out}
+/* LINE SHIMMER — subtle sweep across the entire line */
+@keyframes vlShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.voice-line.listening::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(214,230,255,.06) 50%,transparent 100%);background-size:200% 100%;animation:vlShimmer 3s linear infinite;pointer-events:none}
+/* WORD UNDERLINE — draws under each word */
+.voice-line .vw::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:1px;background:#30D158;transform:scaleX(0);transition:transform .3s ease;transform-origin:left}
+.voice-line .vw.heard::after{transform:scaleX(1)}
+/* MIC BUTTON — better listening indicator */
+.voice-mic{transition:all .3s ease}
+.voice-mic.listening{transform:scale(1.05)}
+.voice-mic.listening svg{animation:cbMicPulse .6s ease-in-out infinite}
+@keyframes cbMicPulse{0%,100%{opacity:1}50%{opacity:.6}}
+/* VOICE STATUS — count animation */
+.voice-status{transition:color .3s ease}
+.voice-status.active{color:#30D158}
+/* WAVEFORM SYNC — more dramatic bars */
+.cb-wave i{transition:height .1s ease,background .3s ease}
+.cb-wave.listening i{animation:cbWaveBounce .4s ease-in-out infinite;animation-delay:var(--wd,0s)}
+@keyframes cbWaveBounce{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1.5)}}
 
 </style>
   <script src="_lib/analytics.js"></script>
@@ -2242,7 +2269,7 @@
 
 /* VOICE LINE — typewriter + progress bar */
 .voice-line{font-size:16px;font-weight:500;color:rgba(255,255,255,.35);text-align:center;line-height:1.5;letter-spacing:-.1px;max-width:300px;position:relative;padding-bottom:20px}
-.voice-line .vw{display:inline-block;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
+.voice-line .vw{display:inline-block;position:relative;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
 .voice-line .vw.show{opacity:1;transform:translateY(0)}
 .voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.5);transform:scale(1.08);animation:vwPop .3s cubic-bezier(.34,1.56,.64,1)}
 @keyframes vwPop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1.08)}}
@@ -2257,6 +2284,33 @@
 /* TYPEWRITER REVEAL — staggered word appearance */
 @keyframes vwTypeIn{0%{opacity:0;transform:translateY(6px);filter:blur(2px)}100%{opacity:1;transform:translateY(0);filter:blur(0)}}
 .voice-line.typing .vw.show{animation:vwTypeIn .35s cubic-bezier(.22,1,.36,1) both}
+
+
+/* PROGRESS PARTICLES — tiny dots travel along the progress bar */
+.vl-progress::after{content:'';position:absolute;top:-2px;left:0;width:4px;height:6px;border-radius:2px;background:#7CE8A4;box-shadow:0 0 6px rgba(48,209,88,.6);animation:vlParticleTravel 2s linear infinite;opacity:0}
+.voice-line.listening .vl-progress::after{opacity:1}
+@keyframes vlParticleTravel{0%{left:0}100%{left:100%}}
+/* WORD RIPPLE — expanding circle from each heard word */
+@keyframes vwRipple{0%{box-shadow:0 0 0 0 rgba(48,209,88,.5)}100%{box-shadow:0 0 0 12px rgba(48,209,88,0)}}
+.voice-line .vw.heard{animation:vwPop .3s cubic-bezier(.34,1.56,.64,1),vwRipple .6s ease-out}
+/* LINE SHIMMER — subtle sweep across the entire line */
+@keyframes vlShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.voice-line.listening::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(214,230,255,.06) 50%,transparent 100%);background-size:200% 100%;animation:vlShimmer 3s linear infinite;pointer-events:none}
+/* WORD UNDERLINE — draws under each word */
+.voice-line .vw::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:1px;background:#30D158;transform:scaleX(0);transition:transform .3s ease;transform-origin:left}
+.voice-line .vw.heard::after{transform:scaleX(1)}
+/* MIC BUTTON — better listening indicator */
+.voice-mic{transition:all .3s ease}
+.voice-mic.listening{transform:scale(1.05)}
+.voice-mic.listening svg{animation:cbMicPulse .6s ease-in-out infinite}
+@keyframes cbMicPulse{0%,100%{opacity:1}50%{opacity:.6}}
+/* VOICE STATUS — count animation */
+.voice-status{transition:color .3s ease}
+.voice-status.active{color:#30D158}
+/* WAVEFORM SYNC — more dramatic bars */
+.cb-wave i{transition:height .1s ease,background .3s ease}
+.cb-wave.listening i{animation:cbWaveBounce .4s ease-in-out infinite;animation-delay:var(--wd,0s)}
+@keyframes cbWaveBounce{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1.5)}}
 
 </style>
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
@@ -3111,7 +3165,7 @@
 
 /* VOICE LINE — typewriter + progress bar */
 .voice-line{font-size:16px;font-weight:500;color:rgba(255,255,255,.35);text-align:center;line-height:1.5;letter-spacing:-.1px;max-width:300px;position:relative;padding-bottom:20px}
-.voice-line .vw{display:inline-block;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
+.voice-line .vw{display:inline-block;position:relative;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
 .voice-line .vw.show{opacity:1;transform:translateY(0)}
 .voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.5);transform:scale(1.08);animation:vwPop .3s cubic-bezier(.34,1.56,.64,1)}
 @keyframes vwPop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1.08)}}
@@ -3126,6 +3180,33 @@
 /* TYPEWRITER REVEAL — staggered word appearance */
 @keyframes vwTypeIn{0%{opacity:0;transform:translateY(6px);filter:blur(2px)}100%{opacity:1;transform:translateY(0);filter:blur(0)}}
 .voice-line.typing .vw.show{animation:vwTypeIn .35s cubic-bezier(.22,1,.36,1) both}
+
+
+/* PROGRESS PARTICLES — tiny dots travel along the progress bar */
+.vl-progress::after{content:'';position:absolute;top:-2px;left:0;width:4px;height:6px;border-radius:2px;background:#7CE8A4;box-shadow:0 0 6px rgba(48,209,88,.6);animation:vlParticleTravel 2s linear infinite;opacity:0}
+.voice-line.listening .vl-progress::after{opacity:1}
+@keyframes vlParticleTravel{0%{left:0}100%{left:100%}}
+/* WORD RIPPLE — expanding circle from each heard word */
+@keyframes vwRipple{0%{box-shadow:0 0 0 0 rgba(48,209,88,.5)}100%{box-shadow:0 0 0 12px rgba(48,209,88,0)}}
+.voice-line .vw.heard{animation:vwPop .3s cubic-bezier(.34,1.56,.64,1),vwRipple .6s ease-out}
+/* LINE SHIMMER — subtle sweep across the entire line */
+@keyframes vlShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.voice-line.listening::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(214,230,255,.06) 50%,transparent 100%);background-size:200% 100%;animation:vlShimmer 3s linear infinite;pointer-events:none}
+/* WORD UNDERLINE — draws under each word */
+.voice-line .vw::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:1px;background:#30D158;transform:scaleX(0);transition:transform .3s ease;transform-origin:left}
+.voice-line .vw.heard::after{transform:scaleX(1)}
+/* MIC BUTTON — better listening indicator */
+.voice-mic{transition:all .3s ease}
+.voice-mic.listening{transform:scale(1.05)}
+.voice-mic.listening svg{animation:cbMicPulse .6s ease-in-out infinite}
+@keyframes cbMicPulse{0%,100%{opacity:1}50%{opacity:.6}}
+/* VOICE STATUS — count animation */
+.voice-status{transition:color .3s ease}
+.voice-status.active{color:#30D158}
+/* WAVEFORM SYNC — more dramatic bars */
+.cb-wave i{transition:height .1s ease,background .3s ease}
+.cb-wave.listening i{animation:cbWaveBounce .4s ease-in-out infinite;animation-delay:var(--wd,0s)}
+@keyframes cbWaveBounce{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1.5)}}
 
 </style>
 
@@ -3996,7 +4077,7 @@
 
 /* VOICE LINE — typewriter + progress bar */
 .voice-line{font-size:16px;font-weight:500;color:rgba(255,255,255,.35);text-align:center;line-height:1.5;letter-spacing:-.1px;max-width:300px;position:relative;padding-bottom:20px}
-.voice-line .vw{display:inline-block;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
+.voice-line .vw{display:inline-block;position:relative;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
 .voice-line .vw.show{opacity:1;transform:translateY(0)}
 .voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.5);transform:scale(1.08);animation:vwPop .3s cubic-bezier(.34,1.56,.64,1)}
 @keyframes vwPop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1.08)}}
@@ -4011,6 +4092,33 @@
 /* TYPEWRITER REVEAL — staggered word appearance */
 @keyframes vwTypeIn{0%{opacity:0;transform:translateY(6px);filter:blur(2px)}100%{opacity:1;transform:translateY(0);filter:blur(0)}}
 .voice-line.typing .vw.show{animation:vwTypeIn .35s cubic-bezier(.22,1,.36,1) both}
+
+
+/* PROGRESS PARTICLES — tiny dots travel along the progress bar */
+.vl-progress::after{content:'';position:absolute;top:-2px;left:0;width:4px;height:6px;border-radius:2px;background:#7CE8A4;box-shadow:0 0 6px rgba(48,209,88,.6);animation:vlParticleTravel 2s linear infinite;opacity:0}
+.voice-line.listening .vl-progress::after{opacity:1}
+@keyframes vlParticleTravel{0%{left:0}100%{left:100%}}
+/* WORD RIPPLE — expanding circle from each heard word */
+@keyframes vwRipple{0%{box-shadow:0 0 0 0 rgba(48,209,88,.5)}100%{box-shadow:0 0 0 12px rgba(48,209,88,0)}}
+.voice-line .vw.heard{animation:vwPop .3s cubic-bezier(.34,1.56,.64,1),vwRipple .6s ease-out}
+/* LINE SHIMMER — subtle sweep across the entire line */
+@keyframes vlShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.voice-line.listening::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(214,230,255,.06) 50%,transparent 100%);background-size:200% 100%;animation:vlShimmer 3s linear infinite;pointer-events:none}
+/* WORD UNDERLINE — draws under each word */
+.voice-line .vw::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:1px;background:#30D158;transform:scaleX(0);transition:transform .3s ease;transform-origin:left}
+.voice-line .vw.heard::after{transform:scaleX(1)}
+/* MIC BUTTON — better listening indicator */
+.voice-mic{transition:all .3s ease}
+.voice-mic.listening{transform:scale(1.05)}
+.voice-mic.listening svg{animation:cbMicPulse .6s ease-in-out infinite}
+@keyframes cbMicPulse{0%,100%{opacity:1}50%{opacity:.6}}
+/* VOICE STATUS — count animation */
+.voice-status{transition:color .3s ease}
+.voice-status.active{color:#30D158}
+/* WAVEFORM SYNC — more dramatic bars */
+.cb-wave i{transition:height .1s ease,background .3s ease}
+.cb-wave.listening i{animation:cbWaveBounce .4s ease-in-out infinite;animation-delay:var(--wd,0s)}
+@keyframes cbWaveBounce{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1.5)}}
 
 </style>
         </div>
@@ -4527,7 +4635,7 @@
 
 /* VOICE LINE — typewriter + progress bar */
 .voice-line{font-size:16px;font-weight:500;color:rgba(255,255,255,.35);text-align:center;line-height:1.5;letter-spacing:-.1px;max-width:300px;position:relative;padding-bottom:20px}
-.voice-line .vw{display:inline-block;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
+.voice-line .vw{display:inline-block;position:relative;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
 .voice-line .vw.show{opacity:1;transform:translateY(0)}
 .voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.5);transform:scale(1.08);animation:vwPop .3s cubic-bezier(.34,1.56,.64,1)}
 @keyframes vwPop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1.08)}}
@@ -4542,6 +4650,33 @@
 /* TYPEWRITER REVEAL — staggered word appearance */
 @keyframes vwTypeIn{0%{opacity:0;transform:translateY(6px);filter:blur(2px)}100%{opacity:1;transform:translateY(0);filter:blur(0)}}
 .voice-line.typing .vw.show{animation:vwTypeIn .35s cubic-bezier(.22,1,.36,1) both}
+
+
+/* PROGRESS PARTICLES — tiny dots travel along the progress bar */
+.vl-progress::after{content:'';position:absolute;top:-2px;left:0;width:4px;height:6px;border-radius:2px;background:#7CE8A4;box-shadow:0 0 6px rgba(48,209,88,.6);animation:vlParticleTravel 2s linear infinite;opacity:0}
+.voice-line.listening .vl-progress::after{opacity:1}
+@keyframes vlParticleTravel{0%{left:0}100%{left:100%}}
+/* WORD RIPPLE — expanding circle from each heard word */
+@keyframes vwRipple{0%{box-shadow:0 0 0 0 rgba(48,209,88,.5)}100%{box-shadow:0 0 0 12px rgba(48,209,88,0)}}
+.voice-line .vw.heard{animation:vwPop .3s cubic-bezier(.34,1.56,.64,1),vwRipple .6s ease-out}
+/* LINE SHIMMER — subtle sweep across the entire line */
+@keyframes vlShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.voice-line.listening::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(214,230,255,.06) 50%,transparent 100%);background-size:200% 100%;animation:vlShimmer 3s linear infinite;pointer-events:none}
+/* WORD UNDERLINE — draws under each word */
+.voice-line .vw::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:1px;background:#30D158;transform:scaleX(0);transition:transform .3s ease;transform-origin:left}
+.voice-line .vw.heard::after{transform:scaleX(1)}
+/* MIC BUTTON — better listening indicator */
+.voice-mic{transition:all .3s ease}
+.voice-mic.listening{transform:scale(1.05)}
+.voice-mic.listening svg{animation:cbMicPulse .6s ease-in-out infinite}
+@keyframes cbMicPulse{0%,100%{opacity:1}50%{opacity:.6}}
+/* VOICE STATUS — count animation */
+.voice-status{transition:color .3s ease}
+.voice-status.active{color:#30D158}
+/* WAVEFORM SYNC — more dramatic bars */
+.cb-wave i{transition:height .1s ease,background .3s ease}
+.cb-wave.listening i{animation:cbWaveBounce .4s ease-in-out infinite;animation-delay:var(--wd,0s)}
+@keyframes cbWaveBounce{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1.5)}}
 
 </style>
           <div class="tone-list" id="vapeYears" style="display:none;" aria-hidden="true">
@@ -5101,7 +5236,7 @@
 
 /* VOICE LINE — typewriter + progress bar */
 .voice-line{font-size:16px;font-weight:500;color:rgba(255,255,255,.35);text-align:center;line-height:1.5;letter-spacing:-.1px;max-width:300px;position:relative;padding-bottom:20px}
-.voice-line .vw{display:inline-block;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
+.voice-line .vw{display:inline-block;position:relative;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
 .voice-line .vw.show{opacity:1;transform:translateY(0)}
 .voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.5);transform:scale(1.08);animation:vwPop .3s cubic-bezier(.34,1.56,.64,1)}
 @keyframes vwPop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1.08)}}
@@ -5116,6 +5251,33 @@
 /* TYPEWRITER REVEAL — staggered word appearance */
 @keyframes vwTypeIn{0%{opacity:0;transform:translateY(6px);filter:blur(2px)}100%{opacity:1;transform:translateY(0);filter:blur(0)}}
 .voice-line.typing .vw.show{animation:vwTypeIn .35s cubic-bezier(.22,1,.36,1) both}
+
+
+/* PROGRESS PARTICLES — tiny dots travel along the progress bar */
+.vl-progress::after{content:'';position:absolute;top:-2px;left:0;width:4px;height:6px;border-radius:2px;background:#7CE8A4;box-shadow:0 0 6px rgba(48,209,88,.6);animation:vlParticleTravel 2s linear infinite;opacity:0}
+.voice-line.listening .vl-progress::after{opacity:1}
+@keyframes vlParticleTravel{0%{left:0}100%{left:100%}}
+/* WORD RIPPLE — expanding circle from each heard word */
+@keyframes vwRipple{0%{box-shadow:0 0 0 0 rgba(48,209,88,.5)}100%{box-shadow:0 0 0 12px rgba(48,209,88,0)}}
+.voice-line .vw.heard{animation:vwPop .3s cubic-bezier(.34,1.56,.64,1),vwRipple .6s ease-out}
+/* LINE SHIMMER — subtle sweep across the entire line */
+@keyframes vlShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.voice-line.listening::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(214,230,255,.06) 50%,transparent 100%);background-size:200% 100%;animation:vlShimmer 3s linear infinite;pointer-events:none}
+/* WORD UNDERLINE — draws under each word */
+.voice-line .vw::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:1px;background:#30D158;transform:scaleX(0);transition:transform .3s ease;transform-origin:left}
+.voice-line .vw.heard::after{transform:scaleX(1)}
+/* MIC BUTTON — better listening indicator */
+.voice-mic{transition:all .3s ease}
+.voice-mic.listening{transform:scale(1.05)}
+.voice-mic.listening svg{animation:cbMicPulse .6s ease-in-out infinite}
+@keyframes cbMicPulse{0%,100%{opacity:1}50%{opacity:.6}}
+/* VOICE STATUS — count animation */
+.voice-status{transition:color .3s ease}
+.voice-status.active{color:#30D158}
+/* WAVEFORM SYNC — more dramatic bars */
+.cb-wave i{transition:height .1s ease,background .3s ease}
+.cb-wave.listening i{animation:cbWaveBounce .4s ease-in-out infinite;animation-delay:var(--wd,0s)}
+@keyframes cbWaveBounce{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1.5)}}
 
 </style>
           <div id="vapeReason" style="display:none;" aria-hidden="true">
@@ -6485,7 +6647,7 @@
 
 /* VOICE LINE — typewriter + progress bar */
 .voice-line{font-size:16px;font-weight:500;color:rgba(255,255,255,.35);text-align:center;line-height:1.5;letter-spacing:-.1px;max-width:300px;position:relative;padding-bottom:20px}
-.voice-line .vw{display:inline-block;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
+.voice-line .vw{display:inline-block;position:relative;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
 .voice-line .vw.show{opacity:1;transform:translateY(0)}
 .voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.5);transform:scale(1.08);animation:vwPop .3s cubic-bezier(.34,1.56,.64,1)}
 @keyframes vwPop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1.08)}}
@@ -6500,6 +6662,33 @@
 /* TYPEWRITER REVEAL — staggered word appearance */
 @keyframes vwTypeIn{0%{opacity:0;transform:translateY(6px);filter:blur(2px)}100%{opacity:1;transform:translateY(0);filter:blur(0)}}
 .voice-line.typing .vw.show{animation:vwTypeIn .35s cubic-bezier(.22,1,.36,1) both}
+
+
+/* PROGRESS PARTICLES — tiny dots travel along the progress bar */
+.vl-progress::after{content:'';position:absolute;top:-2px;left:0;width:4px;height:6px;border-radius:2px;background:#7CE8A4;box-shadow:0 0 6px rgba(48,209,88,.6);animation:vlParticleTravel 2s linear infinite;opacity:0}
+.voice-line.listening .vl-progress::after{opacity:1}
+@keyframes vlParticleTravel{0%{left:0}100%{left:100%}}
+/* WORD RIPPLE — expanding circle from each heard word */
+@keyframes vwRipple{0%{box-shadow:0 0 0 0 rgba(48,209,88,.5)}100%{box-shadow:0 0 0 12px rgba(48,209,88,0)}}
+.voice-line .vw.heard{animation:vwPop .3s cubic-bezier(.34,1.56,.64,1),vwRipple .6s ease-out}
+/* LINE SHIMMER — subtle sweep across the entire line */
+@keyframes vlShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.voice-line.listening::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(214,230,255,.06) 50%,transparent 100%);background-size:200% 100%;animation:vlShimmer 3s linear infinite;pointer-events:none}
+/* WORD UNDERLINE — draws under each word */
+.voice-line .vw::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:1px;background:#30D158;transform:scaleX(0);transition:transform .3s ease;transform-origin:left}
+.voice-line .vw.heard::after{transform:scaleX(1)}
+/* MIC BUTTON — better listening indicator */
+.voice-mic{transition:all .3s ease}
+.voice-mic.listening{transform:scale(1.05)}
+.voice-mic.listening svg{animation:cbMicPulse .6s ease-in-out infinite}
+@keyframes cbMicPulse{0%,100%{opacity:1}50%{opacity:.6}}
+/* VOICE STATUS — count animation */
+.voice-status{transition:color .3s ease}
+.voice-status.active{color:#30D158}
+/* WAVEFORM SYNC — more dramatic bars */
+.cb-wave i{transition:height .1s ease,background .3s ease}
+.cb-wave.listening i{animation:cbWaveBounce .4s ease-in-out infinite;animation-delay:var(--wd,0s)}
+@keyframes cbWaveBounce{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1.5)}}
 
 </style>
         </div>
@@ -7099,7 +7288,7 @@
 
 /* VOICE LINE — typewriter + progress bar */
 .voice-line{font-size:16px;font-weight:500;color:rgba(255,255,255,.35);text-align:center;line-height:1.5;letter-spacing:-.1px;max-width:300px;position:relative;padding-bottom:20px}
-.voice-line .vw{display:inline-block;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
+.voice-line .vw{display:inline-block;position:relative;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
 .voice-line .vw.show{opacity:1;transform:translateY(0)}
 .voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.5);transform:scale(1.08);animation:vwPop .3s cubic-bezier(.34,1.56,.64,1)}
 @keyframes vwPop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1.08)}}
@@ -7114,6 +7303,33 @@
 /* TYPEWRITER REVEAL — staggered word appearance */
 @keyframes vwTypeIn{0%{opacity:0;transform:translateY(6px);filter:blur(2px)}100%{opacity:1;transform:translateY(0);filter:blur(0)}}
 .voice-line.typing .vw.show{animation:vwTypeIn .35s cubic-bezier(.22,1,.36,1) both}
+
+
+/* PROGRESS PARTICLES — tiny dots travel along the progress bar */
+.vl-progress::after{content:'';position:absolute;top:-2px;left:0;width:4px;height:6px;border-radius:2px;background:#7CE8A4;box-shadow:0 0 6px rgba(48,209,88,.6);animation:vlParticleTravel 2s linear infinite;opacity:0}
+.voice-line.listening .vl-progress::after{opacity:1}
+@keyframes vlParticleTravel{0%{left:0}100%{left:100%}}
+/* WORD RIPPLE — expanding circle from each heard word */
+@keyframes vwRipple{0%{box-shadow:0 0 0 0 rgba(48,209,88,.5)}100%{box-shadow:0 0 0 12px rgba(48,209,88,0)}}
+.voice-line .vw.heard{animation:vwPop .3s cubic-bezier(.34,1.56,.64,1),vwRipple .6s ease-out}
+/* LINE SHIMMER — subtle sweep across the entire line */
+@keyframes vlShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.voice-line.listening::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(214,230,255,.06) 50%,transparent 100%);background-size:200% 100%;animation:vlShimmer 3s linear infinite;pointer-events:none}
+/* WORD UNDERLINE — draws under each word */
+.voice-line .vw::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:1px;background:#30D158;transform:scaleX(0);transition:transform .3s ease;transform-origin:left}
+.voice-line .vw.heard::after{transform:scaleX(1)}
+/* MIC BUTTON — better listening indicator */
+.voice-mic{transition:all .3s ease}
+.voice-mic.listening{transform:scale(1.05)}
+.voice-mic.listening svg{animation:cbMicPulse .6s ease-in-out infinite}
+@keyframes cbMicPulse{0%,100%{opacity:1}50%{opacity:.6}}
+/* VOICE STATUS — count animation */
+.voice-status{transition:color .3s ease}
+.voice-status.active{color:#30D158}
+/* WAVEFORM SYNC — more dramatic bars */
+.cb-wave i{transition:height .1s ease,background .3s ease}
+.cb-wave.listening i{animation:cbWaveBounce .4s ease-in-out infinite;animation-delay:var(--wd,0s)}
+@keyframes cbWaveBounce{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1.5)}}
 
 </style>
         </div>
@@ -7629,7 +7845,7 @@
 
 /* VOICE LINE — typewriter + progress bar */
 .voice-line{font-size:16px;font-weight:500;color:rgba(255,255,255,.35);text-align:center;line-height:1.5;letter-spacing:-.1px;max-width:300px;position:relative;padding-bottom:20px}
-.voice-line .vw{display:inline-block;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
+.voice-line .vw{display:inline-block;position:relative;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
 .voice-line .vw.show{opacity:1;transform:translateY(0)}
 .voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.5);transform:scale(1.08);animation:vwPop .3s cubic-bezier(.34,1.56,.64,1)}
 @keyframes vwPop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1.08)}}
@@ -7644,6 +7860,33 @@
 /* TYPEWRITER REVEAL — staggered word appearance */
 @keyframes vwTypeIn{0%{opacity:0;transform:translateY(6px);filter:blur(2px)}100%{opacity:1;transform:translateY(0);filter:blur(0)}}
 .voice-line.typing .vw.show{animation:vwTypeIn .35s cubic-bezier(.22,1,.36,1) both}
+
+
+/* PROGRESS PARTICLES — tiny dots travel along the progress bar */
+.vl-progress::after{content:'';position:absolute;top:-2px;left:0;width:4px;height:6px;border-radius:2px;background:#7CE8A4;box-shadow:0 0 6px rgba(48,209,88,.6);animation:vlParticleTravel 2s linear infinite;opacity:0}
+.voice-line.listening .vl-progress::after{opacity:1}
+@keyframes vlParticleTravel{0%{left:0}100%{left:100%}}
+/* WORD RIPPLE — expanding circle from each heard word */
+@keyframes vwRipple{0%{box-shadow:0 0 0 0 rgba(48,209,88,.5)}100%{box-shadow:0 0 0 12px rgba(48,209,88,0)}}
+.voice-line .vw.heard{animation:vwPop .3s cubic-bezier(.34,1.56,.64,1),vwRipple .6s ease-out}
+/* LINE SHIMMER — subtle sweep across the entire line */
+@keyframes vlShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.voice-line.listening::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(214,230,255,.06) 50%,transparent 100%);background-size:200% 100%;animation:vlShimmer 3s linear infinite;pointer-events:none}
+/* WORD UNDERLINE — draws under each word */
+.voice-line .vw::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:1px;background:#30D158;transform:scaleX(0);transition:transform .3s ease;transform-origin:left}
+.voice-line .vw.heard::after{transform:scaleX(1)}
+/* MIC BUTTON — better listening indicator */
+.voice-mic{transition:all .3s ease}
+.voice-mic.listening{transform:scale(1.05)}
+.voice-mic.listening svg{animation:cbMicPulse .6s ease-in-out infinite}
+@keyframes cbMicPulse{0%,100%{opacity:1}50%{opacity:.6}}
+/* VOICE STATUS — count animation */
+.voice-status{transition:color .3s ease}
+.voice-status.active{color:#30D158}
+/* WAVEFORM SYNC — more dramatic bars */
+.cb-wave i{transition:height .1s ease,background .3s ease}
+.cb-wave.listening i{animation:cbWaveBounce .4s ease-in-out infinite;animation-delay:var(--wd,0s)}
+@keyframes cbWaveBounce{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1.5)}}
 
 </style>
         </div>
@@ -8423,7 +8666,7 @@
 
 /* VOICE LINE — typewriter + progress bar */
 .voice-line{font-size:16px;font-weight:500;color:rgba(255,255,255,.35);text-align:center;line-height:1.5;letter-spacing:-.1px;max-width:300px;position:relative;padding-bottom:20px}
-.voice-line .vw{display:inline-block;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
+.voice-line .vw{display:inline-block;position:relative;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
 .voice-line .vw.show{opacity:1;transform:translateY(0)}
 .voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.5);transform:scale(1.08);animation:vwPop .3s cubic-bezier(.34,1.56,.64,1)}
 @keyframes vwPop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1.08)}}
@@ -8438,6 +8681,33 @@
 /* TYPEWRITER REVEAL — staggered word appearance */
 @keyframes vwTypeIn{0%{opacity:0;transform:translateY(6px);filter:blur(2px)}100%{opacity:1;transform:translateY(0);filter:blur(0)}}
 .voice-line.typing .vw.show{animation:vwTypeIn .35s cubic-bezier(.22,1,.36,1) both}
+
+
+/* PROGRESS PARTICLES — tiny dots travel along the progress bar */
+.vl-progress::after{content:'';position:absolute;top:-2px;left:0;width:4px;height:6px;border-radius:2px;background:#7CE8A4;box-shadow:0 0 6px rgba(48,209,88,.6);animation:vlParticleTravel 2s linear infinite;opacity:0}
+.voice-line.listening .vl-progress::after{opacity:1}
+@keyframes vlParticleTravel{0%{left:0}100%{left:100%}}
+/* WORD RIPPLE — expanding circle from each heard word */
+@keyframes vwRipple{0%{box-shadow:0 0 0 0 rgba(48,209,88,.5)}100%{box-shadow:0 0 0 12px rgba(48,209,88,0)}}
+.voice-line .vw.heard{animation:vwPop .3s cubic-bezier(.34,1.56,.64,1),vwRipple .6s ease-out}
+/* LINE SHIMMER — subtle sweep across the entire line */
+@keyframes vlShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.voice-line.listening::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(214,230,255,.06) 50%,transparent 100%);background-size:200% 100%;animation:vlShimmer 3s linear infinite;pointer-events:none}
+/* WORD UNDERLINE — draws under each word */
+.voice-line .vw::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:1px;background:#30D158;transform:scaleX(0);transition:transform .3s ease;transform-origin:left}
+.voice-line .vw.heard::after{transform:scaleX(1)}
+/* MIC BUTTON — better listening indicator */
+.voice-mic{transition:all .3s ease}
+.voice-mic.listening{transform:scale(1.05)}
+.voice-mic.listening svg{animation:cbMicPulse .6s ease-in-out infinite}
+@keyframes cbMicPulse{0%,100%{opacity:1}50%{opacity:.6}}
+/* VOICE STATUS — count animation */
+.voice-status{transition:color .3s ease}
+.voice-status.active{color:#30D158}
+/* WAVEFORM SYNC — more dramatic bars */
+.cb-wave i{transition:height .1s ease,background .3s ease}
+.cb-wave.listening i{animation:cbWaveBounce .4s ease-in-out infinite;animation-delay:var(--wd,0s)}
+@keyframes cbWaveBounce{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1.5)}}
 
 </style>
         </div>
@@ -9210,7 +9480,7 @@
 
 /* VOICE LINE — typewriter + progress bar */
 .voice-line{font-size:16px;font-weight:500;color:rgba(255,255,255,.35);text-align:center;line-height:1.5;letter-spacing:-.1px;max-width:300px;position:relative;padding-bottom:20px}
-.voice-line .vw{display:inline-block;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
+.voice-line .vw{display:inline-block;position:relative;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
 .voice-line .vw.show{opacity:1;transform:translateY(0)}
 .voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.5);transform:scale(1.08);animation:vwPop .3s cubic-bezier(.34,1.56,.64,1)}
 @keyframes vwPop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1.08)}}
@@ -9225,6 +9495,33 @@
 /* TYPEWRITER REVEAL — staggered word appearance */
 @keyframes vwTypeIn{0%{opacity:0;transform:translateY(6px);filter:blur(2px)}100%{opacity:1;transform:translateY(0);filter:blur(0)}}
 .voice-line.typing .vw.show{animation:vwTypeIn .35s cubic-bezier(.22,1,.36,1) both}
+
+
+/* PROGRESS PARTICLES — tiny dots travel along the progress bar */
+.vl-progress::after{content:'';position:absolute;top:-2px;left:0;width:4px;height:6px;border-radius:2px;background:#7CE8A4;box-shadow:0 0 6px rgba(48,209,88,.6);animation:vlParticleTravel 2s linear infinite;opacity:0}
+.voice-line.listening .vl-progress::after{opacity:1}
+@keyframes vlParticleTravel{0%{left:0}100%{left:100%}}
+/* WORD RIPPLE — expanding circle from each heard word */
+@keyframes vwRipple{0%{box-shadow:0 0 0 0 rgba(48,209,88,.5)}100%{box-shadow:0 0 0 12px rgba(48,209,88,0)}}
+.voice-line .vw.heard{animation:vwPop .3s cubic-bezier(.34,1.56,.64,1),vwRipple .6s ease-out}
+/* LINE SHIMMER — subtle sweep across the entire line */
+@keyframes vlShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.voice-line.listening::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(214,230,255,.06) 50%,transparent 100%);background-size:200% 100%;animation:vlShimmer 3s linear infinite;pointer-events:none}
+/* WORD UNDERLINE — draws under each word */
+.voice-line .vw::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:1px;background:#30D158;transform:scaleX(0);transition:transform .3s ease;transform-origin:left}
+.voice-line .vw.heard::after{transform:scaleX(1)}
+/* MIC BUTTON — better listening indicator */
+.voice-mic{transition:all .3s ease}
+.voice-mic.listening{transform:scale(1.05)}
+.voice-mic.listening svg{animation:cbMicPulse .6s ease-in-out infinite}
+@keyframes cbMicPulse{0%,100%{opacity:1}50%{opacity:.6}}
+/* VOICE STATUS — count animation */
+.voice-status{transition:color .3s ease}
+.voice-status.active{color:#30D158}
+/* WAVEFORM SYNC — more dramatic bars */
+.cb-wave i{transition:height .1s ease,background .3s ease}
+.cb-wave.listening i{animation:cbWaveBounce .4s ease-in-out infinite;animation-delay:var(--wd,0s)}
+@keyframes cbWaveBounce{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1.5)}}
 
 </style>
 
@@ -10002,7 +10299,7 @@
 
 /* VOICE LINE — typewriter + progress bar */
 .voice-line{font-size:16px;font-weight:500;color:rgba(255,255,255,.35);text-align:center;line-height:1.5;letter-spacing:-.1px;max-width:300px;position:relative;padding-bottom:20px}
-.voice-line .vw{display:inline-block;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
+.voice-line .vw{display:inline-block;position:relative;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
 .voice-line .vw.show{opacity:1;transform:translateY(0)}
 .voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.5);transform:scale(1.08);animation:vwPop .3s cubic-bezier(.34,1.56,.64,1)}
 @keyframes vwPop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1.08)}}
@@ -10017,6 +10314,33 @@
 /* TYPEWRITER REVEAL — staggered word appearance */
 @keyframes vwTypeIn{0%{opacity:0;transform:translateY(6px);filter:blur(2px)}100%{opacity:1;transform:translateY(0);filter:blur(0)}}
 .voice-line.typing .vw.show{animation:vwTypeIn .35s cubic-bezier(.22,1,.36,1) both}
+
+
+/* PROGRESS PARTICLES — tiny dots travel along the progress bar */
+.vl-progress::after{content:'';position:absolute;top:-2px;left:0;width:4px;height:6px;border-radius:2px;background:#7CE8A4;box-shadow:0 0 6px rgba(48,209,88,.6);animation:vlParticleTravel 2s linear infinite;opacity:0}
+.voice-line.listening .vl-progress::after{opacity:1}
+@keyframes vlParticleTravel{0%{left:0}100%{left:100%}}
+/* WORD RIPPLE — expanding circle from each heard word */
+@keyframes vwRipple{0%{box-shadow:0 0 0 0 rgba(48,209,88,.5)}100%{box-shadow:0 0 0 12px rgba(48,209,88,0)}}
+.voice-line .vw.heard{animation:vwPop .3s cubic-bezier(.34,1.56,.64,1),vwRipple .6s ease-out}
+/* LINE SHIMMER — subtle sweep across the entire line */
+@keyframes vlShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.voice-line.listening::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(214,230,255,.06) 50%,transparent 100%);background-size:200% 100%;animation:vlShimmer 3s linear infinite;pointer-events:none}
+/* WORD UNDERLINE — draws under each word */
+.voice-line .vw::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:1px;background:#30D158;transform:scaleX(0);transition:transform .3s ease;transform-origin:left}
+.voice-line .vw.heard::after{transform:scaleX(1)}
+/* MIC BUTTON — better listening indicator */
+.voice-mic{transition:all .3s ease}
+.voice-mic.listening{transform:scale(1.05)}
+.voice-mic.listening svg{animation:cbMicPulse .6s ease-in-out infinite}
+@keyframes cbMicPulse{0%,100%{opacity:1}50%{opacity:.6}}
+/* VOICE STATUS — count animation */
+.voice-status{transition:color .3s ease}
+.voice-status.active{color:#30D158}
+/* WAVEFORM SYNC — more dramatic bars */
+.cb-wave i{transition:height .1s ease,background .3s ease}
+.cb-wave.listening i{animation:cbWaveBounce .4s ease-in-out infinite;animation-delay:var(--wd,0s)}
+@keyframes cbWaveBounce{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1.5)}}
 
 </style>
         </div>
@@ -10687,7 +11011,7 @@
 
 /* VOICE LINE — typewriter + progress bar */
 .voice-line{font-size:16px;font-weight:500;color:rgba(255,255,255,.35);text-align:center;line-height:1.5;letter-spacing:-.1px;max-width:300px;position:relative;padding-bottom:20px}
-.voice-line .vw{display:inline-block;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
+.voice-line .vw{display:inline-block;position:relative;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
 .voice-line .vw.show{opacity:1;transform:translateY(0)}
 .voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.5);transform:scale(1.08);animation:vwPop .3s cubic-bezier(.34,1.56,.64,1)}
 @keyframes vwPop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1.08)}}
@@ -10702,6 +11026,33 @@
 /* TYPEWRITER REVEAL — staggered word appearance */
 @keyframes vwTypeIn{0%{opacity:0;transform:translateY(6px);filter:blur(2px)}100%{opacity:1;transform:translateY(0);filter:blur(0)}}
 .voice-line.typing .vw.show{animation:vwTypeIn .35s cubic-bezier(.22,1,.36,1) both}
+
+
+/* PROGRESS PARTICLES — tiny dots travel along the progress bar */
+.vl-progress::after{content:'';position:absolute;top:-2px;left:0;width:4px;height:6px;border-radius:2px;background:#7CE8A4;box-shadow:0 0 6px rgba(48,209,88,.6);animation:vlParticleTravel 2s linear infinite;opacity:0}
+.voice-line.listening .vl-progress::after{opacity:1}
+@keyframes vlParticleTravel{0%{left:0}100%{left:100%}}
+/* WORD RIPPLE — expanding circle from each heard word */
+@keyframes vwRipple{0%{box-shadow:0 0 0 0 rgba(48,209,88,.5)}100%{box-shadow:0 0 0 12px rgba(48,209,88,0)}}
+.voice-line .vw.heard{animation:vwPop .3s cubic-bezier(.34,1.56,.64,1),vwRipple .6s ease-out}
+/* LINE SHIMMER — subtle sweep across the entire line */
+@keyframes vlShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.voice-line.listening::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(214,230,255,.06) 50%,transparent 100%);background-size:200% 100%;animation:vlShimmer 3s linear infinite;pointer-events:none}
+/* WORD UNDERLINE — draws under each word */
+.voice-line .vw::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:1px;background:#30D158;transform:scaleX(0);transition:transform .3s ease;transform-origin:left}
+.voice-line .vw.heard::after{transform:scaleX(1)}
+/* MIC BUTTON — better listening indicator */
+.voice-mic{transition:all .3s ease}
+.voice-mic.listening{transform:scale(1.05)}
+.voice-mic.listening svg{animation:cbMicPulse .6s ease-in-out infinite}
+@keyframes cbMicPulse{0%,100%{opacity:1}50%{opacity:.6}}
+/* VOICE STATUS — count animation */
+.voice-status{transition:color .3s ease}
+.voice-status.active{color:#30D158}
+/* WAVEFORM SYNC — more dramatic bars */
+.cb-wave i{transition:height .1s ease,background .3s ease}
+.cb-wave.listening i{animation:cbWaveBounce .4s ease-in-out infinite;animation-delay:var(--wd,0s)}
+@keyframes cbWaveBounce{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1.5)}}
 
 </style>
   </div>
@@ -12157,7 +12508,7 @@
 
 /* VOICE LINE — typewriter + progress bar */
 .voice-line{font-size:16px;font-weight:500;color:rgba(255,255,255,.35);text-align:center;line-height:1.5;letter-spacing:-.1px;max-width:300px;position:relative;padding-bottom:20px}
-.voice-line .vw{display:inline-block;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
+.voice-line .vw{display:inline-block;position:relative;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
 .voice-line .vw.show{opacity:1;transform:translateY(0)}
 .voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.5);transform:scale(1.08);animation:vwPop .3s cubic-bezier(.34,1.56,.64,1)}
 @keyframes vwPop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1.08)}}
@@ -12172,6 +12523,33 @@
 /* TYPEWRITER REVEAL — staggered word appearance */
 @keyframes vwTypeIn{0%{opacity:0;transform:translateY(6px);filter:blur(2px)}100%{opacity:1;transform:translateY(0);filter:blur(0)}}
 .voice-line.typing .vw.show{animation:vwTypeIn .35s cubic-bezier(.22,1,.36,1) both}
+
+
+/* PROGRESS PARTICLES — tiny dots travel along the progress bar */
+.vl-progress::after{content:'';position:absolute;top:-2px;left:0;width:4px;height:6px;border-radius:2px;background:#7CE8A4;box-shadow:0 0 6px rgba(48,209,88,.6);animation:vlParticleTravel 2s linear infinite;opacity:0}
+.voice-line.listening .vl-progress::after{opacity:1}
+@keyframes vlParticleTravel{0%{left:0}100%{left:100%}}
+/* WORD RIPPLE — expanding circle from each heard word */
+@keyframes vwRipple{0%{box-shadow:0 0 0 0 rgba(48,209,88,.5)}100%{box-shadow:0 0 0 12px rgba(48,209,88,0)}}
+.voice-line .vw.heard{animation:vwPop .3s cubic-bezier(.34,1.56,.64,1),vwRipple .6s ease-out}
+/* LINE SHIMMER — subtle sweep across the entire line */
+@keyframes vlShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.voice-line.listening::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(214,230,255,.06) 50%,transparent 100%);background-size:200% 100%;animation:vlShimmer 3s linear infinite;pointer-events:none}
+/* WORD UNDERLINE — draws under each word */
+.voice-line .vw::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:1px;background:#30D158;transform:scaleX(0);transition:transform .3s ease;transform-origin:left}
+.voice-line .vw.heard::after{transform:scaleX(1)}
+/* MIC BUTTON — better listening indicator */
+.voice-mic{transition:all .3s ease}
+.voice-mic.listening{transform:scale(1.05)}
+.voice-mic.listening svg{animation:cbMicPulse .6s ease-in-out infinite}
+@keyframes cbMicPulse{0%,100%{opacity:1}50%{opacity:.6}}
+/* VOICE STATUS — count animation */
+.voice-status{transition:color .3s ease}
+.voice-status.active{color:#30D158}
+/* WAVEFORM SYNC — more dramatic bars */
+.cb-wave i{transition:height .1s ease,background .3s ease}
+.cb-wave.listening i{animation:cbWaveBounce .4s ease-in-out infinite;animation-delay:var(--wd,0s)}
+@keyframes cbWaveBounce{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1.5)}}
 
 </style>
     `;
@@ -12763,7 +13141,7 @@
 
 /* VOICE LINE — typewriter + progress bar */
 .voice-line{font-size:16px;font-weight:500;color:rgba(255,255,255,.35);text-align:center;line-height:1.5;letter-spacing:-.1px;max-width:300px;position:relative;padding-bottom:20px}
-.voice-line .vw{display:inline-block;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
+.voice-line .vw{display:inline-block;position:relative;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
 .voice-line .vw.show{opacity:1;transform:translateY(0)}
 .voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.5);transform:scale(1.08);animation:vwPop .3s cubic-bezier(.34,1.56,.64,1)}
 @keyframes vwPop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1.08)}}
@@ -12778,6 +13156,33 @@
 /* TYPEWRITER REVEAL — staggered word appearance */
 @keyframes vwTypeIn{0%{opacity:0;transform:translateY(6px);filter:blur(2px)}100%{opacity:1;transform:translateY(0);filter:blur(0)}}
 .voice-line.typing .vw.show{animation:vwTypeIn .35s cubic-bezier(.22,1,.36,1) both}
+
+
+/* PROGRESS PARTICLES — tiny dots travel along the progress bar */
+.vl-progress::after{content:'';position:absolute;top:-2px;left:0;width:4px;height:6px;border-radius:2px;background:#7CE8A4;box-shadow:0 0 6px rgba(48,209,88,.6);animation:vlParticleTravel 2s linear infinite;opacity:0}
+.voice-line.listening .vl-progress::after{opacity:1}
+@keyframes vlParticleTravel{0%{left:0}100%{left:100%}}
+/* WORD RIPPLE — expanding circle from each heard word */
+@keyframes vwRipple{0%{box-shadow:0 0 0 0 rgba(48,209,88,.5)}100%{box-shadow:0 0 0 12px rgba(48,209,88,0)}}
+.voice-line .vw.heard{animation:vwPop .3s cubic-bezier(.34,1.56,.64,1),vwRipple .6s ease-out}
+/* LINE SHIMMER — subtle sweep across the entire line */
+@keyframes vlShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.voice-line.listening::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(214,230,255,.06) 50%,transparent 100%);background-size:200% 100%;animation:vlShimmer 3s linear infinite;pointer-events:none}
+/* WORD UNDERLINE — draws under each word */
+.voice-line .vw::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:1px;background:#30D158;transform:scaleX(0);transition:transform .3s ease;transform-origin:left}
+.voice-line .vw.heard::after{transform:scaleX(1)}
+/* MIC BUTTON — better listening indicator */
+.voice-mic{transition:all .3s ease}
+.voice-mic.listening{transform:scale(1.05)}
+.voice-mic.listening svg{animation:cbMicPulse .6s ease-in-out infinite}
+@keyframes cbMicPulse{0%,100%{opacity:1}50%{opacity:.6}}
+/* VOICE STATUS — count animation */
+.voice-status{transition:color .3s ease}
+.voice-status.active{color:#30D158}
+/* WAVEFORM SYNC — more dramatic bars */
+.cb-wave i{transition:height .1s ease,background .3s ease}
+.cb-wave.listening i{animation:cbWaveBounce .4s ease-in-out infinite;animation-delay:var(--wd,0s)}
+@keyframes cbWaveBounce{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1.5)}}
 
 </style>
     `;
@@ -14506,7 +14911,7 @@
     const orb = document.getElementById('voiceOrb');
     const wave = document.getElementById('cbWave');
     if (!line || !mic) return;
-    var skipBtn=document.getElementById('voiceSkip');if(skipBtn) skipBtn.addEventListener('click',function(){if(!done){done=true;stopRec();stopWave();advance()}});
+    var skipBtn=document.getElementById('voiceSkip');if(skipBtn) skipBtn.addEventListener('click',function(){if(!done){done=true;try{stopRec()}catch(e){};try{stopWave()}catch(e){};setTimeout(function(){advance()},300)}});
     // ── Corbit 2.0 life: orbiting aura, natural blinks, pupil tracking ──
     (function corbitLife() {
       const bot = document.getElementById('voiceOrb');
@@ -14595,9 +15000,12 @@
     function setStatus(t) { if (statusEl) statusEl.textContent = t; }
     function wordMatches(target, heard) {
       if (target === heard) return true;
-      if (target === 'corbit') return /orb|corb|cob/.test(heard);
+      if (target === 'corbit') return /orb|corb|cor/i.test(heard);
+      if (target.length <= 2) return target === heard;
+      if (target.length >= 5 && heard.length >= 3 && target.slice(0,3) === heard.slice(0,3)) return true;
       // Highlight current word
       targets.forEach(function(t){t.el.classList.remove('current')});
+      // Highlight the first un-heard word as the active target
       if (target.length >= 4 && heard.length >= 4 && target.slice(0, 4) === heard.slice(0, 4)) return true;
       return false;
     }
@@ -14620,14 +15028,14 @@
       // Update blush progress
       if(orb){var pct=Math.round(heard/targets.length*100);orb.classList.remove('progress-25','progress-50','progress-75');if(pct>=25)orb.classList.add('progress-25');if(pct>=50)orb.classList.add('progress-50');if(pct>=75)orb.classList.add('progress-75')}
       if (!done && heard >= Math.ceil(targets.length * 0.75)) success();
-      else if (!done && heard > 0) {setStatus('Keep going — ' + heard + '/' + targets.length + ' words locked.');if(orb){orb.classList.add('speaking');setTimeout(function(){orb.classList.remove('speaking')},600)}}
+      else if (!done && heard > 0) {setStatus('Keep going — ' + heard + '/' + targets.length + ' words locked.');if(statusEl) statusEl.classList.add('active')if(orb){orb.classList.remove('phoneme-ah','phoneme-ee','phoneme-oh','phoneme-mm');orb.classList.add('speaking');setTimeout(function(){orb.classList.remove('speaking')},600)}}
     }
     function success() {
       done = true;
       state.voiceDone = true;
       // Screen flash
       var flash=document.createElement('div');flash.className='cb-screen-flash';document.body.appendChild(flash);setTimeout(function(){flash.remove()},800)
-      if (line) {line.classList.add('done');line.classList.remove('typing');line.style.textShadow='0 0 20px rgba(48,209,88,.4)'}
+      if (line) {line.classList.add('done');line.classList.remove('typing','listening');line.style.textShadow='0 0 20px rgba(48,209,88,.4)'}
       try { localStorage.setItem('coreVoiceLinked', '1'); } catch (e) {}
       targets.forEach(function (t,i) { t.el.classList.add('heard');setTimeout(function(){t.el.classList.add('show')},i*60)});
       stopRec();
@@ -14696,8 +15104,9 @@
       rec.onend = function () { if (listening && !done) { try { rec.start(); } catch (e) { stopRec(); } } };
       try { rec.start(); } catch (e) { setStatus('Mic unavailable — skip for now.'); return; }
       listening = true;
-      if (orb) {orb.classList.add('listening');orb.classList.add('speaking');}
+      if (orb) {orb.classList.add('listening');orb.classList.remove('phoneme-ah','phoneme-ee','phoneme-oh','phoneme-mm');orb.classList.add('speaking');}
       if (wave) {wave.classList.add('listening');startWave()}
+      if (line) line.classList.add('listening')
       mic.classList.add('listening');if(orb){orb.classList.add('thinking');setTimeout(function(){orb.classList.remove('thinking');orb.classList.add('listening')},400)}
       if (micLabel) micLabel.textContent = 'Listening…';
       setStatus('Read the line above, naturally.');
@@ -16168,7 +16577,7 @@ body.on-autoadvance .stepwrap::after {
 
 /* VOICE LINE — typewriter + progress bar */
 .voice-line{font-size:16px;font-weight:500;color:rgba(255,255,255,.35);text-align:center;line-height:1.5;letter-spacing:-.1px;max-width:300px;position:relative;padding-bottom:20px}
-.voice-line .vw{display:inline-block;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
+.voice-line .vw{display:inline-block;position:relative;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
 .voice-line .vw.show{opacity:1;transform:translateY(0)}
 .voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.5);transform:scale(1.08);animation:vwPop .3s cubic-bezier(.34,1.56,.64,1)}
 @keyframes vwPop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1.08)}}
@@ -16183,6 +16592,33 @@ body.on-autoadvance .stepwrap::after {
 /* TYPEWRITER REVEAL — staggered word appearance */
 @keyframes vwTypeIn{0%{opacity:0;transform:translateY(6px);filter:blur(2px)}100%{opacity:1;transform:translateY(0);filter:blur(0)}}
 .voice-line.typing .vw.show{animation:vwTypeIn .35s cubic-bezier(.22,1,.36,1) both}
+
+
+/* PROGRESS PARTICLES — tiny dots travel along the progress bar */
+.vl-progress::after{content:'';position:absolute;top:-2px;left:0;width:4px;height:6px;border-radius:2px;background:#7CE8A4;box-shadow:0 0 6px rgba(48,209,88,.6);animation:vlParticleTravel 2s linear infinite;opacity:0}
+.voice-line.listening .vl-progress::after{opacity:1}
+@keyframes vlParticleTravel{0%{left:0}100%{left:100%}}
+/* WORD RIPPLE — expanding circle from each heard word */
+@keyframes vwRipple{0%{box-shadow:0 0 0 0 rgba(48,209,88,.5)}100%{box-shadow:0 0 0 12px rgba(48,209,88,0)}}
+.voice-line .vw.heard{animation:vwPop .3s cubic-bezier(.34,1.56,.64,1),vwRipple .6s ease-out}
+/* LINE SHIMMER — subtle sweep across the entire line */
+@keyframes vlShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.voice-line.listening::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(214,230,255,.06) 50%,transparent 100%);background-size:200% 100%;animation:vlShimmer 3s linear infinite;pointer-events:none}
+/* WORD UNDERLINE — draws under each word */
+.voice-line .vw::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:1px;background:#30D158;transform:scaleX(0);transition:transform .3s ease;transform-origin:left}
+.voice-line .vw.heard::after{transform:scaleX(1)}
+/* MIC BUTTON — better listening indicator */
+.voice-mic{transition:all .3s ease}
+.voice-mic.listening{transform:scale(1.05)}
+.voice-mic.listening svg{animation:cbMicPulse .6s ease-in-out infinite}
+@keyframes cbMicPulse{0%,100%{opacity:1}50%{opacity:.6}}
+/* VOICE STATUS — count animation */
+.voice-status{transition:color .3s ease}
+.voice-status.active{color:#30D158}
+/* WAVEFORM SYNC — more dramatic bars */
+.cb-wave i{transition:height .1s ease,background .3s ease}
+.cb-wave.listening i{animation:cbWaveBounce .4s ease-in-out infinite;animation-delay:var(--wd,0s)}
+@keyframes cbWaveBounce{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1.5)}}
 
 </style>
 
@@ -16818,7 +17254,7 @@ body.on-autoadvance .stepwrap::after {
 
 /* VOICE LINE — typewriter + progress bar */
 .voice-line{font-size:16px;font-weight:500;color:rgba(255,255,255,.35);text-align:center;line-height:1.5;letter-spacing:-.1px;max-width:300px;position:relative;padding-bottom:20px}
-.voice-line .vw{display:inline-block;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
+.voice-line .vw{display:inline-block;position:relative;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
 .voice-line .vw.show{opacity:1;transform:translateY(0)}
 .voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.5);transform:scale(1.08);animation:vwPop .3s cubic-bezier(.34,1.56,.64,1)}
 @keyframes vwPop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1.08)}}
@@ -16833,6 +17269,33 @@ body.on-autoadvance .stepwrap::after {
 /* TYPEWRITER REVEAL — staggered word appearance */
 @keyframes vwTypeIn{0%{opacity:0;transform:translateY(6px);filter:blur(2px)}100%{opacity:1;transform:translateY(0);filter:blur(0)}}
 .voice-line.typing .vw.show{animation:vwTypeIn .35s cubic-bezier(.22,1,.36,1) both}
+
+
+/* PROGRESS PARTICLES — tiny dots travel along the progress bar */
+.vl-progress::after{content:'';position:absolute;top:-2px;left:0;width:4px;height:6px;border-radius:2px;background:#7CE8A4;box-shadow:0 0 6px rgba(48,209,88,.6);animation:vlParticleTravel 2s linear infinite;opacity:0}
+.voice-line.listening .vl-progress::after{opacity:1}
+@keyframes vlParticleTravel{0%{left:0}100%{left:100%}}
+/* WORD RIPPLE — expanding circle from each heard word */
+@keyframes vwRipple{0%{box-shadow:0 0 0 0 rgba(48,209,88,.5)}100%{box-shadow:0 0 0 12px rgba(48,209,88,0)}}
+.voice-line .vw.heard{animation:vwPop .3s cubic-bezier(.34,1.56,.64,1),vwRipple .6s ease-out}
+/* LINE SHIMMER — subtle sweep across the entire line */
+@keyframes vlShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.voice-line.listening::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(214,230,255,.06) 50%,transparent 100%);background-size:200% 100%;animation:vlShimmer 3s linear infinite;pointer-events:none}
+/* WORD UNDERLINE — draws under each word */
+.voice-line .vw::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:1px;background:#30D158;transform:scaleX(0);transition:transform .3s ease;transform-origin:left}
+.voice-line .vw.heard::after{transform:scaleX(1)}
+/* MIC BUTTON — better listening indicator */
+.voice-mic{transition:all .3s ease}
+.voice-mic.listening{transform:scale(1.05)}
+.voice-mic.listening svg{animation:cbMicPulse .6s ease-in-out infinite}
+@keyframes cbMicPulse{0%,100%{opacity:1}50%{opacity:.6}}
+/* VOICE STATUS — count animation */
+.voice-status{transition:color .3s ease}
+.voice-status.active{color:#30D158}
+/* WAVEFORM SYNC — more dramatic bars */
+.cb-wave i{transition:height .1s ease,background .3s ease}
+.cb-wave.listening i{animation:cbWaveBounce .4s ease-in-out infinite;animation-delay:var(--wd,0s)}
+@keyframes cbWaveBounce{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1.5)}}
 
 </style>
 <div class="corb-overlay" id="corbOverlay">
@@ -17618,7 +18081,7 @@ html body .step .copy { text-align:left !important; margin-left:0 !important; ma
 
 /* VOICE LINE — typewriter + progress bar */
 .voice-line{font-size:16px;font-weight:500;color:rgba(255,255,255,.35);text-align:center;line-height:1.5;letter-spacing:-.1px;max-width:300px;position:relative;padding-bottom:20px}
-.voice-line .vw{display:inline-block;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
+.voice-line .vw{display:inline-block;position:relative;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
 .voice-line .vw.show{opacity:1;transform:translateY(0)}
 .voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.5);transform:scale(1.08);animation:vwPop .3s cubic-bezier(.34,1.56,.64,1)}
 @keyframes vwPop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1.08)}}
@@ -17633,6 +18096,33 @@ html body .step .copy { text-align:left !important; margin-left:0 !important; ma
 /* TYPEWRITER REVEAL — staggered word appearance */
 @keyframes vwTypeIn{0%{opacity:0;transform:translateY(6px);filter:blur(2px)}100%{opacity:1;transform:translateY(0);filter:blur(0)}}
 .voice-line.typing .vw.show{animation:vwTypeIn .35s cubic-bezier(.22,1,.36,1) both}
+
+
+/* PROGRESS PARTICLES — tiny dots travel along the progress bar */
+.vl-progress::after{content:'';position:absolute;top:-2px;left:0;width:4px;height:6px;border-radius:2px;background:#7CE8A4;box-shadow:0 0 6px rgba(48,209,88,.6);animation:vlParticleTravel 2s linear infinite;opacity:0}
+.voice-line.listening .vl-progress::after{opacity:1}
+@keyframes vlParticleTravel{0%{left:0}100%{left:100%}}
+/* WORD RIPPLE — expanding circle from each heard word */
+@keyframes vwRipple{0%{box-shadow:0 0 0 0 rgba(48,209,88,.5)}100%{box-shadow:0 0 0 12px rgba(48,209,88,0)}}
+.voice-line .vw.heard{animation:vwPop .3s cubic-bezier(.34,1.56,.64,1),vwRipple .6s ease-out}
+/* LINE SHIMMER — subtle sweep across the entire line */
+@keyframes vlShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.voice-line.listening::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(214,230,255,.06) 50%,transparent 100%);background-size:200% 100%;animation:vlShimmer 3s linear infinite;pointer-events:none}
+/* WORD UNDERLINE — draws under each word */
+.voice-line .vw::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:1px;background:#30D158;transform:scaleX(0);transition:transform .3s ease;transform-origin:left}
+.voice-line .vw.heard::after{transform:scaleX(1)}
+/* MIC BUTTON — better listening indicator */
+.voice-mic{transition:all .3s ease}
+.voice-mic.listening{transform:scale(1.05)}
+.voice-mic.listening svg{animation:cbMicPulse .6s ease-in-out infinite}
+@keyframes cbMicPulse{0%,100%{opacity:1}50%{opacity:.6}}
+/* VOICE STATUS — count animation */
+.voice-status{transition:color .3s ease}
+.voice-status.active{color:#30D158}
+/* WAVEFORM SYNC — more dramatic bars */
+.cb-wave i{transition:height .1s ease,background .3s ease}
+.cb-wave.listening i{animation:cbWaveBounce .4s ease-in-out infinite;animation-delay:var(--wd,0s)}
+@keyframes cbWaveBounce{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1.5)}}
 
 </style>
 
@@ -18248,7 +18738,7 @@ html body .step .copy { text-align:left !important; margin-left:0 !important; ma
 
 /* VOICE LINE — typewriter + progress bar */
 .voice-line{font-size:16px;font-weight:500;color:rgba(255,255,255,.35);text-align:center;line-height:1.5;letter-spacing:-.1px;max-width:300px;position:relative;padding-bottom:20px}
-.voice-line .vw{display:inline-block;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
+.voice-line .vw{display:inline-block;position:relative;transition:all .25s cubic-bezier(.22,1,.36,1);opacity:.3;transform:translateY(4px)}
 .voice-line .vw.show{opacity:1;transform:translateY(0)}
 .voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.5);transform:scale(1.08);animation:vwPop .3s cubic-bezier(.34,1.56,.64,1)}
 @keyframes vwPop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1.08)}}
@@ -18263,6 +18753,33 @@ html body .step .copy { text-align:left !important; margin-left:0 !important; ma
 /* TYPEWRITER REVEAL — staggered word appearance */
 @keyframes vwTypeIn{0%{opacity:0;transform:translateY(6px);filter:blur(2px)}100%{opacity:1;transform:translateY(0);filter:blur(0)}}
 .voice-line.typing .vw.show{animation:vwTypeIn .35s cubic-bezier(.22,1,.36,1) both}
+
+
+/* PROGRESS PARTICLES — tiny dots travel along the progress bar */
+.vl-progress::after{content:'';position:absolute;top:-2px;left:0;width:4px;height:6px;border-radius:2px;background:#7CE8A4;box-shadow:0 0 6px rgba(48,209,88,.6);animation:vlParticleTravel 2s linear infinite;opacity:0}
+.voice-line.listening .vl-progress::after{opacity:1}
+@keyframes vlParticleTravel{0%{left:0}100%{left:100%}}
+/* WORD RIPPLE — expanding circle from each heard word */
+@keyframes vwRipple{0%{box-shadow:0 0 0 0 rgba(48,209,88,.5)}100%{box-shadow:0 0 0 12px rgba(48,209,88,0)}}
+.voice-line .vw.heard{animation:vwPop .3s cubic-bezier(.34,1.56,.64,1),vwRipple .6s ease-out}
+/* LINE SHIMMER — subtle sweep across the entire line */
+@keyframes vlShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.voice-line.listening::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(214,230,255,.06) 50%,transparent 100%);background-size:200% 100%;animation:vlShimmer 3s linear infinite;pointer-events:none}
+/* WORD UNDERLINE — draws under each word */
+.voice-line .vw::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:1px;background:#30D158;transform:scaleX(0);transition:transform .3s ease;transform-origin:left}
+.voice-line .vw.heard::after{transform:scaleX(1)}
+/* MIC BUTTON — better listening indicator */
+.voice-mic{transition:all .3s ease}
+.voice-mic.listening{transform:scale(1.05)}
+.voice-mic.listening svg{animation:cbMicPulse .6s ease-in-out infinite}
+@keyframes cbMicPulse{0%,100%{opacity:1}50%{opacity:.6}}
+/* VOICE STATUS — count animation */
+.voice-status{transition:color .3s ease}
+.voice-status.active{color:#30D158}
+/* WAVEFORM SYNC — more dramatic bars */
+.cb-wave i{transition:height .1s ease,background .3s ease}
+.cb-wave.listening i{animation:cbWaveBounce .4s ease-in-out infinite;animation-delay:var(--wd,0s)}
+@keyframes cbWaveBounce{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1.5)}}
 
 </style>
 
