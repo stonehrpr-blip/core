@@ -1651,6 +1651,36 @@
 @keyframes cbWander{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-3px) rotate(-1.5deg)}50%{transform:translateY(0) rotate(0)}75%{transform:translateY(-2px) rotate(1.5deg)}}
 .corbit-bot:not(.listening):not(.speaking):not(.processing):not(.done) .cb-head{animation:cbWander 6s ease-in-out infinite, cbBob 4.5s ease-in-out infinite}
 
+
+/* AMBIENT FLOATING PARTICLES around bot at all times */
+.cb-float-particle{position:absolute;width:1.5px;height:1.5px;border-radius:50%;background:rgba(214,230,255,.6);pointer-events:none;z-index:0;animation:cbFloatUp var(--fd,4s) var(--fdel,0s) linear infinite}
+@keyframes cbFloatUp{0%{opacity:0;transform:translateY(0) translateX(0)}15%{opacity:.8}85%{opacity:.4}100%{opacity:0;transform:translateY(-60px) translateX(var(--fx,10px))}}
+/* VOICE LINE — animated sweep highlight when words recognized */
+.voice-line .vw{transition:color .3s ease,text-shadow .3s ease}
+.voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.6)}
+.voice-line .vw.current{color:#fff;text-shadow:0 0 12px rgba(214,230,255,.8);animation:vwPulse .6s ease-in-out infinite}
+@keyframes vwPulse{0%,100%{text-shadow:0 0 8px rgba(214,230,255,.6)}50%{text-shadow:0 0 16px rgba(255,255,255,1),0 0 24px rgba(214,230,255,.8)}}
+/* MIC BUTTON — breathing invite pulse */
+.voice-mic:not(.listening):not(.done){animation:micBreathe 2.5s ease-in-out infinite}
+@keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
+.voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
+.voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+/* SUCCESS CONFETTI — green + white particles rain */
+.cb-confetti{position:fixed;pointer-events:none;z-index:200;width:4px;height:4px;border-radius:1px;animation:cbConfettiFall var(--cd,1.2s) var(--cdel,0s) cubic-bezier(.22,1,.36,1) forwards}
+@keyframes cbConfettiFall{0%{opacity:1;transform:translate(0,0) rotate(0deg)}100%{opacity:0;transform:translate(var(--cx,30px),var(--cy,120px)) rotate(var(--cr,180deg))}}
+/* SHADOW REACT — scales when bot moves */
+.cb-shadow{transition:transform .3s ease,opacity .3s ease}
+.corbit-bot.done .cb-shadow{transform:scaleX(1.3);opacity:.8}
+/* SCAN LINE — periodic sweep across face */
+@keyframes cbScanSweep{0%{top:-20%}80%{top:110%}100%{top:110%}}
+.corbit-bot:not(.done) .cb-screen::before{content:'';position:absolute;left:0;right:0;height:2px;background:rgba(214,230,255,.15);animation:cbScanSweep 3s ease-in-out infinite}
+/* ANTENNA TRAIL — faint glow streak */
+@keyframes cbAntTrail{0%,100%{opacity:.2}50%{opacity:.6}}
+.cb-ant-tip::after{content:'';position:absolute;top:50%;left:50%;width:2px;height:16px;background:linear-gradient(180deg,rgba(214,230,255,.3),transparent);transform:translate(-50%,-100%);border-radius:1px;animation:cbAntTrail 2.2s ease-in-out infinite;filter:blur(1px)}
+/* EYE SPARKLE — occasional glint */
+@keyframes cbEyeSparkle{0%,95%,100%{opacity:0}96%{opacity:1}}
+.cb-eye::after{content:'';position:absolute;top:3px;left:4px;width:3px;height:3px;border-radius:50%;background:#fff;animation:cbEyeSparkle 4s ease-in-out infinite}
+
 </style>
   <script src="_lib/analytics.js"></script>
   <script src="_lib/core-config.js"></script>
@@ -2033,6 +2063,36 @@
 /* IDLE WANDER — occasional slow look-around */
 @keyframes cbWander{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-3px) rotate(-1.5deg)}50%{transform:translateY(0) rotate(0)}75%{transform:translateY(-2px) rotate(1.5deg)}}
 .corbit-bot:not(.listening):not(.speaking):not(.processing):not(.done) .cb-head{animation:cbWander 6s ease-in-out infinite, cbBob 4.5s ease-in-out infinite}
+
+
+/* AMBIENT FLOATING PARTICLES around bot at all times */
+.cb-float-particle{position:absolute;width:1.5px;height:1.5px;border-radius:50%;background:rgba(214,230,255,.6);pointer-events:none;z-index:0;animation:cbFloatUp var(--fd,4s) var(--fdel,0s) linear infinite}
+@keyframes cbFloatUp{0%{opacity:0;transform:translateY(0) translateX(0)}15%{opacity:.8}85%{opacity:.4}100%{opacity:0;transform:translateY(-60px) translateX(var(--fx,10px))}}
+/* VOICE LINE — animated sweep highlight when words recognized */
+.voice-line .vw{transition:color .3s ease,text-shadow .3s ease}
+.voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.6)}
+.voice-line .vw.current{color:#fff;text-shadow:0 0 12px rgba(214,230,255,.8);animation:vwPulse .6s ease-in-out infinite}
+@keyframes vwPulse{0%,100%{text-shadow:0 0 8px rgba(214,230,255,.6)}50%{text-shadow:0 0 16px rgba(255,255,255,1),0 0 24px rgba(214,230,255,.8)}}
+/* MIC BUTTON — breathing invite pulse */
+.voice-mic:not(.listening):not(.done){animation:micBreathe 2.5s ease-in-out infinite}
+@keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
+.voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
+.voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+/* SUCCESS CONFETTI — green + white particles rain */
+.cb-confetti{position:fixed;pointer-events:none;z-index:200;width:4px;height:4px;border-radius:1px;animation:cbConfettiFall var(--cd,1.2s) var(--cdel,0s) cubic-bezier(.22,1,.36,1) forwards}
+@keyframes cbConfettiFall{0%{opacity:1;transform:translate(0,0) rotate(0deg)}100%{opacity:0;transform:translate(var(--cx,30px),var(--cy,120px)) rotate(var(--cr,180deg))}}
+/* SHADOW REACT — scales when bot moves */
+.cb-shadow{transition:transform .3s ease,opacity .3s ease}
+.corbit-bot.done .cb-shadow{transform:scaleX(1.3);opacity:.8}
+/* SCAN LINE — periodic sweep across face */
+@keyframes cbScanSweep{0%{top:-20%}80%{top:110%}100%{top:110%}}
+.corbit-bot:not(.done) .cb-screen::before{content:'';position:absolute;left:0;right:0;height:2px;background:rgba(214,230,255,.15);animation:cbScanSweep 3s ease-in-out infinite}
+/* ANTENNA TRAIL — faint glow streak */
+@keyframes cbAntTrail{0%,100%{opacity:.2}50%{opacity:.6}}
+.cb-ant-tip::after{content:'';position:absolute;top:50%;left:50%;width:2px;height:16px;background:linear-gradient(180deg,rgba(214,230,255,.3),transparent);transform:translate(-50%,-100%);border-radius:1px;animation:cbAntTrail 2.2s ease-in-out infinite;filter:blur(1px)}
+/* EYE SPARKLE — occasional glint */
+@keyframes cbEyeSparkle{0%,95%,100%{opacity:0}96%{opacity:1}}
+.cb-eye::after{content:'';position:absolute;top:3px;left:4px;width:3px;height:3px;border-radius:50%;background:#fff;animation:cbEyeSparkle 4s ease-in-out infinite}
 
 </style>
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
@@ -2790,6 +2850,36 @@
 /* IDLE WANDER — occasional slow look-around */
 @keyframes cbWander{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-3px) rotate(-1.5deg)}50%{transform:translateY(0) rotate(0)}75%{transform:translateY(-2px) rotate(1.5deg)}}
 .corbit-bot:not(.listening):not(.speaking):not(.processing):not(.done) .cb-head{animation:cbWander 6s ease-in-out infinite, cbBob 4.5s ease-in-out infinite}
+
+
+/* AMBIENT FLOATING PARTICLES around bot at all times */
+.cb-float-particle{position:absolute;width:1.5px;height:1.5px;border-radius:50%;background:rgba(214,230,255,.6);pointer-events:none;z-index:0;animation:cbFloatUp var(--fd,4s) var(--fdel,0s) linear infinite}
+@keyframes cbFloatUp{0%{opacity:0;transform:translateY(0) translateX(0)}15%{opacity:.8}85%{opacity:.4}100%{opacity:0;transform:translateY(-60px) translateX(var(--fx,10px))}}
+/* VOICE LINE — animated sweep highlight when words recognized */
+.voice-line .vw{transition:color .3s ease,text-shadow .3s ease}
+.voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.6)}
+.voice-line .vw.current{color:#fff;text-shadow:0 0 12px rgba(214,230,255,.8);animation:vwPulse .6s ease-in-out infinite}
+@keyframes vwPulse{0%,100%{text-shadow:0 0 8px rgba(214,230,255,.6)}50%{text-shadow:0 0 16px rgba(255,255,255,1),0 0 24px rgba(214,230,255,.8)}}
+/* MIC BUTTON — breathing invite pulse */
+.voice-mic:not(.listening):not(.done){animation:micBreathe 2.5s ease-in-out infinite}
+@keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
+.voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
+.voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+/* SUCCESS CONFETTI — green + white particles rain */
+.cb-confetti{position:fixed;pointer-events:none;z-index:200;width:4px;height:4px;border-radius:1px;animation:cbConfettiFall var(--cd,1.2s) var(--cdel,0s) cubic-bezier(.22,1,.36,1) forwards}
+@keyframes cbConfettiFall{0%{opacity:1;transform:translate(0,0) rotate(0deg)}100%{opacity:0;transform:translate(var(--cx,30px),var(--cy,120px)) rotate(var(--cr,180deg))}}
+/* SHADOW REACT — scales when bot moves */
+.cb-shadow{transition:transform .3s ease,opacity .3s ease}
+.corbit-bot.done .cb-shadow{transform:scaleX(1.3);opacity:.8}
+/* SCAN LINE — periodic sweep across face */
+@keyframes cbScanSweep{0%{top:-20%}80%{top:110%}100%{top:110%}}
+.corbit-bot:not(.done) .cb-screen::before{content:'';position:absolute;left:0;right:0;height:2px;background:rgba(214,230,255,.15);animation:cbScanSweep 3s ease-in-out infinite}
+/* ANTENNA TRAIL — faint glow streak */
+@keyframes cbAntTrail{0%,100%{opacity:.2}50%{opacity:.6}}
+.cb-ant-tip::after{content:'';position:absolute;top:50%;left:50%;width:2px;height:16px;background:linear-gradient(180deg,rgba(214,230,255,.3),transparent);transform:translate(-50%,-100%);border-radius:1px;animation:cbAntTrail 2.2s ease-in-out infinite;filter:blur(1px)}
+/* EYE SPARKLE — occasional glint */
+@keyframes cbEyeSparkle{0%,95%,100%{opacity:0}96%{opacity:1}}
+.cb-eye::after{content:'';position:absolute;top:3px;left:4px;width:3px;height:3px;border-radius:50%;background:#fff;animation:cbEyeSparkle 4s ease-in-out infinite}
 
 </style>
 
@@ -3564,6 +3654,36 @@
 @keyframes cbWander{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-3px) rotate(-1.5deg)}50%{transform:translateY(0) rotate(0)}75%{transform:translateY(-2px) rotate(1.5deg)}}
 .corbit-bot:not(.listening):not(.speaking):not(.processing):not(.done) .cb-head{animation:cbWander 6s ease-in-out infinite, cbBob 4.5s ease-in-out infinite}
 
+
+/* AMBIENT FLOATING PARTICLES around bot at all times */
+.cb-float-particle{position:absolute;width:1.5px;height:1.5px;border-radius:50%;background:rgba(214,230,255,.6);pointer-events:none;z-index:0;animation:cbFloatUp var(--fd,4s) var(--fdel,0s) linear infinite}
+@keyframes cbFloatUp{0%{opacity:0;transform:translateY(0) translateX(0)}15%{opacity:.8}85%{opacity:.4}100%{opacity:0;transform:translateY(-60px) translateX(var(--fx,10px))}}
+/* VOICE LINE — animated sweep highlight when words recognized */
+.voice-line .vw{transition:color .3s ease,text-shadow .3s ease}
+.voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.6)}
+.voice-line .vw.current{color:#fff;text-shadow:0 0 12px rgba(214,230,255,.8);animation:vwPulse .6s ease-in-out infinite}
+@keyframes vwPulse{0%,100%{text-shadow:0 0 8px rgba(214,230,255,.6)}50%{text-shadow:0 0 16px rgba(255,255,255,1),0 0 24px rgba(214,230,255,.8)}}
+/* MIC BUTTON — breathing invite pulse */
+.voice-mic:not(.listening):not(.done){animation:micBreathe 2.5s ease-in-out infinite}
+@keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
+.voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
+.voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+/* SUCCESS CONFETTI — green + white particles rain */
+.cb-confetti{position:fixed;pointer-events:none;z-index:200;width:4px;height:4px;border-radius:1px;animation:cbConfettiFall var(--cd,1.2s) var(--cdel,0s) cubic-bezier(.22,1,.36,1) forwards}
+@keyframes cbConfettiFall{0%{opacity:1;transform:translate(0,0) rotate(0deg)}100%{opacity:0;transform:translate(var(--cx,30px),var(--cy,120px)) rotate(var(--cr,180deg))}}
+/* SHADOW REACT — scales when bot moves */
+.cb-shadow{transition:transform .3s ease,opacity .3s ease}
+.corbit-bot.done .cb-shadow{transform:scaleX(1.3);opacity:.8}
+/* SCAN LINE — periodic sweep across face */
+@keyframes cbScanSweep{0%{top:-20%}80%{top:110%}100%{top:110%}}
+.corbit-bot:not(.done) .cb-screen::before{content:'';position:absolute;left:0;right:0;height:2px;background:rgba(214,230,255,.15);animation:cbScanSweep 3s ease-in-out infinite}
+/* ANTENNA TRAIL — faint glow streak */
+@keyframes cbAntTrail{0%,100%{opacity:.2}50%{opacity:.6}}
+.cb-ant-tip::after{content:'';position:absolute;top:50%;left:50%;width:2px;height:16px;background:linear-gradient(180deg,rgba(214,230,255,.3),transparent);transform:translate(-50%,-100%);border-radius:1px;animation:cbAntTrail 2.2s ease-in-out infinite;filter:blur(1px)}
+/* EYE SPARKLE — occasional glint */
+@keyframes cbEyeSparkle{0%,95%,100%{opacity:0}96%{opacity:1}}
+.cb-eye::after{content:'';position:absolute;top:3px;left:4px;width:3px;height:3px;border-radius:50%;background:#fff;animation:cbEyeSparkle 4s ease-in-out infinite}
+
 </style>
         </div>
 
@@ -3982,6 +4102,36 @@
 /* IDLE WANDER — occasional slow look-around */
 @keyframes cbWander{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-3px) rotate(-1.5deg)}50%{transform:translateY(0) rotate(0)}75%{transform:translateY(-2px) rotate(1.5deg)}}
 .corbit-bot:not(.listening):not(.speaking):not(.processing):not(.done) .cb-head{animation:cbWander 6s ease-in-out infinite, cbBob 4.5s ease-in-out infinite}
+
+
+/* AMBIENT FLOATING PARTICLES around bot at all times */
+.cb-float-particle{position:absolute;width:1.5px;height:1.5px;border-radius:50%;background:rgba(214,230,255,.6);pointer-events:none;z-index:0;animation:cbFloatUp var(--fd,4s) var(--fdel,0s) linear infinite}
+@keyframes cbFloatUp{0%{opacity:0;transform:translateY(0) translateX(0)}15%{opacity:.8}85%{opacity:.4}100%{opacity:0;transform:translateY(-60px) translateX(var(--fx,10px))}}
+/* VOICE LINE — animated sweep highlight when words recognized */
+.voice-line .vw{transition:color .3s ease,text-shadow .3s ease}
+.voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.6)}
+.voice-line .vw.current{color:#fff;text-shadow:0 0 12px rgba(214,230,255,.8);animation:vwPulse .6s ease-in-out infinite}
+@keyframes vwPulse{0%,100%{text-shadow:0 0 8px rgba(214,230,255,.6)}50%{text-shadow:0 0 16px rgba(255,255,255,1),0 0 24px rgba(214,230,255,.8)}}
+/* MIC BUTTON — breathing invite pulse */
+.voice-mic:not(.listening):not(.done){animation:micBreathe 2.5s ease-in-out infinite}
+@keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
+.voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
+.voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+/* SUCCESS CONFETTI — green + white particles rain */
+.cb-confetti{position:fixed;pointer-events:none;z-index:200;width:4px;height:4px;border-radius:1px;animation:cbConfettiFall var(--cd,1.2s) var(--cdel,0s) cubic-bezier(.22,1,.36,1) forwards}
+@keyframes cbConfettiFall{0%{opacity:1;transform:translate(0,0) rotate(0deg)}100%{opacity:0;transform:translate(var(--cx,30px),var(--cy,120px)) rotate(var(--cr,180deg))}}
+/* SHADOW REACT — scales when bot moves */
+.cb-shadow{transition:transform .3s ease,opacity .3s ease}
+.corbit-bot.done .cb-shadow{transform:scaleX(1.3);opacity:.8}
+/* SCAN LINE — periodic sweep across face */
+@keyframes cbScanSweep{0%{top:-20%}80%{top:110%}100%{top:110%}}
+.corbit-bot:not(.done) .cb-screen::before{content:'';position:absolute;left:0;right:0;height:2px;background:rgba(214,230,255,.15);animation:cbScanSweep 3s ease-in-out infinite}
+/* ANTENNA TRAIL — faint glow streak */
+@keyframes cbAntTrail{0%,100%{opacity:.2}50%{opacity:.6}}
+.cb-ant-tip::after{content:'';position:absolute;top:50%;left:50%;width:2px;height:16px;background:linear-gradient(180deg,rgba(214,230,255,.3),transparent);transform:translate(-50%,-100%);border-radius:1px;animation:cbAntTrail 2.2s ease-in-out infinite;filter:blur(1px)}
+/* EYE SPARKLE — occasional glint */
+@keyframes cbEyeSparkle{0%,95%,100%{opacity:0}96%{opacity:1}}
+.cb-eye::after{content:'';position:absolute;top:3px;left:4px;width:3px;height:3px;border-radius:50%;background:#fff;animation:cbEyeSparkle 4s ease-in-out infinite}
 
 </style>
           <div class="tone-list" id="vapeYears" style="display:none;" aria-hidden="true">
@@ -4444,6 +4594,36 @@
 /* IDLE WANDER — occasional slow look-around */
 @keyframes cbWander{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-3px) rotate(-1.5deg)}50%{transform:translateY(0) rotate(0)}75%{transform:translateY(-2px) rotate(1.5deg)}}
 .corbit-bot:not(.listening):not(.speaking):not(.processing):not(.done) .cb-head{animation:cbWander 6s ease-in-out infinite, cbBob 4.5s ease-in-out infinite}
+
+
+/* AMBIENT FLOATING PARTICLES around bot at all times */
+.cb-float-particle{position:absolute;width:1.5px;height:1.5px;border-radius:50%;background:rgba(214,230,255,.6);pointer-events:none;z-index:0;animation:cbFloatUp var(--fd,4s) var(--fdel,0s) linear infinite}
+@keyframes cbFloatUp{0%{opacity:0;transform:translateY(0) translateX(0)}15%{opacity:.8}85%{opacity:.4}100%{opacity:0;transform:translateY(-60px) translateX(var(--fx,10px))}}
+/* VOICE LINE — animated sweep highlight when words recognized */
+.voice-line .vw{transition:color .3s ease,text-shadow .3s ease}
+.voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.6)}
+.voice-line .vw.current{color:#fff;text-shadow:0 0 12px rgba(214,230,255,.8);animation:vwPulse .6s ease-in-out infinite}
+@keyframes vwPulse{0%,100%{text-shadow:0 0 8px rgba(214,230,255,.6)}50%{text-shadow:0 0 16px rgba(255,255,255,1),0 0 24px rgba(214,230,255,.8)}}
+/* MIC BUTTON — breathing invite pulse */
+.voice-mic:not(.listening):not(.done){animation:micBreathe 2.5s ease-in-out infinite}
+@keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
+.voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
+.voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+/* SUCCESS CONFETTI — green + white particles rain */
+.cb-confetti{position:fixed;pointer-events:none;z-index:200;width:4px;height:4px;border-radius:1px;animation:cbConfettiFall var(--cd,1.2s) var(--cdel,0s) cubic-bezier(.22,1,.36,1) forwards}
+@keyframes cbConfettiFall{0%{opacity:1;transform:translate(0,0) rotate(0deg)}100%{opacity:0;transform:translate(var(--cx,30px),var(--cy,120px)) rotate(var(--cr,180deg))}}
+/* SHADOW REACT — scales when bot moves */
+.cb-shadow{transition:transform .3s ease,opacity .3s ease}
+.corbit-bot.done .cb-shadow{transform:scaleX(1.3);opacity:.8}
+/* SCAN LINE — periodic sweep across face */
+@keyframes cbScanSweep{0%{top:-20%}80%{top:110%}100%{top:110%}}
+.corbit-bot:not(.done) .cb-screen::before{content:'';position:absolute;left:0;right:0;height:2px;background:rgba(214,230,255,.15);animation:cbScanSweep 3s ease-in-out infinite}
+/* ANTENNA TRAIL — faint glow streak */
+@keyframes cbAntTrail{0%,100%{opacity:.2}50%{opacity:.6}}
+.cb-ant-tip::after{content:'';position:absolute;top:50%;left:50%;width:2px;height:16px;background:linear-gradient(180deg,rgba(214,230,255,.3),transparent);transform:translate(-50%,-100%);border-radius:1px;animation:cbAntTrail 2.2s ease-in-out infinite;filter:blur(1px)}
+/* EYE SPARKLE — occasional glint */
+@keyframes cbEyeSparkle{0%,95%,100%{opacity:0}96%{opacity:1}}
+.cb-eye::after{content:'';position:absolute;top:3px;left:4px;width:3px;height:3px;border-radius:50%;background:#fff;animation:cbEyeSparkle 4s ease-in-out infinite}
 
 </style>
           <div id="vapeReason" style="display:none;" aria-hidden="true">
@@ -5717,6 +5897,36 @@
 @keyframes cbWander{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-3px) rotate(-1.5deg)}50%{transform:translateY(0) rotate(0)}75%{transform:translateY(-2px) rotate(1.5deg)}}
 .corbit-bot:not(.listening):not(.speaking):not(.processing):not(.done) .cb-head{animation:cbWander 6s ease-in-out infinite, cbBob 4.5s ease-in-out infinite}
 
+
+/* AMBIENT FLOATING PARTICLES around bot at all times */
+.cb-float-particle{position:absolute;width:1.5px;height:1.5px;border-radius:50%;background:rgba(214,230,255,.6);pointer-events:none;z-index:0;animation:cbFloatUp var(--fd,4s) var(--fdel,0s) linear infinite}
+@keyframes cbFloatUp{0%{opacity:0;transform:translateY(0) translateX(0)}15%{opacity:.8}85%{opacity:.4}100%{opacity:0;transform:translateY(-60px) translateX(var(--fx,10px))}}
+/* VOICE LINE — animated sweep highlight when words recognized */
+.voice-line .vw{transition:color .3s ease,text-shadow .3s ease}
+.voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.6)}
+.voice-line .vw.current{color:#fff;text-shadow:0 0 12px rgba(214,230,255,.8);animation:vwPulse .6s ease-in-out infinite}
+@keyframes vwPulse{0%,100%{text-shadow:0 0 8px rgba(214,230,255,.6)}50%{text-shadow:0 0 16px rgba(255,255,255,1),0 0 24px rgba(214,230,255,.8)}}
+/* MIC BUTTON — breathing invite pulse */
+.voice-mic:not(.listening):not(.done){animation:micBreathe 2.5s ease-in-out infinite}
+@keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
+.voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
+.voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+/* SUCCESS CONFETTI — green + white particles rain */
+.cb-confetti{position:fixed;pointer-events:none;z-index:200;width:4px;height:4px;border-radius:1px;animation:cbConfettiFall var(--cd,1.2s) var(--cdel,0s) cubic-bezier(.22,1,.36,1) forwards}
+@keyframes cbConfettiFall{0%{opacity:1;transform:translate(0,0) rotate(0deg)}100%{opacity:0;transform:translate(var(--cx,30px),var(--cy,120px)) rotate(var(--cr,180deg))}}
+/* SHADOW REACT — scales when bot moves */
+.cb-shadow{transition:transform .3s ease,opacity .3s ease}
+.corbit-bot.done .cb-shadow{transform:scaleX(1.3);opacity:.8}
+/* SCAN LINE — periodic sweep across face */
+@keyframes cbScanSweep{0%{top:-20%}80%{top:110%}100%{top:110%}}
+.corbit-bot:not(.done) .cb-screen::before{content:'';position:absolute;left:0;right:0;height:2px;background:rgba(214,230,255,.15);animation:cbScanSweep 3s ease-in-out infinite}
+/* ANTENNA TRAIL — faint glow streak */
+@keyframes cbAntTrail{0%,100%{opacity:.2}50%{opacity:.6}}
+.cb-ant-tip::after{content:'';position:absolute;top:50%;left:50%;width:2px;height:16px;background:linear-gradient(180deg,rgba(214,230,255,.3),transparent);transform:translate(-50%,-100%);border-radius:1px;animation:cbAntTrail 2.2s ease-in-out infinite;filter:blur(1px)}
+/* EYE SPARKLE — occasional glint */
+@keyframes cbEyeSparkle{0%,95%,100%{opacity:0}96%{opacity:1}}
+.cb-eye::after{content:'';position:absolute;top:3px;left:4px;width:3px;height:3px;border-radius:50%;background:#fff;animation:cbEyeSparkle 4s ease-in-out infinite}
+
 </style>
         </div>
 
@@ -6219,6 +6429,36 @@
 @keyframes cbWander{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-3px) rotate(-1.5deg)}50%{transform:translateY(0) rotate(0)}75%{transform:translateY(-2px) rotate(1.5deg)}}
 .corbit-bot:not(.listening):not(.speaking):not(.processing):not(.done) .cb-head{animation:cbWander 6s ease-in-out infinite, cbBob 4.5s ease-in-out infinite}
 
+
+/* AMBIENT FLOATING PARTICLES around bot at all times */
+.cb-float-particle{position:absolute;width:1.5px;height:1.5px;border-radius:50%;background:rgba(214,230,255,.6);pointer-events:none;z-index:0;animation:cbFloatUp var(--fd,4s) var(--fdel,0s) linear infinite}
+@keyframes cbFloatUp{0%{opacity:0;transform:translateY(0) translateX(0)}15%{opacity:.8}85%{opacity:.4}100%{opacity:0;transform:translateY(-60px) translateX(var(--fx,10px))}}
+/* VOICE LINE — animated sweep highlight when words recognized */
+.voice-line .vw{transition:color .3s ease,text-shadow .3s ease}
+.voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.6)}
+.voice-line .vw.current{color:#fff;text-shadow:0 0 12px rgba(214,230,255,.8);animation:vwPulse .6s ease-in-out infinite}
+@keyframes vwPulse{0%,100%{text-shadow:0 0 8px rgba(214,230,255,.6)}50%{text-shadow:0 0 16px rgba(255,255,255,1),0 0 24px rgba(214,230,255,.8)}}
+/* MIC BUTTON — breathing invite pulse */
+.voice-mic:not(.listening):not(.done){animation:micBreathe 2.5s ease-in-out infinite}
+@keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
+.voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
+.voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+/* SUCCESS CONFETTI — green + white particles rain */
+.cb-confetti{position:fixed;pointer-events:none;z-index:200;width:4px;height:4px;border-radius:1px;animation:cbConfettiFall var(--cd,1.2s) var(--cdel,0s) cubic-bezier(.22,1,.36,1) forwards}
+@keyframes cbConfettiFall{0%{opacity:1;transform:translate(0,0) rotate(0deg)}100%{opacity:0;transform:translate(var(--cx,30px),var(--cy,120px)) rotate(var(--cr,180deg))}}
+/* SHADOW REACT — scales when bot moves */
+.cb-shadow{transition:transform .3s ease,opacity .3s ease}
+.corbit-bot.done .cb-shadow{transform:scaleX(1.3);opacity:.8}
+/* SCAN LINE — periodic sweep across face */
+@keyframes cbScanSweep{0%{top:-20%}80%{top:110%}100%{top:110%}}
+.corbit-bot:not(.done) .cb-screen::before{content:'';position:absolute;left:0;right:0;height:2px;background:rgba(214,230,255,.15);animation:cbScanSweep 3s ease-in-out infinite}
+/* ANTENNA TRAIL — faint glow streak */
+@keyframes cbAntTrail{0%,100%{opacity:.2}50%{opacity:.6}}
+.cb-ant-tip::after{content:'';position:absolute;top:50%;left:50%;width:2px;height:16px;background:linear-gradient(180deg,rgba(214,230,255,.3),transparent);transform:translate(-50%,-100%);border-radius:1px;animation:cbAntTrail 2.2s ease-in-out infinite;filter:blur(1px)}
+/* EYE SPARKLE — occasional glint */
+@keyframes cbEyeSparkle{0%,95%,100%{opacity:0}96%{opacity:1}}
+.cb-eye::after{content:'';position:absolute;top:3px;left:4px;width:3px;height:3px;border-radius:50%;background:#fff;animation:cbEyeSparkle 4s ease-in-out infinite}
+
 </style>
         </div>
 
@@ -6636,6 +6876,36 @@
 /* IDLE WANDER — occasional slow look-around */
 @keyframes cbWander{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-3px) rotate(-1.5deg)}50%{transform:translateY(0) rotate(0)}75%{transform:translateY(-2px) rotate(1.5deg)}}
 .corbit-bot:not(.listening):not(.speaking):not(.processing):not(.done) .cb-head{animation:cbWander 6s ease-in-out infinite, cbBob 4.5s ease-in-out infinite}
+
+
+/* AMBIENT FLOATING PARTICLES around bot at all times */
+.cb-float-particle{position:absolute;width:1.5px;height:1.5px;border-radius:50%;background:rgba(214,230,255,.6);pointer-events:none;z-index:0;animation:cbFloatUp var(--fd,4s) var(--fdel,0s) linear infinite}
+@keyframes cbFloatUp{0%{opacity:0;transform:translateY(0) translateX(0)}15%{opacity:.8}85%{opacity:.4}100%{opacity:0;transform:translateY(-60px) translateX(var(--fx,10px))}}
+/* VOICE LINE — animated sweep highlight when words recognized */
+.voice-line .vw{transition:color .3s ease,text-shadow .3s ease}
+.voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.6)}
+.voice-line .vw.current{color:#fff;text-shadow:0 0 12px rgba(214,230,255,.8);animation:vwPulse .6s ease-in-out infinite}
+@keyframes vwPulse{0%,100%{text-shadow:0 0 8px rgba(214,230,255,.6)}50%{text-shadow:0 0 16px rgba(255,255,255,1),0 0 24px rgba(214,230,255,.8)}}
+/* MIC BUTTON — breathing invite pulse */
+.voice-mic:not(.listening):not(.done){animation:micBreathe 2.5s ease-in-out infinite}
+@keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
+.voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
+.voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+/* SUCCESS CONFETTI — green + white particles rain */
+.cb-confetti{position:fixed;pointer-events:none;z-index:200;width:4px;height:4px;border-radius:1px;animation:cbConfettiFall var(--cd,1.2s) var(--cdel,0s) cubic-bezier(.22,1,.36,1) forwards}
+@keyframes cbConfettiFall{0%{opacity:1;transform:translate(0,0) rotate(0deg)}100%{opacity:0;transform:translate(var(--cx,30px),var(--cy,120px)) rotate(var(--cr,180deg))}}
+/* SHADOW REACT — scales when bot moves */
+.cb-shadow{transition:transform .3s ease,opacity .3s ease}
+.corbit-bot.done .cb-shadow{transform:scaleX(1.3);opacity:.8}
+/* SCAN LINE — periodic sweep across face */
+@keyframes cbScanSweep{0%{top:-20%}80%{top:110%}100%{top:110%}}
+.corbit-bot:not(.done) .cb-screen::before{content:'';position:absolute;left:0;right:0;height:2px;background:rgba(214,230,255,.15);animation:cbScanSweep 3s ease-in-out infinite}
+/* ANTENNA TRAIL — faint glow streak */
+@keyframes cbAntTrail{0%,100%{opacity:.2}50%{opacity:.6}}
+.cb-ant-tip::after{content:'';position:absolute;top:50%;left:50%;width:2px;height:16px;background:linear-gradient(180deg,rgba(214,230,255,.3),transparent);transform:translate(-50%,-100%);border-radius:1px;animation:cbAntTrail 2.2s ease-in-out infinite;filter:blur(1px)}
+/* EYE SPARKLE — occasional glint */
+@keyframes cbEyeSparkle{0%,95%,100%{opacity:0}96%{opacity:1}}
+.cb-eye::after{content:'';position:absolute;top:3px;left:4px;width:3px;height:3px;border-radius:50%;background:#fff;animation:cbEyeSparkle 4s ease-in-out infinite}
 
 </style>
         </div>
@@ -7319,6 +7589,36 @@
 @keyframes cbWander{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-3px) rotate(-1.5deg)}50%{transform:translateY(0) rotate(0)}75%{transform:translateY(-2px) rotate(1.5deg)}}
 .corbit-bot:not(.listening):not(.speaking):not(.processing):not(.done) .cb-head{animation:cbWander 6s ease-in-out infinite, cbBob 4.5s ease-in-out infinite}
 
+
+/* AMBIENT FLOATING PARTICLES around bot at all times */
+.cb-float-particle{position:absolute;width:1.5px;height:1.5px;border-radius:50%;background:rgba(214,230,255,.6);pointer-events:none;z-index:0;animation:cbFloatUp var(--fd,4s) var(--fdel,0s) linear infinite}
+@keyframes cbFloatUp{0%{opacity:0;transform:translateY(0) translateX(0)}15%{opacity:.8}85%{opacity:.4}100%{opacity:0;transform:translateY(-60px) translateX(var(--fx,10px))}}
+/* VOICE LINE — animated sweep highlight when words recognized */
+.voice-line .vw{transition:color .3s ease,text-shadow .3s ease}
+.voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.6)}
+.voice-line .vw.current{color:#fff;text-shadow:0 0 12px rgba(214,230,255,.8);animation:vwPulse .6s ease-in-out infinite}
+@keyframes vwPulse{0%,100%{text-shadow:0 0 8px rgba(214,230,255,.6)}50%{text-shadow:0 0 16px rgba(255,255,255,1),0 0 24px rgba(214,230,255,.8)}}
+/* MIC BUTTON — breathing invite pulse */
+.voice-mic:not(.listening):not(.done){animation:micBreathe 2.5s ease-in-out infinite}
+@keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
+.voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
+.voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+/* SUCCESS CONFETTI — green + white particles rain */
+.cb-confetti{position:fixed;pointer-events:none;z-index:200;width:4px;height:4px;border-radius:1px;animation:cbConfettiFall var(--cd,1.2s) var(--cdel,0s) cubic-bezier(.22,1,.36,1) forwards}
+@keyframes cbConfettiFall{0%{opacity:1;transform:translate(0,0) rotate(0deg)}100%{opacity:0;transform:translate(var(--cx,30px),var(--cy,120px)) rotate(var(--cr,180deg))}}
+/* SHADOW REACT — scales when bot moves */
+.cb-shadow{transition:transform .3s ease,opacity .3s ease}
+.corbit-bot.done .cb-shadow{transform:scaleX(1.3);opacity:.8}
+/* SCAN LINE — periodic sweep across face */
+@keyframes cbScanSweep{0%{top:-20%}80%{top:110%}100%{top:110%}}
+.corbit-bot:not(.done) .cb-screen::before{content:'';position:absolute;left:0;right:0;height:2px;background:rgba(214,230,255,.15);animation:cbScanSweep 3s ease-in-out infinite}
+/* ANTENNA TRAIL — faint glow streak */
+@keyframes cbAntTrail{0%,100%{opacity:.2}50%{opacity:.6}}
+.cb-ant-tip::after{content:'';position:absolute;top:50%;left:50%;width:2px;height:16px;background:linear-gradient(180deg,rgba(214,230,255,.3),transparent);transform:translate(-50%,-100%);border-radius:1px;animation:cbAntTrail 2.2s ease-in-out infinite;filter:blur(1px)}
+/* EYE SPARKLE — occasional glint */
+@keyframes cbEyeSparkle{0%,95%,100%{opacity:0}96%{opacity:1}}
+.cb-eye::after{content:'';position:absolute;top:3px;left:4px;width:3px;height:3px;border-radius:50%;background:#fff;animation:cbEyeSparkle 4s ease-in-out infinite}
+
 </style>
         </div>
 
@@ -7989,6 +8289,36 @@
 /* IDLE WANDER — occasional slow look-around */
 @keyframes cbWander{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-3px) rotate(-1.5deg)}50%{transform:translateY(0) rotate(0)}75%{transform:translateY(-2px) rotate(1.5deg)}}
 .corbit-bot:not(.listening):not(.speaking):not(.processing):not(.done) .cb-head{animation:cbWander 6s ease-in-out infinite, cbBob 4.5s ease-in-out infinite}
+
+
+/* AMBIENT FLOATING PARTICLES around bot at all times */
+.cb-float-particle{position:absolute;width:1.5px;height:1.5px;border-radius:50%;background:rgba(214,230,255,.6);pointer-events:none;z-index:0;animation:cbFloatUp var(--fd,4s) var(--fdel,0s) linear infinite}
+@keyframes cbFloatUp{0%{opacity:0;transform:translateY(0) translateX(0)}15%{opacity:.8}85%{opacity:.4}100%{opacity:0;transform:translateY(-60px) translateX(var(--fx,10px))}}
+/* VOICE LINE — animated sweep highlight when words recognized */
+.voice-line .vw{transition:color .3s ease,text-shadow .3s ease}
+.voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.6)}
+.voice-line .vw.current{color:#fff;text-shadow:0 0 12px rgba(214,230,255,.8);animation:vwPulse .6s ease-in-out infinite}
+@keyframes vwPulse{0%,100%{text-shadow:0 0 8px rgba(214,230,255,.6)}50%{text-shadow:0 0 16px rgba(255,255,255,1),0 0 24px rgba(214,230,255,.8)}}
+/* MIC BUTTON — breathing invite pulse */
+.voice-mic:not(.listening):not(.done){animation:micBreathe 2.5s ease-in-out infinite}
+@keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
+.voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
+.voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+/* SUCCESS CONFETTI — green + white particles rain */
+.cb-confetti{position:fixed;pointer-events:none;z-index:200;width:4px;height:4px;border-radius:1px;animation:cbConfettiFall var(--cd,1.2s) var(--cdel,0s) cubic-bezier(.22,1,.36,1) forwards}
+@keyframes cbConfettiFall{0%{opacity:1;transform:translate(0,0) rotate(0deg)}100%{opacity:0;transform:translate(var(--cx,30px),var(--cy,120px)) rotate(var(--cr,180deg))}}
+/* SHADOW REACT — scales when bot moves */
+.cb-shadow{transition:transform .3s ease,opacity .3s ease}
+.corbit-bot.done .cb-shadow{transform:scaleX(1.3);opacity:.8}
+/* SCAN LINE — periodic sweep across face */
+@keyframes cbScanSweep{0%{top:-20%}80%{top:110%}100%{top:110%}}
+.corbit-bot:not(.done) .cb-screen::before{content:'';position:absolute;left:0;right:0;height:2px;background:rgba(214,230,255,.15);animation:cbScanSweep 3s ease-in-out infinite}
+/* ANTENNA TRAIL — faint glow streak */
+@keyframes cbAntTrail{0%,100%{opacity:.2}50%{opacity:.6}}
+.cb-ant-tip::after{content:'';position:absolute;top:50%;left:50%;width:2px;height:16px;background:linear-gradient(180deg,rgba(214,230,255,.3),transparent);transform:translate(-50%,-100%);border-radius:1px;animation:cbAntTrail 2.2s ease-in-out infinite;filter:blur(1px)}
+/* EYE SPARKLE — occasional glint */
+@keyframes cbEyeSparkle{0%,95%,100%{opacity:0}96%{opacity:1}}
+.cb-eye::after{content:'';position:absolute;top:3px;left:4px;width:3px;height:3px;border-radius:50%;background:#fff;animation:cbEyeSparkle 4s ease-in-out infinite}
 
 </style>
 
@@ -8670,6 +9000,36 @@
 @keyframes cbWander{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-3px) rotate(-1.5deg)}50%{transform:translateY(0) rotate(0)}75%{transform:translateY(-2px) rotate(1.5deg)}}
 .corbit-bot:not(.listening):not(.speaking):not(.processing):not(.done) .cb-head{animation:cbWander 6s ease-in-out infinite, cbBob 4.5s ease-in-out infinite}
 
+
+/* AMBIENT FLOATING PARTICLES around bot at all times */
+.cb-float-particle{position:absolute;width:1.5px;height:1.5px;border-radius:50%;background:rgba(214,230,255,.6);pointer-events:none;z-index:0;animation:cbFloatUp var(--fd,4s) var(--fdel,0s) linear infinite}
+@keyframes cbFloatUp{0%{opacity:0;transform:translateY(0) translateX(0)}15%{opacity:.8}85%{opacity:.4}100%{opacity:0;transform:translateY(-60px) translateX(var(--fx,10px))}}
+/* VOICE LINE — animated sweep highlight when words recognized */
+.voice-line .vw{transition:color .3s ease,text-shadow .3s ease}
+.voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.6)}
+.voice-line .vw.current{color:#fff;text-shadow:0 0 12px rgba(214,230,255,.8);animation:vwPulse .6s ease-in-out infinite}
+@keyframes vwPulse{0%,100%{text-shadow:0 0 8px rgba(214,230,255,.6)}50%{text-shadow:0 0 16px rgba(255,255,255,1),0 0 24px rgba(214,230,255,.8)}}
+/* MIC BUTTON — breathing invite pulse */
+.voice-mic:not(.listening):not(.done){animation:micBreathe 2.5s ease-in-out infinite}
+@keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
+.voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
+.voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+/* SUCCESS CONFETTI — green + white particles rain */
+.cb-confetti{position:fixed;pointer-events:none;z-index:200;width:4px;height:4px;border-radius:1px;animation:cbConfettiFall var(--cd,1.2s) var(--cdel,0s) cubic-bezier(.22,1,.36,1) forwards}
+@keyframes cbConfettiFall{0%{opacity:1;transform:translate(0,0) rotate(0deg)}100%{opacity:0;transform:translate(var(--cx,30px),var(--cy,120px)) rotate(var(--cr,180deg))}}
+/* SHADOW REACT — scales when bot moves */
+.cb-shadow{transition:transform .3s ease,opacity .3s ease}
+.corbit-bot.done .cb-shadow{transform:scaleX(1.3);opacity:.8}
+/* SCAN LINE — periodic sweep across face */
+@keyframes cbScanSweep{0%{top:-20%}80%{top:110%}100%{top:110%}}
+.corbit-bot:not(.done) .cb-screen::before{content:'';position:absolute;left:0;right:0;height:2px;background:rgba(214,230,255,.15);animation:cbScanSweep 3s ease-in-out infinite}
+/* ANTENNA TRAIL — faint glow streak */
+@keyframes cbAntTrail{0%,100%{opacity:.2}50%{opacity:.6}}
+.cb-ant-tip::after{content:'';position:absolute;top:50%;left:50%;width:2px;height:16px;background:linear-gradient(180deg,rgba(214,230,255,.3),transparent);transform:translate(-50%,-100%);border-radius:1px;animation:cbAntTrail 2.2s ease-in-out infinite;filter:blur(1px)}
+/* EYE SPARKLE — occasional glint */
+@keyframes cbEyeSparkle{0%,95%,100%{opacity:0}96%{opacity:1}}
+.cb-eye::after{content:'';position:absolute;top:3px;left:4px;width:3px;height:3px;border-radius:50%;background:#fff;animation:cbEyeSparkle 4s ease-in-out infinite}
+
 </style>
         </div>
 
@@ -9242,6 +9602,36 @@
 /* IDLE WANDER — occasional slow look-around */
 @keyframes cbWander{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-3px) rotate(-1.5deg)}50%{transform:translateY(0) rotate(0)}75%{transform:translateY(-2px) rotate(1.5deg)}}
 .corbit-bot:not(.listening):not(.speaking):not(.processing):not(.done) .cb-head{animation:cbWander 6s ease-in-out infinite, cbBob 4.5s ease-in-out infinite}
+
+
+/* AMBIENT FLOATING PARTICLES around bot at all times */
+.cb-float-particle{position:absolute;width:1.5px;height:1.5px;border-radius:50%;background:rgba(214,230,255,.6);pointer-events:none;z-index:0;animation:cbFloatUp var(--fd,4s) var(--fdel,0s) linear infinite}
+@keyframes cbFloatUp{0%{opacity:0;transform:translateY(0) translateX(0)}15%{opacity:.8}85%{opacity:.4}100%{opacity:0;transform:translateY(-60px) translateX(var(--fx,10px))}}
+/* VOICE LINE — animated sweep highlight when words recognized */
+.voice-line .vw{transition:color .3s ease,text-shadow .3s ease}
+.voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.6)}
+.voice-line .vw.current{color:#fff;text-shadow:0 0 12px rgba(214,230,255,.8);animation:vwPulse .6s ease-in-out infinite}
+@keyframes vwPulse{0%,100%{text-shadow:0 0 8px rgba(214,230,255,.6)}50%{text-shadow:0 0 16px rgba(255,255,255,1),0 0 24px rgba(214,230,255,.8)}}
+/* MIC BUTTON — breathing invite pulse */
+.voice-mic:not(.listening):not(.done){animation:micBreathe 2.5s ease-in-out infinite}
+@keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
+.voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
+.voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+/* SUCCESS CONFETTI — green + white particles rain */
+.cb-confetti{position:fixed;pointer-events:none;z-index:200;width:4px;height:4px;border-radius:1px;animation:cbConfettiFall var(--cd,1.2s) var(--cdel,0s) cubic-bezier(.22,1,.36,1) forwards}
+@keyframes cbConfettiFall{0%{opacity:1;transform:translate(0,0) rotate(0deg)}100%{opacity:0;transform:translate(var(--cx,30px),var(--cy,120px)) rotate(var(--cr,180deg))}}
+/* SHADOW REACT — scales when bot moves */
+.cb-shadow{transition:transform .3s ease,opacity .3s ease}
+.corbit-bot.done .cb-shadow{transform:scaleX(1.3);opacity:.8}
+/* SCAN LINE — periodic sweep across face */
+@keyframes cbScanSweep{0%{top:-20%}80%{top:110%}100%{top:110%}}
+.corbit-bot:not(.done) .cb-screen::before{content:'';position:absolute;left:0;right:0;height:2px;background:rgba(214,230,255,.15);animation:cbScanSweep 3s ease-in-out infinite}
+/* ANTENNA TRAIL — faint glow streak */
+@keyframes cbAntTrail{0%,100%{opacity:.2}50%{opacity:.6}}
+.cb-ant-tip::after{content:'';position:absolute;top:50%;left:50%;width:2px;height:16px;background:linear-gradient(180deg,rgba(214,230,255,.3),transparent);transform:translate(-50%,-100%);border-radius:1px;animation:cbAntTrail 2.2s ease-in-out infinite;filter:blur(1px)}
+/* EYE SPARKLE — occasional glint */
+@keyframes cbEyeSparkle{0%,95%,100%{opacity:0}96%{opacity:1}}
+.cb-eye::after{content:'';position:absolute;top:3px;left:4px;width:3px;height:3px;border-radius:50%;background:#fff;animation:cbEyeSparkle 4s ease-in-out infinite}
 
 </style>
   </div>
@@ -10601,6 +10991,36 @@
 @keyframes cbWander{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-3px) rotate(-1.5deg)}50%{transform:translateY(0) rotate(0)}75%{transform:translateY(-2px) rotate(1.5deg)}}
 .corbit-bot:not(.listening):not(.speaking):not(.processing):not(.done) .cb-head{animation:cbWander 6s ease-in-out infinite, cbBob 4.5s ease-in-out infinite}
 
+
+/* AMBIENT FLOATING PARTICLES around bot at all times */
+.cb-float-particle{position:absolute;width:1.5px;height:1.5px;border-radius:50%;background:rgba(214,230,255,.6);pointer-events:none;z-index:0;animation:cbFloatUp var(--fd,4s) var(--fdel,0s) linear infinite}
+@keyframes cbFloatUp{0%{opacity:0;transform:translateY(0) translateX(0)}15%{opacity:.8}85%{opacity:.4}100%{opacity:0;transform:translateY(-60px) translateX(var(--fx,10px))}}
+/* VOICE LINE — animated sweep highlight when words recognized */
+.voice-line .vw{transition:color .3s ease,text-shadow .3s ease}
+.voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.6)}
+.voice-line .vw.current{color:#fff;text-shadow:0 0 12px rgba(214,230,255,.8);animation:vwPulse .6s ease-in-out infinite}
+@keyframes vwPulse{0%,100%{text-shadow:0 0 8px rgba(214,230,255,.6)}50%{text-shadow:0 0 16px rgba(255,255,255,1),0 0 24px rgba(214,230,255,.8)}}
+/* MIC BUTTON — breathing invite pulse */
+.voice-mic:not(.listening):not(.done){animation:micBreathe 2.5s ease-in-out infinite}
+@keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
+.voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
+.voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+/* SUCCESS CONFETTI — green + white particles rain */
+.cb-confetti{position:fixed;pointer-events:none;z-index:200;width:4px;height:4px;border-radius:1px;animation:cbConfettiFall var(--cd,1.2s) var(--cdel,0s) cubic-bezier(.22,1,.36,1) forwards}
+@keyframes cbConfettiFall{0%{opacity:1;transform:translate(0,0) rotate(0deg)}100%{opacity:0;transform:translate(var(--cx,30px),var(--cy,120px)) rotate(var(--cr,180deg))}}
+/* SHADOW REACT — scales when bot moves */
+.cb-shadow{transition:transform .3s ease,opacity .3s ease}
+.corbit-bot.done .cb-shadow{transform:scaleX(1.3);opacity:.8}
+/* SCAN LINE — periodic sweep across face */
+@keyframes cbScanSweep{0%{top:-20%}80%{top:110%}100%{top:110%}}
+.corbit-bot:not(.done) .cb-screen::before{content:'';position:absolute;left:0;right:0;height:2px;background:rgba(214,230,255,.15);animation:cbScanSweep 3s ease-in-out infinite}
+/* ANTENNA TRAIL — faint glow streak */
+@keyframes cbAntTrail{0%,100%{opacity:.2}50%{opacity:.6}}
+.cb-ant-tip::after{content:'';position:absolute;top:50%;left:50%;width:2px;height:16px;background:linear-gradient(180deg,rgba(214,230,255,.3),transparent);transform:translate(-50%,-100%);border-radius:1px;animation:cbAntTrail 2.2s ease-in-out infinite;filter:blur(1px)}
+/* EYE SPARKLE — occasional glint */
+@keyframes cbEyeSparkle{0%,95%,100%{opacity:0}96%{opacity:1}}
+.cb-eye::after{content:'';position:absolute;top:3px;left:4px;width:3px;height:3px;border-radius:50%;background:#fff;animation:cbEyeSparkle 4s ease-in-out infinite}
+
 </style>
     `;
     document.body.appendChild(wrap);
@@ -11094,6 +11514,36 @@
 /* IDLE WANDER — occasional slow look-around */
 @keyframes cbWander{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-3px) rotate(-1.5deg)}50%{transform:translateY(0) rotate(0)}75%{transform:translateY(-2px) rotate(1.5deg)}}
 .corbit-bot:not(.listening):not(.speaking):not(.processing):not(.done) .cb-head{animation:cbWander 6s ease-in-out infinite, cbBob 4.5s ease-in-out infinite}
+
+
+/* AMBIENT FLOATING PARTICLES around bot at all times */
+.cb-float-particle{position:absolute;width:1.5px;height:1.5px;border-radius:50%;background:rgba(214,230,255,.6);pointer-events:none;z-index:0;animation:cbFloatUp var(--fd,4s) var(--fdel,0s) linear infinite}
+@keyframes cbFloatUp{0%{opacity:0;transform:translateY(0) translateX(0)}15%{opacity:.8}85%{opacity:.4}100%{opacity:0;transform:translateY(-60px) translateX(var(--fx,10px))}}
+/* VOICE LINE — animated sweep highlight when words recognized */
+.voice-line .vw{transition:color .3s ease,text-shadow .3s ease}
+.voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.6)}
+.voice-line .vw.current{color:#fff;text-shadow:0 0 12px rgba(214,230,255,.8);animation:vwPulse .6s ease-in-out infinite}
+@keyframes vwPulse{0%,100%{text-shadow:0 0 8px rgba(214,230,255,.6)}50%{text-shadow:0 0 16px rgba(255,255,255,1),0 0 24px rgba(214,230,255,.8)}}
+/* MIC BUTTON — breathing invite pulse */
+.voice-mic:not(.listening):not(.done){animation:micBreathe 2.5s ease-in-out infinite}
+@keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
+.voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
+.voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+/* SUCCESS CONFETTI — green + white particles rain */
+.cb-confetti{position:fixed;pointer-events:none;z-index:200;width:4px;height:4px;border-radius:1px;animation:cbConfettiFall var(--cd,1.2s) var(--cdel,0s) cubic-bezier(.22,1,.36,1) forwards}
+@keyframes cbConfettiFall{0%{opacity:1;transform:translate(0,0) rotate(0deg)}100%{opacity:0;transform:translate(var(--cx,30px),var(--cy,120px)) rotate(var(--cr,180deg))}}
+/* SHADOW REACT — scales when bot moves */
+.cb-shadow{transition:transform .3s ease,opacity .3s ease}
+.corbit-bot.done .cb-shadow{transform:scaleX(1.3);opacity:.8}
+/* SCAN LINE — periodic sweep across face */
+@keyframes cbScanSweep{0%{top:-20%}80%{top:110%}100%{top:110%}}
+.corbit-bot:not(.done) .cb-screen::before{content:'';position:absolute;left:0;right:0;height:2px;background:rgba(214,230,255,.15);animation:cbScanSweep 3s ease-in-out infinite}
+/* ANTENNA TRAIL — faint glow streak */
+@keyframes cbAntTrail{0%,100%{opacity:.2}50%{opacity:.6}}
+.cb-ant-tip::after{content:'';position:absolute;top:50%;left:50%;width:2px;height:16px;background:linear-gradient(180deg,rgba(214,230,255,.3),transparent);transform:translate(-50%,-100%);border-radius:1px;animation:cbAntTrail 2.2s ease-in-out infinite;filter:blur(1px)}
+/* EYE SPARKLE — occasional glint */
+@keyframes cbEyeSparkle{0%,95%,100%{opacity:0}96%{opacity:1}}
+.cb-eye::after{content:'';position:absolute;top:3px;left:4px;width:3px;height:3px;border-radius:50%;background:#fff;animation:cbEyeSparkle 4s ease-in-out infinite}
 
 </style>
     `;
@@ -12827,6 +13277,8 @@
       const bot = document.getElementById('voiceOrb');
       const aura = document.getElementById('cbAura');
       if (!bot) return;
+      // Ambient floating particles
+      for (let fi=0;fi<10;fi++){var fp=document.createElement('span');fp.className='cb-float-particle';fp.style.cssText='left:'+(20+Math.random()*60)+'%;top:'+(30+Math.random()*50)+'%;--fd:'+(3+Math.random()*5)+'s;--fdel:'+Math.random()*4+'s;--fx:'+((Math.random()-.5)*30)+'px';bot.appendChild(fp)}
       if (aura) for (let i = 0; i < 7; i++) {
         const sp = document.createElement('i');
         sp.className = 'cb-spark';
@@ -12908,6 +13360,8 @@
     function wordMatches(target, heard) {
       if (target === heard) return true;
       if (target === 'corbit') return /orb|corb|cob/.test(heard);
+      // Highlight current word
+      targets.forEach(function(t){t.el.classList.remove('current')});
       if (target.length >= 4 && heard.length >= 4 && target.slice(0, 4) === heard.slice(0, 4)) return true;
       return false;
     }
@@ -12945,7 +13399,9 @@
       if (orb) {
         const r = orb.getBoundingClientRect(), host = orb.closest('.phone') || document.body;
         const hr = host.getBoundingClientRect();
-        for (let i = 0; i < 16; i++) {
+        // Confetti burst
+      for(let ci=0;ci<30;ci++){var cf=document.createElement('span');cf.className='cb-confetti';cf.style.cssText='left:'+(r.left-hr.left+r.width/2)+'px;top:'+(r.top-hr.top+r.height/2)+'px;--cx:'+((Math.random()-.5)*120)+'px;--cy:'+(60+Math.random()*100)+'px;--cr:'+(Math.random()*360)+'deg;--cd:'+(.8+Math.random()*.8)+'s;--cdel:'+(Math.random()*.3)+'s;background:'+(ci%3?'#30D158':'#fff');host.appendChild(cf);setTimeout(function(){cf.remove()},1500)}
+      for (let i = 0; i < 16; i++) {
           const p = document.createElement('span');
           const a = (i / 16) * Math.PI * 2, d = 58 + Math.random() * 46;
           p.style.cssText = 'position:absolute;z-index:99;pointer-events:none;width:4px;height:4px;border-radius:50%;'
@@ -14373,6 +14829,36 @@ body.on-autoadvance .stepwrap::after {
 @keyframes cbWander{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-3px) rotate(-1.5deg)}50%{transform:translateY(0) rotate(0)}75%{transform:translateY(-2px) rotate(1.5deg)}}
 .corbit-bot:not(.listening):not(.speaking):not(.processing):not(.done) .cb-head{animation:cbWander 6s ease-in-out infinite, cbBob 4.5s ease-in-out infinite}
 
+
+/* AMBIENT FLOATING PARTICLES around bot at all times */
+.cb-float-particle{position:absolute;width:1.5px;height:1.5px;border-radius:50%;background:rgba(214,230,255,.6);pointer-events:none;z-index:0;animation:cbFloatUp var(--fd,4s) var(--fdel,0s) linear infinite}
+@keyframes cbFloatUp{0%{opacity:0;transform:translateY(0) translateX(0)}15%{opacity:.8}85%{opacity:.4}100%{opacity:0;transform:translateY(-60px) translateX(var(--fx,10px))}}
+/* VOICE LINE — animated sweep highlight when words recognized */
+.voice-line .vw{transition:color .3s ease,text-shadow .3s ease}
+.voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.6)}
+.voice-line .vw.current{color:#fff;text-shadow:0 0 12px rgba(214,230,255,.8);animation:vwPulse .6s ease-in-out infinite}
+@keyframes vwPulse{0%,100%{text-shadow:0 0 8px rgba(214,230,255,.6)}50%{text-shadow:0 0 16px rgba(255,255,255,1),0 0 24px rgba(214,230,255,.8)}}
+/* MIC BUTTON — breathing invite pulse */
+.voice-mic:not(.listening):not(.done){animation:micBreathe 2.5s ease-in-out infinite}
+@keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
+.voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
+.voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+/* SUCCESS CONFETTI — green + white particles rain */
+.cb-confetti{position:fixed;pointer-events:none;z-index:200;width:4px;height:4px;border-radius:1px;animation:cbConfettiFall var(--cd,1.2s) var(--cdel,0s) cubic-bezier(.22,1,.36,1) forwards}
+@keyframes cbConfettiFall{0%{opacity:1;transform:translate(0,0) rotate(0deg)}100%{opacity:0;transform:translate(var(--cx,30px),var(--cy,120px)) rotate(var(--cr,180deg))}}
+/* SHADOW REACT — scales when bot moves */
+.cb-shadow{transition:transform .3s ease,opacity .3s ease}
+.corbit-bot.done .cb-shadow{transform:scaleX(1.3);opacity:.8}
+/* SCAN LINE — periodic sweep across face */
+@keyframes cbScanSweep{0%{top:-20%}80%{top:110%}100%{top:110%}}
+.corbit-bot:not(.done) .cb-screen::before{content:'';position:absolute;left:0;right:0;height:2px;background:rgba(214,230,255,.15);animation:cbScanSweep 3s ease-in-out infinite}
+/* ANTENNA TRAIL — faint glow streak */
+@keyframes cbAntTrail{0%,100%{opacity:.2}50%{opacity:.6}}
+.cb-ant-tip::after{content:'';position:absolute;top:50%;left:50%;width:2px;height:16px;background:linear-gradient(180deg,rgba(214,230,255,.3),transparent);transform:translate(-50%,-100%);border-radius:1px;animation:cbAntTrail 2.2s ease-in-out infinite;filter:blur(1px)}
+/* EYE SPARKLE — occasional glint */
+@keyframes cbEyeSparkle{0%,95%,100%{opacity:0}96%{opacity:1}}
+.cb-eye::after{content:'';position:absolute;top:3px;left:4px;width:3px;height:3px;border-radius:50%;background:#fff;animation:cbEyeSparkle 4s ease-in-out infinite}
+
 </style>
 
 <!-- ═══════════ CORBIT · APPLE STYLE ═══════════ -->
@@ -14910,6 +15396,36 @@ body.on-autoadvance .stepwrap::after {
 /* IDLE WANDER — occasional slow look-around */
 @keyframes cbWander{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-3px) rotate(-1.5deg)}50%{transform:translateY(0) rotate(0)}75%{transform:translateY(-2px) rotate(1.5deg)}}
 .corbit-bot:not(.listening):not(.speaking):not(.processing):not(.done) .cb-head{animation:cbWander 6s ease-in-out infinite, cbBob 4.5s ease-in-out infinite}
+
+
+/* AMBIENT FLOATING PARTICLES around bot at all times */
+.cb-float-particle{position:absolute;width:1.5px;height:1.5px;border-radius:50%;background:rgba(214,230,255,.6);pointer-events:none;z-index:0;animation:cbFloatUp var(--fd,4s) var(--fdel,0s) linear infinite}
+@keyframes cbFloatUp{0%{opacity:0;transform:translateY(0) translateX(0)}15%{opacity:.8}85%{opacity:.4}100%{opacity:0;transform:translateY(-60px) translateX(var(--fx,10px))}}
+/* VOICE LINE — animated sweep highlight when words recognized */
+.voice-line .vw{transition:color .3s ease,text-shadow .3s ease}
+.voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.6)}
+.voice-line .vw.current{color:#fff;text-shadow:0 0 12px rgba(214,230,255,.8);animation:vwPulse .6s ease-in-out infinite}
+@keyframes vwPulse{0%,100%{text-shadow:0 0 8px rgba(214,230,255,.6)}50%{text-shadow:0 0 16px rgba(255,255,255,1),0 0 24px rgba(214,230,255,.8)}}
+/* MIC BUTTON — breathing invite pulse */
+.voice-mic:not(.listening):not(.done){animation:micBreathe 2.5s ease-in-out infinite}
+@keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
+.voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
+.voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+/* SUCCESS CONFETTI — green + white particles rain */
+.cb-confetti{position:fixed;pointer-events:none;z-index:200;width:4px;height:4px;border-radius:1px;animation:cbConfettiFall var(--cd,1.2s) var(--cdel,0s) cubic-bezier(.22,1,.36,1) forwards}
+@keyframes cbConfettiFall{0%{opacity:1;transform:translate(0,0) rotate(0deg)}100%{opacity:0;transform:translate(var(--cx,30px),var(--cy,120px)) rotate(var(--cr,180deg))}}
+/* SHADOW REACT — scales when bot moves */
+.cb-shadow{transition:transform .3s ease,opacity .3s ease}
+.corbit-bot.done .cb-shadow{transform:scaleX(1.3);opacity:.8}
+/* SCAN LINE — periodic sweep across face */
+@keyframes cbScanSweep{0%{top:-20%}80%{top:110%}100%{top:110%}}
+.corbit-bot:not(.done) .cb-screen::before{content:'';position:absolute;left:0;right:0;height:2px;background:rgba(214,230,255,.15);animation:cbScanSweep 3s ease-in-out infinite}
+/* ANTENNA TRAIL — faint glow streak */
+@keyframes cbAntTrail{0%,100%{opacity:.2}50%{opacity:.6}}
+.cb-ant-tip::after{content:'';position:absolute;top:50%;left:50%;width:2px;height:16px;background:linear-gradient(180deg,rgba(214,230,255,.3),transparent);transform:translate(-50%,-100%);border-radius:1px;animation:cbAntTrail 2.2s ease-in-out infinite;filter:blur(1px)}
+/* EYE SPARKLE — occasional glint */
+@keyframes cbEyeSparkle{0%,95%,100%{opacity:0}96%{opacity:1}}
+.cb-eye::after{content:'';position:absolute;top:3px;left:4px;width:3px;height:3px;border-radius:50%;background:#fff;animation:cbEyeSparkle 4s ease-in-out infinite}
 
 </style>
 <div class="corb-overlay" id="corbOverlay">
@@ -15599,6 +16115,36 @@ html body .step .copy { text-align:left !important; margin-left:0 !important; ma
 @keyframes cbWander{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-3px) rotate(-1.5deg)}50%{transform:translateY(0) rotate(0)}75%{transform:translateY(-2px) rotate(1.5deg)}}
 .corbit-bot:not(.listening):not(.speaking):not(.processing):not(.done) .cb-head{animation:cbWander 6s ease-in-out infinite, cbBob 4.5s ease-in-out infinite}
 
+
+/* AMBIENT FLOATING PARTICLES around bot at all times */
+.cb-float-particle{position:absolute;width:1.5px;height:1.5px;border-radius:50%;background:rgba(214,230,255,.6);pointer-events:none;z-index:0;animation:cbFloatUp var(--fd,4s) var(--fdel,0s) linear infinite}
+@keyframes cbFloatUp{0%{opacity:0;transform:translateY(0) translateX(0)}15%{opacity:.8}85%{opacity:.4}100%{opacity:0;transform:translateY(-60px) translateX(var(--fx,10px))}}
+/* VOICE LINE — animated sweep highlight when words recognized */
+.voice-line .vw{transition:color .3s ease,text-shadow .3s ease}
+.voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.6)}
+.voice-line .vw.current{color:#fff;text-shadow:0 0 12px rgba(214,230,255,.8);animation:vwPulse .6s ease-in-out infinite}
+@keyframes vwPulse{0%,100%{text-shadow:0 0 8px rgba(214,230,255,.6)}50%{text-shadow:0 0 16px rgba(255,255,255,1),0 0 24px rgba(214,230,255,.8)}}
+/* MIC BUTTON — breathing invite pulse */
+.voice-mic:not(.listening):not(.done){animation:micBreathe 2.5s ease-in-out infinite}
+@keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
+.voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
+.voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+/* SUCCESS CONFETTI — green + white particles rain */
+.cb-confetti{position:fixed;pointer-events:none;z-index:200;width:4px;height:4px;border-radius:1px;animation:cbConfettiFall var(--cd,1.2s) var(--cdel,0s) cubic-bezier(.22,1,.36,1) forwards}
+@keyframes cbConfettiFall{0%{opacity:1;transform:translate(0,0) rotate(0deg)}100%{opacity:0;transform:translate(var(--cx,30px),var(--cy,120px)) rotate(var(--cr,180deg))}}
+/* SHADOW REACT — scales when bot moves */
+.cb-shadow{transition:transform .3s ease,opacity .3s ease}
+.corbit-bot.done .cb-shadow{transform:scaleX(1.3);opacity:.8}
+/* SCAN LINE — periodic sweep across face */
+@keyframes cbScanSweep{0%{top:-20%}80%{top:110%}100%{top:110%}}
+.corbit-bot:not(.done) .cb-screen::before{content:'';position:absolute;left:0;right:0;height:2px;background:rgba(214,230,255,.15);animation:cbScanSweep 3s ease-in-out infinite}
+/* ANTENNA TRAIL — faint glow streak */
+@keyframes cbAntTrail{0%,100%{opacity:.2}50%{opacity:.6}}
+.cb-ant-tip::after{content:'';position:absolute;top:50%;left:50%;width:2px;height:16px;background:linear-gradient(180deg,rgba(214,230,255,.3),transparent);transform:translate(-50%,-100%);border-radius:1px;animation:cbAntTrail 2.2s ease-in-out infinite;filter:blur(1px)}
+/* EYE SPARKLE — occasional glint */
+@keyframes cbEyeSparkle{0%,95%,100%{opacity:0}96%{opacity:1}}
+.cb-eye::after{content:'';position:absolute;top:3px;left:4px;width:3px;height:3px;border-radius:50%;background:#fff;animation:cbEyeSparkle 4s ease-in-out infinite}
+
 </style>
 
 <style id="round3-polish">
@@ -16116,6 +16662,36 @@ html body .step .copy { text-align:left !important; margin-left:0 !important; ma
 /* IDLE WANDER — occasional slow look-around */
 @keyframes cbWander{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-3px) rotate(-1.5deg)}50%{transform:translateY(0) rotate(0)}75%{transform:translateY(-2px) rotate(1.5deg)}}
 .corbit-bot:not(.listening):not(.speaking):not(.processing):not(.done) .cb-head{animation:cbWander 6s ease-in-out infinite, cbBob 4.5s ease-in-out infinite}
+
+
+/* AMBIENT FLOATING PARTICLES around bot at all times */
+.cb-float-particle{position:absolute;width:1.5px;height:1.5px;border-radius:50%;background:rgba(214,230,255,.6);pointer-events:none;z-index:0;animation:cbFloatUp var(--fd,4s) var(--fdel,0s) linear infinite}
+@keyframes cbFloatUp{0%{opacity:0;transform:translateY(0) translateX(0)}15%{opacity:.8}85%{opacity:.4}100%{opacity:0;transform:translateY(-60px) translateX(var(--fx,10px))}}
+/* VOICE LINE — animated sweep highlight when words recognized */
+.voice-line .vw{transition:color .3s ease,text-shadow .3s ease}
+.voice-line .vw.heard{color:#30D158;text-shadow:0 0 8px rgba(48,209,88,.6)}
+.voice-line .vw.current{color:#fff;text-shadow:0 0 12px rgba(214,230,255,.8);animation:vwPulse .6s ease-in-out infinite}
+@keyframes vwPulse{0%,100%{text-shadow:0 0 8px rgba(214,230,255,.6)}50%{text-shadow:0 0 16px rgba(255,255,255,1),0 0 24px rgba(214,230,255,.8)}}
+/* MIC BUTTON — breathing invite pulse */
+.voice-mic:not(.listening):not(.done){animation:micBreathe 2.5s ease-in-out infinite}
+@keyframes micBreathe{0%,100%{box-shadow:0 0 0 0 rgba(214,230,255,.2)}50%{box-shadow:0 0 0 10px rgba(214,230,255,0)}}
+.voice-mic.listening{box-shadow:0 0 24px rgba(214,230,255,.6),0 0 48px rgba(190,214,246,.3)!important}
+.voice-mic.done{box-shadow:0 0 20px rgba(48,209,88,.5)!important}
+/* SUCCESS CONFETTI — green + white particles rain */
+.cb-confetti{position:fixed;pointer-events:none;z-index:200;width:4px;height:4px;border-radius:1px;animation:cbConfettiFall var(--cd,1.2s) var(--cdel,0s) cubic-bezier(.22,1,.36,1) forwards}
+@keyframes cbConfettiFall{0%{opacity:1;transform:translate(0,0) rotate(0deg)}100%{opacity:0;transform:translate(var(--cx,30px),var(--cy,120px)) rotate(var(--cr,180deg))}}
+/* SHADOW REACT — scales when bot moves */
+.cb-shadow{transition:transform .3s ease,opacity .3s ease}
+.corbit-bot.done .cb-shadow{transform:scaleX(1.3);opacity:.8}
+/* SCAN LINE — periodic sweep across face */
+@keyframes cbScanSweep{0%{top:-20%}80%{top:110%}100%{top:110%}}
+.corbit-bot:not(.done) .cb-screen::before{content:'';position:absolute;left:0;right:0;height:2px;background:rgba(214,230,255,.15);animation:cbScanSweep 3s ease-in-out infinite}
+/* ANTENNA TRAIL — faint glow streak */
+@keyframes cbAntTrail{0%,100%{opacity:.2}50%{opacity:.6}}
+.cb-ant-tip::after{content:'';position:absolute;top:50%;left:50%;width:2px;height:16px;background:linear-gradient(180deg,rgba(214,230,255,.3),transparent);transform:translate(-50%,-100%);border-radius:1px;animation:cbAntTrail 2.2s ease-in-out infinite;filter:blur(1px)}
+/* EYE SPARKLE — occasional glint */
+@keyframes cbEyeSparkle{0%,95%,100%{opacity:0}96%{opacity:1}}
+.cb-eye::after{content:'';position:absolute;top:3px;left:4px;width:3px;height:3px;border-radius:50%;background:#fff;animation:cbEyeSparkle 4s ease-in-out infinite}
 
 </style>
 
