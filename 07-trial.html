@@ -182,7 +182,6 @@
   @keyframes ctaReady { 0%{transform:scale(1);} 38%{transform:scale(1.04);} 100%{transform:scale(1);} }
   .cta.ready { animation: ctaReady .5s cubic-bezier(.22,1.7,.36,1); }
   .cta:not(:disabled) { box-shadow: 0 12px 28px rgba(0,0,0,.45), 0 0 24px rgba(196,201,210,.2), 0 1px 0 rgba(255,255,255,.6) inset; }
->>>>>>> origin/main
   /* Small phones — compress so contract card fits without clipping */
   @media (max-width: 360px) {
     .step { padding: 14px 20px 28px; gap: 10px; }
@@ -338,7 +337,7 @@
       0 1px 0 rgba(255,255,255,0.6) inset;
     display: flex; align-items: center; justify-content: center; gap: 8px;
     cursor: pointer;
-    transition: background .25s ease, color .25s ease, transform .12s cubic-bezier(0.4, 0, 0.2, 1), box-shadow .25s ease, filter .2s;
+    transition: transform .12s cubic-bezier(0.4, 0, 0.2, 1), box-shadow .22s, filter .2s;
   }
   .cta:hover { box-shadow: 0 12px 32px rgba(0,0,0,0.5), 0 0 30px rgba(214,219,226,0.26), 0 1px 0 rgba(255,255,255,0.7) inset; }
   .cta:active { transform: scale(0.985); }
@@ -3428,7 +3427,7 @@
               <button type="button" class="age-chip" data-age="49" onclick="pickAge(this,'49')">45–54</button>
               <button type="button" class="age-chip" data-age="60" onclick="pickAge(this,'60')">55+</button>
             </div>
-            <script>window.pickAge=function(el,age){var grid=document.getElementById('ageChips');if(!grid)return;grid.querySelectorAll('.age-chip').forEach(function(c){c.classList.remove('sel','pop')});el.classList.add('sel','pop');setTimeout(function(){el.classList.remove('pop')},350);window._state.age=parseInt(age,10);try{if(typeof haptic==='function')haptic(10)}catch(e){}try{if(window._refreshCTA)window._refreshCTA()}catch(e){}}</script>
+            <script>window.pickAge=function(el,age){var grid=document.getElementById('ageChips');if(!grid)return;grid.querySelectorAll('.age-chip').forEach(function(c){c.classList.remove('sel')});el.classList.add('sel');window._state.age=parseInt(age,10);var ctaBtn=document.getElementById('cta');if(ctaBtn){ctaBtn.disabled=false;ctaBtn.style.background='#fff';ctaBtn.style.color='#07070C';ctaBtn.style.cursor='pointer';var note=document.getElementById('ctaNote');if(note)note.textContent='Looks good — tap next'}try{if(typeof haptic==='function')haptic(10)}catch(e){}try{if(window._refreshCTA)window._refreshCTA()}catch(e){}}</script>
           </div>
           <div class="privacy-note" style="margin-top:auto;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
@@ -11755,7 +11754,6 @@
     try {
       if (window.coreI18n && CTA_I18N[label]) label = coreI18n.t(CTA_I18N[label]) || label;
     } catch (e) {}
->>>>>>> origin/main
     cta.textContent = '';
     cta.appendChild(document.createTextNode(label + ' '));
     const sv = document.createElementNS('http://www.w3.org/2000/svg','svg');
@@ -13968,12 +13966,8 @@
   // Passes the full Core username moderation system AND isn't already taken.
   function passesModeration(n) {
     // Immediate block list — test/placeholder names never allowed
-    const BLOCKED = /^(test|admin|user|demo|guest|root|null|undefined|system|moderator|staff|support|help|info|nobody|anonymous|unknown|delete|remove|none|void|blank|sample|example|asshole|bitch|cunt|dick|fuck|shit|slut|whore)$/i;
+    const BLOCKED = /^(test|admin|user|demo|guest|root|null|undefined|system|moderator|staff|support|help|info|nobody|anonymous|unknown|delete|remove|none|void|blank|sample|example)$/i;
     if (BLOCKED.test(n.trim())) return false;
-    // Reject names that look like emails, URLs, or phone numbers
-    if (/[@:/]/.test(n) || /^\d{4,}$/.test(n)) return false;
-    // Reject names that are only symbols or contain 3+ consecutive same chars (spam)
-    if (/^[^a-z0-9]+$/i.test(n) || /(.)\1\1/.test(n)) return false;
     try {
       if (window.coreModeration && window.coreModeration.checkUsername) {
         return window.coreModeration.checkUsername(n).ok;
@@ -13997,15 +13991,12 @@
   const nameSugWrap= document.getElementById('nameSuggestions');
   function paintNameStatus() {
     const v = (nameField.value || '').trim();
-    nameField.classList.remove('shake', 'glow');
     if (!v) {
       nameStatus.textContent = 'Just your first name — your coach uses it.';
       nameStatus.style.color = 'var(--muted)';
       nameField.style.borderColor = 'var(--border)';
       nameField.style.background = '';
       nameSugWrap.style.display = 'none';
-      state.name = '';
-      refreshCTA();
       return;
     }
     if (v.length < 2) {
@@ -14018,17 +14009,9 @@
       refreshCTA();
       return;
     }
-    // Reject purely numeric / symbol-only input (not a real first name)
-    if (/^[0-9_\-\.\s]+$/.test(v)) {
-      nameStatus.innerHTML = '<span style="color:#B6BCC8;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:13px;height:13px;vertical-align:-2px;display:inline-block;"><path d="M6 6l12 12M18 6L6 18"/></svg> Try a real first name.</span>';
-      nameField.style.borderColor = 'rgba(182,188,200,0.55)';
-      nameField.style.background = 'rgba(182,188,200,0.05)';
-      nameField.classList.add('shake');
-      nameSugWrap.style.display = 'none';
-      state.name = '';
-      refreshCTA();
-      return;
-    }
+    // Numbers and symbols (_ .) are allowed — only the moderation system below
+    // can reject a name, and it blocks anything inappropriate (profanity, slurs,
+    // impersonation, contact info, etc.) via the shared Core word-list.
     // Core username moderation — runs on the raw value (so leading/trailing
     // spaces are caught). On any block we show ONE generic message and never
     // reveal which rule fired, nor suggest alternatives.
@@ -14040,7 +14023,6 @@
         (mod.message || 'Try a different name.') + '</span>';
       nameField.style.borderColor = 'rgba(182,188,200,0.55)';
       nameField.style.background = 'rgba(182,188,200,0.05)';
-      nameField.classList.add('shake');
       nameSugWrap.style.display = 'none';
       state.name = '';
       refreshCTA();
@@ -14052,7 +14034,6 @@
     nameStatus.innerHTML = '<span style="color:#D6DBE2;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;vertical-align:-2px;display:inline-block;"><path d="M5 12l4 4 10-11"/></svg> Nice to meet you, ' + escTrialHtml(nice) + '.</span>';
     nameField.style.borderColor = 'rgba(214,219,226,0.45)';
     nameField.style.background = 'rgba(214,219,226,0.06)';
-    nameField.classList.add('glow');
     nameSugWrap.style.display = 'none';
     state.name = v;
     refreshCTA();

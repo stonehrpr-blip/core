@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en" data-font="apple">
+<head>
+<meta charset="utf-8" />
+<title>CORE — Initializing</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#000000" />
+<style>
+  :root {
+    --q-amethyst: #7B4FBF;
+    --q-violet: #5C3A9E;
+    --q-deep: #3A1F6E;
+    --q-platinum: #B8B0C8;
+    --q-core: #E8DFF5;
+    --q-size: 100px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:#000;overflow:hidden}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",sans-serif;
+    -webkit-font-smoothing:antialiased;color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    user-select:none;-webkit-user-select:none;
+  }
+
+  /* === Ambient starfield === */
+  .starfield{position:fixed;inset:0;z-index:0;pointer-events:none}
+  .star{position:absolute;width:1px;height:1px;background:#fff;border-radius:50%;opacity:0}
+  @keyframes starIn{0%{opacity:0;transform:translateY(-4px)}100%{opacity:.7;transform:translateY(0)}}
+
+  /* === Grid lines === */
+  .geo-grid{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;transition:opacity .5s}
+  .geo-grid.show{opacity:.04}
+  .geo-grid svg{width:100%;height:100%}
+
+  #stage{position:relative;z-index:2;width:100%;max-width:440px;text-align:center;padding:40px 28px}
+
+  /* === STAGE 0: Terminal === */
+  #terminalText{font-family:'SF Mono',Monaco,'Courier New',monospace;font-size:10px;color:rgba(180,176,200,.45);letter-spacing:.1em;line-height:2.2;text-align:left;min-height:36px}
+  #terminalText .cursor{display:inline-block;width:5px;height:11px;background:rgba(180,176,200,.55);animation:cursorBlink .4s step-end infinite;vertical-align:text-bottom;margin-left:1px}
+  @keyframes cursorBlink{0%,100%{opacity:1}50%{opacity:0}}
+  #terminalText .glitch{animation:glitchText .15s ease}
+
+  /* === STAGE 1: Quantum Core === */
+  .corbit-stage{display:none;position:relative;margin:0 auto}
+  .quantum-core{
+    position:relative;width:var(--q-size);height:var(--q-size);margin:0 auto 32px;
+    display:flex;align-items:center;justify-content:center;
+    opacity:0;transform:scale(0);filter:blur(30px);
+    animation:coreNova .6s cubic-bezier(.12,1,.25,1) forwards
+  }
+  @keyframes coreNova{
+    0%{opacity:0;transform:scale(0);filter:blur(30px)}
+    45%{opacity:.95;transform:scale(1.12);filter:blur(0)}
+    100%{opacity:1;transform:scale(1);filter:blur(0)}
+  }
+  /* Flash ring */
+  .nova-ring{position:absolute;width:300px;height:300px;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;
+    border:2px solid rgba(123,79,191,.4);opacity:0;animation:novaExpand .8s .15s cubic-bezier(.22,1,.36,1) forwards;pointer-events:none}
+  @keyframes novaExpand{0%{opacity:.8;transform:translate(-50%,-50%) scale(.3)}100%{opacity:0;transform:translate(-50%,-50%) scale(2.5)}}
+  .nova-ring2{position:absolute;width:300px;height:300px;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;
+    border:1px solid rgba(184,176,200,.25);opacity:0;animation:novaExpand .8s .25s cubic-bezier(.22,1,.36,1) forwards;pointer-events:none}
+
+  .core-point{
+    position:absolute;width:18px;height:18px;border-radius:50%;
+    background:radial-gradient(circle,var(--q-core) 0%,rgba(232,223,245,.3) 40%,transparent 70%);
+    box-shadow:0 0 28px var(--q-amethyst),0 0 60px rgba(123,79,191,.8),0 0 120px rgba(92,58,158,.5),0 0 200px rgba(58,31,110,.25);
+    z-index:3;animation:coreBeat 1.4s ease-in-out infinite
+  }
+  @keyframes coreBeat{
+    0%,100%{box-shadow:0 0 28px var(--q-amethyst),0 0 60px rgba(123,79,191,.8),0 0 120px rgba(92,58,158,.5)}
+    50%{box-shadow:0 0 42px var(--q-core),0 0 90px rgba(123,79,191,1),0 0 180px rgba(92,58,158,.7),0 0 260px rgba(58,31,110,.4)}
+  }
+
+  /* === Orbiting particles === */
+  .orb-particle{position:absolute;width:3px;height:3px;border-radius:50%;background:var(--q-platinum);pointer-events:none;z-index:4;
+    box-shadow:0 0 6px var(--q-amethyst),0 0 14px rgba(123,79,191,.4)}
+  @keyframes orbitP{0%{transform:rotate(var(--start)) translateX(var(--dist)) rotate(calc(var(--start)*-1)) scale(1)}100%{transform:rotate(calc(var(--start) + 360deg)) translateX(var(--dist)) rotate(calc(var(--start)*-1 - 360deg)) scale(1)}}
+
+  /* Rings */
+  .ring{position:absolute;border-radius:50%;border-style:solid;border-color:transparent;top:50%;left:50%}
+  .ring-inner{
+    width:calc(var(--q-size) + 24px);height:calc(var(--q-size) + 24px);
+    margin-left:calc((var(--q-size) + 24px)/-2);margin-top:calc((var(--q-size) + 24px)/-2);
+    border-width:1.4px;border-top-color:rgba(123,79,191,.7);border-right-color:rgba(123,79,191,.3);
+    animation:qSpin1 1.8s linear infinite;z-index:1
+  }
+  @keyframes qSpin1{0%{transform:rotate(0deg) rotateX(62deg)}100%{transform:rotate(360deg) rotateX(62deg)}}
+  .ring-outer{
+    width:calc(var(--q-size) + 62px);height:calc(var(--q-size) + 62px);
+    margin-left:calc((var(--q-size) + 62px)/-2);margin-top:calc((var(--q-size) + 62px)/-2);
+    border-width:1.2px;border-left-color:rgba(92,58,158,.55);border-bottom-color:rgba(92,58,158,.2);
+    animation:qSpin2 3s linear infinite;z-index:1
+  }
+  @keyframes qSpin2{0%{transform:rotate(0deg) rotateX(52deg)}100%{transform:rotate(-360deg) rotateX(52deg)}}
+  .ring-accent{
+    width:calc(var(--q-size) + 100px);height:calc(var(--q-size) + 72px);
+    margin-left:calc((var(--q-size) + 100px)/-2);margin-top:calc((var(--q-size) + 72px)/-2);
+    border-width:0.7px;border-top-color:rgba(184,176,200,.35);border-left-color:rgba(184,176,200,.12);
+    animation:qSpin3 4.5s linear infinite;z-index:0
+  }
+  @keyframes qSpin3{0%{transform:rotate(0deg) rotateY(42deg) rotateX(28deg)}100%{transform:rotate(360deg) rotateY(42deg) rotateX(28deg)}}
+
+  .quantum-core::before{
+    content:'';position:absolute;width:260px;height:260px;top:50%;left:50%;
+    transform:translate(-50%,-50%);border-radius:50%;
+    background:radial-gradient(circle,rgba(123,79,191,.12) 0%,rgba(92,58,158,.04) 35%,transparent 60%);
+    animation:auraBreathe 2s ease-in-out .6s infinite;z-index:-1
+  }
+  @keyframes auraBreathe{0%,100%{opacity:.4;transform:translate(-50%,-50%) scale(1)}50%{opacity:.9;transform:translate(-50%,-50%) scale(1.5)}}
+
+  /* === Light rays === */
+  .light-ray{position:absolute;top:50%;left:50%;width:1px;height:80px;background:linear-gradient(rgba(123,79,191,.4),transparent);
+    transform-origin:top center;opacity:0;pointer-events:none;z-index:0}
+  @keyframes rayPulse{0%,100%{opacity:0;transform:translate(-50%,0) rotate(var(--deg)) scaleY(.6)}50%{opacity:.5;transform:translate(-50%,0) rotate(var(--deg)) scaleY(1.2)}}
+
+  /* === DOCKING === */
+  .corbit-docking{position:relative;display:inline-block;transition:all .45s cubic-bezier(.22,1,.36,1);z-index:9999}
+  .corbit-docking.docked{position:fixed;top:22px;left:50%;transform:translate(-50%,0) scale(.38)}
+
+  /* === STAGE 2: Dialog === */
+  .corbit-dialog{display:none;max-width:380px;margin:0 auto;text-align:center}
+  .corbit-name{font-size:20px;font-weight:700;color:var(--q-platinum);letter-spacing:-.2px;margin-bottom:12px}
+  .corbit-msg{font-size:16px;line-height:1.55;color:rgba(255,255,255,.88);letter-spacing:-.2px}
+  .corbit-msg .typed{color:#fff}
+
+  /* === STAGE 3: Prompt === */
+  .corbit-prompt{display:none;margin-top:34px}
+  .prompt-ring{width:60px;height:60px;border-radius:50%;border:1px solid rgba(180,176,200,.15);margin:0 auto 14px;
+    animation:promptExpand 1.2s ease-in-out infinite;position:relative}
+  .prompt-ring::after{content:'';position:absolute;inset:4px;border-radius:50%;background:rgba(123,79,191,.06);animation:coreBeat 1.4s ease-in-out infinite}
+  @keyframes promptExpand{0%,100%{transform:scale(1);border-color:rgba(180,176,200,.15)}50%{transform:scale(1.15);border-color:rgba(180,176,200,.35)}}
+  .prompt-text{font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:rgba(180,176,200,.4);animation:promptPulse 1.2s ease-in-out infinite}
+  @keyframes promptPulse{0%,100%{opacity:.2}50%{opacity:.65}}
+
+  /* === CLICK FLASH === */
+  .click-flash{position:fixed;inset:0;z-index:99999;background:rgba(123,79,191,.15);pointer-events:none;opacity:0;transition:opacity .15s}
+  .click-flash.fire{opacity:1;transition:opacity 0s}
+
+  /* === SPARKS === */
+  .spark{position:fixed;width:3px;height:3px;border-radius:50%;pointer-events:none;z-index:99999;
+    background:var(--q-platinum);box-shadow:0 0 10px var(--q-amethyst),0 0 24px rgba(123,79,191,.6)}
+  @keyframes sparkBurst{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--sx),var(--sy)) scale(0)}}
+
+  /* === VEIL === */
+  .veil{position:fixed;inset:0;background:#000;z-index:9998;opacity:1;transition:opacity .25s ease;pointer-events:none}
+  .veil.out{opacity:0}
+
+  /* === Screen shake === */
+  @keyframes shake{0%,100%{transform:translate(0,0)}10%{transform:translate(-3px,1px)}20%{transform:translate(3px,-1px)}30%{transform:translate(-2px,-2px)}40%{transform:translate(2px,2px)}50%{transform:translate(-1px,1px)}60%{transform:translate(1px,-1px)}70%{transform:translate(-0.5px,0)}100%{transform:translate(0,0)}}
+  .shaking{animation:shake .4s ease-out}
+</style>
+</head>
+<body class="shaking">
+<div class="click-flash" id="clickFlash"></div>
+<div class="starfield" id="starfield"></div>
+<div class="geo-grid" id="geoGrid">
+  <svg viewBox="0 0 400 400"><defs><pattern id="hex" width="40" height="69.28" patternUnits="userSpaceOnUse"><path d="M20 0L40 11.55v34.64L20 57.74 0 46.19V11.55z" fill="none" stroke="rgba(123,79,191,.3)" stroke-width=".3"/></pattern></defs><rect width="400" height="400" fill="url(#hex)"/></svg>
+</div>
+
+<div id="stage">
+  <div id="terminalText"></div>
+  <div class="corbit-stage" id="corbitStage">
+    <div class="corbit-docking" id="corbitOrbWrap">
+      <div class="quantum-core" id="qc">
+        <div class="nova-ring"></div>
+        <div class="nova-ring2"></div>
+        <div class="ring ring-inner"></div>
+        <div class="ring ring-outer"></div>
+        <div class="ring ring-accent"></div>
+        <div class="core-point"></div>
+      </div>
+    </div>
+  </div>
+  <div class="corbit-dialog" id="corbitDialog">
+    <div class="corbit-name">Corbit</div>
+    <div class="corbit-msg" id="corbitMsg"><span class="typed"></span><span class="cursor" id="typeCursor"></span></div>
+  </div>
+  <div class="corbit-prompt" id="corbitPrompt">
+    <div class="prompt-ring"></div>
+    <span class="prompt-text">Tap anywhere to proceed</span>
+  </div>
+</div>
+<div class="veil" id="veil"></div>
+
+<script>
+(function(){
+  var terminal=document.getElementById('terminalText'),cs=document.getElementById('corbitStage'),
+    dialog=document.getElementById('corbitDialog'),msg=dialog.querySelector('.typed'),
+    cursor=document.getElementById('typeCursor'),prompt=document.getElementById('corbitPrompt'),
+    orb=document.getElementById('corbitOrbWrap'),veil=document.getElementById('veil'),
+    flash=document.getElementById('clickFlash'),starfield=document.getElementById('starfield'),
+    geoGrid=document.getElementById('geoGrid'),qc=document.getElementById('qc');
+  var docked=false,dialogDone=false;
+
+  // === Ambient starfield ===
+  for(var i=0;i<60;i++){
+    var s=document.createElement('div');s.className='star';
+    s.style.cssText='left:'+Math.random()*100+'%;top:'+Math.random()*100+'%;animation:starIn .6s '+(Math.random()*.8)+'s ease-out both';
+    starfield.appendChild(s);
+  }
+
+  // === Orbiting particles ===
+  function spawnParticles(){
+    for(var i=0;i<12;i++){
+      var p=document.createElement('div');p.className='orb-particle';
+      var dist=52+Math.random()*30;
+      p.style.cssText='top:50%;left:50%;--dist:'+dist+'px;--start:'+(i*30)+'deg;animation:orbitP '+(3+Math.random()*3)+'s linear infinite';
+      qc.appendChild(p);
+    }
+  }
+
+  // === Light rays ===
+  function spawnRays(){
+    for(var i=0;i<8;i++){
+      var r=document.createElement('div');r.className='light-ray';
+      r.style.cssText='--deg:'+(i*45)+'deg;animation:rayPulse '+(2+Math.random()*2)+'s ease-in-out '+Math.random()+'s infinite';
+      qc.appendChild(r);
+    }
+  }
+
+  // === Screen shake ===
+  function shake(){document.body.classList.add('shaking');setTimeout(function(){document.body.classList.remove('shaking')},400)}
+
+  // === STAGE 0: Terminal — ultra-fast ===
+  var t='[ CORE SYNC INITIALIZED ]',ti=0;
+  function typeT(){
+    if(ti<t.length){terminal.innerHTML=t.substring(0,ti+1)+'<span class="cursor"></span>';ti++;setTimeout(typeT,10+Math.random()*8)}
+    else{
+      // Glitch effect
+      terminal.innerHTML='[ CORE SYNC <span style="opacity:.3">INITIALIZED</span> ]<span class="cursor"></span>';
+      setTimeout(function(){terminal.innerHTML=t+'<span class="cursor"></span>'},80);
+      setTimeout(function(){terminal.style.opacity='0';terminal.style.transition='opacity .1s';setTimeout(function(){terminal.style.display='none';stage1()},120)},200)
+    }
+  }
+  typeT();
+
+  // === STAGE 1: Core NOVA ===
+  function stage1(){
+    cs.style.display='block';geoGrid.classList.add('show');
+    spawnParticles();spawnRays();
+    shake();
+    setTimeout(stage2,700);
+  }
+
+  // === STAGE 2: Typewriter ===
+  var dt="I am Corbit. Your Core companion. Let's begin.",di=0;
+  function stage2(){dialog.style.display='block';typeD()}
+  function typeD(){
+    if(di<dt.length){msg.textContent=dt.substring(0,di+1);di++;setTimeout(typeD,12+Math.random()*8)}
+    else{cursor.style.display='none';dialogDone=true;setTimeout(stage3,120)}
+  }
+  function stage3(){prompt.style.display='block'}
+
+  // === CLICK: Flash + burst + dock ===
+  document.addEventListener('click',function(e){
+    if(docked) return;
+    if(!dialogDone) return;
+    docked=true;
+
+    // Flash
+    flash.classList.add('fire');setTimeout(function(){flash.classList.remove('fire')},150);
+
+    // Particle burst
+    for(var i=0;i<36;i++){
+      var sp=document.createElement('div');sp.className='spark';
+      var a=(i/36)*Math.PI*2,d=30+Math.random()*140;
+      sp.style.cssText='left:'+e.clientX+'px;top:'+e.clientY+'px;--sx:'+(Math.cos(a)*d)+'px;--sy:'+(Math.sin(a)*d)+'px;animation:sparkBurst .55s cubic-bezier(.22,1,.36,1) forwards;animation-delay:'+(Math.random()*.1)+'s';
+      document.body.appendChild(sp);setTimeout(function(){sp.remove()},650);
+    }
+
+    prompt.style.opacity='0';prompt.style.transition='opacity .1s';
+    orb.classList.add('docked');veil.classList.add('out');
+    try{localStorage.setItem('corbitIntroDone','1')}catch(e){}
+    setTimeout(function(){window.location.href='07-trial.html'},450);
+  });
+})();
+</script>
+</body>
+</html>

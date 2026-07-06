@@ -1,0 +1,178 @@
+/* Preserved from 07-trial.html on 2026-07-03 — 14 near-identical copies of
+   this dead CSS block (no matching markup/JS existed in the page) were
+   removed during the polish pass. Kept here in case the purple 'living
+   companion' sheet ever gets its markup built. */
+/* ═══════════════════════════════════════════════════
+   CORBIT · THE LIVING CORE COMPANION
+   Apple-style · Steel palette · Premium
+   ═══════════════════════════════════════════════════ */
+
+:root{--cb-purple:#7B4FBF;--cb-glow:rgba(123,79,191,.4);--cb-steel:#AEB6C4;--cb-hi:#C4C9D2;--cb-bg:#08090C;--cb-card:rgba(255,255,255,.025)}
+
+/* === Arrival Overlay === */
+.corb-overlay{position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.92);display:none;
+  align-items:flex-end;justify-content:center;opacity:1;transition:opacity .5s ease}
+.corb-overlay.out{opacity:0;pointer-events:none}
+
+/* === Apple-style Sheet Panel === */
+.corb-sheet{width:100%;max-width:420px;background:var(--cb-bg);border-radius:28px 28px 0 0;
+  padding:36px 28px 44px;transform:translateY(100%);transition:transform .55s cubic-bezier(.22,1,.36,1);
+  box-shadow:0 -20px 60px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.06) inset;
+  display:flex;flex-direction:column;align-items:center;position:relative;overflow:hidden}
+.corb-sheet.show{transform:translateY(0)}@keyframes cbSheetBounce{0%{transform:translateY(100%)}55%{transform:translateY(-1.5%)}75%{transform:translateY(.5%)}100%{transform:translateY(0)}}
+.corb-sheet::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:36px;height:5px;border-radius:3px;background:rgba(255,255,255,.2);margin-top:12px}
+
+/* === The Orb === */
+.corb-orb-wrapper{position:relative;width:110px;height:110px;margin:20px auto 28px;
+  transition:all .45s cubic-bezier(.22,1,.36,1)}
+.corb-orb-wrapper.docked{position:fixed;top:14px;left:50%;transform:translate(-50%,0) scale(.25);
+  margin:0;z-index:9999}
+.corb-orb{position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle at 36% 33%,#fff 0%,#E8DFF5 8%,var(--cb-purple) 30%,#3A1F6E 60%,#0a0018 90%);
+  box-shadow:0 0 35px var(--cb-glow),0 0 70px rgba(92,58,158,.25),0 0 120px rgba(58,31,110,.1),
+    0 0 0 2px rgba(174,182,196,.15),inset 0 0 25px rgba(200,160,255,.06);
+  animation:cbBreath 3.2s ease-in-out infinite}
+@keyframes cbBreath{0%,100%{box-shadow:0 0 35px var(--cb-glow),0 0 70px rgba(92,58,158,.25),0 0 0 2px rgba(174,182,196,.15)}
+  50%{box-shadow:0 0 55px rgba(123,79,191,.6),0 0 110px rgba(92,58,158,.4),0 0 180px rgba(58,31,110,.2),0 0 0 3px rgba(174,182,196,.25)}}
+
+/* Eyes */
+.corb-eyes{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);display:flex;gap:16px;z-index:3}
+.corb-eye{width:7px;height:11px;border-radius:50%;background:#fff;
+  box-shadow:0 0 8px #fff,0 0 18px rgba(232,223,245,.7),0 0 35px rgba(123,79,191,.5);
+  animation:cbEyePulse 2.8s ease-in-out infinite}
+.corb-eye:nth-child(2){animation-delay:.4s}
+@keyframes cbEyePulse{0%,100%{transform:scaleY(1);opacity:.9}50%{transform:scaleY(.55);opacity:.6}}
+
+/* === Dialog cards === */
+.corb-cards{margin-top:8px;width:100%;display:flex;flex-direction:column;gap:10px}
+.corb-card{background:var(--cb-card);border:1px solid rgba(255,255,255,.06);border-radius:16px;
+  padding:16px 20px;font-size:15px;line-height:1.5;color:rgba(255,255,255,.9);letter-spacing:-.2px;
+  opacity:0;transform:translateY(12px);transition:all .45s cubic-bezier(.22,1,.36,1)}
+.corb-card.show{opacity:1;transform:translateY(0)}
+.corb-card .typed{color:#fff}
+
+/* === Continue button (matches trial CTA) === */
+.corb-continue{margin-top:20px;opacity:0;transform:translateY(10px);transition:all .45s .15s ease;width:100%}
+.corb-continue.show{opacity:1;transform:translateY(0)}.corb-continue button::after{content:'';position:absolute;inset:-2px;border-radius:18px;background:linear-gradient(135deg,rgba(123,79,191,.3),rgba(174,182,196,.15),rgba(123,79,191,.3));z-index:-1;animation:cbBtnGlow 3s ease-in-out infinite;opacity:0;transition:opacity .5s}.corb-continue.show button::after{opacity:1}@keyframes cbBtnGlow{0%,100%{filter:blur(3px);opacity:.6}50%{filter:blur(6px);opacity:1}}
+.corb-continue button{position:relative;overflow:hidden;width:100%;padding:17px 24px;border-radius:16px;border:none;
+  color:#07070C;font-family:inherit;font-size:16.5px;font-weight:700;letter-spacing:-.2px;
+  background:#fff;cursor:pointer;
+  box-shadow:0 12px 28px rgba(0,0,0,.45),0 0 22px rgba(214,219,226,.16),0 1px 0 rgba(255,255,255,.6) inset;
+  transition:transform .12s ease,box-shadow .22s,outline .3s}
+.corb-continue button:hover{box-shadow:0 12px 32px rgba(0,0,0,.5),0 0 30px rgba(214,219,226,.26)}
+.corb-continue button:active{transform:scale(.985)}
+.corb-continue button .corb-btn-shimmer{position:absolute;inset:0;border-radius:16px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);animation:btnShimmer 2s linear infinite;pointer-events:none}
+@keyframes btnShimmer{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}
+
+/* === Siri Sidebar === */
+.corb-sidebar{position:fixed;top:0;right:0;bottom:0;width:min(380px,90vw);z-index:100001;
+  background:rgba(8,9,12,.97);border-left:1px solid rgba(255,255,255,.06);
+  transform:translateX(100%);transition:transform .4s cubic-bezier(.22,1,.36,1);
+  display:flex;flex-direction:column;padding:24px}
+.corb-sidebar.open{transform:translateX(0)}
+.corb-sidebar-header{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.corb-sidebar-close{margin-left:auto;width:28px;height:28px;border-radius:50%;border:1px solid rgba(255,255,255,.08);background:none;color:rgba(255,255,255,.4);cursor:pointer}
+.corb-sidebar-voice{display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:10px 18px;border-radius:50px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  color:rgba(255,255,255,.5);font-size:12px;margin-bottom:16px;cursor:pointer;transition:all .2s}
+.corb-sidebar-voice:hover{background:rgba(255,255,255,.06);color:#fff}
+.corb-sidebar-voice.listening{border-color:var(--cb-purple);box-shadow:0 0 0 4px rgba(123,79,191,.15);animation:cbBreath 2s ease-in-out infinite}
+.corb-sidebar-chat{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.corb-msg{max-width:85%;padding:12px 16px;border-radius:16px;font-size:14px;line-height:1.5;color:#fff}
+.corb-msg.ai{background:rgba(123,79,191,.12);align-self:flex-start;border-bottom-left-radius:4px}
+.corb-msg.user{background:rgba(255,255,255,.07);align-self:flex-end;border-bottom-right-radius:4px}
+.corb-sidebar-input-row{display:flex;gap:8px}
+.corb-sidebar-input{flex:1;padding:13px 16px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:#fff;font-size:14px;outline:none;font-family:inherit}
+.corb-sidebar-input:focus{border-color:var(--cb-steel);box-shadow:0 0 0 3px rgba(174,182,196,.1)}
+.corb-sidebar-send{padding:13px 18px;border-radius:14px;border:none;background:var(--cb-steel);color:#07070C;font-weight:600;cursor:pointer;font-size:13px}
+
+/* === Particles === */
+.corb-particle{position:fixed;pointer-events:none;z-index:100002;width:2px;height:2px;border-radius:50%;
+  background:var(--cb-hi);box-shadow:0 0 6px var(--cb-steel),0 0 16px rgba(174,182,196,.4)}
+@keyframes cbParticle{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--px),var(--py)) scale(0)}}
+
+/* === Guidance popup === */
+.corb-guide{position:fixed;bottom:0;left:0;right:0;z-index:99900;
+  background:rgba(8,9,12,.95);border-top:1px solid rgba(255,255,255,.06);
+  border-radius:24px 24px 0 0;padding:40px 28px 44px;
+  transform:translateY(100%);transition:transform .45s cubic-bezier(.22,1,.36,1);
+  display:flex;flex-direction:column;align-items:center;text-align:center}
+.corb-guide.show{transform:translateY(0)}
+.corb-guide-orb{width:64px;height:64px;border-radius:50%;margin-bottom:20px;
+  background:radial-gradient(circle at 36% 33%,#fff,#7B4FBF 45%,#3A1F6E 100%);
+  box-shadow:0 0 25px rgba(123,79,191,.4)}
+.corb-guide-msg{max-width:300px;font-size:15px;line-height:1.55;color:rgba(255,255,255,.88);letter-spacing:-.2px}
+.corb-guide-tap{margin-top:22px;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:rgba(174,182,196,.35)}
+
+/* === API Key panel === */
+.corb-apikey{position:fixed;inset:0;z-index:100003;background:rgba(0,0,0,.9);display:none;
+  align-items:center;justify-content:center}
+.corb-apikey.show{display:flex}
+.corb-apikey-card{width:90%;max-width:380px;background:var(--cb-bg);border-radius:20px;padding:32px 24px;
+  border:1px solid rgba(255,255,255,.06);text-align:center}
+.corb-apikey-card h3{color:#fff;font-size:18px;margin-bottom:8px}
+.corb-apikey-card p{color:var(--cb-steel);font-size:13px;margin-bottom:20px}
+.corb-apikey-card input{width:100%;padding:14px 16px;border-radius:14px;border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.04);color:#fff;font-size:13px;outline:none;margin-bottom:12px;font-family:monospace}
+.corb-apikey-card input:focus{border-color:var(--cb-purple)}
+.corb-apikey-card button{width:100%;padding:14px;border-radius:14px;border:none;background:var(--cb-purple);color:#fff;font-weight:600;cursor:pointer;font-size:14px;margin-bottom:8px}
+.corb-apikey-card .apikey-skip{color:rgba(255,255,255,.3);font-size:12px;cursor:pointer;background:none;border:none}
+
+
+/* === Ambient arrival stars === */
+.corb-stars-bg{position:fixed;inset:0;z-index:99999;pointer-events:none;opacity:0;transition:opacity .8s ease}
+.corb-stars-bg.show{opacity:1}
+.corb-star-dot{position:absolute;width:1px;height:1px;background:#fff;border-radius:50%;opacity:0}
+@keyframes cbStarGlow{0%{opacity:0;transform:scale(.5)}50%{opacity:.8;transform:scale(1)}100%{opacity:.3;transform:scale(.7)}}
+
+
+/* === Energy convergence field === */
+.corb-energy-field{position:absolute;top:50%;left:50%;width:0;height:0;pointer-events:none;opacity:0;transition:opacity .4s}
+.corb-energy-field.active{opacity:1}
+.corb-energy-line{position:absolute;top:0;left:0;width:2px;height:60px;background:linear-gradient(rgba(123,79,191,.6),transparent);transform-origin:center bottom}
+@keyframes cbEnergyConverge{0%{transform:rotate(var(--ea,0deg)) scaleY(0);opacity:0}50%{opacity:.8}100%{transform:rotate(var(--ea,0deg)) scaleY(1);opacity:0}}
+
+
+.corb-card{position:relative;overflow:hidden}
+.corb-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(174,182,196,.15),transparent);opacity:0;transition:opacity .4s}
+.corb-card.show::before{opacity:1}
+.corb-card .cursor-inline{display:inline-block;width:3px;height:13px;background:rgba(174,182,196,.5);animation:cursorBlink2 .5s step-end infinite;vertical-align:text-bottom;margin-left:1px}
+@keyframes cursorBlink2{0%,100%{opacity:1}50%{opacity:0}}
+
+
+/* === Docked spark orbit === */
+.corb-dock-spark{position:absolute;width:2px;height:2px;border-radius:50%;background:#C4C9D2;
+  box-shadow:0 0 5px #AEB6C4,0 0 12px rgba(174,182,196,.4);pointer-events:none;top:50%;left:50%;z-index:1}
+@keyframes cbDockOrbit1{0%{transform:rotate(0deg) translateX(68px) rotate(0deg) scale(1)}50%{transform:rotate(180deg) translateX(68px) rotate(-180deg) scale(1.6)}100%{transform:rotate(360deg) translateX(68px) rotate(-360deg) scale(1)}}
+@keyframes cbDockOrbit2{0%{transform:rotate(90deg) translateX(82px) rotate(-90deg) scale(.8)}50%{transform:rotate(270deg) translateX(82px) rotate(-270deg) scale(1.4)}100%{transform:rotate(450deg) translateX(82px) rotate(-450deg) scale(.8)}}
+
+
+.corb-sidebar::before{content:'';position:absolute;inset:0;background:rgba(8,9,12,.85);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);z-index:-1}
+.corb-sidebar::after{content:'';position:absolute;left:0;top:10%;bottom:10%;width:1px;background:linear-gradient(transparent,rgba(174,182,196,.08),transparent)}
+
+
+.corb-guide::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:40px;height:4px;border-radius:2px;background:rgba(255,255,255,.15);margin-top:10px}
+
+
+/* === Orb light rays === */
+.corb-rays{position:absolute;top:50%;left:50%;width:0;height:0;pointer-events:none;z-index:0;opacity:0;transition:opacity .3s}
+.corb-rays.active{opacity:1}
+.corb-ray{position:absolute;width:1.5px;height:90px;background:linear-gradient(rgba(232,223,245,.5),transparent);top:0;left:0;transform-origin:center bottom}
+@keyframes cbRayOut{0%{transform:rotate(var(--ra)) scaleY(0);opacity:0}40%{opacity:.6}100%{transform:rotate(var(--ra)) scaleY(1.5);opacity:0}}
+
+@keyframes cbShake{0%,100%{transform:translate(0)}10%{transform:translate(-3px,1px)}20%{transform:translate(3px,-2px)}30%{transform:translate(-4px,0)}40%{transform:translate(4px,2px)}50%{transform:translate(-2px,-1px)}60%{transform:translate(2px,1px)}70%{transform:translate(-1px,0)}}
+.cb-shaking{animation:cbShake .45s ease-out}
+
+
+.corb-ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.15);transform:scale(0);animation:cbRipple .6s ease-out;pointer-events:none}
+@keyframes cbRipple{to{transform:scale(3.5);opacity:0}}
+
+
+#corbDocked:hover .corb-orb{box-shadow:0 0 55px rgba(123,79,191,.7),0 0 110px rgba(92,58,158,.4),0 0 180px rgba(58,31,110,.25),0 0 0 4px rgba(174,182,196,.25)!important;transition:box-shadow .5s cubic-bezier(.22,1,.36,1)}#corbDocked{transition:transform .4s cubic-bezier(.25,1,.4,1)}#corbDocked:hover{transform:translate(-50%,0) scale(.29)!important}
+
+
+.corb-guide::after{content:'';position:absolute;inset:0;background:rgba(8,9,12,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);z-index:-1;border-radius:24px 24px 0 0}
+
+
+.corb-card .typed::after{content:'';display:inline-block;width:2px;height:14px;background:var(--cb-hi);margin-left:2px;vertical-align:text-bottom;animation:cursorGlow .6s step-end infinite;box-shadow:0 0 6px var(--cb-hi),0 0 12px rgba(196,201,210,.4)}@keyframes cursorGlow{0%,100%{opacity:1}50%{opacity:0}}
