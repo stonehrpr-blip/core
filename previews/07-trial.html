@@ -3434,7 +3434,11 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
             <span>Private. Only your coach sees this.</span>
           </div>
+          <button id="describeContinue" class="step-cta" disabled onclick="if(!this.disabled)advance()" style="margin-top:16px">Continue</button>
           <style>
+            .step-cta{width:100%;padding:16px;border-radius:16px;border:none;background:rgba(255,255,255,.06);color:rgba(255,255,255,.3);font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;transition:all.25s}
+            .step-cta:not(:disabled){background:#fff;color:#000;cursor:pointer}
+          </style>
             .step[data-step="101"] .field{background:rgba(255,255,255,.03);border:1.5px solid rgba(255,255,255,.1);border-radius:16px;padding:14px 16px;color:#fff;font-size:15px;line-height:1.5;width:100%;transition:border-color.25s,box-shadow.25s}
             .step[data-step="101"] .field:focus{border-color:rgba(200,210,225,.4);box-shadow:0 0 0 3px rgba(200,210,225,.06);outline:none}
             .step[data-step="101"] .field.ready{border-color:#4ade80;box-shadow:0 0 0 3px rgba(74,222,128,.08)}
@@ -15567,7 +15571,7 @@
   (function(){var cards=document.querySelectorAll('#areaPick .area-card');cards.forEach(function(c){c.addEventListener('click',function(){cards.forEach(function(x){x.classList.remove('sel')});c.classList.add('sel');state.area=c.dataset.area;refreshCTA();maybeAutoAdvance()})})})();
 
   // ── Open text (step 101) ──
-  var describeField=document.getElementById('describe');if(describeField){var dStatus=document.getElementById('describeStatus'),dCount=document.getElementById('describeCount');describeField.addEventListener('input',function(){var v=describeField.value,vt=v.trim(),len=v.length;state.describe=vt;if(dCount)dCount.textContent=len+'/200';if(len>=3){describeField.classList.add('ready');if(dStatus)dStatus.innerHTML='<span style=color:#4ade80>✓ Got it — continuing...</span>'}else{describeField.classList.remove('ready');if(dStatus)dStatus.textContent=len>0?'Keep writing...':'Type a few words to continue'}refreshCTA()})}
+  var describeField=document.getElementById('describe');if(describeField){var dStatus=document.getElementById('describeStatus'),dCount=document.getElementById('describeCount'),dBtn=document.getElementById('describeContinue');describeField.addEventListener('input',function(){var v=describeField.value,vt=v.trim(),len=v.length;state.describe=vt;if(dCount)dCount.textContent=len+'/200';if(len>=3){describeField.classList.add('ready');if(dStatus)dStatus.innerHTML='<span style=color:#4ade80>✓ Ready</span>';if(dBtn)dBtn.disabled=false}else{describeField.classList.remove('ready');if(dStatus)dStatus.textContent=len>0?'Keep writing...':'Type a few words to continue';if(dBtn)dBtn.disabled=true}refreshCTA()})}
 
   // ── Hour slider (step 102) ──
   (function(){var thumb=document.getElementById('hsThumb'),fill=document.getElementById('hsFill'),val=document.getElementById('hourValue'),track=document.getElementById('hourSlider'),dragging=false;if(!thumb)return;function setHr(x){var r=track.getBoundingClientRect(),p=Math.max(0,Math.min(1,(x-r.left)/r.width)),h=Math.round(p*8);fill.style.width=(p*100)+'%';thumb.style.left=(p*100)+'%';val.textContent=h+'h';state.hours=h;refreshCTA()};thumb.addEventListener('pointerdown',function(e){dragging=true;e.preventDefault()});document.addEventListener('pointermove',function(e){if(dragging)setHr(e.clientX)});document.addEventListener('pointerup',function(){dragging=false});track.addEventListener('click',function(e){setHr(e.clientX)})})();
