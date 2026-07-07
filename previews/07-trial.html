@@ -12510,15 +12510,26 @@
   }
 
   function finishOnboarding(paid) {
+    // ── Corbit uses every field below to personalise coaching ──
     const payload = {
-      name: state.name, profile: state.profile,
-      habit: state.habit,
-      goal: state.goal, blocker: state.blocker, routine: state.routine,
+      // Profile
+      name: state.name, profile: state.profile, age: state.age,
+      // Habit focus
+      habit: state.habit, goal: state.goal,
+      // New onboarding (v2)
+      area: state.area,              // Health/Fitness/Money/Focus/Vices/Other
+      describe: state.describe,      // Open-text "where are you right now"
+      hoursWasted: state.hours,      // Hours per day slider
+      hasRoutine: state.hasRoutine,  // Yes/No
+      routinePicks: (state.routines||[]).slice(), // Selected daily habits
+      // Legacy fields
+      blocker: state.blocker, routine: state.routine,
       tone: state.tone, checkin: state.checkin,
       promised: state.promised, trialStartedAt: Date.now(),
       applePayConnected: !!state.applePayConnected,
       plan: state.plan,
       paid: !!paid,
+      onboardingVersion: 2,
       // Habit-specific baseline
       vape: { years: state.vapeYears, amount: state.vapeAmount, reason: state.vapeReason },
       // Life baseline
