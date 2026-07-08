@@ -11474,7 +11474,7 @@
       setCTA(state.voiceDone ? 'Next' : 'Skip for now', false,
         state.voiceDone ? 'Corbit knows your voice' : 'Optional — you can do this later in Settings');
     } else if (s === 1) {
-      var nameOk = state.name.trim().length >= 2;
+      var nameOk = state.name.trim().length >= 3;
       var ageOk = (typeof state.age === 'number' && state.age >= 13 && state.age <= 100);
       setCTA('Next', !(nameOk && ageOk),
         !nameOk ? 'Enter a name to continue' : (!ageOk ? 'Enter your age to continue' : 'Looks good — tap next'));
@@ -13675,8 +13675,8 @@
   // Passes the full Core username moderation system AND isn't already taken.
   function passesModeration(n) {
     var s = n.trim();
-    // Must be 2-20 chars, letters only (with hyphens/apostrophes for compound names)
-    if (s.length < 2 || s.length > 20) return false;
+    // Must be 3-20 chars
+    if (s.length < 3 || s.length > 20) return false;
     if (!/^[\p{L}][\p{L}'\-]*$/u.test(s)) return false;
     // No spaces allowed — first name only
     if (/\s/.test(s)) return false;
@@ -13724,9 +13724,17 @@
       refreshCTA();
       return;
     }
-    // All validation through passesModeration
+    // Too short
+    if (v.length < 3) {
+      nameStatus.innerHTML = '<span style="color:#ef4444;">✕ Your name needs to be more than ' + (3 - v.length) + ' character' + (3 - v.length > 1 ? 's' : '') + '.</span>';
+      nameField.classList.add('field-bad');
+      state.name = '';
+      refreshCTA();
+      return;
+    }
+    // All other validation
     if (!passesModeration(v)) {
-      nameStatus.innerHTML = '<span style="color:#ef4444;">✕ Try a different name.</span>';
+      nameStatus.innerHTML = '<span style="color:#ef4444;">✕ That name can\'t be used — try a different one.</span>';
       nameField.classList.add('field-bad');
       state.name = '';
       refreshCTA();
