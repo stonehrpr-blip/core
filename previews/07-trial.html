@@ -3459,38 +3459,48 @@
           </style>
         </div>
 
-        <!-- STEP 104: Progress preview — dual trajectory -->
+        <!-- STEP 104: Progress preview — two paths, one choice -->
         <div class="step" data-step="104">
           <div style="text-align:center;margin-bottom:4px">
             <span style="font-size:10px;color:rgba(255,255,255,.3);letter-spacing:.5px">STEP 5 OF 12 · YOUR COACH</span>
           </div>
-          <h1 class="title" style="text-align:center">Over time,<br><span class="g">you change.</span></h1>
-          <!-- Dual trajectory graph -->
-          <div style="margin:20px 0;text-align:center">
-            <svg viewBox="0 0 300 140" style="width:100%;max-width:300px">
-              <style>
-                .line-up{stroke-dasharray:320;stroke-dashoffset:320;animation:drawLine .8s .3s cubic-bezier(.4,0,.2,1) forwards}
-                .line-dn{stroke-dasharray:320;stroke-dashoffset:320;animation:drawLine .6s .5s cubic-bezier(.4,0,.2,1) forwards}
-                @keyframes drawLine{to{stroke-dashoffset:0}}
-              </style>
+          <h1 class="title" style="text-align:center">Two paths.<br><span class="g">One choice.</span></h1>
+          <!-- Dual trajectory on a subtle card -->
+          <div style="background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:18px;padding:8px 4px 0;margin:20px 0;text-align:center">
+            <svg viewBox="0 0 300 150" style="width:100%;max-width:300px">
               <defs>
-                <linearGradient id="gup2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4ade80" stop-opacity=".15"/><stop offset="1" stop-color="#4ade80" stop-opacity="0"/></linearGradient>
+                <linearGradient id="gup3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4ade80" stop-opacity=".12"/><stop offset="1" stop-color="#4ade80" stop-opacity="0"/></linearGradient>
               </defs>
-              <!-- Red dashed flat line (without Core) -->
-              <path d="M20,105 C60,103 120,107 180,103 C220,101 260,105 280,102" fill="none" stroke="rgba(239,68,68,.35)" stroke-width="2" stroke-dasharray="5,4" class="line-dn"/>
-              <circle cx="280" cy="102" r="4" fill="rgba(239,68,68,.5)" style="opacity:0;animation:fadeIn .3s 1s forwards"/>
+              <style>
+                .lu{stroke-dasharray:300;stroke-dashoffset:300;animation:dl .8s .3s cubic-bezier(.4,0,.2,1) forwards}
+                .ld{stroke-dasharray:300;stroke-dashoffset:300;animation:dl .7s .5s cubic-bezier(.4,0,.2,1) forwards}
+                @keyframes dl{to{stroke-dashoffset:0}}
+                @keyframes fi{to{opacity:1}}
+                @keyframes pulse{0%,100%{r:5;opacity:1}50%{r:7;opacity:.7}}
+                @keyframes travel{0%{offset-distance:0%;opacity:0}10%{opacity:1}90%{opacity:1}100%{offset-distance:100%;opacity:0}}
+                .td{offset-path:path('M20,100 C60,102 100,104 140,103 C180,102 220,106 260,108');animation:travel 2s 1.2s ease-in-out forwards;opacity:0}
+                .tu{offset-path:path('M20,115 C60,105 100,85 140,70 C180,52 220,35 260,22');animation:travel 2s 1s ease-in-out forwards;opacity:0}
+              </style>
+              <!-- Red falling line (without Core) -->
+              <path d="M20,100 C60,102 100,104 140,103 C180,102 220,106 260,108" fill="none" stroke="rgba(239,68,68,.35)" stroke-width="2" stroke-dasharray="5,4" class="ld"/>
+              <circle cx="260" cy="108" r="4" fill="rgba(239,68,68,.5)" style="opacity:0;animation:fi .3s 1.1s forwards"/>
+              <text x="262" y="118" fill="rgba(239,68,68,.4)" font-size="9" font-weight="600">▼ 12%</text>
               <!-- Green rising line (with Core) -->
-              <path d="M20,110 C60,100 100,80 140,65 C180,48 220,30 280,18" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" class="line-up"/>
-              <circle cx="280" cy="18" r="5" fill="#4ade80" style="opacity:0;animation:fadeIn .3s .9s forwards"/><circle cx="280" cy="18" r="10" fill="#4ade80" opacity=".1" style="opacity:0;animation:fadeIn .3s .9s forwards"/>
-              <!-- Area fill under green line -->
-              <path d="M20,110 C60,100 100,80 140,65 C180,48 220,30 280,18 L280,120 L20,120 Z" fill="url(#gup2)" style="opacity:0;animation:fadeIn .6s .7s forwards"/>
+              <path d="M20,115 C60,105 100,85 140,70 C180,52 220,35 260,22" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" class="lu"/>
+              <path d="M20,115 C60,105 100,85 140,70 C180,52 220,35 260,22 L260,120 L20,120 Z" fill="url(#gup3)" style="opacity:0;animation:fi .6s .6s forwards"/>
+              <circle cx="260" cy="22" r="5" fill="#4ade80" style="opacity:0;animation:fi .3s .9s forwards,pulse 2s 1.5s ease-in-out infinite"/>
+              <circle cx="260" cy="22" r="10" fill="#4ade80" opacity=".08" style="opacity:0;animation:fi .3s .9s forwards"/>
+              <text x="262" y="16" fill="#4ade80" font-size="9" font-weight="700">▲ 92%</text>
+              <!-- Traveling dots -->
+              <circle r="3" fill="#4ade80" class="tu"/><circle r="3" fill="rgba(239,68,68,.6)" class="td"/>
+              <!-- Trail particles on green line -->
+              <circle cx="150" cy="60" r="1.5" fill="#4ade80" opacity="0" style="animation:fi .2s 1.5s forwards"/><circle cx="200" cy="42" r="1.5" fill="#4ade80" opacity="0" style="animation:fi .2s 1.7s forwards"/><circle cx="230" cy="32" r="1.5" fill="#4ade80" opacity="0" style="animation:fi .2s 1.8s forwards"/>
               <!-- Labels -->
-              <text x="280" y="12" fill="#4ade80" font-size="10" font-weight="700" text-anchor="end">With Core</text>
-              <text x="280" y="115" fill="rgba(239,68,68,.5)" font-size="10" text-anchor="end">Without Core</text>
-              <style>@keyframes fadeIn{to{opacity:1}}</style>
+              <text x="180" y="60" fill="#4ade80" font-size="10" font-weight="700" opacity="0" style="animation:fi .4s 1.3s forwards">With Core</text>
+              <text x="180" y="125" fill="rgba(239,68,68,.5)" font-size="10" opacity="0" style="animation:fi .4s 1.5s forwards">Without Core</text>
             </svg>
           </div>
-          <p class="copy" style="text-align:center;margin:20px 0;font-size:13px;color:rgba(255,255,255,.45);line-height:1.5">6 weeks from now,<br>you won't recognise yourself.</p>
+          <p class="copy" style="text-align:center;margin:16px 0;font-size:12px;color:rgba(255,255,255,.4);line-height:1.5">Your trajectory starts today.<br>Every day you show up, that green line climbs.</p>
           <button class="step-cta" style="width:100%" onclick="advance()">Continue <svg viewBox="0 0 24 24" style="width:16px;height:16px;vertical-align:-3px;margin-left:4px"><path d="M5 12h14M13 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         </div>
 
