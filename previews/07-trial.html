@@ -3457,26 +3457,37 @@
           </style>
         </div>
 
-        <!-- STEP 102: Hour slider -->
+        <!-- STEP 102: Hour gauge + slider -->
         <div class="step" data-step="102">
           <div class="kicker">Step 3 · Your time</div>
-          <h1 class="title" id="hourTitle">How many hours a day<br><span class="g">do you lose to this?</span></h1>
-          <p class="copy">Be honest. Most people underestimate.</p>
-          <div class="slider-wrap" style="margin-top:20px">
+          <h1 class="title" id="hourTitle">How many hours a week<br><span class="g">do you waste on this?</span></h1>
+          <p class="copy">Drag the slider. Max 168 hours (24×7).</p>
+          <!-- Semi-circle gauge -->
+          <div class="hour-gauge" id="hourGauge">
+            <svg viewBox="0 0 200 120" id="gaugeSvg">
+              <defs><clipPath id="gClip"><rect x="0" y="0" width="200" height="100"/></clipPath></defs>
+              <g clip-path="url(#gClip)" id="gSegments"></g>
+              <text id="gVal" x="100" y="72" text-anchor="middle" fill="rgba(255,255,255,.3)" font-size="44" font-weight="800">0</text>
+              <text id="gLabel" x="100" y="92" text-anchor="middle" fill="rgba(255,255,255,.25)" font-size="12">hrs/week</text>
+            </svg>
+          </div>
+          <!-- Slider below gauge -->
+          <div class="slider-wrap">
             <div class="hour-slider" id="hourSlider">
               <div class="hs-track"><div class="hs-fill" id="hsFill"></div></div>
               <div class="hs-thumb" id="hsThumb"></div>
             </div>
-            <div class="hs-labels"><span>0</span><span>1h</span><span>2h</span><span>4h</span><span>6h</span><span>8h+</span></div>
-            <div id="hourValue" style="text-align:center;font-size:40px;font-weight:800;color:rgba(255,255,255,.3);margin-top:12px">0h/day</div>
+            <div class="hs-labels"><span>0</span><span>20</span><span>40</span><span>80</span><span>120</span><span>168h</span></div>
           </div>
           <button id="hourContinue" class="step-cta" disabled onclick="if(!this.disabled)advance()">Continue</button>
           <style>
-            .hour-slider{position:relative;height:6px;margin:24px 0}
-            .hs-track{position:absolute;inset:0;border-radius:3px;background:rgba(255,255,255,.06)}
-            .hs-fill{position:absolute;inset:0;border-radius:3px;background:linear-gradient(90deg,#4ade80,#eab308,#ef4444);width:0%;transition:width.08s}
-            .hs-thumb{position:absolute;top:50%;left:0;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.4);transform:translate(-50%,-50%);cursor:grab;transition:left.08s}
-            .hs-labels{display:flex;justify-content:space-between;font-size:10.5px;color:rgba(255,255,255,.35);margin-top:6px;padding:0 2px}
+            .hour-gauge{width:200px;height:120px;margin:0 auto 16px}
+            .hour-gauge svg{width:100%;height:100%}
+            .hour-slider{position:relative;height:6px;margin:20px 0 8px}
+            .hs-track{position:absolute;inset:0;border-radius:3px;background:rgba(255,255,255,.08)}
+            .hs-fill{position:absolute;inset:0;border-radius:3px;background:rgba(255,255,255,.25);width:0%;transition:width.06s}
+            .hs-thumb{position:absolute;top:50%;left:0;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.4);transform:translate(-50%,-50%);cursor:grab;transition:left.06s}
+            .hs-labels{display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,.3);margin-top:4px;padding:0 2px}
           </style>
         </div>
 
@@ -12089,7 +12100,7 @@
     const s = state.step;
     if (s === 100) { setCTA(state.area?'Continue':'Next', !state.area, state.area?'Area locked':'Pick an area'); }
     else if (s === 101) { var d=state.describe||''; setCTA('Continue',d.length<3,d.length<3?'Write a few words':'Got it'); }
-    else if (s === 102) { setCTA('Continue',!state.hours,!state.hours?'Drag the slider':state.hours+'h/day'); }
+    else if (s === 102) { setCTA('Continue',!state.hours,!state.hours?'Drag the slider to continue':state.hours+'h/week — tap to continue'); }
     else if (s === 103) { setCTA('Continue',false,'6 weeks of progress'); }
     else if (s === 104) { setCTA('Next',!state.hasRoutine,!state.hasRoutine?'Pick yes or no':''); }
     else if (s === 105) { var rc=state.routines&&state.routines.length||0; setCTA('Continue',rc<1,rc<1?'Tap at least one':rc+' selected'); }
@@ -15613,10 +15624,19 @@
   var describeField=document.getElementById('describe');if(describeField){var dStatus=document.getElementById('describeStatus'),dCount=document.getElementById('describeCount'),dBtn=document.getElementById('describeContinue'),dMic=document.getElementById('describeMic'),dListening=false,dRec=null;function updateDescribe(){var v=describeField.value,vt=v.trim(),len=v.length;state.describe=vt;if(dCount)dCount.textContent=len+'/200';if(len>=3){describeField.classList.add('ready');if(dStatus)dStatus.innerHTML='<span style=color:#4ade80>✓ Ready</span>';if(dBtn)dBtn.disabled=false}else{describeField.classList.remove('ready');if(dStatus)dStatus.textContent=len>0?'Keep writing...':'Type or tap mic to speak';if(dBtn)dBtn.disabled=true}refreshCTA()}describeField.addEventListener('input',updateDescribe);if(dMic){dMic.addEventListener('click',function(){if(dListening){dListening=false;if(dRec){try{dRec.stop()}catch(e){}dRec=null}dMic.classList.remove('listening');if(dStatus)dStatus.textContent='Type or tap mic to speak';return}var SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){if(dStatus)dStatus.innerHTML='<span style=color:#ef4444>Voice not supported</span>';return}dRec=new SR();dRec.lang='';dRec.continuous=true;dRec.interimResults=true;dRec.onresult=function(ev){var t="";for(var i=0;i<ev.results.length;i++){var r=ev.results[i][0].transcript;if(ev.results[i].isFinal){t+=r.charAt(0).toUpperCase()+r.slice(1);if(!/[.!?]$/.test(r))t+=".";t+=" "}else{t+=r+" "}}if(t.length>=200){dListening=false;if(dRec){try{dRec.stop()}catch(e){}dRec=null}dMic.classList.remove("listening");if(dStatus)dStatus.textContent="200/200 — limit reached"}describeField.value=t.slice(0,200);updateDescribe();setTimeout(function(){describeField.classList.remove("typing")},300)};dRec.onerror=function(){dListening=false;dMic.classList.remove('listening');if(dStatus)dStatus.textContent='Type or tap mic to speak'};dRec.onend=function(){if(dListening){try{dRec.start()}catch(e){dListening=false;dMic.classList.remove('listening')}}};try{dRec.start();dListening=true;dMic.classList.add('listening');if(dStatus)dStatus.innerHTML='<span style=color:#ef4444>Listening…</span>'}catch(e){dListening=false;dMic.classList.remove('listening')}})}}
 
   // ── Hour slider (step 102) ──
-  (function(){var thumb=document.getElementById('hsThumb'),fill=document.getElementById('hsFill'),val=document.getElementById('hourValue'),track=document.getElementById('hourSlider'),btn=document.getElementById('hourContinue'),title=document.getElementById('hourTitle'),dragging=false;if(!thumb)return;function updateUI(h){fill.style.width=((h/8)*100)+'%';thumb.style.left=((h/8)*100)+'%';var colors=['#4ade80','#4ade80','#eab308','#f59e0b','#ef4444','#ef4444','#ef4444','#dc2626','#dc2626'];val.style.color=colors[h]||'#dc2626';val.textContent=h+'h/day';if(btn)btn.disabled=h===0;state.hours=h;refreshCTA()};function setHr(x){var r=track.getBoundingClientRect(),p=Math.max(0,Math.min(1,(x-r.left)/r.width)),h=Math.round(p*8);updateUI(h)};thumb.addEventListener('pointerdown',function(e){dragging=true;e.preventDefault()});document.addEventListener('pointermove',function(e){if(dragging)setHr(e.clientX)});document.addEventListener('pointerup',function(){dragging=false});track.addEventListener('click',function(e){setHr(e.clientX)});if(title&&state.area){var an={health:'your health',fitness:'your fitness',money:'your finances',focus:'your focus',vices:'your habits'};title.innerHTML='How many hours a day<br><span class=g>do you lose to '+ (an[state.area]||'this') +'?</span>'}})();
+  (function(){var thumb=document.getElementById('hsThumb'),fill=document.getElementById('hsFill'),track=document.getElementById('hourSlider'),btn=document.getElementById('hourContinue'),seg=document.getElementById('gSegments'),gVal=document.getElementById('gVal'),dragging=false,MAX=168,SEG=56;if(!thumb)return;
+    // Build gauge segments (56 thin slices forming a semi-circle)
+    if(seg){var html='',r=90,cx=100,cy=100;for(var i=0;i<SEG;i++){var a1=(Math.PI*(i/SEG)),a2=(Math.PI*((i+1)/SEG));var x1=cx+r*Math.cos(a1),y1=cy-r*Math.sin(a1),x2=cx+r*Math.cos(a2),y2=cy-r*Math.sin(a2);var col=i<SEG*.35?'rgba(74,222,128,.15)':i<SEG*.6?'rgba(234,179,8,.15)':i<SEG*.85?'rgba(249,115,22,.15)':'rgba(239,68,68,.15)';html+='<path d=\"M'+cx+' '+cy+' L'+x1+' '+y1+' A'+r+' '+r+' 0 0 0 '+x2+' '+y2+' Z\" fill=\"'+col+'\" data-idx=\"'+i+'\"/>'}seg.innerHTML=html}
+    function updateUI(h){var p=h/MAX;fill.style.width=(p*100)+'%';thumb.style.left=(p*100)+'%';
+      // Color segments based on value
+      var segs=seg?seg.querySelectorAll('path'):null;if(segs){var lit=Math.round(p*SEG);segs.forEach(function(s,i){var c=i<lit?(i<SEG*.35?'rgba(74,222,128,.9)':i<SEG*.6?'rgba(234,179,8,.9)':i<SEG*.85?'rgba(249,115,22,.9)':'rgba(239,68,68,.9)'):(i<SEG*.35?'rgba(74,222,128,.15)':i<SEG*.6?'rgba(234,179,8,.15)':i<SEG*.85?'rgba(249,115,22,.15)':'rgba(239,68,68,.15)');s.setAttribute('fill',c)})}
+      var c2=p<.35?'#4ade80':p<.6?'#eab308':p<.85?'#f97316':'#ef4444';if(gVal){gVal.textContent=h;gVal.setAttribute('fill',c2)}
+      state.hours=h;if(btn)btn.disabled=h===0;refreshCTA()}
+    function setHr(x){var r=track.getBoundingClientRect(),p=Math.max(0,Math.min(1,(x-r.left)/r.width)),h=Math.round(p*MAX);updateUI(h)}
+    thumb.addEventListener('pointerdown',function(e){dragging=true;e.preventDefault()});document.addEventListener('pointermove',function(e){if(dragging)setHr(e.clientX)});document.addEventListener('pointerup',function(){dragging=false});track.addEventListener('click',function(e){setHr(e.clientX)});setHr(track.getBoundingClientRect().left)})();
 
   // ── Time waste visual (step 103) ──
-  (function(){var icon=document.getElementById('twIcon'),stat=document.getElementById('twStat'),ctx=document.getElementById('twContext'),btn=document.getElementById('wasteContinue');if(!icon)return;var h=state.hours||0;var days=Math.round(h*365/24),weeks=Math.round(days/7);if(h===0){icon.textContent='✅';stat.textContent='Zero hours lost';ctx.textContent='You are already in control.';btn.disabled=false}else if(h<=1){icon.textContent='🕐';stat.textContent='~'+days+' days/year';ctx.textContent='About '+(days>=1?days:1)+' full days. Catch it early.';btn.disabled=false}else if(h<=3){icon.textContent='📅';stat.textContent='~'+days+' days/year';ctx.textContent='That is '+weeks+' full weeks. Time for a change.';btn.disabled=false}else if(h<=5){icon.textContent='⏰';stat.textContent='~'+days+' days/year';ctx.textContent='Over '+weeks+' weeks lost. You deserve better.';btn.disabled=false}else{icon.textContent='🔴';stat.textContent='~'+days+' days/year';ctx.textContent='More than '+weeks+' weeks. Let this be the moment.';btn.disabled=false}})();
+  (function(){var icon=document.getElementById('twIcon'),stat=document.getElementById('twStat'),ctx=document.getElementById('twContext'),btn=document.getElementById('wasteContinue');if(!icon)return;var h=state.hours||0;var days=Math.round(h*52/24),weeks=Math.round(days/7);if(h===0){icon.textContent='✅';stat.textContent='Zero hours lost';ctx.textContent='You are already in control.';btn.disabled=false}else if(h<=7){icon.textContent='🕐';stat.textContent='~'+days+' days/year';ctx.textContent='About '+(days>=1?days:1)+' full days. Catch it early.';btn.disabled=false}else if(h<=21){icon.textContent='📅';stat.textContent='~'+days+' days/year';ctx.textContent='That is '+weeks+' full weeks. Time for a change.';btn.disabled=false}else if(h<=35){icon.textContent='⏰';stat.textContent='~'+days+' days/year';ctx.textContent='Over '+weeks+' weeks lost. You deserve better.';btn.disabled=false}else{icon.textContent='🔴';stat.textContent='~'+days+' days/year';ctx.textContent='More than '+weeks+' weeks. Let this be the moment.';btn.disabled=false}})();
 
   // ── Routine yes/no (step 104) ──
   (function(){var btns=document.querySelectorAll('.yn-btn');btns.forEach(function(b){b.addEventListener('click',function(){btns.forEach(function(x){x.classList.remove('sel')});b.classList.add('sel');state.hasRoutine=b.dataset.yn;refreshCTA();maybeAutoAdvance()})})})();
