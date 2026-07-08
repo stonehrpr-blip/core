@@ -3459,45 +3459,6 @@
           </style>
         </div>
 
-        <!-- STEP 104: Your trajectory -->
-        <div class="step" data-step="104">
-          <div class="kicker">Step 5 • Your Coach</div>
-          <h1 class="title">Over time,<br><span class="g">you change.</span></h1>
-          <div style="background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.04);border-radius:20px;padding:8px 8px 4px;margin:16px 0 12px">
-            <svg viewBox="0 0 320 140" style="width:100%;max-width:320px;display:block">
-              <style>
-                .dw{stroke-dasharray:500;stroke-dashoffset:500;animation:dw .9s .2s cubic-bezier(.4,0,.2,1) forwards}
-                .dw2{stroke-dasharray:500;stroke-dashoffset:500;animation:dw .8s .5s cubic-bezier(.4,0,.2,1) forwards}
-                .rv{opacity:0;animation:rv .5s .9s ease-out forwards}
-                @keyframes dw{to{stroke-dashoffset:0}}
-                @keyframes rv{to{opacity:1}}
-                @keyframes pls{0%,100%{opacity:1}50%{opacity:.4}}
-              </style>
-              <defs><linearGradient id="ga2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22c55e" stop-opacity=".18"/><stop offset="1" stop-color="transparent"/></linearGradient></defs>
-              <line x1="0" y1="135" x2="320" y2="135" stroke="rgba(255,255,255,.03)" stroke-width="1"/>
-              <!-- Green: With Core — squiggly climb -->
-              <path d="M20,132 C50,128 80,120 110,108 C140,92 160,80 180,68 C210,52 240,38 270,28 C290,22 305,18 312,16" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" class="dw"/>
-              <path d="M20,132 C50,128 80,120 110,108 C140,92 160,80 180,68 C210,52 240,38 270,28 C290,22 305,18 312,16 L312,135 Z" fill="url(#ga2)" class="rv"/>
-              <circle cx="312" cy="16" r="5" fill="#22c55e" class="rv" style="animation:rv .3s .8s ease-out forwards,pls 2s 1.4s ease-in-out infinite"/>
-              <circle cx="312" cy="16" r="12" fill="#22c55e" opacity=".06" class="rv"/>
-              <!-- Red: Without Core — squiggly flat/dip -->
-              <path d="M20,132 C50,130 80,133 110,131 C140,128 160,130 180,132 C210,134 240,133 270,135 C290,136 305,137 312,138" fill="none" stroke="#f87171" stroke-width="2.5" stroke-dasharray="6,5" class="dw2"/>
-              <circle cx="312" cy="138" r="5" fill="#f87171" class="rv" style="animation-delay:1s"/>
-            </svg>
-            <div style="display:flex;justify-content:space-between;padding:0 10px 8px">
-              <div>
-                <div style="font-size:12px;font-weight:700;color:#22c55e" class="rv">With Core</div>
-                <div style="font-size:9px;color:rgba(255,255,255,.2)" class="rv">Trajectory → Progress</div>
-              </div>
-              <div style="text-align:right">
-                <div style="font-size:12px;font-weight:700;color:#f87171" class="rv">Without</div>
-                <div style="font-size:9px;color:rgba(255,255,255,.15)" class="rv">Trajectory → Stagnation</div>
-              </div>
-            </div>
-          </div>
-          <p class="copy" style="text-align:center;margin:8px 0 12px;font-size:12px;color:rgba(255,255,255,.3);line-height:1.4">6 weeks from now, you won't recognise yourself.</p>
-          <button class="step-cta" style="width:100%" onclick="advance()">Continue <svg viewBox="0 0 24 24" style="width:16px;height:16px;vertical-align:-3px;margin-left:4px"><path d="M5 12h14M13 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-        </div>
 
         <!-- STEP 104: Routine yes/no -->
         <div class="step" data-step="105">
@@ -11176,7 +11137,7 @@
   // 11=blocker · 12=routine · 13=tone · 14=check-in
   // 15-19=the why (past attempts/triggers/real why/who knows/30-day vision)
   // 20=personalized plan payoff · 21=pay
-  const TOTAL = 13;
+  const TOTAL = 12;
   // ── Visit ORDER ─────────────────────────────────────────────────────────
   // Lean, interleaved flow that REUSES existing step bodies (no renumbering),
   // so step-scoped CSS + the parallel habit-branching work stay intact.
@@ -11202,7 +11163,7 @@
   //   0  sign the contract
   //   21 portal / paywall
   // Lean ≤60s flow — 5 quick questions, a payoff, then the contract + portal.
-  const ORDER = [100, 101, 1, 2, 104, 24, 105, 106, 22, 0, 107, 8, 17];
+  const ORDER = [100, 101, 1, 2, 24, 105, 106, 22, 0, 107, 8, 17];
   function curPos() { const i = ORDER.indexOf(state.step); return i < 0 ? 0 : i; }
   // Every screen the user steps through is counted EXCEPT the portal/paywall (21).
   // The 30-day payoff (16) and the contract (0) are real steps too, so the
@@ -11490,9 +11451,9 @@
     const s = state.step;
     if (s === 100) { setCTA(state.area?'Continue':'Next', !state.area, state.area?'Area locked':'Pick an area'); }
     else if (s === 101) { var d=state.describe||''; setCTA('Continue',d.length<3,d.length<3?'Write a few words':'Got it'); }
-    else if (s === 104) { setCTA('Next',!state.hasRoutine,!state.hasRoutine?'Pick yes or no':''); }
-    else if (s === 105) { var rc=state.routines&&state.routines.length||0; setCTA('Continue',rc<1,rc<1?'Tap at least one':rc+' selected'); }
-    else if (s === 106) { setCTA("Let's go",false,'Everything starts now'); }
+    else if (s === 105) { setCTA('Next',!state.hasRoutine,!state.hasRoutine?'Pick yes or no':''); }
+    else if (s === 106) { var rc=state.routines&&state.routines.length||0; setCTA('Continue',rc<1,rc<1?'Tap at least one':rc+' selected'); }
+    else if (s === 107) { setCTA("Let's go",false,'Everything starts now'); }
     else if (s === 0) {
       setCTA('Sign', !state.promised,
         state.promised ? 'Signed. Tap to seal it.' : 'Slide the handle to commit');
