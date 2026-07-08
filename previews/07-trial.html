@@ -13689,15 +13689,9 @@
     if (/(.)\1\1\1/.test(s)) return false;
     // Reject if it looks like an email, URL, or phone
     if (/[@:/]/.test(s)) return false;
-    // Real names that happen to contain blocked substrings — let them through
-    var WHITELIST = /^(Dick|Dickie|Dickinson|Rich|Richard|Richie|Richmond|Cocker|Cockburn|Hitchcock|Kiss|Kisser|Kissinger|Titus|Titania|Tito|Anastasia|Anastacio)$/i;
-    if (!WHITELIST.test(s)) {
-    // Blocked exact matches
+    // Blocked exact matches — 100+ words covering profanity, slurs, violence, drugs, etc.
     var BLOCKED = /^(test|admin|user|demo|guest|root|null|undefined|system|moderator|staff|support|help|info|nobody|anonymous|unknown|delete|remove|none|void|blank|sample|example|asshole|arse|bastard|bitch|bollocks|bugger|cock|cunt|damn|dick|dildo|douche|fag|faggot|fuck|hell|jerk|knob|milf|moron|nigger|paki|piss|prick|pussy|retard|shit|slag|slut|spaz|spic|tits|twat|wank|whore|chink|gook|kike|tranny|dyke|homo|queer|kill|murder|suicide|die|heroin|cocaine|crack|meth|ecstasy|ketamine|opium|viagra|xanax|valium|porn|sex|xxx|cum|penis|vagina|boob|anal|orgy|rape|pedo|incest|hitler|nazi|isis|terrorist|jihad|bomb|shoot|stab|blood|corpse|dead|satan|lucifer|demon|god|jesus|allah|yahweh|buddha|church|mosque|temple|abortion|genocide|torture|slave|traffick|cartel|mafia|gang|lynch|execute|poison|anthrax|cyanide|nuke|nuclear)$/i;
     if (BLOCKED.test(s)) return false;
-    // Blocked substring anywhere in the name
-    if (/(asshole|arse|bastard|bitch|bollocks|bugger|cock|cunt|damn|dick|dildo|douche|fag|faggot|fuck|hell|knob|milf|moron|nigger|paki|piss|prick|pussy|retard|shit|slag|slut|spaz|spic|tits|twat|wank|whore|chink|gook|kike|tranny|dyke|homo|queer|kill|murder|suicide|die|heroin|cocaine|crack|meth|ecstasy|ketamine|opium|viagra|xanax|valium|porn|sex|xxx|cum|penis|vagina|boob|anal|orgy|rape|pedo|incest|hitler|nazi|isis|terrorist|jihad|bomb|shoot|stab|blood|corpse|dead|satan|lucifer|demon|abort|genocide|torture|slave|traffick|cartel|mafia|lynch|execute|poison|nuke)/i.test(s)) return false;
-    }
     try {
       if (window.coreModeration && window.coreModeration.checkUsername) {
         return window.coreModeration.checkUsername(n).ok;
