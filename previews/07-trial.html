@@ -185,6 +185,8 @@
   /* Name field — clean red/green validation */
   .field.field-ok { border-color:#4ade80!important; box-shadow:0 0 0 2px rgba(74,222,128,0.25)!important; }
   .field.field-bad { border-color:#ef4444!important; box-shadow:0 0 0 2px rgba(239,68,68,0.2)!important; }
+  .name-sug-chip{display:inline-block;padding:4px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.6);font-size:12px;cursor:pointer;margin:0 4px;transition:all.15s;font-family:inherit}
+  .name-sug-chip:hover{background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.2)}
   /* Blocked / inappropriate name: blur the typed text itself (transparent
      colour + soft text-shadow — the classic input-text blur that keeps the
      caret usable) so the word is never shown sharp on screen. */
@@ -13706,7 +13708,7 @@
     const ideas = [
       cleaned + Math.floor(Math.random() * 90 + 10),    // alex47
       cleaned + '_' + (new Date().getFullYear() % 100),  // alex_26
-      cleaned.charAt(0).toUpperCase() + cleaned.slice(1) + '.x', // Alex.x
+      cleaned.charAt(0).toUpperCase() + cleaned.slice(1) + '_x', // Alex_x
     ];
     return ideas.filter(nameAvailable).slice(0, 3);
   }
@@ -13737,6 +13739,19 @@
     if (!passesModeration(v)) {
       nameStatus.innerHTML = '<span style="color:#ef4444;">✕ That name can\'t be used — try a different one.</span>';
       nameField.classList.add('field-bad');
+      state.name = '';
+      refreshCTA();
+      return;
+    }
+    // Check if name already taken locally
+    if (isLocallyTaken(v)) {
+      nameStatus.innerHTML = '<span style="color:#eab308;">⚠ That name is already in use.</span>';
+      nameField.classList.add('field-bad');
+      var sugs = suggest(v);
+      if (sugs.length) {
+        nameSugWrap.style.display = 'flex';
+        nameSugWrap.innerHTML = sugs.map(function(s){return '<button class="name-sug-chip" onclick="var nf=document.getElementById(\'name\');nf.value=\''+s+'\';nf.dispatchEvent(new Event(\'input\'))">'+s+'</button>'}).join('');
+      }
       state.name = '';
       refreshCTA();
       return;
