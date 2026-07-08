@@ -3461,31 +3461,36 @@
 
         <!-- STEP 104: Progress preview — dual trajectory -->
         <div class="step" data-step="104">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
-            <span style="background:rgba(74,222,128,.12);color:#4ade80;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px">+20 XP</span>
+          <div style="text-align:center;margin-bottom:4px">
             <span style="font-size:10px;color:rgba(255,255,255,.3);letter-spacing:.5px">STEP 5 OF 12 · YOUR COACH</span>
           </div>
-          <h1 class="title" style="margin-top:8px">Over time,<br><span class="g">you change.</span></h1>
+          <h1 class="title" style="text-align:center">Over time,<br><span class="g">you change.</span></h1>
           <!-- Dual trajectory graph -->
-          <div style="margin:16px 0">
-            <svg viewBox="0 0 300 130" style="width:100%;max-width:300px">
+          <div style="margin:20px 0;text-align:center">
+            <svg viewBox="0 0 300 140" style="width:100%;max-width:300px">
+              <style>
+                .line-up{stroke-dasharray:320;stroke-dashoffset:320;animation:drawLine .8s .3s cubic-bezier(.4,0,.2,1) forwards}
+                .line-dn{stroke-dasharray:320;stroke-dashoffset:320;animation:drawLine .6s .5s cubic-bezier(.4,0,.2,1) forwards}
+                @keyframes drawLine{to{stroke-dashoffset:0}}
+              </style>
               <defs>
-                <linearGradient id="gup" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4ade80" stop-opacity=".2"/><stop offset="1" stop-color="#4ade80" stop-opacity="0"/></linearGradient>
-                <linearGradient id="gdn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(255,255,255,0)" stop-opacity="0"/><stop offset="1" stop-color="rgba(255,255,255,.03)" stop-opacity="0"/></linearGradient>
+                <linearGradient id="gup2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4ade80" stop-opacity=".15"/><stop offset="1" stop-color="#4ade80" stop-opacity="0"/></linearGradient>
               </defs>
-              <!-- Flat line (without Core) -->
-              <path d="M20,95 L280,98" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="2" stroke-dasharray="6,4"/>
-              <circle cx="280" cy="98" r="4" fill="rgba(255,255,255,.3)"/>
-              <!-- Rising line (with Core) -->
-              <path d="M20,105 C100,95 180,70 280,25 L280,105 Z" fill="url(#gup)" opacity=".6"/>
-              <path d="M20,105 C100,90 180,65 280,22" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round"/>
-              <circle cx="280" cy="22" r="5" fill="#4ade80"/><circle cx="280" cy="22" r="10" fill="#4ade80" opacity=".15"/>
+              <!-- Red dashed flat line (without Core) -->
+              <path d="M20,105 C60,103 120,107 180,103 C220,101 260,105 280,102" fill="none" stroke="rgba(239,68,68,.35)" stroke-width="2" stroke-dasharray="5,4" class="line-dn"/>
+              <circle cx="280" cy="102" r="4" fill="rgba(239,68,68,.5)" style="opacity:0;animation:fadeIn .3s 1s forwards"/>
+              <!-- Green rising line (with Core) -->
+              <path d="M20,110 C60,100 100,80 140,65 C180,48 220,30 280,18" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" class="line-up"/>
+              <circle cx="280" cy="18" r="5" fill="#4ade80" style="opacity:0;animation:fadeIn .3s .9s forwards"/><circle cx="280" cy="18" r="10" fill="#4ade80" opacity=".1" style="opacity:0;animation:fadeIn .3s .9s forwards"/>
+              <!-- Area fill under green line -->
+              <path d="M20,110 C60,100 100,80 140,65 C180,48 220,30 280,18 L280,120 L20,120 Z" fill="url(#gup2)" style="opacity:0;animation:fadeIn .6s .7s forwards"/>
               <!-- Labels -->
-              <text x="170" y="55" fill="#4ade80" font-size="11" font-weight="700">With Core</text>
-              <text x="170" y="115" fill="rgba(255,255,255,.3)" font-size="11">Without</text>
+              <text x="280" y="12" fill="#4ade80" font-size="10" font-weight="700" text-anchor="end">With Core</text>
+              <text x="280" y="115" fill="rgba(239,68,68,.5)" font-size="10" text-anchor="end">Without Core</text>
+              <style>@keyframes fadeIn{to{opacity:1}}</style>
             </svg>
           </div>
-          <p class="copy" style="text-align:center;margin-bottom:16px">6 weeks from now, you won't recognise yourself.</p>
+          <p class="copy" style="text-align:center;margin:20px 0;font-size:13px;color:rgba(255,255,255,.45);line-height:1.5">6 weeks from now,<br>you won't recognise yourself.</p>
           <button class="step-cta" style="width:100%" onclick="advance()">Continue <svg viewBox="0 0 24 24" style="width:16px;height:16px;vertical-align:-3px;margin-left:4px"><path d="M5 12h14M13 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         </div>
 
