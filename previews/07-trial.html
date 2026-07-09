@@ -8775,11 +8775,11 @@
         <!-- STEP 24: Meet Corbit -->
         <div class="step" data-step="24">
           <div class="kicker">Step · Your coach</div>
-          <h1 class="title">This is <span class="g">Corbit.</span></h1>
-          <p class="copy">Your AI coach, built into CORE.</p>
+          <h1 class="title">Meet <span class="g">Corbit.</span></h1>
+          <p class="copy">Your AI coach, built into CORE — he keeps you on track, every day.</p>
           <div class="voice-stage">
-            <div class="cb-speech">Hey there.<br>I'll be with you every step.</div>
-            <div class="corbit-bot" id="voiceOrb">
+            <div class="cb-speech" id="cbIntroSpeech">Hi, I'm Corbit.<br>Tap me — I don't bite.</div>
+            <div class="corbit-bot" id="voiceOrb" onclick="corbitTap(this)" role="button" aria-label="Tap Corbit" tabindex="0">
               <span class="cb-halo"></span>
               <span class="cb-ring"></span>
               <span class="cb-antenna"><i class="cb-ant-stem"></i><i class="cb-ant-tip"></i></span>
@@ -8795,8 +8795,41 @@
               </div>
             </div>
           </div>
+          <script>
+            (function(){
+              var TAP_LINES = ["Hey, that tickles.","I'm always here for you.","Let's build this together.","One day at a time — I promise.","You've got this. I've got you."];
+              var tapCount = 0;
+              window.corbitTap = function(el){
+                el.classList.remove('tapped'); void el.offsetWidth; el.classList.add('tapped','happy');
+                setTimeout(function(){ el.classList.remove('happy'); },900);
+                setTimeout(function(){ el.classList.remove('tapped'); },600);
+                var bubble = document.getElementById('cbIntroSpeech');
+                if (bubble) { bubble.textContent = TAP_LINES[tapCount % TAP_LINES.length]; tapCount++; }
+                var host = el.closest('.phone') || el.closest('.step');
+                var pr = host ? host.getBoundingClientRect() : {left:0,top:0};
+                var rect = el.getBoundingClientRect();
+                var cx = rect.left - pr.left + rect.width/2, cy = rect.top - pr.top + rect.height*0.25;
+                for (var i=0;i<8;i++){
+                  var p = document.createElement('span');
+                  var ang = -Math.PI/2 + (Math.random()-0.5)*2.2;
+                  p.style.cssText = 'position:absolute;z-index:99;pointer-events:none;width:5px;height:5px;border-radius:50%;'
+                    + 'background:#E8F1FF;box-shadow:0 0 8px rgba(214,230,255,.9);left:'+cx+'px;top:'+cy+'px;'
+                    + 'animation:ynBurst .6s cubic-bezier(.22,1,.36,1) forwards;animation-delay:'+(i*0.02)+'s;'
+                    + '--bx:'+(Math.cos(ang)*50)+'px;--by:'+(Math.sin(ang)*50-20)+'px;';
+                  host.appendChild(p);
+                  setTimeout(function(elp){return function(){elp.remove()}}(p),700);
+                }
+                try{if(typeof haptic==='function')haptic(14)}catch(e){}
+              };
+            })();
+          </script>
           <button class="step-cta" style="margin-top:16px;width:100%" onclick="advance()">Continue <svg viewBox="0 0 24 24" style="width:16px;height:16px;vertical-align:-3px;margin-left:4px"><path d="M5 12h14M13 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
           <style>
+            .corbit-bot{cursor:pointer}
+            @keyframes cbJump{0%{transform:translateY(0) scale(1,1)}30%{transform:translateY(-26px) scale(.94,1.08)}55%{transform:translateY(0) scale(1.1,.9)}75%{transform:translateY(-6px) scale(.98,1.03)}100%{transform:translateY(0) scale(1,1)}}
+            .corbit-bot.tapped{animation:cbJump .6s cubic-bezier(.28,1.2,.4,1) both}
+            .cb-blush{transition:opacity .3s ease}
+            .cb-mouth{transition:width .25s ease,height .25s ease,margin-left .25s ease,border-radius .25s ease}
             .voice-stage{display:flex;flex-direction:column;align-items:center;gap:16px;margin-top:12px}
             .cb-speech{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:10px 18px;font-size:14px;color:rgba(255,255,255,.85);text-align:center;line-height:1.4;max-width:260px;position:relative;animation:cbIn .5s .3s ease both}
             .cb-speech::after{content:'';position:absolute;bottom:-7px;left:50%;margin-left:-7px;width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:7px solid rgba(255,255,255,.08)}
