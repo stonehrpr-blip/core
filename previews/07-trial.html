@@ -3476,24 +3476,36 @@
           <div class="kicker">Your routine</div>
           <h1 class="title">Do you follow<br><span class="g">a routine?</span></h1>
           <p class="copy">Even a loose one counts.</p>
-          <div class="routine-yn" style="display:flex;gap:12px;margin-top:20px;width:100%">
-            <button class="yn-btn" data-yn="yes" style="flex:1;padding:20px;border-radius:16px;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);color:#fff;font-size:16px;font-weight:700;cursor:pointer;transition:all.2s;font-family:inherit">Yes</button>
-            <button class="yn-btn" data-yn="no" style="flex:1;padding:20px;border-radius:16px;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);color:#fff;font-size:16px;font-weight:700;cursor:pointer;transition:all.2s;font-family:inherit">No</button>
+          <div class="routine-yn">
+            <button class="yn-btn yn-yes" data-yn="yes">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+              <span>Yes</span>
+            </button>
+            <button class="yn-btn yn-no" data-yn="no">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              <span>No</span>
+            </button>
           </div>
           <style>
-            .yn-btn{transition:border-color .2s ease, background .2s ease, box-shadow .2s ease, transform .15s ease}
+            .routine-yn{display:flex;gap:14px;margin-top:24px;width:100%}
+            .yn-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+              padding:30px 14px;border-radius:20px;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);
+              color:#fff;font-size:17px;font-weight:800;cursor:pointer;font-family:inherit;position:relative;overflow:visible;
+              transition:border-color .2s ease, background .2s ease, box-shadow .2s ease, transform .15s ease}
+            .yn-btn svg{width:30px;height:30px;opacity:.55;transition:opacity .2s ease, transform .2s ease}
             .yn-btn:hover{border-color:rgba(255,255,255,.3)}
-            .yn-btn:active{transform:scale(.97)}
-            .yn-btn[data-yn="yes"].sel{
-              border-color:#4ade80;
-              background:rgba(74,222,128,.1);
-              box-shadow:0 0 0 1.5px rgba(74,222,128,.5) inset, 0 0 18px rgba(74,222,128,.45), 0 0 36px rgba(74,222,128,.2);
+            .yn-btn:active{transform:scale(.96)}
+            .yn-yes.sel{
+              border-color:#4ade80; background:rgba(74,222,128,.12); color:#eafff1;
+              box-shadow:0 0 0 1.5px rgba(74,222,128,.55) inset, 0 0 22px rgba(74,222,128,.5), 0 0 44px rgba(74,222,128,.22);
             }
-            .yn-btn[data-yn="no"].sel{
-              border-color:#f87171;
-              background:rgba(248,113,113,.1);
-              box-shadow:0 0 0 1.5px rgba(248,113,113,.5) inset, 0 0 18px rgba(248,113,113,.45), 0 0 36px rgba(248,113,113,.2);
+            .yn-yes.sel svg{opacity:1;color:#4ade80;transform:scale(1.08)}
+            .yn-no.sel{
+              border-color:#f87171; background:rgba(248,113,113,.12); color:#fff0f0;
+              box-shadow:0 0 0 1.5px rgba(248,113,113,.55) inset, 0 0 22px rgba(248,113,113,.5), 0 0 44px rgba(248,113,113,.22);
             }
+            .yn-no.sel svg{opacity:1;color:#f87171;transform:scale(1.08)}
+            @keyframes ynBurst{0%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(calc(-50% + var(--bx)),calc(-50% + var(--by))) scale(0)}}
           </style>
         </div>
 
@@ -3502,19 +3514,50 @@
           <div class="kicker">Build your routine</div>
           <h1 class="title">Tap to build<br><span class="g">your day.</span></h1>
           <p class="copy">Corbit suggests — you decide.</p>
-          <div class="routine-build" id="routineBuild" style="display:flex;flex-direction:column;gap:10px;margin-top:12px;width:100%">
-            <button class="rb-chip" data-routine="wake">Wake up at the same time</button>
-            <button class="rb-chip" data-routine="water">Drink water first thing</button>
-            <button class="rb-chip" data-routine="move">Move for 10 minutes</button>
-            <button class="rb-chip" data-routine="journal">Journal for 5 minutes</button>
-            <button class="rb-chip" data-routine="screen">No phone for first 30 min</button>
-            <button class="rb-chip" data-routine="plan">Plan your top 3 tasks</button>
+          <div class="routine-build" id="routineBuild">
+            <button class="rb-chip" data-routine="wake" style="--rc:#f59e0b">
+              <span class="rb-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+              <span class="rb-label">Wake up at the same time</span>
+            </button>
+            <button class="rb-chip" data-routine="water" style="--rc:#38bdf8">
+              <span class="rb-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3C12 3 6 10.5 6 15a6 6 0 0 0 12 0c0-4.5-6-12-6-12Z"/></svg></span>
+              <span class="rb-label">Drink water first thing</span>
+            </button>
+            <button class="rb-chip" data-routine="move" style="--rc:#4ade80">
+              <span class="rb-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg></span>
+              <span class="rb-label">Move for 10 minutes</span>
+            </button>
+            <button class="rb-chip" data-routine="journal" style="--rc:#a78bfa">
+              <span class="rb-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4H6.5A2.5 2.5 0 0 0 4 6.5v13Z"/><path d="M8 7h8M8 11h6"/></svg></span>
+              <span class="rb-label">Journal for 5 minutes</span>
+            </button>
+            <button class="rb-chip" data-routine="screen" style="--rc:#f87171">
+              <span class="rb-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M3 3l18 18"/></svg></span>
+              <span class="rb-label">No phone for first 30 min</span>
+            </button>
+            <button class="rb-chip" data-routine="plan" style="--rc:#f472b6">
+              <span class="rb-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l2 2 4-4"/><rect x="3" y="4" width="18" height="17" rx="2.5"/></svg></span>
+              <span class="rb-label">Plan your top 3 tasks</span>
+            </button>
           </div>
           <style>
-            .rb-chip{all:unset;display:flex;align-items:center;gap:10px;width:100%;padding:14px 18px;border-radius:14px;border:1.5px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);color:rgba(255,255,255,.7);font-size:15px;font-weight:600;cursor:pointer;transition:all.2s;font-family:inherit;text-align:left}
-            .rb-chip:hover{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.15)}
-            .rb-chip.sel{border-color:#4ade80;background:rgba(74,222,128,.08);color:#4ade80}
-            .rb-chip.sel::after{content:'✓';margin-left:auto;font-size:14px}
+            .routine-build{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;width:100%}
+            .rb-chip{all:unset;display:flex;flex-direction:column;align-items:flex-start;gap:10px;width:100%;box-sizing:border-box;
+              padding:16px 14px;border-radius:16px;border:1.5px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);
+              color:rgba(255,255,255,.75);font-size:13px;font-weight:600;line-height:1.3;cursor:pointer;font-family:inherit;text-align:left;
+              transition:border-color .2s ease,background .2s ease,box-shadow .2s ease,transform .15s ease}
+            .rb-ico{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+              background:color-mix(in srgb, var(--rc) 16%, transparent);color:var(--rc);flex-shrink:0}
+            .rb-ico svg{width:19px;height:19px}
+            .rb-chip:hover{border-color:color-mix(in srgb, var(--rc) 45%, transparent);background:color-mix(in srgb, var(--rc) 6%, transparent)}
+            .rb-chip:active{transform:scale(.97)}
+            .rb-chip.sel{
+              border-color:var(--rc); color:#fff;
+              background:color-mix(in srgb, var(--rc) 14%, transparent);
+              box-shadow:0 0 0 1.5px color-mix(in srgb, var(--rc) 55%, transparent) inset, 0 0 20px color-mix(in srgb, var(--rc) 40%, transparent);
+            }
+            .rb-chip.sel .rb-ico{background:var(--rc);color:#08090c}
+            .rb-chip.sel .rb-label::after{content:' ✓';color:var(--rc);font-weight:800}
           </style>
         </div>
 
@@ -10690,7 +10733,7 @@
     document.body.classList.toggle('on-portal', n === 21);
     document.body.classList.toggle('on-promise', n === 0);   // hold-to-commit replaces the footer CTA
     document.body.classList.toggle('on-corbit-intro', n === 24);   // in-page Continue button replaces the footer CTA
-    document.body.classList.toggle('on-autoadvance', n === 100 || n === 2); // tap advances — no Next button
+    document.body.classList.toggle('on-autoadvance', n === 100 || n === 2 || n === 105); // tap advances — no Next button
     // Demo playback (start the one visible demo, stop any others)
     if (isDemoStep(n)) startDemo(n); else stopAllDemos();
     // Step-enter hooks (keyed by body id — unchanged by the reorder)
@@ -11070,7 +11113,7 @@
   // Auto-advance is OFF — the user always confirms with the Next button.
   // (The card still flicks away when they tap Next; see next().)
   // Single-select screens glide straight to the next one on tap (no Next tap).
-  const AUTO_ADVANCE = new Set([100,104,2,103,24,8]);
+  const AUTO_ADVANCE = new Set([100,104,2,103,24,8,105]);
   function swipeNext() { _swipeDir = 1; advance(); }
   window.swipeNext = swipeNext;
   function maybeAutoAdvance() {
@@ -14188,7 +14231,7 @@
     if (k) k.textContent = 'Step ' + Math.min(curPos() + 1, NUM_QUESTIONS)
       + ' of ' + NUM_QUESTIONS + ' · ' + CHAPTERS[chapterIndexFor()].label;
     // ...and the same body-state classes setStep() would have applied.
-    document.body.classList.toggle('on-autoadvance', state.step === 100 || state.step === 2);
+    document.body.classList.toggle('on-autoadvance', state.step === 100 || state.step === 2 || state.step === 105);
     document.body.classList.toggle('on-corbit-intro', state.step === 24);
   })();
   track('step_view', { step: 0, entry: true });
@@ -14302,7 +14345,34 @@
   var describeField=document.getElementById('describe');if(describeField){var dStatus=document.getElementById('describeStatus'),dCount=document.getElementById('describeCount'),dBtn=document.getElementById('describeContinue'),dMic=document.getElementById('describeMic'),dListening=false,dRec=null;function updateDescribe(){var v=describeField.value,vt=v.trim(),len=v.length;state.describe=vt;if(dCount)dCount.textContent=len+'/200';if(len>=3){describeField.classList.add('ready');if(dStatus)dStatus.innerHTML='<span style=color:#4ade80>✓ Ready</span>';if(dBtn)dBtn.disabled=false}else{describeField.classList.remove('ready');if(dStatus)dStatus.textContent=len>0?'Keep writing...':'Type or tap mic to speak';if(dBtn)dBtn.disabled=true}refreshCTA()}describeField.addEventListener('input',updateDescribe);if(dMic){dMic.addEventListener('click',function(){if(dListening){dListening=false;if(dRec){try{dRec.stop()}catch(e){}dRec=null}dMic.classList.remove('listening');if(dStatus)dStatus.textContent='Type or tap mic to speak';return}var SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){if(dStatus)dStatus.innerHTML='<span style=color:#ef4444>Voice not supported</span>';return}dRec=new SR();dRec.lang='';dRec.continuous=true;dRec.interimResults=true;dRec.onresult=function(ev){var t="";for(var i=0;i<ev.results.length;i++){var r=ev.results[i][0].transcript;if(ev.results[i].isFinal){t+=r.charAt(0).toUpperCase()+r.slice(1);if(!/[.!?]$/.test(r))t+=".";t+=" "}else{t+=r+" "}}if(t.length>=200){dListening=false;if(dRec){try{dRec.stop()}catch(e){}dRec=null}dMic.classList.remove("listening");if(dStatus)dStatus.textContent="200/200 — limit reached"}describeField.value=t.slice(0,200);updateDescribe();setTimeout(function(){describeField.classList.remove("typing")},300)};dRec.onerror=function(){dListening=false;dMic.classList.remove('listening');if(dStatus)dStatus.textContent='Type or tap mic to speak'};dRec.onend=function(){if(dListening){try{dRec.start()}catch(e){dListening=false;dMic.classList.remove('listening')}}};try{dRec.start();dListening=true;dMic.classList.add('listening');if(dStatus)dStatus.innerHTML='<span style=color:#ef4444>Listening…</span>'}catch(e){dListening=false;dMic.classList.remove('listening')}})}}
 
   // ── Routine yes/no (step 104) ──
-  (function(){var btns=document.querySelectorAll('.yn-btn');btns.forEach(function(b){b.addEventListener('click',function(){btns.forEach(function(x){x.classList.remove('sel')});b.classList.add('sel');state.hasRoutine=b.dataset.yn;refreshCTA();maybeAutoAdvance()})})})();
+  (function(){
+    var btns=document.querySelectorAll('.yn-btn');
+    btns.forEach(function(b){
+      b.addEventListener('click',function(){
+        btns.forEach(function(x){x.classList.remove('sel')});
+        b.classList.add('sel');
+        state.hasRoutine=b.dataset.yn;
+        var color = b.dataset.yn==='yes' ? '#4ade80' : '#f87171';
+        var host = b.closest('.phone') || b.closest('.step');
+        var pr = host ? host.getBoundingClientRect() : {left:0,top:0};
+        var rect = b.getBoundingClientRect();
+        var cx = rect.left - pr.left + rect.width/2, cy = rect.top - pr.top + rect.height/2;
+        for (var i=0;i<12;i++) {
+          var p = document.createElement('span');
+          var ang = i/12*Math.PI*2;
+          p.style.cssText = 'position:absolute;z-index:99;pointer-events:none;width:6px;height:6px;border-radius:50%;'
+            + 'background:'+color+';left:'+cx+'px;top:'+cy+'px;box-shadow:0 0 8px '+color+';'
+            + 'animation:ynBurst .6s cubic-bezier(.22,1,.36,1) forwards;animation-delay:'+(i*0.02)+'s;'
+            + '--bx:'+(Math.cos(ang)*70+Math.random()*14)+'px;--by:'+(Math.sin(ang)*70+Math.random()*14)+'px;';
+          host.appendChild(p);
+          setTimeout(function(el){return function(){el.remove()}}(p),700);
+        }
+        try{if(typeof haptic==='function')haptic(10)}catch(e){}
+        refreshCTA();
+        maybeAutoAdvance();
+      });
+    });
+  })();
 
   // ── Routine builder (step 105) ──
   (function(){var chips=document.querySelectorAll('#routineBuild .rb-chip');chips.forEach(function(c){c.addEventListener('click',function(){c.classList.toggle('sel');var sel=[];chips.forEach(function(x){if(x.classList.contains('sel'))sel.push(x.dataset.routine)});state.routines=sel;refreshCTA()})})})();
