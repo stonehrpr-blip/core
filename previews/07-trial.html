@@ -613,6 +613,7 @@
   /* faint ink "bleed" under the live stroke */
   #promiseSigUnder { stroke-dasharray: 1; stroke-dashoffset: 1; }
   #promiseSigPath { stroke-dasharray: 1; stroke-dashoffset: 1; }
+  #promiseSigFlourish { stroke-dasharray: 1; stroke-dashoffset: 1; }
   /* glowing nib that rides the stroke as it's written */
   #promiseSigPen { opacity: 0; }
   #promiseSigPen.live { opacity: 1; }
@@ -3577,7 +3578,7 @@
           <div class="kicker">Ready</div>
           <h1 class="title">Your journey<br><span class="g">starts here.</span></h1>
           <p class="copy">Everything you've shared — your story, your time, your commitment — it all leads to this moment.</p>
-          <div class="portal" aria-hidden="true" style="margin:22px auto 4px">
+          <div class="portal portal-journey" aria-hidden="true" style="margin:52px auto 4px">
             <span class="p-rays"></span>
             <span class="p-vortex"></span>
             <span class="p-ring r1"></span>
@@ -3601,6 +3602,12 @@
             </svg>
             <span class="p-floor"></span>
           </div>
+          <style>
+            /* bigger figure + more breathing room from the copy above, scoped
+               to this step only so step 21's portal is untouched */
+            .portal-journey{width:200px;height:200px}
+            .portal-journey .p-figure{width:104px;bottom:36px}
+          </style>
         </div>
 
 
@@ -3626,11 +3633,11 @@
                     <stop offset="0" stop-color="#ffffff"/><stop offset="0.5" stop-color="#d6dbe2"/><stop offset="1" stop-color="#AEB6C4" stop-opacity="0"/>
                   </radialGradient>
                 </defs>
-                <path id="promiseSigUnder" d="M13 45 C 13 26, 24 14, 33 20 C 41 25, 38 39, 29 36 C 22 34, 26 24, 38 27 C 51 30, 49 41, 62 38 C 74 35, 72 23, 86 27 C 99 31, 96 43, 110 39 C 126 34, 131 20, 146 26 C 165 33, 192 32, 220 41 C 240 47, 259 43, 274 30"
+                <path id="promiseSigUnder" pathLength="1" d="M13 45 C 13 26, 24 14, 33 20 C 41 25, 38 39, 29 36 C 22 34, 26 24, 38 27 C 51 30, 49 41, 62 38 C 74 35, 72 23, 86 27 C 99 31, 96 43, 110 39 C 126 34, 131 20, 146 26 C 165 33, 192 32, 220 41 C 240 47, 259 43, 274 30"
                   stroke="#AEB6C4" stroke-opacity="0.14" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-                <path id="promiseSigPath" d="M13 45 C 13 26, 24 14, 33 20 C 41 25, 38 39, 29 36 C 22 34, 26 24, 38 27 C 51 30, 49 41, 62 38 C 74 35, 72 23, 86 27 C 99 31, 96 43, 110 39 C 126 34, 131 20, 146 26 C 165 33, 192 32, 220 41 C 240 47, 259 43, 274 30"
+                <path id="promiseSigPath" pathLength="1" d="M13 45 C 13 26, 24 14, 33 20 C 41 25, 38 39, 29 36 C 22 34, 26 24, 38 27 C 51 30, 49 41, 62 38 C 74 35, 72 23, 86 27 C 99 31, 96 43, 110 39 C 126 34, 131 20, 146 26 C 165 33, 192 32, 220 41 C 240 47, 259 43, 274 30"
                   stroke="url(#promiseSigGrad)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                <path id="promiseSigFlourish" d="M118 51 C 152 59, 200 59, 256 48" stroke="url(#promiseSigGrad)" stroke-opacity="0.55" stroke-width="2" stroke-linecap="round" fill="none"/>
+                <path id="promiseSigFlourish" pathLength="1" d="M118 51 C 152 59, 200 59, 256 48" stroke="url(#promiseSigGrad)" stroke-opacity="0.55" stroke-width="2" stroke-linecap="round" fill="none"/>
                 <circle id="promiseSigPen" r="4.2" fill="url(#promiseSigNib)"/>
               </svg>
               <div class="promise-sign-line"></div>
@@ -4517,11 +4524,12 @@
                 </linearGradient>
               </defs>
               <line class="grid" x1="0" y1="42" x2="320" y2="42"/><line class="grid" x1="0" y1="85" x2="320" y2="85"/><line class="grid" x1="0" y1="128" x2="320" y2="128"/>
-              <!-- both start low (bottom-left); green climbs, red stays down -->
-              <path class="area area-bad" d="M0,150 C70,151 140,152 210,153 C260,154 290,156 320,158 L320,170 L0,170 Z"/>
-              <path class="line line-bad" pathLength="1" d="M0,150 C70,151 140,152 210,153 C260,154 290,156 320,158"/>
-              <path class="area area-good" d="M0,148 C56,140 96,126 140,104 C188,80 240,50 320,24 L320,170 L0,170 Z"/>
-              <path class="line line-good" pathLength="1" d="M0,148 C56,140 96,126 140,104 C188,80 240,50 320,24"/>
+              <!-- both start low (bottom-left); green climbs with a real, wobbly
+                   life-graph feel, red keeps a rough, restless line near the bottom -->
+              <path class="area area-bad" d="M0,150 C25,144 45,158 70,153 C95,148 115,160 140,154 C165,148 185,158 210,152 C240,146 265,156 290,150 C300,148 310,153 320,150 L320,170 L0,170 Z"/>
+              <path class="line line-bad" pathLength="1" d="M0,150 C25,144 45,158 70,153 C95,148 115,160 140,154 C165,148 185,158 210,152 C240,146 265,156 290,150 C300,148 310,153 320,150"/>
+              <path class="area area-good" d="M0,148 C24,136 40,150 62,132 C84,114 100,128 124,104 C148,80 168,96 190,74 C212,52 232,66 254,46 C276,26 296,36 320,16 L320,170 L0,170 Z"/>
+              <path class="line line-good" pathLength="1" d="M0,148 C24,136 40,150 62,132 C84,114 100,128 124,104 C148,80 168,96 190,74 C212,52 232,66 254,46 C276,26 296,36 320,16"/>
             </svg>
             <div class="graph-x"><span>Day 1</span><span>Day 15</span><span>Day 30</span></div>
           </div>
@@ -8772,7 +8780,7 @@
           <p class="copy">Your AI coach, built into CORE — he keeps you on track, every day.</p>
           <div class="voice-stage">
             <div class="cb-speech" id="cbIntroSpeech">Hi, I'm Corbit.<br>Tap me — I don't bite.</div>
-            <div class="corbit-bot" id="voiceOrb" onclick="corbitTap(this)" role="button" aria-label="Tap Corbit" tabindex="0">
+            <div class="corbit-bot" id="voiceOrb" data-state="calm" onclick="corbitTap(this)" role="button" aria-label="Tap Corbit" tabindex="0">
               <span class="cb-halo"></span>
               <span class="cb-ring"></span>
               <span class="cb-antenna"><i class="cb-ant-stem"></i><i class="cb-ant-tip"></i></span>
@@ -8790,47 +8798,91 @@
           </div>
           <script>
             (function(){
-              var TAP_LINES = [
-                "Hey, that tickles!","I'm always here for you.","Let's build this together.",
-                "One day at a time — I promise.","You've got this. I've got you.",
-                "Okay okay, I'm awake!","Poke me all you want, I'm not going anywhere.",
-                "That's the spirit.","Ready when you are.","Careful, I bounce back."
-              ];
-              var lastIdx = -1;
-              function nextLine(){
-                var i;
-                do { i = Math.floor(Math.random() * TAP_LINES.length); } while (i === lastIdx && TAP_LINES.length > 1);
-                lastIdx = i;
-                return TAP_LINES[i];
+              var el = document.getElementById('voiceOrb');
+              var bubble = document.getElementById('cbIntroSpeech');
+              if (!el) return;
+
+              // ── Corbit's emotion engine ──────────────────────────────────
+              // 11 states, one glow color each (see the [data-state="…"] rules
+              // in this step's <style> block below). Never angry/mean/sarcastic/
+              // disappointed/passive-aggressive/judgmental — only ever calm,
+              // warm, or encouraging, even when flagging something.
+              var EMOTION_COLORS = {
+                calm:'#7dc4ff', happy:'#ffd76a', excited:'#ff7ad9', focused:'#38e0ff',
+                concerned:'#5b7ca8', proud:'#ffd23f', curious:'#b3a6ff', thinking:'#c9ced8',
+                motivational:'#ff6b4a', sleepy:'#5a5f8a', celebratory:'#ffd23f'
+              };
+              var clearTimer = null;
+              function setEmotion(state, opts) {
+                opts = opts || {};
+                if (!EMOTION_COLORS[state]) return;
+                el.dataset.state = state;
+                if (opts.line && bubble) bubble.textContent = opts.line;
+                if (opts.particles) burst(opts.particles === true ? EMOTION_COLORS[state] : opts.particles, opts.count || 10);
+                clearTimeout(clearTimer);
+                if (opts.revertAfter) clearTimer = setTimeout(function(){ setEmotion(opts.revertTo || 'calm'); }, opts.revertAfter);
               }
-              var tapStreak = 0, streakTimer = null;
-              window.corbitTap = function(el){
-                el.classList.remove('tapped'); void el.offsetWidth; el.classList.add('tapped','happy');
-                // rapid repeat taps bounce a little higher each time, up to a cap — feels alive, not looping
-                tapStreak = Math.min(tapStreak + 1, 3);
-                clearTimeout(streakTimer);
-                streakTimer = setTimeout(function(){ tapStreak = 0; }, 900);
-                el.style.setProperty('--jump-scale', (1 + tapStreak * 0.12).toFixed(2));
-                setTimeout(function(){ el.classList.remove('happy'); },900);
-                setTimeout(function(){ el.classList.remove('tapped'); },750);
-                var bubble = document.getElementById('cbIntroSpeech');
-                if (bubble) bubble.textContent = nextLine();
+              window.corbitSetEmotion = setEmotion;
+
+              function burst(color, count) {
                 var host = el.closest('.phone') || el.closest('.step');
-                var pr = host ? host.getBoundingClientRect() : {left:0,top:0};
-                var rect = el.getBoundingClientRect();
+                if (!host) return;
+                var pr = host.getBoundingClientRect(), rect = el.getBoundingClientRect();
                 var cx = rect.left - pr.left + rect.width/2, cy = rect.top - pr.top + rect.height*0.25;
-                for (var i=0;i<10;i++){
+                for (var i=0;i<count;i++){
                   var p = document.createElement('span');
-                  var ang = -Math.PI/2 + (Math.random()-0.5)*2.4;
-                  var d = 45 + Math.random()*30;
+                  var ang = -Math.PI/2 + (Math.random()-0.5)*2.6;
+                  var d = 40 + Math.random()*40;
+                  var c = Array.isArray(color) ? color[i % color.length] : color;
                   p.style.cssText = 'position:absolute;z-index:99;pointer-events:none;width:5px;height:5px;border-radius:50%;'
-                    + 'background:#E8F1FF;box-shadow:0 0 8px rgba(214,230,255,.9);left:'+cx+'px;top:'+cy+'px;'
+                    + 'background:'+c+';box-shadow:0 0 8px '+c+';left:'+cx+'px;top:'+cy+'px;'
                     + 'animation:ynBurst .65s cubic-bezier(.22,1,.36,1) forwards;animation-delay:'+(i*0.018)+'s;'
                     + '--bx:'+(Math.cos(ang)*d)+'px;--by:'+(Math.sin(ang)*d-20)+'px;';
                   host.appendChild(p);
                   setTimeout(function(elp){return function(){elp.remove()}}(p),750);
                 }
-                try{if(typeof haptic==='function')haptic(tapStreak>=3?[10,20,10]:14)}catch(e){}
+              }
+
+              // Sleepy after hours: a small real touch — late at night Corbit
+              // winds down instead of doomscrolling right along with you.
+              var hour = new Date().getHours();
+              var isLateNight = hour >= 23 || hour < 6;
+              if (isLateNight) {
+                setEmotion('sleepy', { line: "It's late — I'll keep it brief tonight." });
+              } else {
+                // Calm on arrival, then curious a beat later — inviting the tap.
+                setTimeout(function(){
+                  setEmotion('curious', { line: "Hi, I'm Corbit. Go on, tap me." });
+                }, 1400);
+              }
+
+              var TAP_LINES = {
+                happy: ["Hey, that tickles!","Let's build this together.","One day at a time — I promise.","That's the spirit."],
+                excited: ["Whoa, okay!","I like your energy.","Let's go, let's go!"],
+                proud: ["Look at you go.","Now that's commitment.","You keep this up, I keep bragging."],
+                celebratory: ["This calls for confetti!","We're doing this!","Best tap yet."]
+              };
+              function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+              var tapCount = 0, tapWindowTimer = null;
+              window.corbitTap = function(target){
+                target.classList.remove('tapped'); void target.offsetWidth; target.classList.add('tapped');
+                tapCount++;
+                clearTimeout(tapWindowTimer);
+                tapWindowTimer = setTimeout(function(){ tapCount = 0; }, 1400);
+                target.style.setProperty('--jump-scale', (1 + Math.min(tapCount-1,3) * 0.12).toFixed(2));
+                setTimeout(function(){ target.classList.remove('tapped'); },750);
+                try{if(typeof haptic==='function')haptic(tapCount>=3?[10,20,10]:14)}catch(e){}
+
+                // brief "thinking" beat, then a reaction that escalates with streak —
+                // never negative, just warmer the more you engage.
+                setEmotion('thinking');
+                setTimeout(function(){
+                  if (tapCount >= 6)      setEmotion('celebratory', { line: pick(TAP_LINES.celebratory), particles: ['#ffd23f','#ff7ad9','#38e0ff'], count: 18, revertAfter: 1600, revertTo:'happy' });
+                  else if (tapCount >= 4) setEmotion('proud',       { line: pick(TAP_LINES.proud), particles: '#ffd23f', revertAfter: 1300, revertTo:'happy' });
+                  else if (tapCount >= 2) setEmotion('excited',     { line: pick(TAP_LINES.excited), particles: '#ff7ad9', revertAfter: 1100, revertTo:'happy' });
+                  else                    setEmotion('happy',      { line: pick(TAP_LINES.happy), particles: '#E8F1FF', revertAfter: 1300, revertTo:'curious' });
+                }, 220);
               };
             })();
           </script>
@@ -8878,7 +8930,82 @@
             .cb-pupil{position:absolute;left:50%;top:50%;width:9px;height:12px;margin:-6px 0 0 -4.5px;border-radius:5px;background:radial-gradient(circle at 35% 30%,#465062,#10131B 75%)}
             .cb-blush{position:absolute;top:53%;width:14px;height:7px;border-radius:50%;background:rgba(255,150,160,.5);filter:blur(2px);opacity:0}
             .cb-blush.l{left:19%}.cb-blush.r{right:19%}
-            .cb-mouth{position:absolute;top:60%;left:50%;width:26px;height:13px;margin-left:-13px;border:2.5px solid rgba(226,238,255,.92);border-top:none;border-left-color:transparent;border-right-color:transparent;border-radius:0 0 26px 26px;box-shadow:0 2px 8px rgba(214,230,255,.35)}
+            .cb-mouth{position:absolute;top:60%;left:50%;width:26px;height:13px;margin-left:-13px;border:2.5px solid rgba(226,238,255,.92);border-top:none;border-left-color:transparent;border-right-color:transparent;border-radius:0 0 26px 26px;box-shadow:0 2px 8px rgba(214,230,255,.35);transition:width .25s ease,height .25s ease,margin-left .25s ease,border-radius .25s ease,border-color .25s ease}
+
+            /* ── Corbit's emotions — one glow color + a small behavior tweak
+               each. Driven by [data-state] on .corbit-bot (see corbitSetEmotion
+               in the script above). Never angry/sarcastic/disappointed — the
+               "concerned" state is just dimmer and softer, never a scolding face. ──── */
+            .cb-eye,.cb-ring,.cb-halo,.cb-ant-tip{transition:box-shadow .4s ease,background .4s ease,opacity .4s ease}
+            .corbit-bot{transition:transform .4s ease}
+
+            /* calm — default, soft blue */
+            .corbit-bot[data-state="calm"] .cb-eye{box-shadow:0 0 10px rgba(125,196,255,.85),0 0 26px rgba(125,196,255,.45)}
+            .corbit-bot[data-state="calm"] .cb-ant-tip{box-shadow:0 0 10px rgba(125,196,255,.9),0 0 22px rgba(125,196,255,.5)}
+
+            /* happy — warm gold, soft smile + blush */
+            .corbit-bot[data-state="happy"] .cb-eye{box-shadow:0 0 12px rgba(255,215,106,.9),0 0 28px rgba(255,215,106,.5)}
+            .corbit-bot[data-state="happy"] .cb-ant-tip{box-shadow:0 0 12px rgba(255,215,106,.95),0 0 24px rgba(255,215,106,.55)}
+            .corbit-bot[data-state="happy"] .cb-blush{opacity:.9}
+            .corbit-bot[data-state="happy"] .cb-mouth{width:32px;height:15px;margin-left:-16px;border-color:rgba(255,230,160,.95)}
+
+            /* excited — vibrant pink, faster bob, wide eyes */
+            .corbit-bot[data-state="excited"] .cb-eye{box-shadow:0 0 14px rgba(255,122,217,.95),0 0 32px rgba(255,122,217,.55);height:30px}
+            .corbit-bot[data-state="excited"] .cb-ant-tip{box-shadow:0 0 14px rgba(255,122,217,1),0 0 28px rgba(255,122,217,.6)}
+            .corbit-bot[data-state="excited"] .cb-blush{opacity:.7}
+            .corbit-bot[data-state="excited"] .cb-mouth{width:30px;height:22px;margin-left:-15px;border-radius:50%;border-color:rgba(255,200,230,.95)}
+            .corbit-bot[data-state="excited"] .cb-head{animation-duration:1.6s}
+
+            /* focused — narrow eyes, cool cyan, no blush */
+            .corbit-bot[data-state="focused"] .cb-eye{box-shadow:0 0 10px rgba(56,224,255,.9),0 0 22px rgba(56,224,255,.45);height:16px}
+            .corbit-bot[data-state="focused"] .cb-ant-tip{box-shadow:0 0 10px rgba(56,224,255,.9)}
+            .corbit-bot[data-state="focused"] .cb-mouth{width:18px;height:4px;margin-left:-9px;border-radius:3px}
+
+            /* concerned — dim, soft, never scolding — just quieter */
+            .corbit-bot[data-state="concerned"] .cb-eye{box-shadow:0 0 6px rgba(91,124,168,.6),0 0 14px rgba(91,124,168,.3);opacity:.85}
+            .corbit-bot[data-state="concerned"] .cb-ant-tip{box-shadow:0 0 6px rgba(91,124,168,.6)}
+            .corbit-bot[data-state="concerned"] .cb-halo{opacity:.6}
+            .corbit-bot[data-state="concerned"] .cb-mouth{width:16px;height:3px;margin-left:-8px;border-radius:2px}
+
+            /* proud — gold, chin-up (slight lift), confident */
+            .corbit-bot[data-state="proud"] .cb-eye{box-shadow:0 0 14px rgba(255,210,63,1),0 0 32px rgba(255,210,63,.55)}
+            .corbit-bot[data-state="proud"] .cb-ant-tip{box-shadow:0 0 14px rgba(255,210,63,1),0 0 30px rgba(255,210,63,.6)}
+            .corbit-bot[data-state="proud"] .cb-blush{opacity:.8}
+            .corbit-bot[data-state="proud"] .cb-mouth{width:30px;height:14px;margin-left:-15px;border-color:rgba(255,225,140,.95)}
+            .corbit-bot[data-state="proud"]{transform:translateY(-4px)}
+
+            /* curious — lavender, gentle head tilt */
+            .corbit-bot[data-state="curious"] .cb-eye{box-shadow:0 0 10px rgba(179,166,255,.85),0 0 24px rgba(179,166,255,.45)}
+            .corbit-bot[data-state="curious"] .cb-ant-tip{box-shadow:0 0 10px rgba(179,166,255,.9)}
+            .corbit-bot[data-state="curious"] .cb-head{transform:rotate(-6deg)}
+            .corbit-bot[data-state="curious"] .cb-mouth{width:14px;height:14px;margin-left:-7px;border-radius:50%;border-color:rgba(226,238,255,.8)}
+
+            /* thinking — quiet pulse, faster ring, pause before "speaking" */
+            .corbit-bot[data-state="thinking"] .cb-eye{box-shadow:0 0 8px rgba(201,206,216,.8),0 0 18px rgba(201,206,216,.4);height:16px}
+            .corbit-bot[data-state="thinking"] .cb-ring{animation-duration:1.4s}
+            .corbit-bot[data-state="thinking"] .cb-mouth{width:14px;height:5px;margin-left:-7px;border-radius:4px}
+
+            /* motivational — energetic orange-red, brighter halo */
+            .corbit-bot[data-state="motivational"] .cb-eye{box-shadow:0 0 14px rgba(255,107,74,.95),0 0 30px rgba(255,107,74,.55)}
+            .corbit-bot[data-state="motivational"] .cb-ant-tip{box-shadow:0 0 14px rgba(255,107,74,1),0 0 28px rgba(255,107,74,.6)}
+            .corbit-bot[data-state="motivational"] .cb-halo{background:radial-gradient(circle,rgba(255,107,74,.22) 0%,rgba(255,107,74,.08) 45%,transparent 70%)}
+            .corbit-bot[data-state="motivational"] .cb-mouth{width:30px;height:14px;margin-left:-15px;border-color:rgba(255,180,160,.95)}
+            .corbit-bot[data-state="motivational"] .cb-head{animation-duration:2.4s}
+
+            /* sleepy — dim, slow breathing, half-lidded eyes */
+            .corbit-bot[data-state="sleepy"] .cb-eye{box-shadow:0 0 5px rgba(90,95,138,.5);height:10px;top:38%;opacity:.75}
+            .corbit-bot[data-state="sleepy"] .cb-ant-tip{box-shadow:0 0 5px rgba(90,95,138,.5)}
+            .corbit-bot[data-state="sleepy"] .cb-halo{opacity:.4}
+            .corbit-bot[data-state="sleepy"] .cb-mouth{width:12px;height:12px;margin-left:-6px;border-radius:50%;border-color:rgba(170,178,210,.7)}
+            .corbit-bot[data-state="sleepy"] .cb-head{animation-duration:7s}
+            .corbit-bot[data-state="sleepy"] .cb-antenna{animation-duration:9s}
+
+            /* celebratory — brightest, biggest smile, confetti via JS burst */
+            .corbit-bot[data-state="celebratory"] .cb-eye{box-shadow:0 0 16px rgba(255,210,63,1),0 0 36px rgba(255,122,217,.6)}
+            .corbit-bot[data-state="celebratory"] .cb-ant-tip{box-shadow:0 0 16px rgba(255,210,63,1),0 0 34px rgba(255,122,217,.65)}
+            .corbit-bot[data-state="celebratory"] .cb-blush{opacity:1}
+            .corbit-bot[data-state="celebratory"] .cb-mouth{width:34px;height:17px;margin-left:-17px;border-color:rgba(255,235,180,1)}
+            .corbit-bot[data-state="celebratory"]{transform:translateY(-6px) scale(1.04)}
           </style>
         </div>
 
@@ -9763,7 +9890,10 @@
       .hold-commit.done{border-color:rgba(74,222,128,.6)}
       .hold-commit.done .hc-fill{width:100% !important;background:linear-gradient(90deg,#30D158,#4ade80)}
       .hold-commit.done .hc-label{color:#08140b}
-      @media (prefers-reduced-motion: reduce){ .hold-commit .hc-label{animation:none !important} }
+      @keyframes hcPop{0%{transform:scale(1)}35%{transform:scale(1.08)}60%{transform:scale(.97)}100%{transform:scale(1)}}
+      .hold-commit.popped{animation:hcPop .5s cubic-bezier(.28,1.2,.4,1) both}
+      .hold-commit.done .hc-ring{box-shadow:0 0 0 2px rgba(74,222,128,.6),0 0 30px rgba(74,222,128,.5)}
+      @media (prefers-reduced-motion: reduce){ .hold-commit .hc-label{animation:none !important}.hold-commit.popped{animation:none !important} }
     </style>
 
     <!-- Free-tier offer sheet (Apple-style bottom sheet) -->
@@ -12976,7 +13106,8 @@
     function setProgress(p) {
       p = Math.max(0, Math.min(1, p));
       fill.style.width = (p * 100) + '%';
-      if (sig) { if (p > 0.1) sig.classList.add('on'); else sig.classList.remove('on'); }
+      // signature stays hidden for the whole hold — it only appears once
+      // they've actually committed, not as a preview of what's coming
     }
     function tick() {
       if (!holding || fired) return;
@@ -13012,11 +13143,29 @@
       if (fired) return;
       fired = true; holding = false;
       if (raf) cancelAnimationFrame(raf);
-      btn.classList.remove('pressing'); btn.classList.add('done');
+      btn.classList.remove('pressing'); btn.classList.add('done','popped');
+      setTimeout(function(){ btn.classList.remove('popped'); }, 500);
       fill.style.transition = 'width .18s ease';
       setProgress(1);
       if (label) label.textContent = '✓ Committed';
       state.promised = true;
+      if (sig) sig.classList.add('on');
+      // the pop: a burst of particles right as the hold finishes
+      var host = btn.closest('.phone') || btn.closest('.footer') || btn;
+      var pr = host.getBoundingClientRect(), rect = btn.getBoundingClientRect();
+      var cx = rect.left - pr.left + rect.width/2, cy = rect.top - pr.top + rect.height/2;
+      var colors = ['#4ade80','#30D158','#ffffff','#7CE8A4'];
+      for (var i=0;i<22;i++){
+        var p = document.createElement('span');
+        var ang = Math.random()*Math.PI*2, d = 50 + Math.random()*70;
+        var c = colors[i % colors.length];
+        p.style.cssText = 'position:absolute;z-index:99;pointer-events:none;width:'+(i%3===0?7:4)+'px;height:'+(i%3===0?7:4)+'px;border-radius:50%;'
+          + 'background:'+c+';box-shadow:0 0 8px '+c+';left:'+cx+'px;top:'+cy+'px;'
+          + 'animation:ynBurst .75s cubic-bezier(.22,1,.36,1) forwards;animation-delay:'+(i*0.012)+'s;'
+          + '--bx:'+(Math.cos(ang)*d)+'px;--by:'+(Math.sin(ang)*d)+'px;';
+        host.appendChild(p);
+        setTimeout(function(elp){return function(){elp.remove()}}(p),850);
+      }
       try { track('promise_signed', { method: 'hold' }); } catch (_) {}
       try { if (typeof haptic === 'function') haptic([10, 40, 20]); } catch (_) {}
       refreshCTA();
