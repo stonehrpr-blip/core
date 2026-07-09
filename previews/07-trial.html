@@ -3620,6 +3620,23 @@
                to this step only so step 21's portal is untouched */
             .portal-journey{width:204px;height:204px}
             .portal-journey .p-figure{width:116px;bottom:auto;top:56%;transform:translate(-50%,-50%)}
+            /* ── launch transition: punch out then in, figure falls into the
+               portal, whole step fades to the next page ── */
+            @keyframes portalZoomPunch{
+              0%{transform:scale(1)}
+              35%{transform:scale(.85)}
+              65%{transform:scale(1.15)}
+              100%{transform:scale(1)}
+            }
+            .portal-journey.launching{animation:portalZoomPunch .8s cubic-bezier(.45,0,.2,1) both}
+            @keyframes figureFall{
+              0%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+              70%{opacity:1;transform:translate(-50%,-50%) scale(.3)}
+              100%{opacity:0;transform:translate(-50%,-50%) scale(.05);filter:blur(3px)}
+            }
+            .portal-journey.launching .p-figure{animation:figureFall .85s cubic-bezier(.55,0,.85,.4) .1s both}
+            @keyframes stepLaunchFade{to{opacity:0;transform:scale(1.03)}}
+            .step[data-step="107"].launching{animation:stepLaunchFade .4s ease .7s forwards}
           </style>
         </div>
 
@@ -11445,6 +11462,19 @@
       _signing = true;
       playSignAnimation(function () { _signing = false; _signed = true; advance(); });
       return;
+    }
+    // Step 107 ("journey starts here"): punch the portal, drop the figure in,
+    // fade the whole step out, then advance.
+    if (state.step === 107) {
+      const stepEl = document.querySelector('.step[data-step="107"]');
+      const portalEl = stepEl && stepEl.querySelector('.portal-journey');
+      if (stepEl && portalEl && !stepEl.classList.contains('launching')) {
+        stepEl.classList.add('launching');
+        portalEl.classList.add('launching');
+        try { if (typeof haptic === 'function') haptic([10, 30, 20]); } catch (e) {}
+        setTimeout(function () { advance(); }, 1120);
+        return;
+      }
     }
     // On the card-deck question screens, tapping Next flicks the card away.
     if (DECK_STEPS.indexOf(state.step) >= 0) _swipeDir = 1;
