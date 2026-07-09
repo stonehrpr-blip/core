@@ -8794,6 +8794,8 @@
           <div class="voice-stage">
             <div class="cb-speech" id="cbIntroSpeech">Hi, I'm Corbit.<br>Tap me — I don't bite.</div>
             <div class="corbit-bot-wrap" id="voiceOrbWrap">
+              <span class="cb-ambient" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+              <span class="cb-ambient-ring" aria-hidden="true"></span>
               <span class="cb-hitbox" id="cbHitbox" aria-hidden="true"></span>
               <div class="corbit-bot" id="voiceOrb" data-state="happy" onclick="corbitTap(this)" role="button" aria-label="Tap Corbit" tabindex="0">
                 <span class="cb-halo"></span>
@@ -8832,9 +8834,10 @@
               };
               var label = document.getElementById('cbEmotionLabel');
               var hitbox = document.getElementById('cbHitbox');
+              var wrap = document.getElementById('voiceOrbWrap');
               function flashHitbox(color) {
+                if (wrap) wrap.style.setProperty('--hb-color', color);
                 if (!hitbox) return;
-                hitbox.style.setProperty('--hb-color', color);
                 hitbox.classList.remove('flash'); void hitbox.offsetWidth; hitbox.classList.add('flash');
               }
               var clearTimer = null;
@@ -9042,17 +9045,37 @@
             .corbit-bot[data-state="celebratory"] .cb-mouth{width:34px;height:17px;margin-left:-17px;border-color:rgba(255,235,180,1)}
             .corbit-bot[data-state="celebratory"]{transform:translateY(-6px) scale(1.04)}
 
-            /* ── outline box that flashes in the current emotion's color every
-               time an emotion is set (a tap, or later a dashboard trigger) ── */
-            .corbit-bot-wrap{position:relative;display:inline-flex}
-            .cb-hitbox{position:absolute;inset:-14px;border-radius:32px;pointer-events:none;
-              border:2px solid var(--hb-color,#7dc4ff);opacity:0}
+            /* ── outline CIRCLE that flashes in the current emotion's color
+               every time an emotion is set (a tap, or later a dashboard
+               trigger) — a true circle, not a rounded box ── */
+            .corbit-bot-wrap{position:relative;display:inline-flex;align-items:center;justify-content:center}
+            .cb-hitbox{position:absolute;top:50%;left:50%;width:206px;height:206px;margin:-103px 0 0 -103px;
+              border-radius:50%;pointer-events:none;border:2px solid var(--hb-color,#7dc4ff);opacity:0}
             .cb-hitbox.flash{animation:cbHitFlash .7s cubic-bezier(.22,1,.36,1)}
             @keyframes cbHitFlash{
-              0%{opacity:.95;box-shadow:0 0 0 0 var(--hb-color,#7dc4ff),0 0 22px var(--hb-color,#7dc4ff),inset 0 0 14px var(--hb-color,#7dc4ff);transform:scale(.94)}
+              0%{opacity:.95;box-shadow:0 0 0 0 var(--hb-color,#7dc4ff),0 0 26px var(--hb-color,#7dc4ff),inset 0 0 16px var(--hb-color,#7dc4ff);transform:scale(.92)}
               60%{opacity:.5}
-              100%{opacity:0;box-shadow:0 0 0 0 transparent;transform:scale(1.06)}
+              100%{opacity:0;box-shadow:0 0 0 0 transparent;transform:scale(1.08)}
             }
+
+            /* ── ambient background life — soft drifting orbs behind Corbit,
+               a slow-turning halo ring, so the space around him doesn't sit
+               dead when he's not being tapped ── */
+            .cb-ambient{position:absolute;top:50%;left:50%;width:280px;height:280px;margin:-140px 0 0 -140px;
+              pointer-events:none;z-index:-1}
+            .cb-ambient i{position:absolute;border-radius:50%;filter:blur(9px);opacity:.35;
+              background:radial-gradient(circle,var(--hb-color,#7dc4ff),transparent 70%)}
+            .cb-ambient i:nth-child(1){width:46px;height:46px;top:8%;left:14%;animation:cbOrbit1 9s ease-in-out infinite}
+            .cb-ambient i:nth-child(2){width:34px;height:34px;top:64%;left:78%;animation:cbOrbit2 7.5s ease-in-out infinite}
+            .cb-ambient i:nth-child(3){width:28px;height:28px;top:74%;left:20%;animation:cbOrbit3 11s ease-in-out infinite}
+            .cb-ambient i:nth-child(4){width:38px;height:38px;top:12%;left:76%;animation:cbOrbit1 8.5s ease-in-out infinite reverse}
+            @keyframes cbOrbit1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(14px,-10px) scale(1.15)}}
+            @keyframes cbOrbit2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-16px,8px) scale(.9)}}
+            @keyframes cbOrbit3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(10px,12px) scale(1.1)}}
+            .cb-ambient-ring{position:absolute;inset:6px;border-radius:50%;pointer-events:none;
+              border:1px dashed var(--hb-color,#7dc4ff);opacity:.16;animation:cbAmbientSpin 22s linear infinite}
+            @keyframes cbAmbientSpin{to{transform:rotate(360deg)}}
+            @media (prefers-reduced-motion: reduce){ .cb-ambient i,.cb-ambient-ring{animation:none !important} }
 
             /* ── eyebrows — the single biggest lever for readable expression ── */
             .cb-brow{position:absolute;top:25%;width:15px;height:3px;border-radius:3px;
