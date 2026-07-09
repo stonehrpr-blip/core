@@ -8793,19 +8793,23 @@
           <p class="copy">Your AI coach, built into CORE — he keeps you on track, every day.</p>
           <div class="voice-stage">
             <div class="cb-speech" id="cbIntroSpeech">Hi, I'm Corbit.<br>Tap me — I don't bite.</div>
-            <div class="corbit-bot" id="voiceOrb" data-state="happy" onclick="corbitTap(this)" role="button" aria-label="Tap Corbit" tabindex="0">
-              <span class="cb-halo"></span>
-              <span class="cb-ring"></span>
-              <span class="cb-antenna"><i class="cb-ant-stem"></i><i class="cb-ant-tip"></i></span>
-              <span class="cb-pod l"></span><span class="cb-pod r"></span>
-              <div class="cb-head">
-                <div class="cb-face">
-                  <span class="cb-eye l"><i class="cb-pupil"></i></span>
-                  <span class="cb-eye r"><i class="cb-pupil"></i></span>
-                  <span class="cb-blush l"></span><span class="cb-blush r"></span>
-                  <span class="cb-mouth"></span>
+            <div class="corbit-bot-wrap" id="voiceOrbWrap">
+              <span class="cb-hitbox" id="cbHitbox" aria-hidden="true"></span>
+              <div class="corbit-bot" id="voiceOrb" data-state="happy" onclick="corbitTap(this)" role="button" aria-label="Tap Corbit" tabindex="0">
+                <span class="cb-halo"></span>
+                <span class="cb-ring"></span>
+                <span class="cb-antenna"><i class="cb-ant-stem"></i><i class="cb-ant-tip"></i></span>
+                <span class="cb-pod l"></span><span class="cb-pod r"></span>
+                <div class="cb-head">
+                  <div class="cb-face">
+                    <span class="cb-brow l"></span><span class="cb-brow r"></span>
+                    <span class="cb-eye l"><i class="cb-pupil"></i></span>
+                    <span class="cb-eye r"><i class="cb-pupil"></i></span>
+                    <span class="cb-blush l"></span><span class="cb-blush r"></span>
+                    <span class="cb-mouth"></span>
+                  </div>
+                  <span class="cb-shine"></span>
                 </div>
-                <span class="cb-shine"></span>
               </div>
             </div>
             <div class="cb-emotion-label" id="cbEmotionLabel">Corbit is happy</div>
@@ -8827,11 +8831,18 @@
                 motivational:'#ff6b4a', sleepy:'#5a5f8a', celebratory:'#ffd23f'
               };
               var label = document.getElementById('cbEmotionLabel');
+              var hitbox = document.getElementById('cbHitbox');
+              function flashHitbox(color) {
+                if (!hitbox) return;
+                hitbox.style.setProperty('--hb-color', color);
+                hitbox.classList.remove('flash'); void hitbox.offsetWidth; hitbox.classList.add('flash');
+              }
               var clearTimer = null;
               function setEmotion(state, opts) {
                 opts = opts || {};
                 if (!EMOTION_COLORS[state]) return;
                 el.dataset.state = state;
+                flashHitbox(EMOTION_COLORS[state]);
                 if (label) {
                   label.textContent = 'Corbit is ' + state;
                   label.style.color = EMOTION_COLORS[state];
@@ -9030,6 +9041,45 @@
             .corbit-bot[data-state="celebratory"] .cb-blush{opacity:1}
             .corbit-bot[data-state="celebratory"] .cb-mouth{width:34px;height:17px;margin-left:-17px;border-color:rgba(255,235,180,1)}
             .corbit-bot[data-state="celebratory"]{transform:translateY(-6px) scale(1.04)}
+
+            /* ── outline box that flashes in the current emotion's color every
+               time an emotion is set (a tap, or later a dashboard trigger) ── */
+            .corbit-bot-wrap{position:relative;display:inline-flex}
+            .cb-hitbox{position:absolute;inset:-14px;border-radius:32px;pointer-events:none;
+              border:2px solid var(--hb-color,#7dc4ff);opacity:0}
+            .cb-hitbox.flash{animation:cbHitFlash .7s cubic-bezier(.22,1,.36,1)}
+            @keyframes cbHitFlash{
+              0%{opacity:.95;box-shadow:0 0 0 0 var(--hb-color,#7dc4ff),0 0 22px var(--hb-color,#7dc4ff),inset 0 0 14px var(--hb-color,#7dc4ff);transform:scale(.94)}
+              60%{opacity:.5}
+              100%{opacity:0;box-shadow:0 0 0 0 transparent;transform:scale(1.06)}
+            }
+
+            /* ── eyebrows — the single biggest lever for readable expression ── */
+            .cb-brow{position:absolute;top:25%;width:15px;height:3px;border-radius:3px;
+              background:rgba(226,238,255,.6);transform-origin:center;
+              transition:transform .35s cubic-bezier(.22,1,.36,1),opacity .3s ease,background .3s ease}
+            .cb-brow.l{left:27.5%;transform:rotate(-3deg)}
+            .cb-brow.r{right:27.5%;transform:rotate(3deg)}
+            .corbit-bot[data-state="happy"] .cb-brow.l{transform:translateY(-2px) rotate(-10deg)}
+            .corbit-bot[data-state="happy"] .cb-brow.r{transform:translateY(-2px) rotate(10deg)}
+            .corbit-bot[data-state="excited"] .cb-brow.l{transform:translateY(-4px) rotate(-15deg);background:rgba(255,122,217,.8)}
+            .corbit-bot[data-state="excited"] .cb-brow.r{transform:translateY(-4px) rotate(15deg);background:rgba(255,122,217,.8)}
+            .corbit-bot[data-state="proud"] .cb-brow.l{transform:translateY(-3px) rotate(-5deg);background:rgba(255,210,63,.85)}
+            .corbit-bot[data-state="proud"] .cb-brow.r{transform:translateY(-3px) rotate(5deg);background:rgba(255,210,63,.85)}
+            .corbit-bot[data-state="curious"] .cb-brow.l{transform:translateY(-5px) rotate(-14deg);background:rgba(179,166,255,.8)}
+            .corbit-bot[data-state="curious"] .cb-brow.r{transform:translateY(1px) rotate(4deg)}
+            .corbit-bot[data-state="thinking"] .cb-brow.l{transform:translateY(1px) rotate(7deg)}
+            .corbit-bot[data-state="thinking"] .cb-brow.r{transform:translateY(1px) rotate(-7deg)}
+            .corbit-bot[data-state="concerned"] .cb-brow.l{transform:translateY(1px) rotate(11deg);opacity:.8}
+            .corbit-bot[data-state="concerned"] .cb-brow.r{transform:translateY(1px) rotate(-11deg);opacity:.8}
+            .corbit-bot[data-state="focused"] .cb-brow.l{transform:translateY(2px) rotate(9deg);width:13px;background:rgba(56,224,255,.85)}
+            .corbit-bot[data-state="focused"] .cb-brow.r{transform:translateY(2px) rotate(-9deg);width:13px;background:rgba(56,224,255,.85)}
+            .corbit-bot[data-state="motivational"] .cb-brow.l{transform:translateY(-3px) rotate(-13deg);background:rgba(255,107,74,.85)}
+            .corbit-bot[data-state="motivational"] .cb-brow.r{transform:translateY(-3px) rotate(13deg);background:rgba(255,107,74,.85)}
+            .corbit-bot[data-state="sleepy"] .cb-brow.l{transform:translateY(4px) rotate(-3deg);opacity:.45}
+            .corbit-bot[data-state="sleepy"] .cb-brow.r{transform:translateY(4px) rotate(3deg);opacity:.45}
+            .corbit-bot[data-state="celebratory"] .cb-brow.l{transform:translateY(-6px) rotate(-17deg);background:rgba(255,210,63,.95)}
+            .corbit-bot[data-state="celebratory"] .cb-brow.r{transform:translateY(-6px) rotate(17deg);background:rgba(255,210,63,.95)}
           </style>
         </div>
 
