@@ -495,6 +495,16 @@
       document.querySelector('.tab[data-pane="' + id + '"]').classList.add('active');
       document.querySelector('.scroll').scrollTop = 0;
     }
+    // Deep-link support: 82-legal.html#terms opens straight to that tab
+    // (index.html links here with #terms / #privacy — this was never wired up).
+    (function () {
+      var id = (location.hash || '').replace('#', '');
+      if (id && document.getElementById(id) && document.querySelector('.tab[data-pane="' + id + '"]')) show(id);
+    })();
+    window.addEventListener('hashchange', function () {
+      var id = (location.hash || '').replace('#', '');
+      if (id && document.getElementById(id) && document.querySelector('.tab[data-pane="' + id + '"]')) show(id);
+    });
   </script>
 </body>
 </html>
