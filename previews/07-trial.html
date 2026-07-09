@@ -3623,69 +3623,11 @@
                 <circle id="promiseSigPen" r="4.2" fill="url(#promiseSigNib)"/>
               </svg>
               <div class="promise-sign-line"></div>
-              <div id="promiseStamp" class="promise-stamp" aria-hidden="true">
-                <svg class="ps-seal" viewBox="0 0 100 100">
-                  <defs>
-                    <!-- worn rubber-stamp ink: turbulence eats away flecks of the mark -->
-                    <filter id="psSpeck">
-                      <feTurbulence type="turbulence" baseFrequency="0.13 0.17" numOctaves="2" seed="14" result="t"/>
-                      <feColorMatrix in="t" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 2.1 -0.78"/>
-                    </filter>
-                    <mask id="psGrunge">
-                      <rect width="100" height="100" fill="#fff"/>
-                      <rect width="100" height="100" filter="url(#psSpeck)"/>
-                    </mask>
-                    <path id="pstar" d="M0,-3.7 L0.94,-1.28 L3.52,-1.14 L1.51,0.49 L2.17,3 L0,1.6 L-2.17,3 L-1.51,0.49 L-3.52,-1.14 L-0.94,-1.28 Z"/>
-                  </defs>
-                  <g class="ps-ink" mask="url(#psGrunge)">
-                    <circle class="ps-ring-o" cx="50" cy="50" r="46.5"/>
-                    <circle class="ps-ring-i" cx="50" cy="50" r="39.5"/>
-                    <!-- a ring of stars, top arc + bottom arc (banner crosses the middle) -->
-                    <use href="#pstar" transform="translate(50 16.5)"/>
-                    <use href="#pstar" transform="translate(38.4 18.6)"/>
-                    <use href="#pstar" transform="translate(61.6 18.6)"/>
-                    <use href="#pstar" transform="translate(27.8 24.6)"/>
-                    <use href="#pstar" transform="translate(72.2 24.6)"/>
-                    <use href="#pstar" transform="translate(50 83.5)"/>
-                    <use href="#pstar" transform="translate(38.4 81.4)"/>
-                    <use href="#pstar" transform="translate(61.6 81.4)"/>
-                    <use href="#pstar" transform="translate(27.8 75.4)"/>
-                    <use href="#pstar" transform="translate(72.2 75.4)"/>
-                    <!-- diagonal PROMISE banner struck across the middle -->
-                    <g transform="rotate(-7 50 50)">
-                      <rect class="ps-band" x="-3" y="40.5" width="106" height="19" rx="0.6"/>
-                      <text class="ps-word" x="50" y="54.4">PROMISE</text>
-                    </g>
-                  </g>
-                </svg>
-              </div>
             </div>
             <div id="promiseMeta" style="font-size:11px; color:var(--dim); letter-spacing:0.04em; font-family:ui-monospace,'SF Mono',Menlo,monospace; margin-top:12px; line-height:16px;">// unsigned</div>
-            <div class="slide-wrap" style="margin-top:14px;">
-              <button type="button" id="holdCommit" class="hold-commit" aria-label="Press and hold to commit">
-                <span class="hc-fill" id="hcFill"></span>
-                <span class="hc-ring" id="hcRing"></span>
-                <span class="hc-label" id="hcLabel">Press &amp; hold to commit</span>
-              </button>
-            </div>
           </div>
           <style>
-            .commit-dock{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:22px 18px 18px;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 0 40px rgba(74,222,128,.05)}
-            .hold-commit{position:relative;width:100%;height:58px;border-radius:16px;border:1.5px solid rgba(255,255,255,.14);
-              background:rgba(255,255,255,.03);overflow:hidden;cursor:pointer;font-family:inherit;-webkit-tap-highlight-color:transparent;
-              -webkit-user-select:none;user-select:none;touch-action:none}
-            .hc-fill{position:absolute;left:0;top:0;bottom:0;width:0%;background:linear-gradient(90deg,rgba(74,222,128,.35),rgba(74,222,128,.55));
-              box-shadow:0 0 20px rgba(74,222,128,.4) inset;transition:width .05s linear}
-            .hc-ring{position:absolute;inset:0;border-radius:16px;pointer-events:none;box-shadow:0 0 0 0 rgba(74,222,128,0);transition:box-shadow .2s ease}
-            .hold-commit.pressing .hc-ring{box-shadow:0 0 0 2px rgba(74,222,128,.5),0 0 24px rgba(74,222,128,.35)}
-            .hc-label{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;height:100%;
-              font-size:14.5px;font-weight:700;letter-spacing:.02em;color:rgba(255,255,255,.85);transition:color .2s ease}
-            .hold-commit:not(.done):not(.pressing) .hc-label{animation:hcHint 1.9s ease-in-out infinite}
-            @keyframes hcHint{0%,100%{opacity:.65}50%{opacity:1}}
-            .hold-commit.done{border-color:rgba(74,222,128,.6)}
-            .hold-commit.done .hc-fill{width:100% !important;background:linear-gradient(90deg,#30D158,#4ade80)}
-            .hold-commit.done .hc-label{color:#08140b}
-            @media (prefers-reduced-motion: reduce){ .hold-commit .hc-label{animation:none !important} }
+            .commit-dock{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:32px 20px;margin-bottom:8px;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 0 40px rgba(74,222,128,.05)}
           </style>
         </div>
 
@@ -9759,9 +9701,33 @@
         <button id="cta" class="cta" onclick="next()" disabled>
           Next <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
         </button>
+        <button type="button" id="holdCommit" class="hold-commit" aria-label="Press and hold to commit">
+          <span class="hc-fill" id="hcFill"></span>
+          <span class="hc-ring" id="hcRing"></span>
+          <span class="hc-label" id="hcLabel">Press &amp; hold to commit</span>
+        </button>
         <div class="footer-note" id="footerNote">Enter your name to continue</div>
       </div>
     </div>
+    <style>
+      .hold-commit{display:none;position:relative;width:100%;height:56px;border-radius:16px;border:1.5px solid rgba(255,255,255,.14);
+        background:rgba(255,255,255,.03);overflow:hidden;cursor:pointer;font-family:inherit;-webkit-tap-highlight-color:transparent;
+        -webkit-user-select:none;user-select:none;touch-action:none}
+      body.on-promise .cta{display:none !important}
+      body.on-promise .hold-commit{display:block}
+      .hc-fill{position:absolute;left:0;top:0;bottom:0;width:0%;background:linear-gradient(90deg,rgba(74,222,128,.35),rgba(74,222,128,.55));
+        box-shadow:0 0 20px rgba(74,222,128,.4) inset;transition:width .05s linear}
+      .hc-ring{position:absolute;inset:0;border-radius:16px;pointer-events:none;box-shadow:0 0 0 0 rgba(74,222,128,0);transition:box-shadow .2s ease}
+      .hold-commit.pressing .hc-ring{box-shadow:0 0 0 2px rgba(74,222,128,.5),0 0 24px rgba(74,222,128,.35)}
+      .hc-label{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;height:100%;
+        font-size:14.5px;font-weight:700;letter-spacing:.02em;color:rgba(255,255,255,.85);transition:color .2s ease}
+      .hold-commit:not(.done):not(.pressing) .hc-label{animation:hcHint 1.9s ease-in-out infinite}
+      @keyframes hcHint{0%,100%{opacity:.65}50%{opacity:1}}
+      .hold-commit.done{border-color:rgba(74,222,128,.6)}
+      .hold-commit.done .hc-fill{width:100% !important;background:linear-gradient(90deg,#30D158,#4ade80)}
+      .hold-commit.done .hc-label{color:#08140b}
+      @media (prefers-reduced-motion: reduce){ .hold-commit .hc-label{animation:none !important} }
+    </style>
 
     <!-- Free-tier offer sheet (Apple-style bottom sheet) -->
     <div class="ap-back" id="freeTierBack" onclick="dismissFreeTierSheet()"></div>
@@ -13031,6 +12997,12 @@
       btn.addEventListener('touchstart', press, { passive: false });
       document.addEventListener('touchend', release);
     }
+    // Coming back to this step after already committing (e.g. tapped back
+    // then forward again): the hold is already spent, so a plain tap just
+    // continues instead of leaving the user stuck with no way forward.
+    btn.addEventListener('click', function () {
+      if (fired && _signed && !_signing) advance();
+    });
     // Keyboard fallback (a11y): hold Enter/Space.
     btn.addEventListener('keydown', function (e) {
       if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) { e.preventDefault(); press(e); }
@@ -15294,8 +15266,9 @@ html body[data-font="apple"] #planTitle .g {
 .slide-commit:not(.dragging):not(.done) .sc-handle { animation:scNudge 1.9s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce){ .slide-commit .sc-label, .slide-commit .sc-handle { animation:none !important; } }
 
-/* contract page: the hold-to-commit button is the CTA, so hide the footer one */
-body.on-promise .footer { display:none !important; }
+/* contract page: the hold-to-commit button replaces the Next button in the
+   same footer (see body.on-promise .cta / .hold-commit rules near the
+   footer markup) — it stays at the bottom like every other step's CTA. */
 /* contract page — centre everything vertically + horizontally */
 /* contract page — lifted to the top, bigger heading, tighter box, clean text */
 .step[data-step="0"] { text-align:center; }
@@ -15303,9 +15276,9 @@ body.on-promise .footer { display:none !important; }
 .step[data-step="0"] #habitChip { align-self:center; margin-top:6px; }
 .step[data-step="0"] #promiseCard { text-align:left; padding:16px 18px !important; margin-top:14px !important; }
 .step[data-step="0"] #contractText { font-size:15px !important; line-height:1.5 !important; }
-/* shorter reserved signature row so the box isn't so tall */
-.step[data-step="0"] .promise-sign { height:44px !important; margin-top:12px !important; opacity:1 !important; }
-.step[data-step="0"] .promise-sign-svg { height:44px !important; }
+/* bigger signature area, room to breathe above the fixed bottom CTA */
+.step[data-step="0"] .promise-sign { height:76px !important; margin-top:8px !important; opacity:1 !important; }
+.step[data-step="0"] .promise-sign-svg { height:76px !important; }
 /* unsigned: show a real "sign here" baseline with an ✗ so the row reads as a
    line you put your name on (the signature draws over it once committed) */
 .step[data-step="0"] .promise-sign-line { transform:scaleX(1) !important; opacity:0.4; }
@@ -15315,10 +15288,7 @@ body.on-promise .footer { display:none !important; }
 }
 .step[data-step="0"] .promise-sign.signed::before { opacity:0; }
 .step[data-step="0"] #promiseMeta { margin-top:8px !important; }
-/* push the signature + slide-to-commit block to the bottom so the slider
-   lands at the same height as the Next button on every other step */
-.step[data-step="0"] .commit-dock { margin-top:18px; padding-bottom:8px; }
-.step[data-step="0"] .slide-wrap { margin-top:14px; }
+.step[data-step="0"] .commit-dock { margin-top:18px; }
 /* auto-advance pages (gender, habit, what-pushed): tapping an option advances,
    so the Next button is redundant — hide it. A hint replaces it. */
 body.on-autoadvance .footer { display:none !important; }
