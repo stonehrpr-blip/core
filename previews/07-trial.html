@@ -13425,7 +13425,17 @@
       var sugs = suggest(v);
       if (sugs.length) {
         nameSugWrap.style.display = 'flex';
-        nameSugWrap.innerHTML = sugs.map(function(s){return '<button class="name-sug-chip" onclick="var nf=document.getElementById(\'name\');nf.value=\''+s+'\';nf.dispatchEvent(new Event(\'input\'))">'+s+'</button>'}).join('');
+        nameSugWrap.innerHTML = '';
+        sugs.forEach(function(s){
+          var chip = document.createElement('button');
+          chip.className = 'name-sug-chip';
+          chip.textContent = s;
+          chip.addEventListener('click', function(){
+            nameField.value = s;
+            nameField.dispatchEvent(new Event('input'));
+          });
+          nameSugWrap.appendChild(chip);
+        });
       }
       state.name = '';
       refreshCTA();
