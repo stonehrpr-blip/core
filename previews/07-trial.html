@@ -3597,7 +3597,7 @@
         <div class="step" data-step="0">
           <div class="kicker">Before we start</div>
           <h1 class="title" data-i18n-html="trial.t0">This only<br/><span class="g">works if you mean it.</span></h1>
-          <p class="copy">Sign it, then slide to commit.</p>
+          <p class="copy">Sign it, then press and hold to commit.</p>
           <div id="habitChip" style="display:none; align-items:center; gap:5px; padding: 2px 7px; border-radius: 999px; background: rgba(255,255,255,0.05); border:none; align-self: flex-start; font-size: 9.5px; color: var(--muted); letter-spacing:-0.05px; margin-top: 2px; opacity:0.85;">
             <span id="habitChipDot" style="width:6px; height:6px; border-radius:50%; box-shadow: 0 0 5px currentColor;"></span>
             <span>Quitting <strong id="habitChipName" style="color:#fff; font-weight:700; text-transform:capitalize;">vape</strong></span>
@@ -3662,15 +3662,31 @@
             </div>
             <div id="promiseMeta" style="font-size:11px; color:var(--dim); letter-spacing:0.04em; font-family:ui-monospace,'SF Mono',Menlo,monospace; margin-top:12px; line-height:16px;">// unsigned</div>
             <div class="slide-wrap" style="margin-top:14px;">
-              <div id="slideCommit" class="slide-commit" role="slider" tabindex="0" aria-label="Slide to commit, or press Enter to commit" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-                <span class="sc-fill" id="scFill"></span>
-                <span class="sc-label" id="scLabel">Slide to commit</span>
-                <span class="sc-handle" id="scHandle">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-                </span>
-              </div>
+              <button type="button" id="holdCommit" class="hold-commit" aria-label="Press and hold to commit">
+                <span class="hc-fill" id="hcFill"></span>
+                <span class="hc-ring" id="hcRing"></span>
+                <span class="hc-label" id="hcLabel">Press &amp; hold to commit</span>
+              </button>
             </div>
           </div>
+          <style>
+            .commit-dock{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:22px 18px 18px;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 0 40px rgba(74,222,128,.05)}
+            .hold-commit{position:relative;width:100%;height:58px;border-radius:16px;border:1.5px solid rgba(255,255,255,.14);
+              background:rgba(255,255,255,.03);overflow:hidden;cursor:pointer;font-family:inherit;-webkit-tap-highlight-color:transparent;
+              -webkit-user-select:none;user-select:none;touch-action:none}
+            .hc-fill{position:absolute;left:0;top:0;bottom:0;width:0%;background:linear-gradient(90deg,rgba(74,222,128,.35),rgba(74,222,128,.55));
+              box-shadow:0 0 20px rgba(74,222,128,.4) inset;transition:width .05s linear}
+            .hc-ring{position:absolute;inset:0;border-radius:16px;pointer-events:none;box-shadow:0 0 0 0 rgba(74,222,128,0);transition:box-shadow .2s ease}
+            .hold-commit.pressing .hc-ring{box-shadow:0 0 0 2px rgba(74,222,128,.5),0 0 24px rgba(74,222,128,.35)}
+            .hc-label{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;height:100%;
+              font-size:14.5px;font-weight:700;letter-spacing:.02em;color:rgba(255,255,255,.85);transition:color .2s ease}
+            .hold-commit:not(.done):not(.pressing) .hc-label{animation:hcHint 1.9s ease-in-out infinite}
+            @keyframes hcHint{0%,100%{opacity:.65}50%{opacity:1}}
+            .hold-commit.done{border-color:rgba(74,222,128,.6)}
+            .hold-commit.done .hc-fill{width:100% !important;background:linear-gradient(90deg,#30D158,#4ade80)}
+            .hold-commit.done .hc-label{color:#08140b}
+            @media (prefers-reduced-motion: reduce){ .hold-commit .hc-label{animation:none !important} }
+          </style>
         </div>
 
         <!-- STEP 1: Name + live availability -->
@@ -10863,7 +10879,7 @@
     else if (s === 107) { setCTA("Let's go",false,'Everything starts now'); }
     else if (s === 0) {
       setCTA('Sign', !state.promised,
-        state.promised ? 'Signed. Tap to seal it.' : 'Slide the handle to commit');
+        state.promised ? 'Signed. Tap to seal it.' : 'Press and hold to commit');
     } else if (s === 1) {
       var nameOk = state.name.trim().length >= 3;
       var ageOk = (typeof state.age === 'number' && state.age >= 13 && state.age <= 100);
@@ -12942,109 +12958,86 @@
   // wire skip-X to exit-intent
   document.querySelector('.skip').onclick = exitConfirm;
 
-  // Slide-to-commit (no keyboard). Drag the handle toward the end to lock the
-  // promise, then it plays the sign → green → red-stamp sequence and advances.
-  // Forgiving: commits once you're ~85% across (mid-drag) or release past ~55%,
-  // and you can grab anywhere on the track — so it never feels "stuck".
+  // Press-and-hold to commit. Hold the button for ~1.1s to lock the promise,
+  // then it plays the sign → green → red-stamp sequence and advances.
+  // Releasing early snaps the fill back to 0 — no partial credit.
   (function () {
-    const slider = document.getElementById('slideCommit');
-    if (!slider) return;
-    const handle = document.getElementById('scHandle');
-    const fill   = document.getElementById('scFill');
-    const label  = document.getElementById('scLabel');
-    const meta   = document.getElementById('promiseMeta');
-    let dragging = false, fired = false, grabOffset = 0, x = 0, lastBuzz = 0;
-    const HW = 50, PAD = 4;
-    function maxX() { return Math.max(1, slider.clientWidth - HW - PAD * 2); }
-    function frac() { return x / maxX(); }
-    function pointX(e) {
-      if (e.touches && e.touches[0]) return e.touches[0].clientX;
-      if (e.changedTouches && e.changedTouches[0]) return e.changedTouches[0].clientX;
-      return e.clientX;
+    const btn   = document.getElementById('holdCommit');
+    if (!btn) return;
+    const fill  = document.getElementById('hcFill');
+    const label = document.getElementById('hcLabel');
+    const meta  = document.getElementById('promiseMeta');
+    const sig   = document.getElementById('promiseSign');
+    const HOLD_MS = 1100;
+    let fired = false, holding = false, startT = 0, raf = null, lastBuzz = 0;
+    function setProgress(p) {
+      p = Math.max(0, Math.min(1, p));
+      fill.style.width = (p * 100) + '%';
+      if (sig) { if (p > 0.1) sig.classList.add('on'); else sig.classList.remove('on'); }
     }
-    function setX(px) {
-      x = Math.max(0, Math.min(maxX(), px));
-      handle.style.transform = 'translateX(' + x + 'px)';
-      fill.style.width = (x + HW) + 'px';
-      if (label) label.style.opacity = String(Math.max(0, 1 - frac() * 1.25));
-      slider.setAttribute('aria-valuenow', Math.round(frac() * 100));
-      // Reveal signature progressively as user slides
-      const sig = document.getElementById('promiseSign');
-      if (sig && frac() > 0.12) { sig.classList.add('on'); } else if (sig) { sig.classList.remove('on'); }
-    }
-    function down(e) {
-      if (fired || _signing) return;
-      const px = pointX(e);
-      const rect = slider.getBoundingClientRect();
-      const handleLeft = rect.left + PAD + x;
-      // grab the handle if you're on it; otherwise jump the handle under the finger
-      grabOffset = (px >= handleLeft && px <= handleLeft + HW) ? (px - handleLeft) : (HW / 2);
-      dragging = true; slider.classList.add('dragging');
-      handle.style.transition = 'none'; fill.style.transition = 'none';
-      if (meta) { meta.textContent = '// committing…'; meta.style.color = '#D6DBE3'; }
-      setX(px - rect.left - PAD - grabOffset);
-      try { if (typeof haptic === 'function') haptic(8); } catch (_) {}
-      if (e.cancelable) e.preventDefault();
-    }
-    function move(e) {
-      if (!dragging || fired) return;
-      const rect = slider.getBoundingClientRect();
-      setX(pointX(e) - rect.left - PAD - grabOffset);
+    function tick() {
+      if (!holding || fired) return;
+      const p = (performance.now() - startT) / HOLD_MS;
+      setProgress(p);
       const now = performance.now();
-      if (now - lastBuzz > 55) { lastBuzz = now; try { if (typeof haptic === 'function') haptic(3); } catch (_) {} }
-      if (frac() >= 0.85) complete();      // forgiving: don't need the exact end
+      if (now - lastBuzz > 90) { lastBuzz = now; try { if (typeof haptic === 'function') haptic(3); } catch (_) {} }
+      if (p >= 1) { complete(); return; }
+      raf = requestAnimationFrame(tick);
+    }
+    function press(e) {
+      if (fired || _signing) return;
+      holding = true; startT = performance.now();
+      btn.classList.add('pressing');
+      fill.style.transition = 'none';
+      if (label) label.textContent = 'Keep holding…';
+      if (meta) { meta.textContent = '// committing…'; meta.style.color = '#D6DBE3'; }
+      try { if (typeof haptic === 'function') haptic(8); } catch (_) {}
+      raf = requestAnimationFrame(tick);
       if (e.cancelable) e.preventDefault();
     }
-    function up() {
-      if (fired) { dragging = false; return; }
-      if (!dragging) return;
-      dragging = false; slider.classList.remove('dragging');
-      handle.style.transition = 'transform .28s cubic-bezier(.22,1,.36,1)';
-      fill.style.transition = 'width .28s cubic-bezier(.22,1,.36,1)';
-      if (frac() >= 0.55) { complete(); return; }   // let go past halfway → still commits
-      setX(0); if (label) label.style.opacity = '1'; if (meta) { meta.textContent = '// unsigned'; meta.style.color = ''; }
+    function release() {
+      if (fired || !holding) return;
+      holding = false;
+      if (raf) cancelAnimationFrame(raf);
+      btn.classList.remove('pressing');
+      fill.style.transition = 'width .25s cubic-bezier(.22,1,.36,1)';
+      setProgress(0);
+      if (label) label.textContent = 'Press & hold to commit';
+      if (meta) { meta.textContent = '// unsigned'; meta.style.color = ''; }
     }
     function complete() {
       if (fired) return;
-      fired = true; dragging = false;
-      slider.classList.remove('dragging'); slider.classList.add('done');
-      handle.style.transition = 'transform .22s cubic-bezier(.22,1.4,.36,1)';
-      fill.style.transition = 'width .22s cubic-bezier(.22,1.4,.36,1)';
-      setX(maxX());
-      if (label) { label.textContent = '✓ Committed'; label.style.opacity = '1'; }
+      fired = true; holding = false;
+      if (raf) cancelAnimationFrame(raf);
+      btn.classList.remove('pressing'); btn.classList.add('done');
+      fill.style.transition = 'width .18s ease';
+      setProgress(1);
+      if (label) label.textContent = '✓ Committed';
       state.promised = true;
-      try { track('promise_signed', { method: 'slide' }); } catch (_) {}
+      try { track('promise_signed', { method: 'hold' }); } catch (_) {}
       try { if (typeof haptic === 'function') haptic([10, 40, 20]); } catch (_) {}
       refreshCTA();
       if (_signing) return;
       _signing = true;
       playSignAnimation(function () { _signing = false; _signed = true; advance(); });
     }
-    // Robust input: pointer events when available, else mouse + touch. Bind the
-    // whole slider for the press, and the document for move/up (no pointer-
-    // capture, which was the flaky bit) so the drag can never be dropped.
     if (window.PointerEvent) {
-      slider.addEventListener('pointerdown', down);
-      document.addEventListener('pointermove', move, { passive: false });
-      document.addEventListener('pointerup', up);
-      document.addEventListener('pointercancel', up);
+      btn.addEventListener('pointerdown', press);
+      document.addEventListener('pointerup', release);
+      document.addEventListener('pointercancel', release);
     } else {
-      slider.addEventListener('mousedown', down);
-      document.addEventListener('mousemove', move);
-      document.addEventListener('mouseup', up);
-      slider.addEventListener('touchstart', down, { passive: false });
-      document.addEventListener('touchmove', move, { passive: false });
-      document.addEventListener('touchend', up);
+      btn.addEventListener('mousedown', press);
+      document.addEventListener('mouseup', release);
+      btn.addEventListener('touchstart', press, { passive: false });
+      document.addEventListener('touchend', release);
     }
-    // Keyboard fallback so the contract is signable without a drag (a11y):
-    // Enter/Space/→/End commits; ← resets.
-    slider.addEventListener('keydown', function (e) {
-      if (fired || _signing) return;
-      if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowRight' || e.key === 'End') { e.preventDefault(); complete(); }
-      else if (e.key === 'ArrowLeft' || e.key === 'Home') { e.preventDefault(); setX(0); }
+    // Keyboard fallback (a11y): hold Enter/Space.
+    btn.addEventListener('keydown', function (e) {
+      if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) { e.preventDefault(); press(e); }
     });
-    // recompute the rest position if the layout changes
-    window.addEventListener('resize', function () { if (!fired) setX(x); });
+    btn.addEventListener('keyup', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); release(); }
+    });
   })();
 
   // ── Live username availability ────────────────────────────────────────
