@@ -8793,7 +8793,7 @@
           <p class="copy">Your AI coach, built into CORE — he keeps you on track, every day.</p>
           <div class="voice-stage">
             <div class="cb-speech" id="cbIntroSpeech">Hi, I'm Corbit.<br>Tap me — I don't bite.</div>
-            <div class="corbit-bot" id="voiceOrb" data-state="calm" onclick="corbitTap(this)" role="button" aria-label="Tap Corbit" tabindex="0">
+            <div class="corbit-bot" id="voiceOrb" data-state="happy" onclick="corbitTap(this)" role="button" aria-label="Tap Corbit" tabindex="0">
               <span class="cb-halo"></span>
               <span class="cb-ring"></span>
               <span class="cb-antenna"><i class="cb-ant-stem"></i><i class="cb-ant-tip"></i></span>
@@ -8808,6 +8808,7 @@
                 <span class="cb-shine"></span>
               </div>
             </div>
+            <div class="cb-emotion-label" id="cbEmotionLabel">Corbit is happy</div>
           </div>
           <script>
             (function(){
@@ -8825,11 +8826,16 @@
                 concerned:'#5b7ca8', proud:'#ffd23f', curious:'#b3a6ff', thinking:'#c9ced8',
                 motivational:'#ff6b4a', sleepy:'#5a5f8a', celebratory:'#ffd23f'
               };
+              var label = document.getElementById('cbEmotionLabel');
               var clearTimer = null;
               function setEmotion(state, opts) {
                 opts = opts || {};
                 if (!EMOTION_COLORS[state]) return;
                 el.dataset.state = state;
+                if (label) {
+                  label.textContent = 'Corbit is ' + state;
+                  label.style.color = EMOTION_COLORS[state];
+                }
                 if (opts.line && bubble) bubble.textContent = opts.line;
                 if (opts.particles) burst(opts.particles === true ? EMOTION_COLORS[state] : opts.particles, opts.count || 10);
                 clearTimeout(clearTimer);
@@ -8856,18 +8862,12 @@
                 }
               }
 
-              // Sleepy after hours: a small real touch — late at night Corbit
-              // winds down instead of doomscrolling right along with you.
-              var hour = new Date().getHours();
-              var isLateNight = hour >= 23 || hour < 6;
-              if (isLateNight) {
-                setEmotion('sleepy', { line: "It's late — I'll keep it brief tonight." });
-              } else {
-                // Calm on arrival, then curious a beat later — inviting the tap.
-                setTimeout(function(){
-                  setEmotion('curious', { line: "Hi, I'm Corbit. Go on, tap me." });
-                }, 1400);
-              }
+              // Trial keeps it simple: Corbit is just happy here. The full
+              // range (sleepy at night, concerned on missed habits, focused
+              // during timers, etc.) is for the dashboard, once there's real
+              // usage data to react to — this label/color system is already
+              // wired for that, it just isn't driven by anything here yet.
+              setEmotion('happy', { line: "Hi, I'm Corbit. Tap me — I don't bite." });
 
               var TAP_LINES = {
                 happy: ["Hey, that tickles!","Let's build this together.","One day at a time — I promise.","That's the spirit."],
@@ -8894,7 +8894,7 @@
                   if (tapCount >= 6)      setEmotion('celebratory', { line: pick(TAP_LINES.celebratory), particles: ['#ffd23f','#ff7ad9','#38e0ff'], count: 18, revertAfter: 1600, revertTo:'happy' });
                   else if (tapCount >= 4) setEmotion('proud',       { line: pick(TAP_LINES.proud), particles: '#ffd23f', revertAfter: 1300, revertTo:'happy' });
                   else if (tapCount >= 2) setEmotion('excited',     { line: pick(TAP_LINES.excited), particles: '#ff7ad9', revertAfter: 1100, revertTo:'happy' });
-                  else                    setEmotion('happy',      { line: pick(TAP_LINES.happy), particles: '#E8F1FF', revertAfter: 1300, revertTo:'curious' });
+                  else                    setEmotion('happy',      { line: pick(TAP_LINES.happy), particles: '#E8F1FF', revertAfter: 1300, revertTo:'happy' });
                 }, 220);
               };
             })();
@@ -8903,18 +8903,29 @@
             .corbit-bot{cursor:pointer}
             .corbit-bot{--jump-scale:1}
             @keyframes cbJump{
-              0%{transform:translateY(0) scale(1,1)}
-              22%{transform:translateY(calc(-38px * var(--jump-scale,1))) scale(.9,1.14)}
-              42%{transform:translateY(0) scale(1.14,.86)}
-              58%{transform:translateY(calc(-16px * var(--jump-scale,1))) scale(.95,1.06)}
-              72%{transform:translateY(0) scale(1.06,.95)}
-              84%{transform:translateY(calc(-6px * var(--jump-scale,1))) scale(.98,1.02)}
+              0%{transform:translateY(0) translateX(0) rotate(0deg) scale(1,1)}
+              22%{transform:translateY(calc(-38px * var(--jump-scale,1))) translateX(-3px) rotate(-3deg) scale(.9,1.14)}
+              42%{transform:translateY(0) translateX(2px) rotate(2deg) scale(1.14,.86)}
+              58%{transform:translateY(calc(-16px * var(--jump-scale,1))) translateX(-1.5px) rotate(-1.5deg) scale(.95,1.06)}
+              72%{transform:translateY(0) translateX(1px) rotate(1deg) scale(1.06,.95)}
+              84%{transform:translateY(calc(-6px * var(--jump-scale,1))) translateX(0) rotate(0deg) scale(.98,1.02)}
               100%{transform:translateY(0) scale(1,1)}
             }
             .corbit-bot.tapped{animation:cbJump .75s cubic-bezier(.28,1.2,.4,1) both}
+            /* smoother, more organic float — a gentle arc instead of a strict
+               vertical elevator up/down */
+            .step[data-step="24"] .cb-head{animation:cbFloat 4.6s ease-in-out infinite !important}
+            @keyframes cbFloat{
+              0%,100%{transform:translateY(0) rotate(0deg)}
+              25%{transform:translateY(-2px) rotate(-1.4deg)}
+              50%{transform:translateY(-5px) rotate(0deg)}
+              75%{transform:translateY(-2px) rotate(1.4deg)}
+            }
             .cb-blush{transition:opacity .3s ease}
             .cb-mouth{transition:width .25s ease,height .25s ease,margin-left .25s ease,border-radius .25s ease}
             .voice-stage{display:flex;flex-direction:column;align-items:center;gap:16px;margin-top:12px}
+            .cb-emotion-label{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+              margin-top:-6px;transition:color .4s ease;text-shadow:0 0 12px currentColor}
             .cb-speech{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:10px 18px;font-size:14px;color:rgba(255,255,255,.85);text-align:center;line-height:1.4;max-width:260px;position:relative;animation:cbIn .5s .3s ease both}
             .cb-speech::after{content:'';position:absolute;bottom:-7px;left:50%;margin-left:-7px;width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:7px solid rgba(255,255,255,.08)}
             @keyframes cbIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
