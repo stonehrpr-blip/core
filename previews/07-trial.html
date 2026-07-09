@@ -3487,12 +3487,12 @@
             </button>
           </div>
           <style>
-            .routine-yn{display:flex;gap:14px;margin-top:24px;width:100%}
-            .yn-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
-              padding:30px 14px;border-radius:20px;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);
-              color:#fff;font-size:17px;font-weight:800;cursor:pointer;font-family:inherit;position:relative;overflow:visible;
+            .routine-yn{display:flex;gap:14px;margin-top:26px;width:100%}
+            .yn-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+              padding:42px 14px;border-radius:22px;border:1.5px solid rgba(255,255,255,.14);background:rgba(255,255,255,.045);
+              color:#fff;font-size:19px;font-weight:800;cursor:pointer;font-family:inherit;position:relative;overflow:visible;
               transition:border-color .2s ease, background .2s ease, box-shadow .2s ease, transform .15s ease}
-            .yn-btn svg{width:30px;height:30px;opacity:.55;transition:opacity .2s ease, transform .2s ease}
+            .yn-btn svg{width:38px;height:38px;opacity:.7;transition:opacity .2s ease, transform .2s ease}
             .yn-btn:hover{border-color:rgba(255,255,255,.3)}
             .yn-btn:active{transform:scale(.96)}
             .yn-yes.sel{
@@ -3513,7 +3513,7 @@
         <div class="step" data-step="106">
           <div class="kicker">Build your routine</div>
           <h1 class="title">Tap to build<br><span class="g">your day.</span></h1>
-          <p class="copy">Corbit suggests — you decide.</p>
+          <p class="copy">Corbit suggests — you decide. Pick as many as you like.</p>
           <div class="routine-build" id="routineBuild">
             <button class="rb-chip" data-routine="wake" style="--rc:#f59e0b">
               <span class="rb-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
@@ -3541,10 +3541,11 @@
             </button>
           </div>
           <style>
-            .routine-build{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;width:100%}
-            .rb-chip{all:unset;display:flex;flex-direction:column;align-items:flex-start;gap:10px;width:100%;box-sizing:border-box;
-              padding:16px 14px;border-radius:16px;border:1.5px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);
-              color:rgba(255,255,255,.75);font-size:13px;font-weight:600;line-height:1.3;cursor:pointer;font-family:inherit;text-align:left;
+            .routine-build{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;width:100%}
+            .rb-chip{all:unset;position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:10px;width:100%;
+              box-sizing:border-box;min-height:104px;padding:16px 30px 16px 14px;border-radius:16px;
+              border:1.5px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);
+              color:rgba(255,255,255,.75);font-size:13px;font-weight:600;line-height:1.35;cursor:pointer;font-family:inherit;text-align:left;
               transition:border-color .2s ease,background .2s ease,box-shadow .2s ease,transform .15s ease}
             .rb-ico{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;
               background:color-mix(in srgb, var(--rc) 16%, transparent);color:var(--rc);flex-shrink:0}
@@ -3557,7 +3558,17 @@
               box-shadow:0 0 0 1.5px color-mix(in srgb, var(--rc) 55%, transparent) inset, 0 0 20px color-mix(in srgb, var(--rc) 40%, transparent);
             }
             .rb-chip.sel .rb-ico{background:var(--rc);color:#08090c}
-            .rb-chip.sel .rb-label::after{content:' ✓';color:var(--rc);font-weight:800}
+            /* checkmark badge: fixed top-right corner on every card, regardless of
+               how long the label is or how many lines it wraps to */
+            .rb-chip::after{
+              content:'';position:absolute;top:10px;right:10px;width:20px;height:20px;border-radius:50%;
+              opacity:0;transform:scale(.6);transition:opacity .2s ease,transform .2s ease;
+            }
+            .rb-chip.sel::after{
+              content:'✓';opacity:1;transform:scale(1);background:var(--rc);color:#08090c;
+              font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;
+              box-shadow:0 0 10px color-mix(in srgb, var(--rc) 60%, transparent);
+            }
           </style>
         </div>
 
@@ -8779,37 +8790,63 @@
           </div>
           <script>
             (function(){
-              var TAP_LINES = ["Hey, that tickles.","I'm always here for you.","Let's build this together.","One day at a time — I promise.","You've got this. I've got you."];
-              var tapCount = 0;
+              var TAP_LINES = [
+                "Hey, that tickles!","I'm always here for you.","Let's build this together.",
+                "One day at a time — I promise.","You've got this. I've got you.",
+                "Okay okay, I'm awake!","Poke me all you want, I'm not going anywhere.",
+                "That's the spirit.","Ready when you are.","Careful, I bounce back."
+              ];
+              var lastIdx = -1;
+              function nextLine(){
+                var i;
+                do { i = Math.floor(Math.random() * TAP_LINES.length); } while (i === lastIdx && TAP_LINES.length > 1);
+                lastIdx = i;
+                return TAP_LINES[i];
+              }
+              var tapStreak = 0, streakTimer = null;
               window.corbitTap = function(el){
                 el.classList.remove('tapped'); void el.offsetWidth; el.classList.add('tapped','happy');
+                // rapid repeat taps bounce a little higher each time, up to a cap — feels alive, not looping
+                tapStreak = Math.min(tapStreak + 1, 3);
+                clearTimeout(streakTimer);
+                streakTimer = setTimeout(function(){ tapStreak = 0; }, 900);
+                el.style.setProperty('--jump-scale', (1 + tapStreak * 0.12).toFixed(2));
                 setTimeout(function(){ el.classList.remove('happy'); },900);
-                setTimeout(function(){ el.classList.remove('tapped'); },600);
+                setTimeout(function(){ el.classList.remove('tapped'); },750);
                 var bubble = document.getElementById('cbIntroSpeech');
-                if (bubble) { bubble.textContent = TAP_LINES[tapCount % TAP_LINES.length]; tapCount++; }
+                if (bubble) bubble.textContent = nextLine();
                 var host = el.closest('.phone') || el.closest('.step');
                 var pr = host ? host.getBoundingClientRect() : {left:0,top:0};
                 var rect = el.getBoundingClientRect();
                 var cx = rect.left - pr.left + rect.width/2, cy = rect.top - pr.top + rect.height*0.25;
-                for (var i=0;i<8;i++){
+                for (var i=0;i<10;i++){
                   var p = document.createElement('span');
-                  var ang = -Math.PI/2 + (Math.random()-0.5)*2.2;
+                  var ang = -Math.PI/2 + (Math.random()-0.5)*2.4;
+                  var d = 45 + Math.random()*30;
                   p.style.cssText = 'position:absolute;z-index:99;pointer-events:none;width:5px;height:5px;border-radius:50%;'
                     + 'background:#E8F1FF;box-shadow:0 0 8px rgba(214,230,255,.9);left:'+cx+'px;top:'+cy+'px;'
-                    + 'animation:ynBurst .6s cubic-bezier(.22,1,.36,1) forwards;animation-delay:'+(i*0.02)+'s;'
-                    + '--bx:'+(Math.cos(ang)*50)+'px;--by:'+(Math.sin(ang)*50-20)+'px;';
+                    + 'animation:ynBurst .65s cubic-bezier(.22,1,.36,1) forwards;animation-delay:'+(i*0.018)+'s;'
+                    + '--bx:'+(Math.cos(ang)*d)+'px;--by:'+(Math.sin(ang)*d-20)+'px;';
                   host.appendChild(p);
-                  setTimeout(function(elp){return function(){elp.remove()}}(p),700);
+                  setTimeout(function(elp){return function(){elp.remove()}}(p),750);
                 }
-                try{if(typeof haptic==='function')haptic(14)}catch(e){}
+                try{if(typeof haptic==='function')haptic(tapStreak>=3?[10,20,10]:14)}catch(e){}
               };
             })();
           </script>
-          <button class="step-cta" style="margin-top:16px;width:100%" onclick="advance()">Continue <svg viewBox="0 0 24 24" style="width:16px;height:16px;vertical-align:-3px;margin-left:4px"><path d="M5 12h14M13 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
           <style>
             .corbit-bot{cursor:pointer}
-            @keyframes cbJump{0%{transform:translateY(0) scale(1,1)}30%{transform:translateY(-26px) scale(.94,1.08)}55%{transform:translateY(0) scale(1.1,.9)}75%{transform:translateY(-6px) scale(.98,1.03)}100%{transform:translateY(0) scale(1,1)}}
-            .corbit-bot.tapped{animation:cbJump .6s cubic-bezier(.28,1.2,.4,1) both}
+            .corbit-bot{--jump-scale:1}
+            @keyframes cbJump{
+              0%{transform:translateY(0) scale(1,1)}
+              22%{transform:translateY(calc(-38px * var(--jump-scale,1))) scale(.9,1.14)}
+              42%{transform:translateY(0) scale(1.14,.86)}
+              58%{transform:translateY(calc(-16px * var(--jump-scale,1))) scale(.95,1.06)}
+              72%{transform:translateY(0) scale(1.06,.95)}
+              84%{transform:translateY(calc(-6px * var(--jump-scale,1))) scale(.98,1.02)}
+              100%{transform:translateY(0) scale(1,1)}
+            }
+            .corbit-bot.tapped{animation:cbJump .75s cubic-bezier(.28,1.2,.4,1) both}
             .cb-blush{transition:opacity .3s ease}
             .cb-mouth{transition:width .25s ease,height .25s ease,margin-left .25s ease,border-radius .25s ease}
             .voice-stage{display:flex;flex-direction:column;align-items:center;gap:16px;margin-top:12px}
@@ -10771,7 +10808,6 @@
     // Step-21 — cinematic portal subscription gate hides all chrome
     document.body.classList.toggle('on-portal', n === 21);
     document.body.classList.toggle('on-promise', n === 0);   // hold-to-commit replaces the footer CTA
-    document.body.classList.toggle('on-corbit-intro', n === 24);   // in-page Continue button replaces the footer CTA
     document.body.classList.toggle('on-autoadvance', n === 100 || n === 2 || n === 105); // tap advances — no Next button
     // Demo playback (start the one visible demo, stop any others)
     if (isDemoStep(n)) startDemo(n); else stopAllDemos();
@@ -10843,6 +10879,7 @@
     else if (s === 105) { setCTA('Next',!state.hasRoutine,!state.hasRoutine?'Pick yes or no':''); }
     else if (s === 106) { var rc=state.routines&&state.routines.length||0; setCTA('Continue',rc<1,rc<1?'Tap at least one':rc+' selected'); }
     else if (s === 107) { setCTA("Let's go",false,'Everything starts now'); }
+    else if (s === 24) { setCTA('Continue', false, "That's Corbit — your coach"); }
     else if (s === 0) {
       setCTA('Sign', !state.promised,
         state.promised ? 'Signed. Tap to seal it.' : 'Press and hold to commit');
@@ -14254,7 +14291,6 @@
       + ' of ' + NUM_QUESTIONS + ' · ' + CHAPTERS[chapterIndexFor()].label;
     // ...and the same body-state classes setStep() would have applied.
     document.body.classList.toggle('on-autoadvance', state.step === 100 || state.step === 2 || state.step === 105);
-    document.body.classList.toggle('on-corbit-intro', state.step === 24);
   })();
   track('step_view', { step: 0, entry: true });
 
@@ -15292,8 +15328,6 @@ html body[data-font="apple"] #planTitle .g {
 /* auto-advance pages (gender, habit, what-pushed): tapping an option advances,
    so the Next button is redundant — hide it. A hint replaces it. */
 body.on-autoadvance .footer { display:none !important; }
-/* Corbit intro (step 24): the in-page Continue button is the CTA, so hide the footer one */
-body.on-corbit-intro .footer { display:none !important; }
 body.on-autoadvance .stepwrap::after {
   content:"Tap an option to continue"; position:absolute; left:0; right:0; bottom:18px;
   text-align:center; font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif; font-size:10.5px;
