@@ -3470,8 +3470,19 @@
             <button class="yn-btn" data-yn="no" style="flex:1;padding:20px;border-radius:16px;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);color:#fff;font-size:16px;font-weight:700;cursor:pointer;transition:all.2s;font-family:inherit">No</button>
           </div>
           <style>
+            .yn-btn{transition:border-color .2s ease, background .2s ease, box-shadow .2s ease, transform .15s ease}
             .yn-btn:hover{border-color:rgba(255,255,255,.3)}
-            .yn-btn.sel{border-color:#4ade80;background:rgba(74,222,128,.08);box-shadow:0 0 0 1px rgba(74,222,128,.2) inset}
+            .yn-btn:active{transform:scale(.97)}
+            .yn-btn[data-yn="yes"].sel{
+              border-color:#4ade80;
+              background:rgba(74,222,128,.1);
+              box-shadow:0 0 0 1.5px rgba(74,222,128,.5) inset, 0 0 18px rgba(74,222,128,.45), 0 0 36px rgba(74,222,128,.2);
+            }
+            .yn-btn[data-yn="no"].sel{
+              border-color:#f87171;
+              background:rgba(248,113,113,.1);
+              box-shadow:0 0 0 1.5px rgba(248,113,113,.5) inset, 0 0 18px rgba(248,113,113,.45), 0 0 36px rgba(248,113,113,.2);
+            }
           </style>
         </div>
 
@@ -4409,15 +4420,6 @@
 .cb-wave i{transition:height .15s ease-out}
 
 </style>
-        </div>
-
-          <div class="tone-list" id="vapeYears" style="display:none;" aria-hidden="true">
-            <button class="tone-row" data-years="lt6mo"></button>
-            <button class="tone-row" data-years="6-12mo"></button>
-            <button class="tone-row" data-years="1-2y"></button>
-            <button class="tone-row" data-years="2-5y"></button>
-            <button class="tone-row" data-years="5y+"></button>
-          </div>
         </div>
 
         <!-- STEP 5: Vape amount per day -->
@@ -8750,6 +8752,28 @@
             .step[data-step="24"].on .corbit-bot{animation:cbEntrance .7s .15s cubic-bezier(.22,1,.36,1) both}
             @keyframes cbBlink{0%,90%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
             .cb-eye.l,.cb-eye.r{animation:cbBlink 4s ease-in-out infinite}
+            /* ── static face shape — no mic/voice, just Corbit's look ── */
+            .corbit-bot{position:relative;width:158px;height:172px}
+            .cb-halo{position:absolute;left:5px;right:5px;top:18px;bottom:6px;border-radius:50%;pointer-events:none;background:radial-gradient(circle,rgba(206,212,222,.16) 0%,rgba(206,212,222,.05) 45%,transparent 70%)}
+            .cb-ring{position:absolute;left:2px;right:2px;top:20px;bottom:8px;border-radius:50%;pointer-events:none;background:conic-gradient(from 0deg,transparent 0deg,rgba(226,231,238,.55) 50deg,transparent 120deg,transparent 200deg,rgba(196,201,210,.35) 260deg,transparent 330deg);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 1.5px));mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 1.5px));animation:cbRingSpin 6s linear infinite}
+            @keyframes cbRingSpin{to{transform:rotate(360deg)}}
+            .cb-antenna{position:absolute;left:50%;top:2px;width:2px;height:26px;margin-left:-1px;z-index:2;transform-origin:50% 100%;animation:cbAntSway 4.5s ease-in-out infinite}
+            @keyframes cbAntSway{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(5deg)}}
+            .cb-ant-stem{position:absolute;inset:0;border-radius:2px;background:linear-gradient(180deg,#9AA1AC,#4A4F58)}
+            .cb-ant-tip{position:absolute;left:50%;top:-7px;width:9px;height:9px;margin-left:-4.5px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#C9D6EA 55%,#8A96AC 100%);box-shadow:0 0 10px rgba(214,230,255,.95),0 0 22px rgba(190,214,246,.55);animation:cbTipPulse 2.2s ease-in-out infinite}
+            @keyframes cbTipPulse{0%,100%{box-shadow:0 0 8px rgba(214,230,255,.75)}50%{box-shadow:0 0 16px rgba(226,238,255,1),0 0 34px rgba(190,214,246,.7)}}
+            .cb-pod{position:absolute;top:52%;width:14px;height:34px;border-radius:8px;z-index:0;background:linear-gradient(180deg,#3A3F49 0%,#14161B 100%);box-shadow:0 1px 0 rgba(255,255,255,.14) inset,0 4px 10px rgba(0,0,0,.5)}
+            .cb-pod.l{left:-2px}.cb-pod.r{right:-2px}
+            .cb-head{position:absolute;left:10px;right:10px;top:22px;bottom:16px;border-radius:42%;background:radial-gradient(circle at 34% 24%,#454B57 0%,#23262D 42%,#101216 78%,#08090C 100%);box-shadow:0 1px 0 rgba(255,255,255,.20) inset,0 -12px 24px rgba(0,0,0,.55) inset,0 18px 44px rgba(0,0,0,.6),0 0 44px rgba(206,212,222,.12);animation:cbBob 4.5s ease-in-out infinite;z-index:1}
+            @keyframes cbBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+            .cb-shine{position:absolute;left:16%;top:8%;width:44%;height:20%;border-radius:50%;background:linear-gradient(180deg,rgba(255,255,255,.24),rgba(255,255,255,0));filter:blur(1px)}
+            .cb-face{position:absolute;inset:0}
+            .cb-eye{position:absolute;top:34%;width:17px;height:27px;border-radius:9px;overflow:hidden;background:linear-gradient(180deg,#FFFFFF,#CFE0F5);box-shadow:0 0 10px rgba(214,230,255,.9),0 0 26px rgba(190,214,246,.5)}
+            .cb-eye.l{left:28%}.cb-eye.r{right:28%}
+            .cb-pupil{position:absolute;left:50%;top:50%;width:9px;height:12px;margin:-6px 0 0 -4.5px;border-radius:5px;background:radial-gradient(circle at 35% 30%,#465062,#10131B 75%)}
+            .cb-blush{position:absolute;top:53%;width:14px;height:7px;border-radius:50%;background:rgba(255,150,160,.5);filter:blur(2px);opacity:0}
+            .cb-blush.l{left:19%}.cb-blush.r{right:19%}
+            .cb-mouth{position:absolute;top:60%;left:50%;width:26px;height:13px;margin-left:-13px;border:2.5px solid rgba(226,238,255,.92);border-top:none;border-left-color:transparent;border-right-color:transparent;border-radius:0 0 26px 26px;box-shadow:0 2px 8px rgba(214,230,255,.35)}
           </style>
         </div>
 
@@ -10655,6 +10679,7 @@
     // Step-21 — cinematic portal subscription gate hides all chrome
     document.body.classList.toggle('on-portal', n === 21);
     document.body.classList.toggle('on-promise', n === 0);   // hold-to-commit replaces the footer CTA
+    document.body.classList.toggle('on-corbit-intro', n === 24);   // in-page Continue button replaces the footer CTA
     document.body.classList.toggle('on-autoadvance', n === 2 || n === 4 || n === 9 || n === 23); // tap advances — no Next button
     // Demo playback (start the one visible demo, stop any others)
     if (isDemoStep(n)) startDemo(n); else stopAllDemos();
@@ -15163,7 +15188,9 @@ body.on-promise .footer { display:none !important; }
 .step[data-step="0"] .slide-wrap { margin-top:14px; }
 /* auto-advance pages (gender, habit, what-pushed): tapping an option advances,
    so the Next button is redundant — hide it. A hint replaces it. */
-body .footer { display:none !important; }
+body.on-autoadvance .footer { display:none !important; }
+/* Corbit intro (step 24): the in-page Continue button is the CTA, so hide the footer one */
+body.on-corbit-intro .footer { display:none !important; }
 body.on-autoadvance .stepwrap::after {
   content:"Tap an option to continue"; position:absolute; left:0; right:0; bottom:18px;
   text-align:center; font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif; font-size:10.5px;
