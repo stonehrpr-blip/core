@@ -8797,7 +8797,6 @@
             <div class="cb-speech" id="cbIntroSpeech">Hi, I'm Corbit.<br>Tap me — I don't bite.</div>
             <div class="corbit-bot-wrap" id="voiceOrbWrap">
               <span class="cb-ambient" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-              <span class="cb-ambient-ring" aria-hidden="true"></span>
               <span class="cb-hitbox" id="cbHitbox" aria-hidden="true"></span>
               <div class="corbit-bot" id="voiceOrb" data-state="happy" onclick="corbitTap(this)" role="button" aria-label="Tap Corbit" tabindex="0">
                 <span class="cb-halo"></span>
@@ -8836,7 +8835,7 @@
               };
               var label = document.getElementById('cbEmotionLabel');
               var hitbox = document.getElementById('cbHitbox');
-              var wrap = document.getElementById('voiceOrbWrap');
+              var wrap = el.closest('.voice-stage') || document.getElementById('voiceOrbWrap');
               function flashHitbox(color) {
                 if (wrap) wrap.style.setProperty('--hb-color', color);
                 if (!hitbox) return;
@@ -8942,8 +8941,18 @@
             .voice-stage{display:flex;flex-direction:column;align-items:center;gap:16px;margin-top:12px}
             .cb-emotion-label{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
               margin-top:-6px;transition:color .4s ease;text-shadow:0 0 12px currentColor}
-            .cb-speech{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:10px 18px;font-size:14px;color:rgba(255,255,255,.85);text-align:center;line-height:1.4;max-width:260px;position:relative;animation:cbIn .5s .3s ease both}
-            .cb-speech::after{content:'';position:absolute;bottom:-7px;left:50%;margin-left:-7px;width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:7px solid rgba(255,255,255,.08)}
+            .cb-speech{background:rgba(24,26,32,.6);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+              border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:13px 20px;
+              font-size:14.5px;font-weight:500;color:rgba(255,255,255,.92);text-align:center;line-height:1.45;
+              max-width:270px;position:relative;
+              box-shadow:0 10px 28px rgba(0,0,0,.4),0 0 0 1px var(--hb-color,#7dc4ff) inset,0 0 20px color-mix(in srgb,var(--hb-color,#7dc4ff) 25%,transparent);
+              animation:cbIn .5s .3s cubic-bezier(.22,1,.36,1) both;
+              transition:box-shadow .4s ease}
+            .cb-speech::before{content:'';position:absolute;inset:0;border-radius:18px;padding:1px;
+              background:linear-gradient(135deg,color-mix(in srgb,var(--hb-color,#7dc4ff) 45%,transparent),transparent 60%);
+              -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+              -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;transition:background .4s ease}
+            .cb-speech::after{content:'';position:absolute;bottom:-7px;left:50%;margin-left:-7px;width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:7px solid rgba(24,26,32,.6)}
             @keyframes cbIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
             @keyframes cbEntrance{0%{opacity:0;transform:translateY(40px)}60%{opacity:1;transform:translateY(-8px)}80%{transform:translateY(2px)}100%{opacity:1;transform:translateY(0)}}
             .step[data-step="24"].on .corbit-bot{animation:cbEntrance .7s .15s cubic-bezier(.22,1,.36,1) both}
@@ -9060,24 +9069,22 @@
               100%{opacity:0;box-shadow:0 0 0 0 transparent;transform:scale(1.08)}
             }
 
-            /* ── ambient background life — soft drifting orbs behind Corbit,
-               a slow-turning halo ring, so the space around him doesn't sit
-               dead when he's not being tapped ── */
-            .cb-ambient{position:absolute;top:50%;left:50%;width:280px;height:280px;margin:-140px 0 0 -140px;
-              pointer-events:none;z-index:-1}
-            .cb-ambient i{position:absolute;border-radius:50%;filter:blur(9px);opacity:.35;
-              background:radial-gradient(circle,var(--hb-color,#7dc4ff),transparent 70%)}
-            .cb-ambient i:nth-child(1){width:46px;height:46px;top:8%;left:14%;animation:cbOrbit1 9s ease-in-out infinite}
-            .cb-ambient i:nth-child(2){width:34px;height:34px;top:64%;left:78%;animation:cbOrbit2 7.5s ease-in-out infinite}
-            .cb-ambient i:nth-child(3){width:28px;height:28px;top:74%;left:20%;animation:cbOrbit3 11s ease-in-out infinite}
-            .cb-ambient i:nth-child(4){width:38px;height:38px;top:12%;left:76%;animation:cbOrbit1 8.5s ease-in-out infinite reverse}
-            @keyframes cbOrbit1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(14px,-10px) scale(1.15)}}
-            @keyframes cbOrbit2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-16px,8px) scale(.9)}}
-            @keyframes cbOrbit3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(10px,12px) scale(1.1)}}
-            .cb-ambient-ring{position:absolute;inset:6px;border-radius:50%;pointer-events:none;
-              border:1px dashed var(--hb-color,#7dc4ff);opacity:.16;animation:cbAmbientSpin 22s linear infinite}
-            @keyframes cbAmbientSpin{to{transform:rotate(360deg)}}
-            @media (prefers-reduced-motion: reduce){ .cb-ambient i,.cb-ambient-ring{animation:none !important} }
+            /* ── ambient background life — a single soft breathing glow behind
+               Corbit, plus a few pinpoint sparkles drifting up (no floating
+               circle blobs) ── */
+            .cb-ambient{position:absolute;top:50%;left:50%;width:260px;height:260px;margin:-130px 0 0 -130px;
+              pointer-events:none;z-index:-1;border-radius:50%;
+              background:radial-gradient(circle,color-mix(in srgb,var(--hb-color,#7dc4ff) 22%,transparent) 0%,transparent 68%);
+              animation:cbAmbientBreathe 4.5s ease-in-out infinite}
+            @keyframes cbAmbientBreathe{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:.85;transform:scale(1.06)}}
+            .cb-ambient i{position:absolute;width:2px;height:2px;border-radius:50%;background:#fff;opacity:0;
+              box-shadow:0 0 4px rgba(255,255,255,.8);animation:cbSparkle 5s ease-in infinite}
+            .cb-ambient i:nth-child(1){top:80%;left:22%;animation-delay:0s}
+            .cb-ambient i:nth-child(2){top:85%;left:68%;animation-delay:1.4s}
+            .cb-ambient i:nth-child(3){top:78%;left:48%;animation-delay:2.7s}
+            .cb-ambient i:nth-child(4){top:88%;left:35%;animation-delay:3.6s}
+            @keyframes cbSparkle{0%{opacity:0;transform:translateY(0)}20%{opacity:.9}80%{opacity:.3}100%{opacity:0;transform:translateY(-70px)}}
+            @media (prefers-reduced-motion: reduce){ .cb-ambient,.cb-ambient i{animation:none !important} }
 
             /* ── eyebrows — the single biggest lever for readable expression ── */
             .cb-brow{position:absolute;top:25%;width:15px;height:3px;border-radius:3px;
@@ -10819,7 +10826,7 @@
   //   0  sign the contract
   //   21 portal / paywall
   // Lean ≤60s flow — 5 quick questions, a payoff, then the contract + portal.
-  const ORDER = [100, 101, 1, 2, 24, 105, 106, 22, 0, 107, 17, 8];
+  const ORDER = [100, 101, 2, 24, 105, 106, 22, 1, 0, 107, 17, 8];
   function curPos() { const i = ORDER.indexOf(state.step); return i < 0 ? 0 : i; }
   // Every screen the user steps through is counted EXCEPT the portal/paywall (21).
   // The 30-day payoff (16) and the contract (0) are real steps too, so the
