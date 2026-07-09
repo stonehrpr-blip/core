@@ -3440,7 +3440,6 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
             <span>Private. Only your coach sees this.</span>
           </div>
-          <button id="describeContinue" class="step-cta" disabled onclick="if(!this.disabled)advance()">Continue</button>
           <style>
             .step-cta{width:100%;padding:16px;border-radius:16px;border:none;background:rgba(255,255,255,.06);color:rgba(255,255,255,.3);font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;transition:all.25s;margin-top:auto}
             .step-cta:not(:disabled){background:#fff;color:#000;cursor:pointer}
@@ -3621,7 +3620,6 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
             <span>Age only tailors your plan &amp; pace — never shared.</span>
           </div>
-          <button id="step1Continue" class="step-cta" disabled onclick="if(!this.disabled)advance()">Continue <svg viewBox="0 0 24 24" style="width:16px;height:16px;vertical-align:-3px;margin-left:4px"><path d="M5 12h14M13 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         </div>
 
         <!-- STEP 2: Profile (gender) — male/female picker -->
@@ -10680,7 +10678,7 @@
     document.body.classList.toggle('on-portal', n === 21);
     document.body.classList.toggle('on-promise', n === 0);   // hold-to-commit replaces the footer CTA
     document.body.classList.toggle('on-corbit-intro', n === 24);   // in-page Continue button replaces the footer CTA
-    document.body.classList.toggle('on-autoadvance', n === 2 || n === 4 || n === 9 || n === 23); // tap advances — no Next button
+    document.body.classList.toggle('on-autoadvance', n === 100 || n === 2); // tap advances — no Next button
     // Demo playback (start the one visible demo, stop any others)
     if (isDemoStep(n)) startDemo(n); else stopAllDemos();
     // Step-enter hooks (keyed by body id — unchanged by the reorder)
@@ -14177,6 +14175,9 @@
     const k = first && first.querySelector('.kicker');
     if (k) k.textContent = 'Step ' + Math.min(curPos() + 1, NUM_QUESTIONS)
       + ' of ' + NUM_QUESTIONS + ' · ' + CHAPTERS[chapterIndexFor()].label;
+    // ...and the same body-state classes setStep() would have applied.
+    document.body.classList.toggle('on-autoadvance', state.step === 100 || state.step === 2);
+    document.body.classList.toggle('on-corbit-intro', state.step === 24);
   })();
   track('step_view', { step: 0, entry: true });
 
@@ -15196,6 +15197,8 @@ body.on-autoadvance .stepwrap::after {
   text-align:center; font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif; font-size:10.5px;
   letter-spacing:0.1em; text-transform:uppercase; color:rgba(235,235,245,0.34); pointer-events:none; z-index:5;
 }
+/* Step 100 (area picker) already has its own "Log in" link at the bottom — don't stack the generic hint on top of it */
+body.on-autoadvance .stepwrap:has(.step[data-step="100"].on)::after { content:none; }
 
 /* ── Clearer BUTTON OUTLINES + soft glow on every tappable card/button ── */
 .tone-row, .habit-card, .profile-card, .age-chip, .why-chip, .pick-card {
