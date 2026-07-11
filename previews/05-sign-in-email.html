@@ -232,7 +232,7 @@
         <div class="glow"></div>
         <div class="eyebrow">Email sign-in</div>
         <h1>What's your email?</h1>
-        <p class="sub">We'll send you a 6-digit code. No password to remember.</p>
+        <p class="sub">We'll send you a sign-in link. No password to remember.</p>
       </div>
 
       <div class="trust-strip" aria-hidden="true">
@@ -246,7 +246,7 @@
         </span>
       </div>
 
-      <div class="form-stack">
+      <div class="form-stack" id="formStack">
         <div class="field-wrap">
           <input
             id="emailInput" class="field" type="email"
@@ -258,11 +258,26 @@
         </div>
 
           <button id="sendBtn" class="cta" onclick="sendCode()" disabled>
-            Send code
+            Continue
             <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
           </button>
-          <p style="font-size:11px;color:var(--mu);text-align:center;margin-top:8px;">We'll send a code to verify you. New or returning — works either way.</p>
+          <p style="font-size:11px;color:var(--mu);text-align:center;margin-top:8px;">We'll email you a link to verify it's you. New or returning — works either way.</p>
 
+      </div>
+
+      <!-- Real-backend path: Supabase sends a clickable link, not a typed
+           code, unless custom SMTP + a customized template are set up. Rather
+           than send people to a code screen with nothing to type, show this
+           instead and let handleOAuthReturn() on 04-sign-in.html pick up the
+           session once they tap the link. -->
+      <div class="form-stack" id="checkEmailPanel" style="display:none;text-align:center;">
+        <div style="width:64px;height:64px;margin:0 auto 18px;border-radius:18px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+        </div>
+        <p style="font-size:15px;font-weight:700;color:#fff;margin:0 0 6px;">Check your email</p>
+        <p style="font-size:13px;color:var(--mu);line-height:1.5;margin:0 0 22px;">We sent a sign-in link to <b id="sentToEmail" style="color:#fff;"></b>. Open it on this device to continue — no code needed.</p>
+        <button id="resendBtn" class="cta" onclick="resendCode()" style="background:rgba(255,255,255,0.06);color:#fff;">Resend link</button>
+        <p style="font-size:12px;margin-top:14px;"><a href="#" onclick="useAnotherEmail();return false;" style="color:var(--accent);">Use a different email</a></p>
       </div>
 
       <div class="footer">
@@ -330,7 +345,7 @@
       emailInput.classList.add('error');
     } else {
       emailMsg.className = 'field-msg ok';
-      emailMsg.textContent = "Looks good. Tap below and we'll send the code.";
+      emailMsg.textContent = "Looks good. Tap below and we'll send the link.";
       emailInput.classList.remove('error');
     }
   }
@@ -356,23 +371,49 @@
     sendBtn.disabled = true;
     sendBtn.style.opacity = '0.7';
     sendBtn.firstChild.nodeValue = 'Sending… ';
-    // Real backend: send the OTP via Supabase. Local mode: skip and go to
-    // the OTP screen which accepts any 6-digit code.
+    // Real backend: Supabase's default template sends a clickable link, not a
+    // typed code (that requires custom SMTP + a customized template) — so
+    // show a "check your email" state instead of a code screen with nothing
+    // to type. Tapping the link redirects back to 04-sign-in.html, which
+    // already detects the resulting session and routes onward.
+    // Local mode: skip and go to the OTP screen, which accepts any 6-digit code.
+    const goCheckEmail = () => {
+      document.getElementById('sentToEmail').textContent = v;
+      document.getElementById('formStack').style.display = 'none';
+      document.getElementById('checkEmailPanel').style.display = 'block';
+    };
     const goNext = () => { window.location.href = '06-sign-in-otp.html' + (location.search || ''); };
     if (window.coreAccounts && window.coreAccounts.isReal()) {
       window.coreAccounts.signInWithEmailOtp(v)
-        .then(goNext)
+        .then(goCheckEmail)
         .catch(err => {
           console.error('[sign-in-email] OTP send failed:', err);
           sendBtn.disabled = false;
           sendBtn.style.opacity = '1';
-          sendBtn.firstChild.nodeValue = 'Send code ';
+          sendBtn.firstChild.nodeValue = 'Continue ';
           alert('Could not send code: ' + (err && err.message ? err.message : 'unknown error'));
         });
     } else {
       setTimeout(goNext, 600);
     }
   }
+
+  function resendCode() {
+    var v = ''; try { v = localStorage.getItem('corePendingEmail') || ''; } catch (e) {}
+    if (!v || !window.coreAccounts || !window.coreAccounts.isReal()) return;
+    var btn = document.getElementById('resendBtn');
+    btn.disabled = true; btn.textContent = 'Sending…';
+    window.coreAccounts.signInWithEmailOtp(v)
+      .then(function () { btn.textContent = 'Sent — check your inbox'; setTimeout(function () { btn.disabled = false; btn.textContent = 'Resend link'; }, 3000); })
+      .catch(function (err) { console.error('[sign-in-email] resend failed:', err); btn.disabled = false; btn.textContent = 'Resend link'; alert('Could not resend: ' + (err && err.message ? err.message : 'unknown error')); });
+  }
+  function useAnotherEmail() {
+    document.getElementById('checkEmailPanel').style.display = 'none';
+    document.getElementById('formStack').style.display = '';
+    emailInput.focus();
+  }
+  window.resendCode = resendCode;
+  window.useAnotherEmail = useAnotherEmail;
 
   if (window.coreTrack) coreTrack('screen_view', { screen: 'sign-in-email' });
 </script>
