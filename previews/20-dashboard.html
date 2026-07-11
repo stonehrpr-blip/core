@@ -2177,6 +2177,14 @@ body.edit-active .w-add-ghost{display:none;}
   document.getElementById('notifyBatch').addEventListener('click',function(){
     document.getElementById('notifyWidget').scrollIntoView({behavior:'smooth'});
   });
+  // Individual notification tap: mark that one read
+  document.querySelectorAll('.notify-item').forEach(function(item){
+    item.addEventListener('click',function(){
+      var dot=item.querySelector('.notify-dot');
+      if(dot) dot.style.background='rgba(255,255,255,.15)';
+      item.style.opacity='.45';
+    });
+  });
   window.addEventListener('coreStateChange', paintTrends);
 })();
 </script>
