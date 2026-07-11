@@ -210,7 +210,6 @@
         <a class="item" href="20-dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 11l9-7 9 7M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/></svg><span class="nl">Home</span></a>
         <a class="item" href="21-quests.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M9 5h11M9 12h11M9 19h11M4 5l1 1 2-2M4 12l1 1 2-2M4 19l1 1 2-2"/></svg><span class="nl">Quests</span></a>
         <a class="item" href="coach.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="nl">Coach</span></a>
-        <a class="item" href="community.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="nl">Community</span></a>
         <a class="item active" href="24-more.html" aria-current="page"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2.5"/><circle cx="12" cy="12" r="2.5"/><circle cx="19" cy="12" r="2.5"/></svg><span class="nl">More</span></a>
       </nav>
       <div class="home-indicator"></div>
@@ -238,8 +237,7 @@
 
     function coins(){ return (S.read().coins)||0; }
     function shards(){ return (S.read().shards)||0; }
-    function tickets(){ return ig('coreTickets',0); }
-    function bal(c){ return c==='shards'?shards():c==='tickets'?tickets():coins(); }
+    function bal(c){ return c==='shards'?shards():coins(); }
     function dispatch(){ try{ window.dispatchEvent(new CustomEvent('core:progress-updated',{detail:{source:'wallet'}})); }catch(e){} }
 
     var LEDGER_KEY='coreCoinLedger.v1';
@@ -248,39 +246,34 @@
 
     function ICOIN(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/></svg>'; }
     function ISHARD(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M6 3h12l3 6-9 12L3 9z"/><path d="M3 9h18M9 3l3 18M15 3l-3 6"/></svg>'; }
-    function ITICKET(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2 2 2 0 0 0 0 4 2 2 0 0 1-2 2H5a2 2 0 0 1-2-2 2 2 0 0 0 0-4z"/><path d="M14 6v12" stroke-dasharray="2 2.4"/></svg>'; }
-    function curSvg(c){ return c==='shards'?ISHARD():c==='tickets'?ITICKET():ICOIN(); }
+    function curSvg(c){ return c==='shards'?ISHARD():ICOIN(); }
     function CIicon(){ return ICOIN(); }
 
     var META={
       coins:  { label:'Coins',   sub:'Grind currency. Earned from quests & streaks — or topped up below.', glow:'rgba(255,203,82,0.18)' },
-      shards: { label:'Shards',  sub:'Prestige currency. Earn it, convert coins, or top up below.', glow:'rgba(63,224,208,0.18)' },
-      tickets:{ label:'Tickets', sub:'Loot currency for opening chests. Earn it, convert coins, or top up below.', glow:'rgba(255,138,76,0.18)' }
+      shards: { label:'Shards',  sub:'Prestige currency. Earn it, convert coins, or top up below.', glow:'rgba(63,224,208,0.18)' }
     };
     // real-money packs (amt = amount of THAT currency) — Apple Pay, confirm-gated
     var PACKS={
       coins:  [{amt:600,usd:'0.99',label:'Pouch'},{amt:3500,usd:'3.99',label:'Stack',bonus:'+10% bonus',best:true},{amt:10000,usd:'9.99',label:'Vault',bonus:'+25% bonus'}],
-      shards: [{amt:50,usd:'1.99',label:'Handful'},{amt:150,usd:'4.99',label:'Pouch',bonus:'+15% bonus',best:true},{amt:400,usd:'9.99',label:'Trove',bonus:'+30% bonus'}],
-      tickets:[{amt:5,usd:'0.99',label:'Few'},{amt:15,usd:'2.99',label:'Roll',bonus:'+10% bonus',best:true},{amt:40,usd:'6.99',label:'Crate',bonus:'+25% bonus'}]
+      shards: [{amt:50,usd:'1.99',label:'Handful'},{amt:150,usd:'4.99',label:'Pouch',bonus:'+15% bonus',best:true},{amt:400,usd:'9.99',label:'Trove',bonus:'+30% bonus'}]
     };
-    // in-game exchange: spend coins to get shards / tickets. Bigger tiers give a
+    // in-game exchange: spend coins to get shards. Bigger tiers give a
     // better rate (a real bonus), but it stays priced so it never out-earns a chest.
     var EXCHANGE={
-      shards: [{coins:500,amt:10},{coins:1500,amt:33,bonus:'+10%'},{coins:4000,amt:100,bonus:'+25%'}],
-      tickets:[{coins:400,amt:2},{coins:1500,amt:9,bonus:'+15%'},{coins:3000,amt:20,bonus:'+33%'}]
+      shards: [{coins:500,amt:10},{coins:1500,amt:33,bonus:'+10%'},{coins:4000,amt:100,bonus:'+25%'}]
     };
     var EXCHANGE_CONFIRM_AT=1500;   // small conversions are one-tap; big ones confirm first
 
     var EARN={
       coins:[['Daily quests','<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>'],['Keep your streak','<path d="M12 2c1 3-1 4-1 6 0 1 1 2 1 2s2-1 2-3c2 2 3 4 3 7a5 5 0 0 1-10 0c0-3 2-5 3-7Z"/>'],['Level up your rank','<path d="M13 2L3 14h7l-1 8 10-12h-7l1-8Z"/>'],['Daily login bonus','<circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/>']],
-      shards:[['Rank milestones','<path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/>'],['Long streak milestones (7 / 30 / 100)','<path d="M12 2c1 3-1 4-1 6 0 1 1 2 1 2s2-1 2-3c2 2 3 4 3 7a5 5 0 0 1-10 0c0-3 2-5 3-7Z"/>'],['Achievements','<path d="M12 3l7 3v5c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M9 11.5l2 2 4-4.5"/>'],['CORE Plus monthly grant','<path d="M5 16l-2-9 6 4 3-6 3 6 6-4-2 9z"/>']],
-      tickets:[['Claim the free chest','<path d="M3 9l2-4h14l2 4M3 9v9a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V9M3 9h18M12 9v3"/>'],['Streak rewards','<path d="M12 2c1 3-1 4-1 6 0 1 1 2 1 2s2-1 2-3c2 2 3 4 3 7a5 5 0 0 1-10 0c0-3 2-5 3-7Z"/>'],['Daily login','<circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/>'],['Open Epic+ chests','<path d="M3 9l2-4h14l2 4M3 9v9h18V9M3 9h18M12 9v3"/>'],['CORE Plus monthly grant','<path d="M5 16l-2-9 6 4 3-6 3 6 6-4-2 9z"/>']]
+      shards:[['Rank milestones','<path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/>'],['Long streak milestones (7 / 30 / 100)','<path d="M12 2c1 3-1 4-1 6 0 1 1 2 1 2s2-1 2-3c2 2 3 4 3 7a5 5 0 0 1-10 0c0-3 2-5 3-7Z"/>'],['Achievements','<path d="M12 3l7 3v5c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M9 11.5l2 2 4-4.5"/>'],['CORE Plus monthly grant','<path d="M5 16l-2-9 6 4 3-6 3 6 6-4-2 9z"/>']]
     };
 
     function friends(){ var f=jget('coreFriends',[]); return Array.isArray(f)?f:[]; }
     function friendName(id){ return String(id).replace(/^CORE-/,''); }
 
-    var cur = (location.search.match(/[?&]cur=(coins|shards|tickets)/)||[])[1] || 'coins';
+    var cur = (location.search.match(/[?&]cur=(coins|shards)/)||[])[1] || 'coins';
     var giftFriend=null, giftAmt=0;
 
     var toastT; function toast(m,kind){ var t=qs('#toast'); var ic=kind==='good'?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l4 4 10-11"/></svg>':kind==='warn'?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>':''; t.className='toast show'+(kind?' '+kind:''); t.innerHTML=ic+'<span>'+m+'</span>'; clearTimeout(toastT); toastT=setTimeout(function(){t.classList.remove('show');},2000); }
@@ -297,16 +290,14 @@
     function creditCur(c,amount){
       if(c==='coins'){ try{ S.earnCoins(amount,'topup'); }catch(e){} lset('coreCoins',String(coins())); }
       else if(c==='shards'){ S.update(function(s){ s.shards=(s.shards||0)+amount; return s; }); }
-      else if(c==='tickets'){ lset('coreTickets',String(tickets()+amount)); }
     }
     function deduct(c,amount){
       if(c==='coins'){ var r=S.spendCoins(amount,'wallet'); if(!r||!r.ok) return false; lset('coreCoins',String(coins())); return true; }
       if(c==='shards'){ if(shards()<amount) return false; S.update(function(s){ s.shards=(s.shards||0)-amount; return s; }); return true; }
-      if(c==='tickets'){ if(tickets()<amount) return false; lset('coreTickets',String(tickets()-amount)); return true; }
       return false;
     }
 
-    // ── real-money pack (Apple Pay) — works for coins / shards / tickets ──
+    // ── real-money pack (Apple Pay) — works for coins / shards ──
     function buyPack(c,p){
       var lab=META[c].label;
       var rows='<div class="cap-row"><span>'+p.amt.toLocaleString()+' '+lab+'</span><strong>CORE</strong></div>'+
@@ -316,7 +307,7 @@
       if(window.coreApplePay){ coreApplePay.open({ rows:rows, onAuthorized:done }); }
       else { confirmSheet({ title:'Buy '+p.amt.toLocaleString()+' '+lab.toLowerCase()+'?', body:'You’ll be charged <b>$'+p.usd+'</b>. Preview — no real charge.', cta:'Confirm $'+p.usd, onConfirm:done }); }
     }
-    // ── coins -> shards / tickets exchange ──
+    // ── coins -> shards exchange ──
     function applyExchange(c,ex){ if(!deduct('coins',ex.coins)){ toast('Not enough coins','warn'); return; } creditCur(c,ex.amt); rec('coins',-ex.coins,'Convert to '+META[c].label.toLowerCase()); rec(c,ex.amt,'Converted from coins'); SFX('coin'); toast('Got '+ex.amt+' '+META[c].label.toLowerCase(),'good'); S.syncProgress(); dispatch(); render(); }
     function doExchange(c,ex){
       if(coins()<ex.coins){ toast('Not enough coins','warn'); return; }
@@ -339,7 +330,7 @@
     function render(){
       // seg
       var seg=qs('#seg'); seg.innerHTML='';
-      ['coins','shards','tickets'].forEach(function(c){ var b=document.createElement('button'); b.className=(c===cur?'on '+c:''); b.innerHTML='<span style="width:15px;height:15px;display:inline-flex">'+curSvg(c)+'</span>'+META[c].label; b.onclick=function(){ if(cur!==c){ cur=c; giftFriend=null; giftAmt=0; render(); } }; seg.appendChild(b); });
+      ['coins','shards'].forEach(function(c){ var b=document.createElement('button'); b.className=(c===cur?'on '+c:''); b.innerHTML='<span style="width:15px;height:15px;display:inline-flex">'+curSvg(c)+'</span>'+META[c].label; b.onclick=function(){ if(cur!==c){ cur=c; giftFriend=null; giftAmt=0; render(); } }; seg.appendChild(b); });
 
       // hero
       var hero=qs('#hero'); hero.className='hero '+cur; hero.style.setProperty('--accentglow',META[cur].glow);
@@ -402,7 +393,7 @@
 
     // help
     try{ if(window.coreHelp){ window.coreHelp.attach('helpBtn',{ title:'Your Wallet', bullets:[
-      'Coins can be topped up with Apple Pay. Shards & tickets are earned-only — never sold.',
+      'Coins can be topped up with Apple Pay. Shards are earned-only — never sold.',
       'Switch the currency with the tabs up top to buy, earn or gift it.',
       'Gift any currency to a friend — you confirm before anything leaves your balance.',
       'See exactly how to earn each currency, and a running history of every change.'
@@ -413,12 +404,10 @@
       if(/[?&]demo=1/.test(location.search)){
         var _s=S.read(); if(!_s.xp && !(_s.stats&&(_s.stats.body||_s.stats.brain))){ if(S.seedDemo) S.seedDemo(); }
         try{ lset('coreLastDailyBonus', new Date().toDateString()); }catch(e){}
-        if(ig('coreTickets',-1)<0) lset('coreTickets','11');
         S.update(function(s){ s.coins=4200; s.shards=240; return s; });
         if(!friends().length) jset('coreFriends',['CORE-K7Q2-9XMP','CORE-B3FW-RT81','CORE-Z9LC-4HVD']);
         if(!jget(LEDGER_KEY,[]).length){ var n=Date.now(); jset(LEDGER_KEY,[
           {ts:n-4*60000,cur:'coins',delta:120,label:'Daily quests'},
-          {ts:n-30*60000,cur:'tickets',delta:2,label:'Streak reward'},
           {ts:n-3*3600000,cur:'shards',delta:60,label:'Rank milestone: Crystal'},
           {ts:n-9*3600000,cur:'coins',delta:600,label:'Coin pack ($0.99)'},
           {ts:n-26*3600000,cur:'coins',delta:-250,label:'Blue Frame'}

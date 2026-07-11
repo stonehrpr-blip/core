@@ -845,23 +845,18 @@
     const rar = CHEST_RAR_ORDER[tier];
     const item = CHEST_ITEMS[rar];
     // Rewards scale hard with chest rank so higher chests feel genuinely worth it.
-    // Tickets (the loot currency) only drop from Epic+ chests — a small earned-only
-    // faucet that still nets a sink vs the ticket cost of opening them.
     const COIN_TBL   = [90, 220, 500, 1100, 2500];
     const SHARD_TBL  = [1, 4, 12, 30, 75];
-    const TICKET_TBL = [0, 0, 1, 2, 4];
     const xp = Math.round((60 + tier * 40) * xpMultiplier());
     const coinsR = COIN_TBL[tier];
     const shards = SHARD_TBL[tier];
-    const ticketsR = TICKET_TBL[tier];
     const reveals = [
       { kind: 'xp',     n: '+' + xp + ' XP',         r: 'rare',   ic: '<path d="M13 2L3 14h7l-1 8 10-12h-7l1-8Z"/>' },
       { kind: 'coins',  n: '+' + coinsR + ' Coins',  r: 'common', ic: '<circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/>' },
     ];
     if (shards > 0)   reveals.push({ kind: 'shards',  n: '+' + shards + ' Shards',   r: 'epic',      ic: '<path d="M6 3h12l3 6-9 12L3 9z"/><path d="M3 9h18"/>' });
-    if (ticketsR > 0) reveals.push({ kind: 'tickets', n: '+' + ticketsR + ' Tickets', r: 'legendary', ic: '<path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2 2 2 0 0 0 0 4 2 2 0 0 1-2 2H5a2 2 0 0 1-2-2 2 2 0 0 0 0-4z"/><path d="M14 6v12" stroke-dasharray="2 2.4"/>' });
     reveals.push({ kind: 'item', n: item.name, r: rar, ic: item.ic, hi: true });
-    return { rar: rar, tier: tier, floor: floor, item: item, rid: 'chest_' + rar + '_' + Date.now(), xp: xp, coins: coinsR, shards: shards, tickets: ticketsR, reveals: reveals };
+    return { rar: rar, tier: tier, floor: floor, item: item, rid: 'chest_' + rar + '_' + Date.now(), xp: xp, coins: coinsR, shards: shards, reveals: reveals };
   }
 
   // Apply a rolled chest to state: XP + coins + shards + inventory item, record the
@@ -872,11 +867,6 @@
     try { addXp(roll.xp, 'chest:' + source); } catch (e) {}
     try { earnCoins(roll.coins, 'chest:' + source); } catch (e) {}
     if (roll.shards > 0) update((s) => { s.shards = (s.shards || 0) + roll.shards; return s; });
-    // Tickets live in the flat `coreTickets` key (shared with Shop + Wallet).
-    if (roll.tickets > 0) {
-      try { const t = parseInt(localStorage.getItem('coreTickets') || '0', 10) || 0;
-        localStorage.setItem('coreTickets', String(t + roll.tickets)); } catch (e) {}
-    }
     let it = null;
     try {
       it = addItem({ id: roll.rid || ('chest_' + roll.rar + '_' + Date.now()), name: roll.item.name,

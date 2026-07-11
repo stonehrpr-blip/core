@@ -179,7 +179,7 @@
         <div id="content"></div>
 
         <div class="plus" data-plus><div class="pi"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 16l-2-9 6 4 3-6 3 6 6-4-2 9z"/></svg></div>
-          <div class="pt"><div class="ptt">CORE Plus</div><div class="pts">Monthly shards & tickets, exclusive cosmetics, more.</div></div>
+          <div class="pt"><div class="ptt">CORE Plus</div><div class="pts">Monthly shards grant, exclusive cosmetics, more.</div></div>
           <div class="pp">$7.99</div></div>
       </div>
 
@@ -187,7 +187,6 @@
         <a class="item" href="20-dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 11l9-7 9 7M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/></svg><span class="nl">Home</span></a>
         <a class="item" href="21-quests.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M9 5h11M9 12h11M9 19h11M4 5l1 1 2-2M4 12l1 1 2-2M4 19l1 1 2-2"/></svg><span class="nl">Quests</span></a>
         <a class="item" href="coach.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="nl">Coach</span></a>
-        <a class="item" href="community.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="nl">Community</span></a>
         <a class="item active" href="24-more.html" aria-current="page"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2.5"/><circle cx="12" cy="12" r="2.5"/><circle cx="19" cy="12" r="2.5"/></svg><span class="nl">More</span></a>
       </nav>
       <div class="home-indicator"></div>
@@ -215,8 +214,7 @@
     // ── balances (the single source the rest of the app reads) ──
     function coins(){ return (S.read().coins)||0; }
     function shards(){ return (S.read().shards)||0; }
-    function tickets(){ return ig('coreTickets',0); }
-    function bal(c){ return c==='shards'?shards():c==='tickets'?tickets():coins(); }
+    function bal(c){ return c==='shards'?shards():coins(); }
     function rankIdx(){ try{ return S.rankFor(S.read().xp||0).idx; }catch(e){ return 0; } }
     function needIdx(n){ try{ var i=S.RANKS.findIndex(function(r){return r.name===n;}); return i<0?99:i; }catch(e){ return 99; } }
     function dispatch(){ try{ window.dispatchEvent(new CustomEvent('core:progress-updated',{detail:{source:'shop'}})); }catch(e){} }
@@ -226,7 +224,6 @@
 
     // ── icons ──
     function CI(c){ return c==='shards'?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M6 3h12l3 6-9 12L3 9z"/><path d="M3 9h18"/></svg>'
-      : c==='tickets'?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2 2 2 0 0 0 0 4 2 2 0 0 1-2 2H5a2 2 0 0 1-2-2 2 2 0 0 0 0-4z"/><path d="M14 6v12" stroke-dasharray="2 2.4"/></svg>'
       : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/></svg>'; }
     var AV='<svg class="av" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="3.2"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/></svg>';
 
@@ -278,11 +275,11 @@
       {id:'powercore', name:'Power Core', rar:'Legendary', cost:140, cur:'shards', kind:'boost', effect:'+100 CORE Power.', desc:'A permanent boost up the leaderboard.'}
     ];
     var CHESTS=[
-      {id:'chest_common',    name:'Common Chest',    rar:'Common',    floor:'common',    cost:1,  cur:'tickets', kind:'chest', desc:'Coins, XP & a surprise drop.'},
-      {id:'chest_rare',      name:'Rare Chest',      rar:'Rare',      floor:'rare',      cost:3,  cur:'tickets', kind:'chest', desc:'Guarantees at least a Rare drop.'},
-      {id:'chest_epic',      name:'Epic Chest',      rar:'Epic',      floor:'epic',      cost:6,  cur:'tickets', kind:'chest', desc:'Epic floor — bigger shard payouts.'},
-      {id:'chest_legendary', name:'Legendary Chest', rar:'Legendary', floor:'legendary', cost:10, cur:'tickets', kind:'chest', lockRank:'Ascend', desc:'Legendary floor. Requires Ascend rank.'},
-      {id:'chest_mythic',    name:'Mythic Chest',    rar:'Mythic',    floor:'mythic',    cost:20, cur:'tickets', kind:'chest', lockRank:'CORE', desc:'Guarantees a Mythic pull. Requires CORE rank.'}
+      {id:'chest_common',    name:'Common Chest',    rar:'Common',    floor:'common',    cost:5,   cur:'shards', kind:'chest', desc:'Coins, XP & a surprise drop.'},
+      {id:'chest_rare',      name:'Rare Chest',      rar:'Rare',      floor:'rare',      cost:15,  cur:'shards', kind:'chest', desc:'Guarantees at least a Rare drop.'},
+      {id:'chest_epic',      name:'Epic Chest',      rar:'Epic',      floor:'epic',      cost:30,  cur:'shards', kind:'chest', desc:'Epic floor — bigger shard payouts.'},
+      {id:'chest_legendary', name:'Legendary Chest', rar:'Legendary', floor:'legendary', cost:60,  cur:'shards', kind:'chest', lockRank:'Ascend', desc:'Legendary floor. Requires Ascend rank.'},
+      {id:'chest_mythic',    name:'Mythic Chest',    rar:'Mythic',    floor:'mythic',    cost:120, cur:'shards', kind:'chest', lockRank:'CORE', desc:'Guarantees a Mythic pull. Requires CORE rank.'}
     ];
     var byId={}; COSMETICS.concat(BOOSTS,CHESTS).forEach(function(it){ byId[it.id]=it; });
     // Giftable = cosmetics + boosts. Chests are opened by you (my pick — not giftable).
@@ -313,7 +310,6 @@
     function spend(cur,amt,reason){
       if(cur==='coins'){ var r=S.spendCoins(amt,reason); if(!r||!r.ok) return false; lset('coreCoins',String(coins())); return true; }
       if(cur==='shards'){ if(shards()<amt) return false; S.update(function(s){ s.shards=(s.shards||0)-amt; return s; }); return true; }
-      if(cur==='tickets'){ if(tickets()<amt) return false; lset('coreTickets',String(tickets()-amt)); return true; }
       return false;
     }
     function grant(it){
@@ -364,9 +360,9 @@
     }
     function openChest(it){
       if(lockedReason(it)){ toast(lockedReason(it),'warn'); return; }
-      if(tickets()<it.cost){ toast('Need '+it.cost+' tickets','warn'); return; }
-      if(!spend('tickets',it.cost,'chest:'+it.id)){ toast('Need '+it.cost+' tickets','warn'); return; }
-      rec('tickets',-it.cost,it.name);
+      if(shards()<it.cost){ toast('Need '+it.cost+' shards','warn'); return; }
+      if(!spend('shards',it.cost,'chest:'+it.id)){ toast('Need '+it.cost+' shards','warn'); return; }
+      rec('shards',-it.cost,it.name);
       pushUniq('coreOwnedChests', it.id);   // consumed by 28-chest.html
       SFX('confirm');
       location.href='28-chest.html?chest='+encodeURIComponent(it.id)+'&from=shop';
@@ -424,13 +420,13 @@
       } else if(lock){
         actions='<div class="sh-actions"><button class="btn primary" disabled>'+lock+'</button></div>';
       } else if(it.kind==='chest'){
-        if(tickets()>=it.cost){
-          actions='<div class="sh-actions"><button class="btn primary" data-act="open"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l2-4h14l2 4M3 9v9h18V9M3 9h18M12 9v3"/></svg>Open for '+it.cost+' tickets</button></div>';
+        if(shards()>=it.cost){
+          actions='<div class="sh-actions"><button class="btn primary" data-act="open"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l2-4h14l2 4M3 9v9h18V9M3 9h18M12 9v3"/></svg>Open for '+it.cost+' shards</button></div>';
         } else {
-          var short=it.cost-tickets();
-          actions='<div class="sh-actions"><button class="btn primary" disabled>Need '+short+' more ticket'+(short===1?'':'s')+'</button>'+
-            '<button class="btn ghost" data-act="gettickets"><span style="width:16px;height:16px;display:inline-flex">'+CI('tickets')+'</span>Get tickets</button></div>'+
-            '<div class="sh-note">You have '+tickets()+' of '+it.cost+' tickets. Top up or convert coins in your Wallet.</div>';
+          var short=it.cost-shards();
+          actions='<div class="sh-actions"><button class="btn primary" disabled>Need '+short+' more shard'+(short===1?'':'s')+'</button>'+
+            '<button class="btn ghost" data-act="getshards"><span style="width:16px;height:16px;display:inline-flex">'+CI('shards')+'</span>Get shards</button></div>'+
+            '<div class="sh-note">You have '+shards()+' of '+it.cost+' shards. Top up or convert coins in your Wallet.</div>';
         }
       } else if(own){
         var line = equippable(it) ? (eq?'<button class="btn equipped" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l4 4 10-11"/></svg>Equipped</button>':'<button class="btn primary" data-act="equip">Equip</button>')
@@ -453,7 +449,7 @@
       else if(act==='self'){ if(buyForSelf(it)){ closeSheet(); render(); } }
       else if(act==='equip'){ equip(it); closeSheet(); render(); }
       else if(act==='open'){ closeSheet(); openChest(it); }
-      else if(act==='gettickets'){ SFX('confirm'); location.href='wallet.html?cur=tickets'; }
+      else if(act==='getshards'){ SFX('confirm'); location.href='wallet.html?cur=shards'; }
       else if(act==='sendgift'){ if(giftPick && giftTo(it,giftPick)){ closeSheet(); render(); } }
     });
 
@@ -463,7 +459,7 @@
     function renderBal(){
       var host=qs('#bal');
       function chip(c,lab,v){ return '<div class="b '+c+'" data-wallet="'+c+'"><span class="bi">'+CI(c)+'</span><div><div class="bv">'+v.toLocaleString()+'</div><div class="bl">'+lab+'</div></div></div>'; }
-      host.innerHTML=chip('coins','Coins',coins())+chip('shards','Shards',shards())+chip('tickets','Tickets',tickets());
+      host.innerHTML=chip('coins','Coins',coins())+chip('shards','Shards',shards());
     }
     function rowHTML(it){
       var lock=lockedReason(it), own=owned(it), eq=equipped(it);
@@ -506,10 +502,10 @@
     // help (minimal) — includes a one-line rarity guide
     try{ if(window.coreHelp){ window.coreHelp.attach('helpBtn',{ title:'Shop', bullets:[
       'Tap any item to buy it for yourself — or gift it to a friend.',
-      'Tap a balance up top to open your Wallet — top up or convert coins, shards & tickets, or gift them.',
+      'Tap a balance up top to open your Wallet — top up or convert coins & shards, or gift them.',
       'Boosts apply the moment you buy them and are saved to your account.',
       'Rarity, low to high: Common · Rare · Epic · Legendary · Mythic — shown by the coloured dot.',
-      'Chests are opened with tickets — bigger chests pay out more.'
+      'Chests are opened with shards — bigger chests pay out more.'
     ]}); } }catch(e){}
 
     // demo seeding — deterministic
@@ -517,7 +513,6 @@
       if(/[?&]demo=1/.test(location.search)){
         var _s=S.read(); if(!_s.xp && !(_s.stats&&(_s.stats.body||_s.stats.brain))){ if(S.seedDemo) S.seedDemo(); }
         try{ lset('coreLastDailyBonus', new Date().toDateString()); }catch(e){}
-        if(ig('coreTickets',-1)<0) lset('coreTickets','11');
         S.update(function(s){ s.coins=4200; s.shards=240; return s; });
         if(!friends().length) jset('coreFriends',['CORE-K7Q2-9XMP','CORE-B3FW-RT81','CORE-Z9LC-4HVD']);
       }
