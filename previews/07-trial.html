@@ -15358,6 +15358,22 @@
     if (typeof window.__portalLaunch === 'function') window.__portalLaunch();
   });
 })();
+
+// First paint: the opening step ships with class="on" hardcoded in the HTML
+// (so it still renders with JS disabled), which meant it never got the
+// cardIn entrance every later step gets via setStep() — it just appeared
+// instantly. Play that same entrance on load instead.
+(function () {
+  function playOpeningCardIn() {
+    var first = document.querySelector('.step.on');
+    if (!first) return;
+    document.body.classList.add('deck');
+    first.classList.add('cardin');
+    setTimeout(function () { first.classList.remove('cardin'); }, 600);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', playOpeningCardIn);
+  else playOpeningCardIn();
+})();
 </script>
 <style id="metal-skin">
 /* ================================================================
