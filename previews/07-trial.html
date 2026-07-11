@@ -8925,6 +8925,35 @@
               // wired for that, it just isn't driven by anything here yet.
               setEmotion('happy', { line: "Hi, I'm Corbit. Tap me — I don't bite." });
 
+              // Arrival flourish — fires once, exactly when this step becomes
+              // active (watches the "on" class rather than the cbEntrance
+              // animationend event, which doesn't reliably fire here since
+              // this same element also carries other, infinite animations).
+              var wrap = document.getElementById('voiceOrbWrap');
+              var step24 = el.closest('.step');
+              var arrived = false;
+              function fireArrival(){
+                if (arrived) return; arrived = true;
+                if (wrap) {
+                  var glow = document.createElement('div');
+                  glow.className = 'cb-arrival-glow';
+                  wrap.insertBefore(glow, wrap.firstChild);
+                  setTimeout(function(){ glow.remove(); }, 1200);
+                }
+                burst(['#ffd76a','#fff2c2','#ffe08a'], 16);
+                try { if (typeof haptic === 'function') haptic(12); } catch(_){}
+              }
+              if (step24) {
+                if (step24.classList.contains('on')) {
+                  setTimeout(fireArrival, 550);
+                } else {
+                  var mo = new MutationObserver(function(){
+                    if (step24.classList.contains('on')) { mo.disconnect(); setTimeout(fireArrival, 550); }
+                  });
+                  mo.observe(step24, { attributes:true, attributeFilter:['class'] });
+                }
+              }
+
               var TAP_LINES = {
                 happy: ["Hey, that tickles!","Let's build this together.","One day at a time — I promise.","That's the spirit."],
                 excited: ["Whoa, okay!","I like your energy.","Let's go, let's go!"],
@@ -8995,8 +9024,18 @@
               -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;transition:background .4s ease}
             .cb-speech::after{content:'';position:absolute;bottom:-7px;left:50%;margin-left:-7px;width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:7px solid rgba(24,26,32,.6)}
             @keyframes cbIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-            @keyframes cbEntrance{0%{opacity:0;transform:translateY(40px)}60%{opacity:1;transform:translateY(-8px)}80%{transform:translateY(2px)}100%{opacity:1;transform:translateY(0)}}
-            .step[data-step="24"].on .corbit-bot{animation:cbEntrance .7s .15s cubic-bezier(.22,1,.36,1) both}
+            @keyframes cbEntrance{
+              0%{opacity:0;transform:translateY(52px) scale(.55) rotate(-14deg)}
+              45%{opacity:1;transform:translateY(-12px) scale(1.08) rotate(4deg)}
+              65%{transform:translateY(4px) scale(.97) rotate(-2deg)}
+              82%{transform:translateY(-3px) scale(1.02) rotate(1deg)}
+              100%{opacity:1;transform:translateY(0) scale(1) rotate(0deg)}
+            }
+            .step[data-step="24"].on .corbit-bot{animation:cbEntrance .85s .15s cubic-bezier(.22,1,.36,1) both}
+            @keyframes cbArrivalGlow{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}35%{opacity:.9}100%{opacity:0;transform:translate(-50%,-50%) scale(2.1)}}
+            .cb-arrival-glow{position:absolute;left:50%;top:42%;width:120px;height:120px;border-radius:50%;pointer-events:none;z-index:0;
+              background:radial-gradient(circle,rgba(255,215,106,.55),transparent 70%);animation:cbArrivalGlow 1s .2s ease-out both}
+            @media(prefers-reduced-motion:reduce){.step[data-step="24"].on .corbit-bot,.cb-arrival-glow{animation:none!important}}
             @keyframes cbBlink{0%,90%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
             .cb-eye.l,.cb-eye.r{animation:cbBlink 4s ease-in-out infinite}
             /* ── static face shape — no mic/voice, just Corbit's look ── */
