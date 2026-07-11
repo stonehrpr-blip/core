@@ -3696,6 +3696,15 @@
                 <circle id="promiseSigPen" r="4.2" fill="url(#promiseSigNib)"/>
               </svg>
               <div class="promise-sign-line"></div>
+              <div class="promise-stamp" id="promiseStamp" aria-hidden="true">
+                <svg class="ps-seal" viewBox="0 0 94 94">
+                  <circle class="ps-ring-o ps-ink" cx="47" cy="47" r="43"/>
+                  <circle class="ps-ring-i ps-ink" cx="47" cy="47" r="35"/>
+                  <path class="ps-star ps-ink" d="M47 21 l3.4 8.7 9.4.4-7.4 6 2.6 9-8-5.3-8 5.3 2.6-9-7.4-6 9.4-.4z"/>
+                  <path class="ps-band ps-ink" d="M18 62 Q47 80 76 62"/>
+                  <text class="ps-word ps-ink" x="47" y="66">SEALED</text>
+                </svg>
+              </div>
             </div>
             <div id="promiseMeta" style="font-size:11px; color:var(--dim); letter-spacing:0.04em; font-family:ui-monospace,'SF Mono',Menlo,monospace; margin-top:12px; line-height:16px;">// unsigned</div>
           </div>
@@ -10060,15 +10069,19 @@
       </div>
     </div>
     <style>
-      .hold-commit{display:none;position:relative;width:100%;height:56px;border-radius:16px;border:1.5px solid rgba(255,255,255,.14);
+      .hold-commit{--progress:0;display:none;position:relative;width:100%;height:58px;border-radius:17px;border:1.5px solid rgba(255,255,255,.14);
         background:rgba(255,255,255,.03);overflow:hidden;cursor:pointer;font-family:inherit;-webkit-tap-highlight-color:transparent;
-        -webkit-user-select:none;user-select:none;touch-action:none}
+        -webkit-user-select:none;user-select:none;touch-action:none;
+        box-shadow:0 0 calc(6px + var(--progress) * 26px) rgba(126,196,255,calc(.12 + var(--progress) * .35)),
+                    0 0 0 1px rgba(255,255,255,.06) inset;
+        transition:box-shadow .1s linear,border-color .2s ease}
       body.on-promise .cta{display:none !important}
       body.on-promise .hold-commit{display:block}
-      .hc-fill{position:absolute;left:0;top:0;bottom:0;width:0%;background:linear-gradient(90deg,rgba(74,222,128,.35),rgba(74,222,128,.55));
-        box-shadow:0 0 20px rgba(74,222,128,.4) inset;transition:width .05s linear}
-      .hc-ring{position:absolute;inset:0;border-radius:16px;pointer-events:none;box-shadow:0 0 0 0 rgba(74,222,128,0);transition:box-shadow .2s ease}
-      .hold-commit.pressing .hc-ring{box-shadow:0 0 0 2px rgba(74,222,128,.5),0 0 24px rgba(74,222,128,.35)}
+      .hc-fill{position:absolute;left:0;top:0;bottom:0;width:0%;
+        background:linear-gradient(90deg,#7dc4ff,#b3a6ff 45%,#ffd76a 78%,#4ade80);
+        box-shadow:0 0 22px rgba(126,196,255,.45) inset;transition:width .05s linear}
+      .hc-ring{position:absolute;inset:0;border-radius:17px;pointer-events:none;box-shadow:0 0 0 0 rgba(126,196,255,0);transition:box-shadow .2s ease}
+      .hold-commit.pressing .hc-ring{box-shadow:0 0 0 2px rgba(126,196,255,.55),0 0 28px rgba(179,166,255,.4)}
       .hc-label{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;height:100%;
         font-size:14.5px;font-weight:700;letter-spacing:.02em;color:rgba(255,255,255,.85);transition:color .2s ease}
       .hold-commit:not(.done):not(.pressing) .hc-label{animation:hcHint 1.9s ease-in-out infinite}
@@ -11563,7 +11576,8 @@
   // Ink-draw signature seal on the contract when the user taps "Sign".
   // The nib rides the stroke live, an ink-bleed under-stroke trails it, then
   // the whole thing flips to a "signed" green seal.
-  function playSignAnimation(done) {
+  function playSignAnimation(done, opts) {
+    opts = opts || {};
     const wrap = document.getElementById('promiseSign');
     const path = document.getElementById('promiseSigPath');
     const under = document.getElementById('promiseSigUnder');
@@ -11583,6 +11597,13 @@
     if (meta) { meta.innerHTML = '// signing…'; meta.style.color = '#AEB6C4'; }
     // Reveal the signature row
     wrap.classList.add('on');
+
+    // The hold-to-commit button already drew the signature live, stroke by
+    // stroke, in sync with the hold — skip straight to the flush + stamp.
+    if (opts.skipDraw) {
+      flushGreenAndStamp();
+      return;
+    }
 
     const DRAW = 1900;  // ms for the ink to fully draw — slow enough to actually watch it get written
     const len = path.getTotalLength();
@@ -11628,7 +11649,9 @@
     }, 220);
 
     // Once it's drawn, the ink flushes GREEN (committed)…
-    setTimeout(function () {
+    setTimeout(flushGreenAndStamp, 220 + DRAW + 60);
+
+    function flushGreenAndStamp() {
       const GREEN = '#D6DBE2';
       path.style.transition = 'stroke .35s ease';
       path.style.stroke = GREEN;
@@ -11664,7 +11687,7 @@
         track('promise_sign_completed', {});
         setTimeout(function () { if (done) done(); }, 950);
       }, 420);
-    }, 220 + DRAW + 60);
+    }
   }
 
   function finishOnboarding(paid) {
@@ -13360,13 +13383,65 @@
     const label = document.getElementById('hcLabel');
     const meta  = document.getElementById('promiseMeta');
     const sig   = document.getElementById('promiseSign');
-    const HOLD_MS = 1100;
-    let fired = false, holding = false, startT = 0, raf = null, lastBuzz = 0;
+    const sigPath = document.getElementById('promiseSigPath');
+    const sigUnder = document.getElementById('promiseSigUnder');
+    const sigFlourish = document.getElementById('promiseSigFlourish');
+    const sigPen = document.getElementById('promiseSigPen');
+    const HOLD_MS = 1300;
+    let fired = false, holding = false, startT = 0, raf = null, lastBuzz = 0, lastSpark = 0, sigLen = 0;
+    function primeSignature() {
+      if (!sigPath || sigLen) return;
+      sigLen = sigPath.getTotalLength();
+      [sigPath, sigUnder, sigFlourish].forEach(function (p) {
+        if (!p) return;
+        const l = p.getTotalLength ? p.getTotalLength() : sigLen;
+        p.style.transition = 'none';
+        p.style.strokeDasharray = l;
+        p.style.strokeDashoffset = l;
+      });
+    }
+    // Small ink sparks flick off the nib while it's actively writing.
+    function sparkAtPen() {
+      if (!sigPen || !sig) return;
+      var host = sig;
+      var cx = parseFloat(sigPen.getAttribute('cx')) || 0, cy = parseFloat(sigPen.getAttribute('cy')) || 0;
+      var svgEl = sig.querySelector('.promise-sign-svg');
+      var vb = svgEl ? svgEl.viewBox.baseVal : null;
+      var rect = svgEl ? svgEl.getBoundingClientRect() : null;
+      var hostRect = host.getBoundingClientRect();
+      if (!rect || !vb) return;
+      var scaleX = rect.width / vb.width, scaleY = rect.height / vb.height;
+      var px = (rect.left - hostRect.left) + cx * scaleX, py = (rect.top - hostRect.top) + cy * scaleY;
+      for (var i = 0; i < 2; i++) {
+        var s = document.createElement('span');
+        var ang = Math.random() * Math.PI * 2, d = 6 + Math.random() * 14;
+        s.style.cssText = 'position:absolute;z-index:5;pointer-events:none;width:3px;height:3px;border-radius:50%;'
+          + 'background:#D2D7E0;box-shadow:0 0 5px rgba(210,215,224,.8);left:' + px + 'px;top:' + py + 'px;'
+          + 'animation:ynBurst .4s ease-out forwards;'
+          + '--bx:' + (Math.cos(ang) * d) + 'px;--by:' + (Math.sin(ang) * d) + 'px;';
+        host.appendChild(s);
+        setTimeout(function (el) { return function () { el.remove(); }; }(s), 420);
+      }
+    }
     function setProgress(p) {
       p = Math.max(0, Math.min(1, p));
       fill.style.width = (p * 100) + '%';
-      // signature stays hidden for the whole hold — it only appears once
-      // they've actually committed, not as a preview of what's coming
+      btn.style.setProperty('--progress', p);
+      // The signature draws live, in step with the hold — under-stroke trails
+      // slightly, the flourish only flicks in once the name is mostly done.
+      if (sigLen && sigPath) {
+        sigPath.style.strokeDashoffset = sigLen * (1 - p);
+        if (sigUnder) sigUnder.style.strokeDashoffset = sigLen * (1 - Math.min(1, p * 1.06));
+        if (sigFlourish) {
+          const fp = Math.max(0, (p - 0.62) / 0.38);
+          const fl = sigFlourish.getTotalLength ? sigFlourish.getTotalLength() : sigLen;
+          sigFlourish.style.strokeDashoffset = fl * (1 - fp);
+        }
+        if (sigPen && sigPath.getPointAtLength) {
+          const pt = sigPath.getPointAtLength(p * sigLen);
+          sigPen.setAttribute('cx', pt.x); sigPen.setAttribute('cy', pt.y);
+        }
+      }
     }
     function tick() {
       if (!holding || fired) return;
@@ -13374,16 +13449,20 @@
       setProgress(p);
       const now = performance.now();
       if (now - lastBuzz > 90) { lastBuzz = now; try { if (typeof haptic === 'function') haptic(3); } catch (_) {} }
+      if (p > 0.05 && p < 1 && now - lastSpark > 100) { lastSpark = now; sparkAtPen(); }
       if (p >= 1) { complete(); return; }
       raf = requestAnimationFrame(tick);
     }
     function press(e) {
       if (fired || _signing) return;
+      primeSignature();
       holding = true; startT = performance.now();
       btn.classList.add('pressing');
       fill.style.transition = 'none';
+      if (sig) { sig.classList.add('on'); sig.style.transition = 'none'; }
+      if (sigPen) sigPen.classList.add('live');
       if (label) label.textContent = 'Keep holding…';
-      if (meta) { meta.textContent = '// committing…'; meta.style.color = '#D6DBE3'; }
+      if (meta) { meta.textContent = '// signing…'; meta.style.color = '#D6DBE3'; }
       try { if (typeof haptic === 'function') haptic(8); } catch (_) {}
       raf = requestAnimationFrame(tick);
       if (e.cancelable) e.preventDefault();
@@ -13395,6 +13474,11 @@
       btn.classList.remove('pressing');
       fill.style.transition = 'width .25s cubic-bezier(.22,1,.36,1)';
       setProgress(0);
+      // Retract the ink smoothly instead of just vanishing.
+      if (sigPath) {
+        [sigPath, sigUnder, sigFlourish].forEach(function (p) { if (p) p.style.transition = 'stroke-dashoffset .3s ease'; });
+      }
+      if (sigPen) sigPen.classList.remove('live');
       if (label) label.textContent = 'Press & hold to commit';
       if (meta) { meta.textContent = '// unsigned'; meta.style.color = ''; }
     }
@@ -13406,31 +13490,32 @@
       setTimeout(function(){ btn.classList.remove('popped'); }, 500);
       fill.style.transition = 'width .18s ease';
       setProgress(1);
+      if (sigPen) sigPen.classList.remove('live');
       if (label) label.textContent = '✓ Committed';
       state.promised = true;
       if (sig) sig.classList.add('on');
-      // the pop: a burst of particles right as the hold finishes
+      // the pop: a bigger burst of particles right as the hold finishes
       var host = btn.closest('.phone') || btn.closest('.footer') || btn;
       var pr = host.getBoundingClientRect(), rect = btn.getBoundingClientRect();
       var cx = rect.left - pr.left + rect.width/2, cy = rect.top - pr.top + rect.height/2;
-      var colors = ['#4ade80','#30D158','#ffffff','#7CE8A4'];
-      for (var i=0;i<22;i++){
+      var colors = ['#4ade80','#30D158','#ffffff','#7CE8A4','#FFD76A','#7dc4ff'];
+      for (var i=0;i<32;i++){
         var p = document.createElement('span');
-        var ang = Math.random()*Math.PI*2, d = 50 + Math.random()*70;
+        var ang = Math.random()*Math.PI*2, d = 55 + Math.random()*90;
         var c = colors[i % colors.length];
         p.style.cssText = 'position:absolute;z-index:99;pointer-events:none;width:'+(i%3===0?7:4)+'px;height:'+(i%3===0?7:4)+'px;border-radius:50%;'
           + 'background:'+c+';box-shadow:0 0 8px '+c+';left:'+cx+'px;top:'+cy+'px;'
-          + 'animation:ynBurst .75s cubic-bezier(.22,1,.36,1) forwards;animation-delay:'+(i*0.012)+'s;'
+          + 'animation:ynBurst .8s cubic-bezier(.22,1,.36,1) forwards;animation-delay:'+(i*0.011)+'s;'
           + '--bx:'+(Math.cos(ang)*d)+'px;--by:'+(Math.sin(ang)*d)+'px;';
         host.appendChild(p);
-        setTimeout(function(elp){return function(){elp.remove()}}(p),850);
+        setTimeout(function(elp){return function(){elp.remove()}}(p),900);
       }
       try { track('promise_signed', { method: 'hold' }); } catch (_) {}
       try { if (typeof haptic === 'function') haptic([10, 40, 20]); } catch (_) {}
       refreshCTA();
       if (_signing) return;
       _signing = true;
-      playSignAnimation(function () { _signing = false; _signed = true; advance(); });
+      playSignAnimation(function () { _signing = false; _signed = true; advance(); }, { skipDraw: true });
     }
     if (window.PointerEvent) {
       btn.addEventListener('pointerdown', press);
