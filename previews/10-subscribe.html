@@ -78,6 +78,14 @@
     .proof .sep{width:1px;height:10px;background:var(--hair-2);}
     .proof b{color:#fff;font-weight:800;}
 
+    /* one-time exit-offer discount — only shown when claimed via the trial's
+       "leave anyway" gift offer (localStorage coreDiscountClaimed==='50') */
+    .discount-banner{display:flex;align-items:center;justify-content:center;gap:7px;margin:14px auto 0;padding:10px 16px;
+      border-radius:999px;background:linear-gradient(135deg,rgba(255,107,126,.16),rgba(255,138,61,.12));
+      border:1px solid rgba(255,107,126,.34);color:#fff;font-size:13px;font-weight:700;text-align:center;max-width:280px;}
+    .discount-banner[hidden]{display:none;}
+    .discount-banner b{color:#FF8A65;}
+
     /* price hero — the headline offer */
     .offer{margin:15px auto 0;display:flex;align-items:flex-start;justify-content:center;gap:9px;}
     .offer .big{font-size:56px;font-weight:900;letter-spacing:-2.8px;line-height:0.86;
@@ -271,6 +279,9 @@
         <span><b>40,000+</b> members building</span>
       </div>
 
+      <!-- exit-offer discount banner — hidden unless claimed on the trial -->
+      <div class="discount-banner stage d3" id="discountBanner" hidden>🎁 <b>50% off</b> is applied to your plan</div>
+
       <!-- the headline offer -->
       <div class="offer stage d3">
         <span class="big" id="offerBig">$0.99</span>
@@ -365,6 +376,26 @@
                bullet:'<b>Save 33%</b> — best value, billed yearly',
                fine:'$39.99/year (about $3.33/mo). Cancel anytime.' }
     };
+    // One-time discount from the trial's exit offer — only applies if they
+    // actually claimed it (localStorage set by 07-trial.html's gift sheet).
+    // Halves the ongoing renewal price; the discounted intro price stays as-is.
+    (function applyExitDiscount(){
+      var claimed=''; try{ claimed=localStorage.getItem('coreDiscountClaimed')||''; }catch(e){}
+      if (claimed!=='50') return;
+      var m=PLANS.monthly, a=PLANS.annual;
+      m.desc='$0.99 first month, then $2.49/mo'; m.renew='$2.49 / month';
+      m.offerThen='then <b>$2.49/month</b> · 50% off, cancel anytime';
+      m.bullet='First month <b>80% off</b>, then <b>50% off</b> every month after';
+      m.fine='$0.99 for your first month, then $2.49/month (50% off). Cancel anytime.';
+      a.price='$19.99'; a.today='$19.99'; a.renew='$19.99 / year';
+      a.desc='Billed yearly · 50% off applied'; a.per='/yr · 50% off';
+      a.save='SAVE 50%'; a.pill='Save 50% · best value';
+      a.offerThen='<b>$19.99/year</b> · 50% off, cancel anytime';
+      a.bullet='<b>50% off</b> — your exit-offer discount, billed yearly';
+      a.fine='$19.99/year (50% off, about $1.67/mo). Cancel anytime.';
+      var banner=document.querySelector('#discountBanner'); if (banner) banner.hidden=false;
+    })();
+
     var sel='monthly';
     var ANCHOR={ monthly:'$4.99', annual:'$59.88' };
     function syncOffer(){

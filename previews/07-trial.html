@@ -449,24 +449,48 @@
   .ap-decline:hover { color: #fff; }
 
   /* exit-intent sheet */
-  .sheet-back { position:absolute; inset:0; background:rgba(0,0,0,0.55); backdrop-filter: blur(6px); z-index:40; opacity:0; pointer-events:none; transition: opacity .25s; }
+  .sheet-back { position:absolute; inset:0; background:rgba(0,0,0,0.62); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index:40; opacity:0; pointer-events:none; transition: opacity .25s; }
   .sheet-back.on { opacity:1; pointer-events:auto; }
+  /* Apple-glass sheet — translucent frosted card, not a solid panel */
   .sheet {
     position:absolute; left:0; right:0; bottom:0; z-index:41;
-    background: linear-gradient(180deg, #0E0E1B 0%, #07071A 100%);
+    background: linear-gradient(180deg, rgba(40,42,58,0.72) 0%, rgba(18,19,30,0.82) 100%);
+    backdrop-filter: blur(34px) saturate(1.8); -webkit-backdrop-filter: blur(34px) saturate(1.8);
     border-top-left-radius:28px; border-top-right-radius:28px;
-    border-top:1px solid rgba(255,255,255,0.08);
+    border-top:1px solid rgba(255,255,255,0.16);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 -20px 60px rgba(0,0,0,0.55);
     padding: 22px 24px 36px;
     transform: translateY(100%); transition: transform .35s cubic-bezier(.22,1,.36,1);
-    box-shadow: 0 -20px 60px rgba(0,0,0,0.6);
   }
   .sheet.on { transform: translateY(0); }
-  .sheet-grab { width:40px; height:4px; border-radius:999px; background: rgba(255,255,255,0.18); margin: 0 auto 14px; }
+  .sheet-grab { width:40px; height:4px; border-radius:999px; background: rgba(255,255,255,0.28); margin: 0 auto 14px; }
   .sheet-title { font-size:20px; font-weight:700; letter-spacing:-0.5px; line-height:1.2; margin:0; }
   .sheet-copy { font-size:13px; color: var(--muted); line-height:18px; margin-top:8px; }
-  .sheet-btns { display:flex; flex-direction:column; gap:8px; margin-top:18px; }
-  .sheet-stay { padding:16px; border-radius:999px; border:none; font-size:15px; font-weight:600; color:#fff; background: linear-gradient(135deg, var(--grad-a) 0%, var(--grad-b) 45%, var(--grad-c) 100%); cursor:pointer; }
-  .sheet-leave { padding:14px; border-radius:999px; background:transparent; border:1px solid var(--border); color:var(--muted); font-size:13px; cursor:pointer; }
+  .sheet-btns { display:flex; flex-direction:column; gap:10px; margin-top:18px; }
+  /* Both buttons share one size — same height/radius/font — and differ only
+     by fill + text color, matching Apple's action-sheet convention where the
+     safe action is filled and the other option is glass with distinct color. */
+  .sheet-stay, .sheet-leave {
+    height:52px; padding:0 16px; border-radius:999px; font-size:15px; font-weight:700;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .sheet-stay { border:none; color:#fff; background: linear-gradient(135deg, var(--grad-a) 0%, var(--grad-b) 45%, var(--grad-c) 100%); }
+  .sheet-leave { border:1px solid rgba(255,255,255,0.14); color:#FF6B6B; background:rgba(255,255,255,0.06); }
+
+  /* ── Last-chance discount offer: gift box that "unwraps" on tap ── */
+  .offer-gift{ position:relative; width:84px; height:84px; margin:2px auto 16px; border-radius:22px;
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+    background:linear-gradient(135deg,#FF6B7E,#FF8A3D); box-shadow:0 12px 30px rgba(255,107,126,.4);
+    transition:transform .15s; }
+  .offer-gift:active{ transform:scale(.94); }
+  .offer-gift svg{ width:38px; height:38px; color:#fff; position:relative; z-index:2; }
+  .offer-gift.opening{ animation:giftShake .5s ease; pointer-events:none; }
+  @keyframes giftShake{ 0%,100%{transform:rotate(0);} 20%{transform:rotate(-9deg);} 40%{transform:rotate(9deg);} 60%{transform:rotate(-6deg);} 80%{transform:rotate(6deg);} }
+  .offer-burst{ position:absolute; inset:-40px; pointer-events:none; }
+  .offer-burst span{ position:absolute; width:7px; height:7px; border-radius:50%; left:50%; top:50%; opacity:0; }
+  .offer-gift.opening .offer-burst span{ animation:burstOut .8s cubic-bezier(.2,.8,.2,1) forwards; }
+  @keyframes burstOut{ 0%{ opacity:1; transform:translate(-50%,-50%) scale(.3); } 100%{ opacity:0; transform:translate(calc(-50% + var(--bx)),calc(-50% + var(--by))) scale(1); } }
+  @media(prefers-reduced-motion:reduce){ .offer-gift.opening, .offer-gift.opening .offer-burst span{ animation:none; } }
 
   /* ─────────────────────────────────────────────────────────────────
      DARK + MYSTERIOUS RETUNE
@@ -10123,6 +10147,22 @@
       </div>
     </div>
 
+    <!-- last-chance discount offer — only shown after they decline the exit sheet -->
+    <div class="sheet-back" id="offerBack" onclick="offerDecline()"></div>
+    <div class="sheet" id="offerSheet" role="dialog">
+      <div class="sheet-grab"></div>
+      <div class="offer-gift" id="offerGift" onclick="offerClaim()" role="button" tabindex="0" aria-label="Claim your discount">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="18" height="12" rx="1.5"/><path d="M3 9v-1a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1"/><path d="M12 7v14M12 7c-1.7 0-4-1-4-3.2A2 2 0 0 1 10 2c1.8 0 2 2.5 2 5zm0 0c1.7 0 4-1 4-3.2A2 2 0 0 0 14 2c-1.8 0-2 2.5-2 5z"/></svg>
+        <div class="offer-burst" id="offerBurst"></div>
+      </div>
+      <h2 class="sheet-title">Wait — one sec.</h2>
+      <p class="sheet-copy">Before you go: here's <strong style="color:#fff;">50% off</strong> your first month. Today only.</p>
+      <div class="sheet-btns">
+        <button class="sheet-stay" onclick="offerClaim()">Claim my 50% off</button>
+        <button class="sheet-leave" onclick="offerDecline()">No thanks, leave</button>
+      </div>
+    </div>
+
     <!-- iOS-style time picker sheet (for daily rhythm step) -->
     <div class="tp-back" id="tpBack" onclick="closeTimePicker(false)"></div>
     <div class="tp-sheet" id="tpSheet" role="dialog" aria-modal="true">
@@ -13198,6 +13238,8 @@
   window.exitConfirm = exitConfirm;
   window.exitDismiss = exitDismiss;
   window.exitNow = exitNow;
+  window.offerDecline = offerDecline;
+  window.offerClaim = offerClaim;
   function exitConfirm() {
     // X on every trial page -> a confirm sheet so progress isn't lost on a
     // mis-tap. Remember the step so they can resume where they left off.
@@ -13213,8 +13255,50 @@
     document.getElementById('exitBack').classList.remove('on');
   }
   function exitNow() {
+    // Instead of leaving immediately, swap to a one-time 50%-off offer —
+    // last chance before they actually go.
     track('exit_intent_left', { step: state.step });
+    document.getElementById('exitSheet').classList.remove('on');
+    document.getElementById('exitBack').classList.remove('on');
+    var sheet = document.getElementById('offerSheet'), back = document.getElementById('offerBack');
+    if (sheet && back) {
+      track('exit_offer_shown', { step: state.step });
+      setTimeout(function () { back.classList.add('on'); sheet.classList.add('on'); }, 260);
+    } else {
+      window.location.href = '01-index.html';
+    }
+  }
+  function offerDecline() {
+    track('exit_offer_declined', { step: state.step });
     window.location.href = '01-index.html';
+  }
+  function offerClaim() {
+    var gift = document.getElementById('offerGift');
+    if (!gift || gift.classList.contains('opening')) return;
+    gift.classList.add('opening');
+    var burst = document.getElementById('offerBurst');
+    if (burst && !burst.childElementCount) {
+      var colors = ['#FF6B7E', '#FFD166', '#4DA3FF', '#34D399', '#9F8FFF'];
+      for (var i = 0; i < 14; i++) {
+        var ang = Math.random() * Math.PI * 2, dist = 42 + Math.random() * 40;
+        var s = document.createElement('span');
+        s.style.setProperty('--bx', (Math.cos(ang) * dist).toFixed(0) + 'px');
+        s.style.setProperty('--by', (Math.sin(ang) * dist).toFixed(0) + 'px');
+        s.style.background = colors[i % colors.length];
+        burst.appendChild(s);
+      }
+    }
+    track('exit_offer_claimed', { step: state.step });
+    try {
+      localStorage.setItem('coreDiscountClaimed', '50');
+      localStorage.setItem('coreDiscountClaimedAt', String(Date.now()));
+    } catch (e) {}
+    try { if (window.coreSfx) coreSfx('success'); } catch (e) {}
+    setTimeout(function () {
+      document.getElementById('offerSheet').classList.remove('on');
+      document.getElementById('offerBack').classList.remove('on');
+      gift.classList.remove('opening');
+    }, 900);
   }
 
   function pickCheckin(card) {
