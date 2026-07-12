@@ -115,34 +115,52 @@
     body.revealed #stage1{display:none;}
     body.revealed #stage2{opacity:1;pointer-events:auto;}
 
-    .rank-card{width:304px;padding:32px 24px 24px;position:relative;flex-shrink:0;text-align:center;overflow:hidden;
+    /* ═══════════ Trading-card shell ═══════════
+       A real collectible-card layout: rounded rect body, a painted metal
+       frame border in the rank's colour, gem-cut corner studs, an edition
+       tag, a windowed art panel, and a slow-looping holo-foil sheen. */
+    .rank-card{width:296px;padding:16px 16px 22px;position:relative;flex-shrink:0;text-align:center;overflow:hidden;
+      border-radius:26px;
       background:
-        linear-gradient(165deg, color-mix(in srgb, var(--rc) 24%, rgba(10,11,18,0.62)), color-mix(in srgb, var(--rc) 5%, rgba(5,6,11,0.5)));
-      border:1px solid color-mix(in srgb, var(--rc) 55%, transparent);
-      clip-path:polygon(0 0, calc(100% - 28px) 0, 100% 28px, 100% 100%, 28px 100%, 0 calc(100% - 28px));
-      box-shadow:0 30px 70px rgba(0,0,0,0.55), 0 0 0 1px color-mix(in srgb, var(--rc) 22%, transparent) inset, 0 0 64px color-mix(in srgb, var(--rc) 28%, transparent);
+        linear-gradient(165deg, color-mix(in srgb, var(--rc) 22%, #14151c), color-mix(in srgb, var(--rc) 6%, #0a0b10));
+      box-shadow:
+        0 0 0 2.5px color-mix(in srgb, var(--rc) 70%, transparent),
+        0 0 0 3.5px rgba(0,0,0,0.5),
+        0 0 0 4.5px color-mix(in srgb, var(--rc) 34%, transparent),
+        0 30px 70px rgba(0,0,0,0.55),
+        0 0 46px color-mix(in srgb, var(--rc) 30%, transparent);
       animation:cardPop .62s cubic-bezier(.16,1.7,.3,1) both;}
-    @keyframes cardPop{0%{transform:scale(0.2);opacity:0;}35%{opacity:1;}65%{transform:scale(1.06);}100%{transform:scale(1);opacity:1;}}
+    @keyframes cardPop{0%{transform:scale(0.2) rotate(-6deg);opacity:0;}35%{opacity:1;}65%{transform:scale(1.05) rotate(0.5deg);}100%{transform:scale(1) rotate(0deg);opacity:1;}}
     /* top hairline highlight — light catching the bevel of the glass */
-    .rank-card::before{content:'';position:absolute;left:0;right:0;top:0;height:90px;pointer-events:none;
+    .rank-card::before{content:'';position:absolute;left:0;right:0;top:0;height:90px;pointer-events:none;z-index:0;
       background:linear-gradient(180deg, color-mix(in srgb,var(--rc) 18%, rgba(255,255,255,0.16)), transparent);
       opacity:0.7;}
-    /* a single specular light-sweep across the whole card after it lands */
-    .rank-card::after{content:'';position:absolute;top:-40%;bottom:-40%;left:-60%;width:55%;pointer-events:none;z-index:3;
-      background:linear-gradient(105deg, transparent, rgba(255,255,255,0.16) 50%, transparent);
-      transform:skewX(-16deg);}
-    body.revealed .rank-card::after{animation:cardSweep 1.1s ease .85s 1 both;}
+    /* holo-foil sheen — one strong sweep on reveal, then a slow perpetual
+       shimmer so the card keeps reading as foil/premium while it sits there */
+    .rank-card::after{content:'';position:absolute;top:-60%;bottom:-60%;left:-60%;width:45%;pointer-events:none;z-index:5;
+      background:linear-gradient(105deg, transparent, rgba(255,255,255,0.5) 45%, color-mix(in srgb,var(--rc) 60%,#fff) 50%, rgba(255,255,255,0.5) 55%, transparent);
+      opacity:0; transform:skewX(-16deg); mix-blend-mode:screen;}
+    body.revealed .rank-card::after{animation:cardSweep 1.15s ease .85s 1 both, cardFoilLoop 6s ease-in-out 2.1s infinite;}
     @keyframes cardSweep{0%{left:-60%;opacity:0;}10%{opacity:1;}60%{left:120%;opacity:1;}100%{left:120%;opacity:0;}}
-    /* gem mounted in an octagonal metal socket */
-    .rank-socket{width:152px;height:152px;margin:2px auto 0;padding:2px;position:relative;overflow:hidden;
-      background:linear-gradient(135deg, color-mix(in srgb,var(--rc) 92%,#fff 6%), color-mix(in srgb,var(--rc) 22%,transparent));
-      clip-path:polygon(26% 0,74% 0,100% 26%,100% 74%,74% 100%,26% 100%,0 74%,0 26%);
-      box-shadow:0 0 40px color-mix(in srgb,var(--rc) 50%,transparent);}
-    .rank-socket-in{width:100%;height:100%;position:relative;display:flex;align-items:center;justify-content:center;
-      background:radial-gradient(circle at 50% 40%, color-mix(in srgb,var(--rc) 20%,#06060c), #04040a 76%);
-      clip-path:polygon(26% 0,74% 0,100% 26%,100% 74%,74% 100%,26% 100%,0 74%,0 26%);}
+    @keyframes cardFoilLoop{0%,100%{left:-60%;opacity:0;}45%{opacity:0;}55%{opacity:.55;}70%{left:120%;opacity:0;}}
+    /* corner studs — small gem-cut accents like screws on a card frame */
+    .card-stud{position:absolute;width:9px;height:9px;z-index:6;pointer-events:none;
+      background:linear-gradient(135deg,#fff,var(--rc) 55%,color-mix(in srgb,var(--rc) 60%,#000));
+      clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);
+      box-shadow:0 0 8px color-mix(in srgb,var(--rc) 70%,transparent);}
+    .card-stud.tl{top:11px;left:11px;} .card-stud.tr{top:11px;right:11px;}
+    .card-stud.bl{bottom:11px;left:11px;} .card-stud.br{bottom:11px;right:11px;}
+    /* edition tag — top-right corner, like a card's set/number stamp */
+    .card-edition{position:absolute;top:14px;right:26px;z-index:6;font-size:9px;font-weight:800;letter-spacing:.12em;
+      color:color-mix(in srgb,var(--rc) 55%,#fff);font-family:'Space Mono',ui-monospace,monospace;}
+    /* windowed art panel — the "picture box" every trading card has */
+    .card-art{position:relative;margin:26px auto 0;width:184px;height:184px;border-radius:20px;
+      background:radial-gradient(circle at 50% 38%, color-mix(in srgb,var(--rc) 22%,#06060c), #04040a 74%);
+      border:1px solid color-mix(in srgb,var(--rc) 40%,transparent);
+      box-shadow:0 0 0 1px rgba(255,255,255,0.05) inset, 0 10px 26px rgba(0,0,0,0.45) inset, 0 0 30px color-mix(in srgb,var(--rc) 26%,transparent);
+      display:flex;align-items:center;justify-content:center;overflow:hidden;}
     /* radial light rays behind the gem — the "halo" of the reveal */
-    .rank-socket-in::before{content:'';position:absolute;inset:-30%;z-index:0;pointer-events:none;
+    .card-art::before{content:'';position:absolute;inset:-30%;z-index:0;pointer-events:none;
       background:conic-gradient(from 0deg, transparent 0deg, color-mix(in srgb,var(--rc) 30%,transparent) 8deg, transparent 16deg,
         transparent 30deg, color-mix(in srgb,var(--rc) 24%,transparent) 38deg, transparent 46deg,
         transparent 90deg, color-mix(in srgb,var(--rc) 30%,transparent) 98deg, transparent 106deg,
@@ -151,30 +169,34 @@
       opacity:0.55;mix-blend-mode:screen;animation:raySpin 26s linear infinite;
       -webkit-mask:radial-gradient(circle, #000 30%, transparent 70%);mask:radial-gradient(circle, #000 30%, transparent 70%);}
     @keyframes raySpin{to{transform:rotate(360deg);}}
-    .rank-gem{position:relative;z-index:1;width:114px;height:114px;
+    .rank-gem{position:relative;z-index:1;width:132px;height:132px;
       filter:drop-shadow(0 0 16px color-mix(in srgb, var(--rc) 64%, transparent)) drop-shadow(0 8px 22px color-mix(in srgb, var(--rc) 45%, transparent));
       animation:gemFloat 4s ease-in-out 1s infinite;}
     .rank-gem img{width:100%;height:100%;object-fit:contain;display:block;}
     @keyframes gemFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
-    .rank-eyebrow{margin-top:22px;font-size:11px;font-weight:900;font-style:italic;letter-spacing:0.26em;text-transform:uppercase;
+    .rank-eyebrow{position:relative;z-index:6;margin-top:20px;font-size:11px;font-weight:900;font-style:italic;letter-spacing:0.26em;text-transform:uppercase;
       color:color-mix(in srgb,var(--rc) 72%, #ffffff);}
-    .rank-name{margin-top:5px;font-size:39px;font-weight:900;font-style:italic;text-transform:uppercase;letter-spacing:-1.2px;line-height:1;color:#fff;
+    .rank-name{position:relative;z-index:6;margin-top:5px;font-size:37px;font-weight:900;font-style:italic;text-transform:uppercase;letter-spacing:-1.2px;line-height:1;color:#fff;
       text-shadow:0 0 28px color-mix(in srgb,var(--rc) 55%,transparent);}
     /* tier label as a refined inline chip */
-    .rank-tier{display:inline-block;margin-top:11px;padding:5px 12px;font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;
+    .rank-tier{position:relative;z-index:6;display:inline-block;margin-top:11px;padding:5px 12px;font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;
       color:color-mix(in srgb,var(--rc) 40%, #ffffff);
       background:color-mix(in srgb,var(--rc) 12%, transparent);
       border:1px solid color-mix(in srgb,var(--rc) 34%, transparent);border-radius:100px;}
-    .rank-divider{height:1px;margin-top:24px;
+    /* stat plate — a distinct footer bar, like a card's rules/stat box */
+    .card-stat-plate{position:relative;z-index:6;margin-top:20px;border-radius:16px;
+      background:rgba(0,0,0,0.22);border:1px solid rgba(255,255,255,0.08);
+      box-shadow:0 1px 0 rgba(255,255,255,0.05) inset;overflow:hidden;}
+    .rank-divider{height:1px;
       background:linear-gradient(90deg, transparent, color-mix(in srgb,var(--rc) 40%, rgba(255,255,255,0.18)), transparent);}
     .rank-rows{display:flex;}
-    .rank-row{flex:1;padding:16px 0 2px;text-align:center;}
+    .rank-row{flex:1;padding:14px 0 12px;text-align:center;}
     .rank-row+.rank-row{border-left:1px solid rgba(255,255,255,0.08);}
     .rr-v{font-size:21px;font-weight:800;color:#fff;letter-spacing:-0.3px;}
     .rr-k{margin-top:5px;font-size:9.5px;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.60);}
     /* progress toward the next rank — makes the starting rank feel like the
        bottom of a climb instead of a dead end */
-    .rank-next{margin:18px 4px 2px;}
+    .rank-next{position:relative;z-index:6;margin:16px 4px 2px;}
     .rn-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px;
       font-size:10px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;
       font-family:'Space Mono',ui-monospace,"SF Mono",Menlo,monospace;}
@@ -262,18 +284,24 @@
     <!-- Stage 2: rank card + unlocks -->
     <div class="stage" id="stage2">
       <div class="rank-card" id="rankCard">
-        <div class="rank-socket"><div class="rank-socket-in"><div class="rank-gem" id="rankGem"></div></div></div>
+        <span class="card-stud tl" aria-hidden="true"></span>
+        <span class="card-stud tr" aria-hidden="true"></span>
+        <span class="card-stud bl" aria-hidden="true"></span>
+        <span class="card-stud br" aria-hidden="true"></span>
+        <div class="card-edition" id="rankTier">01 / 30</div>
+        <div class="card-art"><div class="rank-gem" id="rankGem"></div></div>
         <div class="rank-eyebrow">You are ranked</div>
         <div class="rank-name" id="rankName">Moonstone</div>
-        <div class="rank-tier" id="rankTier">Rank 1 of 10</div>
-        <div class="rank-divider"></div>
-        <div class="rank-rows">
-          <div class="rank-row"><div class="rr-v" id="rPlayer">Player</div><div class="rr-k">Name</div></div>
-          <div class="rank-row"><div class="rr-v" id="rScore">0</div><div class="rr-k">Score</div></div>
-        </div>
-        <div class="rank-next" id="rankNext">
-          <div class="rn-head"><span id="rnLabel">Next rank</span><span id="rnXp">0 XP</span></div>
-          <div class="rn-track"><div class="rn-fill" id="rnFill"></div></div>
+        <div class="card-stat-plate">
+          <div class="rank-rows">
+            <div class="rank-row"><div class="rr-v" id="rPlayer">Player</div><div class="rr-k">Name</div></div>
+            <div class="rank-row"><div class="rr-v" id="rScore">0</div><div class="rr-k">Score</div></div>
+          </div>
+          <div class="rank-divider"></div>
+          <div class="rank-next" id="rankNext">
+            <div class="rn-head"><span id="rnLabel">Next rank</span><span id="rnXp">0 XP</span></div>
+            <div class="rn-track"><div class="rn-fill" id="rnFill"></div></div>
+          </div>
         </div>
       </div>
 
@@ -339,7 +367,7 @@
   document.getElementById('rankGem').innerHTML = '<img src="assets/ranks/'+rank.key+'.png" alt="'+rank.name+'" />';
   document.getElementById('rankName').textContent = rank.name;
   var pad2=function(n){return (n<10?'0':'')+n;};
-  document.getElementById('rankTier').textContent = 'Rank '+pad2(idx+1)+' of '+RANKS.length;
+  document.getElementById('rankTier').textContent = pad2(idx+1)+' / '+RANKS.length;
   document.getElementById('rPlayer').textContent = name;
   document.getElementById('rScore').textContent = xp.toLocaleString();
 

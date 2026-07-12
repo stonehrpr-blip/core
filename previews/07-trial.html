@@ -3417,7 +3417,7 @@
       <div class="stepwrap" id="stepwrap">
 
         <!-- STEP 100: Area picker — what area to fix -->
-        <div class="step on" data-step="100">
+        <div class="step" data-step="100">
           <div class="kicker">Step 1 · Choose your focus</div>
           <h1 class="title">What area do you<br><span class="g">need to fix?</span></h1>
           <p class="copy">Pick the one that matters most right now.</p>
@@ -3644,6 +3644,28 @@
                to this step only so step 21's portal is untouched */
             .portal-journey{width:204px;height:204px}
             .portal-journey .p-figure{width:116px;bottom:auto;top:56%;transform:translate(-50%,-50%)}
+            /* ── entrance: whole step slides in from the side instead of the
+               generic vertical rise every other step gets, and the figure
+               itself runs in from off-screen to its mark in front of the
+               portal a beat later ── */
+            @keyframes step107In{
+              from{opacity:0;transform:translate3d(-28px,0,0)}
+              to{opacity:1;transform:translate3d(0,0,0)}
+            }
+            .step[data-step="107"].on{animation:step107In .55s cubic-bezier(.22,1,.36,1) both}
+            @keyframes figureRunIn{
+              0%{opacity:0;transform:translate(calc(-50% - 150px),-50%) rotate(-10deg) scale(.8)}
+              55%{opacity:1;transform:translate(calc(-50% + 16px),-50%) rotate(4deg) scale(1.06)}
+              75%{transform:translate(calc(-50% - 7px),-50%) rotate(-1.5deg) scale(.98)}
+              100%{transform:translate(-50%,-50%) rotate(0deg) scale(1)}
+            }
+            .step[data-step="107"].on .p-figure{
+              animation:figureRunIn .75s .3s cubic-bezier(.22,1,.36,1) both, pgStep 3.4s ease-in-out .95s infinite;
+            }
+            @media (prefers-reduced-motion:reduce){
+              .step[data-step="107"].on{animation:none!important}
+              .step[data-step="107"].on .p-figure{animation:pgStep 3.4s ease-in-out infinite!important}
+            }
             /* ── launch transition: punch out then in, figure falls into the
                portal, whole step fades to the next page ── */
             @keyframes portalZoomPunch{
@@ -3715,7 +3737,7 @@
         </div>
 
         <!-- STEP 1: Name + live availability -->
-        <div class="step" data-step="1">
+        <div class="step on" data-step="1">
           <div class="kicker">Step 1 · Basics</div>
           <h1 class="title" data-i18n-html="trial.t1">What should we<br/><span class="g">call you?</span></h1>
           <p class="copy">First name only.</p>
@@ -3867,6 +3889,10 @@
               <div class="habit-name">Just build</div>
               <div class="habit-desc">Build instead</div>
             </button>
+          </div>
+
+          <div style="margin-top:auto;text-align:center;padding:12px 0 4px">
+            <a href="04-sign-in.html" style="color:rgba(255,255,255,.35);font-size:12px;text-decoration:none;letter-spacing:-.05px">Already have an account? <span style="color:rgba(255,255,255,.6);font-weight:600">Log in</span></a>
           </div>
 
           <style>
@@ -7940,90 +7966,14 @@
           </div>
         </div>
 
-        <!-- STEP 21: Trial pitch + plan choice + Apple Pay connect (final) -->
-        <div class="step" data-step="17">
-          <div class="kicker">Final step</div>
-          <h1 class="title" id="payTitle">Start your<br/><span class="g">7 days free.</span></h1>
-          <p class="copy">$0 today. Then your plan starts after 7 days. Cancel any time in Settings.</p>
-
-          <!-- Social proof — reassurance at the decision point -->
-          <div class="social-proof">
-            <div class="sp-stars" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 6 20.2l1.4-6.8L2.3 9l6.9-.7z"/></svg>
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 6 20.2l1.4-6.8L2.3 9l6.9-.7z"/></svg>
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 6 20.2l1.4-6.8L2.3 9l6.9-.7z"/></svg>
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 6 20.2l1.4-6.8L2.3 9l6.9-.7z"/></svg>
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 6 20.2l1.4-6.8L2.3 9l6.9-.7z"/></svg>
-            </div>
-            <span class="sp-text"><b>4.8</b> · 12,000+ people starting over</span>
-          </div>
-
-          <!-- Plan choice — annual pre-selected (best value) -->
-          <div class="plan-choice" id="planChoice">
-            <button type="button" class="plan-opt selected" data-plan="annual" onclick="selectPlan('annual')">
-              <div class="plan-opt-radio"></div>
-              <div class="plan-opt-body">
-                <div class="plan-opt-top">
-                  <span class="plan-opt-name">Annual</span>
-                  <span class="plan-opt-tag">BEST VALUE · SAVE 53%</span>
-                </div>
-                <div class="plan-opt-price">$44.99<span>/yr</span> <span class="plan-opt-eq">≈ $3.75/mo</span></div>
-              </div>
-            </button>
-            <button type="button" class="plan-opt" data-plan="monthly" onclick="selectPlan('monthly')">
-              <div class="plan-opt-radio"></div>
-              <div class="plan-opt-body">
-                <div class="plan-opt-top">
-                  <span class="plan-opt-name">Monthly</span>
-                </div>
-                <div class="plan-opt-price">$7.99<span>/mo</span></div>
-              </div>
-            </button>
-          </div>
-
-          <!-- Apple Pay hero — big price + Apple Settings-list benefits -->
-          <div class="ap-hero">
-            <div class="ap-price-row">
-              <div class="ap-price-big">$0</div>
-              <div class="ap-price-meta">
-                <div class="ap-price-label">due today</div>
-                <div class="ap-price-sub" id="apPriceSub">then $44.99/yr after 7 days · cancel any time</div>
-              </div>
-            </div>
-            <div class="ap-badge">
-              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-              7 days free
-            </div>
-          </div>
-
-          <div class="ap-list">
-            <div class="ap-list-row">
-              <div class="ap-list-ico"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>
-              <div class="ap-list-body">
-                <div class="ap-list-title">5-stat life score</div>
-                <div class="ap-list-sub">Grows the days you don't</div>
-              </div>
-            </div>
-            <div class="ap-list-row">
-              <div class="ap-list-ico"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>
-              <div class="ap-list-body">
-                <div class="ap-list-title">AI Coach</div>
-                <div class="ap-list-sub">Trained on your tone choice</div>
-              </div>
-            </div>
-            <div class="ap-list-row">
-              <div class="ap-list-ico" style="background:var(--accent);"><svg viewBox="0 0 24 24"><path d="M5 8l7 5 7-5M5 8v9h14V8M5 8l3-3h8l3 3"/></svg></div>
-              <div class="ap-list-body">
-                <div class="ap-list-title">A letter from you · day 7</div>
-                <div class="ap-list-sub">Coach writes it when you make it through the first week</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Payment is collected at the very end (just before the app). Here we
-               only confirm the plan — the bottom CTA starts the free trial. -->
-          <div id="applePayState" class="ap-state">$0 today · no card needed yet · cancel any time in Settings</div>
-
+        <!-- STEP 17 (data-step=17): the in-trial paywall was removed — the real
+             subscription page now lives at 10-subscribe.html, right after
+             08-rank-reveal.html. This div is kept only because its <style>
+             block below also defines the live .r8-* CSS used by step 8
+             (the 30-day plan screen) elsewhere in the DOM — pulling that out
+             is a separate cleanup. data-step="17" is no longer in ORDER, so
+             this is never visited/rendered. -->
+        <div class="step" data-step="17" aria-hidden="true" style="display:none">
           <style>
             .ap-hero {
               margin-top: 12px;
@@ -10880,7 +10830,7 @@
     } catch(e){}
   }
 
-  const state = { step:100, promised:false, name:'', profile:null,
+  const state = { step:1, promised:false, name:'', profile:null,
                   // Step 3 now picks habit (replaces legacy goal). goal derived: 'quit'|'build'.
                   habit:null, goal:null,
                   blocker:null, routine:null,
@@ -10935,7 +10885,15 @@
   //   0  sign the contract
   //   21 portal / paywall
   // Lean ≤60s flow — 5 quick questions, a payoff, then the contract + portal.
-  const ORDER = [100, 101, 2, 24, 105, 106, 22, 1, 0, 107, 17, 8];
+  // Paywall (17) was pulled out of the trial — it now lives at 10-subscribe.html,
+  // right after 08-rank-reveal.html, so trial goes straight from the portal (107)
+  // to the 30-day plan payoff (8), then finishOnboarding() hands off to rank-reveal.
+  // Name (1) moved to the very front — asking who someone is before anything
+  // else. Area (100, "what area do you need to fix") was a coarse duplicate of
+  // the habit picker (4, "what are you tackling first") and never drove any
+  // personalisation (state.area was write-only) — swapped it out for the habit
+  // picker, which actually feeds the contract/plan copy via state.habit.
+  const ORDER = [1, 4, 101, 2, 24, 105, 106, 22, 0, 107, 8];
   function curPos() { const i = ORDER.indexOf(state.step); return i < 0 ? 0 : i; }
   // Every screen the user steps through is counted EXCEPT the portal/paywall (21).
   // The 30-day payoff (16) and the contract (0) are real steps too, so the
@@ -11106,7 +11064,7 @@
   let _swipeDir = 0;
   let _instantStep = false;   // skip the step transition (set just before advance())
   // The quick Q&A screens that render as a flickable card deck.
-  const DECK_STEPS = [100, 101, 102, 5, 1, 2, 103, 24, 104, 105, 22, 0, 106];
+  const DECK_STEPS = [4, 101, 102, 5, 1, 2, 103, 24, 104, 105, 22, 0, 106];
   function setStep(n) {
     // Allow demo ids (18-20) beyond TOTAL; bail only if there's no body for n.
     if (n < 0) return;
@@ -11153,7 +11111,7 @@
     // Step-21 — cinematic portal subscription gate hides all chrome
     document.body.classList.toggle('on-portal', n === 21);
     document.body.classList.toggle('on-promise', n === 0);   // hold-to-commit replaces the footer CTA
-    document.body.classList.toggle('on-autoadvance', n === 100 || n === 2 || n === 105); // tap advances — no Next button
+    document.body.classList.toggle('on-autoadvance', n === 4 || n === 2 || n === 105); // tap advances — no Next button
     // Demo playback (start the one visible demo, stop any others)
     if (isDemoStep(n)) startDemo(n); else stopAllDemos();
     // Step-enter hooks (keyed by body id — unchanged by the reorder)
@@ -11219,7 +11177,7 @@
   }
   function refreshCTA() {
     const s = state.step;
-    if (s === 100) { setCTA(state.area?'Continue':'Next', !state.area, state.area?'Area locked':'Pick an area'); }
+    if (s === 4) { setCTA(state.habit?'Continue':'Next', !state.habit, state.habit?'Locked in':'Pick one to continue'); }
     else if (s === 101) { var d=state.describe||''; setCTA('Continue',d.length<3,d.length<3?'Write a few words':'Got it'); }
     else if (s === 105) { setCTA('Next',!state.hasRoutine,!state.hasRoutine?'Pick yes or no':''); }
     else if (s === 106) { var rc=state.routines&&state.routines.length||0; setCTA('Continue',rc<1,rc<1?'Tap at least one':rc+' selected'); }
@@ -11534,7 +11492,7 @@
   // Auto-advance is OFF — the user always confirms with the Next button.
   // (The card still flicks away when they tap Next; see next().)
   // Single-select screens glide straight to the next one on tap (no Next tap).
-  const AUTO_ADVANCE = new Set([100,104,2,103,24,8,105]);
+  const AUTO_ADVANCE = new Set([4,104,2,103,24,8,105]);
   function swipeNext() { _swipeDir = 1; advance(); }
   window.swipeNext = swipeNext;
   function maybeAutoAdvance() {
@@ -14793,7 +14751,7 @@
     if (k) k.textContent = 'Step ' + Math.min(curPos() + 1, NUM_QUESTIONS)
       + ' of ' + NUM_QUESTIONS + ' · ' + CHAPTERS[chapterIndexFor()].label;
     // ...and the same body-state classes setStep() would have applied.
-    document.body.classList.toggle('on-autoadvance', state.step === 100 || state.step === 2 || state.step === 105);
+    document.body.classList.toggle('on-autoadvance', state.step === 4 || state.step === 2 || state.step === 105);
   })();
   track('step_view', { step: 0, entry: true });
 
@@ -15851,8 +15809,8 @@ body.on-autoadvance .stepwrap::after {
   text-align:center; font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif; font-size:10.5px;
   letter-spacing:0.1em; text-transform:uppercase; color:rgba(235,235,245,0.34); pointer-events:none; z-index:5;
 }
-/* Step 100 (area picker) already has its own "Log in" link at the bottom — don't stack the generic hint on top of it */
-body.on-autoadvance .stepwrap:has(.step[data-step="100"].on)::after { content:none; }
+/* Step 4 (habit picker) already has its own "Log in" link at the bottom — don't stack the generic hint on top of it */
+body.on-autoadvance .stepwrap:has(.step[data-step="4"].on)::after { content:none; }
 
 /* ── Clearer BUTTON OUTLINES + soft glow on every tappable card/button ── */
 .tone-row, .habit-card, .profile-card, .age-chip, .why-chip, .pick-card {
