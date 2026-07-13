@@ -85,8 +85,19 @@
      lag on phones and added the bright-blue cast. Kept as a no-op so any
      leftover markup/JS references stay harmless. */
   .aurora { display:none !important; }
-  /* Star field — denser, with two parallax depth layers for subtle movement */
-  .stars { position:absolute; inset:-2%; pointer-events:none; z-index:2; }
+  /* Kill the shared "breathing rim" glow (.phone::before, core-theme.css) —
+     the animated white/silver inset border around the phone frame that was
+     visible on every step. Every trial page should just have a clean edge. */
+  .phone::before { content:none !important; animation:none !important; box-shadow:none !important; }
+  /* Star field — disabled for a clean, flat background on every trial page.
+     Kept as a no-op (same pattern as .aurora above) so any leftover
+     markup/JS that still builds/references .star elements stays harmless. */
+  .stars { display:none !important; position:absolute; inset:-2%; pointer-events:none; z-index:2; }
+  /* core-starfield.js (loaded below) injects a SECOND, separate star layer
+     (.sf-base/.sf-drift/.sf-layer, with .sf-star/.sf-shoot inside) into
+     every .phone regardless of the .stars rule above — disable that too so
+     the background is actually flat, not just the original inline layer. */
+  .sf-base, .sf-drift, .sf-layer { display:none !important; }
   .stars.far  { animation: starDrift 64s ease-in-out infinite; opacity:0.85; }
   .stars.near { animation: starDrift 42s ease-in-out infinite reverse; }
   @keyframes starDrift {
@@ -3465,42 +3476,36 @@
         </div>
 
 
-        <!-- STEP 101: Open text — describe where you are -->
+        <!-- STEP 101: tap-choice — where are you right now -->
         <div class="step" data-step="101">
           <div class="kicker">Step 2 · Your story</div>
-          <h1 class="title">Describe where you<br><span class="g">are right now.</span></h1>
-          <p class="copy">Be honest. No one else reads this.</p>
-          <div class="field-wrap">
-            <textarea id="describe" class="field" placeholder="I'm at a point where..." maxlength="200" rows="4" style="resize:none;min-height:100px;font-family:inherit"></textarea>
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
-              <div id="describeStatus" style="font-size:11.5px;color:var(--muted)">Type or tap mic to speak</div>
-              <div id="describeCount" style="font-size:11px;color:rgba(255,255,255,.25)">0/200</div>
-            </div>
-            <button id="describeMic" class="voice-mic-btn">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>
-              <span>Tap to speak</span>
-            </button>
+          <h1 class="title">Where are you<br><span class="g">right now?</span></h1>
+          <p class="copy">Be honest. No one else sees this.</p>
+          <div class="why-pick" id="describeChoice">
+            <button type="button" class="why-btn" data-describe="starting">Just starting out</button>
+            <button type="button" class="why-btn" data-describe="fell-off">Tried before, fell off</button>
+            <button type="button" class="why-btn" data-describe="struggling">Struggling most days</button>
+            <button type="button" class="why-btn" data-describe="ready">Ready for real change</button>
           </div>
           <div class="privacy-note" style="margin-top:14px">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
             <span>Private. Only your coach sees this.</span>
           </div>
-          <style>
-            .step-cta{width:100%;padding:16px;border-radius:16px;border:none;background:rgba(255,255,255,.06);color:rgba(255,255,255,.3);font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;transition:all.25s;margin-top:auto}
-            .step-cta:not(:disabled){background:#fff;color:#000;cursor:pointer}
-            .step[data-step="101"] .field{background:rgba(255,255,255,.03);border:1.5px solid rgba(255,255,255,.1);border-radius:16px;padding:14px 16px;color:#fff;font-size:15px;line-height:1.5;width:100%;transition:border-color.25s,box-shadow.25s}
-            .step[data-step="101"] .field:focus{border-color:rgba(200,210,225,.4);box-shadow:0 0 0 3px rgba(200,210,225,.06);outline:none}
-            .step[data-step="101"] .field.ready{border-color:#4ade80;box-shadow:0 0 0 3px rgba(74,222,128,.08)}
-            .voice-mic-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px;margin-top:8px;border-radius:16px;border:none;background:linear-gradient(135deg,rgba(168,85,247,.12),rgba(139,92,246,.06));color:rgba(168,85,247,.8);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all.25s;position:relative;overflow:hidden}
-            .voice-mic-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(168,85,247,.2),transparent);opacity:0;transition:opacity.3s}
-            .voice-mic-btn:hover::before{opacity:1}
-            .voice-mic-btn svg{width:18px;height:18px}
-            .voice-mic-btn:hover{color:#c084fc;transform:translateY(-1px)}
-            .voice-mic-btn.listening{animation:micBreathe 2.5s ease-in-out infinite}
-            @keyframes micBreathe{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.02);opacity:1}}
-            @keyframes voiceTextIn{0%{opacity:.6;filter:blur(2px)}100%{opacity:1;filter:blur(0)}}
-            .field.typing{animation:voiceTextIn .4s ease-out}
-          </style>
+          <script>
+            (function(){
+              var btns = document.querySelectorAll('#describeChoice .why-btn');
+              btns.forEach(function(b){
+                b.addEventListener('click', function(){
+                  btns.forEach(function(x){ x.classList.remove('sel'); });
+                  b.classList.add('sel');
+                  window._state.describe = b.dataset.describe;
+                  try { if (typeof haptic === 'function') haptic(10); } catch(e){}
+                  if (window._refreshCTA) window._refreshCTA();
+                  if (window.maybeAutoAdvance) window.maybeAutoAdvance();
+                });
+              });
+            })();
+          </script>
         </div>
 
 
@@ -3692,11 +3697,6 @@
           <div class="kicker">Before we start</div>
           <h1 class="title" data-i18n-html="trial.t0">This only<br/><span class="g">works if you mean it.</span></h1>
           <p class="copy">Sign it, then press and hold to commit.</p>
-          <div id="habitChip" style="display:none; align-items:center; gap:5px; padding: 2px 7px; border-radius: 999px; background: rgba(255,255,255,0.05); border:none; align-self: flex-start; font-size: 9.5px; color: var(--muted); letter-spacing:-0.05px; margin-top: 2px; opacity:0.85;">
-            <span id="habitChipDot" style="width:6px; height:6px; border-radius:50%; box-shadow: 0 0 5px currentColor;"></span>
-            <span>Quitting <strong id="habitChipName" style="color:#fff; font-weight:700; text-transform:capitalize;">vape</strong></span>
-            <button onclick="clearHabit()" style="margin-left:2px; background:none; border:none; color: var(--dim); cursor:pointer; padding:0 1px; font-size:11px;" aria-label="Change habit">×</button>
-          </div>
 
           <div class="commit-dock">
             <div class="commit-dock-kicker">Your promise</div>
@@ -4596,6 +4596,32 @@
             <div class="sac-sub" id="sacSub">on your current trajectory</div>
             <div class="sac-foot">Estimate based on your answers — and every clean day gives time back.</div>
           </div>
+        </div>
+
+        <!-- STEP 200: "calculating" loading beat — plays right before the
+             routine builder (106), which now runs last among the real
+             questions so it lands as the payoff, not a mid-flow question. -->
+        <div class="step" data-step="200">
+          <div class="calc-stage">
+            <svg class="calc-ring" viewBox="0 0 120 120" aria-hidden="true">
+              <circle class="calc-ring-track" cx="60" cy="60" r="52"/>
+              <circle class="calc-ring-fill" id="calcRingFill" cx="60" cy="60" r="52" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/>
+            </svg>
+            <div class="calc-pct" id="calcPct">0%</div>
+          </div>
+          <div class="calc-label">Calculating your plan…</div>
+          <div class="calc-sub">Pulling together everything you told us</div>
+          <style>
+            .step[data-step="200"] { align-items:center; justify-content:center; text-align:center; gap:22px; }
+            .calc-stage { position:relative; width:150px; height:150px; }
+            .calc-ring { width:100%; height:100%; transform:rotate(-90deg); }
+            .calc-ring-track { fill:none; stroke:rgba(255,255,255,.08); stroke-width:6; }
+            .calc-ring-fill { fill:none; stroke:#C4C9D2; stroke-width:6; stroke-linecap:round; transition:stroke-dashoffset .1s linear; }
+            .calc-pct { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:28px; font-weight:800; letter-spacing:-0.5px; color:#fff; }
+            .calc-label { font-size:16px; font-weight:700; color:rgba(255,255,255,.9); }
+            .calc-sub { font-size:12.5px; color:var(--muted); margin-top:-14px; }
+            body.on-calculating .footer { display:none !important; }
+          </style>
         </div>
 
         <!-- STEP 7 (merged): one graph, without-Core vs with-Core -->
@@ -10010,38 +10036,43 @@
         <button id="cta" class="cta" onclick="next()" disabled>
           Next <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
         </button>
-        <button type="button" id="holdCommit" class="hold-commit" aria-label="Press and hold to commit">
+        <button type="button" id="holdCommit" class="hold-commit" aria-label="Hold to promise">
           <span class="hc-fill" id="hcFill"></span>
           <span class="hc-ring" id="hcRing"></span>
-          <span class="hc-label" id="hcLabel">Press &amp; hold to commit</span>
+          <span class="hc-label" id="hcLabel">Hold to<br/>promise</span>
         </button>
         <div class="footer-note" id="footerNote">Enter your name to continue</div>
       </div>
     </div>
     <style>
-      .hold-commit{--progress:0;display:none;position:relative;width:100%;height:58px;border-radius:17px;border:1.5px solid rgba(255,255,255,.14);
-        background:rgba(255,255,255,.03);overflow:hidden;cursor:pointer;font-family:inherit;-webkit-tap-highlight-color:transparent;
-        -webkit-user-select:none;user-select:none;touch-action:none;
-        box-shadow:0 0 calc(6px + var(--progress) * 26px) rgba(126,196,255,calc(.12 + var(--progress) * .35)),
-                    0 0 0 1px rgba(255,255,255,.06) inset;
-        transition:box-shadow .1s linear,border-color .2s ease}
+      /* New hold-to-promise button: a clean circular dial instead of the old
+         horizontal pill. The ring fill is pure CSS driven off the same
+         --progress custom property the JS already writes every tick (no JS
+         changes needed) — a conic-gradient masked into a ring shape. */
+      .hold-commit{--progress:0;display:none;position:relative;width:118px;height:118px;margin:6px auto 0;border-radius:50%;
+        border:none;background:transparent;cursor:pointer;font-family:inherit;-webkit-tap-highlight-color:transparent;
+        -webkit-user-select:none;user-select:none;touch-action:none;padding:0}
       body.on-promise .cta{display:none !important}
       body.on-promise .hold-commit{display:block}
-      .hc-fill{position:absolute;left:0;top:0;bottom:0;width:0%;
-        background:linear-gradient(90deg,#7dc4ff,#b3a6ff 45%,#ffd76a 78%,#4ade80);
-        box-shadow:0 0 22px rgba(126,196,255,.45) inset;transition:width .05s linear}
-      .hc-ring{position:absolute;inset:0;border-radius:17px;pointer-events:none;box-shadow:0 0 0 0 rgba(126,196,255,0);transition:box-shadow .2s ease}
-      .hold-commit.pressing .hc-ring{box-shadow:0 0 0 2px rgba(126,196,255,.55),0 0 28px rgba(179,166,255,.4)}
-      .hc-label{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;height:100%;
-        font-size:14.5px;font-weight:700;letter-spacing:.02em;color:rgba(255,255,255,.85);transition:color .2s ease}
+      .hc-ring{position:absolute;inset:0;border-radius:50%;pointer-events:none;
+        background:conic-gradient(from -90deg, #C4C9D2 calc(var(--progress) * 360deg), rgba(255,255,255,.09) 0deg);
+        -webkit-mask:radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 7px));
+                mask:radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 7px));
+        transition:background .05s linear}
+      /* Old element kept (JS still writes fill.style.width harmlessly) but
+         repurposed into the plain center disc behind the label. */
+      .hc-fill{position:absolute;inset:9px;width:auto !important;border-radius:50%;
+        background:rgba(255,255,255,.035);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);transition:none !important}
+      .hold-commit.pressing .hc-fill{background:rgba(196,201,210,.08)}
+      .hc-label{position:absolute;inset:9px;z-index:1;display:flex;align-items:center;justify-content:center;text-align:center;
+        font-size:13px;font-weight:700;letter-spacing:.01em;line-height:1.25;color:rgba(255,255,255,.85);transition:color .2s ease}
       .hold-commit:not(.done):not(.pressing) .hc-label{animation:hcHint 1.9s ease-in-out infinite}
       @keyframes hcHint{0%,100%{opacity:.65}50%{opacity:1}}
-      .hold-commit.done{border-color:rgba(74,222,128,.6)}
-      .hold-commit.done .hc-fill{width:100% !important;background:linear-gradient(90deg,#30D158,#4ade80)}
-      .hold-commit.done .hc-label{color:#08140b}
+      .hold-commit.done .hc-ring{background:conic-gradient(from -90deg, #4ade80 360deg, #4ade80 0deg)}
+      .hold-commit.done .hc-fill{background:rgba(74,222,128,.12);box-shadow:inset 0 0 0 1px rgba(74,222,128,.5)}
+      .hold-commit.done .hc-label{color:#4ade80}
       @keyframes hcPop{0%{transform:scale(1)}35%{transform:scale(1.08)}60%{transform:scale(.97)}100%{transform:scale(1)}}
       .hold-commit.popped{animation:hcPop .5s cubic-bezier(.28,1.2,.4,1) both}
-      .hold-commit.done .hc-ring{box-shadow:0 0 0 2px rgba(74,222,128,.6),0 0 30px rgba(74,222,128,.5)}
       @media (prefers-reduced-motion: reduce){ .hold-commit .hc-label{animation:none !important}.hold-commit.popped{animation:none !important} }
     </style>
 
@@ -10884,16 +10915,26 @@
   //   16 your 30-day plan — quotes your "why" back (earned payoff)
   //   0  sign the contract
   //   21 portal / paywall
-  // Lean ≤60s flow — 5 quick questions, a payoff, then the contract + portal.
+  // Lean ≤60s flow — quick questions, a payoff, then the contract + portal.
   // Paywall (17) was pulled out of the trial — it now lives at 10-subscribe.html,
   // right after 08-rank-reveal.html, so trial goes straight from the portal (107)
   // to the 30-day plan payoff (8), then finishOnboarding() hands off to rank-reveal.
   // Name (1) moved to the very front — asking who someone is before anything
   // else. Area (100, "what area do you need to fix") was a coarse duplicate of
-  // the habit picker (4, "what are you tackling first") and never drove any
-  // personalisation (state.area was write-only) — swapped it out for the habit
-  // picker, which actually feeds the contract/plan copy via state.habit.
-  const ORDER = [1, 4, 101, 2, 24, 105, 106, 22, 0, 107, 8];
+  // the old habit picker and never drove any personalisation (state.area was
+  // write-only), so it stays parked out of ORDER.
+  // The standalone habit picker (4, "what are you tackling first") was pulled
+  // out of the flow entirely — one fewer question to answer. state.habit stays
+  // null for anyone who lands here without a ?habit= from an upstream screen,
+  // and every consumer (renderContract/renderPlanScreen's `isBuild` check)
+  // already treats an unrecognised/missing habit as the generic "build" path,
+  // so nothing downstream needed a code change.
+  // The routine builder (106, "build your day") now runs LAST among the real
+  // questions — right after a "calculating your plan" loading beat (200) and
+  // right before the 30-day payoff (8) — so it reads as the payoff moment
+  // ("here's your plan") instead of just another mid-flow question, and the
+  // commit (0) + portal (107) stay the true final "sign, then launch" beat.
+  const ORDER = [1, 101, 2, 24, 105, 22, 200, 106, 8, 0, 107];
   function curPos() { const i = ORDER.indexOf(state.step); return i < 0 ? 0 : i; }
   // Every screen the user steps through is counted EXCEPT the portal/paywall (21).
   // The 30-day payoff (16) and the contract (0) are real steps too, so the
@@ -11111,7 +11152,8 @@
     // Step-21 — cinematic portal subscription gate hides all chrome
     document.body.classList.toggle('on-portal', n === 21);
     document.body.classList.toggle('on-promise', n === 0);   // hold-to-commit replaces the footer CTA
-    document.body.classList.toggle('on-autoadvance', n === 4 || n === 2 || n === 105); // tap advances — no Next button
+    document.body.classList.toggle('on-calculating', n === 200);   // loading beat — no footer/CTA, auto-advances
+    document.body.classList.toggle('on-autoadvance', n === 2 || n === 105 || n === 101); // tap advances — no Next button
     // Demo playback (start the one visible demo, stop any others)
     if (isDemoStep(n)) startDemo(n); else stopAllDemos();
     // Step-enter hooks (keyed by body id — unchanged by the reorder)
@@ -11120,6 +11162,7 @@
     if (n === 0) renderContract();                          // personalise the contract with name/habit/reason
     if (n === 7) renderSacrifice();                          // life sacrificed
     if (n === 8) renderGraph(n);                             // combined with/without-Core graph
+    if (n === 200) runCalculatingAnimation();                // "calculating your plan" loading ring
     if (n === 13) seedTriggersFromBlocker();
     if (n === 22 && window.__paintCommit) window.__paintCommit();   // reflect stored level
     if (n === 16) renderPlanScreen();
@@ -11178,7 +11221,8 @@
   function refreshCTA() {
     const s = state.step;
     if (s === 4) { setCTA(state.habit?'Continue':'Next', !state.habit, state.habit?'Locked in':'Pick one to continue'); }
-    else if (s === 101) { var d=state.describe||''; setCTA('Continue',d.length<3,d.length<3?'Write a few words':'Got it'); }
+    else if (s === 101) { setCTA('Continue', !state.describe, !state.describe ? 'Pick one to continue' : 'Got it'); }
+    else if (s === 200) { setCTA('Continue', true, 'Calculating your plan…'); }
     else if (s === 105) { setCTA('Next',!state.hasRoutine,!state.hasRoutine?'Pick yes or no':''); }
     else if (s === 106) { var rc=state.routines&&state.routines.length||0; setCTA('Continue',rc<1,rc<1?'Tap at least one':rc+' selected'); }
     else if (s === 107) { setCTA("Let's go",false,'Everything starts now'); }
@@ -11482,17 +11526,25 @@
   // Advance one position along ORDER (or finish at the end).
   function advance() {
     const i = ORDER.indexOf(state.step);
-    if (i >= 0 && i < ORDER.length - 1) {
-      setStep(ORDER[i + 1]);
-    } else {
-      // End of flow -> start the trial + run the celebration chain.
-      finishOnboarding(true);
+    const goNext = function () {
+      if (i >= 0 && i < ORDER.length - 1) setStep(ORDER[i + 1]);
+      else finishOnboarding(true);   // End of flow -> start the trial + run the celebration chain.
+    };
+    // Right after meeting Corbit, ask for the permissions the coach actually
+    // needs to track progress — notifications, cross-app tracking, health
+    // data. Shown once per session; every path (Next tap, auto-advance,
+    // swipe) funnels through here.
+    if (state.step === 24 && !state.permsAsked) {
+      state.permsAsked = true;
+      showTrialPermissionChain(goNext);
+      return;
     }
+    goNext();
   }
   // Auto-advance is OFF — the user always confirms with the Next button.
   // (The card still flicks away when they tap Next; see next().)
   // Single-select screens glide straight to the next one on tap (no Next tap).
-  const AUTO_ADVANCE = new Set([4,104,2,103,24,8,105]);
+  const AUTO_ADVANCE = new Set([104,2,103,24,8,105,101]);
   function swipeNext() { _swipeDir = 1; advance(); }
   window.swipeNext = swipeNext;
   function maybeAutoAdvance() {
@@ -11657,7 +11709,7 @@
       habit: state.habit, goal: state.goal,
       // New onboarding (v2)
       area: state.area,              // Health/Fitness/Money/Focus/Vices/Other
-      describe: state.describe,      // Open-text "where are you right now"
+      describe: state.describe,      // "Where are you right now" — tap choice
       hoursWasted: state.hours,      // Hours per day slider
       hasRoutine: state.hasRoutine,  // Yes/No
       routinePicks: (state.routines||[]).slice(), // Selected daily habits
@@ -12430,10 +12482,12 @@
       </div>
     `;
     document.body.appendChild(wrap);
-    wrap.querySelector('#notifAllow').addEventListener('click', async () => {
+    wrap.querySelector('#notifAllow').addEventListener('click', () => {
+      // Don't block the sheet transition on the real browser prompt — see
+      // showPermSheet() for why (it may never resolve in some contexts).
       try {
         if ('Notification' in window && Notification.permission === 'default') {
-          await Notification.requestPermission();
+          Notification.requestPermission().catch(function(){});
         }
       } catch(e){}
       try { localStorage.setItem('coreNotifAsked', '1'); } catch(e){}
@@ -12446,6 +12500,95 @@
       track('notif_permission', { allowed: false });
       wrap.remove();
       showWelcomeConfirm();
+    });
+  }
+
+  // ── Trial permission chain (notifications → tracking → health) ───────
+  // Three native-style sheets shown back-to-back, right after Corbit is
+  // introduced, so the coach can actually nudge/measure/personalize.
+  // Reuses the same visual language as showNotifPermission() above, but
+  // calls `done()` at the end instead of jumping to showWelcomeConfirm()
+  // (that function belongs to the separate free-tier-decline path).
+  function showPermSheet(opts) {
+    const wrap = document.createElement('div');
+    wrap.className = 'perm-sheet';
+    wrap.style.cssText = `position:fixed;inset:0;z-index:9999;
+      background:rgba(2,2,10,0.92);backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);
+      display:flex;align-items:center;justify-content:center;padding:24px;
+      font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text',sans-serif;animation:fadeIn 0.3s ease;`;
+    wrap.innerHTML = `
+      <div style="background:#0a0a14;border:1px solid rgba(255,255,255,0.10);
+                  border-radius:20px;padding:28px 22px;max-width:340px;width:100%;text-align:center;">
+        <div style="width:72px;height:72px;border-radius:20px;margin:0 auto 16px;
+                    background:#AEB6C4;
+                    display:flex;align-items:center;justify-content:center;
+                    box-shadow:0 12px 30px rgba(0,0,0,0.35);">${opts.icon}</div>
+        <h2 style="font-size:22px;font-weight:700;color:#fff;letter-spacing:-0.4px;margin:0 0 8px;">${escTrialHtml(opts.title)}</h2>
+        <p style="font-size:14px;color:rgba(255,255,255,0.72);line-height:1.45;margin:0 0 20px;">${escTrialHtml(opts.copy)}</p>
+        <button id="permAllow" style="width:100%;padding:14px;border-radius:14px;border:none;
+                   background:#AEB6C4;color:#fff;
+                   font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;
+                   margin-bottom:8px;">${escTrialHtml(opts.allowLabel)}</button>
+        <button id="permSkip" style="width:100%;padding:12px;background:transparent;border:none;
+                   color:rgba(255,255,255,0.72);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;">${escTrialHtml(opts.skipLabel)}</button>
+      </div>
+    `;
+    document.body.appendChild(wrap);
+    const finish = function (allowed) {
+      try { track(opts.event, { allowed: allowed }); } catch (e) {}
+      wrap.remove();
+      opts.done();
+    };
+    wrap.querySelector('#permAllow').addEventListener('click', () => {
+      // Fire the real browser permission prompt without letting it block our
+      // own sheet transition — some browsers/contexts never resolve this
+      // (no UI to answer it), and the user's tap on OUR button is already
+      // their answer either way.
+      if (opts.requestBrowserNotif) {
+        try {
+          if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission().catch(function(){});
+          }
+        } catch (e) {}
+      }
+      finish(true);
+    });
+    wrap.querySelector('#permSkip').addEventListener('click', () => finish(false));
+  }
+  const BELL_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:36px;height:36px;"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>';
+  const TRACK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:36px;height:36px;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.6" fill="#fff"/></svg>';
+  const HEART_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:36px;height:36px;"><path d="M12 20.3C6.4 16.5 3.5 13.1 3.5 9.2A3.8 3.8 0 0 1 12 7.3 3.8 3.8 0 0 1 20.5 9.2C20.5 13.1 17.6 16.5 12 20.3Z"/></svg>';
+  function showTrialPermissionChain(done) {
+    showPermSheet({
+      icon: BELL_ICON,
+      title: 'Stay on track.',
+      copy: "Allow notifications so Corbit can nudge you at the right times — a single calm ping, never spam.",
+      allowLabel: 'Allow notifications',
+      skipLabel: 'Not now',
+      event: 'perm_notifications',
+      requestBrowserNotif: true,
+      done: function () {
+        showPermSheet({
+          icon: TRACK_ICON,
+          title: 'Track your progress.',
+          copy: 'Allow Core to track your activity across other apps so your plan and streaks stay accurate everywhere you use it.',
+          allowLabel: 'Allow tracking',
+          skipLabel: "Ask app not to track",
+          event: 'perm_tracking',
+          done: function () {
+            showPermSheet({
+              icon: HEART_ICON,
+              title: 'Connect your health data.',
+              copy: 'Core would like to read Steps, Sleep and Workouts to fold real data into your plan and progress.',
+              allowLabel: 'Allow',
+              skipLabel: "Don't allow",
+              event: 'perm_health',
+              done: done
+            });
+          }
+        });
+      }
     });
   }
 
@@ -13437,7 +13580,7 @@
         [sigPath, sigUnder, sigFlourish].forEach(function (p) { if (p) p.style.transition = 'stroke-dashoffset .3s ease'; });
       }
       if (sigPen) sigPen.classList.remove('live');
-      if (label) label.textContent = 'Press & hold to commit';
+      if (label) label.innerHTML = 'Hold to<br/>promise';
       if (meta) { meta.textContent = '// unsigned'; meta.style.color = ''; }
     }
     function complete() {
@@ -13449,7 +13592,7 @@
       fill.style.transition = 'width .18s ease';
       setProgress(1);
       if (sigPen) sigPen.classList.remove('live');
-      if (label) label.textContent = '✓ Committed';
+      if (label) label.textContent = '✓ Promised';
       state.promised = true;
       if (sig) sig.classList.add('on');
       // the pop: a bigger burst of particles right as the hold finishes
@@ -14077,6 +14220,35 @@
   // Graphs are drawn purely via CSS (stroke animation on .on). The hook just
   // exists so re-entry restarts cleanly; nothing else needed.
   function renderGraph(/* n */) {}
+
+  // ── "Calculating your plan" loading ring (step 200) ─────────────────────
+  // Pure timed screen — no user input. Fills the ring 0→100%, then
+  // auto-advances into the routine builder once it's full.
+  var _calcRunning = false;
+  function runCalculatingAnimation() {
+    if (_calcRunning) return;
+    _calcRunning = true;
+    var ring = document.getElementById('calcRingFill');
+    var pctEl = document.getElementById('calcPct');
+    if (ring) { ring.style.transition = 'none'; ring.style.strokeDashoffset = '100'; void ring.offsetWidth; ring.style.transition = ''; }
+    if (pctEl) pctEl.textContent = '0%';
+    var reduce = false; try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+    var DUR = reduce ? 300 : 1900;
+    var start = performance.now();
+    function tick(now) {
+      if (state.step !== 200) { _calcRunning = false; return; }
+      var t = Math.min(1, (now - start) / DUR);
+      var eased = 1 - Math.pow(1 - t, 2);
+      var p = Math.round(eased * 100);
+      if (ring) ring.style.strokeDashoffset = String(100 - eased * 100);
+      if (pctEl) pctEl.textContent = p + '%';
+      if (t < 1) { requestAnimationFrame(tick); return; }
+      _calcRunning = false;
+      try { if (typeof haptic === 'function') haptic(10); } catch (e) {}
+      setTimeout(function () { if (state.step === 200) advance(); }, 260);
+    }
+    requestAnimationFrame(tick);
+  }
 
   function setVapeLevel(stage, i) {
     const cfg = VAPE_CFG[stage.id]; if (!cfg) return;
@@ -14860,8 +15032,8 @@
   function burstParticles(el){var pn=el.closest('.phone')||el.closest('.step');if(!pn)return;var pr=pn.getBoundingClientRect(),cr=el.getBoundingClientRect(),cx=cr.left-pr.left+cr.width/2,cy=cr.top-pr.top+cr.height/2;for(var i=0;i<8;i++){var p=document.createElement('span');p.style.cssText='position:absolute;z-index:99;pointer-events:none;width:4px;height:4px;border-radius:50%;background:#C4C9D2;left:'+cx+'px;top:'+cy+'px;animation:genderBurst .45s cubic-bezier(.22,1,.36,1) forwards;animation-delay:'+(i*.015)+'s;--gx:'+(Math.cos(i/8*Math.PI*2)*35)+'px;--gy:'+(Math.sin(i/8*Math.PI*2)*35)+'px';pn.appendChild(p);setTimeout(function(){p.remove()},500)}}
   (function(){var cards=document.querySelectorAll('#areaPick .area-card');cards.forEach(function(c){c.addEventListener('click',function(){cards.forEach(function(x){x.classList.remove('sel')});c.classList.add('sel');burstParticles(c);state.area=c.dataset.area;refreshCTA();maybeAutoAdvance()})})})();
 
-  // ── Open text (step 101) ──
-  var describeField=document.getElementById('describe');if(describeField){var dStatus=document.getElementById('describeStatus'),dCount=document.getElementById('describeCount'),dBtn=document.getElementById('describeContinue'),dMic=document.getElementById('describeMic'),dListening=false,dRec=null;function updateDescribe(){var v=describeField.value,vt=v.trim(),len=v.length;state.describe=vt;if(dCount)dCount.textContent=len+'/200';if(len>=3){describeField.classList.add('ready');if(dStatus)dStatus.innerHTML='<span style=color:#4ade80>✓ Ready</span>';if(dBtn)dBtn.disabled=false}else{describeField.classList.remove('ready');if(dStatus)dStatus.textContent=len>0?'Keep writing...':'Type or tap mic to speak';if(dBtn)dBtn.disabled=true}refreshCTA()}describeField.addEventListener('input',updateDescribe);if(dMic){dMic.addEventListener('click',function(){if(dListening){dListening=false;if(dRec){try{dRec.stop()}catch(e){}dRec=null}dMic.classList.remove('listening');if(dStatus)dStatus.textContent='Type or tap mic to speak';return}var SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){if(dStatus)dStatus.innerHTML='<span style=color:#ef4444>Voice not supported</span>';return}dRec=new SR();dRec.lang='';dRec.continuous=true;dRec.interimResults=true;dRec.onresult=function(ev){var t="";for(var i=0;i<ev.results.length;i++){var r=ev.results[i][0].transcript;if(ev.results[i].isFinal){t+=r.charAt(0).toUpperCase()+r.slice(1);if(!/[.!?]$/.test(r))t+=".";t+=" "}else{t+=r+" "}}if(t.length>=200){dListening=false;if(dRec){try{dRec.stop()}catch(e){}dRec=null}dMic.classList.remove("listening");if(dStatus)dStatus.textContent="200/200 — limit reached"}describeField.value=t.slice(0,200);updateDescribe();setTimeout(function(){describeField.classList.remove("typing")},300)};dRec.onerror=function(){dListening=false;dMic.classList.remove('listening');if(dStatus)dStatus.textContent='Type or tap mic to speak'};dRec.onend=function(){if(dListening){try{dRec.start()}catch(e){dListening=false;dMic.classList.remove('listening')}}};try{dRec.start();dListening=true;dMic.classList.add('listening');if(dStatus)dStatus.innerHTML='<span style=color:#ef4444>Listening…</span>'}catch(e){dListening=false;dMic.classList.remove('listening')}})}}
+  // Step 101 ("where are you right now") is now a tap-choice — see the
+  // #describeChoice click handler inlined in that step's own <script>.
 
   // ── Routine yes/no (step 104) ──
   (function(){
@@ -15781,16 +15953,12 @@ html body[data-font="apple"] #planTitle .g {
 /* contract page: the hold-to-commit button replaces the Next button in the
    same footer (see body.on-promise .cta / .hold-commit rules near the
    footer markup) — it stays at the bottom like every other step's CTA. */
-/* contract page — centre everything vertically + horizontally */
-/* contract page — lifted to the top, bigger heading, tighter box, clean text */
-.step[data-step="0"] { text-align:center; }
-.step[data-step="0"] .title { font-size:30px !important; line-height:1.05 !important; }
-.step[data-step="0"] #habitChip { align-self:center; margin-top:6px; }
-.step[data-step="0"] #promiseCard { text-align:left; padding:16px 18px !important; margin-top:14px !important; }
-.step[data-step="0"] #contractText { font-size:15px !important; line-height:1.5 !important; }
+/* contract page — left-aligned heading like every other question step
+   (no more centred/boxed treatment — the habit chip that justified the
+   center layout is gone, so this now just follows the base .step rules). */
 /* bigger signature area, room to breathe above the fixed bottom CTA */
-.step[data-step="0"] .promise-sign { height:76px !important; margin-top:8px !important; opacity:1 !important; }
-.step[data-step="0"] .promise-sign-svg { height:76px !important; }
+.step[data-step="0"] .promise-sign { height:76px; margin-top:14px; opacity:1 !important; }
+.step[data-step="0"] .promise-sign-svg { height:76px; }
 /* unsigned: show a real "sign here" baseline with an ✗ so the row reads as a
    line you put your name on (the signature draws over it once committed) */
 .step[data-step="0"] .promise-sign-line { transform:scaleX(1) !important; opacity:0.4; }
@@ -15800,7 +15968,7 @@ html body[data-font="apple"] #planTitle .g {
 }
 .step[data-step="0"] .promise-sign.signed::before { opacity:0; }
 .step[data-step="0"] #promiseMeta { margin-top:8px !important; }
-.step[data-step="0"] .commit-dock { margin-top:auto; margin-bottom:auto; }
+.step[data-step="0"] .commit-dock { margin-top:16px; }
 /* auto-advance pages (gender, habit, what-pushed): tapping an option advances,
    so the Next button is redundant — hide it. A hint replaces it. */
 body.on-autoadvance .footer { display:none !important; }
