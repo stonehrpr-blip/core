@@ -175,6 +175,21 @@
 
   /* step container */
   .stepwrap { flex:1; overflow:hidden; position:relative; }
+  /* Scroll-more affordance — every .step can internally scroll (it has
+     overflow-y:auto) when content is taller than the available space, which
+     happens more often than you'd think across the real range of phone
+     screen sizes (iPhone SE up through Pro Max, small/short Android,
+     foldable cover screens). Without a hint, a step that needs scrolling
+     just looks like it's been cut off by the footer. This fade is always
+     present (cheap, invisible over a step that already fits) rather than
+     JS-toggled, so it works uniformly on every device without per-step
+     logic. Overridden by the on-autoadvance hint text below where both
+     would otherwise apply to the same pseudo-element. */
+  .stepwrap::after {
+    content:""; position:absolute; left:0; right:0; bottom:0; height:26px;
+    background:linear-gradient(to bottom, transparent, var(--bg-base));
+    pointer-events:none; z-index:6;
+  }
   .step { position:absolute; inset:0; padding: 28px 26px 16px; display:flex; flex-direction:column; justify-content:flex-start; gap:12px; opacity:0; transform: translate3d(0,14px,0); pointer-events:none; visibility:hidden; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
   .step.on { opacity:1; transform:translate3d(0,0,0); pointer-events:auto; visibility:visible; transition:opacity .32s ease,transform .44s cubic-bezier(.22,1,.36,1); will-change:opacity,transform; }
   .step::-webkit-scrollbar { display:none; }
@@ -227,12 +242,16 @@
     .step { padding: 12px 22px 26px; gap: 8px; }
     .title { font-size: 22px; line-height: 1.08; }
     .copy { font-size: 13px; line-height: 18px; }
-    /* Contract card compression */
-    #promiseCard { padding: 12px 14px !important; margin-top: 0 !important; }
-    #promiseCard > div:nth-child(2) { font-size: 11.5px !important; line-height: 16px !important; margin-top: 5px !important; }
-    #promiseCard > div:nth-child(3) { margin-top: 8px !important; }
-    #promiseCard > div:nth-child(3) > div:first-child { font-size: 9px !important; margin-bottom: 5px !important; }
-    #promiseCard > div:last-child { font-size: 10px !important; margin-top: 8px !important; }
+    /* Promise card compression — was targeting #promiseCard, an id from an
+       older contract-card design that no longer exists in the DOM (so this
+       never actually fired), which meant the current .commit-dock never
+       shrank on short screens and could overlap the hold-to-promise button
+       below it. Target the real elements instead. */
+    .step[data-step="0"] .commit-dock { padding: 18px 16px 20px !important; margin-top: 8px !important; }
+    .step[data-step="0"] .promise-sign { height: 54px !important; margin-top: 8px !important; }
+    .step[data-step="0"] .promise-sign-svg { height: 54px !important; }
+    .step[data-step="0"] #promiseMeta { margin-top: 6px !important; font-size: 10px !important; }
+    .hold-commit { width: 92px !important; height: 92px !important; margin-top: 2px !important; }
     .field { padding: 11px 12px !important; font-size: 14px !important; }
     .footer { padding: 8px 22px 0; }
     .cta { padding: 13px !important; font-size: 14px !important; }
