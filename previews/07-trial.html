@@ -3501,10 +3501,10 @@
           <h1 class="title">Where are you<br><span class="g">right now?</span></h1>
           <p class="copy">Be honest. No one else sees this.</p>
           <div class="why-pick" id="describeChoice">
-            <button type="button" class="why-btn" data-describe="starting">Just starting out</button>
-            <button type="button" class="why-btn" data-describe="fell-off">Tried before, fell off</button>
-            <button type="button" class="why-btn" data-describe="struggling">Struggling most days</button>
-            <button type="button" class="why-btn" data-describe="ready">Ready for real change</button>
+            <button type="button" class="why-btn" data-describe="starting"><span class="wbi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c0-6 0-11 0-11"/><path d="M12 10c0-3.5 2-6 7-6 0 5-2.5 7-7 7Z"/><path d="M12 14c0-3-1.8-5-6-5 0 4.2 2.2 6 6 6Z"/></svg></span> Just starting out</button>
+            <button type="button" class="why-btn" data-describe="fell-off"><span class="wbi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 1 3 6.7"/><path d="M3 21v-5h5"/></svg></span> Tried before, fell off</button>
+            <button type="button" class="why-btn" data-describe="struggling"><span class="wbi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12.5h4l2-5 3 9 2-7 1.5 3h6.5"/></svg></span> Struggling most days</button>
+            <button type="button" class="why-btn" data-describe="ready"><span class="wbi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c4-2.5 5-6.5 5-11 0-3-2-6-5-8-3 2-5 5-5 8 0 4.5 1 8.5 5 11Z"/><circle cx="12" cy="9.5" r="1.8"/><path d="M8.5 16.5 6 19M15.5 16.5 18 19"/></svg></span> Ready for real change</button>
           </div>
           <div class="privacy-note" style="margin-top:14px">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
@@ -11732,6 +11732,9 @@
       hoursWasted: state.hours,      // Hours per day slider
       hasRoutine: state.hasRoutine,  // Yes/No
       routinePicks: (state.routines||[]).slice(), // Selected daily habits
+      // Real permission decisions from the single consolidated sheet —
+      // features that depend on one of these should check it, not assume yes.
+      permNotif: !!state.permNotif, permTracking: !!state.permTracking, permHealth: !!state.permHealth,
       // Legacy fields
       blocker: state.blocker, routine: state.routine,
       tone: state.tone, checkin: state.checkin,
@@ -12522,92 +12525,170 @@
     });
   }
 
-  // ── Trial permission chain (notifications → tracking → health) ───────
-  // Three native-style sheets shown back-to-back, right after Corbit is
-  // introduced, so the coach can actually nudge/measure/personalize.
-  // Reuses the same visual language as showNotifPermission() above, but
-  // calls `done()` at the end instead of jumping to showWelcomeConfirm()
-  // (that function belongs to the separate free-tier-decline path).
-  function showPermSheet(opts) {
+  // ── Trial permissions — one page, real state ─────────────────────────
+  // A single consolidated sheet (was three sequential full-screen sheets)
+  // covering notifications, cross-app tracking and health data, shown once
+  // right after Corbit is introduced. Each row is decided independently and
+  // shows its REAL resulting status — not a placeholder that always says
+  // "allowed". Notifications go through the actual browser permission API;
+  // tracking/health have no browser-level equivalent (ATT/HealthKit are
+  // native-only) so their choice is the app's own honest record of what the
+  // user tapped. A denied row is visibly locked (dimmed icon, "Blocked"
+  // badge, description swaps to explain what's unavailable) and the
+  // decision is carried into state (state.permNotif/permTracking/permHealth)
+  // and into finishOnboarding()'s payload, so anything downstream that
+  // gates a feature on a permission has real data to check, not a guess.
+  const BELL_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>';
+  const TRACK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.6" fill="#fff"/></svg>';
+  const HEART_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.3C6.4 16.5 3.5 13.1 3.5 9.2A3.8 3.8 0 0 1 12 7.3 3.8 3.8 0 0 1 20.5 9.2C20.5 13.1 17.6 16.5 12 20.3Z"/></svg>';
+  const LOCK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+  const CHECK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+
+  // Real browser check for notifications — races the actual API against a
+  // timeout so a context that never resolves it (no UI to answer, headless,
+  // etc.) can't hang the sheet forever; falls back to whatever the browser
+  // actually reports rather than assuming success.
+  async function requestRealNotifPermission() {
+    if (!('Notification' in window)) return 'unsupported';
+    if (Notification.permission !== 'default') return Notification.permission;
+    try {
+      const result = await Promise.race([
+        Notification.requestPermission(),
+        new Promise((resolve) => setTimeout(() => resolve('timeout'), 4000)),
+      ]);
+      return result === 'timeout' ? Notification.permission : result;
+    } catch (e) { return Notification.permission || 'denied'; }
+  }
+
+  function showTrialPermissionChain(done) {
+    const PERMS = [
+      { key: 'notif',  icon: BELL_ICON,  title: 'Notifications',      desc: 'Corbit nudges you at the right times',              lockedDesc: "Off — Corbit can't nudge you",              real: true },
+      { key: 'track',  icon: TRACK_ICON, title: 'Cross-app tracking', desc: 'Keeps your plan and streaks accurate everywhere',   lockedDesc: "Off — Core can't track activity elsewhere", real: false },
+      { key: 'health', icon: HEART_ICON, title: 'Health data',        desc: 'Steps, sleep & workouts feed into your plan',       lockedDesc: "Off — no health data synced into your plan", real: false },
+    ];
+    const decided = {};
+
+    if (!document.getElementById('permSheetStyle')) {
+      const style = document.createElement('style');
+      style.id = 'permSheetStyle';
+      style.textContent = `
+        .perm-sheet{position:fixed;inset:0;z-index:9999;background:rgba(2,2,10,0.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+          display:flex;align-items:center;justify-content:center;padding:22px;overflow-y:auto;-webkit-overflow-scrolling:touch;
+          font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text',sans-serif;animation:fadeIn 0.3s ease}
+        /* Card can be taller than a short/narrow screen (Galaxy Fold cover,
+           iPhone SE, ...) — center it when it fits, but let the whole sheet
+           scroll instead of clipping rows or the Continue button off-screen. */
+        .perm-card{background:#0a0a14;border:1px solid rgba(255,255,255,.10);border-radius:20px;padding:24px 18px;max-width:360px;width:100%;margin:auto}
+        .perm-card h2{font-size:19px;font-weight:700;color:#fff;letter-spacing:-0.3px;margin:0 0 4px;text-align:center}
+        .perm-sub{font-size:12.5px;color:rgba(255,255,255,.6);line-height:1.4;margin:0 0 18px;text-align:center}
+        .perm-rows{display:flex;flex-direction:column;gap:10px}
+        .perm-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 11px;padding:12px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);transition:background .2s,border-color .2s}
+        .perm-row.decided.granted{border-color:rgba(74,222,128,.35)}
+        .perm-row.decided.denied{background:rgba(255,255,255,.015);border-color:rgba(255,255,255,.06)}
+        .perm-row-ico{flex-shrink:0;width:38px;height:38px;border-radius:11px;background:#AEB6C4;display:flex;align-items:center;justify-content:center;transition:background .2s,opacity .2s}
+        .perm-row-ico svg{width:19px;height:19px}
+        .perm-row.decided.denied .perm-row-ico{background:rgba(255,255,255,.08);opacity:.5}
+        .perm-row-body{flex:1 1 120px;min-width:0}
+        .perm-row-title{font-size:13.5px;font-weight:700;color:#fff}
+        .perm-row-desc{font-size:11px;color:rgba(255,255,255,.55);line-height:1.35;margin-top:2px}
+        .perm-row.decided.denied .perm-row-desc{color:rgba(255,255,255,.4)}
+        /* On very narrow screens, icon+title+buttons don't fit on one line —
+           flex-wrap above lets the actions drop to their own row instead of
+           squeezing the description text into a sliver. */
+        .perm-row-actions{display:flex;gap:6px;flex-shrink:0;margin-left:auto}
+        .perm-mini-btn{padding:7px 11px;border-radius:9px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:#fff;
+          font-family:inherit;font-size:11.5px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent}
+        .perm-mini-btn.allow{background:#AEB6C4;border-color:transparent;color:#0a0a14}
+        .perm-badge{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:6px 10px;border-radius:9px;white-space:nowrap}
+        .perm-badge svg{width:12px;height:12px}
+        .perm-badge.granted{color:#4ade80;background:rgba(74,222,128,.1)}
+        .perm-badge.denied{color:rgba(255,255,255,.55);background:rgba(255,255,255,.06)}
+        .perm-continue-btn{width:100%;padding:14px;border-radius:14px;border:none;margin-top:18px;background:#AEB6C4;color:#0a0a14;
+          font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s}
+        .perm-continue-btn:disabled{opacity:.35;cursor:not-allowed}
+        @media (max-width: 340px) {
+          .perm-card{padding:20px 14px}
+          .perm-row{padding:10px}
+          .perm-row-ico{width:32px;height:32px}
+          .perm-row-ico svg{width:16px;height:16px}
+          .perm-row-title{font-size:12.5px}
+          .perm-row-desc{font-size:10.5px}
+          .perm-mini-btn{padding:6px 9px;font-size:11px}
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
     const wrap = document.createElement('div');
+    wrap.id = 'permSheet';
     wrap.className = 'perm-sheet';
-    wrap.style.cssText = `position:fixed;inset:0;z-index:9999;
-      background:rgba(2,2,10,0.92);backdrop-filter:blur(10px);
-      -webkit-backdrop-filter:blur(10px);
-      display:flex;align-items:center;justify-content:center;padding:24px;
-      font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text',sans-serif;animation:fadeIn 0.3s ease;`;
     wrap.innerHTML = `
-      <div style="background:#0a0a14;border:1px solid rgba(255,255,255,0.10);
-                  border-radius:20px;padding:28px 22px;max-width:340px;width:100%;text-align:center;">
-        <div style="width:72px;height:72px;border-radius:20px;margin:0 auto 16px;
-                    background:#AEB6C4;
-                    display:flex;align-items:center;justify-content:center;
-                    box-shadow:0 12px 30px rgba(0,0,0,0.35);">${opts.icon}</div>
-        <h2 style="font-size:22px;font-weight:700;color:#fff;letter-spacing:-0.4px;margin:0 0 8px;">${escTrialHtml(opts.title)}</h2>
-        <p style="font-size:14px;color:rgba(255,255,255,0.72);line-height:1.45;margin:0 0 20px;">${escTrialHtml(opts.copy)}</p>
-        <button id="permAllow" style="width:100%;padding:14px;border-radius:14px;border:none;
-                   background:#AEB6C4;color:#fff;
-                   font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;
-                   margin-bottom:8px;">${escTrialHtml(opts.allowLabel)}</button>
-        <button id="permSkip" style="width:100%;padding:12px;background:transparent;border:none;
-                   color:rgba(255,255,255,0.72);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;">${escTrialHtml(opts.skipLabel)}</button>
+      <div class="perm-card">
+        <h2>Set up your permissions</h2>
+        <p class="perm-sub">Corbit needs these to actually help — decide each one.</p>
+        <div class="perm-rows">
+          ${PERMS.map((p) => `
+            <div class="perm-row" data-perm="${p.key}">
+              <div class="perm-row-ico">${p.icon}</div>
+              <div class="perm-row-body">
+                <div class="perm-row-title">${escTrialHtml(p.title)}</div>
+                <div class="perm-row-desc" data-desc>${escTrialHtml(p.desc)}</div>
+              </div>
+              <div class="perm-row-actions" data-actions>
+                <button type="button" class="perm-mini-btn allow" data-choice="allow">Allow</button>
+                <button type="button" class="perm-mini-btn" data-choice="deny">Deny</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <button type="button" id="permContinue" class="perm-continue-btn" disabled>Continue</button>
       </div>
     `;
     document.body.appendChild(wrap);
-    const finish = function (allowed) {
-      try { track(opts.event, { allowed: allowed }); } catch (e) {}
-      wrap.remove();
-      opts.done();
-    };
-    wrap.querySelector('#permAllow').addEventListener('click', () => {
-      // Fire the real browser permission prompt without letting it block our
-      // own sheet transition — some browsers/contexts never resolve this
-      // (no UI to answer it), and the user's tap on OUR button is already
-      // their answer either way.
-      if (opts.requestBrowserNotif) {
-        try {
-          if ('Notification' in window && Notification.permission === 'default') {
-            Notification.requestPermission().catch(function(){});
-          }
-        } catch (e) {}
-      }
-      finish(true);
+
+    function checkAllDecided() {
+      const allDone = PERMS.every((p) => decided[p.key] !== undefined);
+      wrap.querySelector('#permContinue').disabled = !allDone;
+    }
+
+    function setRowState(key, granted) {
+      decided[key] = granted;
+      const p = PERMS.find((x) => x.key === key);
+      const row = wrap.querySelector('.perm-row[data-perm="' + key + '"]');
+      row.classList.add('decided');
+      row.classList.toggle('granted', granted);
+      row.classList.toggle('denied', !granted);
+      row.querySelector('[data-desc]').textContent = granted ? p.desc : p.lockedDesc;
+      row.querySelector('[data-actions]').innerHTML = granted
+        ? '<span class="perm-badge granted">' + CHECK_ICON + ' Allowed</span>'
+        : '<span class="perm-badge denied">' + LOCK_ICON + ' Blocked</span>';
+      try { track('perm_' + key, { allowed: granted }); } catch (e) {}
+      checkAllDecided();
+    }
+
+    PERMS.forEach((p) => {
+      const row = wrap.querySelector('.perm-row[data-perm="' + p.key + '"]');
+      row.querySelector('[data-choice="allow"]').addEventListener('click', async () => {
+        if (p.key === 'notif') {
+          const result = await requestRealNotifPermission();
+          // Reflects reality: if the browser itself already blocked
+          // notifications, tapping our "Allow" can't override that.
+          setRowState('notif', result === 'granted');
+        } else {
+          setRowState(p.key, true);
+        }
+      });
+      row.querySelector('[data-choice="deny"]').addEventListener('click', () => {
+        setRowState(p.key, false);
+      });
     });
-    wrap.querySelector('#permSkip').addEventListener('click', () => finish(false));
-  }
-  const BELL_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:36px;height:36px;"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>';
-  const TRACK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:36px;height:36px;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.6" fill="#fff"/></svg>';
-  const HEART_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:36px;height:36px;"><path d="M12 20.3C6.4 16.5 3.5 13.1 3.5 9.2A3.8 3.8 0 0 1 12 7.3 3.8 3.8 0 0 1 20.5 9.2C20.5 13.1 17.6 16.5 12 20.3Z"/></svg>';
-  function showTrialPermissionChain(done) {
-    showPermSheet({
-      icon: BELL_ICON,
-      title: 'Stay on track.',
-      copy: "Allow notifications so Corbit can nudge you at the right times — a single calm ping, never spam.",
-      allowLabel: 'Allow notifications',
-      skipLabel: 'Not now',
-      event: 'perm_notifications',
-      requestBrowserNotif: true,
-      done: function () {
-        showPermSheet({
-          icon: TRACK_ICON,
-          title: 'Track your progress.',
-          copy: 'Allow Core to track your activity across other apps so your plan and streaks stay accurate everywhere you use it.',
-          allowLabel: 'Allow tracking',
-          skipLabel: "Ask app not to track",
-          event: 'perm_tracking',
-          done: function () {
-            showPermSheet({
-              icon: HEART_ICON,
-              title: 'Connect your health data.',
-              copy: 'Core would like to read Steps, Sleep and Workouts to fold real data into your plan and progress.',
-              allowLabel: 'Allow',
-              skipLabel: "Don't allow",
-              event: 'perm_health',
-              done: done
-            });
-          }
-        });
-      }
+
+    wrap.querySelector('#permContinue').addEventListener('click', () => {
+      state.permNotif = !!decided.notif;
+      state.permTracking = !!decided.track;
+      state.permHealth = !!decided.health;
+      wrap.remove();
+      done();
     });
   }
 
