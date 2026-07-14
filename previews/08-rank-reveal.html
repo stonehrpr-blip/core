@@ -43,8 +43,11 @@
     /* orbiting constellation of connected dots, slowly circling the shield —
        a faint ring traces the same circle behind them so they read as one
        orbit instead of loose scattered points */
-    .myst-orbit{position:absolute;inset:0;border-radius:50%;border:1px solid rgba(206,212,222,0.14);pointer-events:none;}
     .myst-orbit-group{position:absolute;inset:0;animation:mSpin 34s linear infinite;pointer-events:none;}
+    /* the connecting network — a faint polygon linking every dot, so the ring
+       reads as one constellation instead of loose scattered points */
+    .myst-net{position:absolute;inset:0;width:100%;height:100%;overflow:visible;}
+    .myst-net polygon{fill:none;stroke:rgba(206,212,222,0.22);stroke-width:1;}
     .mo-dot{position:absolute;top:50%;left:50%;width:5px;height:5px;margin:-2.5px;border-radius:50%;
       background:#fff;box-shadow:0 0 9px 2px rgba(214,219,226,0.75);
       transform:rotate(var(--a)) translateX(100px);animation:moBlink 3.2s ease-in-out infinite;animation-delay:var(--d,0s);}
@@ -269,8 +272,10 @@
     <div class="stage" id="stage1" role="button" tabindex="0" aria-label="Tap to reveal your rank">
       <div class="pre-eyebrow">Standing calculated</div>
       <div class="mystery" aria-hidden="true">
-        <span class="myst-orbit"></span>
         <span class="myst-orbit-group">
+          <svg class="myst-net" viewBox="0 0 200 200">
+            <polygon points="200.0,100.0 176.6,164.3 117.4,198.5 50.0,186.6 6.0,134.2 6.0,65.8 50.0,13.4 117.4,1.5 176.6,35.7"/>
+          </svg>
           <i class="mo-dot" style="--a:0deg;--d:0s"></i>
           <i class="mo-dot" style="--a:40deg;--d:.35s"></i>
           <i class="mo-dot" style="--a:80deg;--d:.7s"></i>

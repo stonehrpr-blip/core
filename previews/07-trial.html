@@ -337,6 +337,19 @@
   .field { width:100%; padding: 18px 18px; border-radius:16px; border:1px solid var(--border); background: rgba(255,255,255,0.04); color:white; font-size:17px; font-family:inherit; outline:none; transition: border-color .2s, background .2s, box-shadow .2s; }
   .field::placeholder { color: rgba(255,255,255,0.45); }
   .field:focus { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 6%, transparent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 12%, transparent); }
+  /* Step 1 (name): a rounder, softer, Apple-style field — no hard border by
+     default (just a hairline + inset shadow for depth), a bigger radius, and
+     a calmer focus ring instead of the sharp outline every other field uses. */
+  .step[data-step="1"] .field{
+    border-radius:20px;border-color:rgba(255,255,255,.09);
+    background:rgba(255,255,255,.055);
+    box-shadow:0 1px 0 rgba(255,255,255,.05) inset,0 1px 2px rgba(0,0,0,.2);
+  }
+  .step[data-step="1"] .field:focus{
+    border-color:color-mix(in srgb, var(--accent) 55%, transparent);
+    background:rgba(255,255,255,.07);
+    box-shadow:0 0 0 4px color-mix(in srgb, var(--accent) 14%, transparent),0 1px 0 rgba(255,255,255,.06) inset;
+  }
 
   /* style picker */
   .pick-grid { display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:6px; }
@@ -4623,6 +4636,48 @@
             <div class="sac-sub" id="sacSub">on your current trajectory</div>
             <div class="sac-foot">Estimate based on your answers — and every clean day gives time back.</div>
           </div>
+        </div>
+
+        <!-- STEP 201: weekly AI-routine preview — shows the routine Corbit
+             just "built" from the picks on step 106, laid out across the
+             week with today highlighted. Placeholder logic for now (mirrors
+             the same picks every day); once the OpenAI key is wired in this
+             is where the real per-day plan renders instead. -->
+        <div class="step" data-step="201">
+          <div class="kicker">Your AI routine</div>
+          <h1 class="title">Corbit built your<br><span class="g">morning routine.</span></h1>
+          <p class="copy">It repeats through the week — Corbit fine-tunes each day once he's learned your patterns.</p>
+          <div class="week-strip" id="weekStrip" aria-hidden="true"></div>
+          <div class="week-today-label" id="weekTodayLabel"></div>
+          <div class="wr-list" id="weeklyRoutineList"></div>
+          <div class="wr-ai-note">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg>
+            Powered by your AI coach — gets smarter with every day you log.
+          </div>
+          <style>
+            .step[data-step="201"] .week-strip{display:flex;justify-content:space-between;gap:5px;margin-top:16px;width:100%}
+            .wk-day{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:9px 2px;border-radius:13px;
+              background:rgba(255,255,255,.03);border:1.5px solid rgba(255,255,255,.08)}
+            .wk-day .wk-d{font-size:9.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.4)}
+            .wk-day .wk-n{font-size:14px;font-weight:800;color:rgba(255,255,255,.75)}
+            .wk-day.today{background:color-mix(in srgb, var(--accent) 16%, transparent);border-color:var(--accent)}
+            .wk-day.today .wk-d{color:var(--accent-hi)}
+            .wk-day.today .wk-n{color:#fff}
+            .week-today-label{margin-top:10px;font-size:12px;font-weight:700;color:rgba(255,255,255,.55);letter-spacing:-0.05px}
+            .wr-list{display:flex;flex-direction:column;gap:8px;margin-top:14px;width:100%}
+            .wr-item{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:14px;
+              background:rgba(255,255,255,.03);border:1.5px solid color-mix(in srgb, var(--rc,#4ade80) 40%, transparent)}
+            .wr-ico{width:22px;height:22px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--rc,#4ade80)}
+            .wr-ico svg{width:18px;height:18px}
+            .wr-label{flex:1;font-size:13px;font-weight:600;color:rgba(255,255,255,.88);letter-spacing:-0.05px}
+            .wr-check{width:18px;height:18px;flex-shrink:0;border-radius:50%;background:var(--rc,#4ade80);color:#08090c;
+              font-size:10.5px;font-weight:800;display:flex;align-items:center;justify-content:center}
+            .wr-empty{padding:14px;text-align:center;font-size:12.5px;color:var(--dim)}
+            .wr-ai-note{display:flex;align-items:center;gap:8px;margin-top:16px;padding:11px 13px;border-radius:13px;
+              background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
+              font-size:11px;color:rgba(255,255,255,.5);line-height:1.4}
+            .wr-ai-note svg{width:15px;height:15px;flex-shrink:0;color:var(--accent-hi)}
+          </style>
         </div>
 
         <!-- STEP 200: "calculating" loading beat — plays right before the
@@ -10905,7 +10960,9 @@
   // right as you're about to sign, not as a cold-open first question.
   // Routine builder (106) runs later, toward the "day" chapters, with the
   // calculating/loading beat (200) right after it instead of before.
-  const ORDER = [101, 2, 24, 105, 22, 106, 200, 8, 1, 0, 107];
+  // 201 = weekly AI-routine preview, right after the routine builder and
+  // before the calculating/loading beat.
+  const ORDER = [101, 2, 24, 105, 22, 106, 201, 200, 8, 1, 0, 107];
   function curPos() { const i = ORDER.indexOf(state.step); return i < 0 ? 0 : i; }
   // Every screen the user steps through is counted EXCEPT the portal/paywall (21).
   // The 30-day payoff (16) and the contract (0) are real steps too, so the
@@ -11134,6 +11191,7 @@
     if (n === 7) renderSacrifice();                          // life sacrificed
     if (n === 8) renderGraph(n);                             // combined with/without-Core graph
     if (n === 200) runCalculatingAnimation();                // "calculating your plan" loading ring
+    if (n === 201) renderWeeklyRoutine();                    // week view of the routine Corbit "built"
     if (n === 13) seedTriggersFromBlocker();
     if (n === 22 && window.__paintCommit) window.__paintCommit();   // reflect stored level
     if (n === 16) renderPlanScreen();
@@ -11245,6 +11303,9 @@
       setCTA('Next', c < 1, c < 1 ? 'Tap what\'s true for you' : 'Coach will hold this up for you');
     } else if (s === 15) {
       setCTA('Next', !state.successVision, !state.successVision ? 'Pick a win shape' : '');
+    } else if (s === 201) {
+      // Weekly routine preview — passive, always advanceable.
+      setCTA('Continue', false, '');
     } else if (s === 16) {
       // Personalized payoff screen — passive, always advanceable. Next is the
       // contract, so the CTA leads into committing (not an "offer").
@@ -14206,6 +14267,56 @@
   // Pure timed screen — no user input. Fills the ring 0→100%, then
   // auto-advances into the routine builder once it's full.
   var _calcRunning = false;
+  // Week strip + the routine list Corbit "built" from the step-106 picks.
+  // Placeholder logic — mirrors the same picks every day for now; once the
+  // OpenAI key is wired in, this is where the real per-day plan renders.
+  function renderWeekStrip() {
+    var strip = document.getElementById('weekStrip');
+    var label = document.getElementById('weekTodayLabel');
+    if (!strip) return;
+    var days = ['S','M','T','W','T','F','S'];
+    var now = new Date();
+    var todayIdx = now.getDay();
+    strip.innerHTML = '';
+    for (var i = 0; i < 7; i++) {
+      var d = new Date(now);
+      d.setDate(now.getDate() - todayIdx + i);
+      var cell = document.createElement('div');
+      cell.className = 'wk-day' + (i === todayIdx ? ' today' : '');
+      cell.innerHTML = '<span class="wk-d">' + days[i] + '</span><span class="wk-n">' + d.getDate() + '</span>';
+      strip.appendChild(cell);
+    }
+    if (label) {
+      var full = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+      label.textContent = 'Today · ' + full;
+    }
+  }
+  function renderWeeklyRoutine() {
+    renderWeekStrip();
+    var list = document.getElementById('weeklyRoutineList');
+    if (!list) return;
+    list.innerHTML = '';
+    var picks = state.routines || [];
+    if (!picks.length) {
+      list.innerHTML = '<div class="wr-empty">No routine items picked yet — go back and build one.</div>';
+      return;
+    }
+    picks.forEach(function (key) {
+      var src = document.querySelector('#routineBuild .rb-chip[data-routine="' + key + '"]');
+      if (!src) return;
+      var icoEl = src.querySelector('.rb-ico');
+      var labelEl = src.querySelector('.rb-label');
+      var panel = src.closest('.rb-panel');
+      var rc = panel ? panel.style.getPropertyValue('--rc') : '';
+      var row = document.createElement('div');
+      row.className = 'wr-item';
+      if (rc) row.style.setProperty('--rc', rc);
+      row.innerHTML = '<span class="wr-ico">' + (icoEl ? icoEl.innerHTML : '') + '</span>'
+        + '<span class="wr-label">' + (labelEl ? escTrialHtml(labelEl.textContent) : key) + '</span>'
+        + '<span class="wr-check">✓</span>';
+      list.appendChild(row);
+    });
+  }
   function runCalculatingAnimation() {
     if (_calcRunning) return;
     _calcRunning = true;
