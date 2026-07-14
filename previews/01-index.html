@@ -3,8 +3,12 @@
 <head>
   <script>/*theme-killswitch*/try{localStorage.removeItem("coreTheme");}catch(e){}</script>
   <script>
-    // Onboarding gate — if user has completed onboarding, no re-entry from here.
-    try{(function(){var h=location.hostname;window.__corePreview=(location.protocol==='file:'||h==='localhost'||h==='127.0.0.1'||/[?&]preview=1/.test(location.search));})();}catch(e){}if(!window.__corePreview){try { if (!/[?&]preview=1/.test(location.search)) { if (localStorage.getItem('coreSubscribed') === '1') { location.replace('20-dashboard.html'); } else if (localStorage.getItem('coreOnboardComplete') === '1') { location.replace('10-subscribe.html'); } } } catch(e){}}
+    // Onboarding gate removed — same issue as 07-trial.html: it redirected
+    // away on every load (based on stale coreOnboardComplete/coreSubscribed
+    // flags left in localStorage from previous testing) whenever the page
+    // wasn't opened on exactly localhost/127.0.0.1/file:, which turned this
+    // — the actual first page of the app — into a surprise redirect straight
+    // to 10-subscribe.html for anyone testing on a LAN IP or tunnel URL.
   </script>
   <meta charset="utf-8" />
   <title>CORE — Become your core</title>
