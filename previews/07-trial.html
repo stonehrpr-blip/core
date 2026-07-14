@@ -99,15 +99,19 @@
      page (an "Iron Man HUD baseline" flourish), independent of the rim
      above. This is the second, separate source of the glowing line. */
   .phone::after { content:none !important; filter:none !important; }
-  /* Star field — disabled for a clean, flat background on every trial page.
-     Kept as a no-op (same pattern as .aurora above) so any leftover
-     markup/JS that still builds/references .star elements stays harmless. */
-  .stars { display:none !important; position:absolute; inset:-2%; pointer-events:none; z-index:2; }
-  /* core-starfield.js (loaded below) injects a SECOND, separate star layer
-     (.sf-base/.sf-drift/.sf-layer, with .sf-star/.sf-shoot inside) into
-     every .phone regardless of the .stars rule above — disable that too so
-     the background is actually flat, not just the original inline layer. */
+  /* Star field — brought back at low density/opacity (a little bit of
+     atmosphere, not the busy full version). Only the original inline layer
+     (16 far + 12 near stars) is on; the second, heavier core-starfield.js
+     layer stays off so it doesn't double up into something busy. */
+  .stars { position:absolute; inset:-2%; pointer-events:none; z-index:2; opacity:0.55; }
   .sf-base, .sf-drift, .sf-layer { display:none !important; }
+  /* core-starfield.js (loaded later in <head>) marks .phone[data-starfield],
+     which activates a rule in core-starfield.css that hides any DIRECT-CHILD
+     .stars element (it assumes its own .sf-* layer replaces them) — that
+     rule out-specifies the one above once the attribute lands, so re-win it
+     here with an ID-qualified selector. */
+  .phone[data-starfield] > .stars#starsFar,
+  .phone[data-starfield] > .stars#stars { display:block !important; }
   .stars.far  { animation: starDrift 64s ease-in-out infinite; opacity:0.85; }
   .stars.near { animation: starDrift 42s ease-in-out infinite reverse; }
   @keyframes starDrift {
@@ -304,30 +308,30 @@
   .cm-bar[data-lvl="5"] > span { height:100%; }
   /* even before picking, hint each bar's own color so the whole meter reads
      vivid immediately — same idea as the routine-builder card icons */
-  .cm-bar[data-lvl="1"] > span { background:linear-gradient(180deg, rgba(255,106,94,.22), rgba(224,54,43,.08)); border-color:rgba(255,106,94,.22); }
-  .cm-bar[data-lvl="2"] > span { background:linear-gradient(180deg, rgba(255,168,54,.22), rgba(232,114,15,.08)); border-color:rgba(255,168,54,.22); }
-  .cm-bar[data-lvl="3"] > span { background:linear-gradient(180deg, rgba(255,222,58,.22), rgba(237,185,13,.08)); border-color:rgba(255,222,58,.22); }
-  .cm-bar[data-lvl="4"] > span { background:linear-gradient(180deg, rgba(60,229,106,.22), rgba(31,169,74,.08)); border-color:rgba(60,229,106,.22); }
-  .cm-bar[data-lvl="5"] > span { background:linear-gradient(180deg, rgba(79,176,255,.22), rgba(10,107,216,.08)); border-color:rgba(79,176,255,.22); }
+  .cm-bar[data-lvl="1"] > span { background:linear-gradient(180deg, rgba(255,106,94,.12), rgba(224,54,43,.05)); border-color:rgba(255,106,94,.14); }
+  .cm-bar[data-lvl="2"] > span { background:linear-gradient(180deg, rgba(255,168,54,.12), rgba(232,114,15,.05)); border-color:rgba(255,168,54,.14); }
+  .cm-bar[data-lvl="3"] > span { background:linear-gradient(180deg, rgba(255,222,58,.12), rgba(237,185,13,.05)); border-color:rgba(255,222,58,.14); }
+  .cm-bar[data-lvl="4"] > span { background:linear-gradient(180deg, rgba(60,229,106,.12), rgba(31,169,74,.05)); border-color:rgba(60,229,106,.14); }
+  .cm-bar[data-lvl="5"] > span { background:linear-gradient(180deg, rgba(79,176,255,.12), rgba(10,107,216,.05)); border-color:rgba(79,176,255,.14); }
   .cm-bar > span:hover { filter:brightness(1.25); }
   /* selected bars: a BRIGHT rainbow rising red -> orange -> gold -> green ->
      blue. Vivid Apple-system tones that pop on matte black. The glow grows
      a touch with each level; the top level is a clean bright blue (no purple). */
   .cm-bar.on > span {
     border-color:transparent;
-    box-shadow:0 4px 12px rgba(0,0,0,0.28), 0 1px 0 rgba(255,255,255,0.14) inset;
+    box-shadow:0 2px 6px rgba(0,0,0,0.24), 0 1px 0 rgba(255,255,255,0.12) inset;
     animation:cmPop .34s cubic-bezier(.22,1.6,.36,1); }
-  /* Softer, less-glowy fills — depth shadow only, minimal coloured bloom. */
+  /* Minimal bloom — mostly a flat-color fill with just enough shadow for depth. */
   .cm-bar[data-lvl="1"].on > span { background:linear-gradient(180deg, #FF6A5E, #E0362B);
-    box-shadow:0 4px 12px rgba(255,90,77,0.20), 0 1px 0 rgba(255,255,255,0.18) inset; }
+    box-shadow:0 2px 6px rgba(0,0,0,0.22), 0 1px 0 rgba(255,255,255,0.14) inset; }
   .cm-bar[data-lvl="2"].on > span { background:linear-gradient(180deg, #FFA836, #E8720F);
-    box-shadow:0 4px 12px rgba(255,159,40,0.20), 0 1px 0 rgba(255,255,255,0.18) inset; }
+    box-shadow:0 2px 6px rgba(0,0,0,0.22), 0 1px 0 rgba(255,255,255,0.14) inset; }
   .cm-bar[data-lvl="3"].on > span { background:linear-gradient(180deg, #FFDE3A, #EDB90D);
-    box-shadow:0 4px 12px rgba(255,214,40,0.20), 0 1px 0 rgba(255,255,255,0.18) inset; }
+    box-shadow:0 2px 6px rgba(0,0,0,0.22), 0 1px 0 rgba(255,255,255,0.14) inset; }
   .cm-bar[data-lvl="4"].on > span { background:linear-gradient(180deg, #3CE56A, #1FA94A);
-    box-shadow:0 4px 12px rgba(52,209,94,0.22), 0 1px 0 rgba(255,255,255,0.18) inset; }
+    box-shadow:0 2px 6px rgba(0,0,0,0.22), 0 1px 0 rgba(255,255,255,0.14) inset; }
   .cm-bar[data-lvl="5"].on > span { background:linear-gradient(180deg, #4FB0FF, #0A6BD8);
-    box-shadow:0 4px 14px rgba(47,143,255,0.24), 0 1px 0 rgba(255,255,255,0.20) inset; }
+    box-shadow:0 2px 6px rgba(0,0,0,0.22), 0 1px 0 rgba(255,255,255,0.14) inset; }
   @keyframes cmPop{ 0%{ transform:scaleY(0.82); } 60%{ transform:scaleY(1.06); } 100%{ transform:scaleY(1); } }
   .commit-label { text-align:center; margin-top:18px; font-size:18px; font-weight:800; letter-spacing:-0.3px; color:#fff; min-height:24px; transition:color .2s; }
   /* faded small hint before anything is picked */
@@ -3585,9 +3589,9 @@
           <h1 class="title">Tap to build<br><span class="g">your day.</span></h1>
           <p class="copy">Corbit suggests — you decide. Pick as many as you like.</p>
           <div class="rb-tabs" id="rbTabs">
-            <button type="button" class="rb-tab sel" data-tab="morning" style="--tc:#f5a623">Morning</button>
-            <button type="button" class="rb-tab" data-tab="midday" style="--tc:#f2545b">Midday</button>
-            <button type="button" class="rb-tab" data-tab="evening" style="--tc:#34c77b">Evening</button>
+            <button type="button" class="rb-tab sel" data-tab="morning" style="--tc:#f5a623"><span class="rb-tab-label">Morning</span><span class="rb-tab-count" id="rbCountMorning"></span></button>
+            <button type="button" class="rb-tab" data-tab="midday" style="--tc:#f2545b"><span class="rb-tab-label">Midday</span><span class="rb-tab-count" id="rbCountMidday"></span></button>
+            <button type="button" class="rb-tab" data-tab="evening" style="--tc:#34c77b"><span class="rb-tab-label">Evening</span><span class="rb-tab-count" id="rbCountEvening"></span></button>
           </div>
           <div class="routine-build" id="routineBuild">
             <section class="rb-section" data-panel="morning" style="--rc:#f5a623">
@@ -3637,12 +3641,17 @@
                bg matches --bg-base so it hides content scrolling under it. */
             .rb-tabs{display:flex;gap:8px;margin-top:14px;width:100%;position:sticky;top:-2px;z-index:4;
               padding:8px 0 10px;background:linear-gradient(180deg,#08090C 82%,rgba(8,9,12,0))}
-            .rb-tab{all:unset;flex:1;text-align:center;padding:10px 6px;border-radius:12px;box-sizing:border-box;
+            .rb-tab{all:unset;flex:1;display:flex;align-items:center;justify-content:center;gap:5px;text-align:center;padding:10px 6px;border-radius:12px;box-sizing:border-box;
               font-size:12.5px;font-weight:700;letter-spacing:-0.1px;color:rgba(255,255,255,.5);
               background:rgba(255,255,255,.03);border:1.5px solid rgba(255,255,255,.08);cursor:pointer;
-              transition:border-color .15s ease,background .15s ease,color .15s ease}
+              transition:border-color .15s ease,background .15s ease,color .15s ease,transform .12s ease}
+            .rb-tab:active{transform:scale(.96)}
             .rb-tab.sel{color:#08090c;background:var(--tc);border-color:var(--tc);
               box-shadow:0 0 18px color-mix(in srgb, var(--tc) 40%, transparent)}
+            .rb-tab-count{display:none;min-width:16px;height:16px;padding:0 4px;border-radius:99px;font-size:10px;font-weight:800;
+              align-items:center;justify-content:center;background:rgba(255,255,255,.16);color:#fff}
+            .rb-tab-count.show{display:inline-flex}
+            .rb-tab.sel .rb-tab-count{background:rgba(8,9,12,.22);color:#08090c}
             .routine-build{width:100%}
             .rb-section{width:100%;scroll-margin-top:64px}
             .rb-section + .rb-section{margin-top:20px}
@@ -3664,6 +3673,9 @@
               border-color:var(--rc);
               box-shadow:0 0 0 1px color-mix(in srgb, var(--rc) 30%, transparent) inset, 0 0 16px color-mix(in srgb, var(--rc) 32%, transparent);
             }
+            @keyframes rbChipPop{0%{transform:scale(1)}40%{transform:scale(1.045)}100%{transform:scale(1)}}
+            .rb-chip.pop{animation:rbChipPop .32s cubic-bezier(.28,1.2,.4,1) both}
+            @media (prefers-reduced-motion:reduce){ .rb-chip.pop{animation:none} }
             .rb-chip.sel .rb-label{color:#fff}
             /* checkmark badge — top-right, clear of the top-left icon */
             .rb-chip::after{
@@ -3682,7 +3694,7 @@
         <div class="step" data-step="107">
           <div class="kicker">Ready</div>
           <h1 class="title">Your journey<br><span class="g">starts here.</span></h1>
-          <p class="copy">Everything you've shared — your story, your time, your commitment — it all leads to this moment.</p>
+          <p class="copy">Everything you've shared leads to this moment.</p>
           <div class="portal portal-journey" aria-hidden="true" style="margin:52px auto 4px">
             <span class="p-rays"></span>
             <span class="p-vortex"></span>
@@ -3712,15 +3724,13 @@
                to this step only so step 21's portal is untouched */
             .portal-journey{width:204px;height:204px}
             .portal-journey .p-figure{width:116px;bottom:auto;top:56%;transform:translate(-50%,-50%)}
-            /* ── entrance: whole step slides in from the side instead of the
-               generic vertical rise every other step gets, and the figure
-               itself runs in from off-screen to its mark in front of the
-               portal a beat later ── */
+            /* ── entrance: simple fade-in instead of the generic vertical
+               rise every other step gets ── */
             @keyframes step107In{
-              from{opacity:0;transform:translate3d(-28px,0,0)}
-              to{opacity:1;transform:translate3d(0,0,0)}
+              from{opacity:0}
+              to{opacity:1}
             }
-            .step[data-step="107"].on{animation:step107In .55s cubic-bezier(.22,1,.36,1) both}
+            .step[data-step="107"].on{animation:step107In .6s ease both}
             /* the figure is already there, floating in place — no slide/run-in
                entrance, just the idle bob loop */
             .step[data-step="107"].on .p-figure{
@@ -3786,7 +3796,7 @@
           </div>
           <style>
             .commit-dock{position:relative;background:rgba(255,255,255,.025);border:1.5px solid rgba(255,255,255,.14);border-radius:24px;
-              padding:34px 24px 26px;margin-bottom:8px;overflow:hidden;cursor:pointer;-webkit-tap-highlight-color:transparent;
+              padding:42px 24px 32px;margin-bottom:8px;overflow:hidden;cursor:pointer;-webkit-tap-highlight-color:transparent;
               -webkit-user-select:none;user-select:none;touch-action:none;
               box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 0 calc(10px + var(--progress,0) * 30px) rgba(126,196,255,calc(.06 + var(--progress,0) * .3))}
             .commit-dock-kicker{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.4);text-align:center}
@@ -3803,10 +3813,29 @@
           <h1 class="title" data-i18n-html="trial.t1">What should we<br/><span class="g">call you?</span></h1>
           <p class="copy">First name only.</p>
           <div class="field-wrap">
-            <input id="name" class="field" type="text" placeholder="Your first name" autocomplete="given-name" maxlength="24" autocapitalize="words" spellcheck="false" />
+            <div class="apple-field-shell">
+              <svg class="apple-field-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3.1-6.2 7-6.2s7 2.6 7 6.2"/></svg>
+              <input id="name" class="field apple-field-input" type="text" placeholder="Your first name" autocomplete="given-name" maxlength="24" autocapitalize="words" spellcheck="false" />
+            </div>
             <div id="nameStatus" class="name-status" style="font-size:11.5px; margin-top:8px; padding-left:4px; min-height:16px; color:var(--muted); letter-spacing:-0.05px;">Your coach uses it to keep things personal.</div>
             <div id="nameSuggestions" class="name-suggestions" style="display:none; margin-top:10px; flex-wrap:wrap; gap:6px;"></div>
           </div>
+          <style>
+            /* Apple Settings-list style field: leading icon + input inside one
+               soft, floating rounded card with real depth (not just a flat
+               tinted rectangle). */
+            .apple-field-shell{position:relative;display:flex;align-items:center;
+              border-radius:20px;background:linear-gradient(180deg, rgba(255,255,255,.065), rgba(255,255,255,.03));
+              box-shadow:0 1px 0 rgba(255,255,255,.07) inset, 0 10px 26px rgba(0,0,0,.28);
+              border:1px solid rgba(255,255,255,.1);transition:border-color .2s ease, box-shadow .2s ease}
+            .apple-field-shell:focus-within{border-color:color-mix(in srgb, var(--accent) 55%, transparent);
+              box-shadow:0 1px 0 rgba(255,255,255,.08) inset, 0 0 0 4px color-mix(in srgb, var(--accent) 14%, transparent), 0 10px 26px rgba(0,0,0,.3)}
+            .apple-field-ico{width:19px;height:19px;flex-shrink:0;margin-left:18px;color:rgba(255,255,255,.4);transition:color .2s ease}
+            .apple-field-shell:focus-within .apple-field-ico{color:var(--accent-hi)}
+            .apple-field-input.field{background:none !important;border:none !important;box-shadow:none !important;
+              padding-left:12px !important}
+            .apple-field-input.field:focus{box-shadow:none !important}
+          </style>
           <div class="field-wrap" style="margin-top:18px;">
             <div style="font-size:11.5px; color:var(--muted); margin:0 0 9px 4px; letter-spacing:-0.05px;">Your age</div>
             <div id="ageChips" class="age-chips">
@@ -4667,7 +4696,7 @@
         <div class="step" data-step="201">
           <div class="kicker">Your AI routine</div>
           <h1 class="title">Corbit built your<br><span class="g">morning routine.</span></h1>
-          <p class="copy">It repeats through the week — Corbit fine-tunes each day once he's learned your patterns.</p>
+          <p class="copy">It repeats all week — Corbit fine-tunes it as he learns you.</p>
           <div class="week-strip" id="weekStrip" aria-hidden="true"></div>
           <div class="week-today-label" id="weekTodayLabel"></div>
           <div class="wr-list" id="weeklyRoutineList"></div>
@@ -4676,20 +4705,28 @@
             Powered by your AI coach — gets smarter with every day you log.
           </div>
           <style>
-            /* Circular day markers. Every day is a filled coloured circle
-               EXCEPT today, which is an outlined ring only, so the current
-               day stands out. */
+            /* Circular day markers, cycling the same 3 time-of-day accent
+               colors from the routine builder. Every day is a filled
+               coloured circle EXCEPT today, which is an outlined ring only,
+               so the current day stands out. */
             .step[data-step="201"] .week-strip{display:flex;justify-content:space-between;gap:6px;margin-top:18px;width:100%}
             .wk-day{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px}
             .wk-day .wk-d{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.42)}
             .wk-day .wk-n{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;
               font-size:14px;font-weight:800;color:#06180d;border:2px solid transparent;
-              background:#34c77b;box-shadow:0 2px 7px rgba(52,199,123,.24)}
+              background:var(--wc,#34c77b);box-shadow:0 2px 7px color-mix(in srgb, var(--wc,#34c77b) 35%, transparent)}
             /* today = outlined only, transparent fill */
-            .wk-day.today .wk-n{background:transparent;color:#34c77b;border-color:#34c77b;box-shadow:0 0 10px rgba(52,199,123,.28)}
-            .wk-day.today .wk-d{color:#34c77b}
+            .wk-day.today .wk-n{background:transparent;color:var(--wc,#34c77b);border-color:var(--wc,#34c77b);
+              box-shadow:0 0 10px color-mix(in srgb, var(--wc,#34c77b) 40%, transparent)}
+            .wk-day.today .wk-d{color:var(--wc,#34c77b)}
             .week-today-label{margin-top:14px;font-size:12px;font-weight:700;color:rgba(255,255,255,.55);letter-spacing:-0.05px}
             .wr-list{display:flex;flex-direction:column;gap:8px;margin-top:14px;width:100%}
+            /* Section headers — same visual language as the routine builder's
+               .rb-sec-head, so this reveal reads as a direct continuation. */
+            .wr-sec-head{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.12em;
+              text-transform:uppercase;color:color-mix(in srgb, var(--rc) 70%, #fff);margin:14px 2px 2px}
+            .wr-sec-head:first-child{margin-top:0}
+            .wr-sec-dot{width:8px;height:8px;border-radius:50%;background:var(--rc);box-shadow:0 0 8px var(--rc)}
             .wr-item{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:14px;
               background:rgba(255,255,255,.03);border:1.5px solid color-mix(in srgb, var(--rc,#4ade80) 40%, transparent)}
             .wr-ico{width:22px;height:22px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--rc,#4ade80)}
@@ -9023,9 +9060,24 @@
               var TAP_LINES = ["Hey, that tickles!","Let's build this together.","One day at a time — I promise.","That's the spirit."];
               function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 
+              // One tap plays one full jump, always to completion — driven by
+              // animationend rather than a fixed setTimeout, so a second tap
+              // that lands mid-air can't yank the 'tapped' class off early and
+              // snap Corbit back to rest before the animation actually
+              // finished (that snap read as "teleporting back").
+              var jumping = false;
+              function onJumpEnd(e){
+                if (e.animationName !== 'cbJump') return;
+                target_.removeEventListener('animationend', onJumpEnd);
+                target_.classList.remove('tapped');
+                jumping = false;
+              }
+              var target_ = null;
               window.corbitTap = function(target){
-                target.classList.remove('tapped'); void target.offsetWidth; target.classList.add('tapped');
-                setTimeout(function(){ target.classList.remove('tapped'); },750);
+                if (jumping) return; // let the current jump land before starting another
+                jumping = true; target_ = target;
+                target.classList.add('tapped');
+                target.addEventListener('animationend', onJumpEnd);
                 try{if(typeof haptic==='function')haptic(14)}catch(e){}
                 setEmotion('happy', { line: pick(TAP_LINES), particles: '#E8F1FF', revertAfter: 1300, revertTo:'happy' });
               };
@@ -10110,8 +10162,8 @@
       .hc-fill{position:absolute;left:16px;right:16px;bottom:14px;height:4px;border-radius:99px;
         background:rgba(255,255,255,.08);overflow:hidden;pointer-events:none}
       .hc-fill::after{content:'';position:absolute;inset:0;width:calc(var(--progress,0) * 100%);
-        background:linear-gradient(90deg,#7dc4ff,#b3a6ff 45%,#ffd76a 78%,#4ade80);
-        box-shadow:0 0 12px rgba(126,196,255,.55);transition:width .25s cubic-bezier(.22,1,.36,1)}
+        background:linear-gradient(90deg,#1FA94A,#4ade80);
+        box-shadow:0 0 12px rgba(74,222,128,.5);transition:width .25s cubic-bezier(.22,1,.36,1)}
       .commit-dock.pressing .hc-fill::after{transition:width .05s linear}
       .hc-ring{position:absolute;inset:0;border-radius:24px;pointer-events:none;box-shadow:0 0 0 0 rgba(126,196,255,0);transition:box-shadow .2s ease}
       .commit-dock.pressing .hc-ring{box-shadow:0 0 0 2px rgba(126,196,255,.55) inset,0 0 28px rgba(179,166,255,.4)}
@@ -10992,7 +11044,7 @@
   // calculating/loading beat (200) right after it instead of before.
   // 201 = weekly AI-routine preview, right after the routine builder and
   // before the calculating/loading beat.
-  const ORDER = [101, 2, 24, 105, 22, 106, 201, 200, 8, 1, 0, 107];
+  const ORDER = [101, 2, 24, 105, 22, 106, 200, 201, 8, 1, 0, 107];
   function curPos() { const i = ORDER.indexOf(state.step); return i < 0 ? 0 : i; }
   // Every screen the user steps through is counted EXCEPT the portal/paywall (21).
   // The 30-day payoff (16) and the contract (0) are real steps too, so the
@@ -12593,30 +12645,41 @@
     } catch (e) { return Notification.permission || 'denied'; }
   }
 
-  // A single real iOS-style system alert — small centered light card,
-  // bold title, plain message, thin dividers, blue text buttons (no icon
-  // tile, no app branding — that's deliberate, it's meant to read as OS
-  // chrome interrupting the app, exactly like the real thing does).
+  // A full-bleed permission sheet — bigger and more prominent than a plain
+  // iOS alert, and deliberately ONE weighted action: a big primary "Allow
+  // Access" button, with the decline as a small de-emphasized text link
+  // underneath instead of a second equally-weighted button. One tap gets
+  // you through it instead of hunting for the right one of two.
   function showAppleAlert(opts) {
     if (!document.getElementById('appleAlertStyle')) {
       const style = document.createElement('style');
       style.id = 'appleAlertStyle';
       style.textContent = `
-        .apple-alert-back{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.35);
-          display:flex;align-items:center;justify-content:center;padding:24px;animation:fadeIn .18s ease}
-        .apple-alert{width:100%;max-width:270px;background:rgba(248,248,250,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-          border-radius:14px;overflow:hidden;text-align:center;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',Helvetica,Arial,sans-serif;
-          box-shadow:0 12px 40px rgba(0,0,0,.35);animation:appleAlertIn .28s cubic-bezier(.32,.72,0,1) both}
-        @keyframes appleAlertIn{0%{opacity:0;transform:scale(1.18)}100%{opacity:1;transform:scale(1)}}
+        .apple-alert-back{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);
+          display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .18s ease}
+        .apple-alert{width:100%;max-width:390px;background:#101114;
+          border-radius:28px 28px 0 0;overflow:hidden;text-align:center;
+          font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',Helvetica,Arial,sans-serif;
+          padding:10px 24px calc(26px + env(safe-area-inset-bottom));
+          box-shadow:0 -20px 60px rgba(0,0,0,.6),0 1px 0 rgba(255,255,255,.06) inset;
+          border-top:1px solid rgba(255,255,255,.08);
+          animation:appleSheetIn .32s cubic-bezier(.22,1,.36,1) both}
+        @keyframes appleSheetIn{0%{opacity:0;transform:translateY(100%)}100%{opacity:1;transform:translateY(0)}}
         @media (prefers-reduced-motion: reduce){ .apple-alert{animation:none} .apple-alert-back{animation:none} }
-        .apple-alert-title{font-size:15.5px;font-weight:600;color:#000;padding:18px 16px 4px;line-height:1.3;letter-spacing:-0.1px}
-        .apple-alert-msg{font-size:12.5px;color:#000;opacity:.82;padding:0 16px 16px;line-height:1.38}
-        .apple-alert-buttons{display:flex;border-top:1px solid rgba(0,0,0,.22)}
-        .apple-alert-btn{flex:1;padding:11px 4px;font-size:16.5px;color:#007AFF;background:none;border:none;
-          font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
-        .apple-alert-btn.default{font-weight:600}
-        .apple-alert-btn + .apple-alert-btn{border-left:1px solid rgba(0,0,0,.22)}
-        .apple-alert-btn:active{background:rgba(0,0,0,.06)}
+        .apple-alert-grab{width:36px;height:5px;border-radius:99px;background:rgba(255,255,255,.2);margin:0 auto 18px}
+        .apple-alert-icon{width:64px;height:64px;border-radius:18px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;
+          background:linear-gradient(160deg, var(--pc,#4FB0FF), color-mix(in srgb, var(--pc,#4FB0FF) 55%, #000));
+          box-shadow:0 10px 26px color-mix(in srgb, var(--pc,#4FB0FF) 35%, transparent)}
+        .apple-alert-icon svg{width:32px;height:32px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+        .apple-alert-title{font-size:19px;font-weight:700;color:#fff;padding:0 6px;line-height:1.28;letter-spacing:-0.2px}
+        .apple-alert-msg{font-size:13.5px;color:rgba(255,255,255,.62);padding:8px 10px 22px;line-height:1.45}
+        .apple-alert-cta{width:100%;padding:16px;border-radius:15px;border:none;font-family:inherit;
+          font-size:16px;font-weight:700;letter-spacing:-0.2px;color:#08090c;cursor:pointer;
+          background:linear-gradient(180deg,#fff,#e9ebef);
+          box-shadow:0 10px 26px rgba(0,0,0,.4);-webkit-tap-highlight-color:transparent}
+        .apple-alert-cta:active{transform:scale(.98)}
+        .apple-alert-deny{margin-top:14px;background:none;border:none;font-family:inherit;
+          font-size:13.5px;font-weight:600;color:rgba(255,255,255,.42);cursor:pointer;padding:6px;-webkit-tap-highlight-color:transparent}
       `;
       document.head.appendChild(style);
     }
@@ -12624,13 +12687,13 @@
       const back = document.createElement('div');
       back.className = 'apple-alert-back';
       back.innerHTML = `
-        <div class="apple-alert" role="alertdialog" aria-modal="true">
+        <div class="apple-alert" role="alertdialog" aria-modal="true" style="--pc:${opts.color || '#4FB0FF'}">
+          <div class="apple-alert-grab"></div>
+          <div class="apple-alert-icon">${opts.icon || ''}</div>
           <div class="apple-alert-title">${escTrialHtml(opts.title)}</div>
           <div class="apple-alert-msg">${escTrialHtml(opts.message)}</div>
-          <div class="apple-alert-buttons">
-            <button type="button" class="apple-alert-btn" data-choice="deny">${escTrialHtml(opts.denyLabel)}</button>
-            <button type="button" class="apple-alert-btn default" data-choice="allow">${escTrialHtml(opts.allowLabel)}</button>
-          </div>
+          <button type="button" class="apple-alert-cta" data-choice="allow">${escTrialHtml(opts.allowLabel || 'Allow Access')}</button>
+          <button type="button" class="apple-alert-deny" data-choice="deny">${escTrialHtml(opts.denyLabel)}</button>
         </div>
       `;
       document.body.appendChild(back);
@@ -12647,10 +12710,12 @@
   // native-only) so their result is the app's own honest record of the tap.
   // All three are stored in state and threaded into finishOnboarding()'s
   // payload, so anything gating a feature on a permission has real data.
+  const PERM_ICON_TRACK = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="#fff" stroke="none"/></svg>';
+  const PERM_ICON_HEALTH = '<svg viewBox="0 0 24 24"><path d="M12 20.3C6.4 16.5 3.5 13.1 3.5 9.2A3.8 3.8 0 0 1 12 7.3 3.8 3.8 0 0 1 20.5 9.2C20.5 13.1 17.6 16.5 12 20.3Z"/><path d="M8.5 12h2l1-2 2 4 1-2h1.5"/></svg>';
   const PERM_DEFS = {
-    notif:  { key: 'notif',  title: '"Core" Would Like to Send You Notifications', message: 'Notifications may include alerts, sounds and icon badges. These can be configured in Settings.', allowLabel: 'Allow', denyLabel: "Don't Allow", real: true },
-    track:  { key: 'track',  title: 'Allow "Core" to Track Your Activity Across Other Apps and Websites?', message: "This lets your plan and streaks stay accurate everywhere you use Core.", allowLabel: 'Allow', denyLabel: 'Ask App Not to Track', real: false },
-    health: { key: 'health', title: '"Core" Would Like to Access Your Health Data', message: 'Steps, Sleep and Workouts will be used to personalize your plan.', allowLabel: 'Allow', denyLabel: "Don't Allow", real: false },
+    notif:  { key: 'notif',  title: '"Core" Would Like to Send You Notifications', message: 'Notifications may include alerts, sounds and icon badges. These can be configured in Settings.', allowLabel: 'Allow Access', denyLabel: "Don't Allow", real: true },
+    track:  { key: 'track',  title: 'Keep Your Streaks Accurate', message: "Allow Core to track your activity across apps so your plan and streaks stay accurate everywhere.", allowLabel: 'Allow Access', denyLabel: 'Ask App Not to Track', color: '#4FB0FF', icon: PERM_ICON_TRACK, real: false },
+    health: { key: 'health', title: '"Core" Would Like to Access Your Health Data', message: 'Steps, Sleep and Workouts will be used to personalize your plan.', allowLabel: 'Allow Access', denyLabel: "Don't Allow", color: '#3CE56A', icon: PERM_ICON_HEALTH, real: false },
   };
   async function askOnePermission(key, done) {
     const p = PERM_DEFS[key];
@@ -12660,17 +12725,10 @@
       // prompt (a genuine native pull-down) — no fake card in front of it.
       const result = await requestRealNotifPermission();
       granted = result === 'granted';
-      // If granted, actually fire a real sample notification so the user
-      // sees it work — not a placeholder.
-      if (granted) {
-        try {
-          const n = new Notification('CORE', {
-            body: "You're all set — I'll nudge you at the right moments.",
-            tag: 'core-welcome', silent: false,
-          });
-          setTimeout(function () { try { n.close(); } catch (e) {} }, 4500);
-        } catch (e) {}
-      }
+      // No sample toast after granting — the real OS permission prompt
+      // (the one the browser/device just showed) is already the proof it
+      // works; firing our own notification right after read as an unexplained
+      // random alert with no context.
     } else {
       // Tracking / health have no browser-level equivalent (ATT / HealthKit
       // are native-only), so their prompt stays an iOS-style card and their
@@ -14315,6 +14373,10 @@
   // Week strip + the routine list Corbit "built" from the step-106 picks.
   // Placeholder logic — mirrors the same picks every day for now; once the
   // OpenAI key is wired in, this is where the real per-day plan renders.
+  // Same 3 accent colors as the routine builder (amber/red/green for
+  // morning/midday/evening) — cycled across the 7 day-circles so the week
+  // strip visually echoes the page you just built the routine on.
+  var WEEK_CYCLE_COLORS = ['#f5a623', '#f2545b', '#34c77b'];
   function renderWeekStrip() {
     var strip = document.getElementById('weekStrip');
     var label = document.getElementById('weekTodayLabel');
@@ -14326,8 +14388,10 @@
     for (var i = 0; i < 7; i++) {
       var d = new Date(now);
       d.setDate(now.getDate() - todayIdx + i);
+      var c = WEEK_CYCLE_COLORS[i % WEEK_CYCLE_COLORS.length];
       var cell = document.createElement('div');
       cell.className = 'wk-day' + (i === todayIdx ? ' today' : '');
+      cell.style.setProperty('--wc', c);
       cell.innerHTML = '<span class="wk-d">' + days[i] + '</span><span class="wk-n">' + d.getDate() + '</span>';
       strip.appendChild(cell);
     }
@@ -14346,20 +14410,43 @@
       list.innerHTML = '<div class="wr-empty">No routine items picked yet — go back and build one.</div>';
       return;
     }
+    // Group by time-of-day section (same Morning/Midday/Evening buckets as
+    // the routine builder), each with its own colored header, instead of one
+    // flat list — echoes step 6's layout directly.
+    var groups = { morning: [], midday: [], evening: [] };
+    var groupMeta = {
+      morning: { label: 'Morning', rc: '#f5a623' },
+      midday:  { label: 'Midday',  rc: '#f2545b' },
+      evening: { label: 'Evening', rc: '#34c77b' },
+    };
     picks.forEach(function (key) {
       var src = document.querySelector('#routineBuild .rb-chip[data-routine="' + key + '"]');
       if (!src) return;
-      var icoEl = src.querySelector('.rb-ico');
-      var labelEl = src.querySelector('.rb-label');
       var panel = src.closest('.rb-section');
-      var rc = panel ? panel.style.getPropertyValue('--rc') : '';
-      var row = document.createElement('div');
-      row.className = 'wr-item';
-      if (rc) row.style.setProperty('--rc', rc);
-      row.innerHTML = '<span class="wr-ico">' + (icoEl ? icoEl.innerHTML : '') + '</span>'
-        + '<span class="wr-label">' + (labelEl ? escTrialHtml(labelEl.textContent) : key) + '</span>'
-        + '<span class="wr-check">✓</span>';
-      list.appendChild(row);
+      var name = panel ? panel.dataset.panel : 'morning';
+      if (!groups[name]) name = 'morning';
+      groups[name].push(src);
+    });
+    ['morning', 'midday', 'evening'].forEach(function (name) {
+      var items = groups[name];
+      if (!items.length) return;
+      var meta = groupMeta[name];
+      var head = document.createElement('div');
+      head.className = 'wr-sec-head';
+      head.style.setProperty('--rc', meta.rc);
+      head.innerHTML = '<span class="wr-sec-dot"></span>' + meta.label;
+      list.appendChild(head);
+      items.forEach(function (src) {
+        var icoEl = src.querySelector('.rb-ico');
+        var labelEl = src.querySelector('.rb-label');
+        var row = document.createElement('div');
+        row.className = 'wr-item';
+        row.style.setProperty('--rc', meta.rc);
+        row.innerHTML = '<span class="wr-ico">' + (icoEl ? icoEl.innerHTML : '') + '</span>'
+          + '<span class="wr-label">' + (labelEl ? escTrialHtml(labelEl.textContent) : '') + '</span>'
+          + '<span class="wr-check">✓</span>';
+        list.appendChild(row);
+      });
     });
   }
   function runCalculatingAnimation() {
@@ -15210,7 +15297,25 @@
   })();
 
   // ── Routine builder (step 105) ──
-  (function(){var chips=document.querySelectorAll('#routineBuild .rb-chip');chips.forEach(function(c){c.addEventListener('click',function(){c.classList.toggle('sel');var sel=[];chips.forEach(function(x){if(x.classList.contains('sel'))sel.push(x.dataset.routine)});state.routines=sel;refreshCTA()})})})();
+  (function(){
+    var chips=document.querySelectorAll('#routineBuild .rb-chip');
+    var countEls={morning:document.getElementById('rbCountMorning'),midday:document.getElementById('rbCountMidday'),evening:document.getElementById('rbCountEvening')};
+    function refreshCounts(){
+      ['morning','midday','evening'].forEach(function(name){
+        var n=document.querySelectorAll('#routineBuild .rb-section[data-panel="'+name+'"] .rb-chip.sel').length;
+        var el=countEls[name]; if(!el) return;
+        el.textContent=n>0?n:'';
+        el.classList.toggle('show', n>0);
+      });
+    }
+    chips.forEach(function(c){c.addEventListener('click',function(){
+      c.classList.toggle('sel');
+      if(c.classList.contains('sel')){ c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop'); }
+      var sel=[];chips.forEach(function(x){if(x.classList.contains('sel'))sel.push(x.dataset.routine)});
+      state.routines=sel;refreshCTA();refreshCounts();
+    })});
+    refreshCounts();
+  })();
   // Routine builder tabs — Morning/Midday/Evening are quick-jump anchors over
   // one long scrollable list of all three sections. Tapping a tab scrolls its
   // section into view; scrolling the list updates which tab is active. All
@@ -15921,10 +16026,10 @@
    slow drift stays, the constant opacity flicker on every star goes. */
 .step:not(.on), .step:not(.on) * { animation-play-state: paused !important; }
 .star, .sf-star { animation: none !important; }
-/* kill the full-screen scan-line sweep + the duplicate inline starfield (the
-   sf-* field already provides stars), and stop the Face-ID pulse off-screen */
+/* kill the full-screen scan-line sweep, and stop the Face-ID pulse off-screen.
+   (Stars are back on at low opacity — see the .stars rule near the top —
+   the sf-* field stays off so there's only one light layer, not two.) */
 .core-scan-line { display: none !important; }
-.stars.far, .stars.near { display: none !important; }
 .ap-faceid-anim svg { animation-play-state: paused !important; }
 .ap-sheet.on .ap-faceid-anim svg { animation-play-state: running !important; }
 .commit-label.hint { font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif !important; letter-spacing:0.04em !important; text-transform:none !important; }
@@ -16155,7 +16260,14 @@ html body[data-font="apple"] #planTitle .g {
    (no more centred/boxed treatment — the habit chip that justified the
    center layout is gone, so this now just follows the base .step rules). */
 /* bigger signature area, room to breathe above the fixed bottom CTA */
-.step[data-step="0"] .promise-sign { height:76px; margin-top:14px; opacity:1 !important; }
+/* The signature row starts almost invisible and gradually reveals itself as
+   you hold — tied directly to --progress (set on .commit-dock, the hold
+   target, and inherited down) — instead of snapping fully visible the
+   moment the page loads. */
+.step[data-step="0"] .promise-sign { height:96px; margin-top:18px;
+  opacity:calc(0.12 + var(--progress, 0) * 0.88) !important;
+  transition:opacity .1s linear; }
+.step[data-step="0"] .promise-sign.signed { opacity:1 !important; }
 .step[data-step="0"] .promise-sign-svg { height:76px; }
 /* unsigned: show a real "sign here" baseline with an ✗ so the row reads as a
    line you put your name on (the signature draws over it once committed) */
