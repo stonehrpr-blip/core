@@ -40,26 +40,27 @@
     /* mystery emblem — a sealed gem socket teasing the reveal */
     .mystery{position:relative;width:200px;height:200px;margin:24px auto 32px;display:flex;align-items:center;justify-content:center;
       animation:s1In .9s ease .05s both;}
-    .myst-ring{position:absolute;border-radius:50%;pointer-events:none;}
-    .myst-ring.r-a{width:200px;height:200px;border:1.5px dashed rgba(206,212,222,0.26);animation:mSpin 22s linear infinite;}
-    .myst-ring.r-b{width:160px;height:160px;border:1px solid rgba(206,212,222,0.14);
-      box-shadow:0 0 36px rgba(206,212,222,0.12) inset;animation:mSpinRev 13s linear infinite;}
-    /* faint orbiting tick that draws the eye round the emblem */
-    .myst-ring.r-orbit{width:200px;height:200px;animation:mSpin 7s linear infinite;}
-    .myst-ring.r-orbit::after{content:'';position:absolute;top:-3px;left:50%;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;
-      background:#fff;box-shadow:0 0 10px 2px rgba(214,219,226,0.85);}
+    /* orbiting constellation of connected dots, slowly circling the shield —
+       a faint ring traces the same circle behind them so they read as one
+       orbit instead of loose scattered points */
+    .myst-orbit{position:absolute;inset:0;border-radius:50%;border:1px solid rgba(206,212,222,0.14);pointer-events:none;}
+    .myst-orbit-group{position:absolute;inset:0;animation:mSpin 34s linear infinite;pointer-events:none;}
+    .mo-dot{position:absolute;top:50%;left:50%;width:5px;height:5px;margin:-2.5px;border-radius:50%;
+      background:#fff;box-shadow:0 0 9px 2px rgba(214,219,226,0.75);
+      transform:rotate(var(--a)) translateX(100px);animation:moBlink 3.2s ease-in-out infinite;animation-delay:var(--d,0s);}
+    @keyframes moBlink{0%,100%{opacity:0.35;}50%{opacity:1;}}
     .myst-socket{position:relative;width:118px;height:118px;display:flex;align-items:center;justify-content:center;
       background:linear-gradient(150deg, rgba(232,236,242,0.62) 0%, rgba(170,178,192,0.16) 52%, rgba(120,128,142,0.42) 100%);
-      clip-path:polygon(26% 0,74% 0,100% 26%,100% 74%,74% 100%,26% 100%,0 74%,0 26%);
+      clip-path:polygon(50% 0%,92% 14%,92% 52%,50% 100%,8% 52%,8% 14%);
       box-shadow:0 0 40px rgba(206,212,222,0.28), 0 14px 30px rgba(0,0,0,0.55);
       animation:mPulse 3s ease-in-out infinite, mBob 5s ease-in-out infinite;}
     .myst-socket::before{content:'';position:absolute;inset:2px;
       background:radial-gradient(circle at 50% 38%, rgba(206,212,222,0.26), #050510 76%);
-      clip-path:polygon(26% 0,74% 0,100% 26%,100% 74%,74% 100%,26% 100%,0 74%,0 26%);}
+      clip-path:polygon(50% 0%,92% 14%,92% 52%,50% 100%,8% 52%,8% 14%);}
     /* moving specular highlight sweeping the bezel — brushed-steel sheen */
     .myst-socket::after{content:'';position:absolute;inset:0;
       background:linear-gradient(115deg, transparent 38%, rgba(255,255,255,0.5) 50%, transparent 62%);
-      clip-path:polygon(26% 0,74% 0,100% 26%,100% 74%,74% 100%,26% 100%,0 74%,0 26%);
+      clip-path:polygon(50% 0%,92% 14%,92% 52%,50% 100%,8% 52%,8% 14%);
       mix-blend-mode:screen;opacity:0.55;animation:mSheen 4.2s ease-in-out infinite;}
     .myst-core{position:absolute;width:58px;height:58px;border-radius:50%;z-index:1;
       background:radial-gradient(circle,#fff,rgba(206,212,222,0.5) 46%,transparent 72%);
@@ -268,9 +269,18 @@
     <div class="stage" id="stage1" role="button" tabindex="0" aria-label="Tap to reveal your rank">
       <div class="pre-eyebrow">Standing calculated</div>
       <div class="mystery" aria-hidden="true">
-        <span class="myst-ring r-a"></span>
-        <span class="myst-ring r-b"></span>
-        <span class="myst-ring r-orbit"></span>
+        <span class="myst-orbit"></span>
+        <span class="myst-orbit-group">
+          <i class="mo-dot" style="--a:0deg;--d:0s"></i>
+          <i class="mo-dot" style="--a:40deg;--d:.35s"></i>
+          <i class="mo-dot" style="--a:80deg;--d:.7s"></i>
+          <i class="mo-dot" style="--a:120deg;--d:1.05s"></i>
+          <i class="mo-dot" style="--a:160deg;--d:1.4s"></i>
+          <i class="mo-dot" style="--a:200deg;--d:1.75s"></i>
+          <i class="mo-dot" style="--a:240deg;--d:2.1s"></i>
+          <i class="mo-dot" style="--a:280deg;--d:2.45s"></i>
+          <i class="mo-dot" style="--a:320deg;--d:2.8s"></i>
+        </span>
         <span class="myst-socket"><span class="myst-core"></span><span class="myst-q">?</span></span>
       </div>
       <div class="pre-title">Reveal your rank</div>
