@@ -3547,46 +3547,39 @@
           <p class="copy">Even a loose one counts.</p>
           <div class="routine-yn">
             <button class="yn-btn yn-yes" data-yn="yes">
-              <span class="yn-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
               <span>Yes</span>
             </button>
             <button class="yn-btn yn-no" data-yn="no">
-              <span class="yn-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
               <span>No</span>
             </button>
           </div>
           <style>
             .routine-yn{display:flex;gap:14px;margin-top:26px;width:100%}
-            .yn-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
-              padding:38px 14px;border-radius:24px;border:1.5px solid rgba(255,255,255,.14);
-              background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015));
-              box-shadow:0 1px 0 rgba(255,255,255,.06) inset, 0 14px 30px rgba(0,0,0,.32);
+            .yn-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+              padding:42px 14px;border-radius:22px;border:1.5px solid rgba(255,255,255,.14);background:rgba(255,255,255,.045);
               color:#fff;font-size:19px;font-weight:800;cursor:pointer;font-family:inherit;position:relative;overflow:visible;
               transition:border-color .2s ease, background .2s ease, box-shadow .2s ease, transform .15s ease}
-            .yn-ic{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;
-              transition:background .2s ease, box-shadow .2s ease}
-            .yn-btn svg{width:26px;height:26px;opacity:.85;transition:opacity .2s ease, transform .2s ease}
+            .yn-btn svg{width:38px;height:38px;opacity:.7;transition:opacity .2s ease, transform .2s ease}
             .yn-btn:hover{border-color:rgba(255,255,255,.3)}
             .yn-btn:active{transform:scale(.96)}
-            /* vivid even at rest, not just when selected */
-            .yn-yes{border-color:rgba(74,222,128,.28)}
-            .yn-yes .yn-ic{background:rgba(74,222,128,.14)}
-            .yn-yes svg{color:#4ade80}
-            .yn-no{border-color:rgba(248,113,113,.28)}
-            .yn-no .yn-ic{background:rgba(248,113,113,.14)}
-            .yn-no svg{color:#f87171}
+            /* vivid even at rest, not just when selected — palette per the
+               user's spec: #07a607 green for Yes, #d90c09 red for No */
+            .yn-yes{background:linear-gradient(180deg, rgba(7,166,7,.2), rgba(7,166,7,.05)); border-color:rgba(7,166,7,.35)}
+            .yn-yes svg{color:#07a607}
+            .yn-no{background:linear-gradient(180deg, rgba(217,12,9,.2), rgba(217,12,9,.05)); border-color:rgba(217,12,9,.35)}
+            .yn-no svg{color:#d90c09}
             .yn-yes.sel{
-              border-color:#4ade80; background:linear-gradient(180deg, rgba(74,222,128,.16), rgba(74,222,128,.04)); color:#eafff1;
-              box-shadow:0 0 0 1.5px rgba(74,222,128,.55) inset, 0 0 22px rgba(74,222,128,.4), 0 14px 30px rgba(0,0,0,.32);
+              border-color:#07a607; background:rgba(7,166,7,.15); color:#eafff1;
+              box-shadow:0 0 0 1.5px rgba(7,166,7,.6) inset, 0 0 22px rgba(7,166,7,.55), 0 0 44px rgba(7,166,7,.24);
             }
-            .yn-yes.sel .yn-ic{background:#4ade80;box-shadow:0 0 18px rgba(74,222,128,.6)}
-            .yn-yes.sel svg{opacity:1;color:#08090c;transform:scale(1.08)}
+            .yn-yes.sel svg{opacity:1;color:#07a607;transform:scale(1.08)}
             .yn-no.sel{
-              border-color:#f87171; background:linear-gradient(180deg, rgba(248,113,113,.16), rgba(248,113,113,.04)); color:#fff0f0;
-              box-shadow:0 0 0 1.5px rgba(248,113,113,.55) inset, 0 0 22px rgba(248,113,113,.4), 0 14px 30px rgba(0,0,0,.32);
+              border-color:#d90c09; background:rgba(217,12,9,.15); color:#fff0f0;
+              box-shadow:0 0 0 1.5px rgba(217,12,9,.6) inset, 0 0 22px rgba(217,12,9,.55), 0 0 44px rgba(217,12,9,.24);
             }
-            .yn-no.sel .yn-ic{background:#f87171;box-shadow:0 0 18px rgba(248,113,113,.6)}
-            .yn-no.sel svg{opacity:1;color:#08090c;transform:scale(1.08)}
+            .yn-no.sel svg{opacity:1;color:#d90c09;transform:scale(1.08)}
             @keyframes ynBurst{0%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(calc(-50% + var(--bx)),calc(-50% + var(--by))) scale(0)}}
           </style>
         </div>
@@ -3671,7 +3664,8 @@
                carries the category colour; the fill stays a neutral dark card. */
             .rb-chip{all:unset;position:relative;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:9px;
               width:100%;box-sizing:border-box;min-height:96px;padding:13px 11px 12px;border-radius:16px;
-              border:1.5px solid color-mix(in srgb, var(--rc) 50%, transparent);background:#1a1b1f;
+              border:1.5px solid color-mix(in srgb, var(--rc) 50%, transparent);
+              background:linear-gradient(165deg, color-mix(in srgb, var(--rc) 16%, #1a1b1f), color-mix(in srgb, var(--rc) 6%, #1a1b1f));
               color:rgba(255,255,255,.82);font-size:11.5px;font-weight:600;line-height:1.3;text-align:left;cursor:pointer;font-family:inherit;
               will-change:transform;transition:border-color .15s ease,transform .12s ease,box-shadow .15s ease,background .15s ease}
             .rb-ico{width:26px;height:26px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--rc)}
@@ -3815,7 +3809,12 @@
               box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 0 calc(10px + var(--progress,0) * 30px) rgba(126,196,255,calc(.06 + var(--progress,0) * .3))}
             .commit-dock-kicker{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.4);text-align:center}
             /* a tiny idle "breathing" pulse — the card hints it wants to be held */
-            @keyframes dockBreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.008)}}
+            /* translateY here MUST match the step[data-step="0"] .commit-dock
+               offset below — the animation's transform fully replaces the
+               static one while it's running, so if the two ever disagree the
+               card visibly jumps the instant .pressing stops the animation
+               (exactly when the user starts holding). Keep them in sync. */
+            @keyframes dockBreathe{0%,100%{transform:translateY(-40px) scale(1)}50%{transform:translateY(-40px) scale(1.008)}}
             .commit-dock:not(.pressing):not(.done){animation:dockBreathe 2.6s ease-in-out infinite}
             @media (prefers-reduced-motion: reduce){ .commit-dock{animation:none !important} }
           </style>
@@ -3841,8 +3840,11 @@
             .apple-field-shell{position:relative;display:flex;align-items:center;overflow:hidden;
               border-radius:20px;background:linear-gradient(180deg, rgba(255,255,255,.065), rgba(255,255,255,.03));
               box-shadow:0 1px 0 rgba(255,255,255,.07) inset, 0 10px 26px rgba(0,0,0,.28);
-              border:1px solid rgba(255,255,255,.1);-webkit-tap-highlight-color:transparent;outline:none}
-            .apple-field-shell:focus-within{background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06))}
+              border:1px solid rgba(255,255,255,.1);-webkit-tap-highlight-color:transparent;outline:none;
+              transition:background .15s ease,border-color .15s ease,box-shadow .15s ease}
+            .apple-field-shell:focus-within{background:linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.08));
+              border-color:color-mix(in srgb, var(--accent-hi,#fff) 55%, rgba(255,255,255,.1));
+              box-shadow:0 1px 0 rgba(255,255,255,.1) inset, 0 0 0 3px color-mix(in srgb, var(--accent-hi,#fff) 18%, transparent), 0 10px 26px rgba(0,0,0,.3)}
             .apple-field-shell:focus-within .apple-field-ico{color:rgba(255,255,255,.8)}
             .apple-field-ico{width:19px;height:19px;flex-shrink:0;margin-left:18px;color:rgba(255,255,255,.4);transition:color .15s ease;
               -webkit-tap-highlight-color:transparent}
@@ -4728,7 +4730,7 @@
             .wk-day{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px}
             .wk-day .wk-d{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.42)}
             .wk-day .wk-n{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-              font-size:14px;font-weight:800;color:#06180d;border:2px solid transparent;
+              font-size:14px;font-weight:800;color:#fff;border:2px solid transparent;
               background:var(--wc,#34c77b);box-shadow:0 2px 7px color-mix(in srgb, var(--wc,#34c77b) 35%, transparent)}
             /* today = outlined only, transparent fill */
             .wk-day.today .wk-n{background:transparent;color:var(--wc,#34c77b);border-color:var(--wc,#34c77b);
@@ -14431,7 +14433,7 @@
   // One consistent light blue for every day circle in the strip — the
   // amber/red/green time-of-day coding stays below on the routine list
   // itself, so the strip reads as a calendar, not a repeat of that legend.
-  var WEEK_STRIP_COLOR = '#5AC8FA';
+  var WEEK_STRIP_COLOR = '#0A84FF';
   function renderWeekStrip() {
     var strip = document.getElementById('weekStrip');
     var label = document.getElementById('weekTodayLabel');
@@ -14542,9 +14544,69 @@
         var reply = data && data.reply ? String(data.reply).trim() : '';
         if (reply) noteEl.textContent = reply;
       })
-      .catch(function (e) { try { console.warn('AI routine note unavailable:', e); } catch (_) {} })
+      .catch(function (e) {
+        try { console.warn('AI routine note unavailable via worker:', e); } catch (_) {}
+        // Local-dev-only fallback: if you pasted a personal OpenAI key into
+        // the dev panel (see initDevAiKeyPanel below), use it directly so you
+        // can test the feature before the worker is reachable from this
+        // origin. isDevContext() hard-blocks this on any real deployed
+        // domain — the key only ever leaves this browser on localhost/file.
+        if (isDevContext()) fetchAiNoteDirect(prompt, noteEl);
+      })
       .finally(function () { clearTimeout(timer); });
   }
+
+  function isDevContext() {
+    return location.protocol === 'file:' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  }
+
+  // Direct OpenAI call using a key YOU paste into the dev panel, stored only
+  // in this browser's localStorage. This is strictly a local-testing
+  // convenience — calling a model API straight from client JS puts the key
+  // in plain view of anyone's network tab, so this path is hard-gated to
+  // isDevContext() and must never run against real users.
+  function fetchAiNoteDirect(prompt, noteEl) {
+    var key = '';
+    try { key = localStorage.getItem('coreDevOpenAIKey') || ''; } catch (e) {}
+    if (!key) return;
+    fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+      body: JSON.stringify({ model: 'gpt-4o-mini', messages: [{ role: 'user', content: prompt }], max_tokens: 60 }),
+    })
+      .then(function (r) { return r.ok ? r.json() : Promise.reject(new Error('bad status ' + r.status)); })
+      .then(function (data) {
+        var reply = data && data.choices && data.choices[0] && data.choices[0].message
+          ? String(data.choices[0].message.content || '').trim() : '';
+        if (reply) noteEl.textContent = reply;
+      })
+      .catch(function (e) { try { console.warn('AI routine note unavailable via direct key:', e); } catch (_) {} });
+  }
+
+  // Hidden dev panel for pasting a personal OpenAI key for local testing —
+  // only ever renders on localhost/file (isDevContext()), never on a real
+  // deployed domain, so it can't appear for real users. The key is saved to
+  // this browser's localStorage only; it is never written to any file and
+  // never committed.
+  function initDevAiKeyPanel() {
+    if (!isDevContext()) return;
+    var wrap = document.createElement('div');
+    wrap.style.cssText = 'position:fixed;left:8px;bottom:8px;z-index:99999;background:#111;border:1px solid #333;'
+      + 'border-radius:10px;padding:8px;font:11px -apple-system,sans-serif;color:#9ab;max-width:260px;opacity:.85';
+    var saved = '';
+    try { saved = localStorage.getItem('coreDevOpenAIKey') || ''; } catch (e) {}
+    wrap.innerHTML = '<div style="margin-bottom:4px;color:#8a8">DEV ONLY — local OpenAI key (fallback if core-ai worker is unreachable)</div>'
+      + '<input id="devOpenAIKeyInput" type="password" placeholder="sk-..." style="width:100%;box-sizing:border-box;'
+      + 'background:#000;color:#eee;border:1px solid #333;border-radius:6px;padding:4px 6px;margin-bottom:4px" value="' + escTrialHtml(saved) + '" />'
+      + '<button id="devOpenAIKeySave" style="width:100%;padding:4px;border-radius:6px;border:none;background:#2a5;color:#000;cursor:pointer">Save locally</button>';
+    document.body.appendChild(wrap);
+    document.getElementById('devOpenAIKeySave').addEventListener('click', function () {
+      var v = document.getElementById('devOpenAIKeyInput').value.trim();
+      try { if (v) localStorage.setItem('coreDevOpenAIKey', v); else localStorage.removeItem('coreDevOpenAIKey'); } catch (e) {}
+      wrap.style.opacity = '1'; setTimeout(function () { wrap.style.opacity = '.85'; }, 400);
+    });
+  }
+  initDevAiKeyPanel();
 
   function runCalculatingAnimation() {
     if (_calcRunning) return;
@@ -16390,7 +16452,7 @@ html body[data-font="apple"] #planTitle .g {
 /* Center the promise card in the space below the heading — auto top/bottom
    margins split the leftover space so the card sits in the middle of the
    screen instead of hugging the heading. */
-.step[data-step="0"] .commit-dock { margin-top:auto; margin-bottom:auto; transform:translateY(-28px); }
+.step[data-step="0"] .commit-dock { margin-top:auto; margin-bottom:auto; transform:translateY(-40px); }
 /* auto-advance pages (gender, habit, what-pushed): tapping an option advances,
    so the Next button is redundant — hide it. A hint replaces it. */
 body.on-autoadvance .footer { display:none !important; }
