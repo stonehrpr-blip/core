@@ -1140,8 +1140,8 @@
   /* draw-on animation (pathLength=1) */
   .rgraph .line { stroke-dasharray:1; stroke-dashoffset:1; }
   .step[data-step="8"].on .line-bad,
-  .step[data-step="8"].on .line-good { animation: drawLine 1.1s cubic-bezier(.4,0,.2,1) .15s forwards; }
-  .step[data-step="8"].on .area-good { animation: fadeArea .9s ease .5s both; }
+  .step[data-step="8"].on .line-good { animation: drawLine .7s cubic-bezier(.4,0,.2,1) .05s forwards; }
+  .step[data-step="8"].on .area-good { animation: fadeArea .55s ease .2s both; }
   @keyframes drawLine { to { stroke-dashoffset:0; } }
   @keyframes fadeArea { from { opacity:0; } to { opacity:1; } }
   .rgraph .area-good { opacity:0; }
@@ -3547,38 +3547,46 @@
           <p class="copy">Even a loose one counts.</p>
           <div class="routine-yn">
             <button class="yn-btn yn-yes" data-yn="yes">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+              <span class="yn-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
               <span>Yes</span>
             </button>
             <button class="yn-btn yn-no" data-yn="no">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              <span class="yn-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span>
               <span>No</span>
             </button>
           </div>
           <style>
             .routine-yn{display:flex;gap:14px;margin-top:26px;width:100%}
-            .yn-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
-              padding:42px 14px;border-radius:22px;border:1.5px solid rgba(255,255,255,.14);background:rgba(255,255,255,.045);
+            .yn-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+              padding:38px 14px;border-radius:24px;border:1.5px solid rgba(255,255,255,.14);
+              background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015));
+              box-shadow:0 1px 0 rgba(255,255,255,.06) inset, 0 14px 30px rgba(0,0,0,.32);
               color:#fff;font-size:19px;font-weight:800;cursor:pointer;font-family:inherit;position:relative;overflow:visible;
               transition:border-color .2s ease, background .2s ease, box-shadow .2s ease, transform .15s ease}
-            .yn-btn svg{width:38px;height:38px;opacity:.7;transition:opacity .2s ease, transform .2s ease}
+            .yn-ic{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;
+              transition:background .2s ease, box-shadow .2s ease}
+            .yn-btn svg{width:26px;height:26px;opacity:.85;transition:opacity .2s ease, transform .2s ease}
             .yn-btn:hover{border-color:rgba(255,255,255,.3)}
             .yn-btn:active{transform:scale(.96)}
             /* vivid even at rest, not just when selected */
-            .yn-yes{background:linear-gradient(180deg, rgba(74,222,128,.16), rgba(74,222,128,.04)); border-color:rgba(74,222,128,.28)}
+            .yn-yes{border-color:rgba(74,222,128,.28)}
+            .yn-yes .yn-ic{background:rgba(74,222,128,.14)}
             .yn-yes svg{color:#4ade80}
-            .yn-no{background:linear-gradient(180deg, rgba(248,113,113,.16), rgba(248,113,113,.04)); border-color:rgba(248,113,113,.28)}
+            .yn-no{border-color:rgba(248,113,113,.28)}
+            .yn-no .yn-ic{background:rgba(248,113,113,.14)}
             .yn-no svg{color:#f87171}
             .yn-yes.sel{
-              border-color:#4ade80; background:rgba(74,222,128,.12); color:#eafff1;
-              box-shadow:0 0 0 1.5px rgba(74,222,128,.55) inset, 0 0 22px rgba(74,222,128,.5), 0 0 44px rgba(74,222,128,.22);
+              border-color:#4ade80; background:linear-gradient(180deg, rgba(74,222,128,.16), rgba(74,222,128,.04)); color:#eafff1;
+              box-shadow:0 0 0 1.5px rgba(74,222,128,.55) inset, 0 0 22px rgba(74,222,128,.4), 0 14px 30px rgba(0,0,0,.32);
             }
-            .yn-yes.sel svg{opacity:1;color:#4ade80;transform:scale(1.08)}
+            .yn-yes.sel .yn-ic{background:#4ade80;box-shadow:0 0 18px rgba(74,222,128,.6)}
+            .yn-yes.sel svg{opacity:1;color:#08090c;transform:scale(1.08)}
             .yn-no.sel{
-              border-color:#f87171; background:rgba(248,113,113,.12); color:#fff0f0;
-              box-shadow:0 0 0 1.5px rgba(248,113,113,.55) inset, 0 0 22px rgba(248,113,113,.5), 0 0 44px rgba(248,113,113,.22);
+              border-color:#f87171; background:linear-gradient(180deg, rgba(248,113,113,.16), rgba(248,113,113,.04)); color:#fff0f0;
+              box-shadow:0 0 0 1.5px rgba(248,113,113,.55) inset, 0 0 22px rgba(248,113,113,.4), 0 14px 30px rgba(0,0,0,.32);
             }
-            .yn-no.sel svg{opacity:1;color:#f87171;transform:scale(1.08)}
+            .yn-no.sel .yn-ic{background:#f87171;box-shadow:0 0 18px rgba(248,113,113,.6)}
+            .yn-no.sel svg{opacity:1;color:#08090c;transform:scale(1.08)}
             @keyframes ynBurst{0%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(calc(-50% + var(--bx)),calc(-50% + var(--by))) scale(0)}}
           </style>
         </div>
@@ -3663,9 +3671,9 @@
                carries the category colour; the fill stays a neutral dark card. */
             .rb-chip{all:unset;position:relative;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:9px;
               width:100%;box-sizing:border-box;min-height:96px;padding:13px 11px 12px;border-radius:16px;
-              border:1.5px solid color-mix(in srgb, var(--rc) 50%, transparent);background:rgba(255,255,255,.03);
+              border:1.5px solid color-mix(in srgb, var(--rc) 50%, transparent);background:#1a1b1f;
               color:rgba(255,255,255,.82);font-size:11.5px;font-weight:600;line-height:1.3;text-align:left;cursor:pointer;font-family:inherit;
-              will-change:transform;transition:border-color .15s ease,transform .12s ease,box-shadow .15s ease}
+              will-change:transform;transition:border-color .15s ease,transform .12s ease,box-shadow .15s ease,background .15s ease}
             .rb-ico{width:26px;height:26px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--rc)}
             .rb-ico svg{width:22px;height:22px}
             .rb-chip:active{transform:scale(.96)}
@@ -3749,11 +3757,17 @@
             }
             .portal-journey.launching{animation:portalZoomPunch .8s cubic-bezier(.45,0,.2,1) both}
             @keyframes figureFall{
-              0%{opacity:1;transform:translate(-50%,-50%) scale(1)}
-              70%{opacity:1;transform:translate(-50%,-50%) scale(.3)}
-              100%{opacity:0;transform:translate(-50%,-50%) scale(.05);filter:blur(3px)}
+              0%{opacity:1;transform:translate(-50%,-50%) translateY(0) scale(1)}
+              45%{opacity:1;transform:translate(-50%,-50%) translateY(10px) scale(.55)}
+              75%{opacity:.9;transform:translate(-50%,-50%) translateY(28px) scale(.22)}
+              100%{opacity:0;transform:translate(-50%,-50%) translateY(46px) scale(.04);filter:blur(4px)}
             }
-            .portal-journey.launching .p-figure{animation:figureFall .85s cubic-bezier(.55,0,.85,.4) .1s both}
+            /* Scoped through the same .step[data-step="107"].on ancestor so
+               this beats the idle-bob rule above (.step[...].on .p-figure)
+               on specificity — otherwise the bob rule silently wins and the
+               fall never actually plays (it was always just the whole step
+               fading out under a stationary bobbing figure). */
+            .step[data-step="107"].on .portal-journey.launching .p-figure{animation:figureFall .85s cubic-bezier(.55,0,.85,.4) .1s both}
             @keyframes stepLaunchFade{to{opacity:0;transform:scale(1.03)}}
             .step[data-step="107"].launching{animation:stepLaunchFade .4s ease .7s forwards}
           </style>
@@ -3828,8 +3842,9 @@
               border-radius:20px;background:linear-gradient(180deg, rgba(255,255,255,.065), rgba(255,255,255,.03));
               box-shadow:0 1px 0 rgba(255,255,255,.07) inset, 0 10px 26px rgba(0,0,0,.28);
               border:1px solid rgba(255,255,255,.1);-webkit-tap-highlight-color:transparent;outline:none}
-            .apple-field-shell:focus-within{background:linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.045))}
-            .apple-field-ico{width:19px;height:19px;flex-shrink:0;margin-left:18px;color:rgba(255,255,255,.4);
+            .apple-field-shell:focus-within{background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06))}
+            .apple-field-shell:focus-within .apple-field-ico{color:rgba(255,255,255,.8)}
+            .apple-field-ico{width:19px;height:19px;flex-shrink:0;margin-left:18px;color:rgba(255,255,255,.4);transition:color .15s ease;
               -webkit-tap-highlight-color:transparent}
             .apple-field-input.field{background:none !important;border:none !important;box-shadow:none !important;
               outline:none !important;-webkit-tap-highlight-color:transparent;caret-color:var(--accent-hi,#fff);
@@ -4702,7 +4717,7 @@
           <div class="wr-list" id="weeklyRoutineList"></div>
           <div class="wr-ai-note">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg>
-            Powered by your AI coach — gets smarter with every day you log.
+            <span id="wrAiNoteText">Powered by your AI coach — gets smarter with every day you log.</span>
           </div>
           <style>
             /* Circular day markers, cycling the same 3 time-of-day accent
@@ -10969,11 +10984,36 @@
     fill(document.getElementById("stars"), 12, true);
   })();
 
+  // Ad attribution — first-touch capture of UTM params + ad-platform click
+  // IDs from the URL, stored once so it survives the whole funnel (and a
+  // page reload) instead of being lost the moment the user clicks past the
+  // landing page. Without this, none of the conversion events below can be
+  // tied back to the campaign/creative that actually drove the trial, so ad
+  // spend can't be optimized. First-touch on purpose: a later organic
+  // revisit shouldn't overwrite the original paid attribution.
+  function captureAttribution() {
+    try {
+      if (localStorage.getItem('coreAttribution')) return;
+      const p = new URLSearchParams(location.search);
+      const keys = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term','gclid','fbclid','ttclid','msclkid'];
+      const attr = {};
+      keys.forEach(function (k) { const v = p.get(k); if (v) attr[k] = v; });
+      if (Object.keys(attr).length) {
+        attr.captured_at = Date.now();
+        localStorage.setItem('coreAttribution', JSON.stringify(attr));
+      }
+    } catch (e) {}
+  }
+  captureAttribution();
+  function getAttribution() {
+    try { return JSON.parse(localStorage.getItem('coreAttribution') || 'null') || {}; } catch (e) { return {}; }
+  }
+
   // Analytics breadcrumb — swap console.log for Mixpanel/PostHog/Amplitude later.
   // Also routes through window.coreTrack so events land in the analytics ring buffer.
   function track(event, props) {
     try {
-      const payload = Object.assign({ ts: Date.now(), surface: 'trial' }, props || {});
+      const payload = Object.assign({ ts: Date.now(), surface: 'trial' }, getAttribution(), props || {});
       // dev-only console breadcrumb — keep production consoles clean
       if (location.protocol === 'file:' || /localhost|127\.0\.0\.1/.test(location.hostname)) console.log('[analytics]', event, payload);
       if (typeof window.coreTrack === 'function') window.coreTrack(event, payload);
@@ -14388,10 +14428,10 @@
   // Week strip + the routine list Corbit "built" from the step-106 picks.
   // Placeholder logic — mirrors the same picks every day for now; once the
   // OpenAI key is wired in, this is where the real per-day plan renders.
-  // Same 3 accent colors as the routine builder (amber/red/green for
-  // morning/midday/evening) — cycled across the 7 day-circles so the week
-  // strip visually echoes the page you just built the routine on.
-  var WEEK_CYCLE_COLORS = ['#f5a623', '#f2545b', '#34c77b'];
+  // One consistent light blue for every day circle in the strip — the
+  // amber/red/green time-of-day coding stays below on the routine list
+  // itself, so the strip reads as a calendar, not a repeat of that legend.
+  var WEEK_STRIP_COLOR = '#5AC8FA';
   function renderWeekStrip() {
     var strip = document.getElementById('weekStrip');
     var label = document.getElementById('weekTodayLabel');
@@ -14403,7 +14443,7 @@
     for (var i = 0; i < 7; i++) {
       var d = new Date(now);
       d.setDate(now.getDate() - todayIdx + i);
-      var c = WEEK_CYCLE_COLORS[i % WEEK_CYCLE_COLORS.length];
+      var c = WEEK_STRIP_COLOR;
       var cell = document.createElement('div');
       cell.className = 'wk-day' + (i === todayIdx ? ' today' : '');
       cell.style.setProperty('--wc', c);
@@ -14463,7 +14503,49 @@
         list.appendChild(row);
       });
     });
+    fetchAiRoutineNote(picks);
   }
+
+  // One short, personalized line from the real AI coach backend — proxied
+  // through our own Worker (core-ai.stonehrpr.workers.dev), which holds the
+  // actual model API key server-side. The client never sees or ships a key,
+  // it only ever calls our own domain. Fails silently to the static default
+  // text already in the markup (no network in dev/CORS-blocked previews,
+  // rate limits, etc. should never break the page).
+  var _aiNoteFetched = false;
+  function fetchAiRoutineNote(picks) {
+    if (_aiNoteFetched) return;
+    _aiNoteFetched = true;
+    var noteEl = document.getElementById('wrAiNoteText');
+    if (!noteEl) return;
+    var labels = picks.map(function (key) {
+      var el = document.querySelector('#routineBuild .rb-chip[data-routine="' + key + '"] .rb-label');
+      return el ? el.textContent.trim() : key;
+    }).filter(Boolean);
+    var name = (state.name || '').trim() || 'there';
+    var reason = state.reason || state.identity || '';
+    var prompt = 'You are Corbit, a warm and encouraging habit coach. '
+      + 'Speak directly to ' + name + ' in exactly one short sentence (max 22 words), no quotes, no hashtags. '
+      + 'Their picked routine habits: ' + (labels.join(', ') || 'none yet') + '. '
+      + (reason ? ('Their main motivation: ' + reason + '. ') : '')
+      + 'Reference at least one specific habit by name and sound genuinely encouraging, never preachy.';
+    var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 6000);
+    fetch('https://core-ai.stonehrpr.workers.dev/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: [{ role: 'user', content: prompt }] }),
+      signal: ctrl ? ctrl.signal : undefined,
+    })
+      .then(function (r) { return r.ok ? r.json() : Promise.reject(new Error('bad status ' + r.status)); })
+      .then(function (data) {
+        var reply = data && data.reply ? String(data.reply).trim() : '';
+        if (reply) noteEl.textContent = reply;
+      })
+      .catch(function (e) { try { console.warn('AI routine note unavailable:', e); } catch (_) {} })
+      .finally(function () { clearTimeout(timer); });
+  }
+
   function runCalculatingAnimation() {
     if (_calcRunning) return;
     _calcRunning = true;
@@ -14472,7 +14554,18 @@
     if (ring) { ring.style.transition = 'none'; ring.style.strokeDashoffset = '100'; void ring.offsetWidth; ring.style.transition = ''; }
     if (pctEl) pctEl.textContent = '0%';
     var reduce = false; try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
-    var DUR = reduce ? 300 : 1900;
+    // Slower and staged — long enough to read as actually working through
+    // everything the user answered, not just filling a bar.
+    var DUR = reduce ? 300 : 4200;
+    var subEl = document.querySelector('#stepwrap .step[data-step="200"] .calc-sub');
+    var REVIEW_STAGES = [
+      { at: 0,  text: 'Pulling together everything you told us' },
+      { at: 20, text: 'Reading your routine and habits' },
+      { at: 45, text: 'Weighing your commitment level' },
+      { at: 68, text: 'Matching a coaching tone to you' },
+      { at: 88, text: 'Building your first week' },
+    ];
+    var stageIdx = 0;
     var start = performance.now();
     var shownPct = 0;
     function tick(now) {
@@ -14482,6 +14575,10 @@
       var p = Math.round(eased * 100);
       if (ring) ring.style.strokeDashoffset = String(100 - eased * 100);
       if (pctEl) pctEl.textContent = p + '%';
+      while (stageIdx + 1 < REVIEW_STAGES.length && p >= REVIEW_STAGES[stageIdx + 1].at) {
+        stageIdx++;
+        if (subEl) subEl.textContent = REVIEW_STAGES[stageIdx].text;
+      }
       // One tiny vibration per percent — 1% = 1 tick, so it physically reads
       // as counting up instead of just a visual fill.
       if (p > shownPct) {
@@ -16117,12 +16214,9 @@
 .tone-row[data-reason].sel .tone-check, .tone-row[data-identity].sel .tone-check { background: var(--col) !important; border-color: var(--col) !important; }
 .tone-row[data-reason].sel .tone-check::after, .tone-row[data-identity].sel .tone-check::after { border-left-color:#0c0d12 !important; border-bottom-color:#0c0d12 !important; }
 
-/* Commitment meter → vivid rainbow (red → orange → gold → green → blue) */
-.cm-bar[data-lvl="1"].on > span { background:linear-gradient(180deg,#FF6A5E,#E0362B) !important; box-shadow:0 6px 22px rgba(255,90,77,0.65), 0 0 20px rgba(255,90,77,0.4), 0 1px 0 rgba(255,255,255,0.25) inset !important; }
-.cm-bar[data-lvl="2"].on > span { background:linear-gradient(180deg,#FFA836,#E8720F) !important; box-shadow:0 6px 22px rgba(255,159,40,0.65), 0 0 20px rgba(255,159,40,0.4), 0 1px 0 rgba(255,255,255,0.25) inset !important; }
-.cm-bar[data-lvl="3"].on > span { background:linear-gradient(180deg,#FFDE3A,#EDB90D) !important; box-shadow:0 6px 24px rgba(255,214,40,0.68), 0 0 22px rgba(255,214,40,0.42), 0 1px 0 rgba(255,255,255,0.28) inset !important; }
-.cm-bar[data-lvl="4"].on > span { background:linear-gradient(180deg,#3CE56A,#1FA94A) !important; box-shadow:0 6px 26px rgba(52,209,94,0.7), 0 0 24px rgba(52,209,94,0.46), 0 1px 0 rgba(255,255,255,0.28) inset !important; }
-.cm-bar[data-lvl="5"].on > span { background:linear-gradient(180deg,#4FB0FF,#0A6BD8) !important; box-shadow:0 8px 30px rgba(47,143,255,0.75), 0 0 28px rgba(90,170,255,0.55), 0 1px 0 rgba(255,255,255,0.55) inset !important; }
+/* Commitment meter colors — glow itself lives with the base rules near the
+   top of the file (.cm-bar[data-lvl].on); this block used to re-glow them
+   with !important and silently undo every later "less glow" pass. */
 
 /* ═══════════ XP SYSTEM — clean, premium gold ═══════════
    One clear read: a crisp gold step-progress line + a tidy gold pill that
@@ -16296,7 +16390,7 @@ html body[data-font="apple"] #planTitle .g {
 /* Center the promise card in the space below the heading — auto top/bottom
    margins split the leftover space so the card sits in the middle of the
    screen instead of hugging the heading. */
-.step[data-step="0"] .commit-dock { margin-top:auto; margin-bottom:auto; }
+.step[data-step="0"] .commit-dock { margin-top:auto; margin-bottom:auto; transform:translateY(-28px); }
 /* auto-advance pages (gender, habit, what-pushed): tapping an option advances,
    so the Next button is redundant — hide it. A hint replaces it. */
 body.on-autoadvance .footer { display:none !important; }
