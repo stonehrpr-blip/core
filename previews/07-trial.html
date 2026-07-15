@@ -9066,6 +9066,12 @@
               // snap Corbit back to rest before the animation actually
               // finished (that snap read as "teleporting back").
               var jumping = false;
+              // Lock the one-time entrance out for good once it's played, so
+              // removing .tapped after a jump can't fall back onto it and
+              // replay it (see the .entered rule in the <style> below).
+              el.addEventListener('animationend', function(e){
+                if (e.animationName === 'cbEntrance') el.classList.add('entered');
+              });
               function onJumpEnd(e){
                 if (e.animationName !== 'cbJump') return;
                 target_.removeEventListener('animationend', onJumpEnd);
@@ -9076,10 +9082,11 @@
               window.corbitTap = function(target){
                 if (jumping) return; // let the current jump land before starting another
                 jumping = true; target_ = target;
+                target.classList.add('entered'); // guard even if tapped before entrance finished
                 target.classList.add('tapped');
                 target.addEventListener('animationend', onJumpEnd);
                 try{if(typeof haptic==='function')haptic(14)}catch(e){}
-                setEmotion('happy', { line: pick(TAP_LINES), particles: '#E8F1FF', revertAfter: 1300, revertTo:'happy' });
+                setEmotion('happy', { line: pick(TAP_LINES), particles: ['#ffd76a', '#ffe6a3'], revertAfter: 1300, revertTo:'happy' });
               };
             })();
           </script>
@@ -9135,6 +9142,12 @@
               100%{opacity:1;transform:translateY(0) scale(1)}
             }
             .step[data-step="24"].on .corbit-bot{animation:cbEntrance .5s .1s cubic-bezier(.22,1,.36,1) both}
+            /* Once the entrance has played, lock it out — otherwise removing
+               .tapped after a jump falls back to this rule (animation-name
+               changes cbJump -> cbEntrance) and RESTARTS cbEntrance from its
+               0% (translateY(28px), opacity 0), which reads as Corbit
+               vanishing and re-entering right after he lands. */
+            .step[data-step="24"].on .corbit-bot.entered:not(.tapped){animation:none}
             @media(prefers-reduced-motion:reduce){.step[data-step="24"].on .corbit-bot{animation:none!important}}
             @keyframes cbBlink{0%,90%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
             .cb-eye.l,.cb-eye.r{animation:cbBlink 4s ease-in-out infinite}
@@ -10941,7 +10954,9 @@
           : (r < 0.62 ? 's1' : r < 0.88 ? 's2' : 's3');   // far layer skews tiny
         s.className = 'star ' + tier + (Math.random() < 0.18 ? ' b' : '');
         s.style.left = (Math.random()*100) + '%';
-        s.style.top  = (Math.random()*100) + '%';
+        // keep clear of the topbar/progress-bar band up top — stars there
+        // read as a stray mark next to the bar instead of ambient background
+        s.style.top  = (16 + Math.random()*84) + '%';
         s.style.setProperty('--d',   (2.5 + Math.random()*5) + 's');
         s.style.setProperty('--del', (Math.random()*5) + 's');
         s.style.setProperty('--min', (0.10 + Math.random()*0.20).toFixed(2));
