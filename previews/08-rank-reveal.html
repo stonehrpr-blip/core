@@ -128,11 +128,10 @@
       background:
         linear-gradient(165deg, color-mix(in srgb, var(--rc) 22%, #14151c), color-mix(in srgb, var(--rc) 6%, #0a0b10));
       box-shadow:
-        0 0 0 2.5px color-mix(in srgb, var(--rc) 70%, transparent),
+        0 0 0 2.5px color-mix(in srgb, var(--rc) 65%, transparent),
         0 0 0 3.5px rgba(0,0,0,0.5),
-        0 0 0 4.5px color-mix(in srgb, var(--rc) 34%, transparent),
-        0 30px 70px rgba(0,0,0,0.55),
-        0 0 46px color-mix(in srgb, var(--rc) 30%, transparent);
+        0 24px 60px rgba(0,0,0,0.55),
+        0 0 30px color-mix(in srgb, var(--rc) 20%, transparent);
       animation:cardPop .62s cubic-bezier(.16,1.7,.3,1) both;}
     @keyframes cardPop{0%{transform:scale(0.2) rotate(-6deg);opacity:0;}35%{opacity:1;}65%{transform:scale(1.05) rotate(0.5deg);}100%{transform:scale(1) rotate(0deg);opacity:1;}}
     /* top hairline highlight — light catching the bevel of the glass */
@@ -173,7 +172,7 @@
       opacity:0.55;mix-blend-mode:screen;animation:raySpin 26s linear infinite;
       -webkit-mask:radial-gradient(circle, #000 30%, transparent 70%);mask:radial-gradient(circle, #000 30%, transparent 70%);}
     @keyframes raySpin{to{transform:rotate(360deg);}}
-    .rank-gem{position:relative;z-index:1;width:132px;height:132px;
+    .rank-gem{position:relative;z-index:1;width:150px;height:150px;
       filter:drop-shadow(0 0 16px color-mix(in srgb, var(--rc) 64%, transparent)) drop-shadow(0 8px 22px color-mix(in srgb, var(--rc) 45%, transparent));
       animation:gemFloat 4s ease-in-out 1s infinite;}
     .rank-gem img{width:100%;height:100%;object-fit:contain;display:block;}
@@ -225,8 +224,8 @@
       border:1px solid rgba(255,255,255,0.07);
       box-shadow:0 6px 16px rgba(0,0,0,0.25);}
     .unlock-ic{width:24px;height:24px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:50%;
-      background:rgba(36,138,61,0.16);box-shadow:0 0 0 1px rgba(36,138,61,0.3) inset;}
-    .unlock-ic svg{width:14px;height:14px;stroke:#34C759;fill:none;stroke-width:3.4;stroke-linecap:round;stroke-linejoin:round;}
+      background:color-mix(in srgb, var(--rc, #34C759) 18%, transparent);box-shadow:0 0 0 1px color-mix(in srgb, var(--rc, #34C759) 32%, transparent) inset;}
+    .unlock-ic svg{width:14px;height:14px;stroke:var(--rc, #34C759);fill:none;stroke-width:3.4;stroke-linecap:round;stroke-linejoin:round;}
     .unlock-label{font-size:14.5px;font-weight:600;color:rgba(255,255,255,0.94);letter-spacing:-0.1px;}
     body.revealed .unlocks-head{animation:unlockIn .5s ease .7s both;}
     body.revealed .unlock{animation:unlockIn .55s cubic-bezier(.22,1,.32,1) both;}
@@ -377,7 +376,9 @@
   var rank = RANKS[idx];
 
   var card=document.getElementById('rankCard');
-  card.style.setProperty('--rc', rank.color);
+  // Set on #stage2 (a shared ancestor of the card AND the unlock list) so
+  // both pick up the rank color, not just the card itself.
+  document.getElementById('stage2').style.setProperty('--rc', rank.color);
   // Real emblem artwork — keyed transparent PNG per rank.
   document.getElementById('rankGem').innerHTML = '<img src="assets/ranks/'+rank.key+'.png" alt="'+rank.name+'" />';
   document.getElementById('rankName').textContent = rank.name;
